@@ -1,0 +1,14 @@
+# build artifacts
+dist/
+build/
+target/
+*.tgz
+*.egg-info/
+__pycache__/
+node_modules/
+
+# editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

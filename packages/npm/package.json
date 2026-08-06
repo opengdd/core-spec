@@ -1,0 +1,26 @@
+{
+  "name": "opengdd",
+  "version": "0.0.0",
+  "description": "OpenGDD - an open format for machine-buildable game design documents. Name reservation; specification and tooling in development.",
+  "license": "MIT",
+  "author": "Starphase Lab <steward@opengdd.org>",
+  "homepage": "https://github.com/opengdd/opengdd#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/opengdd/opengdd.git"
+  },
+  "bugs": {
+    "url": "https://github.com/opengdd/opengdd/issues"
+  },
+  "keywords": [
+    "opengdd",
+    "gdd",
+    "game-design-document",
+    "game-design",
+    "specification"
+  ],
+  "files": [
+    "README.md",
+    "LICENSE"
+  ]
+}

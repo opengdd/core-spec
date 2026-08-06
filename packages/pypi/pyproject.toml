@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "opengdd"
+version = "0.0.0"
+description = "OpenGDD - an open format for machine-buildable game design documents. Name reservation; specification and tooling in development."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Starphase Lab", email = "steward@opengdd.org" }]
+keywords = ["opengdd", "gdd", "game-design-document", "game-design", "specification"]
+classifiers = [
+  "Development Status :: 1 - Planning",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: Games/Entertainment",
+]
+
+[project.urls]
+Homepage = "https://github.com/opengdd/opengdd"
+Repository = "https://github.com/opengdd/opengdd"
+Issues = "https://github.com/opengdd/opengdd/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/opengdd"]
