@@ -5,8 +5,8 @@ edition = "2021"
 description = "OpenGDD - an open format for machine-buildable game design documents. Name reservation; specification and tooling in development."
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/opengdd/opengdd"
-homepage = "https://github.com/opengdd/opengdd"
+repository = "https://github.com/opengdd/core-spec"
+homepage = "https://github.com/opengdd/core-spec"
 keywords = ["opengdd", "gdd", "game-design", "spec"]
 categories = ["game-development"]
 

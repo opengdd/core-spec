@@ -6,7 +6,7 @@ can build the described game from them.
 
 The specification is in development and has not yet been published. This
 repository currently holds name reservations only; it will become the home of
-the specification, schemas, and conformance suite.
+the OpenGDD core specification and its schemas.
 
 - Steward: Starphase Lab
 - Contact: steward@opengdd.org
