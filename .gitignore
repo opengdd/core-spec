@@ -2,6 +2,8 @@
 dist/
 build/
 target/
+# library crate: lockfile is not committed
+Cargo.lock
 *.tgz
 *.egg-info/
 __pycache__/
