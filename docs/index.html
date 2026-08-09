@@ -4,40 +4,184 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OpenGDD</title>
-<meta name="description" content="OpenGDD — an open format for machine-buildable game design documents. In development.">
+<meta name="description" content="OpenGDD: an open format for game designs that a machine can build, and that every build is judged against. In development.">
 <style>
-  :root { color-scheme: light dark; }
-  body {
-    margin: 0; min-height: 100vh; display: grid; place-items: center;
-    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
-    background: #fdfdfc; color: #1a1a18;
+  :root {
+    color-scheme: light dark;
+    --bg: #faf8f4; --ink: #211f1c; --muted: #767066;
+    --line: #e2ddd3; --accent: #a35c17; --panel: #f2efe8;
+    --mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
   }
-  main { max-width: 34rem; padding: 2rem; }
-  h1 { font-size: 1.5rem; margin: 0 0 .75rem; letter-spacing: .01em; }
-  p { margin: .5rem 0; }
-  .muted { color: #6b6b66; font-size: .9rem; }
-  a { color: inherit; }
   @media (prefers-color-scheme: dark) {
-    body { background: #131312; color: #e8e8e4; }
-    .muted { color: #97978f; }
+    :root {
+      --bg: #151412; --ink: #e9e6e0; --muted: #938d81;
+      --line: #2e2c28; --accent: #e0a35c; --panel: #1d1b18;
+    }
   }
+  body {
+    margin: 0; min-height: 100vh;
+    font: 17px/1.75 "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    background: var(--bg); color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 37rem; padding: 5.5rem 1.5rem 4rem; margin: 0 auto; }
+  h1 {
+    font-size: 2.1rem; font-weight: 400; letter-spacing: .015em;
+    margin: 0 0 .35rem;
+  }
+  .tagline { color: var(--muted); font-style: italic; margin: 0 0 1.5rem; }
+  .label {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--accent);
+    margin: 3rem 0 .75rem;
+  }
+  p { margin: .75rem 0; }
+  em { font-style: italic; }
+  .spec {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 4px; padding: 1.1rem 1.3rem; margin: 1.4rem 0;
+    font-size: .95rem; line-height: 1.8;
+  }
+  .spec .key {
+    font-family: var(--mono); font-size: .82em; color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 9%, transparent);
+    padding: .08em .35em; border-radius: 3px; white-space: nowrap;
+  }
+  .spec .at {
+    display: block; margin-top: .65rem; padding-top: .6rem;
+    border-top: 1px dashed var(--line);
+    font-family: var(--mono); font-size: .74rem; color: var(--muted);
+    letter-spacing: .03em;
+  }
+  .spec .at b { color: var(--accent); font-weight: 500; }
+  .obj {
+    margin-top: .9rem; background: var(--bg);
+    border: 1px solid var(--line); border-radius: 4px;
+    font-family: var(--mono); font-size: .74rem; line-height: 1.7;
+    overflow: hidden;
+  }
+  .obj-name {
+    padding: .45rem .9rem; color: var(--accent); font-weight: 500;
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
+  }
+  .obj-row {
+    display: grid; grid-template-columns: 8.5rem 1fr; gap: .8rem;
+    padding: .35rem .9rem;
+  }
+  .obj-row + .obj-row { border-top: 1px solid color-mix(in srgb, var(--line) 55%, transparent); }
+  .obj-k { color: var(--muted); }
+  .obj-v { color: var(--ink); opacity: .8; }
+  @media (max-width: 480px) { .obj-row { grid-template-columns: 1fr; gap: .1rem; } }
+  .flow {
+    font-family: var(--mono); font-size: .78rem; letter-spacing: .12em;
+    color: var(--muted); text-align: center; margin: 1.6rem 0;
+  }
+  .flow b { color: var(--ink); font-weight: 500; }
+  .flow .x { color: var(--accent); }
+  footer {
+    margin-top: 4rem; padding-top: 1.2rem; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: .85rem;
+  }
+  a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--line); }
+  a:hover { text-decoration-color: var(--accent); }
 </style>
 </head>
 <body>
 <main>
   <h1>OpenGDD</h1>
-  <p>An open format for game design documents that machines can build
-  from. A spec written this way is complete enough that a builder,
-  human or AI agent, can turn it into a working game without the
-  designer in the room.</p>
-  <p>The specification is still being forged and tested against real
-  games. When it's ready to be read, and broken, it will be
-  published here.</p>
-  <p class="muted">
+  <p class="tagline">An open format for game designs that a machine
+  can build.</p>
+
+  <p>The game design document (GDD) is where a game is worked out
+  before it is made: its rules, its world, how it should feel to
+  play. Studios have written them for decades, for human teams to
+  interpret. OpenGDD gives the document the final word: you design
+  the game in it, your agent builds from it, and the build is
+  checked against what you promised.</p>
+
+  <p class="label">The shift</p>
+
+  <p>Agents can build games now. The demos are astonishing, but look
+  closely and most of them are memories: games everyone already
+  loves, reconstructed from the weights. The skill is real. The
+  designs are borrowed.</p>
+
+  <p>Building is becoming abundant. What stays scarce is a design
+  worth building: an original game, thought through and written down
+  so clearly that nothing is lost on the way to the screen.</p>
+
+  <p class="label">The document</p>
+
+  <p>An OpenGDD specification is <em>technical screenwriting</em>.
+  Prose carries the vision; structure carries the proof. The designer
+  states each rule together with its reason, sets the creative
+  direction, pins the tuned numbers, and writes acceptance tests: the
+  checks a finished game has to pass before it can call itself a
+  build of this design.</p>
+
+  <div class="spec">
+    The ferry departs the instant the bell falls silent, taking
+    whoever is aboard. The bell rings for
+    <span class="key">bell.ring_seconds</span> and never longer; a
+    passenger left on the pier remembers it. Boarding costs
+    <span class="key">fare.embers</span>, charged only when the ferry
+    actually moves.
+    <span class="at"><b>acceptance&nbsp;test</b> departure-is-exact:
+    the end of the bell, the departure, and the fare must land on the
+    same tick.</span>
+  </div>
+
+  <p>Creative direction is written the same way. Anything can be a
+  named object, even a mood: the prose says when it takes hold, the
+  object says what it holds.</p>
+
+  <div class="spec">
+    Crossing at dusk, the world thins: the water goes still, the far
+    shore loses its edges, and the mood shifts to
+    <span class="key">dusk_crossing_mood</span> until the pier lantern
+    is lit.
+    <div class="obj">
+      <div class="obj-name">dusk_crossing_mood</div>
+      <div class="obj-row"><span class="obj-k">intent</span><span class="obj-v">"the passage should feel like held breath"</span></div>
+      <div class="obj-row"><span class="obj-k">reference</span><span class="obj-v">ref/dusk-water-study.png</span></div>
+      <div class="obj-row"><span class="obj-k">anti-references</span><span class="obj-v">"storybook warmth", "horror gloom"</span></div>
+      <div class="obj-row"><span class="obj-k">behaviors</span><span class="obj-v">"lantern light gutters low", "oar sounds soften and slow"</span></div>
+    </div>
+  </div>
+
+  <p>The reference points the way; the build interprets it. Two
+  faithful builds of this crossing may look different, but they
+  should feel the same.</p>
+
+  <p class="label">The contract</p>
+
+  <p class="flow"><b>DESIGN</b> &nbsp;&rarr;&nbsp;
+  <b>SPEC</b> &nbsp;&rarr;&nbsp; <b>BUILD</b>
+  <span class="x">&nbsp;·&nbsp; any&nbsp;engine, any&nbsp;agent</span></p>
+
+  <p>A spec is a contract between a design and its build. Both sides
+  can be you: you write the design, your agent builds it. And if you
+  allow it, others can build your design too, on engines and in
+  styles you never imagined. The contract holds either way.</p>
+
+  <p>Every design draws its own boundary. On one side, what every
+  build must honor: the rules, the numbers, the exact weight of a
+  jump. On the other, what stays open: engine, interpretation,
+  polish, craft. The designer draws that creative boundary, surface
+  by surface.</p>
+
+  <p class="label">Status</p>
+
+  <p>The format is being forged against real games: written out,
+  handed to independent agents, broken, and revised. When it can
+  stand up to you as well, it will be published here.</p>
+
+  <footer>
     Steward: Starphase Lab ·
     <a href="mailto:steward@opengdd.org">steward@opengdd.org</a> ·
     <a href="https://github.com/opengdd">github.com/opengdd</a>
-  </p>
+  </footer>
 </main>
 </body>
 </html>
