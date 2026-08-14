@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengdd.org/schema/core/v0.5/opengdd-build.schema.json",
+  "title": "OpenGDD v0.5 build manifest",
+  "type": "object",
+  "required": ["opengdd", "spec", "designer", "builder", "personalization", "resolved_tuning", "harness"],
+  "additionalProperties": false,
+  "properties": {
+    "opengdd": { "const": "0.5" },
+    "spec": {
+      "type": "object",
+      "required": ["id", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        }
+      }
+    },
+    "designer": { "$ref": "#/$defs/party" },
+    "builder": { "$ref": "#/$defs/party" },
+    "personalization": {
+      "type": "object",
+      "required": ["answers"],
+      "additionalProperties": false,
+      "properties": {
+        "answers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "number"]
+          },
+          "description": "Question id to answer used, incl. defaulted questions; choice/text answers are strings, number answers numbers; empty object when none. Cross-checks against declared questions are validator-level (SPEC 7)."
+        }
+      }
+    },
+    "resolved_tuning": {
+      "type": "object",
+      "required": ["tunables", "constants"],
+      "additionalProperties": false,
+      "properties": {
+        "tunables": {
+          "type": "object",
+          "additionalProperties": { "type": "number" },
+          "description": "Complete flat tunables map after answer resolution (SPEC 5 resolved tuning snapshot)"
+        },
+        "constants": {
+          "type": "object",
+          "additionalProperties": { "type": "number" },
+          "description": "Package constants; an empty object when the package declares none"
+        }
+      }
+    },
+    "harness": {
+      "type": "object",
+      "required": ["algorithm", "result_hash", "payload", "acceptance"],
+      "additionalProperties": true,
+      "properties": {
+        "algorithm": {
+          "enum": ["sha256"],
+          "description": "The only currently defined algorithm"
+        },
+        "result_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "payload": {
+          "type": "object",
+          "required": ["scope", "file"],
+          "additionalProperties": false,
+          "properties": {
+            "scope": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Exact human-readable statement of what the hash covers"
+            },
+            "file": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Package-relative path to the canonical payload bytes"
+            }
+          }
+        },
+        "acceptance": {
+          "type": "object",
+          "required": ["passed", "total"],
+          "additionalProperties": false,
+          "properties": {
+            "passed": { "type": "integer", "minimum": 0 },
+            "total": { "type": "integer", "minimum": 0 }
+          }
+        }
+      },
+      "$comment": "additionalProperties true by design: build-local checkpoint records, fixtures, and transcripts live here without being core contract (SPEC 7)."
+    },
+    "commerce": {
+      "type": "object",
+      "required": ["license", "split"],
+      "additionalProperties": false,
+      "properties": {
+        "license": { "enum": ["opengdd-share-v0"] },
+        "split": {
+          "type": "object",
+          "required": ["designer", "builder"],
+          "additionalProperties": false,
+          "properties": {
+            "designer": { "type": "number", "minimum": 0, "maximum": 100 },
+            "builder": { "type": "number", "minimum": 0, "maximum": 100 }
+          },
+          "description": "Percentages; validator must additionally check they sum to 100"
+        },
+        "derived_from": {
+          "type": "object",
+          "required": ["id", "version"],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+            },
+            "version": {
+              "type": "string",
+              "pattern": "^\\d+\\.\\d+\\.\\d+$"
+            }
+          }
+        }
+      },
+      "description": "The manifest's commerce profile, copied verbatim; present only when a commerce split exists to attribute"
+    },
+    "renderer": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional free-text declaration of the rendering technique this build used, such as \"three.js 0.185.1, WebGL\" (SPEC 7). The renderer is the builder's fact, never the spec's: SPEC 3's platform names the state space, and two builds of one spec may declare different renderers. Declarative only in v0.5; the web-1 capture recipe does not read it."
+    },
+    "capture_profile": {
+      "type": "object",
+      "required": ["id", "kind"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "description": "Build-local label for the concrete adapter invocation" },
+        "kind": { "enum": ["web-1"], "description": "Closed, versioned enum. web-1 names the headless-browser reference profile summarized in SPEC 7: synthetic-clock deterministic frame capture with a capture-manifest record. Widening this enum is an ordinary additive change." }
+      },
+      "$comment": "capture_profile is distinct from the manifest-level verification_profiles/material-simulation-envelope-1 concept (SPEC 3, SPEC 6a).",
+      "description": "Optional declaration of which capture adapter and serving/run recipe produced this certification (SPEC 7). Declarative only: does not change acceptance-count or hash-payload rules."
+    },
+    "resources": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/buildResource" },
+      "$comment": "Resource-id uniqueness is a validator-level check. List presence is a disclosure, not a certified-complete claim (SPEC 7).",
+      "description": "Optional build-resource provenance disclosure list: kits, third-party assets, and tools the build consumed (SPEC 7). Provenance only: it creates no split obligation and changes no certification outcome."
+    },
+    "direction_result": { "$ref": "#/$defs/directionResult" }
+  },
+  "$defs": {
+    "party": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "handle": { "type": "string" },
+        "contact": { "type": "string" },
+        "role": { "type": "string" }
+      }
+    },
+    "buildResource": {
+      "type": "object",
+      "required": ["id", "kind", "artifact", "license", "hash"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["kit", "asset", "tool"] },
+        "artifact": {
+          "type": "string",
+          "minLength": 1,
+        "description": "Names the exact single immutable file or archive hash covers: a URL, a registry coordinate (name@version), or a package-relative path. A multi-file kit, tree, or tool install MUST be packaged into one archive before hashing; v0.5 defines no directory/tree-hash canonicalization."
+        },
+        "license": { "type": "string", "minLength": 1, "description": "Free-text declaration; presence, not truth, is checked" },
+        "hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$", "description": "Covers exactly the bytes named by artifact" },
+        "source": { "type": "string", "description": "Optional origin (URL, registry id, or similar), distinct from artifact's exact-bytes identification" }
+      }
+    },
+    "directionClaimPath": {
+      "type": "string",
+      "pattern": "^(pillars|mood|anti|invariants|motion)\\.[a-z0-9]+(-[a-z0-9]+)*$",
+      "$comment": "This pattern is a necessary, not sufficient, check. A validator-level cross-check (SPEC 7/9.11) additionally MUST resolve every path against the certifying spec's direction.json and reject a path that does not name a declared entry of one of the five fixed-judged kinds (pillars.*, mood.*, anti.*, invariants.*, motion.*). A syntactically well-formed but nonexistent path, such as pillars.not-declared, is a hard failure.",
+      "description": "SPEC 9.10 dotted-path citation of a judged direction claim"
+    },
+    "directionResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "anyOf": [
+        { "required": ["judged"] },
+        { "required": ["certified_pins"] }
+      ],
+      "properties": {
+        "judged": {
+          "type": "object",
+          "required": ["status", "assessed", "adherent"],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "const": "pending",
+            "description": "SPEC 9.11 judged gate. pending is the only value v0.5 defines because the panel protocol is not yet integrated into the conformance suite."
+            },
+            "assessed": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/directionClaimPath" },
+          "description": "Every judged claim this run attempted to assess (coverage-of-claims-assessed, SPEC 9.11). Each path MUST resolve to a declared entry; see directionClaimPath $comment."
+            },
+            "adherent": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/directionClaimPath" },
+          "description": "The subset of assessed judged as adherent (adherence-over-assessed-claims, SPEC 9.11). A validator-level check requires adherent to be a subset of assessed and requires every path to resolve to a declared entry."
+            }
+          },
+      "description": "Required exactly when the certifying spec's direction.json declares at least one judged claim (pillars/mood/anti/invariants/motion); absent otherwise."
+        },
+        "certified_pins": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["path", "value"],
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string",
+                "pattern": "^constraints\\.palette\\.[a-z0-9]+(-[a-z0-9]+)*$"
+              },
+              "value": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" }
+            }
+          },
+      "description": "SPEC 9.9 descent-rule evidence: the captured resolved value for every constraints.palette.* entry carrying certify: true in the source spec's direction.json. Only direction-constraint palette pins appear here; mood-descriptor palettes cannot carry certify in v0.5. A validator-level cross-check (SPEC 7) requires exactly one entry per certified palette claim and requires value to equal that claim's declared value within ΔE00 = 0. Required exactly when the certifying spec's direction.json declares at least one certify:true constraints.palette.* claim; absent otherwise."
+        }
+      },
+      "description": "SPEC 9.11/9.9 direction certification result. Required exactly when the certifying spec's direction.json declares at least one judged claim OR at least one certify:true constraints.palette.* claim. The two conditions are independent: a constraints-only carrier with a certified pin and zero judged claims carries certified_pins with no judged member. Absent when neither condition holds. judged and certified_pins may both be present."
+    }
+  }
+}

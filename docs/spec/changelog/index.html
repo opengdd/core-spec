@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Changelog — OpenGDD</title>
+<meta name="description" content="Changes to the OpenGDD game design document format, with migration notes for each version.">
+<link rel="canonical" href="https://opengdd.org/spec/changelog/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Changelog — OpenGDD">
+<meta property="og:description" content="Changes to the OpenGDD game design document format, with migration notes for each version.">
+<meta property="og:url" content="https://opengdd.org/spec/changelog/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Changelog — OpenGDD">
+<meta name="twitter:description" content="Changes to the OpenGDD game design document format, with migration notes for each version.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/get-started/">Get Started</a>
+      <a href="/spec/" aria-current="page">Spec</a>
+      <a href="/standard/">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Versions</p><ul>
+<li class="toc-h2"><a href="#v0-5-draft-2026-08-12">v0.5 draft — 2026-08-12</a></li>
+<li class="toc-h3"><a href="#migrating-from-v0-4">Migrating from v0.4</a></li>
+<li class="toc-h2"><a href="#v0-4-draft-2026-08-09">v0.4 draft — 2026-08-09</a></li>
+<li class="toc-h3"><a href="#migrating-from-v0-3">Migrating from v0.3</a></li>
+<li class="toc-h2"><a href="#v0-3-draft-2026-08-08">v0.3 draft — 2026-08-08</a></li>
+<li class="toc-h3"><a href="#migrating-from-v0-2">Migrating from v0.2</a></li>
+<li class="toc-h2"><a href="#v0-2-draft-2026-08-06">v0.2 draft — 2026-08-06</a></li>
+<li class="toc-h3"><a href="#migrating-from-v0-1">Migrating from v0.1</a></li>
+</ul></nav>
+<article class="doc-body">
+<h1>Changelog</h1>
+<h2 id="v0-5-draft-2026-08-12">v0.5 draft — 2026-08-12<a class="heading-anchor" href="#v0-5-draft-2026-08-12" aria-label="Link to this section">#</a></h2>
+<p>OpenGDD v0.5 renames named objects to <strong>symbols</strong> and defines symbol identity as scoped, while keeping descriptors as format-owned shapes and reserving <strong>collection</strong> for §1b. The <code class="anchor">tuning.json.values</code> and <code class="anchor">opengdd-build.json.resolved_tuning.values</code> members become <code>tunables</code> and <code class="anchor">resolved_tuning.tunables</code> in a hard version cut. The names now express the change-authority axis; numeric-only tuning remains because rebalancing is change by degree.</p>
+<p>v0.5 also separates the platform family from the renderer. §3's <code class="anchor">target.platform</code> names the delivery target and accepts <code>web-2d</code> and <code>web-3d</code>. Rendering technique remains builder craft, while <code class="anchor">opengdd-build.json</code> can carry an optional free-text <code>renderer</code> declaration for a particular build. Rendered-capture certification for 3D remains outside v0.5 because the only defined capture profile is <code>web-1</code>.</p>
+<h3 id="migrating-from-v0-4">Migrating from v0.4<a class="heading-anchor" href="#migrating-from-v0-4" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Rename <code class="anchor">tuning.json</code>'s <code>values</code> member to <code>tunables</code>.</li>
+<li>Rename <code class="anchor">opengdd-build.json</code>'s <code class="anchor">resolved_tuning.values</code> member to <code class="anchor">resolved_tuning.tunables</code>.</li>
+<li>Replace the term <strong>named object</strong> with <strong>symbol</strong> in format-facing prose and tools.</li>
+</ul>
+<p>This is a hard version cut: the v0.5 validator rejects the old <code>values</code> members rather than migrating them implicitly.</p>
+<h2 id="v0-4-draft-2026-08-09">v0.4 draft — 2026-08-09<a class="heading-anchor" href="#v0-4-draft-2026-08-09" aria-label="Link to this section">#</a></h2>
+<p>v0.4 adds a structured art-direction surface while preserving the designer's ability to communicate through prose. It also adds a portable grid-layout encoding and more complete build provenance.</p>
+<ul>
+<li><strong>Direction block and schema (§9):</strong> a package can declare <code class="anchor">direction.json</code> through <code class="anchor">manifest.json.build.direction</code>. The block carries pillars, mood, anti-references, constraints, viewing contexts, invariants, and a narrow material/wet-motion vocabulary. Claim paths bind to their viewing context; checked constraints cite acceptance tests. Whole-direction judged status is recordable but remains <code>pending</code> in v0.4.</li>
+<li><strong>Certified palette pins (§§7 and 9):</strong> an exact palette constraint can opt into build evidence with <code>certify: true</code>. The source path, captured value, and cross-document requirements are schema- and validator-checked.</li>
+<li><strong>Mood descriptors (§8a):</strong> format-owned mood objects carry intent, references, anti-references, palette roles, behaviors, and an optional inert audio sketch. References identify exactly which annotated properties are borrowed. Media paths, licenses, hashes, and byte signatures are validated.</li>
+<li><strong><code>parallel-string-layers-1</code> (§7a):</strong> a closed encoding for rectangular, same-shape string layers with alphabet, role, dimensions, and fill policy. It is a layout carrier, not a universal puzzle-solver interface.</li>
+<li><strong>Build provenance (§7):</strong> <code class="anchor">opengdd-build.json</code> gains optional <code>capture_profile</code>, <code>resources</code>, and <code>direction_result</code> members. Resource digests cover one explicitly named artifact; presence is a disclosure, not a claim that every consumed resource is listed.</li>
+<li><strong>Audio direction (§10):</strong> a non-normative planning annex. It creates no validation or certification consequence in v0.4.</li>
+<li><strong>Prose/schema alignment:</strong> cardinalities, identifier grammar, claim classes, certified-pin ownership, and cross-document presence rules are stated consistently in the specification, schemas, and validator.</li>
+</ul>
+<h3 id="migrating-from-v0-3">Migrating from v0.3<a class="heading-anchor" href="#migrating-from-v0-3" aria-label="Link to this section">#</a></h3>
+<p>Most v0.4 constructs are additive. A package that adopts none of them normally needs only a version bump, subject to two namespace collisions that v0.3 deliberately left open:</p>
+<ul>
+<li><strong><code class="anchor">build.direction</code>:</strong> v0.3 reserved this member but did not validate the target. In v0.4 it names a real direction block and the referenced file must exist and validate.</li>
+<li><strong><code>parallel-string-layers-1</code>:</strong> a v0.3 package that independently used this format id for another shape must rename its local format before upgrading.</li>
+</ul>
+<p>Change the source manifest's <code>opengdd</code> value from <code>&quot;0.3&quot;</code> to <code>&quot;0.4&quot;</code>. Any retained <code class="anchor">opengdd-build.json</code> being certified against v0.4 must also use <code>&quot;0.4&quot;</code>; a historical build record can remain associated with v0.3.</p>
+<h2 id="v0-3-draft-2026-08-08">v0.3 draft — 2026-08-08<a class="heading-anchor" href="#v0-3-draft-2026-08-08" aria-label="Link to this section">#</a></h2>
+<p>v0.3 adds reusable structure for graphs, rule-state systems, mixed clock regimes, macroscopic material simulation, and build evidence.</p>
+<ul>
+<li><strong>Declared graph edge sets (§1c):</strong> typed cross-record edges plus the <code>opengdd-graph-1</code> static-lint predicates for existence closure, acyclicity, reciprocity, bounded reachability, and monotone attributes.</li>
+<li><strong>Ruleset state (§2c):</strong> finite rule registries, applicability tags, closed hook and derived-predicate universes, and state bindings. Open-ended player-authored rule vocabularies remain outside v0.x certification.</li>
+<li><strong>Clocks and resolution regimes (§4b):</strong> optional clock behavior across declared regimes and standard replay transitions. Atomic transaction and snapshot semantics remain deferred.</li>
+<li><strong>Material-simulation envelope (§6a):</strong> declared minimum feature width, observation schedule, interaction table, macroscopic measures, and bounded outcome models. It does not certify sub-envelope or universal-emergence claims.</li>
+<li><strong>Solver-interface problem statement (§7a):</strong> documents the open layout and predicate questions and provides a finite-domain exhaustive-search idiom; it does not lock a universal puzzle profile.</li>
+<li><strong>Build-manifest schema (§7):</strong> <code class="anchor">opengdd-build.json</code> gains a schema and validator-level cross-document checks for identity, parties, personalization, resolved tuning, evidence payload, digest, and acceptance counts.</li>
+<li><strong><code class="anchor">build.direction</code> reserved:</strong> namespace is set aside for the v0.4 direction block and remains inert in v0.3.</li>
+</ul>
+<h3 id="migrating-from-v0-2">Migrating from v0.2<a class="heading-anchor" href="#migrating-from-v0-2" aria-label="Link to this section">#</a></h3>
+<p>Package-side constructs are additive; a package that declares none of them is valid after changing manifest <code>opengdd</code> from <code>&quot;0.2&quot;</code> to <code>&quot;0.3&quot;</code>.</p>
+<p>Builds certifying against v0.3 must ship an <code class="anchor">opengdd-build.json</code> matching the new schema: personalization answers, both resolved-tuning sections, and the evidence algorithm, digest, payload, and acceptance counts. Existing v0.2 build records remain associated with v0.2.</p>
+<h2 id="v0-2-draft-2026-08-06">v0.2 draft — 2026-08-06<a class="heading-anchor" href="#v0-2-draft-2026-08-06" aria-label="Link to this section">#</a></h2>
+<ul>
+<li><strong>Numeric authority homes:</strong> separates mutable <code>values</code>, Fixed <code>constants</code>, per-content facts, and verification inputs.</li>
+<li><strong>Typed expressions:</strong> adds closed <code>opengdd-expr-1</code> expressions for declared numeric, Boolean, finite-list, and runtime-state operations.</li>
+<li><strong>Structured-content envelope:</strong> adds declared collections, format ids, stable record ids, reference closure, and authority.</li>
+<li><strong>Verification classes:</strong> standardizes <code>scenario</code>, <code>property</code>, <code>exhaustive-search</code>, and <code>static-lint</code>, including bounded evidence.</li>
+<li><strong>PRNG stream addresses:</strong> defines canonical nested unit and named-stream addressing over FNV-1a-derived Mulberry32 sub-seeds.</li>
+<li><strong>Numeric personalization:</strong> adds ordered target operations, bound policy, and a resolved tuning snapshot in <code class="anchor">opengdd-build.json</code>.</li>
+<li><strong>Commerce profile:</strong> moves licensing, split, and derivation metadata into an optional profile used only when relevant to third-party building or listing.</li>
+<li><strong>Package safety:</strong> defines path normalization and archive traversal guards.</li>
+</ul>
+<p>The general grid-replay solver profile is not part of v0.2 and remains deferred.</p>
+<h3 id="migrating-from-v0-1">Migrating from v0.1<a class="heading-anchor" href="#migrating-from-v0-1" aria-label="Link to this section">#</a></h3>
+<p>v0.2 is a breaking revision and does not accept a v0.1 package unchanged.</p>
+<ul>
+<li>Change manifest <code>opengdd</code> from <code>&quot;0&quot;</code> to <code>&quot;0.2&quot;</code>.</li>
+<li>Move top-level <code>license</code>, <code>split</code>, and any <code>derived_from</code> value into the optional <code>commerce</code> block.</li>
+<li>Declare legacy structured-content directories as §1b collections when they need machine discovery and validation.</li>
+<li>Keep mutable tuning in <code>values</code>, move Fixed numeric values to <code>constants</code>, and keep metadata under <code>meta</code>.</li>
+<li>Replace personalization notes that change numeric tuning with explicit <code>tuning_overrides</code> or numeric-question resolution operations.</li>
+</ul>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

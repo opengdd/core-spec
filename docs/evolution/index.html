@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evolution — OpenGDD</title>
+<meta name="description" content="How the OpenGDD game design document format evolves: the 0.x policy, the 1.0 promise, public proposals, and open questions.">
+<link rel="canonical" href="https://opengdd.org/evolution/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Evolution — OpenGDD">
+<meta property="og:description" content="How the OpenGDD game design document format evolves: the 0.x policy, the 1.0 promise, public proposals, and open questions.">
+<meta property="og:url" content="https://opengdd.org/evolution/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Evolution — OpenGDD">
+<meta name="twitter:description" content="How the OpenGDD game design document format evolves: the 0.x policy, the 1.0 promise, public proposals, and open questions.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/get-started/">Get Started</a>
+      <a href="/spec/">Spec</a>
+      <a href="/standard/" aria-current="page">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="wrap">
+<h1>How the format evolves</h1>
+
+<p>OpenGDD is on a 0.x workbench. Minor versions may reshape
+constructs while the format earns its stability against real games.
+Every construct in the current draft is there because two different
+games needed it. The <a href="/spec/changelog/">changelog</a> records
+each version's migration path. Schema URLs are versioned and never
+repurposed, so a package that validated under its own version will
+always validate under it.</p>
+
+<h2>The 1.0 promise</h2>
+
+<p>Version 1.0 is a set of criteria. There is no target date. When all
+five hold, 1.0 is declared:</p>
+
+<ol>
+<li><strong>Stability.</strong> Once a package is valid, it stays
+valid. Later 1.x releases will not break it. Breaking changes wait for
+version 2.0, and they are announced well before they arrive.</li>
+<li><strong>Testable conformance.</strong> A suite of checks decides
+whether a package conforms. Anyone who runs it gets the same
+answer.</li>
+<li><strong>An independent implementation.</strong> Someone outside the
+project has built a working tool from the written specification alone.
+That is the proof the specification is complete.</li>
+<li><strong>Public review.</strong> A public review round has run, and
+every finding is resolved.</li>
+<li><strong>The battery.</strong> The format is tested against real
+games, and it must express them at the predicted level. The
+<a href="/spec/limitations/">known limitations</a> page must be
+current.</li>
+</ol>
+
+<p>Until then the version stays at 0.x: the format still changes as
+real games teach it.</p>
+
+<h2>How proposals happen</h2>
+
+<p>Evidence first. A construct enters the specification when real
+games need it, not when an argument sounds right. The strongest
+proposal names a game, shows what the current format forces it to do
+awkwardly or dishonestly, and sketches the smallest construct that
+fixes it. Two independent instances of a need move a proposal from
+"interesting" to "ready to draft."</p>
+
+<p>Proposals go to
+<a href="https://github.com/opengdd/core-spec/discussions">GitHub
+Discussions on the specification repository</a>: new constructs in
+Proposals, questions in Q&amp;A, and things you built in Show and
+tell. Security reports go to
+<a href="mailto:security@opengdd.org">security@opengdd.org</a>,
+never to public threads.</p>
+
+<h2>Open questions, right now</h2>
+
+<p>Questions the current draft has open, where opinions and evidence
+are wanted:</p>
+
+<ul>
+<li><strong>A designer shorthand for acceptance tests.</strong>
+Writing formal verification descriptors is the steepest part of
+authoring a package. Should there be a shorthand tier that a tool
+can expand into the formal descriptor?</li>
+<li><strong>Prose sub-files for large specs.</strong> Chapters grow.
+Should a chapter be able to split into paired record-and-prose
+sub-files without inventing a second structure?</li>
+<li><strong>The level-encoding family.</strong> The current grid
+encoding handles parallel string layers. Single-grid pictures and
+overlapping glyphs recur in real games. What does the family
+need?</li>
+<li><strong>The solver interface.</strong> Authored puzzles can
+declare solvability, but the contract an independent solver would
+certify against is still open. The evidence so far says the drafted
+shape must widen before it locks.</li>
+<li><strong>The 3D capture recipe.</strong> A <code>web-3d</code>
+build can certify today when its acceptance tests need only logic
+and state observations. A rendered-capture profile needs a
+renderer-neutral way to classify what sits under a sampled pixel;
+the recipe is unwritten.</li>
+</ul>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

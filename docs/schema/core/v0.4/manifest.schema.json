@@ -1,0 +1,676 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengdd.org/schema/core/v0.4/manifest.schema.json",
+  "title": "OpenGDD v0.4 manifest",
+  "type": "object",
+  "required": ["opengdd", "id", "version", "title", "designer", "target", "build"],
+  "additionalProperties": false,
+  "properties": {
+    "opengdd": { "const": "0.4" },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Registry-unique spec id, kebab-case"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "designer": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "handle": { "type": "string", "description": "Registry handle" },
+        "contact": { "type": "string" }
+      }
+    },
+    "target": {
+      "type": "object",
+      "required": ["platform", "genre"],
+      "additionalProperties": false,
+      "properties": {
+        "platform": { "enum": ["web-2d"] },
+        "genre": { "type": "string", "minLength": 1 },
+        "session_minutes": { "type": "number", "minimum": 0 },
+        "audience": { "type": "string" }
+      }
+    },
+    "build": {
+      "type": "object",
+      "required": ["chapters", "plan", "tuning"],
+      "additionalProperties": false,
+      "properties": {
+        "chapters": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/packagePath" },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "plan": { "$ref": "#/$defs/packagePath" },
+        "tuning": {
+          "$ref": "#/$defs/packagePath",
+          "description": "Path to tuning.json using the v0.3 values/constants/meta/invariants/clocks shape"
+        },
+        "personalization": { "$ref": "#/$defs/packagePath" },
+        "direction": {
+          "$ref": "#/$defs/packagePath",
+          "description": "Path to direction.json (SPEC 9). Normative as of v0.4: MUST be declared exactly when 04-presentation.md carries a direction block, and MUST NOT be declared otherwise (validator-level cross-check)."
+        }
+      }
+    },
+    "content": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/contentCollection" },
+      "uniqueItems": true,
+      "$comment": "Collection-id uniqueness and stable-item-id uniqueness are validator-level checks beyond JSON Schema; uniqueItems does not enforce identifier-field uniqueness.",
+      "description": "Structured-content collections; collection ids must be unique"
+    },
+    "graphs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/graphEdgeSet" },
+      "uniqueItems": true,
+      "$comment": "Edge-set-id uniqueness, collection-id resolution, and predicate discharge are validator-level checks (SPEC 1c).",
+      "description": "Declared graph edge sets over content collections (SPEC 1c)"
+    },
+    "ruleset_state": { "$ref": "#/$defs/rulesetState" },
+    "descriptors": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mood": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/moodDescriptor" }
+        }
+      },
+      "$comment": "Only 'mood' is a populated descriptor family in v0.4 (SPEC 8/8a). character, cutscene, storyboard, and space-atmosphere are named-but-empty candidate-family chairs and MUST NOT appear as keys here until a future revision admits them; additionalProperties:false enforces that.",
+      "description": "Named descriptor families (SPEC 8). Descriptor-id uniqueness within a family is a validator-level check."
+    },
+    "verification_profiles": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/verificationProfileInstance" },
+      "uniqueItems": true,
+      "$comment": "Instance-id uniqueness and reference resolution from collections/ATs are validator-level checks (SPEC 6a).",
+      "description": "Named, configured verification-profile instances (SPEC 6a)"
+    },
+    "commerce": {
+      "type": "object",
+      "required": ["license", "split"],
+      "additionalProperties": false,
+      "properties": {
+        "license": { "enum": ["opengdd-share-v0"] },
+        "split": {
+          "type": "object",
+          "required": ["designer", "builder"],
+          "additionalProperties": false,
+          "properties": {
+            "designer": { "type": "number", "minimum": 0, "maximum": 100 },
+            "builder": { "type": "number", "minimum": 0, "maximum": 100 }
+          },
+          "description": "Percentages; validator must additionally check they sum to 100"
+        },
+        "derived_from": {
+          "type": "object",
+          "required": ["id", "version"],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+            },
+            "version": {
+              "type": "string",
+              "pattern": "^\\d+\\.\\d+\\.\\d+$"
+            }
+          }
+        }
+      },
+      "description": "Optional in core; required when offered for third-party building or marketplace listing on any registry"
+    }
+  },
+  "$defs": {
+    "kebabId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "sha256Hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "mediaFile": {
+      "type": "object",
+      "required": ["path", "license", "hash", "format"],
+      "additionalProperties": false,
+      "properties": {
+        "path": { "$ref": "#/$defs/packagePath" },
+        "license": { "type": "string", "minLength": 1 },
+        "hash": { "$ref": "#/$defs/sha256Hash" },
+        "format": { "enum": ["png", "jpg", "jpeg", "webp"] }
+      },
+      "$comment": "SPEC 8a media packaging: license presence (not truth), hash pin, and format allowlist. Byte-signature-matches-declared-format is a required validator-level check. v0.4 defines no per-file size cap, so none is encoded here.",
+      "description": "One package-relative media file attached to a reference or anti-reference (SPEC 8a/9.3)"
+    },
+    "annotatedReference": {
+      "type": "object",
+      "required": ["description", "borrows"],
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string", "minLength": 1 },
+        "borrows": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "media": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/mediaFile" }
+        }
+      },
+      "description": "SPEC 8a/9.3 annotated reference: every entry MUST name the borrowed property"
+    },
+    "antiReference": {
+      "type": "object",
+      "required": ["description"],
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string", "minLength": 1 },
+        "observable": { "$ref": "#/$defs/observableCriteria" },
+        "media": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/mediaFile" }
+        }
+      },
+      "description": "SPEC 8a mood-descriptor anti-reference. An anti-reference MAY attach a labeled 'not this' sheet, matching §8a's normative media rule for references and anti-references. No class member appears here: a mood descriptor's audit class is derived at the descriptor level (SPEC 9.2), unlike §9.4's direction-block anti entries."
+    },
+    "observableCriteria": {
+      "type": "object",
+      "required": ["criteria"],
+      "additionalProperties": false,
+      "properties": {
+        "criteria": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Prose statement of the mechanical test a ban states (SPEC 9.4)"
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "required": ["population", "states", "coverage"],
+      "additionalProperties": false,
+      "properties": {
+        "population": { "type": "string", "minLength": 1 },
+        "states": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "coverage": {
+          "oneOf": [
+            { "const": "exhaustive" },
+            {
+              "type": "object",
+              "required": ["sampled"],
+              "additionalProperties": false,
+              "properties": {
+                "sampled": {
+                  "type": "object",
+                  "required": ["oracle"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "oracle": {
+                      "oneOf": [
+                        { "const": "per-sample" },
+                        {
+                          "type": "object",
+                          "required": ["aggregate"],
+                          "additionalProperties": false,
+                          "properties": {
+                            "aggregate": {
+                              "type": "object",
+                              "required": ["aggregation", "metric", "threshold"],
+                              "additionalProperties": false,
+                              "properties": {
+                                "aggregation": { "enum": ["count", "rate", "min", "max", "mean"] },
+                                "metric": { "type": "string", "minLength": 1 },
+                                "threshold": {
+                                  "type": "object",
+                                  "required": ["op", "value"],
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "op": { "enum": ["eq", "lt", "lte", "gt", "gte"] },
+                                    "value": { "type": "number" }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "description": "SPEC 9.5 shared scope shape (mirrored in direction.schema.json for the direction-carrier's own claims). Used here by a mood descriptor's palette roles (SPEC 8a)."
+    },
+    "moodBehavior": {
+      "type": "object",
+      "required": ["trigger", "response"],
+      "additionalProperties": false,
+      "properties": {
+        "trigger": { "type": "string", "minLength": 1 },
+        "response": { "enum": ["this mood becomes active", "this mood becomes inactive"] },
+        "timing": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_latency_ms": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        }
+      },
+      "description": "SPEC 8a minimal reactivity contract: onset/offset only"
+    },
+    "paletteRole": {
+      "type": "object",
+      "required": ["value", "tolerance", "scope"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+        "tolerance": { "type": "number", "minimum": 0 },
+        "scope": { "$ref": "#/$defs/scope" }
+      },
+      "description": "SPEC 9.5 palette role, reused for a mood descriptor's own palette (SPEC 8a). scope is required. No certify member appears here: certify is direction-constraint-only in v0.4, and opengdd-build.schema.json's certified_pins accepts only constraints.palette.<key> paths. A designer wanting an exactly pinned mood color expresses it as a direction-block constraints.palette entry instead (SPEC 8a/9.9)."
+    },
+    "moodDescriptor": {
+      "type": "object",
+      "required": ["id", "intent", "anti"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/kebabId" },
+        "intent": { "type": "string", "minLength": 1 },
+        "references": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/annotatedReference" }
+        },
+        "anti": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/antiReference" }
+        },
+        "palette": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "$ref": "#/$defs/paletteRole" }
+        },
+        "behaviors": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/moodBehavior" }
+        },
+        "audio": {
+          "type": "object",
+          "description": "DRAFT, non-normative (SPEC 10); no schema-fixed shape in v0.4"
+        }
+      }
+    },
+    "graphEdgeSet": {
+      "type": "object",
+      "required": ["id", "edges"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/kebabId" },
+        "edges": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["from", "member", "to"],
+            "additionalProperties": false,
+            "properties": {
+              "from": {
+                "type": "object",
+                "required": ["collection"],
+                "additionalProperties": false,
+                "properties": { "collection": { "$ref": "#/$defs/kebabId" } }
+              },
+              "member": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Record member name or JSON Pointer carrying target ids"
+              },
+              "to": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "object",
+                  "required": ["collection"],
+                  "additionalProperties": false,
+                  "properties": { "collection": { "$ref": "#/$defs/kebabId" } }
+                }
+              },
+              "discriminator": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Required when a site's target collection varies per record"
+              },
+              "discriminator_map": {
+                "type": "object",
+                "minProperties": 1,
+                "additionalProperties": { "$ref": "#/$defs/kebabId" },
+                "description": "Maps discriminator values to target collection ids when values are domain vocabulary rather than collection ids"
+              }
+            }
+          }
+        },
+        "inverse": {
+          "type": "object",
+          "required": ["member"],
+          "additionalProperties": false,
+          "properties": {
+            "member": { "type": "string", "minLength": 1 }
+          },
+          "description": "Back-pointer member on target records, for reciprocity checks"
+        }
+      }
+    },
+    "rulesetState": {
+      "type": "object",
+      "additionalProperties": false,
+      "anyOf": [
+        { "required": ["rulesets"] },
+        { "required": ["hooks"] },
+        { "required": ["derived_predicates"] },
+        { "required": ["identity_sets"] }
+      ],
+      "properties": {
+        "rulesets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "$ref": "#/$defs/kebabId" },
+              "initial": { "type": "boolean" }
+            }
+          },
+          "$comment": "Ruleset-id uniqueness and the exactly-one-initial rule are validator-level checks (SPEC 2c)."
+        },
+        "hooks": {
+          "type": "object",
+          "required": ["id", "contract", "members"],
+          "additionalProperties": false,
+          "properties": {
+            "id": { "$ref": "#/$defs/kebabId" },
+            "contract": { "type": "string", "minLength": 1 },
+            "members": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/kebabId" }
+            }
+          }
+        },
+        "derived_predicates": {
+          "type": "object",
+          "required": ["id", "contract", "subjects", "predicates", "derivation"],
+          "additionalProperties": false,
+          "properties": {
+            "id": { "$ref": "#/$defs/kebabId" },
+            "contract": { "type": "string", "minLength": 1 },
+            "subjects": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/kebabId" }
+            },
+            "predicates": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/kebabId" }
+            },
+            "derivation": { "const": "fixed" }
+          }
+        },
+        "identity_sets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["entity_class", "contract", "entities", "candidate_types"],
+            "additionalProperties": false,
+            "properties": {
+              "entity_class": { "$ref": "#/$defs/kebabId" },
+              "contract": { "type": "string", "minLength": 1 },
+              "entities": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "required": ["collection"],
+                    "additionalProperties": false,
+                    "properties": { "collection": { "$ref": "#/$defs/kebabId" } }
+                  },
+                  {
+                    "type": "object",
+                    "required": ["members"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "members": {
+                        "type": "array",
+                        "minItems": 1,
+                        "uniqueItems": true,
+                        "items": { "$ref": "#/$defs/kebabId" }
+                      }
+                    }
+                  }
+                ]
+              },
+              "candidate_types": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": { "$ref": "#/$defs/kebabId" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "packagePath": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Package-relative path that remains inside the package after normalization"
+    },
+    "tuningRef": {
+      "type": "object",
+      "required": ["ref"],
+      "additionalProperties": false,
+      "properties": {
+        "ref": { "type": "string", "pattern": "^tuning:[A-Za-z0-9_.-]+$" }
+      }
+    },
+    "verificationProfileInstance": {
+      "type": "object",
+      "required": ["id", "profile", "min_feature_width", "observation_schedule", "interaction_table", "measures", "measures_contract", "subsystems"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/kebabId" },
+        "profile": { "const": "material-simulation-envelope-1" },
+        "min_feature_width": { "$ref": "#/$defs/tuningRef" },
+        "observation_schedule": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^(event:[a-z0-9]+(-[a-z0-9]+)*|cadence:[A-Za-z0-9_.-]+)$"
+          }
+        },
+        "interaction_table": {
+          "type": "object",
+          "required": ["collection", "materials_collection", "pair_members", "interaction_member", "priority_member", "completeness"],
+          "additionalProperties": false,
+          "properties": {
+            "collection": { "$ref": "#/$defs/kebabId" },
+            "materials_collection": { "$ref": "#/$defs/kebabId" },
+            "pair_members": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "interaction_member": { "type": "string", "minLength": 1 },
+            "priority_member": { "type": "string", "minLength": 1 },
+            "inert_value": { "type": "string", "minLength": 1 },
+            "completeness": { "enum": ["closed", "representative"] }
+          }
+        },
+        "measures": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": ["area", "center-of-mass", "connectivity", "free-surface-order", "ordered-conversion-events", "opening-class", "support-collapse-events", "fire-envelope-bounds"]
+          }
+        },
+        "measures_contract": { "type": "string", "minLength": 1 },
+        "opening_thresholds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "number", "exclusiveMinimum": 0 },
+          "$comment": "Strict monotonic increase is a validator-level check.",
+          "description": "Strictly increasing width thresholds in world units; required by the validator when measures includes opening-class"
+        },
+        "subsystems": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "outcome_model"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "$ref": "#/$defs/kebabId" },
+              "outcome_model": { "enum": ["deterministic", "seeded", "legal-outcome-set"] },
+              "envelope": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Required by the validator when outcome_model is legal-outcome-set"
+              }
+            }
+          }
+        }
+      }
+    },
+    "authority": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["level"],
+          "additionalProperties": false,
+          "properties": {
+            "level": { "enum": ["fixed", "delegated"] }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["level", "question"],
+          "additionalProperties": false,
+          "properties": {
+            "level": { "const": "personalization" },
+            "question": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "contentSource": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "file"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "catalog" },
+            "file": { "$ref": "#/$defs/packagePath" }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["kind", "directory", "members"],
+          "additionalProperties": false,
+          "properties": {
+            "kind": { "const": "items" },
+            "directory": { "$ref": "#/$defs/packagePath" },
+            "members": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          }
+        }
+      ]
+    },
+    "contentCollection": {
+      "type": "object",
+      "required": ["id", "format", "contract", "source", "authority", "id_member"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+        },
+        "format": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*-(?:v)?[0-9]+$",
+          "description": "Versioned format id"
+        },
+        "contract": { "type": "string", "minLength": 1 },
+        "source": { "$ref": "#/$defs/contentSource" },
+        "authority": { "$ref": "#/$defs/authority" },
+        "id_member": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+        },
+        "verification_profile": { "type": "string", "minLength": 1 },
+        "layout": { "$ref": "#/$defs/gridLayoutBinding" }
+      },
+      "if": {
+        "properties": { "format": { "const": "parallel-string-layers-1" } },
+        "required": ["format"]
+      },
+      "then": { "required": ["layout"] },
+      "else": { "not": { "required": ["layout"] } },
+      "$comment": "SPEC 7a grid-layout encoding family: layout is required exactly when format is parallel-string-layers-1, and illegal otherwise."
+    },
+    "gridLayoutBinding": {
+      "type": "object",
+      "required": ["layers", "cell_unit"],
+      "additionalProperties": false,
+      "properties": {
+        "layers": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "cell_unit": { "const": "unicode-scalar-value" }
+      },
+      "$comment": "layers names the closed set of record member names a validator reads as grid layers (SPEC 7a); congruence, non-empty rows, and single-cell-per-coordinate rules are validator-level checks over the named members.",
+          "description": "Mechanical layer binding for the parallel-string-layers-1 encoding (SPEC 7a)"
+    }
+  }
+}

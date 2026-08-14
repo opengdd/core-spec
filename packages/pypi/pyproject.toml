@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "opengdd"
 version = "0.0.0"
-description = "OpenGDD - an open format for machine-buildable game design documents. Name reservation; specification and tooling in development."
+description = "OpenGDD — an open format for game design documents. Registry placeholder; see opengdd.org."
 readme = "README.md"
 requires-python = ">=3.9"
 license = "MIT"
@@ -20,7 +20,7 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/opengdd/core-spec"
+Homepage = "https://opengdd.org/"
 Repository = "https://github.com/opengdd/core-spec"
 Issues = "https://github.com/opengdd/core-spec/issues"
 

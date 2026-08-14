@@ -1,8 +1,7 @@
-//! OpenGDD - name reservation.
+//! OpenGDD registry placeholder.
 //!
-//! The OpenGDD specification is in development and has not yet been
-//! published. This crate contains no functional code.
-//! See <https://github.com/opengdd>.
+//! OpenGDD is an open format for game design documents. This crate contains no
+//! functional code. See <https://opengdd.org/> for the working specification.
 
-/// The OpenGDD format revision this crate targets. None yet.
+/// The OpenGDD format revision targeted by this placeholder crate.
 pub const SPEC_REVISION: Option<&str> = None;

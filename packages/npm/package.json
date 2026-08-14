@@ -1,10 +1,10 @@
 {
   "name": "opengdd",
   "version": "0.0.0",
-  "description": "OpenGDD - an open format for machine-buildable game design documents. Name reservation; specification and tooling in development.",
+  "description": "OpenGDD — an open format for game design documents. Registry placeholder; see opengdd.org.",
   "license": "MIT",
   "author": "Starphase Lab <steward@opengdd.org>",
-  "homepage": "https://github.com/opengdd/core-spec#readme",
+  "homepage": "https://opengdd.org/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/opengdd/core-spec.git"

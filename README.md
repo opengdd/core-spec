@@ -1,23 +1,28 @@
 # OpenGDD
 
-OpenGDD is an open format for machine-buildable game design documents — game
-specifications complete enough that a competent implementer, human or agent,
-can build the described game from them.
+OpenGDD is an open format for game design documents. Designers write the game
+in prose. Structured data supports validation, and authority levels state who
+decides.
 
-The specification is in development and has not yet been published. This
-repository currently holds name reservations only; it will become the home of
-the OpenGDD core specification and its schemas.
+Version 0.5 is a working draft. A builder may be a person, a studio, an AI
+agent, or a combination; the designer may also be the builder.
 
-- Steward: Starphase Lab
-- Contact: steward@opengdd.org
+- [Read the specification](SPEC.md)
+- [Start with the guide](https://opengdd.org/get-started/)
+- [Explore the standard and schemas](https://opengdd.org/standard/)
+- [Discuss proposals and questions](https://github.com/opengdd/core-spec/discussions)
 
-## Contents
+## Repository contents
 
-| Path | Purpose |
-| --- | --- |
-| `packages/npm` | `opengdd` on npm — name reservation |
-| `packages/pypi` | `opengdd` on PyPI — name reservation |
-| `packages/crates` | `opengdd` on crates.io — name reservation |
+- `SPEC.md` and `CHANGELOG.md` define the current core draft.
+- `schema/core/v0.5/` contains the versioned JSON Schemas.
+- `conformance/` contains the validator and conformance documentation.
+- `examples/tic-tac-toe/` is the complete teaching example used by the guide.
+- `docs/` is the generated source for [opengdd.org](https://opengdd.org/).
 
-Code in this repository is licensed MIT. Specification text, when published,
-will be licensed CC-BY-4.0.
+Starphase Lab stewards the specification, conformance suite, and site.
+
+## Licensing
+
+Specification prose and documentation are licensed under CC BY 4.0. Schemas
+and validator code are licensed under MIT.

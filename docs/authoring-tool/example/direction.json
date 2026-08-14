@@ -1,0 +1,33 @@
+{
+  "semantics": {
+    "tolerance": "ciede2000-lab-d65-v1",
+    "metrics": ["wcag21-contrast-ratio"]
+  },
+  "mood": {
+    "paper-quiet": {
+      "descriptor": "descriptor:mood:paper-quiet",
+      "class": "judged",
+      "viewing": "table-reading"
+    }
+  },
+  "constraints": {
+    "palette": {
+      "mark-ink": {
+        "value": "#2B2A26",
+        "tolerance": 12,
+        "scope": {
+          "population": "every placed mark and every grid line",
+          "states": ["in-game"],
+          "coverage": "exhaustive"
+        }
+      }
+    }
+  },
+  "viewing": {
+    "table-reading": {
+      "scale_speed": "the whole board on screen at once, at real play speed",
+      "calibration": "sRGB display at standard desktop viewing distance",
+      "blind_builder_identity": true
+    }
+  }
+}

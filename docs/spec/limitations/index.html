@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Known limitations — OpenGDD</title>
+<meta name="description" content="Known limits of the OpenGDD game design document format, including what v0.x excludes and what real-game testing has not yet standardized.">
+<link rel="canonical" href="https://opengdd.org/spec/limitations/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Known limitations — OpenGDD">
+<meta property="og:description" content="Known limits of the OpenGDD game design document format, including what v0.x excludes and what real-game testing has not yet standardized.">
+<meta property="og:url" content="https://opengdd.org/spec/limitations/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Known limitations — OpenGDD">
+<meta name="twitter:description" content="Known limits of the OpenGDD game design document format, including what v0.x excludes and what real-game testing has not yet standardized.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/get-started/">Get Started</a>
+      <a href="/spec/" aria-current="page">Spec</a>
+      <a href="/standard/">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Limitations</p><ul>
+<li class="toc-h2"><a href="#deliberately-out-of-scope">Deliberately out of scope</a></li>
+<li class="toc-h2"><a href="#in-scope-constructs-not-yet-standardized">In-scope constructs not yet standardized</a></li>
+<li class="toc-h2"><a href="#edge-boundaries">Edge boundaries</a></li>
+<li class="toc-h3"><a href="#what-a-player-knows-is-not-a-state-predicate">What a player knows is not a state predicate</a></li>
+<li class="toc-h3"><a href="#author-declared-rule-mechanics-work-open-mutation-is-out">Author-declared rule mechanics work; open mutation is out</a></li>
+<li class="toc-h3"><a href="#bounded-simulation-certifies-simulation-grain-does-not">Bounded simulation certifies; simulation grain does not</a></li>
+<li class="toc-h3"><a href="#mixed-time-regimes-express-portable-verification-is-the-gap">Mixed time regimes express; portable verification is the gap</a></li>
+<li class="toc-h2"><a href="#authoring-lessons-the-format-cannot-absorb">Authoring lessons the format cannot absorb</a></li>
+<li class="toc-h2"><a href="#art-direction-what-transmits-and-what-does-not-yet">Art direction: what transmits, and what does not yet</a></li>
+<li class="toc-h2"><a href="#audio">Audio</a></li>
+</ul></nav>
+<article class="doc-body">
+<h1>Known limitations</h1>
+<p>This document ships with OpenGDD v0.x. An honest format states what it cannot yet do. The limits below come from development rounds that pressed the format against real games, both original designs written for the purpose and well-known published games expressed after the fact. &quot;Expressible&quot; never means &quot;uniformly machine-discoverable or portably machine-verifiable,&quot; and this page keeps those apart.</p>
+<h2 id="deliberately-out-of-scope">Deliberately out of scope<a class="heading-anchor" href="#deliberately-out-of-scope" aria-label="Link to this section">#</a></h2>
+<p>OpenGDD v0.x does not define:</p>
+<ul>
+<li>multiplayer session, delivery, and networking behavior;</li>
+<li>rendered-capture certification for 3D renderers — a <code>web-3d</code> package validates, and a build of one can certify when its acceptance tests need only logic and state observations, but no standardized sampling recipe exists yet for photographing a 3D renderer's output;</li>
+<li>binary asset pipelines;</li>
+<li>localization structure;</li>
+<li>monetization design beyond attribution;</li>
+<li>a registry API; or</li>
+<li>target families beyond web delivery (<code>web-2d</code>, <code>web-3d</code>).</li>
+</ul>
+<p>The multiplayer exclusion was pressed directly by expressing a well-known social-deduction game (Among Us). It held, but proved thin: roughly three quarters of that game's normative rules already express as ordinary deterministic rules. A future profile would mostly need to standardize session membership, authority, state delivery, and private-view non-leakage; none of that is standardized or certified in v0.x. Human testimony, belief, deception, and trust remain permanently outside machine certification. A separate test (Inscryption) confirmed that authentic host-filesystem, save-byte, achievement, and recording integration is not standardized for the v0.x web target, even though simulated in-fiction versions of those things are ordinary game state.</p>
+<h2 id="in-scope-constructs-not-yet-standardized">In-scope constructs not yet standardized<a class="heading-anchor" href="#in-scope-constructs-not-yet-standardized" aria-label="Link to this section">#</a></h2>
+<p>These are not claims that any game is unbuildable. They are places where a package today needs local prose conventions or bespoke verification adapters that independent tools cannot infer from OpenGDD alone. Each has a queued proposal; see <a href="/evolution/">how the format evolves</a>.</p>
+<ul>
+<li><strong>Numeric authority tiers.</strong> No formal boundary yet between balance tunables, fixed structural constants, per-content certified facts, and verification parameters.</li>
+<li><strong>Typed validity conditions.</strong> Per-key ranges cannot state ordering between keys, derived equalities, registry counts, or bounds computed from other bounds.</li>
+<li><strong>Structured-content authority.</strong> JSON data collections have no standard way to inherit or override the chapter authority levels.</li>
+<li><strong>Richer test kinds.</strong> The build plan names scenario acceptance tests; bounded properties, complete state-space searches, static spec/content lint, and replay fixtures with tolerances are used in practice but not yet all first-class.</li>
+<li><strong>PRNG addressing.</strong> No standard grammar for naming independent random streams or nested variable-count events portably.</li>
+<li><strong>Machine-readable personalization.</strong> Numeric personalization has no machine-readable target, operation, and bound policy.</li>
+<li><strong>Authored-puzzle solver interface.</strong> Authored puzzles have a normative layout encoding, but the solver-interface contract that would let an independent tool certify solvability is still open, and the evidence says the current draft must widen before locking.</li>
+</ul>
+<h2 id="edge-boundaries">Edge boundaries<a class="heading-anchor" href="#edge-boundaries" aria-label="Link to this section">#</a></h2>
+<p>Statements about what v0.x standardizes and certifies, not about what is expressible in principle. Each was established by expressing a published game that lives on the edge in question.</p>
+<h3 id="what-a-player-knows-is-not-a-state-predicate">What a player knows is not a state predicate<a class="heading-anchor" href="#what-a-player-knows-is-not-a-state-predicate" aria-label="Link to this section">#</a></h3>
+<p>Claims about what a player knows, perceives, believes, or can infer (the heart of Outer Wilds or Return of the Obra Dinn) are outside the machine-certification surface, and converting them into invented authoritative flags would be dishonest. The corresponding operational claims are expressible and certifiable: route reachability, causally inert log state, elimination necessity, batch-validation behavior. v0.x certifies the operational witness, never the epistemic claim.</p>
+<h3 id="author-declared-rule-mechanics-work-open-mutation-is-out">Author-declared rule mechanics work; open mutation is out<a class="heading-anchor" href="#author-declared-rule-mechanics-work-open-mutation-is-out" aria-label="Link to this section">#</a></h3>
+<p>A finite rule universe derived at runtime (Baba Is You), a closed ruleset replacement (Inscryption), and activation of predeclared rule hooks (Frostpunk) are all expressible today, though a shared ruleset-state construct is still queued. Runtime creation of rule vocabulary the author never declared remains not standardized and not certified.</p>
+<h3 id="bounded-simulation-certifies-simulation-grain-does-not">Bounded simulation certifies; simulation grain does not<a class="heading-anchor" href="#bounded-simulation-certifies-simulation-grain-does-not" aria-label="Link to this section">#</a></h3>
+<p>Continuous physics and emergent systems are not wholesale outside the format: fixed observable envelopes can certify motion without mandating an integrator, and bounded agent, hazard, and history-readout properties can be certified even for deep simulations (Dwarf Fortress). Two honest boundaries stand. First, a category gap: &quot;the simulation produces a good story&quot; is not a state predicate, and a package should decline proxy oracles that would certify the proxy instead. Second, the one genuine break found so far (Noita): material outcomes below the declared observable envelope stay player-observable, and pinning them would promote simulation grain into fixed architecture, which the format does not license. Sub-envelope outcomes are not standardized or certified in v0.x. A macroscopic material-envelope profile survives this break and was corroborated from the structural side (Teardown); it is queued.</p>
+<h3 id="mixed-time-regimes-express-portable-verification-is-the-gap">Mixed time regimes express; portable verification is the gap<a class="heading-anchor" href="#mixed-time-regimes-express-portable-verification-is-the-gap" aria-label="Link to this section">#</a></h3>
+<p>One shared state moving through real time, tactical pause, discrete resolution, and strategic time (FTL; XCOM 2 supplies the inverse nesting) expresses today in prose and per-game content. What v0.x does not yet standardize is the reusable clocks block and freeze invariant an independent tool would need to verify the cross-regime seam without learning a bespoke harness. That construct is queued. Two adjacent needs stay outside it, each waiting on more evidence: nested interrupt/reaction-queue traces, and atomic regime-transition transactions.</p>
+<h2 id="authoring-lessons-the-format-cannot-absorb">Authoring lessons the format cannot absorb<a class="heading-anchor" href="#authoring-lessons-the-format-cannot-absorb" aria-label="Link to this section">#</a></h2>
+<p>OpenGDD cannot compensate for a package that leaves its own rules contradictory or its evidence incomplete. Four lessons from the development rounds are worth stating normatively:</p>
+<ol>
+<li><strong>Specify outcomes, not architecture.</strong> The valid requirement is the observable result: tests run headlessly, replay bounds hold, runtime values match the resolved data. Internal organization is the builder's craft.</li>
+<li><strong>A fixture needs an input and a target.</strong> A tolerance without a recorded input, schedule, and expected observation certifies nothing. A fixture is certifying only when its input, expected observations, tolerances, and diagnostics are all present.</li>
+<li><strong>Do not create a second authority channel.</strong> A local field whose values duplicate the authority levels, without being recognized by them, silently redefines Fixed. Declare data-collection authority in chapter prose until the standardized member exists.</li>
+<li><strong>Do not restate tuning values in normative prose.</strong> Prose states formulas and key bindings; literal numbers in prose must be non-normative or generated from the authoritative data.</li>
+</ol>
+<p>Beyond these, ordinary spec defects — contradictory authored facts, unreachable test premises, misclassified authority — are caught by review, not by any format primitive. Publication requires semantic review, reachable test setups, reference closure, and successful fixture replay in addition to schema validation.</p>
+<h2 id="art-direction-what-transmits-and-what-does-not-yet">Art direction: what transmits, and what does not yet<a class="heading-anchor" href="#art-direction-what-transmits-and-what-does-not-yet" aria-label="Link to this section">#</a></h2>
+<p>The art-direction block is normative in v0.5, and its transmission has been measured rather than assumed. What the evidence shows so far:</p>
+<ul>
+<li><strong>Palette transmits machine-exactly</strong>, and shape language transmits well, from text-only direction.</li>
+<li><strong>Continuous material feel under-carries.</strong> Decomposable graphic features (stitches, edge treatments, shadows) arrive from reference imagery; fiber, translucency, and wet or matte sheen did not reliably arrive from text or imagery in any tested build, in stills or in motion. Whether this is a notation gap or a current limit of the building agents is undetermined, and the format does not pretend otherwise.</li>
+<li><strong>Personalized direction is unspecified.</strong> How player-selected presentation composes with palette-role semantics is undesigned.</li>
+<li><strong>Not every pinned surface has an evidence path.</strong> Pins carry evidence through certified tuning keys, fixture-backed tests, and declared audit hooks; an exact surface none of those can evidence (an exact texture, say) has no certification path yet.</li>
+</ul>
+<h2 id="audio">Audio<a class="heading-anchor" href="#audio" aria-label="Link to this section">#</a></h2>
+<p>The specification's audio chapter is a draft and non-normative in v0.5. Audio direction can be written and carried mechanically with the same descriptors as visual direction, and it is fenced off from certification: no audio claim is judged or certified in v0.x. This is an honest limitation, not an oversight; the chapter is expected to become normative once the judgment protocol for it is trustworthy.</p>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

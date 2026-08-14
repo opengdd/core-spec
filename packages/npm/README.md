@@ -1,11 +1,11 @@
 # OpenGDD
 
-OpenGDD is an open format for machine-buildable game design documents — game
-specifications complete enough that a competent implementer, human or agent,
-can build the described game from them.
+OpenGDD is an open format for game design documents. Designers write in prose
+for creative control; structured data supports validation.
 
-The specification is in development and has not yet been published. This
-package reserves the `opengdd` name and contains no functional code.
+This package is a registry placeholder and contains no functional code. Read
+the working specification at [opengdd.org](https://opengdd.org/) or in the
+[core-spec repository](https://github.com/opengdd/core-spec).
 
 - Steward: Starphase Lab
 - Contact: steward@opengdd.org

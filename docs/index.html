@@ -3,185 +3,295 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OpenGDD</title>
-<meta name="description" content="OpenGDD: an open format for game designs that a machine can build, and that every build is judged against. In development.">
-<style>
-  :root {
-    color-scheme: light dark;
-    --bg: #faf8f4; --ink: #211f1c; --muted: #767066;
-    --line: #e2ddd3; --accent: #a35c17; --panel: #f2efe8;
-    --mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, monospace;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #151412; --ink: #e9e6e0; --muted: #938d81;
-      --line: #2e2c28; --accent: #e0a35c; --panel: #1d1b18;
-    }
-  }
-  body {
-    margin: 0; min-height: 100vh;
-    font: 17px/1.75 "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
-    background: var(--bg); color: var(--ink);
-    -webkit-font-smoothing: antialiased;
-  }
-  main { max-width: 37rem; padding: 5.5rem 1.5rem 4rem; margin: 0 auto; }
-  h1 {
-    font-size: 2.1rem; font-weight: 400; letter-spacing: .015em;
-    margin: 0 0 .35rem;
-  }
-  .tagline { color: var(--muted); font-style: italic; margin: 0 0 1.5rem; }
-  .label {
-    font-family: var(--mono); font-size: .72rem; letter-spacing: .18em;
-    text-transform: uppercase; color: var(--accent);
-    margin: 3rem 0 .75rem;
-  }
-  p { margin: .75rem 0; }
-  em { font-style: italic; }
-  .spec {
-    background: var(--panel); border: 1px solid var(--line);
-    border-radius: 4px; padding: 1.1rem 1.3rem; margin: 1.4rem 0;
-    font-size: .95rem; line-height: 1.8;
-  }
-  .spec .key {
-    font-family: var(--mono); font-size: .82em; color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 9%, transparent);
-    padding: .08em .35em; border-radius: 3px; white-space: nowrap;
-  }
-  .spec .at {
-    display: block; margin-top: .65rem; padding-top: .6rem;
-    border-top: 1px dashed var(--line);
-    font-family: var(--mono); font-size: .74rem; color: var(--muted);
-    letter-spacing: .03em;
-  }
-  .spec .at b { color: var(--accent); font-weight: 500; }
-  .obj {
-    margin-top: .9rem; background: var(--bg);
-    border: 1px solid var(--line); border-radius: 4px;
-    font-family: var(--mono); font-size: .74rem; line-height: 1.7;
-    overflow: hidden;
-  }
-  .obj-name {
-    padding: .45rem .9rem; color: var(--accent); font-weight: 500;
-    border-bottom: 1px solid var(--line);
-    background: color-mix(in srgb, var(--accent) 6%, transparent);
-  }
-  .obj-row {
-    display: grid; grid-template-columns: 8.5rem 1fr; gap: .8rem;
-    padding: .35rem .9rem;
-  }
-  .obj-row + .obj-row { border-top: 1px solid color-mix(in srgb, var(--line) 55%, transparent); }
-  .obj-k { color: var(--muted); }
-  .obj-v { color: var(--ink); opacity: .8; }
-  @media (max-width: 480px) { .obj-row { grid-template-columns: 1fr; gap: .1rem; } }
-  .flow {
-    font-family: var(--mono); font-size: .78rem; letter-spacing: .12em;
-    color: var(--muted); text-align: center; margin: 1.6rem 0;
-  }
-  .flow b { color: var(--ink); font-weight: 500; }
-  .flow .x { color: var(--accent); }
-  footer {
-    margin-top: 4rem; padding-top: 1.2rem; border-top: 1px solid var(--line);
-    color: var(--muted); font-size: .85rem;
-  }
-  a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--line); }
-  a:hover { text-decoration-color: var(--accent); }
-</style>
+<title>OpenGDD — Open format for game design documents</title>
+<meta name="description" content="OpenGDD is an open format for game design documents, written in prose for creative control and blended with data for validation. v0.5 is a working draft.">
+<link rel="canonical" href="https://opengdd.org/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="OpenGDD — Open format for game design documents">
+<meta property="og:description" content="OpenGDD is an open format for game design documents, written in prose for creative control and blended with data for validation. v0.5 is a working draft.">
+<meta property="og:url" content="https://opengdd.org/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="OpenGDD — Open format for game design documents">
+<meta name="twitter:description" content="OpenGDD is an open format for game design documents, written in prose for creative control and blended with data for validation. v0.5 is a working draft.">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://opengdd.org/#website","url":"https://opengdd.org/","name":"OpenGDD","description":"OpenGDD is an open format for game design documents, written in prose for creative control and blended with data for validation. v0.5 is a working draft.","publisher":{"@type":"Organization","@id":"https://opengdd.org/#steward","name":"Starphase Lab"},"sameAs":["https://github.com/opengdd/core-spec"]}</script>
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
 </head>
-<body>
-<main>
-  <h1>OpenGDD</h1>
-  <p class="tagline">An open format for game designs that a machine
-  can build.</p>
-
-  <p>The game design document (GDD) is where a game is worked out
-  before it is made: its rules, its world, how it should feel to
-  play. Studios have written them for decades, for human teams to
-  interpret. OpenGDD gives the document the final word: you design
-  the game in it, your agent builds from it, and the build is
-  checked against what you promised.</p>
-
-  <p class="label">The shift</p>
-
-  <p>Agents can build games now. The demos are astonishing, but look
-  closely and most of them are memories: games everyone already
-  loves, reconstructed from the weights. The skill is real. The
-  designs are borrowed.</p>
-
-  <p>Building is becoming abundant. What stays scarce is a design
-  worth building: an original game, thought through and written down
-  so clearly that nothing is lost on the way to the screen.</p>
-
-  <p class="label">The document</p>
-
-  <p>An OpenGDD specification is <em>technical screenwriting</em>.
-  Prose carries the vision; structure carries the proof. The designer
-  states each rule together with its reason, sets the creative
-  direction, pins the tuned numbers, and writes acceptance tests: the
-  checks a finished game has to pass before it can call itself a
-  build of this design.</p>
-
-  <div class="spec">
-    The ferry departs the instant the bell falls silent, taking
-    whoever is aboard. The bell rings for
-    <span class="key">bell.ring_seconds</span> and never longer; a
-    passenger left on the pier remembers it. Boarding costs
-    <span class="key">fare.embers</span>, charged only when the ferry
-    actually moves.
-    <span class="at"><b>acceptance&nbsp;test</b> departure-is-exact:
-    the end of the bell, the departure, and the fare must land on the
-    same tick.</span>
+<body class="landing-page">
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/get-started/">Get Started</a>
+      <a href="/spec/">Spec</a>
+      <a href="/standard/">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
   </div>
-
-  <p>Creative direction is written the same way. Anything can be a
-  named object, even a mood: the prose says when it takes hold, the
-  object says what it holds.</p>
-
-  <div class="spec">
-    Crossing at dusk, the world thins: the water goes still, the far
-    shore loses its edges, and the mood shifts to
-    <span class="key">dusk_crossing_mood</span> until the pier lantern
-    is lit.
-    <div class="obj">
-      <div class="obj-name">dusk_crossing_mood</div>
-      <div class="obj-row"><span class="obj-k">intent</span><span class="obj-v">"the passage should feel like held breath"</span></div>
-      <div class="obj-row"><span class="obj-k">reference</span><span class="obj-v">ref/dusk-water-study.png</span></div>
-      <div class="obj-row"><span class="obj-k">anti-references</span><span class="obj-v">"storybook warmth", "horror gloom"</span></div>
-      <div class="obj-row"><span class="obj-k">behaviors</span><span class="obj-v">"lantern light gutters low", "oar sounds soften and slow"</span></div>
+</header>
+<main class="flush">
+<section class="hero" aria-labelledby="landing-title">
+  <div class="hero-grid">
+    <div class="hero-mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg></div>
+    <div class="hero-copy">
+      <p class="hero-kicker">Version 0.5 · Working draft</p>
+      <h1 id="landing-title">OpenGDD</h1>
+      <p class="tagline">An open format for game design documents.</p>
+      <p class="hero-summary">Written in prose for creative control.
+      Blended with data for validation.</p>
+      <div class="hero-links">
+        <a href="/spec/">Read the specification</a>
+        <a href="/get-started/">Start with the guide</a>
+      </div>
     </div>
   </div>
+</section>
 
-  <p>The reference points the way; the build interprets it. Two
-  faithful builds of this crossing may look different, but they
-  should feel the same.</p>
+<div class="landing">
 
-  <p class="label">The contract</p>
+  <section class="landing-section landing-intro" aria-labelledby="purpose">
+    <div>
+      <h2 id="purpose">A standard for game designers and builders</h2>
+    </div>
+    <div class="landing-prose">
+      <p class="landing-lede">An OpenGDD package defines what the game must
+      do, and how far the designer's creative control reaches. Everything
+      past that line is the builder's craft.</p>
+      <p>Designers write it in Markdown and JSON. Builders use it to build
+      the game. The finished build can then be checked against the same
+      package.</p>
+    </div>
+    <div class="role-grid">
+      <article class="role-card role-card-designer">
+        <h3>The designer</h3>
+        <p>Holds creative control of the design. Writes the rules, tunes
+        the values, sets the direction, and states the acceptance tests.</p>
+      </article>
+      <article class="role-card role-card-builder">
+        <h3>The builder</h3>
+        <p>Owns the implementation craft. A person, a studio, an AI agent,
+        or any combination; the designer can be the builder too.</p>
+      </article>
+    </div>
+  </section>
 
-  <p class="flow"><b>DESIGN</b> &nbsp;&rarr;&nbsp;
-  <b>SPEC</b> &nbsp;&rarr;&nbsp; <b>BUILD</b>
-  <span class="x">&nbsp;·&nbsp; any&nbsp;engine, any&nbsp;agent</span></p>
+  <section class="landing-section landing-package" aria-labelledby="inside-package">
+    <div class="landing-section-head">
+      <h2 id="inside-package">Prose, named values, and acceptance tests</h2>
+      <p>Prose describes the game rules, mechanics, and behavior. JSON
+      embeds the values and symbols as checkable data. Acceptance tests
+      state what a finished build must demonstrate.</p>
+    </div>
 
-  <p>A spec is a contract between a design and its build. Both sides
-  can be you: you write the design, your agent builds it. And if you
-  allow it, others can build your design too, on engines and in
-  styles you never imagined. The contract holds either way.</p>
+    <div class="package-demo" aria-label="One combat rule represented as prose, two tuned values, and an acceptance test">
+      <div class="package-file package-file-prose">
+        <p class="package-file-name">02-mechanics.md</p>
+        <p class="package-rule">A basic attack lands a critical hit with
+        chance <span class="key">combat.crit_chance</span>. A critical hit
+        deals <span class="key">combat.crit_multiplier</span> times normal
+        damage.</p>
+      </div>
+      <div class="package-file package-file-value">
+        <p class="package-file-name">tuning.json</p>
+        <div class="package-value">
+          <code>combat.crit_chance</code>
+          <strong>0.05</strong>
+          <span>probability per hit</span>
+        </div>
+        <div class="package-value">
+          <code>combat.crit_multiplier</code>
+          <strong>2.0</strong>
+          <span>× normal damage</span>
+        </div>
+      </div>
+      <div class="package-file package-file-test">
+        <p class="package-file-name">05-build-plan.md · AT-1</p>
+        <p class="package-test">In a seeded run of attacks, criticals occur
+        at the declared chance. Each one deals the declared multiple of
+        normal damage.</p>
+      </div>
+    </div>
 
-  <p>Every design draws its own boundary. On one side, what every
-  build must honor: the rules, the numbers, the exact weight of a
-  jump. On the other, what stays open: engine, interpretation,
-  polish, craft. The designer draws that creative boundary, surface
-  by surface.</p>
+    <div class="landing-after-demo">
+      <p>This example states one rule in prose, gives each number a symbol,
+      and makes the required result observable.</p>
+    </div>
+  </section>
 
-  <p class="label">Status</p>
+  <section class="landing-section landing-authority" aria-labelledby="authority-levels">
+    <div class="landing-section-head">
+      <h2 id="authority-levels">Three levels of authority for creative control</h2>
+      <p>Every rule the designer writes carries an authority level. Fixed is
+      the default; Delegated and Personalization must be declared.</p>
+    </div>
 
-  <p>The format is being forged against real games: written out,
-  handed to independent agents, broken, and revised. When it can
-  stand up to you as well, it will be published here.</p>
+    <div class="authority-grid">
+      <article class="authority-card authority-fixed">
+        <h3>Fixed</h3>
+        <p>The build follows the rule as written. A deviation is a defect,
+        not an interpretation.</p>
+        <p class="authority-example">Criticals occur at exactly the declared
+        chance.</p>
+      </article>
+      <article class="authority-card authority-delegated">
+        <h3>Delegated</h3>
+        <p>The rule sets intent and constraints; the decision within them
+        belongs to the builder.</p>
+        <p class="authority-example">How a critical hit looks and sounds,
+        within the stated direction.</p>
+      </article>
+      <article class="authority-card authority-personalization">
+        <h3>Personalization</h3>
+        <p>The package declares a question; each build supplies its own
+        answer.</p>
+        <p class="authority-example">Should a double attack roll the crit
+        chance once or twice?</p>
+      </article>
+    </div>
+  </section>
 
-  <footer>
-    Steward: Starphase Lab ·
-    <a href="mailto:steward@opengdd.org">steward@opengdd.org</a> ·
-    <a href="https://github.com/opengdd">github.com/opengdd</a>
-  </footer>
+  <section class="landing-section landing-evidence" aria-labelledby="evidence-path">
+    <div class="landing-section-head">
+      <h2 id="evidence-path">Validated packages, certified builds</h2>
+      <p>The validator checks the package itself, before any build exists.
+      Certification runs the finished build against the package's acceptance
+      tests and records the evidence.</p>
+    </div>
+
+    <ol class="evidence-flow">
+      <li>
+        <span class="evidence-number">1</span>
+        <h3>Design</h3>
+        <p>The designer writes the package and its acceptance tests.</p>
+      </li>
+      <li>
+        <span class="evidence-number">2</span>
+        <h3>Validate</h3>
+        <p>The validator checks every package requirement that is
+        mechanically testable.</p>
+      </li>
+      <li>
+        <span class="evidence-number">3</span>
+        <h3>Build</h3>
+        <p>The builder follows Fixed rules and resolves declared
+        choices.</p>
+      </li>
+      <li>
+        <span class="evidence-number">4</span>
+        <h3>Certify</h3>
+        <p>The builder runs the acceptance tests and records tuning,
+        outcomes, and evidence with the build.</p>
+      </li>
+    </ol>
+
+    <a class="text-link" href="/conformance/">How conformance works</a>
+  </section>
+
+  <section class="landing-section landing-builds" aria-labelledby="faithful-builds">
+    <div class="landing-build-copy">
+      <h2 id="faithful-builds">Implementation choices remain with the builder</h2>
+      <p>OpenGDD leaves the engine, renderer, code structure, and other
+      implementation craft to the builder. Two builds can differ in every
+      one of them and both pass certification against the same package.</p>
+    </div>
+
+    <div class="build-branch" aria-label="One design branching into two faithful builds">
+      <div class="design-node">One OpenGDD package</div>
+      <div class="build-variants">
+        <article>
+          <h3>One implementation</h3>
+          <p>Code, renderer, and polish chosen by its builder.</p>
+        </article>
+        <article>
+          <h3>Another implementation</h3>
+          <p>Different craft choices within the boundaries the package
+          declares.</p>
+        </article>
+      </div>
+      <p class="shared-commitments">Same Fixed rules · same certified tuning · same acceptance tests</p>
+    </div>
+  </section>
+
+  <section class="landing-band" aria-labelledby="working-draft">
+    <div class="landing-band-copy">
+      <h2 id="working-draft">Version 0.5 is a working draft</h2>
+      <p>The format is being tested against real games and clean-room builds.
+      A clean-room build starts from the package alone, without access to an
+      earlier implementation. Findings that expose a missing rule or weak
+      construct feed into the next revision.</p>
+      <div class="landing-link-row">
+        <a href="/evolution/">Follow the format's evolution</a>
+        <a href="/spec/limitations/">Read the known limitations</a>
+      </div>
+    </div>
+    <dl class="draft-facts">
+      <div><dt>Current version</dt><dd>0.5</dd></div>
+      <div><dt>Change policy</dt><dd>0.x constructs may change</dd></div>
+      <div><dt>Public materials</dt><dd>Specification, schemas, changelog, and limitations</dd></div>
+    </dl>
+  </section>
+
+  <section class="landing-section landing-trust" aria-labelledby="licensing">
+    <div>
+      <h2 id="licensing">Licensing and publication</h2>
+      <p class="trust-location">OpenGDD is published at
+      <a href="https://opengdd.org/">opengdd.org</a>. The core specification
+      source is at
+      <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a>.</p>
+    </div>
+    <div class="trust-facts">
+      <p><span>Specification prose</span><strong>CC-BY 4.0</strong></p>
+      <p><span>Schemas and validator code</span><strong>MIT</strong></p>
+    </div>
+  </section>
+
+  <section class="landing-section landing-explore" aria-labelledby="explore-opengdd">
+    <div class="landing-section-head">
+      <h2 id="explore-opengdd">Documentation and tools</h2>
+    </div>
+    <div class="explore-grid">
+      <a class="explore-card" href="/get-started/">
+        <h3>Get started</h3>
+        <p>Six short chapters teach the format with small platforming
+        examples.</p>
+      </a>
+      <a class="explore-card" href="/authoring-tool/">
+        <h3>Authoring tool</h3>
+        <p>Write and check a package in the browser. Your files stay on your
+        machine.</p>
+      </a>
+      <a class="explore-card" href="/spec/">
+        <h3>The v0.5 specification</h3>
+        <p>The current draft, with every construct and its exact rules.</p>
+      </a>
+      <a class="explore-card" href="/standard/">
+        <h3>Standard resources</h3>
+        <p>The schemas, conformance process, and public evolution policy.</p>
+      </a>
+    </div>
+  </section>
+
+</div>
 </main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const h=document.querySelector(".landing-page .site-header");if(!h)return;let queued=false;const paint=()=>{queued=false;h.classList.toggle("is-stuck",scrollY>32)};addEventListener("scroll",()=>{if(!queued){queued=true;requestAnimationFrame(paint)}},{passive:true});paint()})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
 </body>
 </html>

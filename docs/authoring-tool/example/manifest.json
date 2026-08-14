@@ -1,0 +1,38 @@
+{
+  "opengdd": "0.5",
+  "id": "tic-tac-toe",
+  "version": "1.0.0",
+  "title": "Tic-Tac-Toe",
+  "designer": {
+    "name": "OpenGDD Examples"
+  },
+  "target": {
+    "platform": "web-2d",
+    "genre": "abstract strategy",
+    "session_minutes": 2,
+    "audience": "anyone; two players sharing one device"
+  },
+  "build": {
+    "chapters": [
+      "01-overview.md",
+      "02-mechanics.md",
+      "04-presentation.md"
+    ],
+    "plan": "05-build-plan.md",
+    "tuning": "tuning.json",
+    "direction": "direction.json"
+  },
+  "descriptors": {
+    "mood": [
+      {
+        "id": "paper-quiet",
+        "intent": "The quiet of a game drawn on scrap paper between two people who happen to be nearby. Friendly, unhurried, low stakes; losing costs nothing but the pleasure of drawing the next grid.",
+        "anti": [
+          { "description": "not an arena: no announcers, no glow, no dramatic stings, no victory fanfare" },
+          { "description": "not a casino: no chance imagery, no jackpot celebration, nothing that implies luck was involved" },
+          { "description": "not a children's toy: no wobbling mascots or candy gloss; the game is casual, not infantile" }
+        ]
+      }
+    ]
+  }
+}

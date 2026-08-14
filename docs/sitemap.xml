@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://opengdd.org/</loc></url>
+  <url><loc>https://opengdd.org/get-started/</loc></url>
+  <url><loc>https://opengdd.org/spec/</loc></url>
+  <url><loc>https://opengdd.org/spec/changelog/</loc></url>
+  <url><loc>https://opengdd.org/spec/limitations/</loc></url>
+  <url><loc>https://opengdd.org/standard/</loc></url>
+  <url><loc>https://opengdd.org/schema/</loc></url>
+  <url><loc>https://opengdd.org/conformance/</loc></url>
+  <url><loc>https://opengdd.org/evolution/</loc></url>
+  <url><loc>https://opengdd.org/authoring-tool/</loc></url>
+  <url><loc>https://opengdd.org/about/</loc></url>
+</urlset>

@@ -1,0 +1,1364 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The specification — OpenGDD</title>
+<meta name="description" content="The OpenGDD specification for game design documents: package layout, authority levels, structured data, acceptance tests, build evidence, and art direction.">
+<link rel="canonical" href="https://opengdd.org/spec/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The specification — OpenGDD">
+<meta property="og:description" content="The OpenGDD specification for game design documents: package layout, authority levels, structured data, acceptance tests, build evidence, and art direction.">
+<meta property="og:url" content="https://opengdd.org/spec/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="The specification — OpenGDD">
+<meta name="twitter:description" content="The OpenGDD specification for game design documents: package layout, authority levels, structured data, acceptance tests, build evidence, and art direction.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/get-started/">Get Started</a>
+      <a href="/spec/" aria-current="page">Spec</a>
+      <a href="/standard/">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Specification</p><ul>
+<li class="toc-h2"><a href="#the-two-roles-non-normative">The two roles (non-normative)</a></li>
+<li class="toc-h2"><a href="#terms-for-designers-non-normative">Terms, for designers (non-normative)</a></li>
+<li class="toc-h3"><a href="#words-borrowed-from-standards-writing">Words borrowed from standards writing</a></li>
+<li class="toc-h3"><a href="#words-this-format-defines-for-itself">Words this format defines for itself</a></li>
+<li class="toc-h2"><a href="#1-package-layout"><span class="toc-num">1.</span>Package layout</a></li>
+<li class="toc-h2"><a href="#1a-the-fantasy-block-required"><span class="toc-num">1a.</span>The fantasy block (required)</a></li>
+<li class="toc-h2"><a href="#1b-structured-content-collections"><span class="toc-num">1b.</span>Structured content collections</a></li>
+<li class="toc-h2"><a href="#1c-declared-graph-edge-sets"><span class="toc-num">1c.</span>Declared graph edge sets</a></li>
+<li class="toc-h2"><a href="#2-the-three-authority-levels"><span class="toc-num">2.</span>The three authority levels</a></li>
+<li class="toc-h2"><a href="#2a-the-responsibility-boundary"><span class="toc-num">2a.</span>The responsibility boundary</a></li>
+<li class="toc-h2"><a href="#2b-spec-lifecycle"><span class="toc-num">2b.</span>Spec lifecycle</a></li>
+<li class="toc-h2"><a href="#2c-ruleset-state"><span class="toc-num">2c.</span>Ruleset state</a></li>
+<li class="toc-h2"><a href="#3-manifest-json"><span class="toc-num">3.</span>manifest.json</a></li>
+<li class="toc-h2"><a href="#3a-canonical-schema-urls"><span class="toc-num">3a.</span>Canonical schema URLs</a></li>
+<li class="toc-h2"><a href="#4-tuning-json"><span class="toc-num">4.</span>tuning.json</a></li>
+<li class="toc-h2"><a href="#4a-declared-expressions-and-invariants"><span class="toc-num">4a.</span>Declared expressions and invariants</a></li>
+<li class="toc-h2"><a href="#4b-clocks-and-resolution-regimes"><span class="toc-num">4b.</span>Clocks and resolution regimes</a></li>
+<li class="toc-h2"><a href="#5-build-personalization-personalization-json"><span class="toc-num">5.</span>Build personalization (personalization.json)</a></li>
+<li class="toc-h3"><a href="#enumerated-answers">Enumerated answers</a></li>
+<li class="toc-h3"><a href="#numeric-answers">Numeric answers</a></li>
+<li class="toc-h3"><a href="#the-resolved-tuning-snapshot">The resolved tuning snapshot</a></li>
+<li class="toc-h2"><a href="#6-build-plan-and-acceptance-tests-05-build-plan-md"><span class="toc-num">6.</span>Build plan and acceptance tests (05-build-plan.md)</a></li>
+<li class="toc-h3"><a href="#acceptance-test-classes">Acceptance-test classes</a></li>
+<li class="toc-h3"><a href="#direction-claim-citations">Direction-claim citations</a></li>
+<li class="toc-h2"><a href="#6a-material-simulation-envelope-profile"><span class="toc-num">6a.</span>Material-simulation envelope profile</a></li>
+<li class="toc-h3"><a href="#carrier-and-references">Carrier and references</a></li>
+<li class="toc-h3"><a href="#minimum-scale-and-observation-points">Minimum scale and observation points</a></li>
+<li class="toc-h3"><a href="#interaction-table">Interaction table</a></li>
+<li class="toc-h3"><a href="#measures-and-claim-scale">Measures and claim scale</a></li>
+<li class="toc-h3"><a href="#subsystem-outcome-models">Subsystem outcome models</a></li>
+<li class="toc-h3"><a href="#certification-boundary">Certification boundary</a></li>
+<li class="toc-h2"><a href="#7-certified-builds-opengdd-build-json"><span class="toc-num">7.</span>Certified builds (opengdd-build.json)</a></li>
+<li class="toc-h3"><a href="#core-fields">Core fields</a></li>
+<li class="toc-h3"><a href="#cross-document-checks">Cross-document checks</a></li>
+<li class="toc-h3"><a href="#optional-renderer-declaration">Optional renderer declaration</a></li>
+<li class="toc-h3"><a href="#optional-capture-profile">Optional capture profile</a></li>
+<li class="toc-h3"><a href="#optional-resource-disclosure">Optional resource disclosure</a></li>
+<li class="toc-h3"><a href="#conditional-direction-result">Conditional direction result</a></li>
+<li class="toc-h2"><a href="#7a-authored-puzzles"><span class="toc-num">7a.</span>Authored puzzles</a></li>
+<li class="toc-h3"><a href="#grid-layout-encoding-family-parallel-string-layers-1-normative">Grid-layout encoding family: parallel-string-layers-1 (normative)</a></li>
+<li class="toc-h3"><a href="#open-solver-profile">Open solver profile</a></li>
+<li class="toc-h3"><a href="#worked-example-deduction-claims-as-finite-domain-csp">Worked example: deduction claims as finite-domain CSP</a></li>
+<li class="toc-h2"><a href="#8-symbols-and-descriptors"><span class="toc-num">8.</span>Symbols and descriptors</a></li>
+<li class="toc-h3"><a href="#symbols">Symbols</a></li>
+<li class="toc-h3"><a href="#descriptors">Descriptors</a></li>
+<li class="toc-h2"><a href="#8a-the-mood-descriptor"><span class="toc-num">8a.</span>The mood descriptor</a></li>
+<li class="toc-h3"><a href="#prose-citations-normative">Prose citations (normative)</a></li>
+<li class="toc-h3"><a href="#reference-semantics-normative">Reference semantics (normative)</a></li>
+<li class="toc-h3"><a href="#media-packaging-normative">Media packaging (normative)</a></li>
+<li class="toc-h2"><a href="#9-the-art-direction-block"><span class="toc-num">9.</span>The art-direction block</a></li>
+<li class="toc-h3"><a href="#9-1-pillars-pillars"><span class="toc-num">9.1</span>Pillars (pillars)</a></li>
+<li class="toc-h3"><a href="#9-2-mood-mood"><span class="toc-num">9.2</span>Mood (mood)</a></li>
+<li class="toc-h3"><a href="#9-3-references-references"><span class="toc-num">9.3</span>References (references)</a></li>
+<li class="toc-h3"><a href="#9-4-anti-references-anti"><span class="toc-num">9.4</span>Anti-references (anti)</a></li>
+<li class="toc-h3"><a href="#9-5-constraint-core-constraints"><span class="toc-num">9.5</span>Constraint core (constraints)</a></li>
+<li class="toc-h3"><a href="#9-6-evaluation-context-viewing"><span class="toc-num">9.6</span>Evaluation context (viewing)</a></li>
+<li class="toc-h3"><a href="#9-7-variation-envelope-invariants"><span class="toc-num">9.7</span>Variation envelope (invariants)</a></li>
+<li class="toc-h3"><a href="#9-8-motion-rubric-motion"><span class="toc-num">9.8</span>Motion rubric (motion)</a></li>
+<li class="toc-h3"><a href="#9-9-authority-descent-and-boundary-rules"><span class="toc-num">9.9</span>Authority, descent, and boundary rules</a></li>
+<li class="toc-h3"><a href="#9-10-machine-carrier-direction-json"><span class="toc-num">9.10</span>Machine carrier: direction.json</a></li>
+<li class="toc-h3"><a href="#9-11-audit-hooks-and-the-certification-gate"><span class="toc-num">9.11</span>Audit hooks and the certification gate</a></li>
+<li class="toc-h2"><a href="#10-audio-direction-draft-non-normative"><span class="toc-num">10.</span>Audio direction (DRAFT — non-normative)</a></li>
+<li class="toc-h2"><a href="#11-what-v0-deliberately-excludes"><span class="toc-num">11.</span>What v0 deliberately excludes</a></li>
+</ul></nav>
+<article class="doc-body">
+<h1>The specification</h1>
+<p class="note">OpenGDD v0.5, a working draft. The format is versioned
+on a 0.x workbench: constructs earn their place against real games
+before anything is called 1.0. <a href="/spec/changelog/">What changed
+between versions</a> · <a href="/spec/limitations/">what the format
+knowingly does not cover yet</a>.</p>
+<p>OpenGDD is an open format for game design documents. Designers write the game in prose. Structured data makes selected claims checkable. Three authority levels state which decisions stay fixed, which belong to the builder, and which are resolved separately for each build.</p>
+<p>A builder turns the document into a running game. The builder may be a person, a studio, an AI agent, or a combination. The document can also carry optional attribution and commerce terms. The core format does not require a particular transaction model.</p>
+<p>Version 0.5 calls designer-defined names symbols (§8) and rebalance-safe numeric values tunables (§4). It retains the art-direction block (§9), descriptor layer (§8), and grid-layout encoding (§7a).</p>
+<p>Throughout this document, the words MUST, MUST NOT, SHOULD, and MAY are used in their RFC 2119 sense.</p>
+<p>Status: v0.5 draft. License: specification text CC-BY-4.0; schemas and validator code MIT.</p>
+<h2 id="the-two-roles-non-normative">The two roles (non-normative)<a class="heading-anchor" href="#the-two-roles-non-normative" aria-label="Link to this section">#</a></h2>
+<p>A spec connects the designer who authors the game with the builder who implements it.</p>
+<div class="table-scroll"><table>
+<thead><tr><th>The <strong>designer</strong></th><th>The <strong>builder</strong></th></tr></thead>
+<tbody>
+<tr><td>Writes the spec. Prose carries the design intent. Structured data makes selected claims checkable. The designer chooses an authority level for every design statement.</td><td>Turns the spec into a running game. A builder may be a person, a studio, an AI agent, or a combination.</td></tr>
+<tr><td>Owns every difference a player could notice that changes how the game plays (§2a).</td><td>Owns how the game is made: the code, the pipeline, everything no player could tell apart between two faithful builds — plus whatever visible surface the spec expressly delegates (§2a).</td></tr>
+</tbody>
+</table></div>
+<p>One person can hold both roles, and often will. The roles stay distinct because a design can travel: if the designer wishes, the same spec can go to any number of builders, and every resulting build is judged against the same acceptance tests (§6, §7). When a design travels under terms, the manifest's optional commerce members record them (§3).</p>
+<h2 id="terms-for-designers-non-normative">Terms, for designers (non-normative)<a class="heading-anchor" href="#terms-for-designers-non-normative" aria-label="Link to this section">#</a></h2>
+<p>This section is a reading aid for designers meeting the format for the first time. It is not part of the format. Nothing here adds a rule, removes one, or changes what any rule requires. Where a summary below and the numbered sections disagree, the numbered sections are right.</p>
+<h3 id="words-borrowed-from-standards-writing">Words borrowed from standards writing<a class="heading-anchor" href="#words-borrowed-from-standards-writing" aria-label="Link to this section">#</a></h3>
+<div class="table-scroll"><table>
+<thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>Normative</strong></td><td>A statement that decides whether something is correct. If a package or a build breaks one, it does not conform. <strong>Informative</strong> text explains, gives examples, and states intent. It decides nothing.</td></tr>
+<tr><td><strong>MUST, MUST NOT, SHOULD, MAY</strong></td><td>Set in capitals, these four words are exact. MUST is a requirement. MUST NOT is a prohibition. SHOULD is a strong recommendation, which you may set aside when you have a reason and have weighed it. MAY is a genuinely free choice. The convention comes from RFC 2119, a short standards document that fixed these four meanings so nobody has to argue about them again.</td></tr>
+<tr><td><strong>Schema</strong></td><td>A machine-readable description of what a JSON file is allowed to contain: which members have to be there, what type each one holds, and which values are legal. OpenGDD publishes its schemas next to this document.</td></tr>
+<tr><td><strong>Validator</strong></td><td>A program that reads a package and reports what is wrong with it. It checks the schemas, and it also checks rules a schema cannot express, such as whether every reference points at something that exists.</td></tr>
+<tr><td><strong>Conforming</strong></td><td>Satisfying the format's rules. A package conforms, a build conforms, and a validator conforms, each against the rules written for it.</td></tr>
+<tr><td><strong>Certified build</strong></td><td>A build that has been run against its spec's acceptance tests and ships the evidence record described in §7. Conforming is the standard a thing meets. Certification is the record that proves a particular build met it.</td></tr>
+</tbody>
+</table></div>
+<h3 id="words-this-format-defines-for-itself">Words this format defines for itself<a class="heading-anchor" href="#words-this-format-defines-for-itself" aria-label="Link to this section">#</a></h3>
+<div class="table-scroll"><table>
+<thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>Spec, package</strong></td><td>A spec is one game's design, written in this format. It is a directory of files (§1). This document says <em>package</em> when the files themselves are the subject, and <em>spec</em> when the design is.</td></tr>
+<tr><td><strong>Manifest</strong></td><td><code class="anchor">manifest.json</code>, the file at the top of the package. It names the spec, the entry-point chapters, the build plan, and the tuning file (§3).</td></tr>
+<tr><td><strong>Carrier</strong></td><td>Much of a design is written twice: once as prose for a person, once as structured data for a program. The carrier is the machine-readable half of that pair: the JSON file or JSON block a program reads and checks. <code class="anchor">direction.json</code> is the carrier for the art direction written into <code class="anchor">04-presentation.md</code> (§9).</td></tr>
+<tr><td><strong>Fantasy block</strong></td><td>Every game idea begins with a fantasy, meaning what the player gets to be and feel. A spec opens the same way. <code class="anchor">01-overview.md</code> starts with the fantasy in a fixed shape: one sentence of player fantasy, three to five feel adjectives, and a line saying what the game is not (§1a). It sits inside a fence tagged <code>fantasy</code>.</td></tr>
+<tr><td><strong>Fixed, DELEGATED, PERSONALIZATION</strong></td><td>The three authority levels (§2). Every design statement in a spec carries one of them. Fixed is the default, and means build it as written. DELEGATED hands that decision to whoever builds the game. PERSONALIZATION hands it to an answer chosen for that one build. The designer writes the questions in <code class="anchor">personalization.json</code>, each build supplies its answers, and a skipped question falls back to the <code>default</code> the designer wrote (§5).</td></tr>
+<tr><td><strong>Symbol</strong></td><td>A designer-defined name in a carrier or declared namespace. Symbol identity is scoped: the same spelling in two scopes may name different symbols, and first use defines the symbol in that scope (§8).</td></tr>
+<tr><td><strong>Tunable, constant</strong></td><td>Both are numbers listed under a key in <code class="anchor">tuning.json</code>. A tunable is listed under <code>tunables</code>, and a revision that only rebalances the game may change it. A constant is listed under <code>constants</code>, and a rebalance may not touch it: changing a constant is a change to the mechanics or the content (§4).</td></tr>
+<tr><td><strong>Build contract</strong></td><td>The aggregate agreement in <code class="anchor">manifest.json</code>: the spec's identity, chapters, build plan, tuning, and optional personalization inputs (§§1, 3).</td></tr>
+<tr><td><strong>Contract pointer</strong></td><td>A machine member, such as a collection's <code>contract</code>, that points to the Fixed prose section defining its semantics (§1b).</td></tr>
+<tr><td><strong>Acceptance test</strong></td><td>A numbered check written into <code class="anchor">05-build-plan.md</code>, <code>AT-1</code> onward. Each one pairs test text a person can read with a JSON block a program reads to run the check (§6). Acceptance tests are what a build is certified against.</td></tr>
+</tbody>
+</table></div>
+<h2 id="1-package-layout">1. Package layout<a class="heading-anchor" href="#1-package-layout" aria-label="Link to this section">#</a></h2>
+<p>A spec is a directory. It travels as a zip file or a git repository.</p>
+<pre><code class="lang-text">my-game/
+  manifest.json          # identity + build contract — REQUIRED
+  tuning.json            # runtime tunables and numeric constants — REQUIRED
+  personalization.json   # designer-authored per-build questions — optional
+  01-overview.md         # pitch, pillars, player experience — REQUIRED
+  02-mechanics.md        # complete rules — REQUIRED
+  03-content.md          # story, characters, dialogue, levels/generation — optional
+  04-presentation.md     # art direction, audio direction, UI, feel — optional
+  05-build-plan.md       # phases, checkpoints, acceptance tests — REQUIRED
+  assets/                # optional reference images, palettes, sketches
+  &lt;declared content&gt;/    # optional structured collections (§1b) and fixtures</code></pre>
+<p>The build contract lives in <code class="anchor">manifest.json</code>. It names the entry-point chapters, the build plan, and the tuning file (§3).</p>
+<p>The Markdown chapters are written for the builder who will turn the spec into a game. Ordinary prose is welcome. Write complete chapters and keep them short: every rule a player could observe is decided — written precisely, or expressly handed over under one of §2's authority levels, on the boundary §2a draws — and each rule is stated once. Length is not thoroughness — a spec that decides everything in few words builds better, reads better, and costs less to build from. §2a's tie-break rule is one example of what that precision requires.</p>
+<p>Numeric authority means which file owns which number. §4 assigns it. Three of its assignments are worth knowing here.</p>
+<ul>
+<li>A runtime tunable or an exposed constant lives under a key in <code class="anchor">tuning.json</code>, such as <code class="anchor">hazard.interval_seconds</code>. In a balance-only revision a tunable may change, and a constant may not (§4).</li>
+<li>A fact about one piece of content lives in that content's own collection record. In a card game, the cost printed on a card is stored on that card (§1b), not in <code class="anchor">tuning.json</code> and not in a chapter's prose.</li>
+<li>If an acceptance test needs an input, the input lives with the test. A test that replays fixed random seeds carries its own list of seeds (§6).</li>
+</ul>
+<p>Normative prose MUST cite the tuning key rather than repeat the value it holds: write <code class="anchor">hazard.interval_seconds</code>, never the number stored under it.</p>
+<p>Every package-relative path MUST remain inside the package after normalization, so resolving its <code>..</code> segments must not lead out of the package directory. <code>assets/../../elsewhere.png</code> resolves outside, and is invalid.</p>
+<h2 id="1a-the-fantasy-block-required">1a. The fantasy block (required)<a class="heading-anchor" href="#1a-the-fantasy-block-required" aria-label="Link to this section">#</a></h2>
+<p><code class="anchor">01-overview.md</code> MUST open with a fenced <code>fantasy</code> block. The fence carries the tag <code>fantasy</code>, and the block MUST be the first substantive content in the file, after the opening <code>#</code> title heading. It holds three things:</p>
+<ul>
+<li><strong>One sentence of player fantasy.</strong> &quot;You are the getaway driver, and the plan is already falling apart.&quot;</li>
+<li><strong>Three to five feel adjectives.</strong> For example: fast, slick, breathless.</li>
+<li><strong>Anti-references</strong>: what this game is NOT. &quot;Not: grindy, tactical, punishing.&quot; Saying what the game is not constrains an AI builder better than positive description does. Without it, an AI builder tends toward the average of its genre.</li>
+</ul>
+<p><strong>Line grammar.</strong> The block is read line by line. Blank lines are ignored, as is leading and trailing whitespace on any line. Label matching ignores case.</p>
+<ul>
+<li>The <strong>feel adjectives</strong> sit on one line opening <code>Feel:</code>, separated by commas. There MUST be three to five of them, and an empty entry does not count toward that total.</li>
+<li>The <strong>anti-references</strong> sit on one line opening <code>NOT:</code> or <code>Anti-references:</code>. That line MUST NOT be empty after its label.</li>
+<li>The <strong>player fantasy</strong> is the first line opening with neither label. It MUST end with a sentence-ending mark. It MUST carry exactly one such mark followed by whitespace or by the end of the line. The marks are <code>.</code>, <code>!</code>, and <code>?</code>.</li>
+</ul>
+<p>A sentence-ending mark closing the <code>Feel:</code> or anti-reference line is punctuation, and not part of the last entry on it.</p>
+<pre><code class="lang-fantasy">You are the getaway driver, and the plan is already falling apart.
+Feel: fast, slick, breathless.
+NOT: grindy, tactical, punishing.</code></pre>
+<p>A spec deliberately leaves some decisions to the builder. Those are its DELEGATED sections, tagged <code>&gt; DELEGATED:</code> (§2), and they turn up in any chapter: a presentation chapter might delegate the menu typeface, or the paint on the getaway car.</p>
+<p><strong>Every DELEGATED section is implicitly constrained by the fantasy block.</strong> The block is the tie-breaker for every delegated decision in the spec, no matter which chapter makes it. When the block says &quot;NOT: punishing&quot; and a delegated choice is open between a harsh crash sound and a soft scrape, the soft scrape wins.</p>
+<h2 id="1b-structured-content-collections">1b. Structured content collections<a class="heading-anchor" href="#1b-structured-content-collections" aria-label="Link to this section">#</a></h2>
+<p>Structured content, such as a deck of cards, a table of enemies, or a tree of dialogue nodes, is discoverable through the optional <code>content</code> array in <code class="anchor">manifest.json</code>. Each entry in that array declares one <strong>collection</strong>.</p>
+<pre><code class="lang-json">{
+  &quot;id&quot;: &quot;cards&quot;,
+  &quot;format&quot;: &quot;example-card-catalog-v1&quot;,
+  &quot;contract&quot;: &quot;03-content.md#card-catalog-format&quot;,
+  &quot;source&quot;: {
+    &quot;kind&quot;: &quot;catalog&quot;,
+    &quot;file&quot;: &quot;cards/catalog.json&quot;
+  },
+  &quot;authority&quot;: { &quot;level&quot;: &quot;fixed&quot; },
+  &quot;id_member&quot;: &quot;id&quot;,
+  &quot;verification_profile&quot;: &quot;card-catalog&quot;
+}</code></pre>
+<p>Each collection MUST declare six things:</p>
+<ul>
+<li><strong><code>id</code></strong> — a name for the collection, stable and unique within the package.</li>
+<li><strong><code>format</code></strong> — a versioned id for the format this collection is written in, such as <code>example-card-catalog-v1</code> above.</li>
+<li><strong><code>contract</code></strong> — a contract pointer to the Fixed chapter section that defines this collection's collection-record kinds, fields, references, and closure rules. The reference checks further down are decided by those rules.</li>
+<li><strong><code>source</code></strong> — where the collection records live. Either <code>catalog</code> with exactly one <code>file</code>, or <code>items</code> with one <code>directory</code> and an explicit ordered <code>members</code> list.</li>
+<li><strong><code>authority</code></strong> — an authority level, written with the machine values from §2.</li>
+<li><strong><code>id_member</code></strong> — the name of the collection-record field whose values are stable and unique inside this collection. Collection records keep whatever field they already have: a dialogue tree whose nodes carry <code>node_id</code> declares <code>&quot;id_member&quot;: &quot;node_id&quot;</code>. The catalog above simply uses <code>id</code>.</li>
+</ul>
+<p>A collection held in a single file still declares all six; the simplest case is not an exception.</p>
+<p>An item collection keeps its collection records as separate files in a directory, and its <code>members</code> list is the collection: it MUST name every file the collection uses, in order. The order files happen to sit in the directory on disk means nothing.</p>
+<p>Three rules hold over every collection:</p>
+<ol>
+<li>Every declared file and item MUST exist.</li>
+<li>Every stable id MUST be unique inside its collection.</li>
+<li>Every reference MUST resolve under the target and closure rules defined in the collection's contract section.</li>
+</ol>
+<p>These rules are not for the designer to memorize: they are checks the validator runs and reports. Four findings are hard validation failures: a missing member, a consumed member the collection never declared, a dangling reference, and a reference cycle the collection's contract section forbids.</p>
+<p>(A note for tool authors rather than designers: collection-id uniqueness and stable-item-id uniqueness are the validator's checks, not JSON Schema's — <code>uniqueItems</code> compares whole array entries, not one chosen field inside them.)</p>
+<p><code>verification_profile</code> is optional. It links the collection to the §6 descriptors.</p>
+<p>A collection's contract section may define fields particular to its own game, and <code>tie_break</code> is one such field. Core OpenGDD does not define dialogue node kinds, effect verbs, card verbs, grid glyphs, recipe semantics, or screen geometry. A per-collection-record <code>condition</code> member is another field defined in that section, and §4a constrains what its expressions may bind to.</p>
+<p>Every overridable collection record MAY carry an authority of its own:</p>
+<pre><code class="lang-json">{ &quot;authority&quot;: { &quot;level&quot;: &quot;personalization&quot;, &quot;question&quot;: &quot;theme&quot; } }</code></pre>
+<p>The machine values are <code>fixed</code>, <code>delegated</code>, and <code>personalization</code>. A <code>personalization</code> collection record MUST name its question. A collection record at either other level MUST NOT name one. A collection record carrying no <code>authority</code> inherits the authority of its collection. A local alias such as <code>voice</code> MUST NOT create a second authority channel.</p>
+<h2 id="1c-declared-graph-edge-sets">1c. Declared graph edge sets<a class="heading-anchor" href="#1c-declared-graph-edge-sets" aria-label="Link to this section">#</a></h2>
+<p>Collection records point at one another. A card in §1b's catalog might carry a <code>set_id</code> field holding the id of the set it belongs to. Each such pointer is an <strong>edge</strong>. §1b already requires every reference to resolve, but that is all it requires. What an edge means, and which field carries it, is written only as prose in the collection's contract.</p>
+<p>Structural claims about the graph as a whole then have nowhere to sit, so each package writes its own lint rule for them. Those claims include closure, acyclicity, reciprocity, and monotonicity. The optional manifest member <code>graphs</code> gives the edges a declared, typed form instead. A card's <code>set_id</code> edge would be declared exactly this way; the example below is a technology tree's prerequisite edges, because that graph runs deep enough to exercise the structural claims further down:</p>
+<pre><code class="lang-json">{
+  &quot;id&quot;: &quot;tech-prerequisites&quot;,
+  &quot;edges&quot;: [
+    {
+      &quot;from&quot;: { &quot;collection&quot;: &quot;technologies&quot; },
+      &quot;member&quot;: &quot;prerequisite_ids&quot;,
+      &quot;to&quot;: [{ &quot;collection&quot;: &quot;technologies&quot; }]
+    }
+  ],
+  &quot;inverse&quot;: { &quot;member&quot;: &quot;unlocks&quot; }
+}</code></pre>
+<ul>
+<li><code>id</code> is package-unique, kebab-case.</li>
+<li>Each <strong>edge site</strong> declares <code class="anchor">from.collection</code>, <code>member</code>, and <code>to</code>.<ul>
+<li><code class="anchor">from.collection</code> names a declared §1b collection id.</li>
+<li><code>member</code> names the collection-record field carrying target ids. It is written as a member name, or as a JSON Pointer for a nested site, and it holds one id or an array of ids.</li>
+<li><code>to</code> is the complete list of permitted target collections.</li>
+</ul></li>
+<li><strong>Orientation is fixed.</strong> Every extracted edge points from the collection record that carries <code>member</code> to the collection record it references. For <code>prerequisite_ids</code> on a technology, edges point dependent → prerequisite.</li>
+<li>A site whose target collection varies from one collection record to another MUST name a <code>discriminator</code> member. By default, the discriminator's value on each collection record MUST equal the id of one collection listed in <code>to</code>. When the discriminating values are domain vocabulary rather than collection ids, the site declares a <code>discriminator_map</code> from each permitted value to a collection listed in <code>to</code>, and an unmapped value is a hard failure. Without a discriminator, a target id that exists in more than one permitted target collection is a hard failure, the ambiguous edge.</li>
+<li><code>inverse</code> optionally names the back-pointer member on the target collection records, which is what makes reciprocity checkable. The back-pointer member holds one id or an array of ids, under the same extraction rule as <code>member</code>.</li>
+</ul>
+<p>Declaring an edge set makes <strong>existence-closure</strong> an unconditional obligation, checked as part of package validation: every edge value MUST resolve to a collection record in a permitted target collection.</p>
+<p>All other predicate classes are claims. Each MUST be invoked by a §6 <code>static-lint</code> acceptance test whose <code>rule_set</code> is <code>opengdd-graph-1</code>. Those rules use the closed descriptor grammar below. A rule carrying members outside its own predicate's list is invalid. No predicate here carries rates, capacities, or flow fields.</p>
+<ol>
+<li><strong><code>existence-closure</code></strong> — <code>{ &quot;predicate&quot;: &quot;existence-closure&quot;, &quot;edge_set&quot;: &lt;id&gt; }</code>. This restates the unconditional check above as a claim a test can cite. Diagnostics: <code>dangling-edge</code>, carrying the source collection-record id, the member, and the value.</li>
+<li><strong><code>acyclic</code></strong> — <code>{ &quot;predicate&quot;: &quot;acyclic&quot;, &quot;edge_set&quot;: &lt;id&gt; }</code>. The edge set induces a directed acyclic graph, so no path returns to where it started. Diagnostics: <code>cycle</code>, carrying one complete cycle as an ordered list of collection-record ids.</li>
+<li><strong><code>reciprocal</code></strong> — <code>{ &quot;predicate&quot;: &quot;reciprocal&quot;, &quot;edge_set&quot;: &lt;id&gt;, &quot;exemptions&quot;: [ { &quot;collection&quot;: &lt;id&gt;, &quot;id&quot;: &lt;record-id&gt; } ] }</code>, where <code>exemptions</code> is optional. Forward edges and declared <code>inverse</code> back-pointers form a bijection in both directions, so each forward edge has exactly one matching back-pointer and the reverse holds too. Exempted collection records are ignored. The edge set MUST declare <code>inverse</code>. Diagnostics: <code>one-way-edge</code>, <code>dangling-back-pointer</code>, and <code>duplicate-edge</code>, each carrying both collection-record ids.</li>
+<li><strong><code>bounded-reachability</code></strong> — <code>{ &quot;predicate&quot;: &quot;bounded-reachability&quot;, &quot;edge_set&quot;: &lt;id&gt;, &quot;roots&quot;: [ { &quot;collection&quot;: &lt;id&gt;, &quot;id&quot;: &lt;record-id&gt; } ], &quot;bound&quot;: { &quot;kind&quot;: &quot;depth&quot; | &quot;nodes&quot;, &quot;maximum&quot;: &lt;positive integer&gt; } }</code>.</li>
+</ol>
+<p>The obligation is root coverage. Every collection record in the edge set's source and target collections is reachable from some declared root, within the bound, following declared edge orientation.</p>
+<p>The two bound kinds measure different things. <code>kind: &quot;depth&quot;</code> bounds the edge count of any accepted path from a root. <code>kind: &quot;nodes&quot;</code> bounds the total number of distinct collection records the search may visit.</p>
+<p>Exceeding the bound before coverage is decided is itself the <code>bound-exceeded</code> failure. It never passes silently. Diagnostics: <code>unreached-id</code>, <code>bound-exceeded</code>.</p>
+<ol>
+<li><strong><code>monotone-attribute-along-path</code></strong> —</li>
+</ol>
+<p><code>json { &quot;predicate&quot;: &quot;monotone-attribute-along-path&quot;, &quot;edge_set&quot;: &quot;tech-prerequisites&quot;, &quot;attribute&quot;: { &quot;member&quot;: &quot;era_order&quot; }, &quot;direction&quot;: &quot;non-increasing&quot; }</code></p>
+<p><code>attribute</code> takes one of two forms. <code>{ &quot;member&quot;: &lt;name&gt; }</code> applies when every collection in the edge set uses one member name. <code>{ &quot;members&quot;: { &lt;collection-id&gt;: &lt;name&gt;, ... } }</code> covers every collection the edge set touches, one name each.</p>
+<p><code>direction</code> compares along declared edge orientation. <code>non-decreasing</code> asserts attribute(from) &lt;= attribute(to) on every edge. <code>non-increasing</code> asserts attribute(from) &gt;= attribute(to). The example above is <code>non-increasing</code> because prerequisite edges point dependent → prerequisite, and the claim being made is prerequisite.era &lt;= dependent.era.</p>
+<p>The check runs edge by edge, and passing it implies the property holds along whole paths. The path-level property is the certified claim.</p>
+<p>A missing or non-numeric attribute on any collection record in the edge set is a hard failure. Diagnostics: <code>monotonicity-violation</code>, carrying both collection-record ids and both values, and <code>missing-attribute</code>.</p>
+<p>Diagnostics are per file, collection-record id, edge, and rule, as §6 <code>static-lint</code> already requires.</p>
+<p>The carrier is structure-only. It does not define what an edge <em>means</em>: recipe, unlock, and adjacency semantics stay in the collection's contract section. It carries no rates, capacities, conservation, throughput, or steady-state flow claims, no runtime graph state, and no solver predicates (§6, §7a).</p>
+<h2 id="2-the-three-authority-levels">2. The three authority levels<a class="heading-anchor" href="#2-the-three-authority-levels" aria-label="Link to this section">#</a></h2>
+<p>Every design statement in the spec carries one of three authority levels. Fixed is the default and needs no tag. Chapters mark non-default sections with a blockquote tag.</p>
+<div class="table-scroll"><table>
+<thead><tr><th>Level</th><th>Tag</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>Fixed</strong></td><td>(default, untagged)</td><td>Build exactly as written. Deviation fails certification.</td></tr>
+<tr><td><strong>Delegated</strong></td><td><code>&gt; DELEGATED:</code></td><td>The builder decides. The spec states intent and constraints; the implementation may vary.</td></tr>
+<tr><td><strong>Personalization</strong></td><td><code>&gt; PERSONALIZATION: &lt;id&gt;</code></td><td>Resolved by the answer to question <code>&lt;id&gt;</code> in <code class="anchor">personalization.json</code>.</td></tr>
+</tbody>
+</table></div>
+<p>The taxonomy is borrowed from tabletop roleplaying modules, which separate read-aloud text from guidance meant for the game master. It is the core mechanism of the format. It makes every build unique while keeping the design intact.</p>
+<h2 id="2a-the-responsibility-boundary">2a. The responsibility boundary<a class="heading-anchor" href="#2a-the-responsibility-boundary" aria-label="Link to this section">#</a></h2>
+<p>One test decides which statements must be Fixed and which may be Delegated: <strong>does the difference change play, in a way a player can observe?</strong></p>
+<p>Suppose two builds of one spec differ. If a player could notice the difference, and it changes how the game plays, that difference is design surface. The spec must pin it, and give the design reason. If no player could ever tell, it is the builder's craft.</p>
+<p>That leaves a third case, and it is the common one in presentation: a difference a player plainly sees which does not change how the game plays. Two builds may light the same room differently, or animate the same win at different speeds. That surface is Delegated. A designer who wants to constrain it without pinning it uses the art-direction block (§9), which states targets and leaves the means open.</p>
+<p>The rendering technique is one such surface. A spec's §3 <code>platform</code> names the state space the design is responsible for; the renderer that draws it is the builder's, and a <code>web-2d</code> world may be drawn with flat sprites or a perspective 3D renderer without touching the design surface, provided every Fixed and constrained claim still holds. The build declares its renderer in <code class="anchor">opengdd-build.json</code> (§7); the spec never does.</p>
+<p>Some decisions belong to neither party, but to <strong>the format itself</strong>. These are ecosystem properties, where builds agreeing with each other matters more than anyone's preference. v0.2 fixes three of them.</p>
+<ul>
+<li><strong>PRNG algorithm.</strong> Seeds are strings. Hash an addressed seed's exact UTF-8 bytes with FNV-1a (32-bit), then drive Mulberry32. For the designer this means a random stream is named by a readable address, and a Fixed procedure reading that address draws the same sequence in anyone's build, which is what makes a seeded acceptance test checkable.</li>
+<li><strong>PRNG address.</strong> A stream address has this canonical text grammar:</li>
+</ul>
+<p><code>text address = seed *( &quot;:&quot; unit &quot;:&quot; index ) [ &quot;:stream:&quot; stream ] unit    = lowercase-kebab-name index   = &quot;0&quot; | [ &quot;-&quot; ] nonzero-digit *digit stream  = lowercase-kebab-name</code></p>
+<p><code>+</code>, leading zeroes, and <code>-0</code> are forbidden.</p>
+<p>The spec MUST declare four things about its addresses.</p>
+<ol>
+<li>Every unit and named-stream template.</li>
+<li>Each index's meaning and origin.</li>
+<li>Whether a unit accepts signed coordinates or only non-negative ordinals.</li>
+<li>The order in which draws are consumed inside a sequential stream.</li>
+</ol>
+<p>An address may carry more than one <code>unit:index</code> component, as in <code>{seed}:chunk-x:-4:chunk-y:7:stream:terrain</code>. Ordinal units may nest, as in <code>{seed}:arena:2:wave:4:spawn:7:stream:choreography</code>. The v0.1 floor form remains <code>{seed}:floor:{n}</code> with non-negative <code>n</code>. A root stream is allowed only when declared. No free-form path segment is an address.</p>
+<p>Named streams isolate draw sequences from each other. The same address and Fixed consuming procedure MUST produce the same result in every build. A Delegated consuming procedure promises deterministic replay only within its own build and that build's Fixed invariants. So a spec MUST NOT require an exact cross-build artifact hash while delegating the procedure that creates it.</p>
+<ul>
+<li><strong>Tie-break lint rule.</strong> Some rules force a choice: which target, which order, what happens when two conditions fire at once, which of two equal distances wins. Every such rule MUST state its tie-break. A validator should flag choice-shaped verbs such as &quot;nearest&quot;, &quot;first&quot;, and &quot;when both&quot; when no tie-break is present.</li>
+</ul>
+<h2 id="2b-spec-lifecycle">2b. Spec lifecycle<a class="heading-anchor" href="#2b-spec-lifecycle" aria-label="Link to this section">#</a></h2>
+<p>Three stages describe how far a spec has been proven.</p>
+<ul>
+<li><strong>Draft.</strong> No build has ever been certified from it. It is buildable at your own risk, and ambiguity reports are expected and welcomed.</li>
+<li><strong>Proven.</strong> At least one certified build exists, normally the designer's own reference build. Producing that build is part of authoring, because it exposes the rules the spec left unstated.</li>
+<li><strong>Hardened.</strong> At least two independent builders have certified builds.</li>
+</ul>
+<p>A failed build checkpoint generates an <strong>ambiguity report</strong>, routed to the designer as a spec issue: what the builder found, what the spec left open, and which spec revision it was filed against. The format does not yet standardize the report's shape.</p>
+<p>Reviews attach to builds, and never to specs. A spec's quality signal comes instead from its certification rate, its independent-build count, and the ratings of its certified builds.</p>
+<h2 id="2c-ruleset-state">2c. Ruleset state<a class="heading-anchor" href="#2c-ruleset-state" aria-label="Link to this section">#</a></h2>
+<p>Some games change which rules are active while play is in progress. A game might swap one complete ruleset for another. It might derive rules from the board layout after every step, or activate predeclared effects at runtime.</p>
+<p>Fixed prose can define these systems, and declared state can represent them. The optional manifest member <code>ruleset_state</code> gives that pattern a shared structure:</p>
+<pre><code class="lang-json">{
+  &quot;ruleset_state&quot;: {
+    &quot;rulesets&quot;: [
+      { &quot;id&quot;: &quot;act1-cabin&quot;, &quot;initial&quot;: true },
+      { &quot;id&quot;: &quot;act2-pixel&quot; }
+    ],
+    &quot;hooks&quot;: {
+      &quot;id&quot;: &quot;law-hooks&quot;,
+      &quot;contract&quot;: &quot;03-content.md#law-verb-table&quot;,
+      &quot;members&quot;: [&quot;allow-assignment&quot;, &quot;set-cookhouse-recipe&quot;]
+    },
+    &quot;derived_predicates&quot;: {
+      &quot;id&quot;: &quot;active-rules&quot;,
+      &quot;contract&quot;: &quot;02-mechanics.md#rule-recomputation&quot;,
+      &quot;subjects&quot;: [&quot;baba&quot;, &quot;wall&quot;, &quot;flag&quot;, &quot;rock&quot;],
+      &quot;predicates&quot;: [&quot;you&quot;, &quot;win&quot;, &quot;stop&quot;, &quot;push&quot;],
+      &quot;derivation&quot;: &quot;fixed&quot;
+    },
+    &quot;identity_sets&quot;: [
+      { &quot;entity_class&quot;: &quot;board-entity&quot;,
+        &quot;contract&quot;: &quot;02-mechanics.md#identity-mutation&quot;,
+        &quot;entities&quot;: { &quot;collection&quot;: &quot;board-entities&quot; },
+        &quot;candidate_types&quot;: [&quot;baba&quot;, &quot;wall&quot;, &quot;flag&quot;, &quot;rock&quot;] }
+    ]
+  }
+}</code></pre>
+<p>A <code>ruleset_state</code> block MUST contain <code>rulesets</code>, or one or more of <code>hooks</code>, <code>derived_predicates</code>, and <code>identity_sets</code>. Every member list is explicit, finite, and closed when the spec is authored.</p>
+<p><code>hooks</code>, <code>derived_predicates</code>, and every <code>identity_sets</code> entry carry a <code>contract</code> pointer. It points to the Fixed chapter section that defines that construct's semantics, under §1b's closure discipline. A ruleset needs no contract pointer of its own. Its semantics are the chapter statements tagged with its id, using the tag defined below.</p>
+<p>When <code>rulesets</code> is present, its ids are unique and exactly one entry carries <code>initial: true</code>.</p>
+<p>Every <code>derived_predicates</code> block MUST carry <code>derivation: &quot;fixed&quot;</code>. <code>derivation</code> names the authority level of the recomputation procedure. That procedure is Fixed, and the build must implement it. The format names the procedure and binds it to a contract pointer. The pointed-to prose expresses what the procedure does. Hook and derivation semantics therefore remain Fixed prose. The format defines no effect or mutation language, and <code>opengdd-expr-1</code> remains read-only.</p>
+<p>Each <code>identity_sets</code> entry declares its entity id space through <code>entities</code>. It takes one of two forms:</p>
+<ul>
+<li><code>{ &quot;collection&quot;: &lt;§1b collection id&gt; }</code> uses the stable item ids from that collection.</li>
+<li><code>{ &quot;members&quot;: [&lt;explicit id list&gt;] }</code> supplies the ids directly.</li>
+</ul>
+<p>Every entity id used in a <code>state:member</code> identity reference MUST match <code>^[a-z0-9]+(-[a-z0-9]+)*$</code>, the kebab-case grammar. The <code>:</code> delimiter cannot appear in any segment. When an identity set uses a collection, any stable id that violates this grammar is a hard failure.</p>
+<p>These declarations make four §4a reference forms resolvable. Each reference has a Boolean value:</p>
+<ul>
+<li><code>state:member:ruleset:&lt;ruleset-id&gt;</code> is true when that ruleset is active.</li>
+<li><code>state:member:&lt;hooks-id&gt;:&lt;hook-id&gt;</code> is true when that predeclared hook is live.</li>
+<li><code>state:member:&lt;predicates-id&gt;:&lt;subject&gt;:&lt;predicate&gt;</code> tests membership in the derived rule universe. This is a three-segment <code>state:member</code> form. §4a admits it only for a declared <code>derived_predicates</code> block.</li>
+<li><code>state:member:&lt;entity-class&gt;:&lt;entity-id&gt;:&lt;type&gt;</code> reports an entity's current identity. This is also a three-segment form. It is valid only when a declared <code>identity_sets</code> entry contains the entity id in its <code>entities</code> space and the type in its <code>candidate_types</code>.</li>
+</ul>
+<p>The first segment after <code>state:member</code> is a namespace. The id <code>ruleset</code> is reserved. The ids of <code>hooks</code>, <code>derived_predicates</code>, and every <code>entity_class</code> MUST be mutually unique. They MUST NOT equal <code>ruleset</code> or collide with any §4a declared-set id. A colliding declaration is a hard failure.</p>
+<p>Use <code>&gt; RULESET: &lt;id&gt;</code> to scope a prose section to one ruleset. A <code class="anchor">tuning.json</code> <code>meta</code> entry MAY also carry a <code>ruleset</code> member. Both forms MUST name a declared ruleset id. A dangling tag is a hard failure.</p>
+<p>A prose tag has an exact syntactic scope. It starts at the tag and ends at the next <code>&gt; RULESET:</code> tag in the same heading section, or at the end of that section, whichever comes first. The section ends at the next heading of the same or a higher level. An untagged statement is authoritative under every ruleset.</p>
+<p>The core lint promise covers exactly three things: parsing ruleset tags, checking that each ruleset tag and <code class="anchor">tuning.json</code> <code class="anchor">meta.ruleset</code> value names a declared ruleset id, and enumerating which statements are shared or belong to one ruleset.</p>
+<p>Tags cannot establish semantic claims about mutual exclusion or reachability, such as &quot;these two rulesets are never simultaneously active.&quot; Game-local §6 tests discharge those claims. Use a <code>scenario</code>, an <code>exhaustive-search</code> test, or a game-local <code>static-lint</code> rule set.</p>
+<p>Four things remain deliberately out of scope:</p>
+<ul>
+<li>mechanics that let players create new rule vocabulary during play. Certification tests against a declared, finite vocabulary; a rule word that first exists at runtime has no declared set to test against. A fixed vocabulary the designer declared in full is fine, however the player combines it;</li>
+<li>any mutation language;</li>
+<li>any coupling to a solver profile, so §7a remains unchanged; and</li>
+<li>any semantic ontology for what activated rules mean. Endings and consequences remain authored predicates over declared memberships.</li>
+</ul>
+<h2 id="3-manifest-json">3. manifest.json<a class="heading-anchor" href="#3-manifest-json" aria-label="Link to this section">#</a></h2>
+<p>The manifest carries the spec's identity and build contract. It is machine-validated against <a href="https://opengdd.org/schema/core/v0.5/manifest.schema.json">manifest.schema.json</a>. Here is a complete manifest for §1a's getaway driver, with none of the optional top-level structures further down:</p>
+<pre><code class="lang-json">{
+  &quot;opengdd&quot;: &quot;0.5&quot;,
+  &quot;id&quot;: &quot;getaway-driver&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;title&quot;: &quot;Getaway Driver&quot;,
+  &quot;designer&quot;: { &quot;name&quot;: &quot;OpenGDD Examples&quot; },
+  &quot;target&quot;: {
+    &quot;platform&quot;: &quot;web-2d&quot;,
+    &quot;genre&quot;: &quot;arcade driving&quot;,
+    &quot;session_minutes&quot;: 5,
+    &quot;audience&quot;: &quot;anyone; one hand on the keyboard&quot;
+  },
+  &quot;build&quot;: {
+    &quot;chapters&quot;: [&quot;01-overview.md&quot;, &quot;02-mechanics.md&quot;, &quot;03-content.md&quot;,
+                 &quot;04-presentation.md&quot;],
+    &quot;plan&quot;: &quot;05-build-plan.md&quot;,
+    &quot;tuning&quot;: &quot;tuning.json&quot;,
+    &quot;personalization&quot;: &quot;personalization.json&quot;
+  }
+}</code></pre>
+<p>Its required top-level fields are exactly:</p>
+<ul>
+<li><strong><code>opengdd</code></strong> is the format version. Its value is <code>&quot;0.5&quot;</code>.</li>
+<li><strong><code>id</code> and <code>version</code></strong> identify the spec. <code>version</code> uses semver, and <code>id</code> is unique within a registry.</li>
+<li><strong><code>title</code> and <code>designer</code></strong> name the game and its designer. The designer has a name and may also have a registry handle and contact details.</li>
+<li><strong><code>target</code></strong> gives the platform, the genre family, the session length, and the audience. <code>platform</code> names the delivery target and the <strong>state space</strong> the designer is responsible for — what the game must keep track of, not what it looks like. v0.x accepts <code>web-2d</code> and <code>web-3d</code>. A game whose world is a plane declares <code>web-2d</code> no matter how a build draws it; <code>web-3d</code> is for a game whose state itself needs three dimensions. Rendering technique is never a platform fact: it is the builder's craft on §2a's boundary, and a build records what it rendered with in <code class="anchor">opengdd-build.json</code> (§7).</li>
+<li><strong><code>build</code></strong> names the entry-point chapters and the paths to the build plan and tuning file. It may also name a personalization file.</li>
+</ul>
+<p><code class="anchor">build.direction</code> names the optional §9 art-direction carrier, <code class="anchor">direction.json</code>. As of v0.5 the rules for that file are normative, and it has a schema of its own. A direction block in <code class="anchor">04-presentation.md</code> and a declared carrier MUST appear together. If either appears without the other, validation fails.</p>
+<p>Five optional top-level fields declare other package structures:</p>
+<ul>
+<li><code>content</code> declares §1b collections.</li>
+<li><code>graphs</code> declares §1c edge sets over those collections.</li>
+<li><code>ruleset_state</code> declares the §2c block.</li>
+<li><code>descriptors</code> declares the named descriptor families from §8. Mood is the only populated family in v0.5 (§8a).</li>
+<li><code>verification_profiles</code> declares configured §6a instances. Each one defines the certifiable envelope for a simulated material system, such as fire spread or falling sand, without fixing how it is implemented.</li>
+</ul>
+<p><code>verification_profiles</code> and <code>capture_profile</code> name different things. A <code>verification_profiles</code> entry is a claim envelope in the spec. The <code>capture_profile</code> in <code class="anchor">opengdd-build.json</code> identifies the capture adapter and serving recipe used for one certification run (§7).</p>
+<p>The optional <code>commerce</code> profile contains <code>license</code>, <code>split</code>, and an optional <code>derived_from</code> field:</p>
+<pre><code class="lang-json">{
+  &quot;commerce&quot;: {
+    &quot;license&quot;: &quot;opengdd-share-v0&quot;,
+    &quot;split&quot;: { &quot;designer&quot;: 50, &quot;builder&quot;: 50 },
+    &quot;derived_from&quot;: { &quot;id&quot;: &quot;parent-spec&quot;, &quot;version&quot;: &quot;1.0.0&quot; }
+  }
+}</code></pre>
+<p>The commerce profile is REQUIRED when a spec is offered for third-party building or marketplace listing on any registry. It MAY be omitted without penalty for internal, jam, archival, test, and other artifact-only uses. Game-spec certification never requires commerce metadata. Whether the profile is present or absent MUST NOT change gameplay expression, authority, or build certification.</p>
+<p><code>opengdd-share-v0</code> permits building and deployment under the declared split. Revenue-bearing builds must ship with attribution metadata. The percentages in <code>split</code> MUST sum to 100.</p>
+<p><code>derived_from</code> is <strong>Reserved</strong> and inert in v0.x. It records lineage metadata only. Fork licensing and royalties remain outside v0.x. Modifications beyond the declared personalization bounds have no certified path. These rules belong to the commerce profile and do not change core artifact semantics.</p>
+<h2 id="3a-canonical-schema-urls">3a. Canonical schema URLs<a class="heading-anchor" href="#3a-canonical-schema-urls" aria-label="Link to this section">#</a></h2>
+<p>Every published schema is identified and served at a canonical URL:</p>
+<pre><code class="lang-text">https://opengdd.org/schema/&lt;layer&gt;/v&lt;minor&gt;/&lt;file&gt;.schema.json</code></pre>
+<p>For example:</p>
+<pre><code class="lang-text">https://opengdd.org/schema/core/v0.5/manifest.schema.json</code></pre>
+<p>Four rules govern these URLs:</p>
+<ol>
+<li><strong>The layer comes before the version.</strong> Each layer versions independently. <code>core</code> is the only layer today. A future commerce profile could be another. The URL layout MUST NOT imply that different layers share one version.</li>
+<li><strong>The version segment uses the format version.</strong> It is <code>v</code> followed by the manifest's <code>opengdd</code> value. A schema under <code>/core/v0.5/</code> validates manifests that declare <code>&quot;opengdd&quot;: &quot;0.5&quot;</code>. Schema URLs use minor-version granularity. Patch-level corrections are published as errata at the same URL and MUST NOT silently change any validation outcome.</li>
+<li><strong>Published URLs are permanent.</strong> A schema MAY be superseded by a newer version at a new URL. Its existing URL MUST NOT be repurposed or removed. The content served there is frozen except for the errata allowed above.</li>
+<li><strong>There is no floating alias.</strong> Documents MUST reference an explicit version. The format defines no <code>/latest/</code> URL.</li>
+</ol>
+<p>For a designer, what these rules protect is durability. A spec that declares <code>&quot;opengdd&quot;: &quot;0.5&quot;</code> is checked against the schemas at <code>/core/v0.5/</code>, and that address still serves those schemas years from now. Corrections appear there as published errata, never as a silent change of verdict.</p>
+<h2 id="4-tuning-json">4. tuning.json<a class="heading-anchor" href="#4-tuning-json" aria-label="Link to this section">#</a></h2>
+<p><code class="anchor">tuning.json</code> assigns each runtime number a role:</p>
+<p><code>tunables</code> and <code>constants</code> name the change-authority axis: a rebalance-safe knob versus an identity-bearing pillar. Neither is a runtime variable. Rebalancing is change by degree, which presumes numbers; discrete choices are declared sets, and text is content records.</p>
+<pre><code class="lang-json">{
+  &quot;tunables&quot;: { &quot;hazard.interval_seconds&quot;: 1.2 },
+  &quot;constants&quot;: { &quot;lane.count&quot;: 2 },
+  &quot;meta&quot;: {
+    &quot;hazard.interval_seconds&quot;: { &quot;range&quot;: [0.8, 2.0], &quot;certify&quot;: true },
+    &quot;lane.count&quot;: { &quot;certify&quot;: true }
+  },
+  &quot;invariants&quot;: [
+    {
+      &quot;language&quot;: &quot;opengdd-expr-1&quot;,
+      &quot;id&quot;: &quot;positive-interval&quot;,
+      &quot;assert&quot;: { &quot;op&quot;: &quot;gt&quot;, &quot;args&quot;: [
+        { &quot;ref&quot;: &quot;tuning:hazard.interval_seconds&quot; }, 0
+      ] },
+      &quot;message&quot;: &quot;hazard interval must be positive&quot;
+    }
+  ]
+}</code></pre>
+<ul>
+<li><strong><code>tunables</code> is required.</strong> It is a flat object with namespaced dotted keys. Every runtime numeric parameter that a data-only balance or configuration revision may change MUST live here.</li>
+<li><strong><code>constants</code> is optional.</strong> It is a flat object of numeric Fixed rules exposed to runtime data. Changing a constant is a mechanics or content change. A balance-only revision cannot change it.</li>
+<li><strong><code>meta</code> is optional.</strong> Its keys come from <code>tunables</code> or <code>constants</code>. A <code>range</code> is an inclusive <code>[minimum, maximum]</code>, and is allowed only when the key comes from <code>tunables</code>. <code>certify</code> says whether the built value must match the resolved snapshot. A <code>meta</code> entry MAY also carry a <code>ruleset</code> member naming a §2c ruleset id.</li>
+<li><strong><code>invariants</code> is optional.</strong> It contains the §4a expressions. Every invariant MUST evaluate true after personalization resolution and before a run starts.</li>
+<li><strong><code>clocks</code> is optional.</strong> It declares the §4b regimes-and-clocks block.</li>
+</ul>
+<p>A key MUST be unique across <code>tunables</code> and <code>constants</code>. Every <code>meta</code> key MUST exist in exactly one of those objects. A balance-only game-spec revision may change only <code>tunables</code>, and only within declared ranges. It MUST NOT change <code>constants</code>, structured-content facts, or verification fixtures.</p>
+<p>Numbers that belong elsewhere stay elsewhere:</p>
+<ul>
+<li>A numeric semantic cardinality MAY remain in Fixed prose when no machine consumer needs it. A mechanics chapter saying a run lasts three rounds is one such number.</li>
+<li>A per-content measurement or solver-derived fact lives with its structured content item.</li>
+<li>Verification inputs, sample counts, seed sets, schedules, expected observations, and tolerances live in the acceptance test or its fixture.</li>
+<li>Examples and identifiers carry no numeric authority. A displayed numeric example in prose MUST be marked non-normative.</li>
+</ul>
+<h2 id="4a-declared-expressions-and-invariants">4a. Declared expressions and invariants<a class="heading-anchor" href="#4a-declared-expressions-and-invariants" aria-label="Link to this section">#</a></h2>
+<p><code>opengdd-expr-1</code> is a closed, typed abstract syntax tree stored as data. It is never source text. A named expression has four members: <code>language</code>, a stable <code>id</code>, a Boolean <code>assert</code>, and a diagnostic <code>message</code>.</p>
+<pre><code class="lang-json">{
+  &quot;language&quot;: &quot;opengdd-expr-1&quot;,
+  &quot;id&quot;: &quot;interval-order&quot;,
+  &quot;assert&quot;: {
+    &quot;op&quot;: &quot;lte&quot;,
+    &quot;args&quot;: [
+      { &quot;ref&quot;: &quot;tuning:hazard.interval_min_seconds&quot; },
+      { &quot;ref&quot;: &quot;tuning:hazard.interval_start_seconds&quot; }
+    ]
+  },
+  &quot;message&quot;: &quot;minimum interval must not exceed starting interval&quot;
+}</code></pre>
+<p>A designer writes an expression like this to hold a rule between numbers. The one above says the minimum hazard interval must never exceed the starting interval. Like every invariant, it is checked after personalization resolution and before a run starts.</p>
+<p>Every expression node takes one of three forms:</p>
+<ul>
+<li>a finite JSON Boolean, number, or string literal;</li>
+<li><code>{ &quot;ref&quot;: &quot;&lt;typed-reference&gt;&quot; }</code>; or</li>
+<li><code>{ &quot;op&quot;: &quot;&lt;operator&gt;&quot;, &quot;args&quot;: [&lt;finite explicit node list&gt;] }</code>.</li>
+</ul>
+<p>The operator set is closed. These are all its operators and signatures:</p>
+<ul>
+<li><strong>Boolean.</strong> <code>and</code>, <code>or</code>, <code>all</code>, and <code>any</code> take one or more Booleans. <code>not</code> takes exactly one Boolean.</li>
+<li><strong>Equality.</strong> <code>eq</code> and <code>ne</code> take exactly two values of the same type.</li>
+<li><strong>Numeric comparison.</strong> <code>lt</code>, <code>lte</code>, <code>gt</code>, and <code>gte</code> take exactly two numbers.</li>
+<li><strong>Numeric arithmetic.</strong> <code>add</code>, <code>mul</code>, <code>min</code>, <code>max</code>, and <code>sum</code> take one or more numbers. <code>sub</code>, <code>div</code>, <code>pow</code>, and <code>mod</code> take exactly two numbers. <code>floor</code>, <code>ceil</code>, and <code>abs</code> take exactly one number.</li>
+<li><strong>Numeric series predicates.</strong> <code>strictly-increasing</code>, <code>nondecreasing</code>, and <code>all-positive</code> take one or more numeric references in an explicit ordered list. They return Boolean.</li>
+</ul>
+<p><code>sum</code>, <code>all</code>, and <code>any</code> operate only on their explicit finite <code>args</code>. They do not traverse runtime collections. <code>mod(a,b)</code> means <code>a - b * floor(a / b)</code>.</p>
+<p>Four conditions are hard validation failures: division by zero, modulo by zero, an invalid real-number domain, and a non-finite result.</p>
+<p>Typed references are profile-limited. The first form below reads <code class="anchor">tuning.json</code>. The other three reach into declared runtime state and declared content:</p>
+<ul>
+<li><code>tuning:&lt;dotted-key&gt;</code> → number from the resolved <code>tunables</code> or <code>constants</code>;</li>
+<li><code>state:number:&lt;declared-id&gt;</code> → number from a declared runtime inventory, resource, counter, or other numeric state binding;</li>
+<li><code>state:member:&lt;declared-set-id&gt;:&lt;declared-member-id&gt;</code> → Boolean membership in a declared runtime set; and</li>
+<li><code>content:&lt;collection-id&gt;:&lt;JSON-Pointer&gt;:count</code> → numeric length of a declared array.</li>
+</ul>
+<p>A format or profile contract MUST declare every runtime-state binding. For each binding, it declares the type and when the value is read.</p>
+<p>A §2c <code>ruleset_state</code> declaration is one such contract. It makes the ruleset, hook, derived-predicate, and identity membership forms listed there resolvable. This includes the three-segment <code>state:member</code> form for declared derived predicates.</p>
+<p>A structured-content condition may bind only declared state ids and literals, unless its contract opts into another binding.</p>
+<p>The following are hard failures: an unknown operator, wrong arity, an unresolved reference, a type mismatch, implicit coercion, and a non-finite number. Arbitrary functions and host code are forbidden. So are filesystem or network access, implicit traversal, recursion, and unbounded iteration. Reachability and solver predicates belong to §6.</p>
+<h2 id="4b-clocks-and-resolution-regimes">4b. Clocks and resolution regimes<a class="heading-anchor" href="#4b-clocks-and-resolution-regimes" aria-label="Link to this section">#</a></h2>
+<p>A game can bridge two resolution regimes. It might place real-time combat inside a paused strategic layer, or a turn-based mission inside a running campaign. Such a game makes player-observable promises about which clocks advance in each regime. A clock here is one source of advance, such as running time or a turn index. A spec MAY declare those promises:</p>
+<pre><code class="lang-json">{
+  &quot;clocks&quot;: {
+    &quot;regimes&quot;: [&quot;strategic-running&quot;, &quot;strategic-paused&quot;, &quot;tactical&quot;],
+    &quot;clocks&quot;: {
+      &quot;strategic_master_clock&quot;: {
+        &quot;governs&quot;: [&quot;state:number:scan_progress&quot;],
+        &quot;behavior&quot;: {
+          &quot;strategic-running&quot;: &quot;advances&quot;,
+          &quot;strategic-paused&quot;: &quot;frozen&quot;,
+          &quot;tactical&quot;: &quot;frozen&quot;
+        }
+      },
+      &quot;faction_turn_index&quot;: {
+        &quot;behavior&quot;: {
+          &quot;strategic-running&quot;: &quot;does-not-exist&quot;,
+          &quot;strategic-paused&quot;: &quot;does-not-exist&quot;,
+          &quot;tactical&quot;: &quot;discrete-only&quot;
+        }
+      }
+    }
+  }
+}</code></pre>
+<p>The <code>clocks</code> block is an optional top-level member of <code class="anchor">tuning.json</code>. <code>regimes</code> is a finite, closed list of package-declared ids. Every clock declares exactly one behavior for every declared regime. The behavior comes from this closed set: <code>advances</code>, <code>frozen</code>, <code>discrete-only</code>, and <code>does-not-exist</code>.</p>
+<p><code>discrete-only</code> is the behavior that the <code>apply-discrete-order</code> action requires below, as <code>advance-clock</code> requires <code>advances</code>. <code>does-not-exist</code> marks state that has no value outside its regime. It does not mean &quot;frozen at zero.&quot; The object shape makes contradictory behaviors for one clock in one regime unrepresentable.</p>
+<p>Chapter regime tags, such as <code>[TACTICAL]</code>, MUST name declared regime ids. The reserved tag value <code>all</code> marks a statement as authoritative in every regime. It is equivalent to leaving the statement untagged, but allows the author to be explicit. <code>all</code> MUST NOT be declared as a regime id.</p>
+<p>A clock MAY declare <code>governs</code>. It is a closed list of §4a typed state references whose values advance only under that clock. The <code>governs</code> lists of different clocks are disjoint. A reference governed by no clock has no declared regime behavior. The §4b lint checks below apply only to governed references.</p>
+<p>A clock MAY declare <code>unit</code> as a string. The default is the spec's declared time unit.</p>
+<p>A replay fixture (§6) has exactly one <strong>active regime</strong> at every point. Regimes do not nest or stack. The fixture declares its initial regime.</p>
+<p>Fixture schedules use standard regime-transition actions. Each action is a JSON object. The following four actions are the complete standard set. Any other <code>action</code> value makes the fixture data invalid:</p>
+<ul>
+<li><code>{ &quot;action&quot;: &quot;enter-regime&quot;, &quot;regime&quot;: &lt;id&gt; }</code> — the named regime becomes active. Precondition: the id is declared.</li>
+<li><code>{ &quot;action&quot;: &quot;exit-regime&quot;, &quot;to&quot;: &lt;id&gt; }</code> — another spelling of <code>enter-regime</code> on <code>to</code>, kept for trace readability. Its semantics are identical.</li>
+<li><code>{ &quot;action&quot;: &quot;advance-clock&quot;, &quot;clock&quot;: &lt;name&gt;, &quot;amount&quot;: &lt;number&gt; }</code> — <code>amount</code> is a finite positive number in the clock's declared unit. Precondition: the clock's behavior in the active regime is <code>advances</code>.</li>
+<li><code>{ &quot;action&quot;: &quot;apply-discrete-order&quot;, &quot;clock&quot;: &lt;name&gt;, &quot;order&quot;: &lt;string&gt; }</code> — precondition: the clock's behavior in the active regime is <code>discrete-only</code>; <code>order</code> names a Fixed action defined in the chapters.</li>
+</ul>
+<p>An action whose precondition fails is invalid fixture data.</p>
+<p>A §6 <code>scenario</code> or <code>property</code> descriptor MAY carry a <strong>freeze invariant</strong>:</p>
+<pre><code class="lang-json">{
+  &quot;freeze_invariant&quot;: {
+    &quot;references&quot;: [&quot;state:number:laser_charge_seconds&quot;],
+    &quot;regimes&quot;: [&quot;strategic-paused&quot;, &quot;tactical&quot;]
+  }
+}</code></pre>
+<p>The block above says that within any one stretch spent in <code>strategic-paused</code> or in <code>tactical</code>, the laser charge reads the same every time the fixture looks at it. A later stretch may read differently.</p>
+<p>For every maximal fixture interval whose active regime is in the named set, each typed reference MUST have the same value at every fixture observation point in that interval. This includes the entry and exit boundaries. Typed references use the §4a forms and must resolve under §4a's declared-binding rules.</p>
+<p>The invariant says nothing about unobserved intermediate states. Naming a reference governed by a clock whose behavior is <code>advances</code> in one of the named regimes is a lint-level contradiction. Naming one governed by a clock whose behavior is <code>does-not-exist</code> in a named regime is a hard failure.</p>
+<p>A freeze invariant asserts only the observation-point equality defined above. It makes no claim about unobserved states, write ordering, indivisibility, or rollback. This section defines no transaction or snapshot semantics. Regime-transition <em>procedures</em>, including what a transition writes and how, remain Fixed prose under §2a.</p>
+<h2 id="5-build-personalization-personalization-json">5. Build personalization (<code class="anchor">personalization.json</code>)<a class="heading-anchor" href="#5-build-personalization-personalization-json" aria-label="Link to this section">#</a></h2>
+<p><code class="anchor">personalization.json</code> is an ordered list of questions asked before or while building:</p>
+<pre><code class="lang-json">{
+  &quot;id&quot;: &quot;theme&quot;,
+  &quot;prompt&quot;: &quot;Where does the chase happen?&quot;,
+  &quot;kind&quot;: &quot;choice&quot;,
+  &quot;options&quot;: [
+    { &quot;id&quot;: &quot;night-city&quot;, &quot;label&quot;: &quot;...&quot;, &quot;notes&quot;: &quot;...&quot; }
+  ],
+  &quot;default&quot;: &quot;night-city&quot;,
+  &quot;affects&quot;: [&quot;03-content.md&quot;, &quot;04-presentation.md&quot;]
+}</code></pre>
+<p>Every question has one of three kinds: <code>choice</code>, <code>text</code>, or <code>number</code>. Questions are optional for each build. When a question is skipped, its <code>default</code> applies.</p>
+<p>For creative variants, designers SHOULD write <code>notes</code> a builder can act on directly: concrete instructions. Notes MUST NOT be the only authority for a numeric change.</p>
+<h3 id="enumerated-answers">Enumerated answers<a class="heading-anchor" href="#enumerated-answers" aria-label="Link to this section">#</a></h3>
+<p>A choice option or other enumerated answer MAY declare exact target-key replacements through <code>tuning_overrides</code>:</p>
+<pre><code class="lang-json">{
+  &quot;id&quot;: &quot;rush-hour&quot;,
+  &quot;label&quot;: &quot;Rush hour&quot;,
+  &quot;tuning_overrides&quot;: { &quot;hazard.interval_seconds&quot;: 0.9 }
+}</code></pre>
+<h3 id="numeric-answers">Numeric answers<a class="heading-anchor" href="#numeric-answers" aria-label="Link to this section">#</a></h3>
+<p>A numeric question that affects tuning MUST declare resolution operations:</p>
+<pre><code class="lang-json">{
+  &quot;id&quot;: &quot;hazard_pace&quot;,
+  &quot;kind&quot;: &quot;number&quot;,
+  &quot;default&quot;: 1.2,
+  &quot;resolution&quot;: [
+    {
+      &quot;target&quot;: &quot;hazard.interval_seconds&quot;,
+      &quot;operation&quot;: &quot;replace&quot;,
+      &quot;operand&quot;: &quot;answer&quot;,
+      &quot;bounds&quot;: &quot;target-meta-range&quot;,
+      &quot;out_of_range&quot;: &quot;clamp&quot;
+    }
+  ]
+}</code></pre>
+<p>Resolution operations use these fields:</p>
+<ul>
+<li><strong><code>operation</code></strong> is <code>replace</code>, <code>add</code>, or <code>multiply</code>.</li>
+<li><strong><code>target</code></strong> MUST name an explicit <code>tunables</code> key. A <code>constants</code> key is never a legal target.</li>
+<li><strong><code>operand</code></strong> is <code>answer</code> or a JSON number.</li>
+<li><strong><code>bounds</code></strong> is <code>target-meta-range</code>.</li>
+<li><strong><code>out_of_range</code></strong> is <code>clamp</code> or <code>reject</code>.</li>
+</ul>
+<p><code>clamp</code> uses the target's inclusive <code class="anchor">meta.range</code>. A target without that range cannot use <code>clamp</code>.</p>
+<p>Resolution order is deterministic:</p>
+<ol>
+<li>Apply questions in question-list order.</li>
+<li>Within each question, apply operations in operation-list order.</li>
+</ol>
+<p>Defaults use the same pipeline. Every final target MUST remain within its declared range.</p>
+<h3 id="the-resolved-tuning-snapshot">The resolved tuning snapshot<a class="heading-anchor" href="#the-resolved-tuning-snapshot" aria-label="Link to this section">#</a></h3>
+<p>The <strong>resolved tuning snapshot</strong> is the complete flat <code>tunables</code> map after all default or supplied answers are applied. For every <code>certify: true</code> key, certification evaluates this snapshot. Package defaults and declared ranges are not certification targets. <code class="anchor">opengdd-build.json</code> MUST record the answers and the full resolved snapshot.</p>
+<p>Choices made at runtime, such as boons, difficulty modifiers, crafting choices, and laws, are gameplay state. They are not build personalization.</p>
+<h2 id="6-build-plan-and-acceptance-tests-05-build-plan-md">6. Build plan and acceptance tests (<code class="anchor">05-build-plan.md</code>)<a class="heading-anchor" href="#6-build-plan-and-acceptance-tests-05-build-plan-md" aria-label="Link to this section">#</a></h2>
+<p>The certification harness executes this chapter. Its acceptance tests are what a build is certified against. The chapter MUST contain ordered phases. The v0 convention lists them as <code>core-loop</code> → <code>content</code> → <code>tuning</code> → <code>presentation</code> → <code>polish</code>. Each phase lists its scope, chapter references, and machine-verifiable checkpoints.</p>
+<h3 id="acceptance-test-classes">Acceptance-test classes<a class="heading-anchor" href="#acceptance-test-classes" aria-label="Link to this section">#</a></h3>
+<p>Acceptance tests are numbered <code>AT-1 … AT-n</code>. Every <code>AT-n</code> heading MUST be followed by two things: a fenced <code>verification</code> JSON descriptor and human-readable test text. The descriptor declares one of four classes.</p>
+<ul>
+<li><strong><code>scenario</code></strong> declares Given/When/Then state and action semantics. An optional <code>replay-fixture</code> adds a versioned input recording, initial state, schedule fixture, ordered expected observations, numeric targets, tolerance semantics, and mismatch diagnostics.</li>
+<li><strong><code>property</code></strong> declares a quantified input or domain and an invariant. It uses either exhaustive domain coverage or a reproducible sampling plan. A sampled plan MUST declare a deterministic <code>seed_set</code> and sample count. Its oracle descriptor MUST declare <code>oracle: &quot;per-sample&quot;</code> or <code>oracle: &quot;aggregate&quot;</code>.<ul>
+<li><code>per-sample</code> applies the invariant to every sample.</li>
+<li><code>aggregate</code> additionally MUST declare the deterministic <code>seed_set</code>, measured <code>metric</code>, <code>aggregation</code>, and <code>threshold</code>. <code>aggregation</code> is <code>count</code>, <code>rate</code>, <code>min</code>, <code>max</code>, <code>mean</code>, or a declared finite histogram with explicit bins.</li>
+</ul></li>
+</ul>
+<p>A finite named schedule set is a valid property domain. A sampled aggregate certifies only its declared bounded distribution claim. It cannot certify universal absence.</p>
+<ul>
+<li><strong><code>exhaustive-search</code></strong> declares initial states, the legal transition or action surface, a predicate, and either a finite-state declaration or an explicit state or depth bound. It MUST declare <code>complete: true|false</code> and the required witness and/or counterexample diagnostics. Only <code>complete: true</code> may certify absence, a minimum, universal reachability, or &quot;every optimal witness&quot; claims. The descriptor MUST name the diagnostics that prove success and diagnose failure.</li>
+<li><strong><code>static-lint</code></strong> declares spec or content artifacts, a versioned rule set, and file/item/rule diagnostics. It does not run the game. The core rule set <code>opengdd-graph-1</code> (§1c) covers the five structural graph-predicate classes over declared edge sets. Game-local rule sets cover obligations outside that core set.</li>
+</ul>
+<p>A <code>scenario</code> or <code>property</code> descriptor MAY also carry a §4b <code>freeze_invariant</code> member. When the package declares clocks, its replay schedules use the standard §4b regime-transition actions.</p>
+<h3 id="direction-claim-citations">Direction-claim citations<a class="heading-anchor" href="#direction-claim-citations" aria-label="Link to this section">#</a></h3>
+<p>A <code>scenario</code> or <code>property</code> descriptor that covers a §9 direction claim MUST carry <code>direction_claims</code>. This member is a non-empty array of exact dotted paths. A fixture may cite only these claim kinds:</p>
+<ul>
+<li><code>constraints.palette.&lt;key&gt;</code></li>
+<li><code>constraints.thresholds.&lt;key&gt;</code></li>
+<li><code>constraints.timing.&lt;key&gt;</code></li>
+<li><code>motion.&lt;key&gt;</code></li>
+</ul>
+<p>Pillars, mood, anti-references, and invariants never cite a fixture. They are scored directly against the finished build under §9.11.</p>
+<p>Direction-claim closure runs both ways:</p>
+<ol>
+<li>Every path in <code>direction_claims</code> MUST resolve to a declared <code class="anchor">direction.json</code> entry. A dangling citation is a hard failure.</li>
+<li>Every <code>constraints.*</code> entry and every <code>motion.*</code> entry's required <code>fixture</code> MUST be named by at least one AT's <code>direction_claims</code>. All <code>constraints.*</code> entries are fixed observational <code>checked</code> claims under §9.11. An entry named by no AT is a validation failure.</li>
+</ol>
+<p>An AT that carries <code>direction_claims</code> MUST NOT restate the cited claim's value, scope, or class. The §9.5 single-source rule extends to this member.</p>
+<p>Example scenario, the commonest class, from the getaway driver's build plan:</p>
+<pre><code class="lang-verification">{
+  &quot;class&quot;: &quot;scenario&quot;,
+  &quot;given&quot;: &quot;a chase running at the certified hazard.interval_seconds&quot;,
+  &quot;when&quot;: [&quot;the road runs for sixty seconds and the player never crashes&quot;],
+  &quot;then&quot;: [&quot;no two hazards arrive closer together than that interval&quot;],
+  &quot;diagnostics&quot;: [&quot;hazard-spawn-log&quot;]
+}</code></pre>
+<p>Example aggregate property:</p>
+<pre><code class="lang-verification">{
+  &quot;class&quot;: &quot;property&quot;,
+  &quot;domain&quot;: &quot;generated chase routes at difficulty 3&quot;,
+  &quot;sampling&quot;: { &quot;seed_set&quot;: [&quot;night-city&quot;, &quot;harbour&quot;], &quot;samples_per_seed&quot;: 100 },
+  &quot;invariant&quot;: &quot;the sampled route can be driven from start to end&quot;,
+  &quot;oracle&quot;: &quot;aggregate&quot;,
+  &quot;metric&quot;: &quot;drivable-route&quot;,
+  &quot;aggregation&quot;: &quot;rate&quot;,
+  &quot;threshold&quot;: { &quot;op&quot;: &quot;eq&quot;, &quot;value&quot;: 1.0 }
+}</code></pre>
+<p>Example complete search:</p>
+<pre><code class="lang-verification">{
+  &quot;class&quot;: &quot;exhaustive-search&quot;,
+  &quot;initial_states&quot;: [&quot;chase-start&quot;],
+  &quot;transitions&quot;: &quot;02-mechanics.md#legal-actions&quot;,
+  &quot;bound&quot;: { &quot;kind&quot;: &quot;action-depth&quot;, &quot;maximum&quot;: 8 },
+  &quot;complete&quot;: true,
+  &quot;predicate&quot;: &quot;every declared ending has a witness&quot;,
+  &quot;diagnostics&quot;: [&quot;witness-per-ending&quot;, &quot;unreached-id&quot;]
+}</code></pre>
+<p>Fixture paths MUST be package-relative. When a fixture is structured content, it MUST be declared through §1b. A tolerance without an expected target is invalid. A target without its input or schedule fixture is also invalid.</p>
+<p>A descriptor states what must be proved. It leaves the implementation architecture open.</p>
+<p>These tests are the spec's ground truth. A build is conforming when it passes every acceptance test and matches every certified resolved tuning key.</p>
+<h2 id="6a-material-simulation-envelope-profile">6a. Material-simulation envelope profile<a class="heading-anchor" href="#6a-material-simulation-envelope-profile" aria-label="Link to this section">#</a></h2>
+<p>A material system might simulate falling-sand fluids, voxel destruction, or fire spread. Fixing it at simulation grain would also fix cell size, neighborhood, and update order as implementation architecture. §2a leaves that architecture open. The named verification profile <code>material-simulation-envelope-1</code> defines the envelope that can be certified. For a designer, that means promising the declared measures at or above a stated size, and only at stated moments. How the simulation is built underneath, down to its cell size and update order, stays the builder's.</p>
+<h3 id="carrier-and-references">Carrier and references<a class="heading-anchor" href="#carrier-and-references" aria-label="Link to this section">#</a></h3>
+<p>Configured instances live in the optional manifest member <code>verification_profiles</code>. It is an array of named instances with package-unique ids. Two places can reference an instance by id:</p>
+<ul>
+<li>a §1b collection's <code>verification_profile</code> member; and</li>
+<li>an AT descriptor's <code>profile</code> member.</li>
+</ul>
+<p>A dangling profile reference is a hard failure.</p>
+<pre><code class="lang-json">{
+  &quot;id&quot;: &quot;destruction-envelope&quot;,
+  &quot;profile&quot;: &quot;material-simulation-envelope-1&quot;,
+  &quot;min_feature_width&quot;: { &quot;ref&quot;: &quot;tuning:material.envelope_min_feature&quot; },
+  &quot;observation_schedule&quot;: [&quot;event:removal-batch&quot;, &quot;cadence:fire.step_seconds&quot;],
+  &quot;interaction_table&quot;: {
+    &quot;collection&quot;: &quot;material-interactions&quot;,
+    &quot;materials_collection&quot;: &quot;materials&quot;,
+    &quot;pair_members&quot;: [&quot;material_a&quot;, &quot;material_b&quot;],
+    &quot;interaction_member&quot;: &quot;result&quot;,
+    &quot;priority_member&quot;: &quot;priority&quot;,
+    &quot;inert_value&quot;: &quot;inert&quot;,
+    &quot;completeness&quot;: &quot;closed&quot;
+  },
+  &quot;measures&quot;: [&quot;area&quot;, &quot;connectivity&quot;, &quot;ordered-conversion-events&quot;],
+  &quot;measures_contract&quot;: &quot;02-mechanics.md#macroscopic-measures&quot;,
+  &quot;opening_thresholds&quot;: [0.5, 1.0, 2.0],
+  &quot;subsystems&quot;: [
+    {
+      &quot;id&quot;: &quot;fire&quot;,
+      &quot;outcome_model&quot;: &quot;legal-outcome-set&quot;,
+      &quot;envelope&quot;: &quot;02-mechanics.md#fire-envelope&quot;
+    }
+  ]
+}</code></pre>
+<h3 id="minimum-scale-and-observation-points">Minimum scale and observation points<a class="heading-anchor" href="#minimum-scale-and-observation-points" aria-label="Link to this section">#</a></h3>
+<p><strong><code>min_feature_width</code></strong> is a tuning reference in world units. The profile makes no cross-build promise below that width.</p>
+<p><strong><code>observation_schedule</code></strong> lists named, discrete observation points. Each entry has one of two forms:</p>
+<ul>
+<li><code>event:&lt;kebab-name&gt;</code>: the name MUST be an event defined in the Fixed chapters or in the citing AT's fixture vocabulary.</li>
+<li><code>cadence:&lt;tuning-key&gt;</code>: the key MUST resolve in <code>tunables</code> or <code>constants</code>. Its value is a period in the spec's declared time unit.</li>
+</ul>
+<p>Claims hold at these observation points. They do not bind states between observations.</p>
+<h3 id="interaction-table">Interaction table<a class="heading-anchor" href="#interaction-table" aria-label="Link to this section">#</a></h3>
+<p><strong><code>interaction_table</code></strong> declares pairwise material interactions through §1b collections:</p>
+<ul>
+<li><code>collection</code> names the collection whose collection records are interaction rows.</li>
+<li><code>materials_collection</code> names the collection whose stable item ids form the material universe.</li>
+<li><code>pair_members</code> names the two row members that hold material ids from that universe.</li>
+<li><code>interaction_member</code> names the row member that carries the interaction outcome.</li>
+<li><code>priority_member</code> names the member that carries each row's resolution priority or tie-break under the §2a lint. It MUST be non-empty on every row.</li>
+</ul>
+<p><code>completeness</code> distinguishes two cases:</p>
+<ul>
+<li><code>&quot;closed&quot;</code> asserts that every unordered pair in the material universe resolves to exactly one explicit row. A row whose <code>interaction_member</code> equals <code>inert_value</code> counts as explicit. A missing or duplicate pair is a hard failure.</li>
+<li><code>&quot;representative&quot;</code> declares a partial table.</li>
+</ul>
+<h3 id="measures-and-claim-scale">Measures and claim scale<a class="heading-anchor" href="#measures-and-claim-scale" aria-label="Link to this section">#</a></h3>
+<p><strong><code>measures</code></strong> uses a closed enum:</p>
+<ul>
+<li><code>area</code></li>
+<li><code>center-of-mass</code></li>
+<li><code>connectivity</code></li>
+<li><code>free-surface-order</code></li>
+<li><code>ordered-conversion-events</code></li>
+<li><code>opening-class</code></li>
+<li><code>support-collapse-events</code></li>
+<li><code>fire-envelope-bounds</code></li>
+</ul>
+<p>This enum standardizes the portable vocabulary. The operational definition of each declared measure remains Fixed prose behind the instance's <code>measures_contract</code> pointer, under §1b's closure discipline. That definition covers inputs, units and axes, comparison and tolerance semantics, and diagnostics.</p>
+<p>The <code>opening-class</code> measure also requires <code>opening_thresholds</code>. This is an inline, strictly increasing array of width thresholds in the same world units as <code>min_feature_width</code>. The thresholds define the opening classes.</p>
+<p>Each AT that cites the profile names its measures, observation points, and tolerances under the §6 fixture rules. It also MUST carry <code>claim_scale</code>: a finite number in world units that is no smaller than the resolved <code>min_feature_width</code>. A smaller <code>claim_scale</code> is a hard failure. An observation point outside the declared schedule is also a hard failure.</p>
+<h3 id="subsystem-outcome-models">Subsystem outcome models<a class="heading-anchor" href="#subsystem-outcome-models" aria-label="Link to this section">#</a></h3>
+<p>Each entry in <strong><code>subsystems</code></strong> declares one <code>outcome_model</code>:</p>
+<ul>
+<li><strong><code>deterministic</code></strong>: identical state and parameters produce an identical result within a build.</li>
+<li><strong><code>seeded</code></strong>: replay uses the §2a addressed PRNG.</li>
+<li><strong><code>legal-outcome-set</code></strong>: a seedless Fixed predicate behind the <code>envelope</code> contract pointer defines the legal outcomes. Any satisfying outcome is conforming. The profile makes no cross-run or cross-build promise about which satisfying outcome is selected.</li>
+</ul>
+<p>A <code>legal-outcome-set</code> subsystem MUST NOT declare a seed. A spec MUST NOT require an exact cross-build artifact hash for that subsystem; this extends the §2a hash prohibition.</p>
+<p>A universal claim says that every possible outcome satisfies the envelope. Only an <code>exhaustive-search</code> with <code>complete: true</code> over a declared finite domain can discharge that claim. Bounded <code>property</code> sampling certifies only its declared bounded distribution claim under §6. It cannot certify universal coverage.</p>
+<h3 id="certification-boundary">Certification boundary<a class="heading-anchor" href="#certification-boundary" aria-label="Link to this section">#</a></h3>
+<p>The profile certifies interaction tables and macroscopic envelopes at or above the declared feature width, and only at declared observations. A claim below that width or outside the schedule is a hard failure. The profile does not certify sub-envelope outcomes, states between observations, or universal emergent behavior.</p>
+<p>Simulation grain stays Delegated. This includes cell size, neighborhood, update order, integrator, exact voxel sets, and debris trajectories.</p>
+<h2 id="7-certified-builds-opengdd-build-json">7. Certified builds (<code class="anchor">opengdd-build.json</code>)<a class="heading-anchor" href="#7-certified-builds-opengdd-build-json" aria-label="Link to this section">#</a></h2>
+<p>A conforming build ships <code class="anchor">opengdd-build.json</code>. The file is machine-validated against <a href="https://opengdd.org/schema/core/v0.5/opengdd-build.schema.json">opengdd-build.schema.json</a>.</p>
+<h3 id="core-fields">Core fields<a class="heading-anchor" href="#core-fields" aria-label="Link to this section">#</a></h3>
+<p>The required top-level fields are exactly:</p>
+<ul>
+<li><strong><code>opengdd</code></strong>: the format version the build certifies against.</li>
+<li><strong><code>spec</code></strong>: the <code>id</code> and <code>version</code> of the built spec.</li>
+<li><strong><code>designer</code></strong> and <strong><code>builder</code></strong>: each carries a name, with optional <code>handle</code>, <code>contact</code>, and <code>role</code>.</li>
+<li><strong><code>personalization</code></strong>: an <code>answers</code> object that maps question ids to the answers used. It is an empty object when there are no answers.</li>
+<li><strong><code>resolved_tuning</code></strong>: the §5 resolved snapshot. It contains the complete, flat <code>tunables</code> map after answer resolution and the package <code>constants</code>. <code>constants</code> is an empty object when the package declares none.</li>
+<li><strong><code>harness</code></strong>: the certification record. Its required members are:<ul>
+<li><code>algorithm</code>. The only value currently defined is <code>&quot;sha256&quot;</code>.</li>
+<li><code>result_hash</code>.</li>
+<li><code>payload</code>, with <code>scope</code> and <code>file</code>. <code>scope</code> is the exact human-readable payload scope. <code>file</code> is a package-relative path to the canonical payload bytes covered by the hash.</li>
+<li><code>acceptance</code>, with <code>passed</code> and <code>total</code> counts.</li>
+</ul></li>
+</ul>
+<p>Canonicalization follows the conformance certification protocol. A digest without a reconstructible payload is unauditable and non-conforming. <code>harness</code> may also contain build-local checkpoint records, fixtures, and transcripts. That additional detail is outside the core contract.</p>
+<h3 id="cross-document-checks">Cross-document checks<a class="heading-anchor" href="#cross-document-checks" aria-label="Link to this section">#</a></h3>
+<p>The schema cannot perform every check because some rules depend on the source package. A conforming validator MUST also verify all of the following:</p>
+<ol>
+<li><code class="anchor">spec.id</code> and <code class="anchor">spec.version</code> match the source manifest.</li>
+<li>The build <code>designer</code> matches the source manifest on their common identity fields: <code>name</code>, plus <code>handle</code> and <code>contact</code> when each is present in both. <code>role</code> is build-local and is excluded from matching.</li>
+<li>Every recorded answer names a declared question and type-checks against that question's kind. Defaulted questions are recorded too.</li>
+<li>The <code class="anchor">resolved_tuning.tunables</code> and <code class="anchor">resolved_tuning.constants</code> keys exactly equal the corresponding source key sets. <code class="anchor">resolved_tuning.tunables</code> is produced by the §5 resolution pipeline, and every value remains inside its declared range.</li>
+<li><code class="anchor">acceptance.total</code> equals the package's enumerated AT count.</li>
+<li>A conforming build has <code>acceptance.passed == acceptance.total</code>.</li>
+</ol>
+<p>When a commerce split exists, the build manifest includes the manifest's commerce profile verbatim (including <code>derived_from</code> when present). Certification itself never depends on commerce metadata.</p>
+<h3 id="optional-renderer-declaration">Optional renderer declaration<a class="heading-anchor" href="#optional-renderer-declaration" aria-label="Link to this section">#</a></h3>
+<p><code class="anchor">opengdd-build.json</code> MAY include <code>renderer</code>: a free-text string naming the rendering technique the build used, such as <code>&quot;three.js 0.185.1, WebGL&quot;</code>. The renderer is the builder's fact, never the spec's: §3's <code>platform</code> names the state space a design is responsible for, and two builds of one spec may declare different renderers. The declaration is informative in v0.5: the <code>web-1</code> capture recipe does not read it, and recipe selection stays with <code class="anchor">capture_profile.kind</code>. If <code>renderer</code> is absent, the renderer is unrecorded; the absence claims nothing.</p>
+<h3 id="optional-capture-profile">Optional capture profile<a class="heading-anchor" href="#optional-capture-profile" aria-label="Link to this section">#</a></h3>
+<p><code class="anchor">opengdd-build.json</code> MAY include <code>capture_profile</code>. It records the capture adapter and serving or run recipe that produced the certification: <code>{ &quot;id&quot;: &lt;string&gt;, &quot;kind&quot;: &lt;string&gt; }</code>.</p>
+<p>This field is unrelated to the manifest-level <code>verification_profiles</code> in §6a. Those profiles define claim envelopes. <code>capture_profile</code> identifies a capture recipe.</p>
+<p><code>kind</code> is a closed, versioned enum. v0.5 defines one value: <code>&quot;web-1&quot;</code>. It names the existing headless-browser reference recipe summarized here:</p>
+<ul>
+<li>advance gameplay on a synthetic 60 Hz clock;</li>
+<li>sample full-viewport frames at 12 fps; and</li>
+<li>record the input hash, duration, rates and counts, determinism checks, and artifact paths in the capture manifest.</li>
+</ul>
+<p><code>web-1</code> is an identifiable, versioned recipe. This field does not define a new profile or certification path. The §7 acceptance-count and hash-payload rules apply regardless of the capture profile.</p>
+<p><code>id</code> is a build-local label for the concrete adapter invocation, such as a run identifier or container tag. It does not need to resolve outside the build. If <code>capture_profile</code> is absent, the certifying profile is unrecorded; the absence does not claim that no profile was used.</p>
+<p>Cross-profile equivalence claims, such as byte-identical resolved surfaces across two profiles, are outside v0.5. A registry of kinds beyond <code>&quot;web-1&quot;</code> is also outside v0.5. A future adapter earns a new enum value through an ordinary additive schema change.</p>
+<h3 id="optional-resource-disclosure">Optional resource disclosure<a class="heading-anchor" href="#optional-resource-disclosure" aria-label="Link to this section">#</a></h3>
+<p><code class="anchor">opengdd-build.json</code> MAY include <code>resources</code>: the build-resource provenance disclosed by the builder. It lists kits, third-party assets, and tools that the build consumed. Each entry has this shape:</p>
+<p><code>{ &quot;id&quot;: &lt;string&gt;, &quot;kind&quot;: &quot;kit&quot; | &quot;asset&quot; | &quot;tool&quot;, &quot;artifact&quot;: &lt;string&gt;, &quot;license&quot;: &lt;string&gt;, &quot;hash&quot;: &quot;sha256:&lt;64 lowercase hex&gt;&quot;, &quot;source&quot;: &lt;string, optional&gt; }</code></p>
+<p><code>artifact</code> identifies the exact immutable file or archive covered by the hash. It may be a URL, a registry coordinate such as <code>name@version</code>, or a package-relative path.</p>
+<p>In v0.5, <code>hash</code> MUST cover exactly one file's bytes. A multi-file kit, source tree, or tool installation MUST be packaged into one archive, such as a <code>.zip</code>, before hashing. v0.5 defines no directory or tree-hash canonicalization.</p>
+<p><code>license</code> is a free-text declaration. The validator checks that it is present; it does not verify the declaration's truth. §8a applies the same rule to media licensing.</p>
+<p><code>resources</code> is the builder's disclosed set for this build. Its presence does not certify that every consumed resource is listed. Its absence means that provenance was not recorded; it does not mean that no resources were used. The list creates no commerce split and changes no certification outcome.</p>
+<p>A designer-authored kit reference used as direction under §8a is a mood- descriptor reference. It is outside this build-resource list. <code>resources</code> records what the builder consumed, the provenance only the builder can disclose.</p>
+<h3 id="conditional-direction-result">Conditional direction result<a class="heading-anchor" href="#conditional-direction-result" aria-label="Link to this section">#</a></h3>
+<p><code>direction_result</code> carries the §9.11 judged-gate record and §9.9 certified palette-pin evidence. It has two independently conditioned members:</p>
+<ul>
+<li><strong><code>judged</code></strong> has the shape <code>{ &quot;status&quot;: &quot;pending&quot;, &quot;assessed&quot;: [&lt;direction claim paths&gt;], &quot;adherent&quot;: [&lt;subset of assessed&gt;] }</code>.</li>
+</ul>
+<p><code>status</code> is fixed to <code>&quot;pending&quot;</code>, the only value defined in v0.5, because the panel protocol is not integrated. <code>judged</code> is required exactly when <code class="anchor">direction.json</code> declares at least one judged claim: <code>pillars.*</code>, <code>mood.*</code>, <code>anti.*</code>, <code>invariants.*</code>, or <code>motion.*</code>. It is absent otherwise.</p>
+<ul>
+<li><strong><code>certified_pins</code></strong> has the shape <code>[{ &quot;path&quot;: &lt;constraints.palette.&lt;key&gt;&gt;, &quot;value&quot;: &lt;8-bit sRGB hex&gt; }]</code>. It is required exactly when the source spec declares at least one <code>certify: true</code> <code>constraints.palette.*</code> claim under §9.5/9.9. It contains one entry for each such claim and is absent otherwise.</li>
+</ul>
+<p>Certified pins apply only to direction-constraint palettes. Mood-descriptor palettes cannot carry <code>certify</code> in v0.5 because no build-evidence path exists for a descriptor-level pin.</p>
+<p><code>direction_result</code> is present when either member's condition holds. It is absent when neither condition holds. The member conditions are independent, so the object may contain <code>judged</code>, <code>certified_pins</code>, or both. These presence rules require validator-level cross-checks against the source spec; the build manifest schema alone cannot express them.</p>
+<p><strong>Claim-path source resolution.</strong> Every path in <code class="anchor">judged.assessed</code> and <code class="anchor">judged.adherent</code> MUST resolve to an entry declared in the certifying spec's <code class="anchor">direction.json</code>. Its prefix must name one of the five fixed-judged kinds. A syntactically valid but nonexistent path, such as <code class="anchor">pillars.not-declared</code>, is a hard failure. The <code>directionClaimPath</code> regex in <code class="anchor">opengdd-build.schema.json</code> is necessary but not sufficient. <code class="anchor">judged.adherent</code> MUST also be a subset of <code class="anchor">judged.assessed</code>.</p>
+<h2 id="7a-authored-puzzles">7a. Authored puzzles<a class="heading-anchor" href="#7a-authored-puzzles" aria-label="Link to this section">#</a></h2>
+<p>Specs with authored logical puzzles MAY declare them as a §1b structured collection. These are puzzles authored as content rather than systemic or generated play. Two tiers are supported:</p>
+<ul>
+<li><strong>Tier 1 — literal layouts.</strong> Each puzzle is data: a layout, entity placements, and a win condition, referenced from the content chapters. The puzzle is fully Fixed and certifiable. For example: “puzzle 7 is solvable in at least 12 moves.”</li>
+<li><strong>Tier 2 — solution-annotated layouts.</strong> Each puzzle also carries designer metadata: intended insight, red herrings, difficulty-curve position, and machine-checkable invariants. Those invariants may include minimum solution length, required mechanics, and forbidden shortcuts. Certification runs an appropriate solver. The insight is Fixed. Its decoration is Delegated.</li>
+</ul>
+<h3 id="grid-layout-encoding-family-parallel-string-layers-1-normative">Grid-layout encoding family: <code>parallel-string-layers-1</code> (normative)<a class="heading-anchor" href="#grid-layout-encoding-family-parallel-string-layers-1-normative" aria-label="Link to this section">#</a></h3>
+<p>v0.5 defines one named, buildable member of the still-open grid-encoding family: the flat, single-cell <code>parallel-string-layers-1</code> carrier. Two independent grid-puzzle instances converged on this layout shape. They did not converge on a solver-adapter interface or predicate vocabulary, so those parts remain open below.</p>
+<p>A §1b collection declares this carrier by setting <code>format</code> to <code>parallel-string-layers-1</code> and adding <code>layout</code> to that collection's manifest declaration. <code>layout</code> is the mechanical layer binding:</p>
+<pre><code class="lang-json">{
+  &quot;id&quot;: &quot;puzzles&quot;,
+  &quot;format&quot;: &quot;parallel-string-layers-1&quot;,
+  &quot;layout&quot;: {
+    &quot;layers&quot;: [&quot;terrain&quot;, &quot;entities&quot;],
+    &quot;cell_unit&quot;: &quot;unicode-scalar-value&quot;
+  },
+  &quot;contract&quot;: &quot;03-content.md#puzzle-layout-format&quot;,
+  &quot;...&quot;: &quot;...&quot;
+}</code></pre>
+<ul>
+<li><strong><code>layers</code></strong> is required. It contains at least two unique strings in a closed, ordered set. Each string names a collection-record member that carries a grid layer. A validator reads exactly these named members from every item collection record. No other member is a layer, whatever its shape. A named member that is missing or is not a string array is a hard failure. Generic tools discover layers from manifest <code class="anchor">layout.layers</code>, not from game prose.</li>
+<li><strong><code>cell_unit</code></strong> is required and fixed to <code>&quot;unicode-scalar-value&quot;</code>, the only value defined in v0.5. A row's column count is its length in Unicode scalar values, or code points. UTF-16 code units and grapheme clusters are not the measurement. A surrogate-pair emoji is one cell. A combining-mark sequence occupies as many cells as it contains scalar values.</li>
+</ul>
+<p>Every item collection record MUST carry all of <code class="anchor">layout.layers</code> as string-array members. Every layer in one collection record MUST be non-empty and congruent with every other layer in that collection record:</p>
+<ul>
+<li>Row count, the array length, MUST be at least 1.</li>
+<li>Every row's column count, measured by <code>cell_unit</code>, MUST be at least 1.</li>
+<li>Row count and every row's column count MUST be identical within each layer and across all layers in the collection record.</li>
+</ul>
+<p>These rules establish one shared, zero-based <code>(x, y)</code> grid per collection record. The grid is at least 1×1, with no partial or zero-width rows.</p>
+<p>A collection record with empty or incongruent layers is a hard failure. A row-count disagreement, including zero rows, is diagnosed as <code>layer-row-mismatch</code>. A column-count disagreement at a named row, including zero columns, is diagnosed as <code>layer-column-mismatch</code>. Both are existence-level package checks under §1b's unconditional closure, mirroring §1c <code>existence-closure</code>. No acceptance test is needed to catch them.</p>
+<p><strong>Single-cell rule (core-fixed).</strong> Each <code>(x, y)</code> coordinate holds exactly one cell value per declared layer: one Unicode scalar value read from that layer's row at that column. The encoding cannot represent one value spanning several cells in a layer. Multi-cell entities are outside <code>parallel-string-layers-1</code>, even if a game contract expresses one entity identity across several single-cell footprints.</p>
+<p>The collection's <code>contract</code> pointer keeps these fields in the game contract under §1b closure:</p>
+<ul>
+<li>per-cell glyph vocabulary;</li>
+<li>overlap rules;</li>
+<li>entity footprints;</li>
+<li>terrain semantics; and</li>
+<li>the win predicate.</li>
+</ul>
+<p>The core encoding fixes the grid shape and layer set. The game contract gives cell values their meaning. This carrier declares no solver adapter or replay grammar. Until those are standardized, a citing collection defines its own command alphabet and predicates under §§6 and 7a.</p>
+<p><strong>The encoding family remains open.</strong> One documented counterexample needs integer per-column heights, region terrain with tile overrides, graph edges between cells, and persistent multi-cell rigid bodies. It still requires a game-local extension.</p>
+<p>The family widens when an encoding or encoding-family member can express that shape without a game-local extension and is validated against a third grid-puzzle fixture that needs it.</p>
+<h3 id="open-solver-profile">Open solver profile<a class="heading-anchor" href="#open-solver-profile" aria-label="Link to this section">#</a></h3>
+<p>The interoperable solver profile <code>opengdd-grid-puzzle-1</code> remains deferred. Evidence from two independent deterministic grid puzzles and two deduction fixtures establishes three parts that an eventual contract must cover.</p>
+<ol>
+<li><strong>Layout envelope.</strong> v0.5 partially resolves this part through the normative <code>parallel-string-layers-1</code> encoding above. The wider encoding family remains open because the height/region/graph/rigid-body counterexample is still unaddressed. The closure condition is stated above.</li>
+<li><strong>Solver-adapter interface.</strong> The interface must use Fixed, observable terms for:<ul>
+<li>initial-state construction from a layout;</li>
+<li>canonical state equality;</li>
+<li>a finite-state proof or explicit state or depth bound;</li>
+<li>ordered legal-action enumeration with tie-breaks;</li>
+<li><code>step(state, action) → state + emitted events</code>;</li>
+<li>the win predicate;</li>
+<li>command decoding; and</li>
+<li>witness serialization.</li>
+</ul></li>
+</ol>
+<p>This target shape survived a second instance without refutation. It is a certification interface. It does not prescribe the game's internal architecture.</p>
+<ol>
+<li><strong>Standard predicate vocabulary.</strong> Predicates discharge through §6 <code>exhaustive-search</code>. Minimum, absence, and universal claims require <code>complete: true</code>.</li>
+</ol>
+<p>Four drafted predicates are not a complete vocabulary: <code>solvable</code>, <code>minimum-actions</code>, <code>event-required-in-every-optimal-witness</code>, and <code>solvable-with-event-suppressed</code>. A fifth claim, an exact event order in every solved witness, required a game-local product automaton.</p>
+<p>This part remains open. It closes when the next exercise decides between a <code>witness-event-order-invariant</code> predicate and a documented product-automaton-with-monitor fallback for the general case.</p>
+<p>The profile is not a universal schema for dossier deduction, silent grammar, mutable-rule, recursive-containment, physics, language, or knowledge-only puzzles. Until it is approved, Tier 1 and Tier 2 collection fields and solver adapters remain versioned game contracts under §§1b and 6.</p>
+<h3 id="worked-example-deduction-claims-as-finite-domain-csp">Worked example: deduction claims as finite-domain CSP<a class="heading-anchor" href="#worked-example-deduction-claims-as-finite-domain-csp" aria-label="Link to this section">#</a></h3>
+<p>Symbolic deduction puzzles, such as “identify all N subjects from the evidence,” certify through §6 <code>exhaustive-search</code> as a constraint-satisfaction problem.</p>
+<p>This method certifies an operational claim: the assignment is uniquely determined, and each declared elimination chain is necessary to that uniqueness. It does not certify what a human perceives or infers.</p>
+<p>The descriptors below use the normative §6 members <code>class</code>, <code>initial_states</code>, <code>transitions</code>, <code>complete</code>, <code>predicate</code>, and <code>diagnostics</code>. The search-space representation inside <code>transitions</code>, meaning its variables, domains, and constraint lists, is game-contract data behind a contract pointer. It is not core format vocabulary. v0.5 defines no CSP subgrammar.</p>
+<p>Uniqueness:</p>
+<pre><code class="lang-verification">{
+  &quot;class&quot;: &quot;exhaustive-search&quot;,
+  &quot;initial_states&quot;: [&quot;all-assignments&quot;],
+  &quot;transitions&quot;: &quot;03-content.md#deduction-csp&quot;,
+  &quot;complete&quot;: true,
+  &quot;predicate&quot;: &quot;at least one satisfying assignment exists AND every satisfying assignment agrees on every variable&quot;,
+  &quot;diagnostics&quot;: [&quot;witness-assignment&quot;, &quot;disagreeing-variable&quot;, &quot;unsatisfiable-core&quot;]
+}</code></pre>
+<p>Elimination-chain necessity uses mask-and-resolve. It restates the same declared search space in full, with one declared chain's premises masked each time:</p>
+<pre><code class="lang-verification">{
+  &quot;class&quot;: &quot;exhaustive-search&quot;,
+  &quot;initial_states&quot;: [&quot;all-assignments&quot;],
+  &quot;transitions&quot;: &quot;03-content.md#deduction-csp-masked&quot;,
+  &quot;complete&quot;: true,
+  &quot;predicate&quot;: &quot;for every declared elimination chain, masking that chain's premises admits &gt;= 2 satisfying assignments that disagree on the chain's concluded variable&quot;,
+  &quot;diagnostics&quot;: [&quot;masked-chain-id&quot;, &quot;disagreeing-assignments-pair&quot;]
+}</code></pre>
+<p>Uniqueness proves that the deduction closes. Mask-and-resolve proves that each declared chain is necessary to uniqueness. This is a chain-level claim; it does not prove that every premise within the chain is independently necessary. That stronger claim requires masking one premise per run.</p>
+<p>Other <code>exhaustive-search</code> techniques, such as a product automaton with an order monitor, are equally valid. The class is standardized. The technique is not.</p>
+<p>Tier 3 is the research horizon: the designer authors an insight sequence, and the builder generates solver-verified instances for each build. Tier 3 is explicitly outside v0.x.</p>
+<h2 id="8-symbols-and-descriptors">8. Symbols and descriptors<a class="heading-anchor" href="#8-symbols-and-descriptors" aria-label="Link to this section">#</a></h2>
+<p>OpenGDD uses two layers: <strong>anything can be a symbol; only descriptors carry format semantics.</strong></p>
+<h3 id="symbols">Symbols<a class="heading-anchor" href="#symbols" aria-label="Link to this section">#</a></h3>
+<p>A symbol is a designer-defined name in a carrier or declared namespace. Symbol identity is scoped: the same spelling in two scopes may name different symbols, and first use defines the symbol in that scope. Naming one creates it — no declaration, no registry. A key such as <code class="anchor">infection.damage</code> or <code class="anchor">tick.day</code> becomes a symbol the moment it is defined, whether written directly into <code class="anchor">tuning.json</code> or promoted there by tooling when an unrecognized name first appears in prose. Custom fields in collection records and personalization question ids work the same way. §4 <code>tunables</code> and <code>constants</code> keys, §1b collection-contract fields, and §4a declared-set members are all symbols. A field name defined in a collection's contract section is one symbol in that collection-contract scope, with many occurrences across its collection records.</p>
+<p>The format gives a symbol no meaning beyond key/value binding. It can validate the symbol's shape, such as a numeric value, string, or declared-set membership. Tooling can bind, complete, and snapshot its name. Designer prose defines what the name means.</p>
+<h3 id="descriptors">Descriptors<a class="heading-anchor" href="#descriptors" aria-label="Link to this section">#</a></h3>
+<p>A descriptor is a reserved shape with fields defined by the format. This lets certification act on the descriptor directly: for example, a palette can be checked, anti-references can feed judges, and behaviors can become rubric lines.</p>
+<p>A descriptor family is a keyed map whose entry shape and semantics the format owns. Designer-defined shapes are §1b collections: their collection-record fields are defined in the collection's contract section. A designer-defined shape becomes a descriptor family only when the format adopts it.</p>
+<p>Descriptors are grouped by family under the manifest's <code>descriptors</code> member:</p>
+<pre><code class="lang-json">{
+  &quot;descriptors&quot;: {
+    &quot;mood&quot;: [ { &quot;id&quot;: &quot;dark-spell-mood&quot;, &quot;...&quot;: &quot;...&quot; } ]
+  }
+}</code></pre>
+<p>Every descriptor has a kebab-case <code>id</code> that is unique within its family in the package.</p>
+<p><code>mood</code> is the first descriptor family, not a special case (§8a). v0.5 defines no <code>character</code>, <code>cutscene</code>, <code>storyboard</code>, or <code>space-atmosphere</code> descriptor family. Declaring any of those family keys is a validation error.</p>
+<p>A future family requires both survey-grade evidence of a corroborated professional-practice construct and a working transmission and audit story. Subjective intuition alone is insufficient. Adding a family requires a format revision; it is not a package-local extension.</p>
+<h2 id="8a-the-mood-descriptor">8a. The mood descriptor<a class="heading-anchor" href="#8a-the-mood-descriptor" aria-label="Link to this section">#</a></h2>
+<p><code>mood</code> is the first populated descriptor family. One <code class="anchor">descriptors.mood</code> entry looks like this:</p>
+<pre><code class="lang-json">{
+  &quot;id&quot;: &quot;dark-spell-mood&quot;,
+  &quot;intent&quot;: &quot;a held breath right before something breaks&quot;,
+  &quot;references&quot;: [
+    {
+      &quot;description&quot;: &quot;the throne-room reveal (cite by description, not a licensed title, unless the citation itself is the annotation)&quot;,
+      &quot;borrows&quot;: [&quot;silhouette weight&quot;, &quot;value grouping&quot;],
+      &quot;media&quot;: [
+        { &quot;path&quot;: &quot;assets/mood/dark-spell-01.png&quot;, &quot;license&quot;: &quot;CC-BY-4.0&quot;,
+          &quot;hash&quot;: &quot;sha256:0000000000000000000000000000000000000000000000000000000000000000&quot;, &quot;format&quot;: &quot;png&quot; }
+      ]
+    }
+  ],
+  &quot;anti&quot;: [
+    { &quot;description&quot;: &quot;no saturated purple 'magic glow' cliche&quot; }
+  ],
+  &quot;palette&quot;: {
+    &quot;threat&quot;: {
+      &quot;value&quot;: &quot;#B3202A&quot;, &quot;tolerance&quot;: 8,
+      &quot;scope&quot;: {
+        &quot;population&quot;: &quot;enemy projectiles and enemy contact surfaces while this mood is active&quot;,
+        &quot;states&quot;: [&quot;in-play&quot;],
+        &quot;coverage&quot;: &quot;exhaustive&quot;
+      }
+    }
+  },
+  &quot;behaviors&quot;: [
+    { &quot;trigger&quot;: &quot;player casts a dark spell&quot;,
+      &quot;response&quot;: &quot;this mood becomes active&quot;,
+      &quot;timing&quot;: { &quot;max_latency_ms&quot;: 150 } }
+  ],
+  &quot;audio&quot;: { &quot;status&quot;: &quot;draft&quot; }
+}</code></pre>
+<ul>
+<li><strong><code>intent</code></strong> is required. It contains a few sentences of prose stating the emotional or creative target. It is <code>advisory</code> and is checked only for presence.</li>
+<li><strong><code>references</code></strong> is optional. It uses the §9.3 <code>annotatedReference</code> shape verbatim. Every entry names the borrowed property; an unannotated reference is invalid.</li>
+<li><strong><code>anti</code></strong> is required and has <code>minItems: 1</code>. A mood descriptor without an anti-reference is a hard failure. The required negative space prevents the reference from silently defining the whole target.</li>
+<li><strong><code>palette</code></strong> is optional. It contains palette roles in the §9.5 shape, scoped to this mood.</li>
+<li><strong><code>behaviors</code></strong> is optional. It binds game events to this mood becoming active or inactive. Each entry contains:<ul>
+<li><code>trigger</code>: a prose-bound game-state condition, under the same authority-prose discipline as §9.5 <code class="anchor">scope.population</code>;</li>
+<li><code>response</code>: exactly <code>&quot;this mood becomes active&quot;</code> or <code>&quot;this mood becomes inactive&quot;</code>; and</li>
+<li>optionally, <code class="anchor">timing.max_latency_ms</code>.</li>
+</ul></li>
+</ul>
+<p>Any other response belongs to a §9 direction-block construct. Mood behavior is not a general event-response language.</p>
+<ul>
+<li><strong><code>audio</code></strong> is optional, DRAFT, and non-normative. The §10 posture applies, and the block has no certification consequence.</li>
+</ul>
+<h3 id="prose-citations-normative">Prose citations (normative)<a class="heading-anchor" href="#prose-citations-normative" aria-label="Link to this section">#</a></h3>
+<p>A mood descriptor is referenced from Fixed or Delegated chapter prose anywhere in the package by the exact inline code token <code>`descriptor:mood:&lt;id&gt;`</code>. This is the family-qualified <code>descriptor:&lt;family&gt;:&lt;id&gt;</code> form, parallel to the §4a <code>tuning:</code>, <code>state:</code>, and <code>content:</code> typed-reference prefixes.</p>
+<p><code>&lt;id&gt;</code> MUST name a declared <code class="anchor">descriptors.mood</code> entry. A token without a matching descriptor is a dangling reference and a hard failure. A bare mood name without the <code>descriptor:mood:</code> prefix is ordinary prose and binds nothing.</p>
+<p>The §9.2 direction block uses the same token in the <code>descriptor</code> member of each keyed <code>mood</code> entry. Each entry has the shape <code>{ descriptor, class, viewing }</code>.</p>
+<h3 id="reference-semantics-normative">Reference semantics (normative)<a class="heading-anchor" href="#reference-semantics-normative" aria-label="Link to this section">#</a></h3>
+<p>A reference in a mood descriptor or §9.3 direction block binds only the properties explicitly named by its <code>borrows</code> annotation. A property can be a quality such as &quot;silhouette weight&quot; or &quot;value grouping&quot;; it is not a claim to reproduce the source's literal pixels.</p>
+<p>Copying visual content that the reference does not annotate is a conformance failure, not stronger compliance. All unannotated content, including the source's exact appearance, remains open.</p>
+<p>Only pinned, certified assets under the §9.9 descent rule bind exactly. When exact pixels are required, use a certified asset reference outside this construct, not an annotated reference.</p>
+<h3 id="media-packaging-normative">Media packaging (normative)<a class="heading-anchor" href="#media-packaging-normative" aria-label="Link to this section">#</a></h3>
+<p>Every media file attached to a reference or anti-reference here or in §9 MUST:</p>
+<ul>
+<li>be a package-relative path resolving inside the package (§1's normalization rule);</li>
+<li>carry a per-file <code>license</code> declaration: a non-empty string naming the license or terms. The validator checks its presence, not its truth. A missing declaration is a hard failure; a false one is the designer's responsibility, not the format's;</li>
+<li>carry a hash pin in the form <code>&quot;sha256:&lt;64 lowercase hex&gt;&quot;</code> over the exact file bytes;</li>
+<li>declare one of the closed format allowlist values: <code>png</code>, <code>jpg</code>, <code>jpeg</code>, or <code>webp</code>. These are the only media formats v0.5 defines; audio media remains deferred under §10.</li>
+</ul>
+<p>v0.5 defines no numeric media-size conformance limit. Validators MUST NOT invent one. Package authors MUST NOT rely on unbounded file sizes; this is authoring guidance, not a numeric validation threshold. Authors remain responsible for deployment-specific limits.</p>
+<p>The validator MUST verify that the file's byte signature decodes as its declared format. It cannot trust the <code>format</code> string alone. A renamed or misdeclared file fails even when its extension and <code>format</code> member agree.</p>
+<p>A file outside the format allowlist, whose bytes do not decode as its declared format, or without a license declaration is a hard failure. This is the direction block's media rule too (§9.3), stated once here since both constructs share the reference shape.</p>
+<h2 id="9-the-art-direction-block">9. The art-direction block<a class="heading-anchor" href="#9-the-art-direction-block" aria-label="Link to this section">#</a></h2>
+<p>The direction block is optional. It is a fenced <code>direction</code> section at the start of <code class="anchor">04-presentation.md</code>, just as the §1a fantasy block starts <code class="anchor">01-overview.md</code>. Its machine carrier is <code class="anchor">direction.json</code>, declared by <code class="anchor">manifest.json.build.direction</code> (§3). Providing the prose block without the carrier, or the carrier without the prose block, is a validation error.</p>
+<p>The fantasy block remains required and is the tie-breaker. A direction block refines the fantasy block and MUST NOT contradict it. When no direction block is present, the existing presentation prose remains sufficient.</p>
+<p>Citation convention for this chapter: prose refers to a carrier entry by its dotted path (<code>viewing.&lt;key&gt;</code>, <code>references.&lt;key&gt;</code>, <code>constraints.palette.&lt;key&gt;</code>). A JSON member that names such an entry always holds the bare <code>&lt;key&gt;</code> alone — <code>&quot;viewing&quot;: &quot;dusk-panel&quot;</code>, never <code>&quot;viewing&quot;: &quot;viewing.dusk-panel&quot;</code>.</p>
+<p><strong>Design principles (normative).</strong></p>
+<ol>
+<li><strong>Constrain, and leave open.</strong> Every construct states both what it constrains and what remains open to interpretation. A construct that leaves nothing open is a pinned value under the §9.9 descent rule, not Delegated content.</li>
+<li><strong>No new authority level.</strong> The entire block uses the existing Delegated authority level (§2): the builder decides, while the specification states intent and constraints in an auditable structure. This creates no exception to the ordinary untagged default; the fence explicitly opens with <code>&gt; DELEGATED: presentation-direction</code>.</li>
+<li><strong>Audit classes belong to individual claims.</strong> The available classes are <code>checked</code> for mechanical verification, <code>judged</code> for panel verification, and <code>advisory</code> for stated intent without a conformance consequence. The block itself has no audit class. Assigning a class stronger than the claim's stated criteria can support is a validation failure.</li>
+<li><strong>Anti-references have primacy.</strong> Negative direction is what holds a build back from drifting into its own references, and from settling into the genre's defaults. The §1a fantasy block's anti-references generalize into this block; they are not replaced.</li>
+<li><strong>Core constructs exclude implementation vocabulary.</strong> Direction states player-observable targets. Renderer channels, rig names, LUT files, and framework tokens MUST NOT appear in core constructs. Color spaces and measurement metrics must be observable-referenced and versioned.</li>
+</ol>
+<h3 id="9-1-pillars-pillars">9.1 Pillars (<code>pillars</code>)<a class="heading-anchor" href="#9-1-pillars-pillars" aria-label="Link to this section">#</a></h3>
+<p><code>pillars</code> defines two to four named priorities that every presentation decision should reinforce. It is a closed object containing two to four entries, keyed by stable kebab-case ids. A key is cited as <code>pillars.&lt;key&gt;</code>, such as <code class="anchor">pillars.readability-first</code>.</p>
+<p>Each entry contains:</p>
+<ul>
+<li><code>statement</code>: required, exactly one sentence;</li>
+<li><code>class</code>: required and authored, with <code>&quot;judged&quot;</code> its single legal value — an entry that omits <code>class</code> fails validation;</li>
+<li><code>viewing</code>: required, naming one <code>viewing.&lt;key&gt;</code>;</li>
+<li><code>tie_break_order</code>: optional, a positive integer; and</li>
+<li><code>references</code>: optional, naming one or more <code>references.&lt;key&gt;</code> ids.</li>
+</ul>
+<p>A pillar is never <code>checked</code>, because no mechanical test can determine whether a choice advanced a priority. It is never <code>advisory</code>, because a panel always scores it. The required <code>viewing</code> member identifies the evaluation context for that score. The optional <code>references</code> member supplies the §9.3 claim-to-reference edge.</p>
+<p>Pillars leave every asset-level solution open. Under the named viewing context, the panel scores whether the build's choices advance them.</p>
+<h3 id="9-2-mood-mood">9.2 Mood (<code>mood</code>)<a class="heading-anchor" href="#9-2-mood-mood" aria-label="Link to this section">#</a></h3>
+<p><code>mood</code> constrains the intended emotional neighborhood by reference. It is a closed object containing one or more entries, keyed by stable local kebab-case ids and cited as <code>mood.&lt;key&gt;</code>. The local key need not equal the referenced descriptor's id.</p>
+<p>Each entry contains:</p>
+<ul>
+<li><code>descriptor</code>: required, one <code>descriptor:mood:&lt;id&gt;</code> token under the §8a citation grammar;</li>
+<li><code>class</code>: required and authored, with <code>&quot;judged&quot;</code> its single legal value — an entry that omits <code>class</code> fails validation;</li>
+<li><code>viewing</code>: required, naming one <code>viewing.&lt;key&gt;</code>; and</li>
+<li><code>references</code>: optional, naming one or more top-level <code>references.&lt;key&gt;</code> ids. This pool is separate from the descriptor's own §8a <code>references</code>.</li>
+</ul>
+<p>The <code>descriptor</code> token MUST resolve to a declared <code class="anchor">descriptors.mood</code> entry. A dangling token is a hard failure. The direction block does not inline mood anchors. Instead, it wraps a reusable descriptor with the audit class and evaluation context specific to this block. The same descriptor token can also be used in prose and in other moods' <code>behaviors</code> triggers.</p>
+<p>The referenced descriptor's mandatory <code>anti</code> member alone establishes the <code>judged</code> class. No other descriptor field is a precondition. Descriptor <code>references</code> are optional supplementary evidence for the panel; their presence never changes the class. The required <code>viewing</code> member identifies the context in which the panel scores the mood citation.</p>
+<p>The entry leaves open the observable means, degree, and local reading that the descriptor's <code>intent</code>, <code>references</code>, <code>anti</code>, and <code>palette</code> do not already pin.</p>
+<h3 id="9-3-references-references">9.3 References (<code>references</code>)<a class="heading-anchor" href="#9-3-references-references" aria-label="Link to this section">#</a></h3>
+<p><code>references</code> defines general presentation references at the direction-block level, rather than references scoped to one mood. When present, it is a closed object containing one or more entries, keyed by stable kebab-case ids and cited as <code>references.&lt;key&gt;</code>.</p>
+<p>Each entry uses the shared §8a <code>annotatedReference</code> shape:</p>
+<ul>
+<li><code>description</code>: required;</li>
+<li><code>borrows</code>: required, with at least one specifically named property, such as &quot;silhouette weight&quot; or &quot;value grouping&quot;; <code>&quot;the whole image&quot;</code> is not a valid property; and</li>
+<li><code>media</code>: optional, under the §8a media-packaging rule.</li>
+</ul>
+<p>A missing or empty <code>borrows</code> member is structurally invalid, not <code>advisory</code>. Every unnamed property and the synthesis remain open; copying a reference is a conformance failure under §8a. A reference has no authored <code>class</code> of its own. Its annotation is a structural consequence of schema validity.</p>
+<h4 id="claim-to-reference-edges-normative">Claim-to-reference edges (normative)<a class="heading-anchor" href="#claim-to-reference-edges-normative" aria-label="Link to this section">#</a></h4>
+<p>Property-transfer fidelity is assessed only while scoring the <code>judged</code> claim that cites a reference. The association is explicit: <code>pillars.*</code>, <code>mood.*</code>, <code>anti.*</code>, <code>invariants.*</code>, and <code>motion.*</code> entries can each carry an optional <code>references</code> member naming one or more <code>references.&lt;key&gt;</code> ids (§§9.1, 9.2, 9.4, 9.7, and 9.8). A dangling id is a hard failure.</p>
+<p>The §8a reference pool attached to a mood descriptor is separate from the direction carrier's top-level <code>references</code> collection.</p>
+<p>Closure applies in both directions. Every declared top-level <code>references.&lt;key&gt;</code> entry MUST be cited by at least one judged claim's <code>references</code> member. An uncited entry is an orphaned reference and a hard failure.</p>
+<h4 id="cultural-source-trigger">Cultural-source trigger<a class="heading-anchor" href="#cultural-source-trigger" aria-label="Link to this section">#</a></h4>
+<p>This trigger depends on the borrowed property, not the source's medium or whether its presentation is fictional. An annotated borrow that depicts or derives from a real place, people, culture, or living tradition MUST cite specific annotated sources.</p>
+<p>Every judged claim that cites such a reference, either directly through its own <code>references</code> member or through a mood descriptor's separate §8a reference pool, MUST bind through its required <code>viewing</code> member to a <code>viewing.&lt;key&gt;</code> whose <code>judge_qualifications</code> names the expertise the judge needs (§9.6). A borrow of a purely invented property creates no such obligation.</p>
+<h3 id="9-4-anti-references-anti">9.4 Anti-references (<code>anti</code>)<a class="heading-anchor" href="#9-4-anti-references-anti" aria-label="Link to this section">#</a></h3>
+<p><code>anti</code> constrains what the presentation is not: forbidden elements, palettes, resemblance targets, and clichés. When the mechanics have a saturated genre prior, the entry names that canonical default explicitly.</p>
+<p>When present, <code>anti</code> is a closed object containing one or more entries, keyed by stable kebab-case ids and cited as <code>anti.&lt;key&gt;</code>. Each entry contains:</p>
+<ul>
+<li><code>description</code>: required;</li>
+<li><code>observable</code>: optional. When present, it contains a required, non-empty <code>criteria</code> string describing the mechanical test;</li>
+<li><code>class</code>: required and authored, with <code>&quot;judged&quot;</code> its single legal value — an entry that omits <code>class</code> fails validation;</li>
+<li><code>viewing</code>: required, naming one <code>viewing.&lt;key&gt;</code>; and</li>
+<li><code>references</code>: optional, naming one or more <code>references.&lt;key&gt;</code> ids through the §9.3 claim-to-reference edge.</li>
+</ul>
+<p>Anti-references leave the replacement open unless positive constructs supply it. On their own they say what to avoid, and never what to move toward.</p>
+<p>Every anti-reference is <code>judged</code>, unconditionally. <code>observable</code> is legal panel-facing documentation of what a mechanical test would check, but v0.5 defines no execution route for it. It never changes or elevates <code>class</code>. Promoting it requires a future revision. The required <code>viewing</code> member names the context in which the panel scores the entry.</p>
+<p>The §8a media-packaging rule also applies here. An anti-reference MAY attach <code>media</code>, such as a labeled &quot;not this&quot; sheet.</p>
+<h3 id="9-5-constraint-core-constraints">9.5 Constraint core (<code>constraints</code>)<a class="heading-anchor" href="#9-5-constraint-core-constraints" aria-label="Link to this section">#</a></h3>
+<p>The constraint core is the mechanically checkable floor: the part of the direction a machine can check by measurement. Runtime numeric authority remains in <code class="anchor">tuning.json</code> under §4; this carrier never restates a runtime number.</p>
+<p><code>constraints</code> is itself a closed object: it contains at least one of <code>palette</code>, <code>thresholds</code>, or <code>timing</code>, and no other member is legal. Each present member is in turn a closed object containing one or more entries, keyed by stable kebab-case ids.</p>
+<h4 id="palette-roles-palette">Palette roles (<code>palette</code>)<a class="heading-anchor" href="#palette-roles-palette" aria-label="Link to this section">#</a></h4>
+<p>A palette role, such as <code class="anchor">palette.threat</code>, is a closed object (no member beyond these four is legal) containing:</p>
+<ul>
+<li><code>value</code>: required, an 8-bit sRGB hexadecimal color written as <code>#</code> plus exactly six hex digits (<code>#RRGGBB</code>, either case; three-digit shorthand is invalid);</li>
+<li><code>tolerance</code>: required, a number greater than or equal to zero;</li>
+<li><code>scope</code>: required, using the shared shape below; and</li>
+<li><code>certify</code>: an optional Boolean.</li>
+</ul>
+<p><code>tolerance</code> is a CIEDE2000 (ΔE00) radius around <code>value</code>, computed in CIELAB D65 after sRGB decoding. <code>tolerance: 0</code> makes the constraint exact. <code>certify: true</code> is legal only when <code>tolerance</code> is exactly zero; otherwise <code>certify</code> is absent or <code>false</code>. The schema enforces this implication. An exact constraint becomes a <strong>certified pin</strong> (§9.9) only when it also declares <code>certify: true</code>; that conjunction, and nothing else, requires the build evidence reported through <code class="anchor">opengdd-build.json</code> <code class="anchor">direction_result.certified_pins</code> (§§7 and 9.9).</p>
+<p>A palette entry constrains values, role assignment, and where they hold. It leaves distribution and harmony open for judgment through pillars and mood.</p>
+<h4 id="perceptual-thresholds-thresholds">Perceptual thresholds (<code>thresholds</code>)<a class="heading-anchor" href="#perceptual-thresholds-thresholds" aria-label="Link to this section">#</a></h4>
+<p>A threshold, such as <code class="anchor">thresholds.actor-vs-background</code>, is a closed object (exactly these six members) containing:</p>
+<ul>
+<li><code>roles</code>: required, always an array, holding one or more bare palette-role keys (<code>[&quot;threat&quot;]</code>, never <code>&quot;threat&quot;</code> alone or <code>&quot;palette.threat&quot;</code>); each MUST resolve to a declared <code>palette</code> entry;</li>
+<li><code>against</code>: required, one bare palette-role key under the same rule;</li>
+<li><code>min_contrast</code>: required, a number greater than zero;</li>
+<li><code>metric</code>: required, a string that MUST appear in <code class="anchor">semantics.metrics</code> (<code>semantics</code> sits at the carrier's root, not inside <code>constraints</code>; it is defined at the end of this section);</li>
+<li><code>viewing</code>: required, holding the bare key of one <code>viewing</code> entry (the member value is <code>&quot;dusk-panel&quot;</code>, never <code>&quot;viewing.dusk-panel&quot;</code>); and</li>
+<li><code>scope</code>: required.</li>
+</ul>
+<p>A threshold constrains measurable separation and leaves form open.</p>
+<h4 id="timing-constraints-timing">Timing constraints (<code>timing</code>)<a class="heading-anchor" href="#timing-constraints-timing" aria-label="Link to this section">#</a></h4>
+<p>Timing entries cover exact runtime values. An entry such as <code class="anchor">timing.dash-recovery</code> contains only a required <code>key</code> in the §4a <code>tuning:&lt;dotted-key&gt;</code> form and a required <code>scope</code>.</p>
+<p>The numeric parameter MUST live in <code class="anchor">tuning.json</code>, where the designer owns it. The direction carrier does not repeat the number. The verified proposition is that rendered event timing matches the resolved tuning value over the declared domain. v0.5 defines no universal numeric window for &quot;matches&quot;; the covering acceptance test's §6 procedure states how the match is checked, and that procedure is what certification audits.</p>
+<p>No constraint entry may carry a <code>class</code> member — the closed shapes above exclude it, so an authored <code>class</code> fails validation. Every palette, threshold, and timing entry has the fixed audit class observational <code>checked</code> (§9.11); none has a <code>judged</code> or <code>advisory</code> reading.</p>
+<h4 id="scope-normative">Scope (normative)<a class="heading-anchor" href="#scope-normative" aria-label="Link to this section">#</a></h4>
+<p>Every constraint-core claim has a <code>scope</code>; this shape does not apply to <code>viewing</code> entries. The scope owns the claim's applicability domain and proof obligation:</p>
+<ul>
+<li><code>population</code>: required, non-empty prose identifying the player-visible instances that carry the role;</li>
+<li><code>states</code>: required, with at least one named game state in which the claim holds. Each state is a non-empty free-form string; v0.5 declares no package-level state registry for these names to resolve against, so a validator MUST NOT reject a name for failing to resolve. The fixture-reach rule below is discharged by the covering acceptance test's own §6 procedure, not by machine-matching state strings; and</li>
+<li><code>coverage</code>: required, either <code>&quot;exhaustive&quot;</code> or a sampled oracle.</li>
+</ul>
+<p>For <code>&quot;exhaustive&quot;</code>, the covering acceptance test MUST observe every member. A sample cannot discharge the claim.</p>
+<p>Sampled coverage is written as a nested object: <code>&quot;coverage&quot;: { &quot;sampled&quot;: { &quot;oracle&quot;: ... } }</code> — the <code>sampled</code> wrapper is a real JSON member, not a prose label. Both wrappers are closed: <code>coverage</code>'s object form admits only <code>sampled</code>, and <code>sampled</code> admits only <code>oracle</code> (a member such as a sample count is illegal). The oracle is either the string <code>&quot;per-sample&quot;</code> or an object whose single member is the key <code>aggregate</code> — <code>&quot;oracle&quot;: { &quot;aggregate&quot;: { ... } }</code> — where <code>aggregate</code> (itself closed, as is its <code>threshold</code> object) contains:</p>
+<ul>
+<li><code>aggregation</code>: exactly one of <code>&quot;count&quot;</code>, <code>&quot;rate&quot;</code>, <code>&quot;min&quot;</code>, <code>&quot;max&quot;</code>, or <code>&quot;mean&quot;</code>;</li>
+<li><code>metric</code>: a string; and</li>
+<li><code>threshold</code>: an object with <code>op</code>, exactly one of <code>&quot;eq&quot;</code>, <code>&quot;lt&quot;</code>, <code>&quot;lte&quot;</code>, <code>&quot;gt&quot;</code>, or <code>&quot;gte&quot;</code>, and a numeric <code>value</code>.</li>
+</ul>
+<p>Aggregate fields are authored once in the carrier and never restated by the fixture, following §6's per-sample and aggregate discipline.</p>
+<p>The covering fixture MUST reach every state named by <code class="anchor">scope.states</code>. It MUST NOT narrow the population, states, or proof obligation. A narrower fixture, or a sampled result presented as exhaustive proof, is a validation failure. The acceptance test cites the carrier key, such as <code>constraints.palette.&lt;key&gt;</code>, and MUST NOT restate its value.</p>
+<h4 id="self-describing-semantics-normative">Self-describing semantics (normative)<a class="heading-anchor" href="#self-describing-semantics-normative" aria-label="Link to this section">#</a></h4>
+<p>The required <code>semantics</code> member sits at the direction carrier's root, as a sibling of <code>constraints</code> and <code>viewing</code> — not inside <code>constraints</code>. It defines measurement semantics:</p>
+<ul>
+<li><code>tolerance</code>: required, a single string holding one versioned tolerance-math id (not an array). v0.5 defines <code>&quot;ciede2000-lab-d65-v1&quot;</code>; and</li>
+<li><code>metrics</code>: required, an array with at least one versioned metric id. v0.5 defines <code>&quot;wcag21-contrast-ratio&quot;</code>.</li>
+</ul>
+<p>The registry is closed: v0.5 recognizes no other ids, and an unrecognized id in <code class="anchor">semantics.tolerance</code> or <code class="anchor">semantics.metrics</code> fails schema validation. Separately from that closure, one cross-check applies: every <code>thresholds.*.metric</code> value MUST appear in <code class="anchor">semantics.metrics</code>. The sampled oracle's <code class="anchor">aggregate.metric</code> is subject to neither rule — that field remains a free-form string naming the sampled measurement.</p>
+<h4 id="designer-side-consistency-normative">Designer-side consistency (normative)<a class="heading-anchor" href="#designer-side-consistency-normative" aria-label="Link to this section">#</a></h4>
+<p>Package validation MUST compute each threshold nominally over its operand roles and verify that the carrier's authored values satisfy it. A carrier that violates its own threshold is a hard failure.</p>
+<h3 id="9-6-evaluation-context-viewing">9.6 Evaluation context (<code>viewing</code>)<a class="heading-anchor" href="#9-6-evaluation-context-viewing" aria-label="Link to this section">#</a></h3>
+<p><code>viewing</code> defines the inputs that stabilize panel evaluation. When present, it is a closed object containing one or more entries, keyed by stable kebab-case ids. Prose in this specification cites an entry as <code>viewing.&lt;key&gt;</code>; a claim's <code>viewing</code> member holds only the bare <code>&lt;key&gt;</code>.</p>
+<p>Each entry contains:</p>
+<ul>
+<li><code>scale_speed</code>: required, non-empty prose stating representative scale and speed;</li>
+<li><code>sequence_context</code>: optional prose. A designer SHOULD include it when an arc matters to a claim that cites this entry; v0.5 defines no machine check for that condition, so its absence is a design-review finding, never a validation failure;</li>
+<li><code>calibration</code>: required, non-empty prose stating calibration assumptions;</li>
+<li><code>blind_builder_identity</code>: a required Boolean; and</li>
+<li><code>judge_qualifications</code>: an optional array of strings. It becomes required and non-empty when a citing claim triggers the §9.3 cultural-source rule. That condition is a validator-level citation cross-check.</li>
+</ul>
+<p>The entry leaves the judgment and panel protocol open. It has no authored <code>class</code>; presence and completeness are structural consequences of schema validity.</p>
+<h4 id="claim-to-viewing-edges-normative">Claim-to-viewing edges (normative)<a class="heading-anchor" href="#claim-to-viewing-edges-normative" aria-label="Link to this section">#</a></h4>
+<p>Every claim kind that can be <code>judged</code>, meaning <code>pillars.*</code>, <code>mood.*</code>, <code>anti.*</code>, <code>invariants.*</code>, and <code>motion.*</code>, has a required <code>viewing</code> member naming exactly one <code>viewing.&lt;key&gt;</code> (§§9.1, 9.2, 9.4, 9.7, and 9.8). A threshold has the same member for the separate purpose of defining its contrast-measurement condition (§9.5).</p>
+<p>A dangling <code>viewing</code> reference is a hard failure. There is no default and no fallback to the sole declared entry. Every judged claim names its context explicitly, even when all claims share one entry.</p>
+<h3 id="9-7-variation-envelope-invariants">9.7 Variation envelope (<code>invariants</code>)<a class="heading-anchor" href="#9-7-variation-envelope-invariants" aria-label="Link to this section">#</a></h3>
+<p><code>invariants</code> constrains the recognition-critical constants that a build MUST preserve. Examples include a silhouette rule, a role-color meaning, or a motif. The collection is a closed object keyed by stable kebab-case ids. A key is cited as <code>invariants.&lt;key&gt;</code>. When present, the <code>invariants</code> collection contains one or more entries.</p>
+<p>Each entry is also closed. No member beyond the following six is legal:</p>
+<ul>
+<li><code>statement</code>: required;</li>
+<li><code>open_axes</code>: required, an array with at least one named axis where interpretation is expected;</li>
+<li><code>observable</code>: optional, using the closed §9.4 shape. It contains only the required, non-empty <code>criteria</code> string;</li>
+<li><code>class</code>: required and authored, with <code>&quot;judged&quot;</code> its single legal value — an entry that omits <code>class</code> fails validation;</li>
+<li><code>viewing</code>: required, naming one viewing entry by its bare key, such as <code>&quot;viewing&quot;: &quot;dusk-panel&quot;</code>; and</li>
+<li><code>references</code>: optional, naming one or more reference entries by their bare keys, such as <code>&quot;references&quot;: [&quot;wet-study&quot;]</code>. This is the §9.3 claim-to-reference edge.</li>
+</ul>
+<p><code>statement</code> is a non-empty string. Every <code>open_axes</code> item is a non-empty string. The ids in a <code>references</code> list are unique.</p>
+<p>An entry leaves everything inside its declared axes open. An empty or missing <code>open_axes</code> member leaves nothing open, and fails block validation. The schema enforces this structurally with <code>minItems: 1</code>.</p>
+<p><code>class</code> and <code>observable</code> follow the same rule as the §9.4 anti-references. The class is always <code>&quot;judged&quot;</code>. The optional <code>observable</code> member is panel-facing documentation and never elevates the class. The required <code>viewing</code> member names the context in which the panel scores the entry.</p>
+<h3 id="9-8-motion-rubric-motion">9.8 Motion rubric (<code>motion</code>)<a class="heading-anchor" href="#9-8-motion-rubric-motion" aria-label="Link to this section">#</a></h3>
+<p><code>motion</code> turns a captured study of wet material behavior and its blind-panel findings into a reusable audit interface: a common structure for declaring the behavior and the evidence used to judge it.</p>
+<p><strong>Scope, restricted (v0.5).</strong> This construct covers only <strong>material/wet behavior over time</strong>, the exact domain covered by the evidence. It does not cover character weight, impact, camera grammar, or any other kinetic-motion quality. Those qualities remain with the deferred general kinetic-motion construct, which is closed for admission until it clears its own evidence bar. A <code>motion</code> entry MUST NOT be cited to satisfy a non-material kinetic direction claim. Such a claim is out of scope for v0.5, rather than merely under-evidenced.</p>
+<p>The <code>motion</code> collection is a closed object keyed by stable kebab-case ids. A key is cited as <code>motion.&lt;key&gt;</code>. When present, the <code>motion</code> collection contains one or more entries. Each entry is also closed. No member beyond the following six is legal:</p>
+<ul>
+<li><code>tags</code>: required, an array containing at least one token from the closed v0.5 vocabulary below;</li>
+<li><code>requires_tier</code>: required, with the value <code>1</code> or <code>2</code>. The number names an evidence class, not a strictness rank — <code>2</code> is the broader requirement, per the comparison rule below;</li>
+<li><code>class</code>: required and authored, with <code>&quot;judged&quot;</code> its single legal value — an entry that omits <code>class</code> fails validation;</li>
+<li><code>fixture</code>: required, an <code>AT-&lt;n&gt;</code> reference (§6) to the covering capture-fixture acceptance test. It uses the positive-integer form <code>AT-[1-9][0-9]*</code>; <code>AT-1</code> is legal, while <code>AT-0</code> and <code>AT-01</code> are illegal;</li>
+<li><code>viewing</code>: required, naming one viewing entry by its bare key, such as <code>&quot;viewing&quot;: &quot;dusk-panel&quot;</code>; and</li>
+<li><code>references</code>: optional, naming one or more reference entries by their bare keys, such as <code>&quot;references&quot;: [&quot;wet-study&quot;]</code>. This is the §9.3 claim-to-reference edge.</li>
+</ul>
+<p><code>tags</code> entries are unique. The ids in a <code>references</code> list are unique.</p>
+<p>The closed v0.5 tag vocabulary assigns each exact token a fixed tier. No other token is legal.</p>
+<div class="table-scroll"><table>
+<thead><tr><th>Tag</th><th>Tier</th></tr></thead>
+<tbody>
+<tr><td><code>traveling-glisten</code></td><td>1</td></tr>
+<tr><td><code>drip</code></td><td>1</td></tr>
+<tr><td><code>ooze</code></td><td>1</td></tr>
+<tr><td><code>moist-deformation</code></td><td>1</td></tr>
+<tr><td><code>event-scoped-liquefaction</code></td><td>2</td></tr>
+</tbody>
+</table></div>
+<p>A package that needs an uncovered behavior class documents it as a KNOWN-LIMITATIONS item. It cannot introduce local vocabulary.</p>
+<p><strong>Tier comparison rule (normative).</strong> <code>requires_tier: 1</code> is satisfied only when the covering fixture shows at least one Tier 1 tag named in <code>tags</code>. <code>requires_tier: 2</code> is satisfied when the fixture shows any named tag, whether Tier 1 or Tier 2.</p>
+<p>A Tier-2-only entry has only <code>event-scoped-liquefaction</code> in <code>tags</code>. Such an entry MUST NOT declare <code>requires_tier: 1</code>. That combination is a hard failure because no Tier 2 tag can satisfy a Tier 1 requirement. In the wet-in-motion finding, an unstated event-scoped dissolve did not clear the &quot;wet&quot; bar.</p>
+<p>The entry's <code>class</code> is always <code>&quot;judged&quot;</code>. A panel applies the tier definition to the fixture's captured frames (§9.11). No pixel-diff oracle applies. Tier satisfaction has no <code>&quot;checked&quot;</code> or <code>&quot;advisory&quot;</code> reading.</p>
+<p>Completeness of the tag, tier, and fixture-reference declarations is separately structural <code>checked</code>, inherent in schema validity. It needs no authored field, following the same reasoning as §§9.3 and 9.6.</p>
+<p>The technique, asset, and exact frame count used to produce a cited tag's tier-qualifying behavior remain open. Achieving a Tier 1 tag through a shader, sprite animation, or particle system is entirely Delegated.</p>
+<h3 id="9-9-authority-descent-and-boundary-rules">9.9 Authority, descent, and boundary rules<a class="heading-anchor" href="#9-9-authority-descent-and-boundary-rules" aria-label="Link to this section">#</a></h3>
+<p><strong>Authority.</strong> The direction block has Delegated authority, as design principle 2 states: the builder decides how to realize it within the stated intent and constraints. An <code>advisory</code> claim is Delegated intent. It guides interpretation and tie-breaks in the same way as fantasy-block prose and carries no conformance constraint.</p>
+<p>If a direction claim conflicts with a Fixed statement elsewhere in <code class="anchor">04-presentation.md</code>, the Fixed statement wins. The conflict is an authoring error. v0.5 does not permit <code>&gt; PERSONALIZATION:</code> tags inside the direction fence. Personalized direction is a recorded KNOWN-LIMITATIONS item.</p>
+<p><strong>The fidelity ladder.</strong> Any player-observable surface may be specified at three fidelities: <em>prose direction</em> → <em>constraints</em> → <em>exact values</em>. The default is prose direction.</p>
+<p><strong>The descent rule.</strong> Designers may descend anywhere. Each descent creates an obligation. At the middle rung, a bounded constraint's obligation is the observational <code>checked</code> claim §9.5 defines, discharged by its covering acceptance test. At the bottom rung, an exact palette constraint uses <code>tolerance: 0</code>, and every builder must reproduce its declared value exactly.</p>
+<p>A <strong>certified pin</strong> is an exact direction-palette constraint that also declares <code>certify: true</code>. For a schema-valid carrier, <code>certify: true</code> is the sole trigger for <code class="anchor">direction_result.certified_pins</code> build evidence. When <code>certify</code> is absent or <code>false</code>, an exact constraint remains uncertified and creates no evidence requirement in that array. A certified surface must have been tested by the designer against a build; that is an authoring obligation carried by the §2b spec lifecycle, and v0.5 defines no per-build machine check for it — an auditor neither passes nor fails a build on it.</p>
+<p>The optional <code>certify</code> member belongs to the closed <code>constraints.palette.&lt;key&gt;</code> object defined in §9.5. It is distinct from §4's <code class="anchor">tuning.json</code> <code class="anchor">meta.certify</code>. <code>certify: true</code> is legal only when <code>tolerance</code> is exactly zero, and <code class="anchor">direction.schema.json</code> enforces that implication. A bounded palette constraint therefore cannot be certified.</p>
+<p>In v0.5, palette-pin certification is available only to direction-constraint palette entries. The mood-descriptor palette shape in §8a does not admit a <code>certify</code> member. A designer who wants an exact, certified mood color places it in a direction-block <code class="anchor">constraints.palette</code> entry.</p>
+<p>Evidence follows the source mechanism:</p>
+<ul>
+<li>Certified tuning keys compare runtime consumption with the resolved snapshot (§4).</li>
+<li>Fixed prose and structured content use acceptance tests and the certification protocol's Fixed-fidelity audit.</li>
+<li>A certified palette pin uses <code class="anchor">opengdd-build.json</code> <code class="anchor">direction_result.certified_pins</code> (§7). This array is required whenever at least one direction-palette claim declares <code>certify: true</code>, regardless of whether the source also declares a judged claim. It contains one entry for each such palette claim. Each entry is a closed object containing exactly <code>path</code> and <code>value</code>: <code>path</code> identifies the <code>constraints.palette.&lt;key&gt;</code> claim, and <code>value</code> records the captured resolved color. The captured value is checked against the declared value at ΔE00 = claim declares <code>certify: true</code>, the array MUST be absent, and an entry whose <code>path</code> resolves to a claim without <code>certify: true</code> is a validation failure.<ol>
+<li>The presence rule runs in both directions: when no direction-palette</li>
+</ol></li>
+</ul>
+<p>A surface with no existing evidence mechanism is recorded as a KNOWN-LIMITATIONS item. The format makes no certification promise for that surface.</p>
+<p><strong>Builder courtesies.</strong> Everything not descended into is interpretation space where builds may compete. Examples include polish iteration, tutorials, key rebinding, and accessibility affordances. These courtesies must serve the spec's fantasy. They may not alter certified surfaces or Fixed rules.</p>
+<p><strong>Soft boundary, hard mechanism.</strong> No rule limits the depth of descent. The only hard boundaries are that certified surfaces bind absolutely and builder courtesies cannot contradict the specification.</p>
+<h3 id="9-10-machine-carrier-direction-json">9.10 Machine carrier: <code class="anchor">direction.json</code><a class="heading-anchor" href="#9-10-machine-carrier-direction-json" aria-label="Link to this section">#</a></h3>
+<p><code class="anchor">direction.json</code> is a single optional JSON file. Its package-relative path is declared by the bare <code>direction</code> member inside the <code>build</code> object in <code class="anchor">manifest.json</code>, as in <code>&quot;build&quot;: { &quot;direction&quot;: &quot;direction.json&quot; }</code>. The file is machine-validated against <a href="https://opengdd.org/schema/core/v0.5/direction.schema.json">direction.schema.json</a>.</p>
+<p>The file's root value is a JSON object. The object is closed: <code>additionalProperties</code> is <code>false</code>. Its only legal top-level members are:</p>
+<div class="table-scroll"><table>
+<thead><tr><th>Bare JSON member</th><th>Presence</th><th>JSON type and cardinality</th></tr></thead>
+<tbody>
+<tr><td><code>semantics</code></td><td>required</td><td>one object</td></tr>
+<tr><td><code>pillars</code></td><td>optional</td><td>an object containing two to four entries</td></tr>
+<tr><td><code>mood</code></td><td>optional</td><td>a non-empty object</td></tr>
+<tr><td><code>references</code></td><td>optional</td><td>a non-empty object</td></tr>
+<tr><td><code>anti</code></td><td>optional</td><td>a non-empty object</td></tr>
+<tr><td><code>constraints</code></td><td>optional</td><td>one object containing at least one of the bare members <code>palette</code>, <code>thresholds</code>, or <code>timing</code></td></tr>
+<tr><td><code>viewing</code></td><td>optional</td><td>a non-empty object</td></tr>
+<tr><td><code>invariants</code></td><td>optional</td><td>a non-empty object</td></tr>
+<tr><td><code>motion</code></td><td>optional</td><td>a non-empty object</td></tr>
+</tbody>
+</table></div>
+<p>The <code>constraints</code> object is closed (<code>additionalProperties: false</code>). Each of its three optional members is a non-empty keyed object. At least one must be present.</p>
+<p>The keyed maps are <code>pillars</code>, <code>mood</code>, <code>references</code>, <code>anti</code>, <code class="anchor">constraints.palette</code>, <code class="anchor">constraints.thresholds</code>, <code class="anchor">constraints.timing</code>, <code>viewing</code>, <code>invariants</code>, and <code>motion</code>. Each is a JSON object, including <code>mood</code>. None is an array. Each map is keyed by package-unique, stable ids. The schema requires every id to match <code>^[a-z0-9]+(-[a-z0-9]+)*$</code>, the kebab-case form used throughout §§9.1–9.8. Each member value must match that map's entry shape. Prose cites these entries by dotted path, such as <code class="anchor">pillars.readability-first</code>, <code class="anchor">mood.the-fear</code>, <code class="anchor">constraints.palette.threat</code>, or <code class="anchor">motion.clear-wetness</code>. Array positions cannot be citation targets.</p>
+<p>Every entry object and every other fixed-shape object described below is closed (<code>additionalProperties: false</code>). The keyed map objects are maps, so their legal member names are the ids themselves. They contain no fixed structural members alongside those ids.</p>
+<p><strong>Entry shapes.</strong> In this table, the first column gives a prose citation. The other columns give the literal bare keys that appear inside its JSON entry object. All <code>viewing</code> values and <code>references</code> array items use bare ids, as in <code>&quot;viewing&quot;: &quot;dusk-panel&quot;</code> and <code>&quot;references&quot;: [&quot;wet-study&quot;]</code>. Threshold <code>roles</code> items and <code>against</code> values also use bare palette ids, as in <code>&quot;roles&quot;: [&quot;threat&quot;]</code> and <code>&quot;against&quot;: &quot;background&quot;</code>.</p>
+<div class="table-scroll"><table>
+<thead><tr><th>Entry</th><th>Required bare JSON keys</th><th>Optional bare JSON keys</th></tr></thead>
+<tbody>
+<tr><td><code>pillars.&lt;id&gt;</code></td><td><code>statement</code>: non-empty string; <code>class</code>: the string <code>&quot;judged&quot;</code>; <code>viewing</code>: kebab-case string</td><td><code>tie_break_order</code>: integer at least 1; <code>references</code>: non-empty array of unique kebab-case strings</td></tr>
+<tr><td><code>mood.&lt;id&gt;</code></td><td><code>descriptor</code>: string matching <code>^descriptor:mood:[a-z0-9]+(-[a-z0-9]+)*$</code>; <code>class</code>: the string <code>&quot;judged&quot;</code>; <code>viewing</code>: kebab-case string</td><td><code>references</code>: non-empty array of unique kebab-case strings</td></tr>
+<tr><td><code>references.&lt;id&gt;</code></td><td><code>description</code>: non-empty string; <code>borrows</code>: non-empty array of non-empty strings</td><td><code>media</code>: non-empty array of media objects</td></tr>
+<tr><td><code>anti.&lt;id&gt;</code></td><td><code>description</code>: non-empty string; <code>class</code>: the string <code>&quot;judged&quot;</code>; <code>viewing</code>: kebab-case string</td><td><code>observable</code>: observable object; <code>media</code>: non-empty array of media objects; <code>references</code>: non-empty array of unique kebab-case strings</td></tr>
+<tr><td><code>constraints.palette.&lt;id&gt;</code></td><td><code>value</code>: string matching <code>^#[0-9A-Fa-f]{6}$</code>; <code>tolerance</code>: number at least 0; <code>scope</code>: scope object</td><td><code>certify</code>: Boolean; when <code>true</code>, <code>tolerance</code> must equal 0</td></tr>
+<tr><td><code>constraints.thresholds.&lt;id&gt;</code></td><td><code>roles</code>: non-empty array of non-empty strings; <code>against</code>: non-empty string; <code>min_contrast</code>: number greater than 0; <code>metric</code>: non-empty string; <code>viewing</code>: kebab-case string; <code>scope</code>: scope object</td><td>none</td></tr>
+<tr><td><code>constraints.timing.&lt;id&gt;</code></td><td><code>key</code>: string matching <code>^tuning:[A-Za-z0-9_.-]+$</code>; <code>scope</code>: scope object</td><td>none</td></tr>
+<tr><td><code>viewing.&lt;id&gt;</code></td><td><code>scale_speed</code>: non-empty string; <code>calibration</code>: non-empty string; <code>blind_builder_identity</code>: Boolean</td><td><code>sequence_context</code>: non-empty string; <code>judge_qualifications</code>: non-empty array of non-empty strings</td></tr>
+<tr><td><code>invariants.&lt;id&gt;</code></td><td><code>statement</code>: non-empty string; <code>open_axes</code>: non-empty array of non-empty strings; <code>class</code>: the string <code>&quot;judged&quot;</code>; <code>viewing</code>: kebab-case string</td><td><code>observable</code>: observable object; <code>references</code>: non-empty array of unique kebab-case strings</td></tr>
+<tr><td><code>motion.&lt;id&gt;</code></td><td><code>tags</code>: non-empty array of unique allowed tag strings; <code>requires_tier</code>: integer <code>1</code> or <code>2</code>; <code>class</code>: the string <code>&quot;judged&quot;</code>; <code>fixture</code>: string matching <code>^AT-[1-9][0-9]*$</code>; <code>viewing</code>: kebab-case string</td><td><code>references</code>: non-empty array of unique kebab-case strings</td></tr>
+</tbody>
+</table></div>
+<p>The table exhausts each entry object's legal JSON members and schema-level constraints. The cross-field resolution rules and semantic requirements in §§9.1–9.8 still apply.</p>
+<p>The five allowed <code>motion.&lt;id&gt;.tags</code> strings are <code>traveling-glisten</code>, <code>drip</code>, <code>ooze</code>, <code>moist-deformation</code>, and <code>event-scoped-liquefaction</code>. When <code>requires_tier</code> is <code>1</code>, the <code>tags</code> array must contain at least one of the first four strings.</p>
+<p>An observable object has one required bare member, <code>criteria</code>, whose value is a non-empty string. A media object has four required bare members: <code>path</code> is a non-empty string; <code>license</code> is a non-empty string; <code>hash</code> is a string matching <code>^sha256:[0-9a-f]{64}$</code>; and <code>format</code> is one of <code>png</code>, <code>jpg</code>, <code>jpeg</code>, or <code>webp</code>.</p>
+<p>A scope object has three required bare members. <code>population</code> is a non-empty string. <code>states</code> is a non-empty array of non-empty strings. <code>coverage</code> is either the string <code>&quot;exhaustive&quot;</code> or the following nested object form:</p>
+<pre><code class="lang-json">{
+  &quot;sampled&quot;: {
+    &quot;oracle&quot;: {
+      &quot;aggregate&quot;: {
+        &quot;aggregation&quot;: &quot;count&quot;,
+        &quot;metric&quot;: &quot;non-empty metric id&quot;,
+        &quot;threshold&quot;: { &quot;op&quot;: &quot;gte&quot;, &quot;value&quot;: 1 }
+      }
+    }
+  }
+}</code></pre>
+<p>In that form, <code>oracle</code> may instead be the string <code>&quot;per-sample&quot;</code>. <code>aggregation</code> must be <code>&quot;count&quot;</code>, <code>&quot;rate&quot;</code>, <code>&quot;min&quot;</code>, <code>&quot;max&quot;</code>, or <code>&quot;mean&quot;</code>. The <code>metric</code> value is a non-empty string. The <code>threshold</code> object requires <code>op</code> and <code>value</code>. The <code>op</code> value must be <code>&quot;eq&quot;</code>, <code>&quot;lt&quot;</code>, <code>&quot;lte&quot;</code>, <code>&quot;gt&quot;</code>, or <code>&quot;gte&quot;</code>; <code>value</code> is a number. The <code>coverage</code>, <code>sampled</code>, object-form <code>oracle</code>, <code>aggregate</code>, and <code>threshold</code> objects are all closed (<code>additionalProperties: false</code>).</p>
+<p>The required <code>semantics</code> object is also closed (<code>additionalProperties: false</code>). It has exactly two bare members. <code>tolerance</code> is the string <code>&quot;ciede2000-lab-d65-v1&quot;</code>. <code>metrics</code> is a non-empty array of unique strings drawn from a one-item vocabulary, so its value in v0.5 is exactly <code>[&quot;wcag21-contrast-ratio&quot;]</code>.</p>
+<p><strong>Fence grammar (normative).</strong> The chapter's <code>direction</code> fence is a line-oriented plain-text block, following the fantasy block convention in §1a.</p>
+<ol>
+<li>Line 1 is exactly <code>&gt; DELEGATED: presentation-direction</code>.</li>
+<li>When at least one section block follows, line 2 is exactly one blank line: the mandatory separator between the header and the first block. A header-only fence needs no line 2.</li>
+<li>Any remaining content consists of one or more <strong>section blocks</strong>. Exactly one blank line separates adjacent section blocks. No blank line follows the last block.</li>
+<li>A section block opens with one legal uppercase label for a populated top-level carrier member. It then contains one or more <strong>entry blocks</strong>, with no blank line between them.</li>
+<li>The judged-claim labels are <code>PILLARS:</code>, <code>MOOD:</code>, <code>ANTI:</code>, <code>INVARIANTS:</code>, and <code>MOTION:</code>. The per-entry closure rule below applies to them.</li>
+<li>The commentary-only labels are <code>REFERENCES:</code>, <code>VIEWING:</code>, and <code>CONSTRAINTS:</code>. They are legal and optional. They carry no closure obligation. Their citation lines must resolve, but a commentary section may omit declared entries or cite the same entry more than once.</li>
+<li>An entry block begins with one <strong>citation line</strong>. The line contains a leading <code>-</code> followed by the entry's exact dotted-path citation in inline code, with nothing else on that line.</li>
+<li>A citation line may be followed by one or more <strong>continuation lines</strong>. Each continuation line is indented by exactly two spaces and contains free rationale prose. The continuation ends at the next citation line, label line, or blank line. Rationale is optional: an entry MAY have zero continuation lines. When present, rationale MUST NOT restate a carrier value under §9.5's single-source rule.</li>
+<li>A constraint citation uses a three-part dotted path: <code>constraints.palette.&lt;key&gt;</code>, <code>constraints.thresholds.&lt;key&gt;</code>, or <code>constraints.timing.&lt;key&gt;</code>.</li>
+</ol>
+<p>Example:</p>
+<pre><code class="lang-direction">&gt; DELEGATED: presentation-direction
+
+PILLARS:
+- `pillars.readability-first`
+  readability before spectacle, always.
+
+MOOD:
+- `mood.the-fear`
+
+ANTI:
+- `anti.no-neon`
+  avoid the genre's saturated purple &quot;magic glow&quot; shorthand for dark magic.</code></pre>
+<p><strong>Chapter/carrier ownership rule (normative).</strong> The carrier holds every machine-checkable fact, including value, scope, and class. The chapter fence may add rationale. For judged-claim collections, closure is checked in both directions for each keyed entry:</p>
+<ul>
+<li>Every citation line in the fence MUST resolve to a declared carrier entry of the matching kind. A dangling citation is a hard failure in both judged-claim and commentary-only sections.</li>
+<li>Every keyed entry in <code>pillars</code>, <code>mood</code>, <code>anti</code>, <code>invariants</code>, and <code>motion</code> MUST have exactly one corresponding citation line in the fence. Zero citations or more than one citation is a hard failure.</li>
+<li>When a judged claim cites a reference entry, it uses its optional <code>references</code> member. Every judged claim cites a viewing entry through its required <code>viewing</code> member. A threshold also cites its viewing context through its required <code>viewing</code> member. Those JSON values use bare keys, not dotted paths: for example, <code>&quot;references&quot;: [&quot;wet-study&quot;]</code> and <code>&quot;viewing&quot;: &quot;dusk-panel&quot;</code>. <code>REFERENCES:</code> and <code>VIEWING:</code> fence sections remain optional commentary and carry no closure obligation.</li>
+<li>Acceptance-test descriptors cite <code>constraints.*</code> entries through their <code>direction_claims</code> members (§6). Constraint entries have the fixed observational class <code>checked</code> and carry no fence-closure obligation. A <code>CONSTRAINTS:</code> fence section remains optional commentary.</li>
+</ul>
+<h3 id="9-11-audit-hooks-and-the-certification-gate">9.11 Audit hooks and the certification gate<a class="heading-anchor" href="#9-11-audit-hooks-and-the-certification-gate" aria-label="Link to this section">#</a></h3>
+<p>The <code>checked</code> audit class means that a machine or fixture verifies the claim. v0.5 has two disjoint kinds of <code>checked</code> coverage:</p>
+<ul>
+<li><strong>Structural facts.</strong> These are facts inherent in <code class="anchor">direction.json</code> validating against its schema, together with §9.10's per-entry fence closure. They include reference, viewing, and invariant-axis completeness; motion tag, tier, fixture, and viewing declaration shape; carrier, scope, and key validity; and the §9.8 tier-comparison rule. The validator or a <code>static-lint</code>-class check verifies these package facts without running the game. They require no capture fixture.</li>
+<li><strong>Observational <code>checked</code> claims.</strong> This kind consists only of <code>constraints.palette.*</code>, <code>constraints.thresholds.*</code>, and <code>constraints.timing.*</code> entries. Their closed JSON shapes carry no <code>class</code> member. Their entry kind fixes the class as observational <code>checked</code>.</li>
+</ul>
+<p>Each observational <code>checked</code> claim MUST be cited through <code>direction_claims</code> by at least one acceptance test whose fixture declares the capture procedure over the domain declared in the carrier (§6). The <code>direction_claims</code> member is a non-empty JSON array of dotted-path strings. For this claim kind — the observational <code>checked</code> constraints — the cited forms are <code>constraints.palette.&lt;key&gt;</code>, <code>constraints.thresholds.&lt;key&gt;</code>, and <code>constraints.timing.&lt;key&gt;</code>; these are full dotted paths rather than bare keys. The array is not limited to these three forms: a motion claim's <code>motion.&lt;key&gt;</code> path also appears here, per the motion-fixture rule below. In every form, <code>&lt;key&gt;</code> matches <code>^[a-z0-9]+(-[a-z0-9]+)*$</code>. Each claim MUST reach every state named in its <code class="anchor">scope.states</code>. A claim omitted from every acceptance test's <code>direction_claims</code> array is a validation failure.</p>
+<p><strong>Judged claims requiring a capture fixture.</strong> Every <code>motion.*</code> entry has the fixed class <code>judged</code> (§9.8). It cannot be <code>checked</code>. Its required <code>fixture</code> member is a string holding a bare positive acceptance-test id in the <code>AT-&lt;n&gt;</code> form. The named acceptance test's non-empty <code>direction_claims</code> array includes the full dotted path <code>motion.&lt;key&gt;</code>. The panel scores the motion tier against that fixture's captured frames. Uncaptured live play is not the scoring evidence. A missing named acceptance test, or a named test that omits the path, is a hard failure.</p>
+<p>Pillars, moods, anti-references, and invariants require no capture fixture. A panel scores each directly against the finished build under the claim's bound <code>viewing</code> context.</p>
+<p><strong>The judged gate.</strong> The complete v0.5 set of <code>judged</code> claim paths is <code>pillars.*</code>, <code>mood.*</code>, <code>anti.*</code>, <code>invariants.*</code>, and <code>motion.*</code> (§§9.1, 9.2, 9.4, 9.7, and 9.8). An assessment considers every attempted claim under its bound <code>viewing</code> context (§9.6). v0.5 records assessment coverage and results, but does not standardize panel composition, scoring, or an overall adherence verdict.</p>
+<p><code>direction_result</code> is the build's JSON record for this gate and for certified palette-pin evidence. It is a closed object in <code class="anchor">opengdd-build.json</code>. Its only legal bare member keys are <code>judged</code> and <code>certified_pins</code>.</p>
+<p>The <code>direction_result</code> object is present exactly when the source spec's <code class="anchor">direction.json</code> declares at least one judged claim or at least one <code>certify: true</code> direction-constraint palette pin. It MUST be absent when neither condition holds. Its two member conditions are independent:</p>
+<ul>
+<li><strong><code>judged</code>.</strong> This member is required exactly when at least one judged claim exists and is absent otherwise. It is a closed object with exactly three required bare members: <code>status</code>, <code>assessed</code>, and <code>adherent</code>. <code>status</code> is the string <code>&quot;pending&quot;</code>, the sole value defined in v0.5. No certificate can assert that the build followed the direction as a whole while the panel protocol remains unintegrated. <code>assessed</code> is an array of the judged claim paths attempted in this run. <code>adherent</code> is an array containing the assessed paths judged adherent. Each array contains unique dotted-path strings. The schema permits either array to be empty. Every path resolves to a declared claim in one of the five judged families above; a dangling path is a validation failure. <code>adherent</code> is a subset of <code>assessed</code>. A path found only in <code>adherent</code> is a validation failure. These arrays report claim coverage and adherence as separate facts.</li>
+<li><strong><code>certified_pins</code>.</strong> This member is required exactly when at least one <code>constraints.palette.&lt;key&gt;</code> entry declares <code>certify: true</code>, and it is absent otherwise (§§7 and 9.9). It is a JSON array with at least one entry. Each entry is a closed object with exactly two required string members. <code>path</code> is a full dotted path in the form <code>constraints.palette.&lt;key&gt;</code>. <code>value</code> is the captured color: <code>#</code> followed by exactly six hexadecimal digits, with upper- and lowercase letters both legal.</li>
+</ul>
+<p>When both source conditions hold, <code>direction_result</code> contains both members. When certified pins are the only condition, it contains <code>certified_pins</code> and has no <code>judged</code> member.</p>
+<p>The <code>direction_result</code> requirement covers only §9 visual-direction claims. The §10 audio annex creates no certification state.</p>
+<p><strong><code>advisory</code> claims</strong> carry no certification consequence. The validator's only job is to ensure that they are not classified above the level their stated criteria support. v0.5 defines no construct whose <code>class</code> can legally be authored as <code>advisory</code>. Every defined judged claim kind has the fixed class <code>judged</code>. Every checked claim kind has the fixed observational class <code>checked</code>. The <code>advisory</code> value remains in the closed audit-class enum for forward compatibility with a future construct that needs it.</p>
+<h2 id="10-audio-direction-draft-non-normative">10. Audio direction (DRAFT — non-normative)<a class="heading-anchor" href="#10-audio-direction-draft-non-normative" aria-label="Link to this section">#</a></h2>
+<p><strong>Status: DRAFT and non-normative.</strong> This section is a planning annex. It creates <strong>no certification consequence</strong>. Nothing elsewhere in this SPEC depends on it: every downstream reference to an audio construct — today, §8a's <code>audio</code> sub-block — remains inert until a future revision promotes this section.</p>
+<p>Two outcomes remain equally available. A later revision may promote the annex to normative status. In the judge/generation loop, a generator proposes candidate audio and a judge evaluates it. Dedicated research may instead show that the current loop cannot close. In that case, the annex may become a named entry in the KNOWN-LIMITATIONS record. No v0.5 rule depends on which outcome is chosen.</p>
+<p>The following vocabulary is entirely DRAFT and non-normative. It mirrors the visual direction block in §9:</p>
+<ul>
+<li><code>audio-pillars</code>: 2–4 named priorities for what sound does.</li>
+<li><code>audio-mood</code>: a prose anchor annotated under §9.3's reference discipline.</li>
+<li><code>audio-references</code> / <code>audio-anti</code>: the annotation and negative-target discipline from §§9.3 and 9.4, plus an audio-specific work-resemblance ban type.</li>
+<li><code>sound-palette</code>: source-family and production-character constraints, organized by category.</li>
+<li><code>audio-behaviors</code>: the reactivity contract. Each behavior connects a game-state trigger to an audible response and a timing bound. This is the audio analogue of §9.8's motion rubric. Adaptive music, parameter-driven mix changes, and state-bound silence MUST be authored as behaviors, never as static adjectives.</li>
+<li><code>diegesis-rules</code>.</li>
+<li><code>mix-hierarchy</code>.</li>
+<li><code>silence-map</code>.</li>
+<li><code>temporal-constraints</code>.</li>
+<li><code>acoustic-space-rules</code>.</li>
+</ul>
+<p>The placement of the reactivity contract remains undecided. It may belong in the direction block or beside the mechanics. That decision remains inside this DRAFT section.</p>
+<p><strong>Certification consequence: none, unconditionally. This rule is normative for v0.5.</strong> Audio content authored under this section is <strong>not evaluated</strong>. It is <strong>not serialized into certification status</strong>. It is <strong>not used to accept or reject any package or build</strong> in v0.5.</p>
+<p>Audio claims have no PENDING state. They receive no <code>checked</code>, <code>judged</code>, or <code>advisory</code> class assignment. They create no capture-coverage obligation. A v0.5 validator and a v0.5 certifier MUST both ignore this section's content operationally, exactly as they ignore any other non-normative prose. Until a future revision promotes some or all of this annex, audio is entirely outside certification.</p>
+<p><strong>Capture is a separate descriptive fact.</strong> It carries no certification meaning of its own. The current capture tooling has no synchronized audio capture. Even a future normative audio-observation claim therefore has nothing to measure against yet. This gap is planning information for the people who scope that future work. It creates no certification rule.</p>
+<h2 id="11-what-v0-deliberately-excludes">11. What v0 deliberately excludes<a class="heading-anchor" href="#11-what-v0-deliberately-excludes" aria-label="Link to this section">#</a></h2>
+<p>v0 deliberately excludes:</p>
+<ul>
+<li>multiplayer and networking;</li>
+<li>rendered-capture certification for 3D renderers — a <code>web-3d</code> package validates, and a build of one can certify when its complete acceptance suite needs only logic and state observations, but no capture profile beyond <code>web-1</code> exists yet and a rendered-capture acceptance test against a 3D renderer has no standardized sampling recipe (§7);</li>
+<li>binary asset pipelines;</li>
+<li>localization structure;</li>
+<li>monetization design beyond the optional commerce split, including IAP design;</li>
+<li>any registry API; and</li>
+<li>target families beyond web delivery (<code>web-2d</code>, <code>web-3d</code>), until the format has held up across ten real specs.</li>
+</ul>
+<hr>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Get started — OpenGDD</title>
+<meta name="description" content="Learn how an OpenGDD game design document carries creative intent in prose, checkable data, authority levels, collections, and contracts.">
+<link rel="canonical" href="https://opengdd.org/get-started/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Get started — OpenGDD">
+<meta property="og:description" content="Learn how an OpenGDD game design document carries creative intent in prose, checkable data, authority levels, collections, and contracts.">
+<meta property="og:url" content="https://opengdd.org/get-started/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Get started — OpenGDD">
+<meta name="twitter:description" content="Learn how an OpenGDD game design document carries creative intent in prose, checkable data, authority levels, collections, and contracts.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/get-started/" aria-current="page">Get Started</a>
+      <a href="/spec/">Spec</a>
+      <a href="/standard/">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Get started</p><ul>
+<li class="toc-h2"><a href="#rules"><span class="toc-num">1</span>Describe the game in prose</a></li>
+<li class="toc-h2"><a href="#symbols"><span class="toc-num">2</span>Symbols as value references</a></li>
+<li class="toc-h2"><a href="#collections"><span class="toc-num">3</span>Collections</a></li>
+<li class="toc-h2"><a href="#contracts"><span class="toc-num">4</span>Contracts</a></li>
+<li class="toc-h2"><a href="#the-package"><span class="toc-num">5</span>The package</a></li>
+<li class="toc-h2"><a href="#try-it"><span class="toc-num">6</span>Try it</a></li>
+</ul></nav>
+<article class="doc-body">
+<h1>Get started</h1>
+
+<p class="note">An OpenGDD package is a game design document made of
+Markdown and JSON. Prose carries the designer's creative intent.
+Structured data makes selected claims checkable. Authority levels state who
+decides. A builder can then implement the game. The finished game can be
+checked against the same package. The builder may be a person, a studio, an
+AI agent, or a combination.</p>
+<section class="chapter">
+<h2 id="rules"><span class="chapter-num">1</span>Describe the game in prose<a class="heading-anchor" href="#rules" aria-label="Link to this section">#</a></h2>
+<p>Every game needs rules, behaviors, and mechanics. In
+OpenGDD, the designer writes them in ordinary prose. The prose carries
+creative intent without forcing each sentence into a data structure.</p>
+
+<div class="spec">
+The player moves sideways and can jump to traverse platforms.
+Touching a spike costs a heart.
+</div>
+
+<p>Rules live in <code>02-mechanics.md</code> as ordinary sentences.
+There is no schema over them, and the builder reads them as ordinary
+language. These sentences are read, not validated, so keep them
+consistent, with each rule stated once.</p>
+
+<p>A rule can also decide how something should feel, and leave the
+method open on purpose.</p>
+
+<div class="spec">
+At the top of a jump the player hangs for a moment before falling. The
+rise is quick and the fall is quicker.
+</div>
+
+<p>Nothing there names a curve, a gravity value, or a frame count. It
+describes what the player feels and leaves the arithmetic to the
+builder. Two builds of this jump may share no code at all. Both can
+be faithful, because the rule fixes the feel and leaves the formula
+open.</p>
+
+<p>Leaving it open is a choice, not a limit. The same jump can be
+designed precisely, in named values. The next chapter shows how.</p>
+</section>
+<section class="chapter">
+<h2 id="symbols"><span class="chapter-num">2</span>Symbols as value references<a class="heading-anchor" href="#symbols" aria-label="Link to this section">#</a></h2>
+<p>A numeric value written in prose is inconvenient.
+Finding and changing a number buried in pages of text is hard, and a
+value typed in two places drifts apart sooner or later. Symbols exist
+for this reason: a <strong>symbol</strong> is a named reference to a
+value, tuned in one place and cited as many times as you need. And
+unlike prose, it can be validated.</p>
+
+<div class="spec">
+The player jumps <span class="key">jump.height_tiles</span> tiles
+from standing. And after walking off a ledge, a full jump is still
+possible for <span class="key">jump.coyote_seconds</span>.
+</div>
+
+<p>Symbols live in <code>tuning.json</code> and come in two variants.
+The distinction matters when a build is validated:</p>
+
+<ul>
+<li>a <strong>tunable</strong> is a value you expect to retune as the
+game is balanced over time;</li>
+<li>a <strong>constant</strong> is a value that helps define the game
+itself. Changing one is a design change, not a rebalance.</li>
+</ul>
+
+<pre><code class="lang-json">{
+  "tunables": {
+    "jump.height_tiles": 3.2,
+    "jump.coyote_seconds": 0.12
+  },
+  "constants": {
+    "player.hearts": 3
+  },
+  "meta": {
+    "jump.coyote_seconds": { "range": [0.05, 0.2] }
+  }
+}</code></pre>
+
+<p>You can declare a symbol in the JSON, or just mention it while
+writing: when the authoring tool sees an unknown key in your prose,
+it offers to create it in <code>tuning.json</code> for you. You stay
+in your creative flow while inventing symbols, and come back to tune
+the values later. Nothing forces you to break the flow.</p>
+
+<img class="doc-shot" src="/assets/symbol-authoring.png" width="1024" height="278"
+  alt="The authoring tool showing a mechanics sentence citing jump.height_tiles, with a side panel classifying the symbol as a known tunable defined in tuning.json with value 3.2"
+  loading="lazy">
+
+<p>Additionally, <code>meta</code> can carry extra facts about a
+symbol, like the range a value must always stay inside. Coyote time,
+the grace period after a ledge where a jump still works, gets 0.05 to
+0.2 seconds here, and no further. A range can also grant bounded
+freedom: the spec may invite each build to pick its own value inside
+one, and the pick is recorded with the build.</p>
+
+<p>That is the format in miniature. Prose carries the intent, symbols
+carry the numbers. Freeform where you want it, validated where it
+counts.</p>
+</section>
+<section class="chapter">
+<h2 id="collections"><span class="chapter-num">3</span>Collections<a class="heading-anchor" href="#collections" aria-label="Link to this section">#</a></h2>
+<p>Games repeat themselves: three enemies, fifty cards, a
+dozen levels. Writing a paragraph for each clogs the prose, and a
+builder has to guess where the list begins and ends.
+<strong>Collections</strong> are handy compartments that group items
+of one kind.</p>
+
+<p class="file-label"><code>enemies.json</code></p>
+<pre><code class="lang-json">[
+  {
+    "enemy_name": "walker",
+    "speed_tiles_per_second": 2,
+    "behavior": "patrols its platform and turns around at the edge"
+  },
+  {
+    "enemy_name": "flyer",
+    "speed_tiles_per_second": 3.5,
+    "behavior": "drifts up and down along a fixed vertical path"
+  },
+  {
+    "enemy_name": "spitter",
+    "speed_tiles_per_second": 0,
+    "behavior": "stands still and fires along the direction it faces"
+  }
+]</code></pre>
+
+<p>For the collection to be recognized and used by the builder, it
+needs an entry in <code>manifest.json</code>. The entry defines how
+to read the collection: this one lives as a single
+<code>catalog</code> file called <code>enemies.json</code>, and each
+entry's name sits in the field <code>enemy_name</code>.</p>
+
+<p class="file-label">the matching entry in <code>manifest.json</code></p>
+<pre><code class="lang-json">{
+  "id": "enemies",
+  "format": "platformer-enemy-catalog-v1",
+  "contract": "03-content.md#the-enemy-catalog",
+  "source": { "kind": "catalog", "file": "enemies.json" },
+  "authority": { "level": "fixed" },
+  "id_member": "enemy_name"
+}</code></pre>
+
+<p><code>format</code> represents the shape you decided this
+collection has: a name, a speed, a behavior. Give it a version, so a
+tool can tell one shape from a later one. <code>authority</code> is
+how much freedom a builder has with these entries. Fixed means none.
+Delegated lets the builder decide within the stated intent and
+constraints. Personalization lets the designer ask a question before each
+build and lets that answer decide. The specification covers all three levels
+in detail.</p>
+
+<p>The bookkeeping around a collection, that every declared file
+exists, every name is unique, every reference resolves, is the
+validator's job to check. It is not yours to memorize.</p>
+
+<p>One field up there is still unexplained: <code>contract</code>.
+A collection holds the data, but the builder needs to know what it
+means. That is the next chapter.</p>
+</section>
+<section class="chapter">
+<h2 id="contracts"><span class="chapter-num">4</span>Contracts<a class="heading-anchor" href="#contracts" aria-label="Link to this section">#</a></h2>
+<p>OpenGDD uses <strong>contracts</strong> to tell builders
+how to interpret data. A contract is prose that says what the shape
+of the data means.</p>
+
+<p>A collection is one shape that needs a contract: its fields are
+yours to invent, and they mean nothing until the contract explains
+their meaning:</p>
+
+<div class="spec">
+<strong>The enemy catalog.</strong> Each entry in
+<span class="key">enemies.json</span> is one kind of enemy. It has an
+<span class="key">enemy_name</span>, a
+<span class="key">speed_tiles_per_second</span>, and a
+<span class="key">behavior</span>. A speed of 0 means the enemy never
+leaves its starting tile. <span class="key">behavior</span> is what
+the enemy does, written in plain language.
+</div>
+
+<p>This contract prose is a section that sits in
+<code>03-content.md</code>, exactly where the collection's
+<code>contract</code> field points. It is where the builder learns
+about the collection and how to read it.</p>
+
+<p>Notice what it never mentions: how an enemy looks. The spec
+decides how the game plays; the look of things is left to whoever
+builds it.</p>
+
+<p>JSON carries the entries, and prose carries their meaning. Symbols
+use the same pattern: JSON carries each value, and prose gives it
+meaning.</p>
+</section>
+<section class="chapter">
+<h2 id="the-package"><span class="chapter-num">5</span>The package<a class="heading-anchor" href="#the-package" aria-label="Link to this section">#</a></h2>
+<p>Everything written so far is a handful of loose files.
+A package makes them one complete, portable design document. A builder
+can use that document to make the game.</p>
+
+<pre><code class="lang-text">platformer/
+  manifest.json      what this is, and what to build from
+  tuning.json        the numbers
+  01-overview.md     the pitch, and how the game should feel
+  02-mechanics.md    the rules
+  03-content.md      the enemy contract
+  05-build-plan.md   phases, and the tests a build has to pass
+  enemies.json       the enemies themselves</code></pre>
+
+<p class="file-label"><code>manifest.json</code>, complete</p>
+<pre><code class="lang-json">{
+  "opengdd": "0.5",
+  "id": "platformer",
+  "version": "0.1.0",
+  "title": "Platformer",
+  "designer": { "name": "You" },
+  "target": {
+    "platform": "web-2d",
+    "genre": "platformer",
+    "session_minutes": 20,
+    "audience": "anyone who has played a platformer"
+  },
+  "build": {
+    "chapters": ["01-overview.md", "02-mechanics.md", "03-content.md"],
+    "plan": "05-build-plan.md",
+    "tuning": "tuning.json"
+  },
+  "content": [
+    {
+      "id": "enemies",
+      "format": "platformer-enemy-catalog-v1",
+      "contract": "03-content.md#the-enemy-catalog",
+      "source": { "kind": "catalog", "file": "enemies.json" },
+      "authority": { "level": "fixed" },
+      "id_member": "enemy_name"
+    }
+  ]
+}</code></pre>
+
+<p>Most of this you have already seen; the <code>content</code> entry
+is chapter 3's collection, unchanged. The top block is identity:
+which revision of the format the package is written against, what
+the game is called, who wrote it, and what it targets.
+The platform says whether the package targets a 2D or 3D web game.
+It does not choose the renderer or visual style. This revision accepts
+<code>web-2d</code> and <code>web-3d</code>. Under <code>build</code> come
+the chapters, the plan, and the tuning file; the numbered chapters
+use the format's standard names, from 01 overview through 05 build
+plan. Some are optional. This small package omits
+<code>04-presentation.md</code>, the art direction chapter. That is
+the whole package. No project file, no build system, nothing to
+install.</p>
+
+<p>This guide walks a deliberately small slice of the format, and
+more guides are coming. Until then, the specification continues
+where this page stops: the
+<a href="/spec/#3-manifest-json">manifest</a>, the
+<a href="/spec/#6-build-plan-and-acceptance-tests-05-build-plan-md">build
+plan and its acceptance tests</a>,
+<a href="/spec/#5-build-personalization-personalization-json">per-build
+personalization</a>, and the
+<a href="/spec/#9-the-art-direction-block">art direction block</a>.</p>
+</section>
+<section class="chapter">
+<h2 id="try-it"><span class="chapter-num">6</span>Try it<a class="heading-anchor" href="#try-it" aria-label="Link to this section">#</a></h2>
+<p>You have seen the shape of a package: prose for the
+rules, JSON for the tuned numbers and the lists, a manifest holding
+them together, and a build plan saying what a finished game must
+prove. A real package differs from this one mostly in size, plus a
+few constructs this guide skipped, like per-build
+personalization.</p>
+
+<div class="cta-row">
+  <a class="cta" href="/authoring-tool/">Try the authoring tool</a>
+  <a class="cta-quiet" href="/spec/">Read the specification</a>
+</div>
+
+<p>The authoring tool runs entirely in your browser and checks a
+package's structure as you write it. The
+<a href="/spec/">specification</a> is where each construct is written
+out with the reason it exists.</p>
+</section>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

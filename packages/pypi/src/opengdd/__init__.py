@@ -1,7 +1,7 @@
-"""OpenGDD - name reservation.
+"""OpenGDD registry placeholder.
 
-The OpenGDD specification is in development and has not yet been published.
-This package contains no functional code. See https://github.com/opengdd
+OpenGDD is an open format for game design documents. This package contains no
+functional code. See https://opengdd.org/ for the working specification.
 """
 
 __version__ = "0.0.0"

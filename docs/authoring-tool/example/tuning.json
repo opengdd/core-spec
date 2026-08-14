@@ -1,0 +1,11 @@
+{
+  "tunables": {},
+  "constants": {
+    "board.size": 3,
+    "win.line_length": 3
+  },
+  "meta": {
+    "board.size": { "certify": true },
+    "win.line_length": { "certify": true }
+  }
+}
