@@ -52,7 +52,7 @@ sections disagree, the numbered sections are right.
 | **Schema** | A machine-readable description of what a JSON file is allowed to contain: which members have to be there, what type each one holds, and which values are legal. OpenGDD publishes its schemas next to this document. |
 | **Validator** | A program that reads a package and reports what is wrong with it. It checks the schemas, and it also checks rules a schema cannot express, such as whether every reference points at something that exists. |
 | **Conforming** | Satisfying the format's rules. A package conforms, a build conforms, and a validator conforms, each against the rules written for it. |
-| **Certified build** | A build that has been run against its spec's acceptance tests and ships the evidence record described in §7. Conforming is the standard a thing meets. Certification is the record that proves a particular build met it. |
+| **Certified build** | A build whose §7 evidence record has passed the separate audit described by the draft certification protocol. Conforming is the standard a thing meets. Certification is the audited record that proves a particular build met it. In v0.5 the protocol is experimental: its draft names verdicts, but none is normative (§2d). |
 
 ### Words this format defines for itself
 
@@ -67,7 +67,7 @@ sections disagree, the numbered sections are right.
 | **Tunable, constant** | Both are numbers listed under a key in `tuning.json`. A tunable is listed under `tunables`, and a revision that only rebalances the game may change it. A constant is listed under `constants`, and a rebalance may not touch it: changing a constant is a change to the mechanics or the content (§4). |
 | **Build contract** | The aggregate agreement in `manifest.json`: the spec's identity, chapters, build plan, tuning, and optional personalization inputs (§§1, 3). |
 | **Contract pointer** | A machine member, such as a collection's `contract`, that points to the Fixed prose section defining its semantics (§1b). |
-| **Acceptance test** | A numbered check written into `05-build-plan.md`, `AT-1` onward. Each one pairs test text a person can read with a JSON block a program reads to run the check (§6). Acceptance tests are what a build is certified against. |
+| **Acceptance test** | A numbered check written into `05-build-plan.md`, `AT-1` onward. Each one pairs test text a person can read with a JSON block a program reads to run the check (§6). Acceptance tests are what a build is certified against under the experimental certification protocol (§2d). |
 
 ## 1. Package layout
 
@@ -373,7 +373,10 @@ rates, capacities, or flow fields.
    along whole paths. The path-level property is the certified claim.
 
    A missing or non-numeric attribute on any collection record in the edge set
-   is a hard failure. Diagnostics: `monotonicity-violation`, carrying both
+   is a hard failure. The attribute rule is decidable from package bytes and
+   is a package-level rule (§2d); evaluating the predicates themselves runs
+   through the citing §6 `static-lint` test. Diagnostics:
+   `monotonicity-violation`, carrying both
    collection-record ids and both values, and `missing-attribute`.
 
 Diagnostics are per file, collection-record id, edge, and rule, as §6
@@ -393,7 +396,7 @@ with a blockquote tag.
 
 | Level | Tag | Meaning |
 |---|---|---|
-| **Fixed** | (default, untagged) | Build exactly as written. Deviation fails certification. |
+| **Fixed** | (default, untagged) | Build exactly as written. Deviation fails certification under the experimental protocol (§2d). |
 | **Delegated** | `> DELEGATED:` | The builder decides. The spec states intent and constraints; the implementation may vary. |
 | **Personalization** | `> PERSONALIZATION: <id>` | Resolved by the answer to question `<id>` in `personalization.json`. |
 
@@ -616,6 +619,72 @@ Four things remain deliberately out of scope:
 - any semantic ontology for what activated rules mean. Endings and
   consequences remain authored predicates over declared memberships.
 
+## 2d. Conformance layers and certification status
+
+v0.5 defines two normative conformance subjects for a design — the package
+and the build record — and one experimental protocol. Every conformance or
+certification statement in this document reads against this section. Prose
+also says that a validator or a runtime outcome conforms; those uses read
+against the rules written for them and introduce no third release subject.
+The severity vocabulary is two-valued throughout: "hard failure",
+"validation failure", and "validation error" all name conformance-deciding
+errors in their layer, and lint-level findings or validator warnings advise
+without deciding — with one §7 exception: the check-6 shortfall warning,
+where the deciding rule is `passed == total` and the warning merely reports
+it.
+
+**Package conformance (normative).** A package conforms when each of its
+machine files validates against its published v0.5 schema — `manifest.json`
+against the manifest schema and, when present, `direction.json` against the
+direction schema — and the package satisfies every package-level MUST in this
+document. A package-level MUST is one decidable from the package bytes alone.
+A MUST about build behavior, cross-build stability, or test execution reads
+against the build-record or experimental layer instead. The published
+validator implements checks of package conformance; the rules, not any one
+tool's current coverage, define it. Package-level rules are of two kinds.
+Machine-decidable rules — schema validity, closure, surface grammar, and
+cross-file consistency — are decided by validation, and a validator error is
+a conformance failure. Prose obligations, such as §2a's tie-break rule or the
+rule that normative prose cites a tuning key rather than repeating its value,
+bind the package with the same force, but deciding a violation can take human
+judgment; a validator surfaces likely violations as warnings, and a warning
+does not by itself decide conformance.
+
+**Build-record conformance (normative).** A build conforms when it ships an
+`opengdd-build.json` that validates against the build schema and passes every
+§7 validator-level cross-document check, including the §7 and §9.11
+direction-result and certified-pin rules. The record is the builder's
+completion claim: shipping it asserts that every acceptance test passed and
+every certified pin matched. v0.5 machine-checks the record's internal
+validity and its consistency with the source package; it does not audit the
+assertion's truth. Auditing truth is certification. A build that still fails
+a test does not yet ship a conforming record; what it has are §2b ambiguity
+reports.
+
+**Build certification (EXPERIMENTAL in v0.5).** Certification is the audited
+claim that one particular build faithfully implements its spec: executing the
+§6 acceptance tests, accounting for every Fixed statement, scoring judged
+direction claims (§9.11 — a scoring whose panel protocol is not yet
+integrated and sits outside the published draft's audit scope), and auditing
+the §7 `harness` evidence under the
+conformance certification protocol published at `conformance/CERTIFICATION.md`
+in the OpenGDD conformance suite. v0.5 does not define a normative
+certification verdict, a complete machine grammar for `verification`
+descriptors, or a panel protocol for judged claims. Where this document
+describes certification, it describes the intended shape of that protocol.
+No v0.5 statement grants or withholds a certification verdict, and no
+construct in this document can fail a build's certification, because v0.5
+defines no normative verdict: the draft protocol's verdicts are experimental.
+
+The experimental status changes no carrier shape. `opengdd-build.json` keeps
+its required members, including `harness`, and packages keep their §6
+structural obligations. Record conformance checks the `harness` member's
+shape and counts only: no record-conformance check executes tests or
+reproduces hashes. Fixed statements bind at full force regardless:
+passing every acceptance test is necessary evidence for the experimental
+certification protocol and never sufficient, because a Fixed statement binds
+whether or not a numbered test restates it (§2).
+
 ## 3. manifest.json
 
 The manifest carries the spec's identity and build contract. It is
@@ -793,7 +862,9 @@ declared sets, and text is content records.
   naming a §2c ruleset id.
 - **`invariants` is optional.** It contains the §4a expressions. Every
   invariant MUST evaluate true after personalization resolution and before a
-  run starts.
+  run starts. At package validation the validator evaluates invariants at
+  package defaults; over a personalized build's resolved snapshot the same
+  obligation is audited under the experimental protocol (§2d).
 - **`clocks` is optional.** It declares the §4b regimes-and-clocks block.
 
 A key MUST be unique across `tunables` and `constants`. Every `meta` key MUST
@@ -864,7 +935,9 @@ not traverse runtime collections. `mod(a,b)` means
 `a - b * floor(a / b)`.
 
 Four conditions are hard validation failures: division by zero, modulo by
-zero, an invalid real-number domain, and a non-finite result.
+zero, an invalid real-number domain, and a non-finite result. At package
+validation these are decided at package defaults; over a personalized build's
+resolved snapshot they are audited under the experimental protocol (§2d).
 
 Typed references are profile-limited. The first form below reads
 `tuning.json`. The other three reach into declared runtime state and declared
@@ -1028,7 +1101,10 @@ building:
 
 Every question has one of three kinds: `choice`, `text`, or `number`.
 Questions are optional for each build. When a question is skipped, its
-`default` applies.
+`default` applies. For a `choice` question, the declared `default` and every
+recorded answer MUST name the `id` of one of its declared `options`: the
+resolution pipeline below is defined only for declared option ids, and an
+undeclared id is a validation failure.
 
 For creative variants, designers SHOULD write `notes` a builder can act on
 directly: concrete instructions. Notes MUST NOT be the only authority for a
@@ -1101,15 +1177,23 @@ choices, and laws, are gameplay state. They are not build personalization.
 
 ## 6. Build plan and acceptance tests (`05-build-plan.md`)
 
-The certification harness executes this chapter. Its acceptance tests are
-what a build is certified against. The chapter MUST contain ordered phases. The v0
+Under the experimental certification protocol (§2d), the certification
+harness executes this chapter, and its acceptance tests are what a build is
+certified against. The chapter's structure below is a normative package
+obligation; the executing harness, and a complete closed machine grammar for
+`verification` descriptors, are not defined in v0.5 and belong to the
+experimental protocol. The chapter MUST contain ordered phases. The v0
 convention lists them as `core-loop` → `content` → `tuning` → `presentation`
 → `polish`. Each phase lists its scope, chapter references, and
-machine-verifiable checkpoints.
+machine-verifiable checkpoints. Phase structure is a prose obligation (§2d):
+v0.5 defines no machine grammar for it, and validators do not decide it.
 
 ### Acceptance-test classes
 
-Acceptance tests are numbered `AT-1 … AT-n`. Every `AT-n` heading MUST be
+Acceptance tests are numbered `AT-1 … AT-n`. Their machine-checked surface
+grammar: an acceptance test is a Markdown heading, at any heading level,
+whose text begins `AT-<n>`; numbering MUST start at `AT-1` and be consecutive
+in document order. Every `AT-n` heading MUST be
 followed by two things: a fenced `verification` JSON descriptor and
 human-readable test text. The descriptor declares one of four classes.
 
@@ -1166,10 +1250,12 @@ Direction-claim closure runs both ways:
 
 1. Every path in `direction_claims` MUST resolve to a declared
    `direction.json` entry. A dangling citation is a hard failure.
-2. Every `constraints.*` entry and every `motion.*` entry's required
-   `fixture` MUST be named by at least one AT's `direction_claims`. All
+2. Every `constraints.*` entry MUST be named by at least one AT's
+   `direction_claims`, and every `motion.*` entry's required `fixture` MUST
+   name an AT whose `direction_claims` array includes that entry's
+   `motion.<key>` path (§9.11). All
    `constraints.*` entries are fixed observational `checked` claims under
-   §9.11. An entry named by no AT is a validation failure.
+   §9.11. An entry satisfied by no AT is a validation failure.
 
 An AT that carries `direction_claims` MUST NOT restate the cited claim's
 value, scope, or class. The §9.5 single-source rule extends to this member.
@@ -1222,8 +1308,12 @@ invalid. A target without its input or schedule fixture is also invalid.
 A descriptor states what must be proved. It leaves the implementation
 architecture open.
 
-These tests are the spec's ground truth. A build is conforming when it passes
-every acceptance test and matches every certified resolved tuning key.
+These tests are the executable subset of the spec, not its boundary. Passing
+every acceptance test and matching every certified resolved tuning key is
+necessary evidence for certification and never sufficient: a Fixed statement
+binds whether or not a numbered test restates it (§2). Certification itself
+is experimental in v0.5, and build-record conformance is defined by §2d
+and §7.
 
 ## 6a. Material-simulation envelope profile
 
@@ -1341,7 +1431,11 @@ as `min_feature_width`. The thresholds define the opening classes.
 Each AT that cites the profile names its measures, observation points, and
 tolerances under the §6 fixture rules. It also MUST carry `claim_scale`: a
 finite number in world units that is no smaller than the resolved
-`min_feature_width`. A smaller `claim_scale` is a hard failure. An observation
+`min_feature_width`. That comparison depends on the build's resolved tuning,
+so it is discharged at audit under the experimental protocol (§2d); at
+package validation a validator MAY check it against the §5 defaults. A
+smaller `claim_scale` at the audited resolution is a hard failure there. An
+observation
 point outside the declared schedule is also a hard failure.
 
 ### Subsystem outcome models
@@ -1379,7 +1473,11 @@ update order, integrator, exact voxel sets, and debris trajectories.
 
 ## 7. Certified builds (`opengdd-build.json`)
 
-A conforming build ships `opengdd-build.json`. The file is machine-validated
+A conforming build ships `opengdd-build.json` (build-record conformance,
+§2d). This chapter keeps the certification vocabulary — "certified",
+"certifies against", "certifying spec" — in §2d's intended-shape sense: the
+record is the artifact the experimental protocol audits. The file is
+machine-validated
 against [opengdd-build.schema.json](https://opengdd.org/schema/core/v0.5/opengdd-build.schema.json).
 
 ### Core fields
@@ -1403,8 +1501,13 @@ The required top-level fields are exactly:
     bytes covered by the hash.
   - `acceptance`, with `passed` and `total` counts.
 
-Canonicalization follows the conformance certification protocol. A digest
-without a reconstructible payload is unauditable and non-conforming.
+Canonicalization follows the conformance certification protocol published at
+`conformance/CERTIFICATION.md` in the OpenGDD conformance suite (§2d).
+Record conformance checks `harness` for shape and counts only; `payload.file`
+is checked as a package-relative path shape, not for existence.
+Reproducing `result_hash` and auditing the payload belong to the experimental
+protocol, under which a digest without a reconstructible payload is
+unauditable and fails the audit.
 `harness` may also contain build-local checkpoint records, fixtures, and
 transcripts. That additional detail is outside the core contract.
 
@@ -1418,13 +1521,26 @@ package. A conforming validator MUST also verify all of the following:
    fields: `name`, plus `handle` and `contact` when each is present in both.
    `role` is build-local and is excluded from matching.
 3. Every recorded answer names a declared question and type-checks against
-   that question's kind. Defaulted questions are recorded too.
+   that question's kind; a `choice` answer MUST additionally name a declared
+   option id (§5). Defaulted questions are recorded too.
 4. The `resolved_tuning.tunables` and `resolved_tuning.constants` keys exactly
    equal the corresponding source key sets. `resolved_tuning.tunables` is
    produced by the §5 resolution pipeline, and every value remains inside its
    declared range.
 5. `acceptance.total` equals the package's enumerated AT count.
 6. A conforming build has `acceptance.passed == acceptance.total`.
+
+Checks 1–6 are the core set, not the whole set. The direction-result
+presence, path, and subset rules and the certified-pin count and value rules
+stated later in this chapter and in §9.11 are validator-level cross-document
+checks of the same rank, and §2d's build-record conformance includes them.
+Check 6 does not conflict with honest reporting: the shipped record is a
+completion claim (§2d), and a build still failing tests reports through §2b
+ambiguity reports rather than a build record. Validators report divergence in
+checks 1–5 and in the direction-result and certified-pin rules as errors. A
+check-6 shortfall is reported as a warning: the record stays well-formed
+evidence of an incomplete build, and the build does not conform until
+`passed` equals `total`.
 
 When a commerce split exists, the build manifest includes the manifest's
 commerce profile verbatim (including `derived_from` when present).
@@ -1520,8 +1636,9 @@ palette-pin evidence. It has two independently conditioned members:
 - **`certified_pins`** has the shape `[{ "path":
   <constraints.palette.<key>>, "value": <8-bit sRGB hex> }]`. It is required
   exactly when the source spec declares at least one `certify: true`
-  `constraints.palette.*` claim under §9.5/9.9. It contains one entry for each
-  such claim and is absent otherwise.
+  `constraints.palette.*` claim under §9.5/9.9. It contains exactly one entry
+  for each such claim — a duplicated `path` is a validation failure — and is
+  absent otherwise.
 
 Certified pins apply only to direction-constraint palettes. Mood-descriptor
 palettes cannot carry `certify` in v0.5 because no build-evidence path exists
@@ -1920,12 +2037,14 @@ invent one. Package authors MUST NOT rely on unbounded file sizes; this is
 authoring guidance, not a numeric validation threshold. Authors remain
 responsible for deployment-specific limits.
 
-The validator MUST verify that the file's byte signature decodes as its
-declared format. It cannot trust the `format` string alone. A renamed or
+The validator MUST verify that the file's leading byte signature matches its
+declared format; full decoding is not required. It cannot trust the `format`
+string alone. A renamed or
 misdeclared file fails even when its extension and `format` member agree.
 
-A file outside the format allowlist, whose bytes do not decode as its
-declared format, or without a license declaration is a hard failure. This
+A file outside the format allowlist, whose leading byte signature does not
+match its declared format, or without a license declaration is a hard
+failure. This
 is the direction block's media rule too (§9.3), stated once here since
 both constructs share the reference shape.
 
@@ -2219,8 +2338,11 @@ Aggregate fields are authored once in the carrier and never restated by the
 fixture, following §6's per-sample and aggregate discipline.
 
 The covering fixture MUST reach every state named by `scope.states`. It MUST
-NOT narrow the population, states, or proof obligation. A narrower fixture, or
-a sampled result presented as exhaustive proof, is a validation failure. The
+NOT narrow the population, states, or proof obligation. The package validator
+cannot decide fixture reach (above), so this obligation is discharged by the
+covering acceptance test's §6 procedure and audited under the experimental
+certification protocol (§2d): a narrower fixture, or a sampled result
+presented as exhaustive proof, fails that audit. The
 acceptance test cites the carrier key, such as `constraints.palette.<key>`, and
 MUST NOT restate its value.
 
@@ -2683,7 +2805,9 @@ observational `checked` constraints — the cited forms are
 keys. The array is not limited to these three forms: a motion claim's
 `motion.<key>` path also appears here, per the motion-fixture rule below. In
 every form, `<key>` matches `^[a-z0-9]+(-[a-z0-9]+)*$`. Each claim
-MUST reach every state named in its `scope.states`. A claim omitted from every
+MUST reach every state named in its `scope.states`; that reach obligation is
+discharged by the §6 procedure and audited under the experimental protocol
+(§2d, §9.5), not decided by the package validator. A claim omitted from every
 acceptance test's `direction_claims` array is a validation failure.
 
 **Judged claims requiring a capture fixture.** Every `motion.*` entry has the
@@ -2704,7 +2828,11 @@ bound `viewing` context.
 9.4, 9.7, and 9.8). An assessment considers every attempted claim under its
 bound `viewing` context (§9.6). v0.5 records assessment coverage and results,
 but does not standardize panel composition, scoring, or an overall adherence
-verdict.
+verdict. The gate belongs to the experimental certification path (§2d): it
+defines no pass/fail outcome in v0.5, empty `assessed` and `adherent` arrays
+are the legal record of a run with no assessment, and no v0.5 conformance or
+certification outcome turns on the gate's contents beyond the validity rules
+stated here.
 
 `direction_result` is the build's JSON record for this gate and for certified
 palette-pin evidence. It is a closed object in `opengdd-build.json`. Its only
@@ -2816,7 +2944,8 @@ v0 deliberately excludes:
 
 - multiplayer and networking;
 - rendered-capture certification for 3D renderers — a `web-3d` package
-  validates, and a build of one can certify when its complete acceptance
+  validates, and a build of one can assemble full certification evidence
+  under the experimental protocol (§2d) when its complete acceptance
   suite needs only logic and state observations, but no capture profile
   beyond `web-1` exists yet and a rendered-capture acceptance test against
   a 3D renderer has no standardized sampling recipe (§7);

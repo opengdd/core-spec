@@ -1782,6 +1782,11 @@ function createValidator(host) {
             const expected = question.kind === "number" ? "number" : question.kind === "choice" || question.kind === "text" ? "string" : undefined;
             if (expected && (typeof answer !== expected || (expected === "number" && !Number.isFinite(answer)))) {
               error("BUILD_ANSWER_TYPE", "§7", "opengdd-build.json", `personalization.answers.${questionId} must be a ${expected} for ${JSON.stringify(question.kind)} question ${JSON.stringify(questionId)}`);
+            } else if (question.kind === "choice" && typeof answer === "string" && Array.isArray(question.options)) {
+              const optionIds = question.options.filter(isObject).map(option => option.id).filter(id => typeof id === "string");
+              if (!optionIds.includes(answer)) {
+                error("BUILD_ANSWER_OPTION", "§7", "opengdd-build.json", `personalization.answers.${questionId} ${JSON.stringify(answer)} is not a declared option id for choice question ${JSON.stringify(questionId)}`);
+              }
             }
           }
         }

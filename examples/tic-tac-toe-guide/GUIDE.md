@@ -113,18 +113,25 @@ test, a judged claim, and a certified build are different facts.
 4. **Judged audit.** Human reviewers assess judged direction claims
    under their declared viewing conditions. The format standardizes
    the claim and context, not a universal scoring scale or panel
-   protocol.
+   protocol. Until that panel protocol integrates, judged results are
+   recorded as coverage and sit outside the certification audit's
+   verdict scope (SPEC §2d).
 
 5. **Certification.** A separate audit checks the full record:
    all acceptance tests, exact runtime equality for certified tuning
    constants, the resolved snapshot and other required facts in
-   `opengdd-build.json`, hash reproducibility, the judged findings,
-   and direct implementation of Fixed obligations. The possible
-   verdicts are certify, certify-with-notes, and do-not-certify.
+   `opengdd-build.json`, hash reproducibility, the judged findings
+   record's validity,
+   and direct implementation of Fixed obligations. The draft
+   certification protocol names certify, certify-with-notes, and
+   do-not-certify as its verdicts.
 
-In this draft, certification names an evidence state under the public
-OpenGDD conformance protocol. It does not grant or imply authorization under
-an OpenGDD certification-mark program. No such program operates today.
+In this draft, certification is experimental (SPEC §2d): the verdicts above
+come from the draft build-certification protocol published with the
+conformance suite, and the specification itself defines no normative
+certification verdict in v0.5. Certification does not grant or imply
+authorization under an OpenGDD certification-mark program. No such program
+operates today.
 
 The vocabulary is worth keeping precise. Package validation is
 **schema-validated**. A palette tolerance is **objectively
@@ -379,8 +386,8 @@ Why remove something so rigorous? It transmits no additional rule to
 the builder. The four lean scenarios cover the behavior most likely to
 break, while every Fixed rule remains binding and auditable. Complete
 enumeration is apparatus for a certification-grade instrument; the
-lean package is optimized for design transmission. This is the same
-distinction used by the Glasswake Mini measurement: apparatus can add
+lean package is optimized for design transmission. The same
+distinction recurs in material-measurement profiles: apparatus can add
 cross-build proof without adding player-observable design. It is
 valuable when that proof is the goal, and it belongs in teaching or a
 certification instrument rather than on every minimal designer spec.
@@ -425,11 +432,12 @@ choices only where the spec delegates them. It implements the phases,
 runs AT-1 through AT-4, records their diagnostics and the resolved
 tuning snapshot, and accounts for the remaining Fixed statements.
 
-The definition of done is a conforming, auditable build, not merely
+The definition of done is a spec-faithful, auditable build, not merely
 four green labels. A game that scrolls the board, identifies players
 only by color, or omits one of two simultaneously completed lines can
 fail Fixed obligations even if its test record looks green. A neon
-arena can also fail the judged mood. Two builders may choose different
+arena can also fall short of the judged mood, though v0.5 records that
+assessment rather than adjudicating it. Two builders may choose different
 strokes, layouts, motion, feedback, and sound while producing the same
 game; that bounded variation is delegated craft.
 

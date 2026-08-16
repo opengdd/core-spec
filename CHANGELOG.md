@@ -28,6 +28,47 @@ defined capture profile is `web-1`.
 This is a hard version cut: the v0.5 validator rejects the old `values`
 members rather than migrating them implicitly.
 
+### Conformance layers and certification status — 2026-08-16
+
+A draft revision adds §2d, which names v0.5's two normative conformance
+subjects — package conformance and build-record conformance — and declares
+build certification **experimental** in v0.5. The acceptance-test execution
+semantics, the complete `verification` descriptor machine grammar, the
+harness hash audit, and the judged-direction gate belong to the experimental
+certification protocol, whose draft is published with the conformance suite
+as `conformance/CERTIFICATION.md` and is now referenced from the
+specification. v0.5 defines no normative certification verdict. Carrier
+shapes are unchanged: no schema member was added, removed, or made optional,
+and existing conforming packages and build records remain conforming. Fixed
+authority is unchanged; passing acceptance tests remains necessary evidence
+and never sufficient. Standardizing certification — including binding the
+complete source-package bytes into build receipts — continues as a v0.6
+track.
+
+An independent re-review of the same revision drove a hardening pass: the
+package- and record-conformance definitions in §2d now name their exact
+schema and check sets, package-level MUSTs are defined as those decidable
+from package bytes alone, the build record is defined as a completion claim
+so honest failure reporting travels through §2b ambiguity reports, the
+fixture-reach obligations in §9.5 and §9.11 are typed as experimental-audit
+obligations rather than validation failures, and the draft certification
+protocol now carries the experimental marking and an RFC 8785-aligned
+byte-reproducible canonical serialization.
+
+A second review round then closed the implementability gaps: §6 states the
+machine-checked surface grammar for acceptance-test headings and types phase
+structure as a prose obligation, §5 and §7 require `choice` answers and
+defaults to name declared option ids (with a matching `BUILD_ANSWER_OPTION`
+validator check), §7 states the error-versus-warning reporting contract for
+its cross-document checks, §2d distinguishes machine-decidable rules from
+prose obligations and defines the severity vocabulary, the remaining
+per-build evaluations (§1c predicates, §4/§4a defaults-versus-snapshot,
+§6a `claim_scale`) are each assigned a conformance layer, and the
+certification protocol restricts hash payloads to I-JSON, defines
+`result_hash` as the digest of `payload.file`'s exact canonical bytes, and
+adds Fixed-statement deviation and narrowed evidence to its verdict-blocking
+list.
+
 ## v0.4 draft — 2026-08-09
 
 v0.4 adds a structured art-direction surface while preserving the designer's

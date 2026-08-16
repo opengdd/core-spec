@@ -21,18 +21,18 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
 <link rel="stylesheet" href="/assets/site.css">
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
-<link rel="stylesheet" href="/authoring-tool/authoring.css?v=ec39adc14d7a">
+<link rel="stylesheet" href="/authoring-tool/authoring.css?v=2e5d77249d1b">
 <style>
 .opengdd-authoring,
 .opengdd-author-file-meta a { font-family: var(--font-body); }
 </style>
 <script type="importmap">
 { "imports": {
-  "opengdd-analysis": "/authoring-tool/lib/lang/tools/src/analysis.mjs?v=ec39adc14d7a",
-  "opengdd-syntax": "/authoring-tool/lib/opengdd/conformance/package-syntax.mjs?v=ec39adc14d7a",
-  "opengdd-file-map-host": "/authoring-tool/lib/opengdd/conformance/file-map-host.mjs?v=ec39adc14d7a",
-  "opengdd-validation": "/authoring-tool/lib/opengdd/conformance/validate-core.mjs?v=ec39adc14d7a",
-  "opengdd-authoring-version": "/authoring-tool/src/version.mjs?v=ec39adc14d7a"
+  "opengdd-analysis": "/authoring-tool/lib/lang/tools/src/analysis.mjs?v=2e5d77249d1b",
+  "opengdd-syntax": "/authoring-tool/lib/opengdd/conformance/package-syntax.mjs?v=2e5d77249d1b",
+  "opengdd-file-map-host": "/authoring-tool/lib/opengdd/conformance/file-map-host.mjs?v=2e5d77249d1b",
+  "opengdd-validation": "/authoring-tool/lib/opengdd/conformance/validate-core.mjs?v=2e5d77249d1b",
+  "opengdd-authoring-version": "/authoring-tool/src/version.mjs?v=2e5d77249d1b"
 } }
 </script>
 </head>
@@ -64,7 +64,7 @@ package selector.</p>
 <div id="authoring-tool"></div>
 </div>
 <script type="module">
-import { mountAuthoringTool } from "/authoring-tool/src/tool.mjs?v=ec39adc14d7a";
+import { mountAuthoringTool } from "/authoring-tool/src/tool.mjs?v=2e5d77249d1b";
 
 const fetchJson = async (url) => {
   const response = await fetch(url);
@@ -98,12 +98,12 @@ mountAuthoringTool(document.querySelector("#authoring-tool"), {
   async loadPackage(id) {
     if (id !== "tic-tac-toe") throw new Error("Unknown package: " + id);
     const files = await Promise.all(exampleFiles.map(async (path) => ({
-      path, text: await fetchText(EXAMPLE_BASE + path + "?v=ec39adc14d7a"),
+      path, text: await fetchText(EXAMPLE_BASE + path + "?v=2e5d77249d1b"),
     })));
     return { id, title: "Tic-Tac-Toe", path: EXAMPLE_BASE, files };
   },
   readerUrl(_packagePath, file) {
-    return EXAMPLE_BASE + file + "?v=ec39adc14d7a";
+    return EXAMPLE_BASE + file + "?v=2e5d77249d1b";
   },
 });
 </script>
