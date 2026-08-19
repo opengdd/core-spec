@@ -423,6 +423,7 @@ main.flush { padding-top: 0; }
   grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
   margin: 1.6rem 0;
 }
+.doc-body > .card { margin: 0 0 1rem; }
 
 .label {
   font-family: var(--font-mono); font-size: 0.72rem;

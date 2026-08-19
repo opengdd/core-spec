@@ -6,7 +6,6 @@
   "mood": {
     "paper-quiet": {
       "descriptor": "descriptor:mood:paper-quiet",
-      "class": "judged",
       "viewing": "table-reading"
     }
   },
@@ -16,18 +15,18 @@
         "value": "#2B2A26",
         "tolerance": 12,
         "scope": {
-          "population": "every placed mark and every grid line",
+          "applies_to": "every placed mark and every grid line",
           "states": ["in-game"],
-          "coverage": "exhaustive"
+          "sampling": "exhaustive"
         }
       }
     }
   },
   "viewing": {
     "table-reading": {
-      "scale_speed": "the whole board on screen at once, at real play speed",
+      "speed_and_size": "the whole board on screen at once, at real play speed",
       "calibration": "sRGB display at standard desktop viewing distance",
-      "blind_builder_identity": true
+      "hide_builder_name": true
     }
   }
 }

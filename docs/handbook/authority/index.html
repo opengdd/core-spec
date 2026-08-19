@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The authoring tool — OpenGDD</title>
-<meta name="description" content="Write an OpenGDD game design document in the browser with live validation and zip export. Your files stay in your browser.">
-<link rel="canonical" href="https://opengdd.org/authoring-tool/">
+<title>Authority — OpenGDD handbook</title>
+<meta name="description" content="You control the creative boundaries of your game: what is settled, and what a builder is free to decide. One authority tag above a paragraph says which is which.">
+<link rel="canonical" href="https://opengdd.org/handbook/authority/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="The authoring tool — OpenGDD">
-<meta property="og:description" content="Write an OpenGDD game design document in the browser with live validation and zip export. Your files stay in your browser.">
-<meta property="og:url" content="https://opengdd.org/authoring-tool/">
+<meta property="og:title" content="Authority — OpenGDD handbook">
+<meta property="og:description" content="You control the creative boundaries of your game: what is settled, and what a builder is free to decide. One authority tag above a paragraph says which is which.">
+<meta property="og:url" content="https://opengdd.org/handbook/authority/">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="The authoring tool — OpenGDD">
-<meta name="twitter:description" content="Write an OpenGDD game design document in the browser with live validation and zip export. Your files stay in your browser.">
+<meta name="twitter:title" content="Authority — OpenGDD handbook">
+<meta name="twitter:description" content="You control the creative boundaries of your game: what is settled, and what a builder is free to decide. One authority tag above a paragraph says which is which.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -21,20 +21,6 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
 <link rel="stylesheet" href="/assets/site.css">
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
-<link rel="stylesheet" href="/authoring-tool/authoring.css?v=db768a7b9ee4">
-<style>
-.opengdd-authoring,
-.opengdd-author-file-meta a { font-family: var(--font-body); }
-</style>
-<script type="importmap">
-{ "imports": {
-  "opengdd-analysis": "/authoring-tool/lib/lang/tools/src/analysis.mjs?v=db768a7b9ee4",
-  "opengdd-syntax": "/authoring-tool/lib/opengdd/conformance/package-syntax.mjs?v=db768a7b9ee4",
-  "opengdd-file-map-host": "/authoring-tool/lib/opengdd/conformance/file-map-host.mjs?v=db768a7b9ee4",
-  "opengdd-validation": "/authoring-tool/lib/opengdd/conformance/validate-core.mjs?v=db768a7b9ee4",
-  "opengdd-authoring-version": "/authoring-tool/src/version.mjs?v=db768a7b9ee4"
-} }
-</script>
 </head>
 <body>
 <header class="site-header">
@@ -42,72 +28,56 @@
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/get-started/">Get Started</a>
-      <a href="/handbook/">Handbook</a>
+      <a href="/handbook/" aria-current="page">Handbook</a>
       <a href="/spec/">Spec</a>
       <a href="/standard/">Standard</a>
-      <a href="/authoring-tool/" aria-current="page">Authoring tool</a>
+      <a href="/authoring-tool/">Authoring tool</a>
       <a href="/about/">About</a>
       <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
     </nav>
   </div>
 </header>
 <main>
-<div class="wrap-wide">
-<h1>The authoring tool</h1>
-<p class="note"><strong>Preview v0.1 · local-first.</strong> Everything on this page
-runs in your browser: your files never leave it. Drafts save in this
-browser, the tool checks conformance as you write, and "Export ZIP"
-downloads a portable copy. Tic-tac-toe opens as a safe example to
-explore; create or import packages and switch among them with the
-package selector.</p>
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Handbook</p><ul>
+<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">1. The shape of a spec</a></li>
+<li class="toc-h2"><a href="/handbook/fantasy-block/">2. The fantasy block</a></li>
+<li class="toc-h2"><a href="/handbook/authority/" aria-current="page">3. Authority</a></li>
+<li class="toc-h2"><a href="/handbook/identifiers/">4. Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/tuning/">5. Tuning</a></li>
+<li class="toc-h2"><a href="/handbook/collections/">6. Collections</a></li>
+<li class="toc-h2"><a href="/handbook/graphs/">7. Graphs</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-states/">8. Modes &amp; states</a></li>
+<li class="toc-h2"><a href="/handbook/acceptance-tests/">9. Acceptance tests</a></li>
+<li class="toc-h2"><a href="/handbook/contracts/">10. Contracts</a></li>
+<li class="toc-h2"><a href="/handbook/direction/">11. Direction: pillars, mood, must_keep</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-pinning/">12. Palette &amp; pinning</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">13. Personalization</a></li>
+<li class="toc-h2"><a href="/handbook/rulebook/">14. The rulebook</a></li>
+<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
+</ul></nav>
+<article class="doc-body">
+<h1>3. Authority</h1>
+<p>You control the creative boundaries of your game: what is settled, and what a builder is free to decide. One <strong>authority</strong> tag above a paragraph says which is which.</p>
+<p><em><code>02-mechanics.md</code>, a prose chapter</em></p>
+<pre><code class="lang-markdown">Ore feeds into a furnace one piece at a time. A furnace runs one job,
+and anything else dropped in waits its turn. A finished bar sits in the
+furnace until someone takes it.
+
+&gt; DELEGATED: how a running furnace and a finished one look and sound.
+&gt; A player crossing the room should be able to tell the two apart
+&gt; without stopping.</code></pre>
+<p>Prose without a tag is your explicit decision. The <code>&gt; DELEGATED:</code> tag hands some direction to the builder: a blockquote line, followed by any label that helps a reader. It holds until the next tag or the end of the section.</p>
+<ul>
+<li><strong>Fixed</strong> is the default. Untagged prose is Fixed, and the builder changes nothing.</li>
+<li><strong>Delegated</strong> hands the stated area to the builder, to decide within the intent you wrote.</li>
+<li><strong>Personalization</strong> asks a question the builder can answer on their own; its machinery is the personalization chapter's subject.</li>
+</ul>
+<p>Delegated is not abandoned. The intent around the tag still binds: a builder may choose the animation, but cannot leave a finished furnace hard to spot. Untagged needs no ceremony either. What you simply write is yours.</p>
+<p><em>Full rules: Reference §2 and §2a.</em></p>
+<p class="note chapter-pager"><a href="/handbook/fantasy-block/">← The fantasy block</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/identifiers/">Identifiers →</a></p>
+</article>
 </div>
-<div class="wrap-wide">
-<div id="authoring-tool"></div>
-</div>
-<script type="module">
-import { mountAuthoringTool } from "/authoring-tool/src/tool.mjs?v=db768a7b9ee4";
-
-const fetchJson = async (url) => {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("Request failed (" + response.status + ")");
-  return response.json();
-};
-const fetchText = async (url) => {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("Request failed (" + response.status + ")");
-  return response.text();
-};
-
-const SCHEMA_BASE = "/schema/core/v0.5/";
-const schemaNames = ["manifest.schema.json", "direction.schema.json", "opengdd-build.schema.json"];
-let schemaRequest;
-// Cache the schemas, but never cache a failure.
-const loadSchemas = () => schemaRequest ??= Promise.all(
-  schemaNames.map(async (name) => [name, await fetchJson(SCHEMA_BASE + name)]),
-).then(Object.fromEntries).catch((error) => { schemaRequest = undefined; throw error; });
-
-const EXAMPLE_BASE = "/authoring-tool/example/";
-const exampleFiles = ["manifest.json","tuning.json","01-overview.md","02-mechanics.md","04-presentation.md","direction.json","05-build-plan.md"];
-
-mountAuthoringTool(document.querySelector("#authoring-tool"), {
-  headingLevel: 2,
-  schemas: loadSchemas,
-  defaultPackageId: "tic-tac-toe",
-  async listPackages() {
-    return [{ id: "tic-tac-toe", title: "Tic-Tac-Toe", revision: "cc2ac3bd0aa4" }];
-  },
-  async loadPackage(id) {
-    if (id !== "tic-tac-toe") throw new Error("Unknown package: " + id);
-    const files = await Promise.all(exampleFiles.map(async (path) => ({
-      path, text: await fetchText(EXAMPLE_BASE + path + "?v=db768a7b9ee4"),
-    })));
-    return { id, title: "Tic-Tac-Toe", path: EXAMPLE_BASE, files };
-  },
-  readerUrl(_packagePath, file) {
-    return EXAMPLE_BASE + file + "?v=db768a7b9ee4";
-  },
-});
-</script>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">

@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Get started — OpenGDD</title>
-<meta name="description" content="Learn how an OpenGDD game design document carries creative intent in prose, checkable data, authority levels, collections, and contracts.">
+<meta name="description" content="Learn how an OpenGDD game design document carries creative intent in prose, checkable data, authority levels, collections, and defining sections.">
 <link rel="canonical" href="https://opengdd.org/get-started/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Get started — OpenGDD">
-<meta property="og:description" content="Learn how an OpenGDD game design document carries creative intent in prose, checkable data, authority levels, collections, and contracts.">
+<meta property="og:description" content="Learn how an OpenGDD game design document carries creative intent in prose, checkable data, authority levels, collections, and defining sections.">
 <meta property="og:url" content="https://opengdd.org/get-started/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Get started — OpenGDD">
-<meta name="twitter:description" content="Learn how an OpenGDD game design document carries creative intent in prose, checkable data, authority levels, collections, and contracts.">
+<meta name="twitter:description" content="Learn how an OpenGDD game design document carries creative intent in prose, checkable data, authority levels, collections, and defining sections.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -28,6 +28,7 @@
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/get-started/" aria-current="page">Get Started</a>
+      <a href="/handbook/">Handbook</a>
       <a href="/spec/">Spec</a>
       <a href="/standard/">Standard</a>
       <a href="/authoring-tool/">Authoring tool</a>
@@ -40,9 +41,9 @@
 <div class="doc-layout">
 <nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Get started</p><ul>
 <li class="toc-h2"><a href="#rules"><span class="toc-num">1</span>Describe the game in prose</a></li>
-<li class="toc-h2"><a href="#symbols"><span class="toc-num">2</span>Symbols as value references</a></li>
+<li class="toc-h2"><a href="#tuning-keys"><span class="toc-num">2</span>Tuning keys as value references</a></li>
 <li class="toc-h2"><a href="#collections"><span class="toc-num">3</span>Collections</a></li>
-<li class="toc-h2"><a href="#contracts"><span class="toc-num">4</span>Contracts</a></li>
+<li class="toc-h2"><a href="#defining-sections"><span class="toc-num">4</span>Defining sections</a></li>
 <li class="toc-h2"><a href="#the-package"><span class="toc-num">5</span>The package</a></li>
 <li class="toc-h2"><a href="#try-it"><span class="toc-num">6</span>Try it</a></li>
 </ul></nav>
@@ -89,13 +90,13 @@ open.</p>
 designed precisely, in named values. The next chapter shows how.</p>
 </section>
 <section class="chapter">
-<h2 id="symbols"><span class="chapter-num">2</span>Symbols as value references<a class="heading-anchor" href="#symbols" aria-label="Link to this section">#</a></h2>
+<h2 id="tuning-keys"><span class="chapter-num">2</span>Tuning keys as value references<a class="heading-anchor" href="#tuning-keys" aria-label="Link to this section">#</a></h2>
 <p>A numeric value written in prose is inconvenient.
 Finding and changing a number buried in pages of text is hard, and a
-value typed in two places drifts apart sooner or later. Symbols exist
-for this reason: a <strong>symbol</strong> is a named reference to a
-value, tuned in one place and cited as many times as you need. And
-unlike prose, it can be validated.</p>
+value typed in two places drifts apart sooner or later. Tuning keys
+exist for this reason: a <strong>tuning key</strong> is a named
+reference to a value, tuned in one place and cited as many times as
+you need. And unlike prose, it can be validated.</p>
 
 <div class="spec">
 The player jumps <span class="key">jump.height_tiles</span> tiles
@@ -103,7 +104,7 @@ from standing. And after walking off a ledge, a full jump is still
 possible for <span class="key">jump.coyote_seconds</span>.
 </div>
 
-<p>Symbols live in <code>tuning.json</code> and come in two variants.
+<p>Keys live in <code>tuning.json</code> and come in two variants.
 The distinction matters when a build is validated:</p>
 
 <ul>
@@ -126,26 +127,26 @@ itself. Changing one is a design change, not a rebalance.</li>
   }
 }</code></pre>
 
-<p>You can declare a symbol in the JSON, or just mention it while
+<p>You can declare a key in the JSON, or just mention it while
 writing: when the authoring tool sees an unknown key in your prose,
 it offers to create it in <code>tuning.json</code> for you. You stay
-in your creative flow while inventing symbols, and come back to tune
+in your creative flow while inventing keys, and come back to tune
 the values later. Nothing forces you to break the flow.</p>
 
 <img class="doc-shot" src="/assets/symbol-authoring.png" width="1024" height="278"
-  alt="The authoring tool showing a mechanics sentence citing jump.height_tiles, with a side panel classifying the symbol as a known tunable defined in tuning.json with value 3.2"
+  alt="The authoring tool showing a mechanics sentence citing jump.height_tiles, with a side panel classifying the key as a known tunable defined in tuning.json with value 3.2"
   loading="lazy">
 
 <p>Additionally, <code>meta</code> can carry extra facts about a
-symbol, like the range a value must always stay inside. Coyote time,
+key, like the range a value must always stay inside. Coyote time,
 the grace period after a ledge where a jump still works, gets 0.05 to
 0.2 seconds here, and no further. A range can also grant bounded
 freedom: the spec may invite each build to pick its own value inside
 one, and the pick is recorded with the build.</p>
 
-<p>That is the format in miniature. Prose carries the intent, symbols
-carry the numbers. Freeform where you want it, validated where it
-counts.</p>
+<p>That is the format in miniature. Prose carries the intent, the
+keys carry the numbers. Freeform where you want it, validated where
+it counts.</p>
 </section>
 <section class="chapter">
 <h2 id="collections"><span class="chapter-num">3</span>Collections<a class="heading-anchor" href="#collections" aria-label="Link to this section">#</a></h2>
@@ -184,10 +185,10 @@ entry's name sits in the field <code>enemy_name</code>.</p>
 <pre><code class="lang-json">{
   "id": "enemies",
   "format": "platformer-enemy-catalog-v1",
-  "contract": "03-content.md#the-enemy-catalog",
-  "source": { "kind": "catalog", "file": "enemies.json" },
+  "defined_in": "03-content.md#the-enemy-catalog",
+  "source": { "type": "catalog", "file": "enemies.json" },
   "authority": { "level": "fixed" },
-  "id_member": "enemy_name"
+  "id_field": "enemy_name"
 }</code></pre>
 
 <p><code>format</code> represents the shape you decided this
@@ -203,19 +204,19 @@ in detail.</p>
 exists, every name is unique, every reference resolves, is the
 validator's job to check. It is not yours to memorize.</p>
 
-<p>One field up there is still unexplained: <code>contract</code>.
+<p>One field up there is still unexplained: <code>defined_in</code>.
 A collection holds the data, but the builder needs to know what it
 means. That is the next chapter.</p>
 </section>
 <section class="chapter">
-<h2 id="contracts"><span class="chapter-num">4</span>Contracts<a class="heading-anchor" href="#contracts" aria-label="Link to this section">#</a></h2>
-<p>OpenGDD uses <strong>contracts</strong> to tell builders
-how to interpret data. A contract is prose that says what the shape
-of the data means.</p>
+<h2 id="defining-sections"><span class="chapter-num">4</span>Defining sections<a class="heading-anchor" href="#defining-sections" aria-label="Link to this section">#</a></h2>
+<p>OpenGDD ties data to prose with <strong>defining
+sections</strong>: a defining section is the part of a chapter that
+says what the shape of the data means.</p>
 
-<p>A collection is one shape that needs a contract: its fields are
-yours to invent, and they mean nothing until the contract explains
-their meaning:</p>
+<p>A collection is one shape that needs this: its fields are yours to
+invent, and they mean nothing until its defining section explains
+them:</p>
 
 <div class="spec">
 <strong>The enemy catalog.</strong> Each entry in
@@ -227,18 +228,18 @@ leaves its starting tile. <span class="key">behavior</span> is what
 the enemy does, written in plain language.
 </div>
 
-<p>This contract prose is a section that sits in
+<p>This defining prose is a section that sits in
 <code>03-content.md</code>, exactly where the collection's
-<code>contract</code> field points. It is where the builder learns
+<code>defined_in</code> field points. It is where the builder learns
 about the collection and how to read it.</p>
 
 <p>Notice what it never mentions: how an enemy looks. The spec
 decides how the game plays; the look of things is left to whoever
 builds it.</p>
 
-<p>JSON carries the entries, and prose carries their meaning. Symbols
-use the same pattern: JSON carries each value, and prose gives it
-meaning.</p>
+<p>JSON carries the entries, and prose carries their meaning. Tuning
+keys use the same pattern: JSON carries each value, and prose gives
+it meaning.</p>
 </section>
 <section class="chapter">
 <h2 id="the-package"><span class="chapter-num">5</span>The package<a class="heading-anchor" href="#the-package" aria-label="Link to this section">#</a></h2>
@@ -251,7 +252,7 @@ can use that document to make the game.</p>
   tuning.json        the numbers
   01-overview.md     the pitch, and how the game should feel
   02-mechanics.md    the rules
-  03-content.md      the enemy contract
+  03-content.md      the enemy definitions
   05-build-plan.md   phases, and the tests a build has to pass
   enemies.json       the enemies themselves</code></pre>
 
@@ -277,10 +278,10 @@ can use that document to make the game.</p>
     {
       "id": "enemies",
       "format": "platformer-enemy-catalog-v1",
-      "contract": "03-content.md#the-enemy-catalog",
-      "source": { "kind": "catalog", "file": "enemies.json" },
+      "defined_in": "03-content.md#the-enemy-catalog",
+      "source": { "type": "catalog", "file": "enemies.json" },
       "authority": { "level": "fixed" },
-      "id_member": "enemy_name"
+      "id_field": "enemy_name"
     }
   ]
 }</code></pre>

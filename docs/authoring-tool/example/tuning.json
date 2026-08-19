@@ -5,7 +5,7 @@
     "win.line_length": 3
   },
   "meta": {
-    "board.size": { "certify": true },
-    "win.line_length": { "certify": true }
+    "board.size": { "must_match": true },
+    "win.line_length": { "must_match": true }
   }
 }

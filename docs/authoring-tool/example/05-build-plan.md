@@ -50,9 +50,9 @@ numbered test covers it.
 
 ### AT-1: Turns and placement
 
-```verification
+```test
 {
-  "class": "scenario",
+  "type": "scenario",
   "given": "a fresh game on an empty board",
   "when": ["the opening placement is made", "play continues with attempts on both empty and occupied cells until the game ends"],
   "then": ["the opening placement belongs to X", "ownership strictly alternates for the whole game", "every occupied-cell attempt is rejected with board and active player unchanged", "every empty-cell placement is accepted and ends the turn"],
@@ -67,9 +67,9 @@ accepted. There is no other action in the game.
 
 ### AT-2: A win ends the game
 
-```verification
+```test
 {
-  "class": "scenario",
+  "type": "scenario",
   "given": "the three prepared positions defined in the test text, in each of which the active player's next placement completes a line of win.line_length of their marks",
   "when": ["the completing placement is made", "any further placement is attempted"],
   "then": ["the game ends immediately as a win for the mover, with every completed line's cells reported in diagnostics", "the further placement is rejected because the game is over"],
@@ -103,9 +103,9 @@ O X .
 
 ### AT-3: Draw, and win before draw
 
-```verification
+```test
 {
-  "class": "scenario",
+  "type": "scenario",
   "given": "the two prepared positions defined in the test text, each with exactly one empty cell: one where filling it completes no line, and one where filling it completes a line",
   "when": ["the last cell is filled in each position"],
   "then": ["the first position ends in a draw", "the second position ends as a win for the mover, never a draw"],
@@ -131,11 +131,11 @@ X O .
 
 ### AT-4: Direction constraint capture
 
-```verification
+```test
 {
-  "class": "scenario",
+  "type": "scenario",
   "given": "a built game rendered at default settings under the table-reading viewing context, played from an empty board to a finished game",
-  "when": ["the capture fixture samples the rendered color of every placed mark and every grid line during the in-game state"],
+  "when": ["the capture procedure samples the rendered color of every placed mark and every grid line during the in-game state"],
   "then": ["constraints.palette.mark-ink is satisfied over its declared scope"],
   "direction_claims": ["constraints.palette.mark-ink"],
   "diagnostics": ["per-member-sampled-color", "delta-e-per-member"]
@@ -144,7 +144,7 @@ X O .
 
 The claim's value, tolerance, and scope are read from
 [direction.json](direction.json), not repeated here. A member is one
-placed mark or one grid line; the fixture samples each member's
+placed mark or one grid line; the capture procedure samples each member's
 interior pixels, excluding antialiased edges, once, in a stable
 resting frame after any placement animation, and every sampled
 interior pixel must sit within the declared tolerance of the declared

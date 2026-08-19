@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Collections — OpenGDD handbook</title>
+<meta name="description" content="Games repeat themselves: three enemies, fifty cards, a dozen crops. The format gives that repetition a home. A collection keeps entries of one kind together in one …">
+<link rel="canonical" href="https://opengdd.org/handbook/collections/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Collections — OpenGDD handbook">
+<meta property="og:description" content="Games repeat themselves: three enemies, fifty cards, a dozen crops. The format gives that repetition a home. A collection keeps entries of one kind together in one …">
+<meta property="og:url" content="https://opengdd.org/handbook/collections/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Collections — OpenGDD handbook">
+<meta name="twitter:description" content="Games repeat themselves: three enemies, fifty cards, a dozen crops. The format gives that repetition a home. A collection keeps entries of one kind together in one …">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/get-started/">Get Started</a>
+      <a href="/handbook/" aria-current="page">Handbook</a>
+      <a href="/spec/">Spec</a>
+      <a href="/standard/">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Handbook</p><ul>
+<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">1. The shape of a spec</a></li>
+<li class="toc-h2"><a href="/handbook/fantasy-block/">2. The fantasy block</a></li>
+<li class="toc-h2"><a href="/handbook/authority/">3. Authority</a></li>
+<li class="toc-h2"><a href="/handbook/identifiers/">4. Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/tuning/">5. Tuning</a></li>
+<li class="toc-h2"><a href="/handbook/collections/" aria-current="page">6. Collections</a></li>
+<li class="toc-h2"><a href="/handbook/graphs/">7. Graphs</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-states/">8. Modes &amp; states</a></li>
+<li class="toc-h2"><a href="/handbook/acceptance-tests/">9. Acceptance tests</a></li>
+<li class="toc-h2"><a href="/handbook/contracts/">10. Contracts</a></li>
+<li class="toc-h2"><a href="/handbook/direction/">11. Direction: pillars, mood, must_keep</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-pinning/">12. Palette &amp; pinning</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">13. Personalization</a></li>
+<li class="toc-h2"><a href="/handbook/rulebook/">14. The rulebook</a></li>
+<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
+</ul></nav>
+<article class="doc-body">
+<h1>6. Collections</h1>
+<p>Games repeat themselves: three enemies, fifty cards, a dozen crops. The format gives that repetition a home. A <strong>collection</strong> keeps entries of one kind together in one catalog file.</p>
+<p><em><code>crops.json</code>, the catalog file</em></p>
+<pre><code class="lang-json">[
+  {
+    &quot;crop_id&quot;: &quot;millet&quot;,
+    &quot;days_to_ripen&quot;: 3,
+    &quot;after_harvest&quot;: &quot;regrows on its own and can be cut again&quot;
+  },
+  {
+    &quot;crop_id&quot;: &quot;pumpkin&quot;,
+    &quot;days_to_ripen&quot;: 8,
+    &quot;after_harvest&quot;: &quot;clears the plot and leaves it bare&quot;
+  },
+  {
+    &quot;crop_id&quot;: &quot;clover&quot;,
+    &quot;days_to_ripen&quot;: 2,
+    &quot;after_harvest&quot;: &quot;stays in the ground and feeds whatever is planted next&quot;
+  }
+]</code></pre>
+<p><em>the matching entry in <code>manifest.json</code></em></p>
+<pre><code class="lang-json">{
+  &quot;id&quot;: &quot;crops&quot;,
+  &quot;format&quot;: &quot;farm-crop-catalog-v1&quot;,
+  &quot;defined_in&quot;: &quot;03-content.md#the-crop-catalog&quot;,
+  &quot;source&quot;: { &quot;type&quot;: &quot;catalog&quot;, &quot;file&quot;: &quot;crops.json&quot; },
+  &quot;authority&quot;: { &quot;level&quot;: &quot;fixed&quot; },
+  &quot;id_field&quot;: &quot;crop_id&quot;
+}</code></pre>
+<p>The catalog's fields are yours to invent. The manifest entry tells everyone how to read them:</p>
+<ul>
+<li><strong><code>id</code></strong>: the collection's name in the package.</li>
+<li><strong><code>format</code></strong>: the shape you decided these entries have, versioned so a tool can tell one shape from a later one.</li>
+<li><strong><code>defined_in</code></strong>: the section of your own prose that says what the fields mean: what <code>days_to_ripen</code> counts, and that <code>after_harvest</code> is plain language for the builder.</li>
+<li><strong><code>source</code></strong>: one catalog file called <code>crops.json</code>, holding every entry.</li>
+<li><strong><code>authority</code></strong>: how much freedom a builder has with the entries; the levels are the authority chapter's subject.</li>
+<li><strong><code>id_field</code></strong>: the field that names an entry, here <code>crop_id</code>.</li>
+</ul>
+<p>JSON carries the entries, and prose carries their meaning.</p>
+<p>Notice what an entry never mentions: how a crop looks. The spec decides how the game plays, and the look of things is left to whoever builds it. Directing that look, where you want it directed, is the direction chapter's subject.</p>
+<p>The bookkeeping around a collection, that every declared file exists, every name is unique, every reference resolves, is the validator's job to check. It is not yours to memorize.</p>
+<p><em>Full rules: Reference §1b.</em></p>
+<p class="note chapter-pager"><a href="/handbook/tuning/">← Tuning</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/graphs/">Graphs →</a></p>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

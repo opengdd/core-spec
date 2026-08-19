@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The handbook — OpenGDD</title>
+<meta name="description" content="The OpenGDD handbook: what each part of the format is for and how the parts fit together, one short chapter per mechanism.">
+<link rel="canonical" href="https://opengdd.org/handbook/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The handbook — OpenGDD">
+<meta property="og:description" content="The OpenGDD handbook: what each part of the format is for and how the parts fit together, one short chapter per mechanism.">
+<meta property="og:url" content="https://opengdd.org/handbook/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="The handbook — OpenGDD">
+<meta name="twitter:description" content="The OpenGDD handbook: what each part of the format is for and how the parts fit together, one short chapter per mechanism.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/get-started/">Get Started</a>
+      <a href="/handbook/" aria-current="page">Handbook</a>
+      <a href="/spec/">Spec</a>
+      <a href="/standard/">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="wrap">
+<h1>The handbook</h1>
+
+<p>The handbook is where the format starts to make sense as a whole:
+what each part is for, and how the parts fit together. Read the
+<a href="/get-started/">get-started guide</a> to write your first spec;
+read this to understand what you wrote; read
+<a href="/spec/">the specification</a> when you need the exact rule.
+Each chapter stands alone, so start anywhere.</p>
+
+<div class="card-grid">
+  <a class="card" href="/handbook/shape-of-a-spec/">
+    <h2>1. The shape of a spec</h2>
+    <p>Your whole design fits in one folder, and you can hand that folder to anyone. A spec is one folder that holds the whole design at once.</p>
+  </a>
+  <a class="card" href="/handbook/fantasy-block/">
+    <h2>2. The fantasy block</h2>
+    <p>Every game idea starts with a fantasy, the feeling of being inside the game. The fantasy block gives it the first word in the spec: the game in one breath, before a …</p>
+  </a>
+  <a class="card" href="/handbook/authority/">
+    <h2>3. Authority</h2>
+    <p>You control the creative boundaries of your game: what is settled, and what a builder is free to decide. One authority tag above a paragraph says which is which.</p>
+  </a>
+  <a class="card" href="/handbook/identifiers/">
+    <h2>4. Identifiers</h2>
+    <p>Every value in your game can carry a name. An identifier is that name: define the value once, cite the name everywhere you mean it. You write the name in backticks, …</p>
+  </a>
+  <a class="card" href="/handbook/tuning/">
+    <h2>5. Tuning</h2>
+    <p>Your game's numbers live in tuning.json, grouped into two categories: tunables and constants.</p>
+  </a>
+  <a class="card" href="/handbook/collections/">
+    <h2>6. Collections</h2>
+    <p>Games repeat themselves: three enemies, fifty cards, a dozen crops. The format gives that repetition a home. A collection keeps entries of one kind together in one …</p>
+  </a>
+  <a class="card" href="/handbook/graphs/">
+    <h2>7. Graphs</h2>
+    <p>Progression is a structure you own. Which entry opens which is written once and provable from then on, the pattern you know from games like Factorio or Civilization. A …</p>
+  </a>
+  <a class="card" href="/handbook/modes-and-states/">
+    <h2>8. Modes &amp; states</h2>
+    <p>Time does not flow the same everywhere in your game: it runs during a dive, holds still while you plot the course. A mode is a named stretch of play, told apart by which …</p>
+  </a>
+  <a class="card" href="/handbook/acceptance-tests/">
+    <h2>9. Acceptance tests</h2>
+    <p>Your spec can demand proof. An acceptance test is a check a finished build has to pass, and you write it: a small block in your build plan, numbered, placed with the …</p>
+  </a>
+  <a class="card" href="/handbook/contracts/">
+    <h2>10. Contracts</h2>
+    <p>A health pool or a stamina bar, a crafting step, an RTS camera: games run on conventions, mechanisms the industry has designed and polished for decades. Each one hides …</p>
+  </a>
+  <a class="card" href="/handbook/direction/">
+    <h2>11. Direction: pillars, mood, must_keep</h2>
+    <p>The look and feel of your game is yours to direct, and the format gives that direction a file of its own. In direction.json you state the visual and emotional intent …</p>
+  </a>
+  <a class="card" href="/handbook/palette-and-pinning/">
+    <h2>12. Palette &amp; pinning</h2>
+    <p>A game's palette is identity, the way you know a frame of Journey or Limbo with the sound off. A palette role writes one of your colors down where the builder reads it: …</p>
+  </a>
+  <a class="card" href="/handbook/personalization/">
+    <h2>13. Personalization</h2>
+    <p>Your design can ask questions. One spec, and each build answers before it is made: one game, several honest shapes of it. You write the question, the options, and what …</p>
+  </a>
+  <a class="card" href="/handbook/rulebook/">
+    <h2>14. The rulebook</h2>
+    <p>You have met every rule on this page already, each in the chapter that owns it. Here they are stated once, plainly, as the law the validator enforces line by line. Scan …</p>
+  </a>
+  <a class="card" href="/handbook/seeds-and-determinism/">
+    <h2>Seeds &amp; determinism</h2>
+    <p>You can hand someone a word and get your dungeon back. A seed is an ordinary string you write in your spec, and an address built on it names one stream of random numbers …</p>
+  </a>
+</div>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

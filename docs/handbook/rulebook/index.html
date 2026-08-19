@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The rulebook — OpenGDD handbook</title>
+<meta name="description" content="You have met every rule on this page already, each in the chapter that owns it. Here they are stated once, plainly, as the law the validator enforces line by line. Scan …">
+<link rel="canonical" href="https://opengdd.org/handbook/rulebook/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The rulebook — OpenGDD handbook">
+<meta property="og:description" content="You have met every rule on this page already, each in the chapter that owns it. Here they are stated once, plainly, as the law the validator enforces line by line. Scan …">
+<meta property="og:url" content="https://opengdd.org/handbook/rulebook/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="The rulebook — OpenGDD handbook">
+<meta name="twitter:description" content="You have met every rule on this page already, each in the chapter that owns it. Here they are stated once, plainly, as the law the validator enforces line by line. Scan …">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/get-started/">Get Started</a>
+      <a href="/handbook/" aria-current="page">Handbook</a>
+      <a href="/spec/">Spec</a>
+      <a href="/standard/">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Handbook</p><ul>
+<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">1. The shape of a spec</a></li>
+<li class="toc-h2"><a href="/handbook/fantasy-block/">2. The fantasy block</a></li>
+<li class="toc-h2"><a href="/handbook/authority/">3. Authority</a></li>
+<li class="toc-h2"><a href="/handbook/identifiers/">4. Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/tuning/">5. Tuning</a></li>
+<li class="toc-h2"><a href="/handbook/collections/">6. Collections</a></li>
+<li class="toc-h2"><a href="/handbook/graphs/">7. Graphs</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-states/">8. Modes &amp; states</a></li>
+<li class="toc-h2"><a href="/handbook/acceptance-tests/">9. Acceptance tests</a></li>
+<li class="toc-h2"><a href="/handbook/contracts/">10. Contracts</a></li>
+<li class="toc-h2"><a href="/handbook/direction/">11. Direction: pillars, mood, must_keep</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-pinning/">12. Palette &amp; pinning</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">13. Personalization</a></li>
+<li class="toc-h2"><a href="/handbook/rulebook/" aria-current="page">14. The rulebook</a></li>
+<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
+</ul></nav>
+<article class="doc-body">
+<h1>14. The rulebook</h1>
+<p>You have met every rule on this page already, each in the chapter that owns it. Here they are stated once, plainly, as the law the validator enforces line by line. Scan the page before you ship a package, and read it as a reference rather than as homework.</p>
+<h4 id="the-package-and-manifest">The package and manifest<a class="heading-anchor" href="#the-package-and-manifest" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>A package MUST carry <code>manifest.json</code>, <code>tuning.json</code>, <code>01-overview.md</code>, <code>02-mechanics.md</code>, and <code>05-build-plan.md</code>. <code>03-content.md</code> and <code>04-presentation.md</code> are optional.</li>
+<li>A chapter holding the content of one of those five roles MUST use that exact filename. Chapters of your own MAY be named however you like.</li>
+<li>The manifest MUST declare <code>opengdd</code>, <code>id</code>, <code>version</code>, <code>title</code>, <code>designer</code>, <code>target</code>, and <code>build</code>.</li>
+<li>Every path a package writes MUST stay inside the package once its <code>..</code> segments resolve.</li>
+</ul>
+<p>(The shape of a spec)</p>
+<h4 id="the-fantasy-block">The fantasy block<a class="heading-anchor" href="#the-fantasy-block" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><code>01-overview.md</code> MUST open with a fenced <code>fantasy</code> block, after the title and before anything else.</li>
+<li>The block MUST hold at least one fantasy line, and the fantasy lines together MUST NOT exceed 280 characters.</li>
+<li>The block MUST carry one <code>Feel:</code> line naming three to five adjectives.</li>
+<li>The block MUST carry one anti-reference line, opening <code>NOT:</code> or <code>Anti-references:</code>, and that line MUST NOT be empty. Each of the two labels MUST appear at most once.</li>
+<li>A fantasy line MUST NOT carry a citation of any kind: not a tuning key in backticks, not a typed reference wearing <code>state:</code>, <code>content:</code>, <code>descriptor:</code>, or the expression form <code>tuning:</code>, and not a chapter anchor such as <code>03-content.md#the-crop-catalog</code>.</li>
+</ul>
+<p>(The fantasy block)</p>
+<h4 id="authority-tags">Authority tags<a class="heading-anchor" href="#authority-tags" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Prose with no tag above it is Fixed, and a builder MUST build it as written.</li>
+<li>A tag holds from where it sits to the next tag in that heading section, or to the end of the section.</li>
+<li>Every difference a player could notice that changes how the game plays MUST be settled: written out as Fixed, or handed over on purpose.</li>
+<li>A <code>&gt; PERSONALIZATION:</code> tag MUST name a question declared in <code>personalization.json</code>.</li>
+</ul>
+<p>(Authority)</p>
+<h4 id="tuning">Tuning<a class="heading-anchor" href="#tuning" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Every runtime number a rebalance may change MUST live under <code>tunables</code>. A number the game's identity rests on lives under <code>constants</code>, and a rebalance MUST NOT touch it.</li>
+<li>Only numbers live in <code>tuning.json</code>, and every one MUST be finite.</li>
+<li>A tuning key MUST be two or more segments joined by dots. A bare word is not a key.</li>
+<li>A key MUST sit in exactly one of <code>tunables</code> and <code>constants</code>, and every <code>meta</code> key MUST name a key that is there.</li>
+<li>A <code>range</code> is legal only on a tunable, and the value in the file MUST sit inside it.</li>
+<li>Prose that settles a rule MUST cite the tuning key, never the number stored under it.</li>
+</ul>
+<p>(Tuning, and Identifiers)</p>
+<h4 id="collections-and-graphs">Collections and graphs<a class="heading-anchor" href="#collections-and-graphs" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>A collection MUST declare all six of <code>id</code>, <code>format</code>, <code>defined_in</code>, <code>source</code>, <code>authority</code>, and <code>id_field</code>. A one-file catalog is no exception.</li>
+<li>Every declared file and entry MUST exist, and every stable id MUST be unique inside its collection.</li>
+<li>An edge site MUST name <code>from.collection</code>, <code>field</code>, and <code>to</code>, and every id in that field MUST resolve to an entry in a permitted collection.</li>
+<li>A claim about the shape of a graph, such as never looping back, MUST be made by a <code>document-check</code> acceptance test. Declaring the edges claims nothing beyond resolution.</li>
+</ul>
+<p>(Collections, and Graphs)</p>
+<h4 id="modes-and-clocks">Modes and clocks<a class="heading-anchor" href="#modes-and-clocks" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Every declared clock MUST state exactly one behavior for every declared mode.</li>
+<li>A behavior MUST be one of <code>advances</code>, <code>frozen</code>, <code>discrete-only</code>, and <code>does-not-exist</code>.</li>
+<li>Exactly one mode is active at a time, and modes MUST NOT nest.</li>
+</ul>
+<p>(Modes &amp; states)</p>
+<h4 id="acceptance-tests">Acceptance tests<a class="heading-anchor" href="#acceptance-tests" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>The build plan MUST carry at least one acceptance test, numbered from <code>AT-1</code>, unique and ascending in document order. A retired number is never reused.</li>
+<li>Every <code>AT-n</code> heading MUST be followed by a fenced <code>test</code> block, and then the same check in one plain sentence.</li>
+<li>Every test block MUST declare a <code>type</code>: <code>scenario</code>, <code>property</code>, <code>exhaustive-search</code>, or <code>document-check</code>.</li>
+<li>The format's own test-block field names are closed, and a field of your own MAY sit beside them.</li>
+</ul>
+<p>(Acceptance tests)</p>
+<h4 id="direction-and-palette">Direction and palette<a class="heading-anchor" href="#direction-and-palette" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>A direction block in <code>04-presentation.md</code> and a declared <code>direction.json</code> MUST appear together. Either one without the other fails validation.</li>
+<li>Every judged entry, meaning a pillar, a mood, an anti-reference, and a <code>must_keep</code>, MUST name one declared viewing context.</li>
+<li>Every <code>must_keep</code> entry MUST list at least one <code>may_vary</code> axis.</li>
+<li>Every mood MUST carry an <code>intent</code> and at least one <code>anti</code> entry, and every reference MUST name at least one property it borrows.</li>
+<li>A palette role MUST carry <code>value</code>, <code>tolerance</code>, and <code>scope</code>. <code>must_match: true</code> is legal only at <code>tolerance: 0</code>.</li>
+<li>Every entry under <code>constraints</code> MUST be cited by at least one acceptance test. A mood palette role MAY go uncited, and is then judged with its mood.</li>
+</ul>
+<p>(Direction, and Palette &amp; pinning)</p>
+<h4 id="personalization">Personalization<a class="heading-anchor" href="#personalization" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Every question MUST carry an <code>id</code>, a <code>prompt</code>, a <code>type</code> of <code>choice</code>, <code>text</code>, or <code>number</code>, and a <code>default</code>.</li>
+<li>A <code>choice</code> question MUST declare its <code>options</code>, and its <code>default</code> and every recorded answer MUST name one of them.</li>
+<li>A key an answer overrides or resolves into MUST be a tunable. A constant is never legal there.</li>
+<li>Every resolved value MUST land inside its key's declared range, and every path in <code>affects</code> MUST exist.</li>
+</ul>
+<p>(Personalization)</p>
+<p><em>Full rules: the Reference, end to end.</em></p>
+<p class="note chapter-pager"><a href="/handbook/personalization/">← Personalization</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism →</a></p>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

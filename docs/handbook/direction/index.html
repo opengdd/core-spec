@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction: pillars, mood, must_keep — OpenGDD handbook</title>
+<meta name="description" content="The look and feel of your game is yours to direct, and the format gives that direction a file of its own. In direction.json you state the visual and emotional intent …">
+<link rel="canonical" href="https://opengdd.org/handbook/direction/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Direction: pillars, mood, must_keep — OpenGDD handbook">
+<meta property="og:description" content="The look and feel of your game is yours to direct, and the format gives that direction a file of its own. In direction.json you state the visual and emotional intent …">
+<meta property="og:url" content="https://opengdd.org/handbook/direction/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Direction: pillars, mood, must_keep — OpenGDD handbook">
+<meta name="twitter:description" content="The look and feel of your game is yours to direct, and the format gives that direction a file of its own. In direction.json you state the visual and emotional intent …">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/get-started/">Get Started</a>
+      <a href="/handbook/" aria-current="page">Handbook</a>
+      <a href="/spec/">Spec</a>
+      <a href="/standard/">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Handbook</p><ul>
+<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">1. The shape of a spec</a></li>
+<li class="toc-h2"><a href="/handbook/fantasy-block/">2. The fantasy block</a></li>
+<li class="toc-h2"><a href="/handbook/authority/">3. Authority</a></li>
+<li class="toc-h2"><a href="/handbook/identifiers/">4. Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/tuning/">5. Tuning</a></li>
+<li class="toc-h2"><a href="/handbook/collections/">6. Collections</a></li>
+<li class="toc-h2"><a href="/handbook/graphs/">7. Graphs</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-states/">8. Modes &amp; states</a></li>
+<li class="toc-h2"><a href="/handbook/acceptance-tests/">9. Acceptance tests</a></li>
+<li class="toc-h2"><a href="/handbook/contracts/">10. Contracts</a></li>
+<li class="toc-h2"><a href="/handbook/direction/" aria-current="page">11. Direction: pillars, mood, must_keep</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-pinning/">12. Palette &amp; pinning</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">13. Personalization</a></li>
+<li class="toc-h2"><a href="/handbook/rulebook/">14. The rulebook</a></li>
+<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
+</ul></nav>
+<article class="doc-body">
+<h1>11. Direction: pillars, mood, must_keep</h1>
+<p>The look and feel of your game is yours to direct, and the format gives that direction a file of its own. In <code>direction.json</code> you state the visual and emotional intent every build answers to. A short fenced <code>direction</code> block sits at the top of <code>04-presentation.md</code>, and the two travel together: neither is legal without the other.</p>
+<p><em><code>direction.json</code>, beside your manifest</em></p>
+<pre><code class="lang-json">{
+  &quot;pillars&quot;: {
+    &quot;white-on-white-still-reads&quot;: {
+      &quot;statement&quot;: &quot;Snow reads against snow: depth comes from shadow and edge, never from tinting the ground another color.&quot;,
+      &quot;viewing&quot;: &quot;climb-camera&quot;,
+      &quot;tie_break_order&quot;: 1
+    },
+    …
+  },
+  &quot;must_keep&quot;: {
+    &quot;the-rope-stays-legible&quot;: {
+      &quot;statement&quot;: &quot;The rope between climbers stays visible in every weather, and its slack reads at a glance.&quot;,
+      &quot;may_vary&quot;: [
+        &quot;rope color and material&quot;,
+        &quot;how falling snow is rendered&quot;,
+        &quot;HUD styling around the weather warning&quot;
+      ],
+      &quot;viewing&quot;: &quot;climb-camera&quot;
+    }
+  },
+  …
+}</code></pre>
+<p>Three constructs carry a direction:</p>
+<ul>
+<li>A <strong>pillar</strong> is one statement every frame answers to; <code>tie_break_order</code> says which pillar wins when two of them pull apart.</li>
+<li>A <strong>mood</strong> names the feel: a descriptor in your manifest, built from references to real works, with an <code>intent</code> every mood states and an <code>anti</code> list of what it is not.</li>
+<li><strong><code>must_keep</code></strong> states what survives every build, and <code>may_vary</code> lists the freedom around it; that list is never empty.</li>
+</ul>
+<p>Which file holds what is a rule: every claim a build is judged or measured against lives in <code>direction.json</code>, and the mood descriptors those claims point at, with their references and their palettes, live in <code>manifest.json</code>.</p>
+<p>Write the <code>anti</code> list generously. Naming what the mood is not is the surest way to hold a build away from the genre's default look.</p>
+<p>These entries are judged by people rather than measured by a machine. A panel watches the finished game under the viewing context the entry names, here <code>climb-camera</code>, and reads your statements against what they see. You declare each viewing context once, in the <code>viewing</code> block of <code>direction.json</code>, and every judged entry names one. Most direction belongs in that tier.</p>
+<p>A reference binds only what its <code>borrows</code> line names, the way a mood board cites Shadow of the Colossus or Kentucky Route Zero for one quality each: silhouette weight, how light falls. The rest stays open.</p>
+<p>Notice the fragment carries no colors. Exact color values, and the tolerance a machine measures them by, are the palette and pinning chapter's subject.</p>
+<p><em>Full rules: Reference §8a and §9.</em></p>
+<p class="note chapter-pager"><a href="/handbook/contracts/">← Contracts</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/palette-and-pinning/">Palette &amp; pinning →</a></p>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

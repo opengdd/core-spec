@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acceptance tests — OpenGDD handbook</title>
+<meta name="description" content="Your spec can demand proof. An acceptance test is a check a finished build has to pass, and you write it: a small block in your build plan, numbered, placed with the …">
+<link rel="canonical" href="https://opengdd.org/handbook/acceptance-tests/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Acceptance tests — OpenGDD handbook">
+<meta property="og:description" content="Your spec can demand proof. An acceptance test is a check a finished build has to pass, and you write it: a small block in your build plan, numbered, placed with the …">
+<meta property="og:url" content="https://opengdd.org/handbook/acceptance-tests/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Acceptance tests — OpenGDD handbook">
+<meta name="twitter:description" content="Your spec can demand proof. An acceptance test is a check a finished build has to pass, and you write it: a small block in your build plan, numbered, placed with the …">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/get-started/">Get Started</a>
+      <a href="/handbook/" aria-current="page">Handbook</a>
+      <a href="/spec/">Spec</a>
+      <a href="/standard/">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Handbook</p><ul>
+<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">1. The shape of a spec</a></li>
+<li class="toc-h2"><a href="/handbook/fantasy-block/">2. The fantasy block</a></li>
+<li class="toc-h2"><a href="/handbook/authority/">3. Authority</a></li>
+<li class="toc-h2"><a href="/handbook/identifiers/">4. Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/tuning/">5. Tuning</a></li>
+<li class="toc-h2"><a href="/handbook/collections/">6. Collections</a></li>
+<li class="toc-h2"><a href="/handbook/graphs/">7. Graphs</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-states/">8. Modes &amp; states</a></li>
+<li class="toc-h2"><a href="/handbook/acceptance-tests/" aria-current="page">9. Acceptance tests</a></li>
+<li class="toc-h2"><a href="/handbook/contracts/">10. Contracts</a></li>
+<li class="toc-h2"><a href="/handbook/direction/">11. Direction: pillars, mood, must_keep</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-pinning/">12. Palette &amp; pinning</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">13. Personalization</a></li>
+<li class="toc-h2"><a href="/handbook/rulebook/">14. The rulebook</a></li>
+<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
+</ul></nav>
+<article class="doc-body">
+<h1>9. Acceptance tests</h1>
+<p>Your spec can demand proof. An <strong>acceptance test</strong> is a check a finished build has to pass, and you write it: a small block in your build plan, numbered, placed with the phase it belongs to.</p>
+<p><em><code>05-build-plan.md</code>, under the heading <code>AT-4: Alarm on sight</code></em></p>
+<pre><code class="lang-test">{
+  &quot;type&quot;: &quot;scenario&quot;,
+  &quot;given&quot;: &quot;a guard on patrol with the player inside its view cone&quot;,
+  &quot;when&quot;: &quot;the player stays visible for alarm.spot_seconds&quot;,
+  &quot;then&quot;: [&quot;the guard raises the alarm&quot;, &quot;every other guard on the floor starts searching&quot;],
+  &quot;diagnostics&quot;: [&quot;visibility-timeline&quot;, &quot;guard-state-after&quot;]
+}</code></pre>
+<p>The fence carries the word <code>test</code>, and that word marks the block as a check rather than an example. Below it you say the same check in one plain sentence, for readers who never run it.</p>
+<p>The fields:</p>
+<ul>
+<li><strong><code>type</code></strong>: which of the format's four kinds of check this is.<ul>
+<li><code>scenario</code> states a situation, an action, and the outcome.</li>
+<li><code>property</code> states a rule that has to hold across a whole domain of inputs, checked exhaustively or over a declared set of seeds.</li>
+<li><code>exhaustive-search</code> walks a bounded space of states and moves, and a complete walk is what proves something never happens, such as no seed producing an unwinnable level.</li>
+<li><code>document-check</code> reads your spec's own files instead of running the game, and holds them to rules you state.</li>
+</ul></li>
+<li><strong><code>given</code></strong>: the situation the check starts in.</li>
+<li><strong><code>when</code></strong>: what happens. One string, or a list when the check takes several steps.</li>
+<li><strong><code>then</code></strong>: what holds afterwards, here two outcomes at once.</li>
+<li><strong><code>diagnostics</code></strong>: what a failing run reports, so a builder sees which part missed.</li>
+</ul>
+<p>Those field names are the format's own, a closed set that never grows without a revision of the format. A field of your own is legal beside them when your checks need one.</p>
+<p>A claim about look and feel becomes binding the same way: a block covering one carries <code>direction_claims</code>, the exact paths it proves. A measurable claim no test cites fails validation, and the validator catches that for you. You make a thing strict by pointing a check at it. Those claims are the direction chapter's subject.</p>
+<p>The block never says how to pass. It names no code, no engine, no method: the outcome is yours, the route to it is the builder's.</p>
+<p><em>Full rules: Reference §6.</em></p>
+<p class="note chapter-pager"><a href="/handbook/modes-and-states/">← Modes &amp; states</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/contracts/">Contracts →</a></p>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

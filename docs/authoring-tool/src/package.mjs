@@ -63,7 +63,7 @@ export function createScaffoldPackage(id, title) {
       `# Mechanics\n\n[DESIGNER: Explain the rules and how the player changes the game state.]\n\n## Core loop {#core-loop}\n\n[DESIGNER: Replace this with the repeated decisions and feedback that form the game.] The build follows \`#core-loop\`.\n\n## AT-1 — Core loop can be completed\n\n[DESIGNER: State the observable behavior this acceptance test protects.]\n`,
       `# Content\n\n[DESIGNER: List the authored places, characters, objects, encounters, or other content the build needs.]\n`,
       `# Presentation\n\n[DESIGNER: Describe the visual, audio, motion, and interface direction. Include concrete anti-goals.]\n`,
-      `# Build plan\n\n[DESIGNER: Replace this with the build order and checkpoints.] Start with \`#core-loop\`, then run \`AT-1\`.\n\n## AT-1 — Core loop can be completed\n\n\`\`\`verification\n{\n  "class": "scenario",\n  "given": "[DESIGNER: replace with the starting state]",\n  "when": "[DESIGNER: replace with the player action]",\n  "then": "[DESIGNER: replace with the observable result]"\n}\n\`\`\`\n\nDESIGNER PLACEHOLDER: Explain in plain language how the builder should run and judge this test.\n`
+      `# Build plan\n\n[DESIGNER: Replace this with the build order and checkpoints.] Start with \`#core-loop\`, then run \`AT-1\`.\n\n## AT-1 — Core loop can be completed\n\n\`\`\`test\n{\n  "type": "scenario",\n  "given": "[DESIGNER: replace with the starting state]",\n  "when": "[DESIGNER: replace with the player action]",\n  "then": "[DESIGNER: replace with the observable result]"\n}\n\`\`\`\n\nDESIGNER PLACEHOLDER: Explain in plain language how the builder should run and judge this test.\n`
     ],
     tuning: {
       tunables: { "play.session_minutes": 10 },

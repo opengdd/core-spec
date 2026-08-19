@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Palette &amp; pinning — OpenGDD handbook</title>
+<meta name="description" content="A game&#39;s palette is identity, the way you know a frame of Journey or Limbo with the sound off. A palette role writes one of your colors down where the builder reads it: …">
+<link rel="canonical" href="https://opengdd.org/handbook/palette-and-pinning/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Palette &amp; pinning — OpenGDD handbook">
+<meta property="og:description" content="A game&#39;s palette is identity, the way you know a frame of Journey or Limbo with the sound off. A palette role writes one of your colors down where the builder reads it: …">
+<meta property="og:url" content="https://opengdd.org/handbook/palette-and-pinning/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Palette &amp; pinning — OpenGDD handbook">
+<meta name="twitter:description" content="A game&#39;s palette is identity, the way you know a frame of Journey or Limbo with the sound off. A palette role writes one of your colors down where the builder reads it: …">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/get-started/">Get Started</a>
+      <a href="/handbook/" aria-current="page">Handbook</a>
+      <a href="/spec/">Spec</a>
+      <a href="/standard/">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Handbook</p><ul>
+<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">1. The shape of a spec</a></li>
+<li class="toc-h2"><a href="/handbook/fantasy-block/">2. The fantasy block</a></li>
+<li class="toc-h2"><a href="/handbook/authority/">3. Authority</a></li>
+<li class="toc-h2"><a href="/handbook/identifiers/">4. Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/tuning/">5. Tuning</a></li>
+<li class="toc-h2"><a href="/handbook/collections/">6. Collections</a></li>
+<li class="toc-h2"><a href="/handbook/graphs/">7. Graphs</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-states/">8. Modes &amp; states</a></li>
+<li class="toc-h2"><a href="/handbook/acceptance-tests/">9. Acceptance tests</a></li>
+<li class="toc-h2"><a href="/handbook/contracts/">10. Contracts</a></li>
+<li class="toc-h2"><a href="/handbook/direction/">11. Direction: pillars, mood, must_keep</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-pinning/" aria-current="page">12. Palette &amp; pinning</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">13. Personalization</a></li>
+<li class="toc-h2"><a href="/handbook/rulebook/">14. The rulebook</a></li>
+<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
+</ul></nav>
+<article class="doc-body">
+<h1>12. Palette &amp; pinning</h1>
+<p>A game's palette is identity, the way you know a frame of Journey or Limbo with the sound off. A <strong>palette role</strong> writes one of your colors down where the builder reads it: the color, how close a build must stay to it, and what wears it. You define the colors once, and every build follows them instead of guessing your look from adjectives.</p>
+<p><em><code>manifest.json</code>, inside a mood descriptor</em></p>
+<pre><code class="lang-json">{
+  &quot;id&quot;: &quot;quiet-dark&quot;,
+  …
+  &quot;palette&quot;: {
+    &quot;light-flame&quot;: {
+      &quot;value&quot;: &quot;#E8A13C&quot;,
+      &quot;tolerance&quot;: 14,
+      &quot;scope&quot;: {
+        &quot;applies_to&quot;: &quot;candle flame cores and the lantern the player carries&quot;,
+        &quot;states&quot;: [&quot;in-play&quot;],
+        &quot;sampling&quot;: { &quot;sampled&quot;: { &quot;verdict&quot;: &quot;per-sample&quot; } }
+      }
+    }
+  }
+}</code></pre>
+<p>Three fields carry it. <code>value</code> is the color, six hex digits in the form every color picker exports. <code>tolerance</code> is how far a build's color may drift, measured as perceptual color distance: 0 means identical, 1 is the smallest difference an eye can catch, and the 14 above keeps builds within nearby shades of the same flame. <code>scope</code> says what wears the color and when. The colors travel with the spec, and a builder on the other side of the world lights the same flame.</p>
+<p>How precise to be is your choice, color by color. The format has names for the three levels:</p>
+<ul>
+<li><strong>described</strong>: prose, no measurement. Always available, and most direction stays here.</li>
+<li><strong>bounded</strong>: a color with a tolerance, like the 14 above. A build stays inside it.</li>
+<li><strong>exact</strong>: <code>tolerance: 0</code>. Every build reproduces the six digits.</li>
+</ul>
+<p>None of the three words appears in your files. They name how precisely you wrote a color down, and the entry's own shape is what places it.</p>
+<p>A color in a mood is read by people: the reviewers who score a finished build against your mood, the direction chapter's judged tier. Want a machine to hold a color instead? Cite the role from an acceptance test by its path, <code>descriptors.mood.quiet-dark.palette.light-flame</code>, and the test checks captured frames against the tolerance the role already declares. At the far end, <code>must_match: true</code> on an exact role makes a <strong>certified pin</strong>: spend it on the color that is the game. Exact colors, contrast thresholds, and timings can also live under <code>constraints</code> in <code>direction.json</code>, the checked tier of the direction chapter.</p>
+<p>Distribution and harmony stay open. Roles say which colors, never how much of each or where the light falls; that balance stays the builder's craft, judged against your mood. Nothing forces a color to any level, and a color left to the reviewers is a fine place to stay.</p>
+<p><em>Full rules: Reference §8a, §9.5, and §9.9.</em></p>
+<p class="note chapter-pager"><a href="/handbook/direction/">← Direction: pillars, mood, must_keep</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/personalization/">Personalization →</a></p>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

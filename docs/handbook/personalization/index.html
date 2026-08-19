@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personalization — OpenGDD handbook</title>
+<meta name="description" content="Your design can ask questions. One spec, and each build answers before it is made: one game, several honest shapes of it. You write the question, the options, and what …">
+<link rel="canonical" href="https://opengdd.org/handbook/personalization/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Personalization — OpenGDD handbook">
+<meta property="og:description" content="Your design can ask questions. One spec, and each build answers before it is made: one game, several honest shapes of it. You write the question, the options, and what …">
+<meta property="og:url" content="https://opengdd.org/handbook/personalization/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Personalization — OpenGDD handbook">
+<meta name="twitter:description" content="Your design can ask questions. One spec, and each build answers before it is made: one game, several honest shapes of it. You write the question, the options, and what …">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/get-started/">Get Started</a>
+      <a href="/handbook/" aria-current="page">Handbook</a>
+      <a href="/spec/">Spec</a>
+      <a href="/standard/">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Handbook</p><ul>
+<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">1. The shape of a spec</a></li>
+<li class="toc-h2"><a href="/handbook/fantasy-block/">2. The fantasy block</a></li>
+<li class="toc-h2"><a href="/handbook/authority/">3. Authority</a></li>
+<li class="toc-h2"><a href="/handbook/identifiers/">4. Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/tuning/">5. Tuning</a></li>
+<li class="toc-h2"><a href="/handbook/collections/">6. Collections</a></li>
+<li class="toc-h2"><a href="/handbook/graphs/">7. Graphs</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-states/">8. Modes &amp; states</a></li>
+<li class="toc-h2"><a href="/handbook/acceptance-tests/">9. Acceptance tests</a></li>
+<li class="toc-h2"><a href="/handbook/contracts/">10. Contracts</a></li>
+<li class="toc-h2"><a href="/handbook/direction/">11. Direction: pillars, mood, must_keep</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-pinning/">12. Palette &amp; pinning</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/" aria-current="page">13. Personalization</a></li>
+<li class="toc-h2"><a href="/handbook/rulebook/">14. The rulebook</a></li>
+<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
+</ul></nav>
+<article class="doc-body">
+<h1>13. Personalization</h1>
+<p>Your design can ask questions. One spec, and each build answers before it is made: one game, several honest shapes of it. You write the question, the options, and what each option does to the numbers.</p>
+<p><em><code>personalization.json</code>, the questions file</em></p>
+<pre><code class="lang-json">{
+  &quot;questions&quot;: [
+    {
+      &quot;id&quot;: &quot;wave_pressure&quot;,
+      &quot;prompt&quot;: &quot;How hard should the waves press?&quot;,
+      &quot;type&quot;: &quot;choice&quot;,
+      &quot;default&quot;: &quot;steady&quot;,
+      &quot;affects&quot;: [&quot;tuning.json&quot;, &quot;04-presentation.md&quot;],
+      &quot;options&quot;: [
+        {
+          &quot;id&quot;: &quot;calm&quot;,
+          &quot;label&quot;: &quot;Room to think&quot;,
+          &quot;notes&quot;: &quot;Between waves the field goes quiet and the music drops out.&quot;,
+          &quot;tuning_overrides&quot;: { &quot;wave.gap_seconds&quot;: 24 }
+        },
+        {
+          &quot;id&quot;: &quot;steady&quot;,
+          &quot;label&quot;: &quot;Steady pressure&quot;,
+          &quot;notes&quot;: &quot;The pacing as shipped.&quot;
+        },
+        {
+          &quot;id&quot;: &quot;relentless&quot;,
+          &quot;label&quot;: &quot;No breathing room&quot;,
+          &quot;notes&quot;: &quot;The horn for the next wave sounds while the last one is still on the field.&quot;,
+          &quot;tuning_overrides&quot;: { &quot;wave.gap_seconds&quot;: 9 }
+        }
+      ]
+    }
+  ]
+}</code></pre>
+<p>One question, three answers a build can give. Its members:</p>
+<ul>
+<li><strong><code>id</code></strong>: the question's name in the package, and what a build records.</li>
+<li><strong><code>prompt</code></strong>: the question as the builder is asked it.</li>
+<li><strong><code>options</code></strong>: the whole answer space. An id outside this list fails validation.</li>
+<li><strong><code>default</code></strong>: the answer that applies when the question is skipped, naming one declared option.</li>
+<li><strong><code>tuning_overrides</code></strong>: the tunable values an option overrides, here the seconds between waves.</li>
+<li><strong><code>affects</code></strong>: the files you are telling the builder this answer reaches.</li>
+</ul>
+<p>Every question carries a default, so a build that answers nothing is still a whole game, tuned the way you shipped it.</p>
+<p>What an answer moves by machine is numbers, through tuning keys. Everything else it changes, like the horn sounding early, lives in prose the builder reads: the <code>notes</code> here, and the chapter sections the question governs. Give a decision a number and a tuning key when you want it checked.</p>
+<p>Not here: choices a player makes while playing. A difficulty toggle in a menu, or a boon taken mid run, belongs to the running game.</p>
+<p>The authority chapter's <code>&gt; PERSONALIZATION:</code> tag names one of these ids, marking where in your prose a question rules. A <code>number</code> question resolves an answer straight into a tunable's range: the tuning chapter's bounded freedom, now being asked.</p>
+<p>Every build records the answers it was given. That a default names a declared option, and that an override lands inside its key's range, is the validator's job, not yours.</p>
+<p><em>Full rules: Reference §5.</em></p>
+<p class="note chapter-pager"><a href="/handbook/palette-and-pinning/">← Palette &amp; pinning</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/rulebook/">The rulebook →</a></p>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

@@ -185,9 +185,9 @@ function planAction(name, number, manifest, files) {
   if (number !== next) return { actions: [], reason: `Cannot add ${name}: the next acceptance test must be AT-${next}.` };
   const block = `## ${name.toUpperCase()} — Acceptance test
 
-\`\`\`verification
+\`\`\`test
 {
-  "class": "scenario",
+  "type": "scenario",
   "given": "TODO",
   "when": "TODO",
   "then": "TODO"

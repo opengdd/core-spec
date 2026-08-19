@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The shape of a spec — OpenGDD handbook</title>
+<meta name="description" content="Your whole design fits in one folder, and you can hand that folder to anyone. A spec is one folder that holds the whole design at once.">
+<link rel="canonical" href="https://opengdd.org/handbook/shape-of-a-spec/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The shape of a spec — OpenGDD handbook">
+<meta property="og:description" content="Your whole design fits in one folder, and you can hand that folder to anyone. A spec is one folder that holds the whole design at once.">
+<meta property="og:url" content="https://opengdd.org/handbook/shape-of-a-spec/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="The shape of a spec — OpenGDD handbook">
+<meta name="twitter:description" content="Your whole design fits in one folder, and you can hand that folder to anyone. A spec is one folder that holds the whole design at once.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/get-started/">Get Started</a>
+      <a href="/handbook/" aria-current="page">Handbook</a>
+      <a href="/spec/">Spec</a>
+      <a href="/standard/">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Handbook</p><ul>
+<li class="toc-h2"><a href="/handbook/shape-of-a-spec/" aria-current="page">1. The shape of a spec</a></li>
+<li class="toc-h2"><a href="/handbook/fantasy-block/">2. The fantasy block</a></li>
+<li class="toc-h2"><a href="/handbook/authority/">3. Authority</a></li>
+<li class="toc-h2"><a href="/handbook/identifiers/">4. Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/tuning/">5. Tuning</a></li>
+<li class="toc-h2"><a href="/handbook/collections/">6. Collections</a></li>
+<li class="toc-h2"><a href="/handbook/graphs/">7. Graphs</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-states/">8. Modes &amp; states</a></li>
+<li class="toc-h2"><a href="/handbook/acceptance-tests/">9. Acceptance tests</a></li>
+<li class="toc-h2"><a href="/handbook/contracts/">10. Contracts</a></li>
+<li class="toc-h2"><a href="/handbook/direction/">11. Direction: pillars, mood, must_keep</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-pinning/">12. Palette &amp; pinning</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">13. Personalization</a></li>
+<li class="toc-h2"><a href="/handbook/rulebook/">14. The rulebook</a></li>
+<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
+</ul></nav>
+<article class="doc-body">
+<h1>1. The shape of a spec</h1>
+<p>Your whole design fits in one folder, and you can hand that folder to anyone. A <strong>spec</strong> is one folder that holds the whole design at once.</p>
+<p><em>a spec folder</em></p>
+<pre><code class="lang-text">my-dungeon-crawler/
+  manifest.json       what this is, and what to build from
+  tuning.json         the numbers
+  01-overview.md      the pitch, and how the game should feel
+  02-mechanics.md     the rules
+  03-content.md       the game's content in lists
+  04-presentation.md  art direction, and the feel of it
+  05-build-plan.md    phases, and the tests a build has to pass
+  06-traps.md         a chapter of your own</code></pre>
+<p>The Markdown chapters carry the design: creative prose you write to describe the game. The JSON files carry your game's data and can be validated.</p>
+<ul>
+<li>The five numbered names are fixed. A builder opens them by name.</li>
+<li><code>03-content.md</code> and <code>04-presentation.md</code> are optional.</li>
+<li>Past those five, add chapters of your own and name them however you like.</li>
+</ul>
+<p>A builder reads <code>manifest.json</code> first, then the files it points at.</p>
+<p><em><code>manifest.json</code>, complete</em></p>
+<pre><code class="lang-json">{
+  &quot;opengdd&quot;: &quot;0.5&quot;,
+  &quot;id&quot;: &quot;my-dungeon-crawler&quot;,
+  &quot;version&quot;: &quot;0.1.0&quot;,
+  &quot;title&quot;: &quot;My Dungeon Crawler&quot;,
+  &quot;designer&quot;: { &quot;name&quot;: &quot;You&quot; },
+  &quot;target&quot;: { &quot;platform&quot;: &quot;web-2d&quot;, &quot;genre&quot;: &quot;dungeon crawler&quot; },
+  &quot;build&quot;: {
+    &quot;chapters&quot;: [&quot;01-overview.md&quot;, &quot;02-mechanics.md&quot;, &quot;03-content.md&quot;,
+                 &quot;04-presentation.md&quot;, &quot;06-traps.md&quot;],
+    &quot;plan&quot;: &quot;05-build-plan.md&quot;,
+    &quot;tuning&quot;: &quot;tuning.json&quot;
+  }
+}</code></pre>
+<p>The top block is identity, <code>target</code> says what kind of game this is, and <code>build</code> names the files to read.</p>
+<p>Nothing else is hiding. No project file, no build system, nothing to install. The chapters are ordinary Markdown, so any editor you already write in will do.</p>
+<p>The authoring tool creates this skeleton and checks that it stays whole.</p>
+<p><em>Full rules: Reference §1 and §3.</em></p>
+<p class="note chapter-pager"><a href="/handbook/">All chapters</a> · <a href="/handbook/fantasy-block/">The fantasy block →</a></p>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

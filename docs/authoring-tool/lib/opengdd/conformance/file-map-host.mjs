@@ -103,7 +103,7 @@ export function createFileMapHost(fileMap, options = {}) {
     isDirectory: file => directories.has(resolve(file)),
     isSymbolicLink: () => false,
     readLink: file => { throw new Error(`EINVAL: invalid argument, readlink '${file}'`); },
-    // Entry order is unspecified by the host contract (a real filesystem does
+    // Entry order is unspecified by the host interface (a real filesystem does
     // not guarantee one); callers must sort whatever they depend on.
     readDir: directory => {
       const absolute = resolve(directory);

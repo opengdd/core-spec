@@ -11,7 +11,7 @@ import { writeZip } from "./zip-write.mjs";
 
 export { AUTHORING_TOOL_VERSION } from "opengdd-authoring-version";
 
-const SCHEMA_NAMES = ["manifest.schema.json", "direction.schema.json", "opengdd-build.schema.json"];
+const SCHEMA_NAMES = ["manifest.schema.json", "tuning.schema.json", "personalization.schema.json", "direction.schema.json", "opengdd-build.schema.json"];
 const HIDDEN_LEGACY_DRAFTS = new Set(["lantern-demo"]);
 const MAX_WRAPPED_TEXT_CHARS = 200_000;
 
