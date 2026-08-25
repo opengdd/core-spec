@@ -21,18 +21,90 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
 <link rel="stylesheet" href="/assets/site.css">
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
-<link rel="stylesheet" href="/authoring-tool/authoring.css?v=db768a7b9ee4">
+<link rel="stylesheet" href="/authoring-tool/authoring.css?v=d3d40624535f">
 <style>
 .opengdd-authoring,
 .opengdd-author-file-meta a { font-family: var(--font-body); }
+/* The tool page is the one wide page: four panels need the room. */
+.wrap-tool { max-width: 112rem; margin: 0 auto; padding: 0 1.4rem; }
+.site-tool { margin-top: 1.2rem; }
+.site-tool-grid {
+  display: grid;
+  grid-template-columns: minmax(13rem, 0.22fr) minmax(20rem, 1fr) minmax(19rem, 0.33fr) minmax(18rem, 0.31fr);
+  gap: 0.6rem;
+  height: min(78vh, 60rem); min-height: 32rem;
+  margin-top: 0.6rem;
+}
+/* Teal frames: the panels, the toolbar, and the status strip share one
+   frame so they read as one instrument on both the light and dark site. */
+.site-tool-header, .site-tool-status.opengdd-author-region {
+  border: 1px solid var(--accent); border-radius: var(--r-md); overflow: hidden;
+}
+.site-tool-header.opengdd-authoring { min-height: 0; }
+.site-tool-panel {
+  display: flex; flex-direction: column;
+  min-width: 0; min-height: 0; overflow: hidden;
+  border: 1px solid var(--accent); border-radius: var(--r-md);
+  background: var(--panel);
+}
+.site-tool-panel > h2 {
+  margin: 0; padding: 0.45rem 0.75rem;
+  font: 600 0.72rem/1.4 var(--font-head); letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--canvas); background: var(--deep-teal);
+}
+.site-tool-region { position: relative; flex: 1; min-height: 0; overflow: auto; }
+.site-tool-context:empty { display: none; }
+/* Fill rules, mirroring the workbench shell's own stylesheet: the editor
+   takes the prose panel with validation docked under it; the file tree
+   and the extension inspector take their panels' full height. */
+.site-tool-panel-prose .site-tool-region { display: grid; grid-template-rows: minmax(0, 1fr) auto; overflow: hidden; }
+.site-tool-panel-prose .opengdd-author-editor-panel { min-height: 0; }
+.site-tool-panel-prose .opengdd-author-inspector { max-height: 12rem; border: 0; border-top: 1px solid var(--line); }
+.site-tool-panel-explorer .site-tool-region { overflow: hidden; }
+.site-tool-panel-explorer .opengdd-author-tree-panel { display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; border: 0; }
+.site-tool-panel-explorer .opengdd-author-tree { flex: 1; min-height: 0; overflow: auto; }
+.site-tool-panel-outline .opengdd-author-outline { height: 100%; overflow: auto; }
+.site-tool-panel-inspector .site-tool-region { display: grid; }
+.site-tool-panel-inspector .opengdd-author-panel-inspector { box-sizing: border-box; min-height: 100%; overflow: auto; padding: 1rem; }
+.site-tool-status.opengdd-author-region { height: auto; min-height: 0; }
+/* Steward ruling 2026-08-25: the outline's collection workflow is not
+   ready for the public page. The site hides the Collections group and its
+   create entries; collections still validate, and their files stay
+   editable in the explorer. Remove when the tool track ships the flow. */
+.site-tool .opengdd-author-outline-group.opengdd-author-kind--collection,
+.site-tool [data-outline-create="Collection"],
+.site-tool [data-outline-add-record] { display: none; }
+/* Host-side guards for two widget stylesheet gaps (reported to the tool
+   track): outline rows may wrap so a sentence badge takes its own line
+   instead of collapsing to a sliver, and the badge keeps its small size
+   against the widget's own "button { font: inherit }". */
+.site-tool .opengdd-author-outline-entry > div { flex-wrap: wrap; }
+.site-tool .opengdd-author-outline-badge--sentence { flex: 1 1 100%; max-width: none; }
+.site-tool .opengdd-authoring .opengdd-author-outline-badge { font-size: 0.62rem; }
+/* Extension panels render plain headings and paragraphs; keep the site's
+   page-level heading scale out of them. */
+.site-tool-panel-inspector .opengdd-author-panel-inspector h2 { margin: 0 0 0.5rem; font: 600 0.92rem/1.4 var(--font-body); }
+.site-tool-panel-inspector .opengdd-author-panel-inspector h2 code { font-size: 0.88rem; }
+.site-tool-panel-inspector .opengdd-author-panel-inspector p { margin: 0.35rem 0; font-size: 0.82rem; }
+.site-tool-status { margin-top: 0.6rem; }
+@media (max-width: 1100px) {
+  .site-tool-grid {
+    grid-template-columns: minmax(13rem, 0.32fr) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 0.7fr);
+  }
+}
+@media (max-width: 760px) {
+  .site-tool-grid { grid-template-columns: 1fr; grid-template-rows: none; height: auto; }
+  .site-tool-panel { height: 24rem; }
+}
 </style>
 <script type="importmap">
 { "imports": {
-  "opengdd-analysis": "/authoring-tool/lib/lang/tools/src/analysis.mjs?v=db768a7b9ee4",
-  "opengdd-syntax": "/authoring-tool/lib/opengdd/conformance/package-syntax.mjs?v=db768a7b9ee4",
-  "opengdd-file-map-host": "/authoring-tool/lib/opengdd/conformance/file-map-host.mjs?v=db768a7b9ee4",
-  "opengdd-validation": "/authoring-tool/lib/opengdd/conformance/validate-core.mjs?v=db768a7b9ee4",
-  "opengdd-authoring-version": "/authoring-tool/src/version.mjs?v=db768a7b9ee4"
+  "opengdd-analysis": "/authoring-tool/lib/lang/tools/src/analysis.mjs?v=d3d40624535f",
+  "opengdd-syntax": "/authoring-tool/lib/opengdd/conformance/package-syntax.mjs?v=d3d40624535f",
+  "opengdd-file-map-host": "/authoring-tool/lib/opengdd/conformance/file-map-host.mjs?v=d3d40624535f",
+  "opengdd-validation": "/authoring-tool/lib/opengdd/conformance/validate-core.mjs?v=d3d40624535f",
+  "opengdd-authoring-version": "/authoring-tool/src/version.mjs?v=d3d40624535f"
 } }
 </script>
 </head>
@@ -41,8 +113,8 @@
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
-      <a href="/get-started/">Get Started</a>
-      <a href="/handbook/">Handbook</a>
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/">Contracts</a>
       <a href="/spec/">Spec</a>
       <a href="/standard/">Standard</a>
       <a href="/authoring-tool/" aria-current="page">Authoring tool</a>
@@ -52,20 +124,42 @@
   </div>
 </header>
 <main>
-<div class="wrap-wide">
+<div class="wrap-tool">
 <h1>The authoring tool</h1>
-<p class="note"><strong>Preview v0.1 · local-first.</strong> Everything on this page
+<p class="note"><strong>Preview v0.2 · for OpenGDD 0.6 · local-first.</strong> Everything on this page
 runs in your browser: your files never leave it. Drafts save in this
 browser, the tool checks conformance as you write, and "Export ZIP"
 downloads a portable copy. Tic-tac-toe opens as a safe example to
 explore; create or import packages and switch among them with the
 package selector.</p>
 </div>
-<div class="wrap-wide">
-<div id="authoring-tool"></div>
+<div class="wrap-tool site-tool">
+<div class="site-tool-header" id="authoring-tool"></div>
+<div class="site-tool-grid">
+  <section class="site-tool-panel site-tool-panel-explorer" aria-label="Package files">
+    <h2>Files</h2>
+    <div class="site-tool-region" data-tool-region="explorer"></div>
+    <div class="site-tool-context" data-tool-region="context"></div>
+  </section>
+  <section class="site-tool-panel site-tool-panel-prose" aria-label="Prose">
+    <h2>Prose</h2>
+    <div class="site-tool-region" data-tool-region="prose"></div>
+  </section>
+  <section class="site-tool-panel site-tool-panel-outline" aria-label="Outline">
+    <h2>Outline</h2>
+    <div class="site-tool-region" data-tool-region="outline"></div>
+  </section>
+  <section class="site-tool-panel site-tool-panel-inspector" aria-label="Inspector">
+    <h2>Inspector</h2>
+    <div class="site-tool-region" data-tool-region="inspector"></div>
+  </section>
+</div>
+<footer class="site-tool-status" data-tool-region="status" aria-label="Package status"></footer>
 </div>
 <script type="module">
-import { mountAuthoringTool } from "/authoring-tool/src/tool.mjs?v=db768a7b9ee4";
+import { mountAuthoringTool } from "/authoring-tool/src/tool.mjs?v=d3d40624535f";
+import inContextPanel from "/authoring-tool/panels/opengdd.in-context/panel.mjs?v=d3d40624535f";
+import notesPanel from "/authoring-tool/panels/example.notes/notes.mjs?v=d3d40624535f";
 
 const fetchJson = async (url) => {
   const response = await fetch(url);
@@ -78,8 +172,11 @@ const fetchText = async (url) => {
   return response.text();
 };
 
-const SCHEMA_BASE = "/schema/core/v0.5/";
-const schemaNames = ["manifest.schema.json", "direction.schema.json", "opengdd-build.schema.json"];
+const SCHEMA_BASE = "/schema/core/v0.6/";
+const schemaNames = [
+  "manifest.schema.json", "tuning.schema.json", "personalization.schema.json",
+  "collection.schema.json", "direction.schema.json", "opengdd-build.schema.json",
+];
 let schemaRequest;
 // Cache the schemas, but never cache a failure.
 const loadSchemas = () => schemaRequest ??= Promise.all(
@@ -89,22 +186,47 @@ const loadSchemas = () => schemaRequest ??= Promise.all(
 const EXAMPLE_BASE = "/authoring-tool/example/";
 const exampleFiles = ["manifest.json","tuning.json","01-overview.md","02-mechanics.md","04-presentation.md","direction.json","05-build-plan.md"];
 
+const region = (name) => document.querySelector('[data-tool-region="' + name + '"]');
+
+// The tool follows the site's theme toggle, not the operating system: the
+// widget honors an ancestor's opengdd-author-theme--light/--dark class.
+const shellElement = document.querySelector(".site-tool");
+const syncTheme = () => {
+  const dark = document.documentElement.dataset.theme === "dark";
+  shellElement.classList.toggle("opengdd-author-theme--dark", dark);
+  shellElement.classList.toggle("opengdd-author-theme--light", !dark);
+};
+syncTheme();
+new MutationObserver(syncTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
 mountAuthoringTool(document.querySelector("#authoring-tool"), {
   headingLevel: 2,
+  regions: {
+    explorer: region("explorer"),
+    context: region("context"),
+    prose: region("prose"),
+    outline: region("outline"),
+    inspector: region("inspector"),
+    status: region("status"),
+  },
+  // Policy stated explicitly: the site host keeps the widget's simple
+  // package flow (tic-tac-toe opens; no cold-start chooser, no host undo).
+  capabilities: { protectedFiles: true, workbenchLabels: true, hostUndo: false, delete: true, coldStart: false },
+  panels: [inContextPanel, notesPanel],
   schemas: loadSchemas,
   defaultPackageId: "tic-tac-toe",
   async listPackages() {
-    return [{ id: "tic-tac-toe", title: "Tic-Tac-Toe", revision: "cc2ac3bd0aa4" }];
+    return [{ id: "tic-tac-toe", title: "Tic-Tac-Toe", revision: "37c1f5a74ea2" }];
   },
   async loadPackage(id) {
     if (id !== "tic-tac-toe") throw new Error("Unknown package: " + id);
     const files = await Promise.all(exampleFiles.map(async (path) => ({
-      path, text: await fetchText(EXAMPLE_BASE + path + "?v=db768a7b9ee4"),
+      path, text: await fetchText(EXAMPLE_BASE + path + "?v=d3d40624535f"),
     })));
     return { id, title: "Tic-Tac-Toe", path: EXAMPLE_BASE, files };
   },
   readerUrl(_packagePath, file) {
-    return EXAMPLE_BASE + file + "?v=db768a7b9ee4";
+    return EXAMPLE_BASE + file + "?v=d3d40624535f";
   },
 });
 </script>

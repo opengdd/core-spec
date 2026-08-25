@@ -1,0 +1,12 @@
+[data-panel="example.notes"] textarea {
+  box-sizing: border-box;
+  min-block-size: 12rem;
+  inline-size: 100%;
+  padding: 0.65rem;
+  border: 1px solid var(--opengdd-author-line);
+  border-radius: 0.25rem;
+  color: var(--opengdd-author-ink);
+  background: var(--opengdd-author-surface);
+  font: inherit;
+  resize: vertical;
+}

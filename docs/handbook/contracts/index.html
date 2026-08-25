@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Contracts — OpenGDD handbook</title>
-<meta name="description" content="A health pool or a stamina bar, a crafting step, an RTS camera: games run on conventions, mechanisms the industry has designed and polished for decades. Each one hides …">
+<title>Contracts | OpenGDD handbook</title>
+<meta name="description" content="A contract provides reusable questions, values, and tests for a familiar game system, such as a health pool or a strategy-game camera. Adopt the contract and record this …">
 <link rel="canonical" href="https://opengdd.org/handbook/contracts/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Contracts — OpenGDD handbook">
-<meta property="og:description" content="A health pool or a stamina bar, a crafting step, an RTS camera: games run on conventions, mechanisms the industry has designed and polished for decades. Each one hides …">
+<meta property="og:title" content="Contracts | OpenGDD handbook">
+<meta property="og:description" content="A contract provides reusable questions, values, and tests for a familiar game system, such as a health pool or a strategy-game camera. Adopt the contract and record this …">
 <meta property="og:url" content="https://opengdd.org/handbook/contracts/">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Contracts — OpenGDD handbook">
-<meta name="twitter:description" content="A health pool or a stamina bar, a crafting step, an RTS camera: games run on conventions, mechanisms the industry has designed and polished for decades. Each one hides …">
+<meta name="twitter:title" content="Contracts | OpenGDD handbook">
+<meta name="twitter:description" content="A contract provides reusable questions, values, and tests for a familiar game system, such as a health pool or a strategy-game camera. Adopt the contract and record this …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -27,8 +27,8 @@
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
-      <a href="/get-started/">Get Started</a>
-      <a href="/handbook/" aria-current="page">Handbook</a>
+      <a href="/learn/" aria-current="page">Learn</a>
+      <a href="/contracts/">Contracts</a>
       <a href="/spec/">Spec</a>
       <a href="/standard/">Standard</a>
       <a href="/authoring-tool/">Authoring tool</a>
@@ -39,56 +39,84 @@
 </header>
 <main>
 <div class="doc-layout">
-<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Handbook</p><ul>
-<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">1. The shape of a spec</a></li>
-<li class="toc-h2"><a href="/handbook/fantasy-block/">2. The fantasy block</a></li>
-<li class="toc-h2"><a href="/handbook/authority/">3. Authority</a></li>
-<li class="toc-h2"><a href="/handbook/identifiers/">4. Identifiers</a></li>
-<li class="toc-h2"><a href="/handbook/tuning/">5. Tuning</a></li>
-<li class="toc-h2"><a href="/handbook/collections/">6. Collections</a></li>
-<li class="toc-h2"><a href="/handbook/graphs/">7. Graphs</a></li>
-<li class="toc-h2"><a href="/handbook/modes-and-states/">8. Modes &amp; states</a></li>
-<li class="toc-h2"><a href="/handbook/acceptance-tests/">9. Acceptance tests</a></li>
-<li class="toc-h2"><a href="/handbook/contracts/" aria-current="page">10. Contracts</a></li>
-<li class="toc-h2"><a href="/handbook/direction/">11. Direction: pillars, mood, must_keep</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-pinning/">12. Palette &amp; pinning</a></li>
-<li class="toc-h2"><a href="/handbook/personalization/">13. Personalization</a></li>
-<li class="toc-h2"><a href="/handbook/rulebook/">14. The rulebook</a></li>
+<nav class="doc-toc" aria-label="Learn"><p class="toc-title">Learn</p>
+<ul class="learn-resources">
+<li><a href="/get-started/">Get started</a></li>
+<li><a href="/handbook/" class="toc-resource-current">Handbook</a></li>
+</ul>
+<div class="toc-group">
+<p class="toc-group-title">Start and foundations</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/an-afternoon-spec/">An afternoon spec</a></li>
+<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">The shape of a spec</a></li>
+<li class="toc-h2"><a href="/handbook/fantasy-block/">The fantasy block</a></li>
+<li class="toc-h2"><a href="/handbook/authority/">Authority</a></li>
+<li class="toc-h2"><a href="/handbook/identifiers/">Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/tuning/">Tuning</a></li>
+<li class="toc-h2"><a href="/handbook/acceptance-tests/">Acceptance tests</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Game systems and content</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/collections/">Collections</a></li>
+<li class="toc-h2"><a href="/handbook/graphs/">Graphs</a></li>
+<li class="toc-h2"><a href="/handbook/runtime-state/">Runtime state</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes &amp; clocks</a></li>
 <li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
-</ul></nav>
+<li class="toc-h2"><a href="/handbook/contracts/" class="here" aria-current="page">Contracts</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Art direction and variation</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-pinning/">Palette &amp; pinning</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">Personalization</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Checking and handoff</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/promises-and-proof/">Promises and proof</a></li>
+<li class="toc-h2"><a href="/handbook/rulebook/">Preflight checklist</a></li>
+</ul>
+</div>
+</nav>
 <article class="doc-body">
-<h1>10. Contracts</h1>
-<p>A health pool or a stamina bar, a crafting step, an RTS camera: games run on conventions, mechanisms the industry has designed and polished for decades. Each one hides the same quiet questions, answered a thousand times and rarely written down. Does overheal clamp? Does a failed craft consume its inputs? A <strong>contract</strong> is one convention written down once, with every question it forces already listed. You adopt one instead of describing the mechanism again.</p>
+<h1>Contracts</h1>
+<p><em>Opt-in: add this when your game needs it.</em></p>
+<p>A <strong>contract</strong> provides reusable questions, values, and tests for a familiar game system, such as a health pool or a strategy-game camera. Adopt the contract and record this game's answers.</p>
 <p><em><code>contracts/stamina.json</code>, one adopted contract</em></p>
 <pre><code class="lang-json">{
   &quot;format&quot;: &quot;opengdd-contract-instance-1&quot;,
   &quot;instance&quot;: &quot;stamina&quot;,
+  &quot;about&quot;: &quot;Stamina powers sprinting and dodging. Drain rates and refill sources stay in this game's chapters.&quot;,
   &quot;core&quot;: {
     …
   },
   &quot;surface&quot;: {
     &quot;answers&quot;: {
-      &quot;at-zero&quot;: &quot;exhausted-lockout&quot;,
-      &quot;at-max&quot;: &quot;clamp&quot;
+      &quot;at-min-effect&quot;: &quot;clamp&quot;
     },
     &quot;knobs&quot;: {
-      &quot;max&quot;: 100,
-      &quot;regen-per-second&quot;: 12
+      &quot;min&quot;: { &quot;value&quot;: 0, &quot;unit&quot;: &quot;stamina-points&quot; },
+      &quot;max&quot;: { &quot;value&quot;: 100, &quot;unit&quot;: &quot;stamina-points&quot; }
     }
   }
 }</code></pre>
-<p>Both halves sit in one file:</p>
+<p>The file has two parts:</p>
 <ul>
-<li>the <strong>core</strong> asks the questions. You copy it in whole and change nothing: those bytes are the shared convention, the same in every game that adopts it.</li>
-<li>the <strong>surface</strong> records this game's answers. One line per question, one number per <strong>knob</strong>, the core's word for a number it takes.</li>
+<li>the <strong>core</strong> declares the system, its questions, and reusable acceptance-test patterns. Copy the chosen core unchanged.</li>
+<li>the <strong>surface</strong> records this game's answers. One line per question, plus one value per <strong>knob</strong>, which is a number defined by the core.</li>
 </ul>
-<p>So <code>at-zero</code> is nobody's invention here. The core asked what happens when the bar empties, and <code>exhausted-lockout</code> is one of the answers it offers. Answering honestly is the work. The typing is not.</p>
-<p>Your build plan then grows the acceptance tests your answers imply, ready-made and named. You never edit that generated block: change an answer, and the authoring tool regenerates it for you.</p>
-<p>Content that merely uses the mechanism stays where it lives, in your chapters and your collections. So does your balance. <code>tuning.json</code> stays purely yours, and a knob's number travels with the build from the surface, never copied across. Ranges are the tuning chapter's subject.</p>
-<p>The questions are not yours to invent. A core that fits your mechanism arrives carrying all of them, and one left blank is the validator's catch rather than your memory's.</p>
-<p>The mechanism is everybody's. The answers are this game's.</p>
-<p><em>Full rules: Reference §10.</em></p>
-<p class="note chapter-pager"><a href="/handbook/acceptance-tests/">← Acceptance tests</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/direction/">Direction: pillars, mood, must_keep →</a></p>
+<p>This excerpt shows one answer and two knobs. A complete surface answers every question that applies. <code>format</code> identifies the kind of file. <code>instance</code> is this game's name for the adopted contract and matches the filename.</p>
+<p>The core asks what happens when stamina would fall below its minimum. This game answers <code>clamp</code>, so the value stops at the minimum. Every applicable question gets one answer.</p>
+<p>The <code>about</code> line explains how this game uses stamina. Game-specific rules, such as which actions drain it, remain in your chapters.</p>
+<p>When the core includes test templates, the authoring tool generates their acceptance tests in the build plan. After changing an answer, regenerate the tests instead of editing them by hand.</p>
+<p><a href="/contracts/">Browse the contracts catalogue</a> to compare the questions and answers before adopting one.</p>
+<p><em>Full rules: <a href="/spec/">OpenGDD specification</a>, §10.</em></p>
+<p class="note chapter-pager"><a href="/handbook/seeds-and-determinism/">← Seeds &amp; determinism</a> · <a href="/handbook/">All chapters</a></p>
 </article>
 </div>
 </main>

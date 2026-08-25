@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The shape of a spec — OpenGDD handbook</title>
-<meta name="description" content="Your whole design fits in one folder, and you can hand that folder to anyone. A spec is one folder that holds the whole design at once.">
+<title>The shape of a spec | OpenGDD handbook</title>
+<meta name="description" content="A spec is one folder containing the complete design. You can give that folder directly to a builder.">
 <link rel="canonical" href="https://opengdd.org/handbook/shape-of-a-spec/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="The shape of a spec — OpenGDD handbook">
-<meta property="og:description" content="Your whole design fits in one folder, and you can hand that folder to anyone. A spec is one folder that holds the whole design at once.">
+<meta property="og:title" content="The shape of a spec | OpenGDD handbook">
+<meta property="og:description" content="A spec is one folder containing the complete design. You can give that folder directly to a builder.">
 <meta property="og:url" content="https://opengdd.org/handbook/shape-of-a-spec/">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="The shape of a spec — OpenGDD handbook">
-<meta name="twitter:description" content="Your whole design fits in one folder, and you can hand that folder to anyone. A spec is one folder that holds the whole design at once.">
+<meta name="twitter:title" content="The shape of a spec | OpenGDD handbook">
+<meta name="twitter:description" content="A spec is one folder containing the complete design. You can give that folder directly to a builder.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -27,8 +27,8 @@
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
-      <a href="/get-started/">Get Started</a>
-      <a href="/handbook/" aria-current="page">Handbook</a>
+      <a href="/learn/" aria-current="page">Learn</a>
+      <a href="/contracts/">Contracts</a>
       <a href="/spec/">Spec</a>
       <a href="/standard/">Standard</a>
       <a href="/authoring-tool/">Authoring tool</a>
@@ -39,46 +39,75 @@
 </header>
 <main>
 <div class="doc-layout">
-<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Handbook</p><ul>
-<li class="toc-h2"><a href="/handbook/shape-of-a-spec/" aria-current="page">1. The shape of a spec</a></li>
-<li class="toc-h2"><a href="/handbook/fantasy-block/">2. The fantasy block</a></li>
-<li class="toc-h2"><a href="/handbook/authority/">3. Authority</a></li>
-<li class="toc-h2"><a href="/handbook/identifiers/">4. Identifiers</a></li>
-<li class="toc-h2"><a href="/handbook/tuning/">5. Tuning</a></li>
-<li class="toc-h2"><a href="/handbook/collections/">6. Collections</a></li>
-<li class="toc-h2"><a href="/handbook/graphs/">7. Graphs</a></li>
-<li class="toc-h2"><a href="/handbook/modes-and-states/">8. Modes &amp; states</a></li>
-<li class="toc-h2"><a href="/handbook/acceptance-tests/">9. Acceptance tests</a></li>
-<li class="toc-h2"><a href="/handbook/contracts/">10. Contracts</a></li>
-<li class="toc-h2"><a href="/handbook/direction/">11. Direction: pillars, mood, must_keep</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-pinning/">12. Palette &amp; pinning</a></li>
-<li class="toc-h2"><a href="/handbook/personalization/">13. Personalization</a></li>
-<li class="toc-h2"><a href="/handbook/rulebook/">14. The rulebook</a></li>
+<nav class="doc-toc" aria-label="Learn"><p class="toc-title">Learn</p>
+<ul class="learn-resources">
+<li><a href="/get-started/">Get started</a></li>
+<li><a href="/handbook/" class="toc-resource-current">Handbook</a></li>
+</ul>
+<div class="toc-group">
+<p class="toc-group-title">Start and foundations</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/an-afternoon-spec/">An afternoon spec</a></li>
+<li class="toc-h2"><a href="/handbook/shape-of-a-spec/" class="here" aria-current="page">The shape of a spec</a></li>
+<li class="toc-h2"><a href="/handbook/fantasy-block/">The fantasy block</a></li>
+<li class="toc-h2"><a href="/handbook/authority/">Authority</a></li>
+<li class="toc-h2"><a href="/handbook/identifiers/">Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/tuning/">Tuning</a></li>
+<li class="toc-h2"><a href="/handbook/acceptance-tests/">Acceptance tests</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Game systems and content</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/collections/">Collections</a></li>
+<li class="toc-h2"><a href="/handbook/graphs/">Graphs</a></li>
+<li class="toc-h2"><a href="/handbook/runtime-state/">Runtime state</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes &amp; clocks</a></li>
 <li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
-</ul></nav>
+<li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Art direction and variation</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-pinning/">Palette &amp; pinning</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">Personalization</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Checking and handoff</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/promises-and-proof/">Promises and proof</a></li>
+<li class="toc-h2"><a href="/handbook/rulebook/">Preflight checklist</a></li>
+</ul>
+</div>
+</nav>
 <article class="doc-body">
-<h1>1. The shape of a spec</h1>
-<p>Your whole design fits in one folder, and you can hand that folder to anyone. A <strong>spec</strong> is one folder that holds the whole design at once.</p>
+<h1>The shape of a spec</h1>
+<p><em>Required: every spec has this.</em></p>
+<p>A <strong>spec</strong> is one folder containing the complete design. You can give that folder directly to a builder.</p>
 <p><em>a spec folder</em></p>
 <pre><code class="lang-text">my-dungeon-crawler/
   manifest.json       what this is, and what to build from
   tuning.json         the numbers
   01-overview.md      the pitch, and how the game should feel
   02-mechanics.md     the rules
-  03-content.md       the game's content in lists
-  04-presentation.md  art direction, and the feel of it
+  03-content.md       prose about the game's content
+  04-presentation.md  art direction and presentation
   05-build-plan.md    phases, and the tests a build has to pass
   06-traps.md         a chapter of your own</code></pre>
-<p>The Markdown chapters carry the design: creative prose you write to describe the game. The JSON files carry your game's data and can be validated.</p>
+<p>The Markdown chapters describe the game in prose. The JSON files store structured data that can be validated.</p>
 <ul>
-<li>The five numbered names are fixed. A builder opens them by name.</li>
+<li>The five numbered filenames are standard. A builder opens them by name.</li>
 <li><code>03-content.md</code> and <code>04-presentation.md</code> are optional.</li>
-<li>Past those five, add chapters of your own and name them however you like.</li>
+<li>Past those five, add chapters of your own and name them however you like. Names numbered <code>06</code> and higher are reserved for your chapters. Future standard files will have unnumbered names.</li>
 </ul>
-<p>A builder reads <code>manifest.json</code> first, then the files it points at.</p>
+<p>The five required files can describe a complete game. Add opt-in files and folders only when your design uses them.</p>
+<p>A builder reads <code>manifest.json</code> first, then the standard files and every additional file listed there.</p>
 <p><em><code>manifest.json</code>, complete</em></p>
 <pre><code class="lang-json">{
-  &quot;opengdd&quot;: &quot;0.5&quot;,
+  &quot;opengdd&quot;: &quot;0.6&quot;,
   &quot;id&quot;: &quot;my-dungeon-crawler&quot;,
   &quot;version&quot;: &quot;0.1.0&quot;,
   &quot;title&quot;: &quot;My Dungeon Crawler&quot;,
@@ -86,16 +115,14 @@
   &quot;target&quot;: { &quot;platform&quot;: &quot;web-2d&quot;, &quot;genre&quot;: &quot;dungeon crawler&quot; },
   &quot;build&quot;: {
     &quot;chapters&quot;: [&quot;01-overview.md&quot;, &quot;02-mechanics.md&quot;, &quot;03-content.md&quot;,
-                 &quot;04-presentation.md&quot;, &quot;06-traps.md&quot;],
-    &quot;plan&quot;: &quot;05-build-plan.md&quot;,
-    &quot;tuning&quot;: &quot;tuning.json&quot;
+                 &quot;04-presentation.md&quot;, &quot;06-traps.md&quot;]
   }
 }</code></pre>
-<p>The top block is identity, <code>target</code> says what kind of game this is, and <code>build</code> names the files to read.</p>
-<p>Nothing else is hiding. No project file, no build system, nothing to install. The chapters are ordinary Markdown, so any editor you already write in will do.</p>
-<p>The authoring tool creates this skeleton and checks that it stays whole.</p>
-<p><em>Full rules: Reference §1 and §3.</em></p>
-<p class="note chapter-pager"><a href="/handbook/">All chapters</a> · <a href="/handbook/fantasy-block/">The fantasy block →</a></p>
+<p><code>opengdd</code> selects the format version. <code>id</code>, <code>version</code>, <code>title</code>, and <code>designer</code> identify the package. <code>target</code> says what kind of game to build, and <code>build.chapters</code> gives the reading order for your prose. The build plan and tuning file already have standard names, so the manifest does not repeat their paths.</p>
+<p>These are ordinary Markdown and JSON files, independent of any engine or build system. The authoring tool can create the folder and keep its names and references connected.</p>
+<p>In later JSON examples, <code>…</code> means that unrelated fields were left out.</p>
+<p><em>Full rules: <a href="/spec/">OpenGDD specification</a>, §1 and §3.</em></p>
+<p class="note chapter-pager"><a href="/handbook/an-afternoon-spec/">← An afternoon spec</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/fantasy-block/">The fantasy block →</a></p>
 </article>
 </div>
 </main>

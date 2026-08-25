@@ -17,7 +17,7 @@ This guide provides that lesson from outside the package.
 The package directory contains seven plain files:
 
 - [manifest.json](../tic-tac-toe/manifest.json): identity and the
-  build contract.
+  build's rules.
 - [tuning.json](../tic-tac-toe/tuning.json): numeric gameplay rules
   held as data.
 - [01-overview.md](../tic-tac-toe/01-overview.md): the game at a
@@ -103,10 +103,10 @@ test, a judged claim, and a certified build are different facts.
    decisions belong to the builder, within the fantasy and direction
    boundaries.
 
-3. **Acceptance testing.** A runner carries out the structured test
-   descriptors in the build plan against the build and records each
-   result and its named diagnostics. Revision 0.5 specifies those
-   contracts but does not define a universal mechanical interface for
+3. **Acceptance testing.** A runner carries out the fenced test blocks
+   in the build plan against the build and records each result and its
+   named diagnostics. Revision 0.6 specifies those
+   test shapes but does not define a universal mechanical interface for
    driving arbitrary games, so the runner is currently a person or a
    capable agent, not necessarily a generic test harness.
 
@@ -118,8 +118,8 @@ test, a judged claim, and a certified build are different facts.
    verdict scope (SPEC §2d).
 
 5. **Certification.** A separate audit checks the full record:
-   all acceptance tests, exact runtime equality for certified tuning
-   constants, the resolved snapshot and other required facts in
+   all acceptance tests, exact runtime equality for `must_match` tuning
+   keys, the resolved snapshot and other required facts in
    `opengdd-build.json`, hash reproducibility, the judged findings
    record's validity,
    and direct implementation of Fixed obligations. The draft
@@ -129,12 +129,12 @@ test, a judged claim, and a certified build are different facts.
 In this draft, certification is experimental (SPEC §2d): the verdicts above
 come from the draft build-certification protocol published with the
 conformance suite, and the specification itself defines no normative
-certification verdict in v0.5. Certification does not grant or imply
+certification verdict in v0.6. Certification does not grant or imply
 authorization under an OpenGDD certification-mark program. No such program
 operates today.
 
 The vocabulary is worth keeping precise. Package validation is
-**schema-validated**. A palette tolerance is **objectively
+**schema-validated**. A color tolerance is **objectively
 measurable**. Acceptance tests are **runner-executed**. Mood is
 **human-judged**. An objectively measurable claim still needs a
 runner and evidence; measurable does not mean the package validator
@@ -145,21 +145,22 @@ Passing tests is necessary, not sufficient. The lean build plan says,
 boundary.” A Fixed sentence binds even if no numbered test repeats it,
 and certification is where the auditor accounts for that remainder.
 
-## manifest.json: identity and contract
+## manifest.json: identity and rules
 
 The [manifest](../tic-tac-toe/manifest.json) opens with
-`"opengdd": "0.5"`; that version governs the whole package. Its
+`"opengdd": "0.6"`; that version governs the whole package. Its
 identity fields name the specification and designer. The `target`
 block declares `web-2d`, the genre, a two-minute session, and the
 two-players-one-device audience. Genre, session length, and audience
 are descriptive metadata. Platform is part of the format's declared
 target family.
 
-The `build` block is the builder's entry point. It names the chapters
-in reading order, then the plan, tuning file, and direction carrier.
-A declared file is load-bearing: it must exist and its contents bind
-the build. The guide is absent from this block because it is not part
-of the specification.
+The `build` block is the builder's entry point. It names the chapters in
+reading order and the optional direction file. The build plan and tuning file
+have canonical root paths, `05-build-plan.md` and `tuning.json`, so the
+manifest does not repeat them. A declared file is load-bearing: it must exist
+and its contents bind the build. The guide is absent from this block because
+it is not part of the specification.
 
 The `descriptors.mood` entry names `paper-quiet`. Its `intent`
 describes a nearby, friendly scrap-paper game, and its three `anti`
@@ -168,36 +169,48 @@ gloss. Other files can cite the descriptor instead of restating it.
 Anti-references matter because excluded interpretations often narrow
 delegated space more efficiently than more positive adjectives.
 
+The manifest also carries the package's `palette`, the declared colors
+the direction file binds by name. A color lives there once; a
+constraint in `direction.json` says how closely a build must hold to
+it.
+
 There is no `commerce` block. It is optional and irrelevant to this
 archival teaching specimen.
 
 ## tuning.json: numeric rules held as data
 
 The [tuning file](../tic-tac-toe/tuning.json) separates numbers by
-role:
+change authority:
 
 - `tunables` contains rebalance-safe runtime numbers.
 - `constants` contains numeric rules whose change would change the
   game.
-- `meta` carries metadata for keys, including whether exact runtime
-  equality must be certified.
+- `meta` carries metadata for keys, including a `must_match` pin for
+  exact runtime equality.
 
 Here `tunables` is empty. `board.size` and `win.line_length` are both
-constants and both have `certify: true`. A wider board or a different
+constants and both have `must_match: true`. A wider board or a different
 line length would be a different game, not a balance patch. The dots
 in those names are ordinary characters in flat keys, not nested JSON.
 
 The chapters refer to the keys instead of repeating their digits.
 That gives each numeric rule one source of truth and lets the
 validator warn about duplicated normative numbers. The certification
-gate later compares the constants with the resolved snapshot of what
-the running build actually consumed; copying the right digits into a
-source file is not enough if runtime behavior uses something else.
+gate later compares the `must_match` constants with the resolved
+snapshot of what the running build actually consumed; copying the right
+digits into a source file is not enough if runtime behavior uses
+something else.
 
 The tuning file does not own every number in the package. Target
 metadata, color values and tolerances, and numbers invented inside
 delegated craft have different homes. It owns normative numeric
 gameplay parameters.
+
+The build record stores the resolved tuning snapshot as an object with two
+maps: `tunables` and `constants`. Personalization would resolve the first;
+this package has none, so its empty tunables map is unchanged. Its two
+constants are copied into the second map. Contract knobs would join whichever
+map matches their declared kind.
 
 ## 01-overview.md: the game and its boundary
 
@@ -262,7 +275,7 @@ specific to this geometry.
 ## 04-presentation.md and direction.json: fixed floor, delegated craft, measurable claims
 
 The [presentation chapter](../tic-tac-toe/04-presentation.md) and
-[direction carrier](../tic-tac-toe/direction.json) divide visual
+[direction file](../tic-tac-toe/direction.json) divide visual
 intent between readable prose and structured claims.
 
 The chapter's Fixed list requires the whole board and all marks to be
@@ -274,21 +287,21 @@ is delegated craft: texture, stroke, animation, layout, typography,
 rejection feedback, and sound. That craft remains bounded by the
 fantasy and `descriptor:mood:paper-quiet` and may alter no rule.
 
-The fenced `direction` block cites two entries from the carrier:
+The fenced `direction` block cites two entries from the direction file:
 
 - `mood.paper-quiet` connects the manifest descriptor to the `judged`
   audit class and the `table-reading` viewing context.
-- `constraints.palette.mark-ink` sets one near-black ink role for
-  every placed mark and grid line during the in-game state, with an
-  exhaustive population and a numeric tolerance.
+- `constraints.colors.mark-ink` binds the manifest palette's near-black
+  ink to every placed mark and grid line during the in-game state, with
+  the claim applying to all of them exhaustively and a numeric tolerance.
 
 The fence explains why the claims exist; `direction.json` holds what
-is claimed. Dotted paths cite carrier entries,
+is claimed. Dotted paths cite direction-file entries,
 `descriptor:mood:paper-quiet` is a typed cross-file reference to the
 manifest, and flat names such as `board.size` are tuning keys. These
 spellings identify different kinds of object.
 
-The carrier's `semantics` block names the color-distance math, and its
+The direction file's `semantics` block names the color-distance math, and its
 viewing entry fixes scale, speed, display assumptions, and builder
 blindness for the judged mood. The required metrics list contains the
 format's contrast-ratio metric even though this package declares no
@@ -297,7 +310,7 @@ contrast constraint; it is format floor, not an extra design claim.
 One shared ink is deliberate. Player identity is carried by X and O
 shape, while ink color carries atmosphere. The claim is objectively
 measurable, but its capture procedure belongs in the build plan rather
-than in the color value itself.
+than in the constraint itself.
 
 ## 05-build-plan.md: phases, four tests, and what moved to teaching
 
@@ -308,24 +321,24 @@ two constants. Presentation pairs AT-4 with direct review of every
 Fixed presentation requirement. Polish may add courtesies that touch
 no rule, after which all tests run again.
 
-All four current tests use the `scenario` class:
+All four current tests use the `scenario` type:
 
 - **AT-1, Turns and placement,** combines the old turn-order and
   legality checks. It covers X opening, alternation, occupied-cell
   rejection without a turn change, and accepted empty-cell placement.
 - **AT-2, A win ends the game,** uses reachable row, column, and
-  diagonal fixtures, checks immediate termination, reports every
+  diagonal replays, checks immediate termination, reports every
   completed line, and rejects a post-game placement.
 - **AT-3, Draw, and win before draw,** uses two one-cell-left boards
   to distinguish a true draw from a last-cell win.
 - **AT-4, Direction constraint capture,** measures
-  `constraints.palette.mark-ink` over its declared scope.
+  `constraints.colors.mark-ink` over its declared scope.
 
-Each test has a fenced `verification` JSON descriptor followed by
-human-readable fixture or procedure text. `given`, `when`, and `then`
-state the contract; `diagnostics` names the evidence a run must
-produce. Those diagnostic labels are package-defined record keys, not
-a central format vocabulary.
+Each test has a fenced `test` JSON block followed by a human-readable
+statement and, where needed, replay or procedure details. `given`,
+`when`, and `then` state what is checked; `diagnostics` names the
+evidence a run must produce. Those diagnostic labels are
+package-defined record keys, not a central format vocabulary.
 
 ### The sampling semantics behind AT-4
 
@@ -333,13 +346,13 @@ The lean AT-4 keeps the procedure short, so it is worth unpacking the
 semantics that the old package's direction test, then numbered AT-6,
 taught at length.
 
-A member of the constrained population is one placed mark or one grid
-line. Exhaustive coverage means the fixture observes every such
+A member of what the claim applies to is one placed mark or one grid
+line. Exhaustive coverage means the capture observes every such
 member, not a convenient sample of members. For each member it samples
 pixels fully inside the stroke and excludes antialiased edge pixels,
 whose blend with the background would measure a different thing. Each
 sampled interior pixel must fall within the `ciede2000-lab-d65-v1`
-tolerance declared in the carrier.
+tolerance declared in `direction.json`.
 
 Timing and state boundaries matter too. Measure each member once in a
 stable resting frame, after placement animation and transient feedback
@@ -349,21 +362,22 @@ Record the viewport and rendering environment with the per-member
 colors and color differences, because those conditions can affect the
 measurement.
 
-The carrier remains the single source for value, tolerance, population
-and state. AT-4 cites the claim and describes how to observe it; it
+The manifest palette remains the single source for the color itself, and the
+direction file the single source for the binding, tolerance, what the claim
+applies to, and state. AT-4 cites the claim and describes how to observe it; it
 does not copy those facts.
 
 ### The removed AT-5 as a certification instrument
 
 The earlier package included an exhaustive-search test. It is no
-longer a current acceptance test, but its descriptor remains useful
+longer a current acceptance test, but its test block remains useful
 teaching material. (Quoted verbatim from the old package: its
 `transitions` anchor pointed at the old chapter's "Taking a turn"
 heading, which the lean chapter folds into "Turns".)
 
-```verification
+```test
 {
-  "class": "exhaustive-search",
+  "type": "exhaustive-search",
   "initial_states": ["the empty board with X to move"],
   "transitions": "02-mechanics.md#taking-a-turn",
   "finite_state": "a state is the grid contents, the active mark, and the game status (in progress, x-win, o-win, or draw); terminal states have no successors; the reachable set is finite because every turn fills one cell and the board has finitely many cells",
@@ -373,7 +387,7 @@ heading, which the lean chapter folds into "Turns".)
 }
 ```
 
-Starting from the empty board, this class can enumerate every reachable
+Starting from the empty board, this type can enumerate every reachable
 state and certify three universal facts: win for X, win for O, and draw
 are the only terminal outcomes; legal play never produces a state in
 which both players have completed lines; and every one of those three
@@ -392,8 +406,8 @@ cross-build proof without adding player-observable design. It is
 valuable when that proof is the goal, and it belongs in teaching or a
 certification instrument rather than on every minimal designer spec.
 
-The format also defines `property` and `static-lint` test classes, but
-this package uses neither. Adding one merely to demonstrate the class
+The format also defines `property` and `document-check` test types, but
+this package uses neither. Adding one merely to demonstrate the type
 would make the example less honest.
 
 ## What the validator checks
@@ -401,13 +415,13 @@ would make the example less honest.
 From the `opengdd` directory, validate the package with:
 
 ```text
-node conformance/validate.mjs examples/tic-tac-toe
+node conformance/validate.mjs specs/tic-tac-toe
 ```
 
 The validator checks required files, schemas, declared paths, tuning
 keys and metadata, the fantasy-block shape, direction citations and
 constraint coverage, consecutive acceptance-test numbering,
-descriptor structure, and required prose after each descriptor. It
+descriptor structure, and required prose after each test block. It
 also issues advisory lints for likely problems such as missing
 tie-break language or duplicated normative numbers. Errors invalidate
 a package; warnings ask for human review.
@@ -436,7 +450,7 @@ The definition of done is a spec-faithful, auditable build, not merely
 four green labels. A game that scrolls the board, identifies players
 only by color, or omits one of two simultaneously completed lines can
 fail Fixed obligations even if its test record looks green. A neon
-arena can also fall short of the judged mood, though v0.5 records that
+arena can also fall short of the judged mood, though v0.6 records that
 assessment rather than adjudicating it. Two builders may choose different
 strokes, layouts, motion, feedback, and sound while producing the same
 game; that bounded variation is delegated craft.
@@ -446,7 +460,7 @@ game; that bounded variation is delegated craft.
 Use this package as a decoder ring for a game you do not already know,
 then read the format specification for constructs this example does
 not need: content collections, personalization questions, declared
-graphs, and clocks and regimes.
+graphs, and clocks and modes.
 
 ## License
 

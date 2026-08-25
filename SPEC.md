@@ -1,4 +1,4 @@
-# OpenGDD v0.5 draft
+# OpenGDD v0.6 working draft
 
 OpenGDD is an open format for game design documents. Designers write the game
 in prose. Structured data makes selected claims checkable. Three authority
@@ -18,8 +18,13 @@ section its pointer names; none needs to be understood before then.
 Throughout this document, the words MUST, MUST NOT, SHOULD, and MAY are used
 in their RFC 2119 sense.
 
-Status: v0.5 draft. License: specification text CC-BY-4.0; schemas and
-validator code MIT.
+Status: v0.6 working draft — not a release. License: specification text
+CC-BY-4.0; schemas and validator code MIT.
+
+This document defines OpenGDD v0.6. Unless a passage explicitly describes a
+migration or historical artifact, every unnumbered current-version statement
+and every normative rule in this document applies to v0.6; no unstated rule is
+inherited from an earlier version.
 
 ## The two roles (non-normative)
 
@@ -77,18 +82,19 @@ section disagree, the numbered section is right.
 | **Test type** | Which shape a test block takes, chosen from a small fixed set (§6). |
 | **`document-check`** | The test type that inspects the package's own files instead of running the game (§6). |
 | **Solution** | A concrete case that shows a claim holds — an actual example, not a promise that one exists. Its opposite number is a counterexample (§6). |
-| **Replay** | The inputs a test plays back, together with the results expected in return. Recorded footage is a **capture**, which is a different thing (§6). |
+| **Replay** | Runner-owned data a test plays back as input. Any expected result is the test block's separate `target`; recorded footage is a **capture**, which is a different thing (§6). |
 | **Evidence** | The record of what actually happened when the tests were run (§7). |
 | **Harness** | The thing that runs the tests. Evidence is the record of what running them produced; the two words are not interchangeable (§6). |
 | **Mode** | A declared span of play with its own sense of how time passes. Called a *resolution mode* on first mention, since games use "mode" for many other things (§4b). |
 | **Completeness** | The idea that a spec holds together: nothing points at something that is not there, and nothing declared is left out. The format applies it in several places, each saying which side has to cover the other (§§1b, 1c). |
 | **`applies_to`** | The plain-prose answer to "which things on screen does this claim apply to?" It sets the claim's reach (§9.5). |
-| **Precision levels** | How precisely a visible claim is written: **described** in words, **bounded** by a tolerance, or **exact** (§9.9). |
+| **Precision levels** | How precisely a visible claim is written: **described** in words, **bounded** by a tolerance, or **exact** (§9.8). |
 | **`must_keep`, `may_vary`** | A `must_keep` entry names something a build has to preserve for the game to still look like itself. Its `may_vary` list names the axes along which builders are free to differ (§9.7). |
-| **Palette role** | A named color with a job: the color itself, how close a build must stay to it, and what wears it. No relation to the designer's and builder's roles (§9.5). |
-| **Pin** | To pin is to fix a value the build must reproduce, and a pin is the value so fixed. A **palette pin** fixes an exact color; a **certified pin** is one the experimental audit would check (§9.9). |
+| **Palette** | A named set of colors, declared in the manifest: the hexes off your moodboard, kept in one place so everything else can point at them. A color inside one gets a name only when something needs to point at it (§3). |
+| **Color constraint** | A promise about one declared color: what wears it, when it holds, and how close a build must stay to it (§9.5). |
+| **Pin** | To pin is to fix a value the build must reproduce, and a pin is the value so fixed. A **color pin** is a color constraint with `tolerance: 0` (§9.8). |
 | **Scope** | The statement of where a claim reaches: what it applies to, when it holds, and how thoroughly it must be observed (§9.5). |
-| **Judged, checked, advisory** | The three audit classes. **Checked** means a machine can verify it, **judged** means people score it, and **advisory** means it states intent and decides nothing. What a construct is fixes its class; no entry writes its own class down (§9.11). |
+| **Judged, checked, advisory** | The three audit classes. **Checked** means a machine can verify it, **judged** means people score it, and **advisory** means it states intent and decides nothing. What a construct is fixes its class; no entry writes its own class down (§9.10). |
 | **Closed** | Closed means no additions. A **closed shape** admits no field beyond the ones the format names; a **closed value set** accepts no value beyond the ones it lists. |
 | **Stable** | Said of a name that must not change between revisions, because other things point at it. |
 | **Error, warning** | The only two severities. An **error** is decisive: the thing does not conform. A **warning** advises and decides nothing (§2d). |
@@ -111,16 +117,19 @@ my-game/
   03-content.md          # story, characters, dialogue, levels/generation — optional
   04-presentation.md     # art direction, audio direction, UI, feel — optional
   05-build-plan.md       # phases, checkpoints, acceptance tests — REQUIRED
-  assets/                # optional reference images, palettes, sketches
+  assets/                # optional reference images, moodboards, sketches
   contracts/             # optional adopted contracts (§10) — reserved name
-  <declared content>/    # optional structured collections (§1b) and replays
+  collections/           # optional structured collections (§1b) — reserved name
 ```
 
-`contracts/` is reserved for the contracts layer (§10); a package that keeps
-its own directory of that name renames it.
+`contracts/` is reserved for the contracts layer (§10), and `collections/`
+for structured content (§1b); a package that keeps its own directory under
+either name renames it.
 
-The entry points live in `manifest.json`. It names the entry-point
-chapters, the build plan, and the tuning file (§3).
+The entry points live in `manifest.json`. It names the entry-point chapters
+and, when present, the personalization and direction files (§3). The build
+plan and tuning file use the canonical root paths shown above and are not
+redirected through the manifest.
 
 **The five chapter filenames are normative.** A chapter carrying the content
 the tree assigns to `01-overview.md`, `02-mechanics.md`, `03-content.md`,
@@ -130,8 +139,23 @@ add further chapters under names of its own; what is fixed is that these five
 roles are not renamed. Other sections rest on that: §1a reads the fantasy
 block from `01-overview.md`, §9 reads the direction fence from
 `04-presentation.md`, and §6 scans acceptance tests in the build plan. The
-build plan is the one name a manifest may redirect, through `build.plan`,
-whose default is the canonical `05-build-plan.md` (§3).
+build plan is always the canonical root file `05-build-plan.md`; the tuning
+file is always the canonical root file `tuning.json` (§3).
+
+The numbered namespace ends at `05`. Numbers beyond it belong to the
+designer's own chapters forever; the five canonical names never renumber and
+never gain numbered siblings; and a future revision that adds a canonical
+file gives it an unnumbered role name, as `direction.json` and
+`personalization.json` already have.
+
+**The kernel promise.** The five required files alone — three Markdown
+chapters written in ordinary prose, and two small JSON files — are a
+complete, conforming design document. Not a draft, and not a minimum
+awaiting the rest of this specification: every further mechanism in this
+document is opt-in, activated by declaring or using it, and a package that
+stops here is finished. This floor is deliberate. Widening it — making any
+further construct required of every package — is a format revision taken
+knowingly, never a side effect of another change.
 
 The Markdown chapters are written for the builder who will turn the spec into
 a game. Ordinary prose is welcome. Decide everything, and say it briefly.
@@ -214,7 +238,8 @@ case.
   ones equally, while squeezing out the detail that belongs in the
   chapters.
 - A fantasy line MUST NOT contain a typed reference — `tuning:`, `state:`,
-  and `content:` from §4a, and `descriptor:` from §8a — a bare tuning
+  and `collections:` from §4a, `descriptor:` from §8a, and `palette:` from
+  §9.5 — a bare tuning
   citation, or a chapter anchor. A **bare tuning citation** is an inline-code
   token that §4's classification rule reads as a citation.
   A **chapter anchor** is a Markdown heading anchor reference, written
@@ -224,9 +249,9 @@ case.
   ordinary text, so "the #1 spot" is not an anchor.
 
   **The anchor of a heading (normative).** Wherever this document resolves a
-  chapter anchor — §1b's `defined_in`, a §6 test block's references, a §10.7
-  citation — the anchor a heading answers to is derived from the heading's
-  text by these steps, in order:
+  chapter anchor — a §6 test block's references, a §10.7 citation — the
+  anchor a heading answers to is derived from the heading's text by these
+  steps, in order:
 
   1. lowercase it;
   2. remove every HTML tag, meaning every run from `<` through the next `>`;
@@ -253,8 +278,10 @@ Feel: fast, slick, breathless.
 NOT: grindy, tactical, punishing.
 ```
 
-A single fantasy line is a complete, valid block. Extra facets earn their
-keep below: they tie-break delegations a role-only sentence never reaches.
+A single player-fantasy line is enough for that part of the block; a complete,
+valid block also carries the required `Feel:` line and anti-reference line.
+Extra fantasy facets earn their keep below: they tie-break delegations a
+role-only sentence never reaches.
 
 A spec deliberately leaves some decisions to the builder. Those are its
 Delegated sections, tagged `> DELEGATED:` (§2), and they turn up in any
@@ -271,117 +298,107 @@ soft scrape wins.
 
 *For designers. Skip unless your game keeps content in records: a deck, a bestiary, a level table, a dialogue tree, or anything like them.*
 
-Structured content, such as a deck of cards, a table of enemies, or a tree of
-dialogue nodes, is discoverable through the optional `content` array in
-`manifest.json`. Each entry in that array declares one **collection**.
+A collection is a folder with record files in it. Everything else is
+opt-in.
 
-```json
-{
-  "id": "cards",
-  "format": "example-card-catalog-v1",
-  "defined_in": "03-content.md#card-catalog-format",
-  "source": {
-    "type": "catalog",
-    "file": "cards/catalog.json"
-  },
-  "authority": { "level": "fixed" },
-  "id_field": "id"
-}
+```text
+my-game/
+  collections/
+    enemies/
+      gloom-moth.json      one record; the filename is its id
+      cinder-wisp.json
+    levels/
+      _collection.json     the optional label: the record schema
+      first-slide.json
 ```
 
-Each collection MUST declare six things:
+**Each immediate subdirectory of `collections/` is one collection**, and the
+folder name is the collection's id, in lowercase kebab-case (the identifier
+grammar of §3). Presence is the whole declaration: there is nothing to
+register in the manifest, and nothing that can contradict what the folder
+holds. The directory holds drawers and nothing else, and a drawer holds its
+optional label and its records and nothing else: a loose file in either
+place is a hard failure, because a file the format cannot read as a record
+would otherwise sit silently beside the ones it can. Drawers are flat —
+subdirectories inside a drawer are not defined in this revision.
+Organization is expressed as sibling drawers with compound kebab names
+(`enemies-bosses`, `enemies-minions`), which is also what differently shaped
+records truthfully are: different collections.
 
-- **`id`** — a name for the collection, stable and unique within the package.
-- **`format`** — a versioned id for the format this collection is written
-  in, such as `example-card-catalog-v1` above.
-- **`defined_in`** — a pointer to the Fixed chapter section that defines this
-  collection: the shapes its records take, their fields, their references, and
-  its completeness rules. The three rules stated below in this §1b are decided
-  by what that section says.
-- **`source`** — where the collection records live. Either `catalog` with
-  exactly one `file`, or `items` with one `directory` and an explicit ordered
-  `members` list.
-- **`authority`** — an authority level, written with the machine values from
-  §2.
-- **`id_field`** — the name of the collection-record field whose values are
-  stable and unique inside this collection. Collection records keep whatever
-  field they already have: a dialogue tree whose nodes carry `node_id`
-  declares `"id_field": "node_id"`. The catalog above simply uses `id`.
+**One file per record, and the filename is the record's id and address.**
+The name minus `.json` MUST be lowercase kebab-case, which also makes
+case-folding collisions unspellable, and the filesystem enforces id
+uniqueness by construction. The file holds one JSON object of the game's
+own fields, and a display name is ordinary record data: the address stays
+stable while the game calls the thing whatever it likes.
 
-A collection MAY declare one further field. **`instance`** binds its records
-to a record schema declared by a contract core (§10). Its value names the
-instance file and the schema by fragment — `contracts/stamina.json#thresholds`
-— where the path is exactly `contracts/<instance>.json` and the fragment is a
-bare key of that core's `collections` object. The core's schema governs record
-shape only: the `defined_in` section still homes this package's own reference
-targets and completeness rules, and the binding adds a record schema rather
-than replacing that section. Every schema a vendored core declares MUST be
-bound exactly once, by this field or by the instance file's inline rows, and
-§10.7 gives the binding rules in full.
+**`_collection.json` is the drawer's optional label**, validated by
+`collection.schema.json` (§3a), and it appears only when it has something
+to say. Its one field is **`record`**: a record schema, written in the same
+closed field grammar a contract core's collection schemas use (§10.5) —
+each field names its `type` and may carry `required` or a row-domain
+`when`, `options`, `pattern`, `unique`, and a `description` saying how the
+field is read. With a schema present, every record in the drawer MUST
+satisfy it: an undeclared field, a missing required field, a wrong type, a
+value outside a closed option set, and a repeated unique value are hard
+failures. Without one, records are free-form designer data, and the format
+says so plainly rather than pretending otherwise. In a schema and in
+records alike, a key opening with `_` is an annotation — read by nothing,
+checked by nothing, and exempt from the undeclared-field rule — the same
+idiom §10.4 gives the contract envelope.
 
-An item collection keeps its collection records as separate files in a
-directory, and its `members` list is the collection: it MUST name every file
-the collection uses, in order. The order files happen to sit in the directory
-on disk means nothing.
+The grammar's §1b dialect adds one type: **`grid`**, a non-empty array of
+strings, one per row. All grid fields of one record MUST agree in
+dimensions, measured in Unicode scalar values — the format fixes the unit —
+and §7a gives the congruence rules in full. The `citation` type and
+flag-domain conditions are §10's dialect: they read a contract instance's
+context, and no such context exists here.
 
-Three rules hold over every collection:
+Field-level meaning — what `speed` measures, what `#` marks — lives in the
+schema's `description`, exactly where contract cores put it. Game rules —
+"bosses spawn once per run" — live in chapters, as every rule does.
+**Drawers are Fixed spec data**: statements of the package, like inline
+contract rows (§10.7), owned by the designer as every other statement is. A
+designer who hands some aspect of a collection's content to the builder
+says so in an ordinary `> DELEGATED:` section, in words, checked as all
+delegation is (§2). No authority machinery attaches to a drawer, and no
+per-collection tag exists: the retired `> COLLECTION:` claim of an earlier
+draft is reported as retired where it survives in a chapter.
 
-1. Every declared file and collection record MUST exist.
-2. Every stable id MUST be unique inside its collection.
-3. Every reference MUST resolve under the target and completeness rules
-   stated in the collection's `defined_in` section.
+**`collections` is a reserved prose first segment** (v0.6, under §4's
+versioning clause). `` `collections.<drawer>` `` cites the drawer as a set,
+`` `collections.<drawer>.<record>` `` cites one record, and a longer token
+names a member of the record's own data and resolves as far as the record,
+the rule descriptors and invariants use. A dangling citation is a hard
+failure. This closes the format's last silent-rename gap: with graph edges
+(§1c), contract row sources (§10.7), and expression references (§4a) all
+hard-checked, renaming a record makes every stale reference a validator
+finding with a file and line — the failure that makes rename tooling
+trustworthy, exactly as §4 says of palettes.
 
-Rules 1 and 2 are machine checks, and not for the designer to memorize: the
-validator runs and reports them. Three findings under them are hard
-validation failures: a missing member, a consumed member the collection never
-declared, and a duplicate stable id.
-
-Rule 3 is decided by machine only as far as the package declares the edges.
-Where a §1c edge set declares the field carrying a reference, every value of
-that field must resolve, unconditionally and on every validation, and a
-dangling one is a hard failure. Where a §1c `acyclic` rule is cited by a §6
-`document-check` test, a cycle is a hard failure of that test. Where neither
-declaration exists, the reference and cycle rules still bind the package with
-full force, as prose obligations under §2d: they are decided by reading the
-`defined_in` section, and a designer who wants them machine-decided declares
+A drawer's record count is a mechanical fact — one file per record — and an
+expression cites it as `collections:<drawer>:count` (§4a). A drawer nothing
+reaches — no prose citation, no count reference, no §1c edge set, no §10.7
+row binding, no §6 artifact — is a **warning**: the spec never mentions it,
+which is a review lead, not an order. Cross-record references beyond what a schema can
+say remain what they have always been: a §1c edge set where declared, hard
+on every validation; a prose obligation under §2d where not, decided by
+reading the chapters, by a designer who wants it machine-decided declaring
 the edge set.
 
-(A note for tool authors rather than designers: collection-id uniqueness and
-stable-record-id uniqueness are the validator's checks, not JSON Schema's —
-`uniqueItems` compares whole array entries, not one chosen field inside
-them.)
-
-A collection's `defined_in` section may define fields particular to its own
-game, and `tie_break` is one such field. Core OpenGDD does not define dialogue
-node types, effect verbs, card verbs, grid glyphs, recipe semantics, or screen
-geometry. A per-collection-record `condition` field is another field defined
-in that section, and §4a constrains what its expressions may bind to.
-
-Every overridable collection record MAY carry an authority of its own:
-
-```json
-{ "authority": { "level": "personalization", "question": "theme" } }
-```
-
-The machine values are `fixed`, `delegated`, and `personalization`. A
-`personalization` collection record MUST name its question. A collection
-record at either other level MUST NOT name one. A collection record carrying
-no `authority` inherits the authority of its collection.
-
-A collection bound to a contract instance is the exception: it MUST carry
-Fixed authority, and none of its records may carry an authority of its own.
-Its rows are inputs to a generated block, and one per-build row would make
-that block differ per build (§10.7).
+A collection bound to a contract instance as its rows takes the core's
+record schema and MUST NOT carry a `record` schema of its own — one shape,
+one home — and §10.7 gives the binding rules in full.
 
 ## 1c. Declared graph edge sets
 
 *For tool authors, and for designers whose content records point at one another, as in a tech tree or a crafting chain.*
 
-Collection records point at one another. A card in §1b's catalog might carry a
+Collection records point at one another. A card in a §1b drawer might carry a
 `set_id` field holding the id of the set it belongs to. Each such pointer
 is an **edge**. §1b already requires every reference to resolve, but that
 is all it requires. What an edge means, and which field carries it, is
-written only as prose in the collection's `defined_in` section.
+written only as prose in the game's chapters.
 
 Structural claims about the graph as a whole then have nowhere to sit, so
 each package invents its own way to check them. Those claims include
@@ -407,7 +424,7 @@ to exercise the structural claims further down:
 
 - `id` is package-unique, kebab-case.
 - Each **edge site** declares `from.collection`, `field`, and `to`.
-  - `from.collection` names a declared §1b collection id.
+  - `from.collection` names a §1b drawer by its collection id.
   - `field` names the collection-record field carrying target ids. It is
     written as a field name, as a JSON Pointer for a nested site, or as a
     JSON Pointer containing one `*` array-wildcard segment for a site inside
@@ -458,12 +475,14 @@ resolve to a collection record in a permitted target collection, with the
 field, and the value. Completeness is not a citable claim, because it never
 needs citing: it runs on every validation, unconditionally.
 
-The three graph predicates below are claims. Each MUST be invoked by a §6
-`document-check` acceptance test whose `rule_set` is `opengdd-graph-1`,
-carrying its rule objects in the test block's `rules` field (§6 defines the
-rule shape). Those rules use the closed grammar below. A rule carrying
-fields outside its own predicate's list is invalid. No predicate
-here carries rates, capacities, or flow fields.
+The three graph predicates below are opt-in claims. A package asserts one by
+including its rule object in a §6 `document-check` acceptance test whose
+`rule_set` is `opengdd-graph-1`. Every predicate the package asserts MUST be
+invoked that way; an edge set need not assert any of them. The test carries
+its rule objects in the test block's `rules` field (§6 defines the rule
+shape). Those rules use the closed grammar below. A rule carrying fields
+outside its own predicate's list is invalid. No predicate here carries rates,
+capacities, or flow fields.
 
 1. **`acyclic`** — `{ "predicate": "acyclic", "edge_set": <id> }`. The edge
    set induces a directed acyclic graph, so no path returns to where it
@@ -534,8 +553,8 @@ A complete worked test block, for the technology tree above plus a
 ```test
 {
   "type": "document-check",
-  "artifacts": ["manifest.json", "content/technologies.json",
-                "content/recipes.json"],
+  "artifacts": ["manifest.json", "collections/technologies/",
+                "collections/recipes/"],
   "rule_set": "opengdd-graph-1",
   "rules": [
     { "predicate": "acyclic", "edge_set": "tech-prerequisites" },
@@ -556,7 +575,7 @@ era than the technology that requires it.
 ````
 
 The declaration is structure-only. It does not define what an edge *means*:
-recipe, unlock, and adjacency semantics stay in the collection's `defined_in`
+recipe, unlock, and adjacency semantics stay in the collection's defining
 section. It carries no rates, capacities, conservation, throughput, or
 steady-state flow claims, no runtime graph state, and no solver predicates
 (§6, §7a).
@@ -571,7 +590,7 @@ with a blockquote tag.
 
 | Level | Tag | Meaning |
 |---|---|---|
-| **Fixed** | (default, untagged) | Build exactly as written. Deviation fails certification under the experimental protocol (§2d). |
+| **Fixed** | (default, untagged) | Build exactly as written. A deviation is an audit finding under the experimental protocol and would block a future normative certification outcome (§2d). |
 | **Delegated** | `> DELEGATED:` | The builder decides. The spec states intent and constraints; the implementation may vary. |
 | **Personalization** | `> PERSONALIZATION: <id>` | Resolved by the answer to question `<id>` in `personalization.json`. |
 
@@ -582,7 +601,7 @@ of the same or a higher level. A statement with no authority tag in scope is
 Fixed, which is why Fixed needs no tag of its own.
 
 **Token grammar.** What follows `DELEGATED:` is an optional free-text label. It
-is descriptive only, and no rule reads it, with one exception: the §9.10
+is descriptive only, and no rule reads it, with one exception: the §9.9
 direction fence requires the exact label `presentation-direction` on its first
 line. What follows `PERSONALIZATION:` MUST be the id of a question declared in
 `personalization.json` (§5). A tag naming no declared question is a hard
@@ -592,11 +611,11 @@ declaration are both package bytes.
 The three levels are the core mechanism of the format: they make every build
 unique while keeping the design intact.
 
-**What v0.5 resolves by machine.** All three levels are prose-level
-instructions to the builder, with one exception: v0.5 defines machine
+**What the format resolves by machine.** All three levels are prose-level
+instructions to the builder, with one exception: this version defines machine
 semantics for Personalization only where an answer moves a number, and §5
 owns that machinery. For a personalized prose section or collection record,
-v0.5 defines no machine effect; §5's "Answers outside tuning" rules say how
+the format defines no machine effect; §5's "Answers outside tuning" rules say how
 the builder resolves one.
 
 ## 2a. The responsibility boundary
@@ -660,7 +679,7 @@ than anyone's preference. The format fixes three of them.
   4. The order in which draws are consumed inside a sequential stream.
 
   These four MUSTs bind the package, and they are prose obligations under
-  §2d. They are discharged in the spec's own chapters, since v0.5 declares no
+  §2d. They are discharged in the spec's own chapters, since the format declares no
   machine site to hold them: no validator can decide whether a spec has named
   every unit or fixed every draw order. People reading the chapters decide it,
   and a builder who finds one missing files a §2b ambiguity report.
@@ -730,9 +749,8 @@ structure:
 ```
 
 A `ruleset_state` block MUST contain `rulesets`. Its ids are unique and
-exactly one entry carries `initial: true`. A ruleset needs no `defined_in`
-pointer. Its semantics are the chapter statements tagged with its id, using
-the tag defined below.
+exactly one entry carries `initial: true`. Its semantics are the chapter
+statements tagged with its id, using the tag defined below.
 
 The declaration makes one §4a reference form resolvable, with a Boolean
 value: `state:member:ruleset:<ruleset-id>` is true when that ruleset is
@@ -763,8 +781,16 @@ or a game-local `document-check` rule set.
 
 *For auditors and tool authors. Designers: read the two-severity rule and move on.*
 
-v0.5 defines two normative conformance subjects for a design — the package
-and the build record — and one experimental protocol. Every conformance or
+The map of the three layers, before the rules:
+
+| Layer | Question it answers | Decided by | Decided from |
+| --- | --- | --- | --- |
+| Package conformance (normative) | Is the design sound on paper? | Validation: machine checks, plus human reading for prose obligations | The package bytes alone |
+| Build-record conformance (normative) | Is the builder's completion claim coherent? | Validation: record shape, arithmetic, consistency with the source package | The record and package bytes alone |
+| Build certification (EXPERIMENTAL) | Is the claim true in reality? | The experimental audit: execution, evidence, judgment | Running the build and reviewing its evidence |
+
+This version defines two normative conformance subjects for a design — the
+package and the build record — and one experimental protocol. Every conformance or
 certification statement in this document reads against this section. Prose
 also says that a validator or a runtime outcome conforms; those uses read
 against the rules written for them and introduce no third conformance subject.
@@ -780,51 +806,57 @@ schema-valid record of an incomplete build.
 
 **Package conformance (normative).** A package conforms when each machine file
 for which this document publishes a schema validates against its published
-v0.5 schema — `manifest.json`
+v0.6 schema — `manifest.json`
 against the manifest schema, `tuning.json` against the tuning schema, and,
 when present, `personalization.json` against the personalization schema and
-`direction.json` against the direction schema — and the package satisfies every package-level MUST in this
-document. A package-level MUST is one decidable from the package bytes alone.
+`direction.json` against the direction schema — and the package satisfies
+every package-level MUST in this document. A package-level MUST is one
+decidable from the package bytes alone — by machine or by a human reader,
+never requiring execution or external state.
 A MUST about build behavior, cross-build stability, or test execution reads
 against the build-record conformance layer or the experimental protocol
-instead. The published
-validator implements checks of package conformance; the rules, not any one
-tool's current coverage, define it. Package-level rules are of two kinds.
+instead. The published validator implements the machine-decidable subset of
+package conformance. A zero-error CLI result establishes only that the checks
+this implementation performs passed; it does not by itself establish full
+package conformance. The rules, not any one tool's current coverage, define
+that outcome. Package-level rules are of two kinds.
 Machine-decidable rules — schema validity, completeness, shape grammar, and
 cross-file consistency — are decided by validation, and a validator error is
 a conformance failure. Prose obligations, such as §2a's tie-break rule or the
 rule that normative prose cites a tuning key rather than repeating its value,
 bind the package with the same force, but deciding a violation can take human
-judgment; a validator surfaces likely violations as warnings, and a warning
-does not by itself decide conformance.
+judgment. A validator may surface likely violations as warnings, but a warning
+does not by itself decide conformance, and the absence of a warning does not
+discharge the human review.
 
 **Build-record conformance (normative).** A build conforms when it ships an
 `opengdd-build.json` that validates against the build schema and passes every
-§7 validator-level package-consistency check, including the §9.11
+§7 validator-level package-consistency check, including the §9.10
 direction-result rules. The record is the builder's
 completion claim: shipping it asserts that every acceptance test passed, and
-so that every certified pin its tests cover matched (§9.9). v0.5 machine-checks the record's internal
-validity and its consistency with the source package; it does not audit the
+so that every exact color constraint its tests cover matched (§9.8). This
+version machine-checks the record's internal validity and its consistency with
+the source package; it does not audit the
 assertion's truth. Auditing that truth is what certification would do. A
 build that still fails a test does not yet ship a conforming record; what it
 has are §2b ambiguity reports.
 
-**Build certification (EXPERIMENTAL in v0.5).** Certification would be the
+**Build certification (EXPERIMENTAL).** Certification would be the
 audited claim that one particular build faithfully implements its spec. The
 audit has four intended parts: executing the §6 acceptance tests, accounting
-for every Fixed statement, scoring judged direction claims (§9.11), and
+for every Fixed statement, scoring judged direction claims (§9.10), and
 auditing the §7 `evidence` record. It is described by the conformance
 certification protocol published at `conformance/CERTIFICATION.md` in the
 OpenGDD conformance suite. The panel protocol behind the third part is not
 yet integrated and sits outside that draft's audit scope.
 
-v0.5 does not define a normative certification outcome, an execution grammar
-for `test` blocks beyond §6's package-level field set, or a panel protocol for
+This version does not define a normative certification outcome, an execution
+grammar for `test` blocks beyond §6's package-level field set, or a panel protocol for
 judged claims. Where this
 document describes certification, it describes the intended shape of that
-protocol. No v0.5 statement grants or withholds a certification outcome, and
-no construct in this document can fail a build's certification, because the
-draft protocol's outcomes are experimental.
+protocol. No statement grants or withholds a normative certification outcome.
+The draft protocol may record audit findings and experimental verdicts, but
+those results are not core conformance outcomes.
 
 The experimental status changes no file's shape. `opengdd-build.json` keeps
 its required fields, including `evidence`, and packages keep their §6
@@ -834,8 +866,8 @@ reproduces hashes. A contract's folder rules, closed surface, vendored-core
 identity, and generated-block byte equality are package-level rules of the
 first kind, all decidable from package bytes (§10); its core digest is not a
 package rule at all, and recomputing one is audit work under the experimental
-protocol, exactly as with every other hash here (§10.3). Fixed statements bind at full force regardless:
-passing every acceptance test is necessary but never sufficient for the
+protocol, exactly as with every other hash here (§10.3). Fixed statements bind
+at full force regardless: passing every acceptance test is necessary but never sufficient for the
 experimental certification protocol, because a Fixed statement binds
 whether or not a numbered test restates it (§2).
 
@@ -844,13 +876,14 @@ whether or not a numbered test restates it (§2).
 *For designers. One short file per spec, and you write it once.*
 
 The manifest carries the spec's identity and entry points. It is
-machine-validated against [manifest.schema.json](https://opengdd.org/schema/core/v0.5/manifest.schema.json). Here
-is a complete manifest for §1a's getaway driver, with none of the optional
+machine-validated against
+[manifest.schema.json](https://opengdd.org/schema/core/v0.6/manifest.schema.json).
+Here is a complete manifest for §1a's getaway driver, with none of the optional
 top-level structures further down:
 
 ```json
 {
-  "opengdd": "0.5",
+  "opengdd": "0.6",
   "id": "getaway-driver",
   "version": "1.0.0",
   "title": "Getaway Driver",
@@ -864,8 +897,6 @@ top-level structures further down:
   "build": {
     "chapters": ["01-overview.md", "02-mechanics.md", "03-content.md",
                  "04-presentation.md"],
-    "plan": "05-build-plan.md",
-    "tuning": "tuning.json",
     "personalization": "personalization.json"
   }
 }
@@ -873,44 +904,49 @@ top-level structures further down:
 
 Its required top-level fields are exactly:
 
-- **`opengdd`** is the format version. Its value is `"0.5"`.
-- **`id` and `version`** identify the spec. `version` uses semver, and `id` is
-  unique within a registry.
+- **`opengdd`** is the format version. Its value is `"0.6"`.
+- **`id` and `version`** identify the spec. `version` is exactly three
+  dot-separated non-negative decimal integers, `MAJOR.MINOR.PATCH`. Each
+  component is either `0` or begins with a non-zero digit; prerelease and build
+  suffixes are not accepted. `id` is a kebab-case package id. Core conformance
+  makes no global uniqueness claim;
+  a catalogue or registry MAY impose uniqueness within its own declared
+  domain.
 - **`title` and `designer`** name the game and its designer. The designer has
   a name and may also have a registry handle and contact details.
 - **`target`** gives the platform, the genre family, the session length, and
   the audience. `platform` names the delivery target and the **state space**
   the designer is responsible for — what the game must keep track of, not
-  what it looks like. v0.x accepts `web-2d` and `web-3d`. A game whose world
-  is a plane declares `web-2d` no matter how a build draws it; `web-3d` is
+  what it looks like. This version accepts `web-2d` and `web-3d`. A game whose
+  world is a plane declares `web-2d` no matter how a build draws it; `web-3d` is
   for a game whose state itself needs three dimensions. Rendering technique
   is never a platform fact: it is the builder's craft on §2a's boundary, and
   a build records what it rendered with in `opengdd-build.json` (§7).
-- **`build`** names the entry-point chapters and the paths to the build plan
-  and tuning file. It may also name a personalization file. The five chapter
-  filenames are normative (§1), so `build.chapters` lists them under their
-  canonical names; `build.plan` is the one of the five a package may point
-  elsewhere, and its default is the canonical `05-build-plan.md`.
+- **`build`** names the entry-point chapters and may name a personalization
+  file. The five chapter filenames are normative (§1), so `build.chapters`
+  lists chapter entry points under their canonical names. The canonical root
+  files `05-build-plan.md` and `tuning.json` are required directly and have no
+  manifest fields.
 
-`build.direction` names the optional §9 direction file, `direction.json`. As
-of v0.5 the rules for that file are normative, and it has a schema of its
+`build.direction` names the optional §9 direction file, `direction.json`. The
+rules for that file are normative, and it has a schema of its
 own. A direction block in `04-presentation.md` and a declared
 `direction.json` MUST appear together. If either appears without the other,
 validation fails.
 
 Four optional top-level fields declare other package structures:
 
-- `content` declares §1b collections.
-- `graphs` declares §1c edge sets over those collections.
+- `graphs` declares §1c edge sets over the package's §1b collections.
 - `ruleset_state` declares the §2c block.
 - `descriptors` declares the named descriptor families from §8. Mood is the
-  only populated family in v0.5 (§8a).
+  only populated family in this version (§8a).
+- `palette` declares the package's named color sets, described below.
 
-Adopted contracts are the one package structure with no manifest field of its
-own: the `contracts/` directory's contents are the declaration (§10.2). The
-manifest still carries the one binding that holds information rather than
-restating presence — a `content` entry's optional `instance` field, which says
-which contract record schema validates that collection's records (§§1b, 10.7).
+Adopted contracts (§10.2) and collections (§1b) have no manifest field at
+all: the `contracts/` and `collections/` directories' contents are the
+declaration. The manifest keeps what it honestly owns — identity, target,
+entry points, palettes, descriptors, graphs, ruleset state — and registers
+no structure a directory already declares by holding it.
 
 The optional `commerce` profile contains `license`, `split`, and an optional
 `derived_from` field:
@@ -925,26 +961,145 @@ The optional `commerce` profile contains `license`, `split`, and an optional
 }
 ```
 
-The commerce profile is REQUIRED when a spec is offered for third-party
-building or marketplace listing on any registry. It MAY be omitted without
-penalty for internal, jam, archival, test, and other artifact-only uses.
-The experimental certification protocol never requires commerce metadata.
-Whether the profile is present or absent MUST NOT change gameplay expression,
-authority, or a build's standing under that protocol.
+The commerce profile is OPTIONAL core metadata. Whether the same package bytes
+are offered, listed, built by a third party, or kept internal does not change
+package conformance and never makes this field required. A publication or
+commerce profile MAY impose requirements within its own declared scope; those
+requirements are outside core conformance. Presence or absence here MUST NOT
+change gameplay expression, authority, or a build's standing under the
+experimental certification protocol.
 
-`opengdd-share-v0` permits building and deployment under the declared split.
-Revenue-bearing builds must ship with attribution metadata. The percentages
-in `split` MUST sum to 100.
+`opengdd-share-v0` records proposed building and deployment terms under the
+declared split. The core format validates the metadata's shape, not whether it
+grants legal permission or whether a distribution satisfied its terms. The
+percentages in `split` MUST sum to 100.
 
-`derived_from` is **Reserved** and inert in v0.x. It records lineage metadata
-only. Fork licensing and royalties remain outside v0.x. Modifications beyond
+`derived_from` is **Reserved** and inert in this version. It records lineage
+metadata only. Its `version` identifies a design spec and therefore uses the
+same numeric `MAJOR.MINOR.PATCH` grammar as the manifest's own `version`.
+Fork licensing and royalties remain outside the core format.
+Modifications beyond
 the declared personalization bounds have no path through the experimental
 certification protocol. These rules belong to the commerce profile and do not
 change core artifact semantics.
 
+### Palettes (`palette`)
+
+A palette is a set of colors with a name. It is where a spec writes down
+"these are the five colors of act two": the hexes off the moodboard, in one
+place, so that everything else in the package points at them instead of
+repeating them.
+
+```json
+"palette": {
+  "story.act-2":   ["#1A1B2E", "#2E3450", "#E8A13C", "#F4E9D8"],
+  "enemies.fire":  ["#B3202A", { "flame": "#E8A13C" }, "#2B0F0A"],
+  "strict-colors": [{ "that-purchase-button": "#7B2FF2" }]
+}
+```
+
+`palette` is OPTIONAL. When present it MUST be a non-empty object. It stands
+on its own: a package MAY declare palettes with no `build.direction`, and a
+package MAY declare a direction block with no palettes — though a §9.5 color
+constraint then has nothing to bind, and a reference that resolves to nothing
+is a hard failure.
+
+**Palette keys.** Each key of the map names one palette. A palette key is one
+or more segments joined by `.`, and the dots are spelling rather than
+structure: the map is flat, and a key groups colors however the designer finds
+useful. Single-segment keys are legal.
+
+- Every segment MUST match `^[a-z0-9]+(-[a-z0-9]+)*$`, the format's kebab-case
+  identifier rule.
+- Every segment MUST contain at least one letter. An all-digit unit between
+  delimiters is what a reader reads as an array position, and neither a key
+  segment nor a color name may offer one (§4).
+- No segment may be `json` or `md`. That exclusion is not strictly needed
+  here — §4's rule 1 classifies a `palette.`-first token before rule 3's
+  reserved-extension prohibition could reach it, so such a key would stay
+  citeable either way — and it is kept uniform with tuning keys anyway, so
+  that a designer learns one naming rule for dotted keys rather than two.
+
+Two palette keys must not collide in a way that leaves a citation
+undecidable; §4 states that rule with the resolution order it protects.
+
+**Palette entries.** Each value MUST be an ordered array of **palette
+entries**, non-empty, with no upper bound. The format defines no maximum and a
+validator MUST NOT invent one. A palette entry MUST be either:
+
+- a bare string in the `#RRGGBB` grammar — an 8-bit sRGB hexadecimal color
+  written as `#` plus exactly six hex digits, either case; three-digit
+  shorthand is invalid — which is the paste-out-of-any-palette-tool form; or
+- a **one-key object** whose single key is the color's name and whose value is
+  a `#RRGGBB` string.
+
+Each of these is a validation failure: a zero-key object (`{}`), a two-key
+object, a number, a Boolean, a null, and an array, which is what a nested
+palette would be. No other entry form is legal.
+
+Order carries no meaning. The array is ordered because JSON arrays are, and
+because designers paste ramps in order; nothing in the format reads position,
+and a position is not a citation target (§4).
+
+Two entries in one palette MAY carry the same hex: a name is a citation
+handle, not a claim that a color differs from its neighbours. Two hex
+spellings that differ only in the case of their digits are compared by no rule
+in this format, and nothing turns on the difference. A validator or authoring
+tool MUST NOT normalize the authored spelling in any artifact it emits — not
+in a diagnostic, not in a rewritten manifest.
+
+**A color is named when something cites it.** Most entries are bare hexes and
+stay that way. A color name MUST match `^[a-z0-9]+(-[a-z0-9]+)*$`, MUST
+contain at least one letter, and MUST be unique within its palette. It is
+dot-free: the dot is the delimiter that separates it from its palette key.
+Uniqueness is per palette rather than across the package, so two palettes MAY
+each carry a color named `flame`.
+
+A bare-string entry has no name and is therefore not a citation target: it is
+read, not pointed at. Anything that binds one color — a §9.5 color
+constraint's `color` field, a §9.5 threshold operand, a prose citation of a
+single color (§4) — MUST name a *named* entry. A reference that resolves to a
+bare-string entry is not merely dangling; there is no name to spell. Naming is
+therefore an edit an authoring tool makes on demand, when the designer first
+cites a color, and never a form the designer fills in up front.
+
+**What a palette does not carry.** A palette has no scope, no tolerance, and
+no per-color machinery of any kind. It carries no audit class of its own,
+exactly as a §9.6 viewing entry and a §9.3 reference carry none: it is
+declared material that other constructs cite. The promise about a color — how
+close a build must stay to it, and where that holds — is a color constraint
+(§9.5), and it lives there because one color makes different promises in
+different places.
+
+A palette read through a §9.2 mood entry is supplementary grounds for the
+panel under that entry's own bound `viewing` context, exactly as a mood's
+`references` and `anti` already are, and never an independent claim. A
+palette reached only by a color constraint, a threshold operand, or prose is
+not panel material at all: its colors are consumed mechanically.
+
+**Reachability.** A palette is **reached** by any one of these, and by nothing
+else:
+
+1. a §8a mood descriptor's `palette` field naming it;
+2. a §9.5 color constraint's `color` field binding into it;
+3. a §9.5 threshold operand — `colors` or `against` — binding into it;
+4. a prose citation of the palette itself, or of any color in it, in any file
+   §4's classification rule walks: the `build.chapters` files and the build
+   plan.
+
+A palette that nothing reaches is legal declared-but-unused data, and a
+validator SHOULD warn about it. Reachability is judged per palette: an unused
+color *name* inside a reached palette draws nothing. Several moods MAY
+reference one palette; nothing about the reference is exclusive.
+
+There is no `PALETTE:` direction-fence section and none can exist: §9.9's
+fence labels name populated `direction.json` fields, and a palette is not one.
+A backticked `palette.` token inside a fence continuation line is chapter
+prose like any other, so it resolves and it reaches.
+
 ## 3a. Canonical schema URLs
 
-*For tool authors. Designers: all you need is that `"opengdd": "0.5"` picks your schemas.*
+*For tool authors. Designers: all you need is that `"opengdd": "0.6"` picks your schemas.*
 
 Every published schema is identified and served at a canonical URL:
 
@@ -955,13 +1110,14 @@ https://opengdd.org/schema/<layer>/v<minor>/<file>.schema.json
 For example:
 
 ```text
-https://opengdd.org/schema/core/v0.5/manifest.schema.json
+https://opengdd.org/schema/core/v0.6/manifest.schema.json
 ```
 
-The `core` layer publishes five schemas: `manifest.schema.json` (§3),
+The `core` layer publishes six schemas: `manifest.schema.json` (§3),
 `tuning.schema.json` (§4), `personalization.schema.json` (§5),
-`direction.schema.json` (§9.10), and `opengdd-build.schema.json` (§7). The
-first four are the package's; the fifth is the build record's. A contract
+`collection.schema.json` (§1b, the drawer label), `direction.schema.json`
+(§9.9), and `opengdd-build.schema.json` (§7). The first five are the
+package's; the sixth is the build record's. A contract
 instance file has no schema here by decision, not by omission: §10's envelope
 is format machinery while a core's content is not (§10.13), so §10 states the
 envelope normatively in prose and a validator implements it. A schema for the
@@ -974,8 +1130,8 @@ Four rules govern these URLs:
    profile could be another. The URL layout MUST NOT imply that different
    schema layers share one version.
 2. **The version segment uses the format version.** It is `v` followed by the
-   manifest's `opengdd` value. A schema under `/core/v0.5/` validates
-   manifests that declare `"opengdd": "0.5"`. Schema URLs use minor-version
+   manifest's `opengdd` value. A schema under `/core/v0.6/` validates
+   manifests that declare `"opengdd": "0.6"`. Schema URLs use minor-version
    granularity. Patch-level corrections are published as errata at the same
    URL and MUST NOT silently change any validation outcome.
 3. **Published URLs are permanent.** A schema MAY be superseded by a newer
@@ -988,8 +1144,9 @@ Four rules govern these URLs:
 
 *For designers. This is where your numbers live, so read it.*
 
-`tuning.json` assigns each runtime number a role. It is machine-validated
-against [tuning.schema.json](https://opengdd.org/schema/core/v0.5/tuning.schema.json).
+`tuning.json` sorts each runtime number into one of two categories. It is
+machine-validated
+against [tuning.schema.json](https://opengdd.org/schema/core/v0.6/tuning.schema.json).
 
 `tunables` and `constants` split every number by who may change it. A tunable
 is a rebalance-safe knob. A constant is a value the game's identity rests on,
@@ -998,7 +1155,8 @@ and a rebalance may not touch it. Neither is a runtime variable.
 Only numbers live here. Rebalancing is change by degree, so it presumes
 numbers: a discrete choice belongs to a content collection record (§1b) or to
 a personalization question's options (§5), and text belongs in content
-records. The one declared set v0.5 defines is §2c's set of ruleset ids.
+records. The one declared set this version defines is §2c's set of ruleset
+ids.
 
 ```json
 {
@@ -1067,18 +1225,23 @@ own bytes.
 
 **Package defaults** are the resolved tuning snapshot (§5) produced by
 applying every personalization question's `default` through §5's resolution
-pipeline. For a package that declares no `personalization.json`, the package
-defaults are `tuning.json`'s own `tunables` verbatim. This is
-the snapshot at which package validation evaluates the invariants above and
-§4a's arithmetic failures.
+pipeline. For a package that declares no `personalization.json`, its
+`tunables` member copies `tuning.json`'s `tunables`, and its `constants` member
+copies `tuning.json`'s `constants` or is empty. Live contract knobs join the
+matching member by kind (§10.11). This is the snapshot at which package
+validation evaluates the invariants above and §4a's arithmetic failures.
 
 A key MUST be unique across `tunables` and `constants`. Every `meta` key MUST
-exist in exactly one of those objects. A balance-only game-spec revision may
-change only `tunables`, and only within declared ranges. It MUST NOT change
-`constants`, structured-content facts, or a test's replays. A contract knob
-follows the same rule under its own declaration: a `kind: tunable` knob is a
-balance revision's to move within its range, and a `kind: constant` knob is
-out of its reach (§10.11).
+exist in exactly one of those objects.
+
+*Versioning guidance (non-normative).* A revision that intends to be
+balance-only changes only `tunables`, within declared ranges, and leaves
+constants, structured-content facts, and test replays untouched; a
+`kind: tunable` contract knob is likewise a balance revision's to move
+within its range, and a `kind: constant` knob is not (§10.11). No
+conformance subject in this version compares two revisions, so this is
+guidance for humans and publication tooling, not a package check; a
+publication profile may own the comparison later.
 
 Numbers that belong elsewhere stay elsewhere:
 
@@ -1117,12 +1280,19 @@ first of these that matches:
    a validation failure.
 
 The reserved first segments are `pillars`, `mood`, `anti`, `must_keep`,
-`constraints`, `viewing`, `semantics`, `meta`, `tunables`, `constants`,
-`invariants`, `clocks`, `manifest`, `build`, `descriptors`, and `contracts`.
+`constraints`, `viewing`, `references`, `semantics`, `meta`, `tunables`,
+`constants`, `invariants`, `clocks`, `manifest`, `build`, `descriptors`,
+`contracts`, `palette`, and `collections`.
 `content` is deliberately not among them: it is a natural key namespace for a
 designer. The list is versioned: a later revision of this format MAY extend
 it as new mechanisms claim a segment, and a validator that rejects a key on a
-newly reserved segment names the revision that reserved it.
+newly reserved segment names the revision that reserved it. `palette`,
+`references`, and `collections` are reserved as of v0.6, so a tuning key
+spelled `palette.*`, `references.*`, or `collections.*` that was legal
+before is rejected with a diagnostic naming that revision. `references.<key>`
+in prose resolves against `direction.json` (§9.3), exactly as the other
+direction families do, and `collections.<drawer>` resolves against the
+`collections/` directory (§1b).
 
 `contracts` earns its place on that list by rule 1: a backticked
 `contracts.stamina.max` in prose is a mechanism path, resolved against the
@@ -1133,9 +1303,82 @@ different channel: it is the §4a reference, resolving in the resolved
 snapshot, and it is what a generated test block carries (§10.9). Prose cites
 bare; the JSON channel cites typed; neither reaches into the other.
 
-Typed references keep their prefixes in prose. `state:` and `content:` (§4a)
-name ids the designer chose, so no first segment can classify them, and
-`descriptor:<family>:<id>` (§8a) is always written in full.
+`palette` earns its place the same way: a backticked
+`` `palette.enemies.fire` `` in prose is a mechanism path, resolved against
+`manifest.json`, which is where the palette map lives (§3). It is the format's
+first resolving family that does not live in `direction.json`, and
+`contracts.*` is the precedent for a family resolved outside that file.
+
+**Resolving a palette citation (normative).** A palette key is dotted and a
+color name is a further segment, so one token can be read two ways. The order
+is fixed, and it governs both channels: a prose citation and the typed
+`palette:` form of §9.5 resolve under exactly these steps.
+
+1. A validator MUST first try **the whole reference text** as a palette key —
+   in prose, the token minus its `palette.` first segment; in the typed JSON
+   form, the text after `palette:`. If a palette of exactly that key is
+   declared, the reference names that palette.
+2. Otherwise it MUST split off the last segment and try the remainder as a
+   palette key. If that palette is declared and carries a named entry matching
+   the last segment, the reference names that one color. When the reference
+   text is a single segment the remainder is empty, so this step yields
+   nothing and resolution proceeds to step 3.
+3. Otherwise the reference is dangling, and a dangling reference is a hard
+   failure.
+
+So `` `palette.enemies.fire` `` names the palette and
+`` `palette.enemies.fire.flame` `` names one color in it. Where the position
+requires a color rather than a palette — a §9.5 `color` field, a §9.5
+threshold operand — a reference that resolves at step 1 fails as *names a
+palette, not a color* rather than as a dangling reference.
+
+**The collision rule.** A palette key MUST NOT equal another palette's key
+plus one of that palette's color names. Declaring `enemies.fire` with a color
+named `flame` alongside a palette keyed `enemies.fire.flame` is a validation
+failure at declaration, not an ambiguity discovered at citation.
+
+**Array positions are not citation targets**, here as everywhere (§9.9), so
+`palette.enemies.fire.2` names nothing: inserting a color into a palette must
+never silently re-aim a citation. No special check is needed for it. §3's
+grammar admits no all-digit key segment and no all-digit color name, so a
+digit tail matches nothing at either step above and the token simply dangles.
+
+Dangling-is-a-hard-failure is what makes the ordinary authoring flow safe.
+Type `` `palette.enemies.fire` `` in prose, and a tool that notices the path
+does not resolve can offer to create it, with the colors set in a side panel;
+naming one color is the same gesture one level down. It is the flow designers
+already have for tuning keys. The format does not specify the tool; it
+specifies the failure that makes the tool trustworthy. When a package declares
+no `palette` map at all, the dangling-citation diagnostic SHOULD name the
+revision that reserved the segment, mirroring the tuning-key diagnostic above.
+
+Typed references keep their prefixes in prose. `state:` and `collections:`
+(§4a) name ids the designer chose, so no first segment can classify them,
+`descriptor:<family>:<id>` (§8a) is always written in full, and `palette:`
+(§9.5) is the JSON channel's spelling of a palette citation. A typed reference
+is never misread as a prose citation: the classification rule above reads
+dotted tokens of word characters, and a token carrying a colon is not one.
+
+**Every reference form, in one place.** This table gathers the format's
+reference spellings; each row's cited section states the governing rules, and
+the classification order above decides what a prose token is.
+
+| Form | Legal where | Resolves against | Failure behavior |
+| --- | --- | --- | --- |
+| Bare dotted token, first segment unreserved — `` `hazard.interval_seconds` `` | Chapter prose, inline code | A declared `tuning.json` key | Dangling citation is a hard failure (§4) |
+| Dotted token, reserved first segment — `` `mood.rain-glass` ``, `` `contracts.stamina.max` ``, `` `palette.enemies.fire.flame` ``, `` `collections.enemies.gloom-moth` `` | Chapter prose, inline code | The owning file or directory: `direction.json` (§9), `tuning.json` `meta.*` (§4), `invariants.<id>` (§4a) and the `clocks` block (§4b) in `tuning.json`, the contract instance (§10), the `manifest.json` palette map (§3), the `collections/` drawers and their records (§1b) | Dangling is a hard failure; a palette token resolves whole-key first (§4) |
+| `tuning:<key>`, including `tuning:contracts.<instance>.<knob>` | JSON channel: §4a expression refs, §9.5 timing entries, generated test blocks | The resolved tuning snapshot (§5) | Dangling reference is a hard failure (§4a) |
+| `state:` forms (§4a), including `state:member:ruleset:<id>` | §4a expression refs; keeps its prefix in prose | Declared state ids (§4a); declared rulesets (§2c) | Dangling is a hard failure (§4a) |
+| `collections:<drawer>:count` | §4a expression refs; keeps its prefix in prose | The `collections/` drawers (§1b) | Dangling is a hard failure (§4a) |
+| `descriptor:<family>:<id>` | Both channels, always written in full | The §8a descriptor families | Dangling is a hard failure (§8a) |
+| `palette:<palette-key>.<color-name>` | JSON channel only: §9.5 `color` fields and threshold operands | The `manifest.json` palette map; the position requires a color | Grammar errors fail before resolution; *names a palette, not a color*; dangling is a hard failure (§9.5) |
+| Chapter anchor — `<file>.md#<anchor>`, bare `#<anchor>` | §6 test references, §10.7 citations | Heading anchors under §1a's derivation | Unresolvable where the position requires one; banned in fantasy lines (§1a) |
+| `> RULESET: <id>` tag; `meta.ruleset` | Prose section tags; `tuning.json` `meta` entries | Declared ruleset ids (§2c) | A dangling tag is a hard failure (§2c) |
+
+Not references, by the same rules: a token whose segments are all digits (a
+version string), a token carrying a `json` or `md` segment (a file mention),
+a colon-bearing token read as prose (not a dotted citation), and a `#` that
+is not preceded by line start or whitespace ("the #1 spot").
 
 ## 4a. Declared expressions and invariants
 
@@ -1203,8 +1446,11 @@ content; the last is legal only inside a contract core:
   resource, counter, or other numeric state binding;
 - `state:member:<declared-set-id>:<declared-member-id>` → Boolean membership in
   a declared runtime set;
-- `content:<collection-id>:<JSON-Pointer>:count` → numeric length of a declared
-  array; and
+- `collections:<drawer>:count` → the number of records in a §1b drawer, one
+  file per record. The v0.5 spelling, `content:<id>:<pointer>:count`, is
+  retired: an expression carrying it is a hard failure that names the
+  replacement, since the catalog file its pointer reached into no longer
+  exists; and
 - `knob:<name>` → number from a contract core's own knob meta, legal **only**
   inside that core's invariants (§10.5). A core is authored before any
   instance of it exists, so it cannot name itself
@@ -1222,9 +1468,9 @@ each binding, it declares the type and when the value is read.
 A package declares a `state:number` binding by either of two paths. A §4b
 clock's `governs` list declares every reference it names, so a governed clock
 value needs nothing further. Otherwise the binding is declared where its prose
-defines it: writing the reference itself in a chapter at the package root, or
-in the `defined_in` section of a §1b collection, declares it, and the
-surrounding prose is where the type and the read timing are stated. A
+defines it: writing the reference itself in a chapter at the package root
+declares it, and the surrounding prose is where the type and the read
+timing are stated. A
 reference neither path declares does not resolve, and citing it is a hard
 failure.
 
@@ -1232,8 +1478,10 @@ A §2c `ruleset_state` declaration is one such definition. It makes the
 `state:member:ruleset:<ruleset-id>` form resolvable: true when the named
 ruleset is active.
 
-A structured-content condition may bind only declared state ids and literals,
-unless the collection's `defined_in` section opts into another binding.
+A drawer record schema's `when` condition reads the row's own fields and
+nothing else (§1b); inside a contract, §10.5's `flag` domain also reads
+the surface's answers. No other structured-content condition exists in
+this version.
 
 The following are hard failures: an unknown operator, wrong arity, an
 unresolved reference, a type mismatch, implicit coercion, and a non-finite
@@ -1302,13 +1550,16 @@ of different clocks are disjoint. A reference governed by no clock has no
 declared mode behavior. The §4b checks below apply only to governed
 references.
 
-A clock MAY declare `unit` as a string. The default is the spec's declared
-time unit.
+Every clock MUST declare `unit` as a string. There is no default: no v0.6
+declaration site defines a package-wide time unit, so an omitted unit would
+leave two tools free to read the same clock differently.
 
-A replay (§6) has exactly one **active mode** at every point.
-Modes do not nest or stack. The replay declares its initial mode.
+A package that declares clocks gives every replay (§6) exactly one **active
+mode** at every point. Modes do not nest or stack. In such a package, every
+replay object carries an `initial_mode` string and a `schedule` array. Other
+replay entries remain runner-defined under §6.
 
-Replay schedules use standard mode-transition actions. Each action is a
+Those replay schedules use standard mode-transition actions. Each action is a
 JSON object. The following four actions are the complete standard set. Any
 other `action` value makes the replay data invalid:
 
@@ -1363,6 +1614,30 @@ and how, remain Fixed prose under §2a.
 
 *For designers. Skip if every build of your spec should come out the same.*
 
+**Two lanes, one file.** Personalization holds two different kinds of
+question, and most confusion in this chapter comes from reading them as one:
+
+- **Numeric resolution.** `number` questions with `resolution` operations,
+  and `choice` options carrying `tuning_overrides`. These resolve
+  mechanically: the same answers always produce the same resolved snapshot,
+  and validation checks the machinery end to end. Walked once with the
+  `hazard_pace` example below: the builder skips the question, so its
+  `default` of `1.2` applies; the `replace` operation writes `1.2` into
+  `hazard.interval_seconds`; the value sits inside that key's `meta.range`;
+  and the resolved snapshot's `tunables` member carries `1.2`, with every
+  constant copied through unchanged. Had an operation instead multiplied a
+  base of `2.0` by an answer of `2.0`, the computed `4.0` would clamp to the
+  range's top under `out_of_range: "clamp"`, or invalidate the answer under
+  `"reject"`.
+- **Creative instruction.** `text` questions, and `choice` options without
+  overrides. The answer is recorded and the builder interprets it; two
+  faithful builds may legitimately differ (§2a). The record proves what was
+  asked and answered — not what it changed.
+
+`affects` serves both lanes without joining either: it is an impact index,
+the designer's declaration of where to look — never an automatic
+transformation. Its shape rules are below.
+
 `personalization.json` carries the questions asked before or while building.
 Its top level is a closed object whose one required field is `questions`:
 
@@ -1372,7 +1647,7 @@ Its top level is a closed object whose one required field is `questions`:
 
 `questions` is an ordered array of question objects, and its order is the
 resolution order below. The file is machine-validated against
-[personalization.schema.json](https://opengdd.org/schema/core/v0.5/personalization.schema.json).
+[personalization.schema.json](https://opengdd.org/schema/core/v0.6/personalization.schema.json).
 One entry of that array:
 
 ```json
@@ -1392,8 +1667,7 @@ A question object carries these fields, and the set is closed: adding one
 takes a format revision.
 
 - **`id`** is required: a string, unique within the file. It is the id a
-  `> PERSONALIZATION: <id>` prose tag (§2) and a collection record's
-  `authority.question` (§1b) name.
+  `> PERSONALIZATION: <id>` prose tag (§2) names.
 - **`prompt`** is required: a non-empty string stating the question as the
   builder is asked it.
 - **`type`** is required, and is exactly one of `choice`, `text`, or `number`.
@@ -1404,10 +1678,10 @@ takes a format revision.
 - **`default`** is required for every question. Its type follows the
   question's `type`: the `id` of one declared option for `choice`, a string
   for `text`, a JSON number for `number`.
-- **`affects`** is optional: an array of package-relative paths, each of which
-  MUST exist.
-- **`resolution`** is legal only on a `number` question. It is the array of
-  operations defined below.
+- **`affects`** is optional: a non-empty array of unique package-relative
+  paths, each of which MUST exist.
+- **`resolution`** is legal only on a `number` question. It is a non-empty
+  array of the operations defined below.
 - **`notes`** is optional: a string, under the same rule as an option's
   `notes`.
 
@@ -1418,10 +1692,11 @@ one is skipped, its `default` applies, so every question has an answer either
 way.
 
 **`affects` (normative).** It declares which files of the package this
-question's answer may influence. Each entry is a package-relative path under
-§1's normalization rule, and every one MUST resolve to a file that exists; a
-path that does not is a hard failure. That existence rule is the whole of its
-machine meaning in v0.5. It grants no permission and withholds none: it does
+question's answer may influence. When present, it contains at least one path
+and does not repeat a path. Each entry is a package-relative path under §1's
+normalization rule, and every one MUST resolve to a file that exists; a path
+that does not is a hard failure. Those shape and existence rules are the whole
+of its machine meaning in this version. It grants no permission and withholds none: it does
 not confine the answer's effect to the listed files, and no validator compares
 it against what the answer actually changed. It is the designer's declaration
 of reach, written for the builder who has to find it.
@@ -1438,7 +1713,8 @@ numeric change.
 ### Enumerated answers
 
 A choice option or other enumerated answer MAY declare exact tuning-key
-replacements through `tuning_overrides`:
+replacements through `tuning_overrides`. When present, this object contains
+at least one entry:
 
 ```json
 {
@@ -1517,23 +1793,26 @@ key's declared range.
 
 ### The resolved tuning snapshot
 
-The **resolved tuning snapshot** is the complete flat `tunables` map after all
-default or supplied answers are applied. It carries every unpruned contract
-knob as well, under its `contracts.<instance>.<knob>` key, so every number a
-build runs on is findable in one place (§10.11). For every `must_match: true` key, it
-is this snapshot that the experimental certification protocol would evaluate
-the built value against, never the package default or the declared range
-(§2d). `opengdd-build.json` MUST record the answers and the full resolved
-snapshot.
+The **resolved tuning snapshot** is one object with exactly two flat map
+members: `tunables` and `constants`. Its `tunables` member contains every
+package tunable after all default or supplied answers are applied; its
+`constants` member copies every package constant unchanged. Every unpruned
+contract knob joins the member selected by its `kind`, under the key
+`contracts.<instance>.<knob>` (§10.11). The full two-member object therefore
+contains every runtime number the package exposes through this machinery.
+For every `must_match: true` key, the experimental certification protocol
+would evaluate the built value against the corresponding value in this
+snapshot, never the package default or the declared range (§2d).
+`opengdd-build.json` MUST record the answers and the full resolved snapshot.
 
 ### Answers outside tuning
 
-Numbers are the whole of what v0.5 resolves by machine. A question may also
-reach prose, through a `> PERSONALIZATION: <id>` section tag (§2), and
-structured content, through a collection record whose `authority.level` is
-`personalization` (§1b). For neither does v0.5 define a machine effect: there
-is no include, exclude, or replace semantics, and no selector saying which
-answer produces which section or which record.
+Numbers are the whole of what this version resolves by machine. A question
+may also reach prose, through a `> PERSONALIZATION: <id>` section tag (§2).
+For prose the format defines no machine effect: there is no include,
+exclude, or replace semantics, and no selector saying which answer produces
+which section. Collection records are Fixed spec data (§1b) and are not a
+personalization channel in this version.
 
 A personalized prose section or collection record is resolved by the
 builder's Delegated interpretation of the recorded answer, under §2a's
@@ -1554,20 +1833,20 @@ Under the experimental certification protocol (§2d), a certification harness
 would execute this chapter, and its acceptance tests are what a build would be
 certified against. The chapter's structure below is a normative package
 obligation, and so is the closed test-block field set stated with the test
-types. The executing runner is not defined in v0.5 and belongs to the
-experimental protocol. The chapter MUST contain ordered phases. The v0
-convention lists them as `core-loop` → `content` → `tuning` → `presentation`
+types. The executing runner is not defined by the core format and belongs to
+the experimental protocol. The chapter MUST contain ordered phases. The
+conventional order is `core-loop` → `content` → `tuning` → `presentation`
 → `polish`. Each phase lists its scope, chapter references, and
 machine-verifiable checkpoints. Phase structure is a prose obligation (§2d):
-v0.5 defines no machine grammar for it, and validators do not decide it.
+the format defines no machine grammar for it, and validators do not decide it.
 
 ### Acceptance-test types
 
 Acceptance tests are numbered `AT-1 … AT-n`. Their machine-checked shape
 grammar: an acceptance test is a Markdown heading, at any heading level,
 whose text begins `AT-<n>`. One file is scanned for those headings — the
-build plan named by the manifest's `build.plan`, which is `05-build-plan.md`
-unless the manifest says otherwise (§3) — and it MUST carry at least one.
+canonical root build plan `05-build-plan.md` (§§1, 3) — and it MUST carry at
+least one.
 Numbers MUST be unique and ascending in document order. Gaps are permitted: a
 deleted test's number is retired and never reused, so `AT-4` names the same
 check in every revision that still has one. This numbering scopes to the
@@ -1579,10 +1858,25 @@ followed by two things: a fenced JSON block whose fence carries the tag word
 same check. This document calls what the fence holds a test block. Every
 test block declares one of four **test types**.
 
+**Choosing the type.** Ask, in order:
+
+1. Does the check read documents or content files, without ever running the
+   game? → `document-check`.
+2. Does it check one concrete play situation — a given state, an action, an
+   expected result? → `scenario`. **This is the default**: most acceptance
+   tests are scenarios, and several concrete scenarios beat one abstract
+   test for writing, reading, and diagnosing.
+3. Does the claim quantify over many inputs — "for every …", "for any
+   sampled …"? → `property`.
+4. Must the claim hold over every reachable state — an impossibility, a
+   minimum, a universal? → `exhaustive-search`, and only `complete: true`
+   establishes it.
+
+When in doubt, write a `scenario`.
+
 - **`scenario`** declares Given/When/Then state and action semantics. An
-  optional `replay` adds a versioned replay: initial state,
-  schedule, ordered expected observations, numeric targets, tolerance
-  semantics, and mismatch diagnostics.
+  optional `replay` carries runner-defined replay data; §4b defines additional
+  fields only when the package declares clocks.
 - **`property`** declares a quantified input or domain and an invariant. Its
   `sampling` member is either the string `"exhaustive"` or a reproducible
   sampling plan object.
@@ -1607,7 +1901,9 @@ test block declares one of four **test types**.
   diagnostics that prove success and diagnose failure.
 - **`document-check`** checks spec or content artifacts without running the
   game. Its test block carries four fields: `artifacts`, the
-  package-relative files the check reads; `rule_set`, the versioned id of
+  package-relative files the check reads, where a path ending in `/` names
+  a directory — a §1b drawer, whose records are the checked documents;
+  `rule_set`, the versioned id of
   the rule grammar the rules are written in (a trailing `-<digits>` suffix
   is a version, matching the format's own rule-set names); `rules`, the
   array of rule objects in that grammar; and `diagnostics`, the named
@@ -1648,16 +1944,27 @@ conformance error (§2d):
   non-empty array of strings; and `bound`, an object naming its `type` string
   and at least one further field carrying the limit, or the `finite_state`
   declaration that stands in for it.
-- `document-check`: `artifacts`, an array of package-relative path strings;
+- `document-check`: `artifacts`, an array of package-relative path strings,
+  each an existing file or, with a trailing `/`, an existing directory;
   `rule_set`, a string ending in its version suffix, as `opengdd-graph-1`
   does, or an object carrying `id` and `version`; `rules`, an array of rule
   objects written in that grammar; and `diagnostics`, a non-empty array of
   strings.
-- In the blocks whose own rules admit them: `direction_claims`, a non-empty
-  array of dotted-path strings (below); `rules` (§1c); `diagnostics`, a
-  non-empty array of strings; `freeze_invariant`, an object (§4b); `replay`,
-  an object; and the expected-observation pair `target`, which takes the
-  observation's own JSON type, and `tolerance`, a number.
+- Beyond each type's required fields, the optional grants are exactly these.
+  `scenario` and `property` blocks MAY carry `diagnostics`, a non-empty
+  array of strings; `direction_claims`, a non-empty array of dotted-path
+  strings (below); `freeze_invariant`, an object (§4b); `replay`, an object;
+  and the expected-observation pair `target`, which takes the observation's
+  own JSON type, with `tolerance`, a finite JSON number.
+  `exhaustive-search` and `document-check` blocks admit no optional field
+  beyond `extensions`; their `diagnostics` (and `document-check`'s `rules`,
+  §1c) are required fields of their own shapes.
+- `extensions`, optional in every block: an object whose keys are
+  package-local kebab-case extension ids and whose values are JSON objects.
+  Each key names one package or harness extension and is the namespace for
+  everything inside its value. The core format validates the container, key
+  grammar, and object-valued entries, but treats each value as opaque and
+  assigns no meaning to its nested fields.
 
 Which of these a block MUST carry is stated with the type that carries it;
 this list settles the names, not the obligations. A package validator decides
@@ -1665,17 +1972,28 @@ these shapes as far as they are decided at all: where a field takes one type,
 it decides that type, and where a field is prose-shaped it decides presence
 and non-emptiness, with the string form and the array form equally legal.
 
-A block MAY carry further fields of the package's own, such as a fixture id
-or a capture handle its harness needs. The format gives them no meaning and
-no validator rejects them, exactly as §8 leaves any other coined identifier
-to the designer.
+A block MUST NOT carry any other top-level field. Package- or harness-owned
+data, such as a fixture id or capture handle, is legal only inside
+`extensions`; placing it directly beside standard fields is a package
+conformance error. The extension ids remain designer-coined identifiers under
+§8, but the one-container rule prevents them from colliding with present or
+future standard fields.
 
-The list is package-level, and closed at the field-name level named here.
+The list is package-level and closed at the top-level field-name layer.
 Test execution semantics are not in it: how a runner reads a `given`, a
 `when`, or a `then`, how it plays a `replay` back, and what an observation is
 worth remain the experimental certification protocol's (§2d). A package
 validator decides which fields are present and whether their shapes are
 well-formed; it never runs the check.
+
+Every test feature has exactly one owner (§2d's layers):
+
+| Test feature | Owner |
+| --- | --- |
+| Block shape, the closed field set, per-type shapes, `direction_claims` resolution and coverage | PACKAGE — the validator decides from bytes |
+| Reading `given`/`when`/`then`, playing back `replay`, `target` and observation semantics, schedule execution | Runner — experimental protocol territory (§2d) |
+| "The tests passed" | RECORD — the build record's claim, checked for shape and counts (§7) |
+| Whether they truly passed, and whether uncited Fixed prose held | AUDIT — the experimental certification audit (§2d, §9.10) |
 
 ### Direction-claim citations
 
@@ -1683,36 +2001,41 @@ A `scenario` or `property` test block that covers a §9 direction claim MUST
 carry `direction_claims`. This field is a non-empty array of exact dotted
 paths. A **test block** may cite only these claim kinds:
 
-- `constraints.palette.<key>`
+- `constraints.colors.<key>`
 - `constraints.thresholds.<key>`
 - `constraints.timing.<key>`
-- `descriptors.mood.<mood-id>.palette.<role>`
 
-The fourth path leaves `direction.json`. It names one palette role inside a
-mood descriptor declared in `manifest.json` (§8a), and its `<mood-id>` segment
-is that descriptor's own `id` — never a `mood.<key>` local key from the
-direction block.
+All three are `constraints.*` paths, and all three name entries inside
+`direction.json`. A palette is not one of them: it is declared material with
+no audit class of its own (§3), so a test block never cites it. Palettes are
+cited in prose instead, under §4's classification rule, and the two channels
+stay separate exactly as they do for contracts.
 
 Pillars, mood entries, anti-references, and `must_keep` entries are never
 cited by a test block. They are scored directly against the finished build
-under §9.11.
+under §9.10.
 
 Direction-claim completeness:
 
-1. Every path in `direction_claims` MUST resolve: a `constraints.*` path to a
-   declared `direction.json` entry, and a `descriptors.mood.*` path to a
-   declared mood descriptor's declared palette role. A dangling citation is a
-   hard failure either way.
+1. Every path in `direction_claims` MUST resolve to a declared
+   `direction.json` entry. A dangling citation is a hard failure.
 2. Every `constraints.*` entry MUST be named by at least one AT's
    `direction_claims`. All `constraints.*` entries are fixed observational
-   `checked` claims under §9.11. An entry covered by no AT is a validation
+   `checked` claims under §9.10. An entry covered by no AT is a validation
    failure.
-3. Completeness does not run back the other way for mood palettes: no rule
-   requires a mood palette role to be cited, and an uncited role is judged
-   with its mood (§8a).
 
 An AT that carries `direction_claims` MUST NOT restate the cited claim's
-value or scope. The §9.5 single-source rule extends to this field.
+value or scope. The §9.5 single-source rule extends to this field, with one
+checked-mirror exception. A claim whose
+`scope.sampling.sampled.verdict` carries `aggregate` MUST be covered by a
+`property` AT with `verdict: "aggregate"`; a scenario or per-sample property
+does not cover it. The test retains the `metric`, `aggregation`, and
+`threshold` fields that its §6 aggregate-property shape requires. The test's
+`metric` and `aggregation` strings MUST equal the cited claim's strings, and
+its `threshold` MUST carry the same `op` and a numerically equal `value`. A
+single test may cover more than one sampled-aggregate claim only when all of
+their mirrored values match. The mirror does not become the authority: the
+claim remains authored in `direction.json`.
 
 Example scenario, the commonest type, from the getaway driver's build plan:
 
@@ -1742,10 +2065,19 @@ Example aggregate property:
 ```
 
 
-Replay paths MUST be package-relative. When a replay is structured
-content, it MUST be declared through §1b. A tolerance without an expected
-target is invalid. A target without its input or schedule replay is also
-invalid.
+At package conformance, `replay`, when present, is an object. A `tolerance`
+without an expected `target` is invalid. When the package declares clocks,
+§4b additionally requires `initial_mode` and a `schedule` array and decides
+every standard action's shape and preconditions.
+
+The remainder is an **experimental certification obligation**, not a package
+conformance check. Because this version deliberately leaves other replay
+entries runner-defined, the certification audit confirms that every path the
+runner treats as replay input is package-relative, that replay input carried
+as structured content is declared through §1b, and that every `target` is
+grounded in an input or schedule the runner actually supplies. A package
+validator does not infer those meanings from opaque replay entries or require
+a particular runner-owned carrier.
 
 A test block states what must be proved. It leaves the implementation
 architecture open.
@@ -1772,15 +2104,15 @@ Two rules keep the block coherent.
 - **The block is not hand-edited.** A validator recomputes it from the
   instance file and requires byte equality, so editing a generated test is a
   validation failure; you change the answer and regenerate (§10.10).
-- **Nothing may point into it.** No reference of any kind — a chapter anchor,
-  a `defined_in` pointer, a contract citation (§10.7) — may target a generated
+- **Nothing may point into it.** No reference of any kind — a chapter
+  anchor, a contract citation (§10.7) — may target a generated
   test or an anchor inside the block. A generated test's existence depends on
   the answers, so change one and the target can legally vanish; a stable name
   is still not a stable target.
 
 A core knows nothing of its adopting package's direction claims, so no
 generated test carries `direction_claims`. Covering a `constraints.*` entry
-(§9.11) stays the package's own work.
+(§9.10) stays the package's own work.
 
 The tests are the executable part of the spec; they are not all of it. Every
 Fixed statement binds even when no test restates it (§2). So passing every
@@ -1796,9 +2128,9 @@ A conforming build ships `opengdd-build.json` (build-record conformance,
 §2d). Where this chapter uses certification vocabulary — "certified",
 "certifying spec", "certifying profile" — it uses it in §2d's
 intended-shape sense: the record is the artifact the experimental protocol
-would audit, and v0.5 defines no normative certification outcome for it. The
+would audit, and the core format defines no normative certification outcome for it. The
 file is machine-validated
-against [opengdd-build.schema.json](https://opengdd.org/schema/core/v0.5/opengdd-build.schema.json).
+against [opengdd-build.schema.json](https://opengdd.org/schema/core/v0.6/opengdd-build.schema.json).
 
 ### Core fields
 
@@ -1814,7 +2146,8 @@ The required top-level fields are exactly:
   flat `tunables` map after answer resolution and the package `constants`,
   each carrying the package's contract keys as well —
   `contracts.<instance>.<knob>`, split between the two by the knob's `kind`
-  (§10.11). `constants` is an empty object when the package declares none.
+  (§10.11). `constants` is an empty object only when neither the package nor
+  any live contract surface declares a constant.
 - **`evidence`**: the test-run record. Its required fields are:
   - `algorithm`. The only value currently defined is `"sha256"`.
   - `result_hash`.
@@ -1823,10 +2156,27 @@ The required top-level fields are exactly:
     canonical payload bytes covered by the hash.
   - `acceptance`, with `passed` and `total` counts.
 
+  Two further fields are conditionally required when the source package is
+  available:
+
+  - `runner`, a closed object with non-empty `id` and `version` strings. It
+    names the runner profile relative to which the result is true. It is
+    required when any source acceptance test is `scenario`, `property`, or
+    `exhaustive-search`, or when a block carries `replay`, `target`, or
+    `direction_claims`. A package containing only `document-check` tests may
+    omit it.
+  - `direction_observations`, one closed `{ claim, context }` object for every
+    observational `constraints.*` claim declared by the source
+    `direction.json`. `claim` is its exact dotted path and `context` is a
+    non-empty plain-language account of what was observed. The array is absent
+    when the source declares no such claims.
+
 Canonicalization follows the conformance certification protocol published at
 `conformance/CERTIFICATION.md` in the OpenGDD conformance suite (§2d).
-Record conformance checks `evidence` for shape and counts only; `payload.file`
-is checked as a package-relative path shape, not for existence.
+The standalone record check validates the evidence shapes it can see.
+Source-backed record validation additionally decides the conditional runner,
+observation, and test-count rules below. `payload.file` is checked as a
+package-relative path shape, not for existence.
 Reproducing `result_hash` and auditing the payload belong to the experimental
 protocol, under which a digest without a reconstructible payload is
 unauditable and fails the audit.
@@ -1850,33 +2200,47 @@ package. A conforming validator MUST also verify all of the following:
    keys the package declares — `contracts.<instance>.<knob>` for every
    unpruned knob of every instance, landing in one set or the other according
    to that knob's `kind`, and a pruned knob entering neither (§10.11).
-   `resolved_tuning.tunables` is
-   produced by the §5 resolution pipeline, and every value remains inside its
-   declared range. A recorded answer whose resolution reaches an
+   The validator MUST compute the complete expected snapshot from the source
+   package, the recorded answers, and the live contract surfaces, then require
+   every recorded value to equal its expected value. The `tunables` member is
+   produced by the §5 resolution pipeline; the `constants` member copies
+   source package and live `kind: constant` contract values unchanged. Every
+   tunable value remains inside its declared range. A recorded answer whose
+   resolution reaches an
    `out_of_range: "reject"` operation with a computed value outside the target
    key's range does not resolve, and the record does not conform (§5).
 5. `acceptance.total` equals the package's enumerated AT count: its game-local
    acceptance tests, plus its generated ones after liveness and per-row
    expansion (§§6, 10.10).
 6. A conforming build has `acceptance.passed == acceptance.total`.
+7. When the source test set contains any runtime test named above,
+   `evidence.runner` is present. Its identity makes results attributable; the
+   core does not interpret the named profile or claim that two profiles are
+   equivalent.
+8. `evidence.direction_observations`, when required, names every declared
+   `constraints.colors.*`, `constraints.thresholds.*`, and
+   `constraints.timing.*` claim exactly once, names no other claim, and gives
+   each a non-empty observation context (§9.10).
 
-Checks 1–6 are the core set, not the whole set. The direction-result
-presence, path, and subset rules of §9.11 are validator-level
+Checks 1–8 are the core set, not the whole set. The direction-result
+presence, path, and subset rules of §9.10 are validator-level
 package-consistency checks of the same rank, and §2d's build-record
 conformance includes them. So is one contract rule: every live
 core invariant is re-evaluated over the resolved snapshot, because an override
 that is legal for its own key can still break a rule between two knobs that no
 per-key range can see (§10.8).
-Validators report divergence in checks 1–6 and in the direction-result rules
+Validators report divergence in checks 1–8 and in the direction-result rules
 as errors. A check-6 shortfall is an error against build conformance rather
 than a complaint about the file (§2d); it does not conflict with honest
 reporting, because the shipped record is a completion claim, and a build
 still failing tests reports through §2b ambiguity reports rather than a
 build record.
 
-When a commerce split exists, the build manifest includes the manifest's
-commerce profile verbatim (including `derived_from` when present). Nothing in
-the experimental certification protocol depends on commerce metadata.
+`opengdd-build.json` MAY copy the source manifest's `commerce` profile. When it
+does, the source manifest MUST carry that profile and the copy MUST be
+verbatim, including `derived_from` when present. Omitting the optional copy
+has no conformance consequence, and nothing in the experimental certification
+protocol depends on commerce metadata.
 
 ### Optional renderer declaration
 
@@ -1884,7 +2248,7 @@ the experimental certification protocol depends on commerce metadata.
 rendering technique the build used, such as `"three.js 0.185.1, WebGL"`.
 The renderer is the builder's fact, never the spec's: §3's `platform` names
 the state space a design is responsible for, and two builds of one spec may
-declare different renderers. The declaration is informative in v0.5: the
+declare different renderers. The declaration is informative in this version: the
 `web-1` capture recipe does not read it, and recipe selection stays with
 `capture_profile.type`.
 
@@ -1894,7 +2258,7 @@ declare different renderers. The declaration is informative in v0.5: the
 adapter and serving or run recipe that produced the captures:
 `{ "id": <string>, "type": <string> }`.
 
-`type` is a closed, versioned enum. v0.5 defines one value: `"web-1"`. It
+`type` is a closed, versioned enum. This version defines one value: `"web-1"`. It
 names the existing headless-browser reference recipe summarized here:
 
 - advance gameplay on a synthetic 60 Hz clock;
@@ -1911,8 +2275,13 @@ run identifier or container tag. It does not need to resolve outside the
 build. If `capture_profile` is absent, the certifying profile is unrecorded;
 the absence does not claim that no profile was used.
 
+`capture_profile` and `evidence.runner` answer different questions. The first
+names a capture recipe; the second names the runner that interpreted runtime
+acceptance tests. One does not substitute for the other, although a build may
+use the same implementation behind both declarations.
+
 Cross-profile equivalence claims and a registry of types beyond `"web-1"`
-are outside v0.5; a future adapter earns a new enum value through an
+are outside this version; a future adapter earns a new enum value through an
 ordinary additive schema change.
 
 ### Optional resource disclosure
@@ -1929,9 +2298,9 @@ the build consumed. Each entry has this shape:
 hash. It may be a URL, a registry coordinate such as `name@version`, or a
 package-relative path.
 
-In v0.5, `hash` MUST cover exactly one file's bytes. A multi-file kit, source
+In this version, `hash` MUST cover exactly one file's bytes. A multi-file kit, source
 tree, or tool installation MUST be packaged into one archive, such as a
-`.zip`, before hashing. v0.5 defines no directory or tree-hash
+`.zip`, before hashing. The format defines no directory or tree-hash
 canonicalization.
 
 `license` is a free-text declaration. The validator checks that it is present;
@@ -1950,10 +2319,10 @@ disclose.
 
 ### Conditional direction result
 
-`direction_result` carries the §9.11 judged-gate record, and §9.11 owns its
+`direction_result` carries the §9.10 judged-gate record, and §9.10 owns its
 shape and validity rules. It is present exactly when the source spec's
 `direction.json` declares at least one judged claim, and MUST be absent
-otherwise. The presence rule and §9.11's path and subset rules require a
+otherwise. The presence rule and §9.10's path and subset rules require a
 validator-level cross-check against the source spec: the build record schema
 alone cannot express them, and its `directionClaimPath` regex is necessary
 but not sufficient.
@@ -1974,57 +2343,51 @@ generated play. Two tiers are supported:
   metadata: intended insight, red herrings, difficulty-curve position, and
   machine-checkable invariants. Those invariants may include minimum solution
   length, required mechanics, and forbidden shortcuts. Checking them needs a
-  solver, and v0.5 standardizes no solver adapter, so the citing package
+  solver, and the format standardizes no solver adapter, so the citing package
   supplies one (below). The insight is Fixed. Its decoration is Delegated.
 
 ### Grid-layout encoding family: `parallel-string-layers-1` (normative)
 
-v0.5 defines one named, buildable member of the still-open grid-encoding
+This version defines one named, buildable member of the still-open grid-encoding
 family: the flat, single-cell `parallel-string-layers-1` encoding. Two
 independent grid-puzzle instances converged on this layout shape. They did not
 converge on a solver-adapter interface or predicate vocabulary, so those parts
 remain open below.
 
-A §1b collection declares this encoding by setting `format` to
-`parallel-string-layers-1` and adding `layout` to that collection's manifest
-declaration. `layout` is the mechanical layer binding:
+A §1b drawer declares this encoding through its record schema (decision
+33): a field of type `grid` is one layer, and the schema's grid fields are
+the layer set. A single-layer grid — one field holding the whole board — is
+the commonest case and declares one grid field. A validator reads exactly
+the grid-typed fields; no other field is a layer, whatever its shape, and
+generic tools discover layers from the schema, not from game prose:
 
 ```json
 {
-  "id": "puzzles",
-  "format": "parallel-string-layers-1",
-  "layout": {
-    "layers": ["terrain", "entities"],
-    "cell_unit": "unicode-scalar-value"
-  },
-  "defined_in": "03-content.md#puzzle-layout-format",
-  "...": "..."
+  "record": {
+    "terrain": { "type": "grid", "required": true,
+      "description": "walls and floor: `#` is wall, `.` is floor" },
+    "entities": { "type": "grid", "required": true,
+      "description": "what stands where: `-` is empty, `o` is a stone" }
+  }
 }
 ```
 
-- **`layers`** is required. It contains one or more unique strings in a
-  closed, ordered set. A single-layer grid — one field holding the whole
-  board — is the commonest case and declares a one-string list. Each string
-  names a collection-record field that carries a grid layer. A validator reads exactly these named fields from
-  every collection record, whether the collection is held as items or as a
-  catalog.
-  No other field is a layer, whatever its shape. A named field that is
-  missing or is not a string array is a hard failure. Generic tools discover
-  layers from manifest `layout.layers`, not from game prose.
-- **`cell_unit`** is required and fixed to `"unicode-scalar-value"`, the only
-  value defined in v0.5. A row's column count is its length in Unicode scalar
-  values, or code points. UTF-16 code units and grapheme clusters are not the
-  measurement. A surrogate-pair emoji is one cell. A combining-mark sequence
-  occupies as many cells as it contains scalar values.
+The cell unit is fixed by the format: a row's column count is its length in
+Unicode scalar values, or code points. UTF-16 code units and grapheme
+clusters are not the measurement. A surrogate-pair emoji is one cell. A
+combining-mark sequence occupies as many cells as it contains scalar
+values. (An earlier draft carried this as a mandatory `cell_unit` field
+with exactly one legal value; a field that can only say one thing is the
+format's to say.)
 
-Every collection record MUST carry all of `layout.layers` as string-array
-fields. Every layer in one collection record MUST be non-empty and congruent
-with every other layer in that collection record:
+A grid field's presence and string-array shape are the record schema's
+rules (§1b). The grids a record does carry MUST be non-empty and congruent
+with one another:
 
 - Row count, the array length, MUST be at least 1.
-- Every row's column count, measured by `cell_unit`, MUST be at least 1.
-- Row count and every row's column count MUST be identical within each layer
-  and across all layers in the collection record.
+- Every row's column count, measured in scalar values, MUST be at least 1.
+- Row count and every row's column count MUST be identical within each grid
+  field and across all grid fields of the record.
 
 These rules establish one shared, zero-based `(x, y)` grid per collection
 record. The grid is at least 1×1, with no partial or zero-width rows.
@@ -2043,19 +2406,20 @@ in a layer. Multi-cell entities are outside `parallel-string-layers-1`, even
 if a game's own rules express one entity identity across several single-cell
 footprints.
 
-The collection's `defined_in` pointer keeps these fields in the game's own
-defining section under §1b completeness:
+The grid field's schema `description` owns the per-cell glyph vocabulary —
+what `#` marks is how the field is read, and field-level reading lives in
+the schema (§1b), written once. The game's own chapters keep the rest in
+the game's own words:
 
-- per-cell glyph vocabulary;
 - overlap rules;
 - entity footprints;
 - terrain semantics; and
 - the win predicate.
 
-The core encoding fixes the grid shape and layer set. The collection's
-`defined_in` section gives cell values their meaning. This encoding declares
-no solver adapter or replay
-grammar. Until those are standardized, a citing collection defines its own
+The core encoding fixes the grid shape and layer set; the schema
+description names the glyphs; the game's prose gives the rules their
+meaning. This encoding declares no solver adapter
+or replay grammar. Until those are standardized, a citing collection defines its own
 command alphabet and predicates under §§6 and 7a.
 
 **The encoding family remains open.** One documented case this encoding
@@ -2086,7 +2450,7 @@ and why the admission bar below governs descriptor families rather than cores.
 
 An identifier is a designer-defined name in a JSON file or declared
 namespace. It is a broader thing than a tuning entry: a tuning key is one
-identifier, and so is a field named in a collection's `defined_in` section
+identifier, and so is a field a collection's record schema names or its
 and a member of a declared set. An id is one kind of identifier; a key is an
 identifier written as a dotted path.
 
@@ -2099,7 +2463,7 @@ way.
 
 Identity is scoped: the same spelling in two scopes may name two different
 identifiers, and first use defines the identifier in that scope. A field
-named in a collection's `defined_in` section is one identifier, no matter how
+a collection's record schema or prose names is one identifier, no matter how
 many records carry that field. Name it once there and you have made one
 identifier; the thousand cards that fill it in are one thousand values, not
 one thousand identifiers.
@@ -2118,13 +2482,13 @@ defines what the name means.
 ### Descriptors
 
 A descriptor is a reserved shape with fields defined by the format. This lets
-tools and audits act on the descriptor directly: for example, a palette
-can be checked, anti-references can feed judges, and behaviors can become
-rubric lines.
+tools and audits act on the descriptor directly: for example, anti-references
+can feed judges, an annotated reference names exactly what a build may borrow,
+and behaviors can become rubric lines.
 
 A descriptor family is a keyed map whose entry shape and semantics the format
-owns. Designer-defined shapes are §1b collections: their collection-record
-fields are defined in the collection's `defined_in` section. A
+owns. Designer-defined shapes are §1b collections: their record fields are the
+designer's, named by a record schema or by prose. A
 designer-defined shape becomes a descriptor family only when the format
 adopts it.
 
@@ -2141,7 +2505,7 @@ Descriptors are grouped by family under the manifest's `descriptors` field:
 Every descriptor has a kebab-case `id` that is unique within its family in the
 package.
 
-`mood` is the first descriptor family, not a special case (§8a). v0.5 defines
+`mood` is the first descriptor family, not a special case (§8a). This version defines
 no `character`, `cutscene`, `storyboard`, or `space-atmosphere` descriptor
 family. Declaring any of those family keys is a validation error.
 
@@ -2174,16 +2538,7 @@ entry looks like this:
   "anti": [
     { "description": "no saturated purple 'magic glow' cliche" }
   ],
-  "palette": {
-    "threat": {
-      "value": "#B3202A", "tolerance": 8,
-      "scope": {
-        "applies_to": "enemy projectiles and enemy contact surfaces",
-        "states": ["in-play"],
-        "sampling": "exhaustive"
-      }
-    }
-  },
+  "palette": "spells.dark",
   "behaviors": [
     { "trigger": "player casts a dark spell",
       "response": "this mood becomes active",
@@ -2196,7 +2551,7 @@ entry looks like this:
 - **`intent`** is required. It contains a few sentences of prose stating the
   emotional or creative target. Its audit class is `advisory`: it states
   intent and decides nothing. No entry writes that class down — what the
-  field is fixes it (§9.11) — and the validator checks only that `intent` is
+  field is fixes it (§9.10) — and the validator checks only that `intent` is
   present.
 - **`references`** is optional. It uses the §9.3 `annotatedReference` shape
   verbatim. Every entry names the borrowed property; an unannotated reference
@@ -2204,11 +2559,28 @@ entry looks like this:
 - **`anti`** is required and has `minItems: 1`. A mood descriptor without an
   anti-reference is a hard failure. The required negative space prevents the
   reference from silently defining the whole target.
-- **`palette`** is optional. It contains palette roles in the full §9.5
-  shape — the required `value`, `tolerance`, and `scope`, and the optional
-  `must_match` — scoped to this mood. `must_match: true` is legal only when
-  `tolerance` is exactly zero, exactly as in §9.5, and it makes the role a
-  certified pin (§9.9).
+- **`palette`** is optional. When present it is a string holding the bare key
+  of one palette declared in `manifest.json` (§3) — `"spells.dark"`, never
+  `"palette.spells.dark"` — following the format's bare-key convention for
+  JSON cross-references (§9.9). It names the colors this mood is built out
+  of, and nothing more: no tolerance, no scope, and no other
+  constraint machinery appears in a mood. That machinery has one home,
+  `constraints.colors` (§9.5), because one color makes different promises in
+  different places.
+
+  The value is resolved by direct lookup in the manifest's `palette` map,
+  never by §4's two-step resolution order. That order exists for citations,
+  which carry the palette-or-color ambiguity; this field is documented as
+  naming a palette, so there is nothing to disambiguate. A value that is not a
+  declared palette key is dangling and a hard failure, including the case
+  where §4's order would have read it as a color: `"palette": "enemies.fire"`
+  with no `enemies.fire` declared is dangling even if a palette `enemies`
+  carries a color named `fire`. A tool MAY offer near misses, that reading
+  among them, but a suggestion is tooling and does not change the verdict.
+
+  Inline palettes are illegal. An inline array would have no name, so nothing
+  could cite it, and the artifact would be invisible to the tooling that makes
+  palettes worth having.
 - **`behaviors`** is optional. It binds game events to this mood becoming
   active or inactive. Each entry contains:
   - `trigger`: a prose-bound game-state condition, under the same
@@ -2220,26 +2592,6 @@ entry looks like this:
   Any other response belongs to a §9 direction-block construct. Mood behavior
   is not a general event-response language.
 
-### Palette roles in a mood (normative)
-
-A mood palette role can be cited by an acceptance test. Its canonical
-citation path is `descriptors.mood.<mood-id>.palette.<role>`, where
-`<mood-id>` is the descriptor's own `id` and `<role>` is the role key. A test
-block names that path in `direction_claims` exactly as it names a
-`constraints.palette.<key>` entry (§6). The path MUST resolve to a declared
-descriptor and one of its declared roles; a dangling citation is a hard
-failure, as it is for every other claim.
-
-Citing changes what the role is worth. An uncited role is `judged`, read by
-the panel as part of the mood it belongs to (§9.2). A cited role is an
-observational `checked` claim, verified by the test that cites it at the
-tolerance the role declares (§9.11).
-
-Nothing requires a role to be cited. The completeness that makes every
-`constraints.*` entry find an acceptance test does not extend here (§6): a
-designer cites the colors worth checking, and leaves the rest to be read as
-direction. That is the point of putting a palette inside a mood.
-
 ### Prose citations (normative)
 
 A mood descriptor is referenced from Fixed or Delegated chapter prose anywhere
@@ -2247,7 +2599,7 @@ in the package by the exact inline code token
 `` `descriptor:mood:<id>` ``. A descriptor reference in prose always carries
 this family-qualified `descriptor:<family>:<id>` form. Prose citation is not
 one uniform spelling across the format: a tuning key is cited bare under §4's
-classification rule, while `state:` and `content:` (§4a) keep their prefixes.
+classification rule, while `state:` and `collections:` (§4a) keep their prefixes.
 
 `<id>` MUST name a declared `descriptors.mood` entry. A token without a
 matching descriptor is a dangling reference and a hard failure. A bare mood
@@ -2264,11 +2616,13 @@ properties explicitly named by its `borrows` annotation. A property can be a
 quality such as "silhouette weight" or "value grouping"; it is not a claim to
 reproduce the source's literal pixels.
 
-Copying visual content that the reference does not annotate is a conformance
-failure, not stronger compliance. All unannotated content, including the
-source's exact appearance, remains open.
+Copying visual content that the reference does not annotate is not stronger
+compliance. When an experimental panel assesses a judged claim that cites the
+reference, such copying is an adverse audit finding. It does not independently
+fail package or build-record conformance. All unannotated content, including
+the source's exact appearance, remains open.
 
-Only pinned assets at the §9.9 **exact** precision level bind exactly. When
+Only pinned assets at the §9.8 **exact** precision level bind exactly. When
 exact pixels are required, use an exact, pinned asset reference outside this
 construct, not an annotated reference.
 
@@ -2285,10 +2639,10 @@ Every media file attached to a reference or anti-reference here or in §9 MUST:
 - carry a hash pin in the form `"sha256:<64 lowercase hex>"` over the exact
   file bytes;
 - declare one of the closed format allowlist values: `png`, `jpg`, `jpeg`, or
-  `webp`. These are the only media formats v0.5 defines; audio direction
-  remains excluded in v0.5 (§11).
+  `webp`. These are the only media formats this version defines; audio
+  direction remains excluded (§11).
 
-v0.5 defines no numeric media-size conformance limit. Validators MUST NOT
+The format defines no numeric media-size conformance limit. Validators MUST NOT
 invent one. Package authors MUST NOT rely on unbounded file sizes; this is
 authoring guidance, not a numeric validation threshold.
 
@@ -2320,15 +2674,45 @@ refines the fantasy block and MUST NOT contradict it. When no direction block
 is present, the existing presentation prose remains sufficient.
 
 Citation convention for this chapter: prose refers to a `direction.json`
-entry by its dotted path (`viewing.<key>`, `references.<key>`, `constraints.palette.<key>`).
+entry by its dotted path (`viewing.<key>`, `references.<key>`, `constraints.colors.<key>`).
 A JSON field that names such an entry always holds the bare `<key>` alone —
 `"viewing": "dusk-panel"`, never `"viewing": "viewing.dusk-panel"`.
+
+**The whole path, once.** The smallest complete exact-color claim crosses
+four files, in this order:
+
+1. The color exists in one place: `manifest.json` declares the palette
+   `enemies.fire` carrying the color `flame` (§3). No other file holds a hex.
+2. The claim lives in `direction.json`:
+   `constraints.colors.light-flame` references the color as
+   `"palette:enemies.fire.flame"`, sets `tolerance: 0`, and scopes what
+   wears it and when (§9.5).
+3. The prose half opens `04-presentation.md`: the `direction` fence states
+   the intent and cites the entry by its dotted path. Fence and file pair
+   or neither is legal.
+4. A §6 acceptance test in `05-build-plan.md` cites the claim in
+   `direction_claims`. The claim is now covered: validation checks that
+   every link above resolves, the build record's passing test asserts the
+   captured color matched at ΔE00 = 0, and the experimental audit is what
+   would check that assertion against reality.
+
+Every direction mechanism in this chapter is an elaboration of that path.
+
+**Where each piece lives and who checks it:**
+
+| Piece | Declared in | Cited by | Package check | Beyond the package |
+| --- | --- | --- | --- | --- |
+| Color value | `manifest.json` palette (§3) | `palette:` references | Key and name grammar; references resolve | — |
+| Claim | `direction.json` `constraints` (§9.5) | Prose dotted path; test `direction_claims` | Closed shape; typed reference resolves; tolerance rules | — |
+| Intent prose | `04-presentation.md` fence | — | Fence–file pairing; fence grammar | `judged` and `advisory` content reads to the audit |
+| Covering test | `05-build-plan.md` test block (§6) | `direction_claims` dotted paths | Citation resolves to a declared claim; block shape | Runner executes; audit reviews evidence |
+| Build outcome | `opengdd-build.json` (§7, §9.10) | — | Record check: shape and package consistency | Audit checks the assertion's truth |
 
 **Design principles (normative).**
 
 1. **Constrain, and leave open.** Every construct states both what it
    constrains and what remains open to interpretation. A construct that
-   leaves nothing open is a pinned value at the §9.9 **exact** precision
+   leaves nothing open is a pinned value at the §9.8 **exact** precision
    level, not Delegated content.
 2. **No new authority level.** The entire block uses the existing Delegated
    authority level (§2): the builder decides, while the specification states
@@ -2340,8 +2724,7 @@ A JSON field that names such an entry always holds the bare `<key>` alone —
    and `advisory` for stated intent without a conformance consequence. The
    block itself has no audit class. A claim's kind fixes its class; no entry
    writes one down, and claiming a class stronger than the entry kind allows
-   is a validation failure. The one claim that moves is the §8a mood palette
-   role: an acceptance test's citation carries it from `judged` to `checked`.
+   is a validation failure. Nothing outside a claim's own shape can move it.
 4. **Anti-references have primacy.** Negative direction is what holds a build
    back from drifting into its own references, and from settling into the
    genre's defaults. The §1a fantasy
@@ -2370,9 +2753,10 @@ Each entry contains:
 Every pillar is `judged`, unconditionally; the entry does not say so, because
 the entry kind fixes it. A pillar is never `checked`, because no mechanical
 test can determine whether a choice advanced a priority. It is never
-`advisory`, because a panel always scores it. The required `viewing` field
-identifies the evaluation context for that score. The optional `references`
-field supplies the §9.3 claim-to-reference edge.
+`advisory`, because it is eligible for panel scoring under the experimental
+audit. The required `viewing` field identifies the evaluation context for any
+such score. The optional `references` field supplies the §9.3
+claim-to-reference edge.
 
 `tie_break_order` says which pillar prevails when two of them pull against
 each other: the lower value wins. Equal values, or a pillar that declares
@@ -2380,8 +2764,9 @@ none, leave the tie to the panel, reading the entries' own statements under
 their bound viewing context. It is §2a's tie-break discipline applied to
 pillars.
 
-Pillars leave every asset-level choice open. Under the named viewing
-context, the panel scores whether the build's choices advance them.
+Pillars leave every asset-level choice open. When an assessment is attempted,
+the panel scores whether the build's choices advance them under the named
+viewing context.
 
 ### 9.2 Mood (`mood`)
 
@@ -2411,10 +2796,13 @@ The referenced descriptor's mandatory `anti` field alone establishes the
 `judged` class. No other descriptor field is a precondition. Descriptor
 `references` are optional supplementary grounds for the panel; their
 presence never changes the class. The required `viewing` field identifies
-the context in which the panel scores the mood citation.
+the context in which an experimental panel would score the mood citation.
 
 The entry leaves open the observable means, degree, and local reading that the
-descriptor's `intent`, `references`, `anti`, and `palette` do not already pin.
+descriptor's `intent`, `references`, and `anti` do not already pin. A
+descriptor's `palette` pins nothing on its own: it names the colors the mood
+is built out of, and the promises about them, if any, are color constraints
+(§9.5).
 
 ### 9.3 References (`references`)
 
@@ -2434,9 +2822,11 @@ Each entry uses the shared §8a `annotatedReference` shape:
 - `media`: optional, under the §8a media-packaging rule.
 
 A missing or empty `borrows` field is structurally invalid, not `advisory`.
-Every unnamed property and the synthesis remain open; copying a reference is
-a conformance failure under §8a. A reference carries no audit class of its
-own. Its annotation is a structural consequence of schema validity.
+Every unnamed property and the synthesis remain open; copying outside the
+annotation has the experimental audit consequence defined in §8a, not an
+independent package- or build-record-conformance consequence. A reference
+carries no audit class of its own. Its annotation is a structural consequence
+of schema validity.
 
 #### Claim-to-reference edges (normative)
 
@@ -2498,10 +2888,10 @@ Anti-references leave the replacement open unless positive constructs supply
 it. On their own they say what to avoid, and never what to move toward.
 
 Every anti-reference is `judged`, unconditionally. `observable` is legal
-panel-facing documentation of what a mechanical test would check, but v0.5
-defines no execution route for it. It never changes or elevates the audit
+panel-facing documentation of what a mechanical test would check, but the core
+format defines no execution route for it. It never changes or elevates the audit
 class. Promoting it requires a future revision. The required `viewing` field
-names the context in which the panel scores the entry.
+names the context in which an experimental panel would score the entry.
 
 The §8a media-packaging rule also applies here. An anti-reference MAY attach
 `media`, such as a labeled "not this" board.
@@ -2516,43 +2906,91 @@ remains in `tuning.json` under §4; `direction.json` never restates a runtime
 number.
 
 `constraints` is itself a closed object: it contains at least one of
-`palette`, `thresholds`, or `timing`, and no other field is legal. Each
+`colors`, `thresholds`, or `timing`, and no other field is legal. Each
 present field is in turn a closed object containing one or more entries,
 keyed by stable kebab-case ids.
 
-#### Palette roles (`palette`)
+#### Color constraints (`colors`)
 
-A palette role, such as `palette.threat`, is a closed object (no field
-beyond these four is legal) containing:
+A color constraint, such as `colors.light-flame`, is a promise about one
+declared color: what wears it, when the promise holds, and how close a build
+must stay to it. The color itself lives in a palette (§3); the constraint adds
+the claim.
 
-- `value`: required, an 8-bit sRGB hexadecimal color written as `#` plus
-  exactly six hex digits (`#RRGGBB`, either case; three-digit shorthand is
-  invalid);
+```json
+"constraints": {
+  "colors": {
+    "light-flame": {
+      "color": "palette:enemies.fire.flame",
+      "tolerance": 14,
+      "scope": {
+        "applies_to": "the lantern flame and its cast light",
+        "states": ["in-play"],
+        "sampling": "exhaustive"
+      }
+    }
+  }
+}
+```
+
+A color constraint is a closed object (no field beyond these three is legal)
+containing:
+
+- `color`: required, a typed reference to one **named** palette entry, written
+  `palette:<palette-key>.<color-name>`. The referenced palette MUST be
+  declared in `manifest.json` (§3) and MUST carry a color of that name. A
+  dangling `color` is a hard failure, and a reference that names a palette
+  rather than a color fails as *names a palette, not a color* (§4);
 - `tolerance`: required, a number greater than or equal to zero;
-- `scope`: required, using the shared shape below; and
-- `must_match`: an optional Boolean.
+- `scope`: required, using the shared shape below.
 
-`tolerance` is a CIEDE2000 (ΔE00) radius around `value`, computed in CIELAB
-D65 after sRGB decoding. `tolerance: 0` makes the constraint exact.
-`must_match: true` is legal only when `tolerance` is exactly zero; otherwise
-`must_match` is absent or `false`. The schema enforces this implication.
-Writing `must_match: true` on an exact constraint is what turns it into a
-**certified pin** — the experimental certification protocol's name for a pin
-whose value that protocol would audit (§9.9). Nothing else does, and the
-acceptance test that covers the claim is what verifies it (§9.9).
+A constraint never carries a hex of its own, and there is no raw-hex escape: a
+deliberately off-palette accent, or a bag of one-off pinned colors, is just
+another palette. Colors live in one place, so a build's palette cannot drift
+from the one the spec declares.
 
-A palette entry constrains values, role assignment, and where they hold. It
-leaves distribution and harmony open for judgment through pillars and mood.
+`palette:` is the JSON channel's spelling, matching the `tuning:` form the
+timing entries below use: prose cites bare and with dots, the JSON channel
+cites typed and with a colon, and the typed form is used exactly where a
+reference crosses files. It is a grammar rather than a template — `palette:`,
+a palette key, a dot, a color name — and because a key may itself contain dots
+while a name may not, the split point is decided by §4's resolution order and
+not by counting dots. Each of the following is a validation failure raised
+before resolution is attempted, and its diagnostic is a grammar error rather
+than a dangling reference: no `palette:` prefix at all, whether a bare dotted
+path or a leftover raw hex; no dot after the prefix (`palette:a`); an empty
+key part (`palette:.flame`); an empty name part (`palette:a.`); any whitespace
+anywhere in the value; the prose spelling written into a `color` field
+(`palette.a.b`), which the JSON channel does not accept; and any character
+outside the key and color-name grammars of §3.
+
+`tolerance` is a CIEDE2000 (ΔE00) radius around the referenced color, computed
+in CIELAB D65 after sRGB decoding. `tolerance: 0` makes the constraint exact.
+The acceptance test that covers the claim verifies it at that tolerance
+(§9.8).
+
+A color constraint says which declared color applies, how close a build must
+stay to it, and where the claim holds. It leaves distribution and harmony open
+for judgment through pillars and mood.
+
+Tolerance and scope stay on the constraint rather than on the palette entry,
+because the relationship runs one color to many promises: the same flame is a
+candle at tolerance 14 in one place and a lantern pinned at 0 in another.
+Neither moves onto the covering test either, which would let the proof author
+shrink the promise invisibly (§6).
 
 #### Perceptual thresholds (`thresholds`)
 
 A threshold, such as `thresholds.actor-vs-background`, is a closed object
 (exactly these six fields) containing:
 
-- `roles`: required, always an array, holding one or more bare
-  palette-role keys (`["threat"]`, never `"threat"` alone or
-  `"palette.threat"`); each MUST resolve to a declared `palette` entry;
-- `against`: required, one bare palette-role key under the same rule;
+- `colors`: required, always an array with at least one element. Each element
+  is a typed `palette:<palette-key>.<color-name>` reference in the form above
+  — `["palette:enemies.fire.flame"]`, never a bare key and never the prose
+  spelling `"palette.enemies.fire.flame"` — and each MUST resolve to a
+  **named** color. A reference that names a palette rather than a color fails
+  as *names a palette, not a color* rather than as a dangling reference;
+- `against`: required, one typed reference under exactly the same rule;
 - `min_contrast`: required, a number greater than zero;
 - `metric`: required, a string that MUST appear in `semantics.metrics`
   (`semantics` sits at the direction file's root, not inside `constraints`; it is
@@ -2561,7 +2999,12 @@ A threshold, such as `thresholds.actor-vs-background`, is a closed object
   field value is `"dusk-panel"`, never `"viewing.dusk-panel"`); and
 - `scope`: required.
 
-A threshold constrains measurable separation and leaves form open.
+A threshold constrains measurable separation and leaves form open. Its
+operands are palette colors rather than sibling constraint entries, so naming
+a color as an operand places no coverage obligation on that color: the
+threshold's own covering acceptance test proves the contrast claim (§6), and a
+designer who wants an operand's value independently held writes a color
+constraint for it.
 
 #### Timing constraints (`timing`)
 
@@ -2572,13 +3015,13 @@ Timing entries cover exact runtime values. An entry such as
 The numeric parameter MUST live in `tuning.json`, where the designer owns it.
 The direction file does not repeat the number. The verified proposition is
 that rendered event timing matches the resolved tuning value over the declared
-domain. v0.5 defines no universal numeric window for "matches"; the covering
+domain. The core format defines no universal numeric window for "matches"; the covering
 acceptance test's §6 procedure states how the match is checked, and that
 procedure is what the experimental certification protocol would audit.
 
 No constraint entry may carry an audit class of its own — the closed shapes
-above exclude one, so writing one fails validation. Every palette, threshold, and
-timing entry has the fixed audit class observational `checked` (§9.11); none
+above exclude one, so writing one fails validation. Every color, threshold, and
+timing entry has the fixed audit class observational `checked` (§9.10); none
 has a `judged` or `advisory` reading.
 
 #### Scope (normative)
@@ -2588,9 +3031,9 @@ Every constraint-core claim has a `scope`; this shape does not apply to
 obligation:
 
 - `applies_to`: required, non-empty prose identifying the player-visible
-  instances that carry the role;
+  instances the claim covers;
 - `states`: required, with at least one named game state in which the claim
-  holds. Each state is a non-empty free-form string; v0.5 declares no
+  holds. Each state is a non-empty free-form string; the format declares no
   package-level state registry for these names to resolve against, so a
   validator MUST NOT reject a name for failing to resolve. The
   replay-reach rule below is delegated to the covering acceptance test's
@@ -2620,16 +3063,19 @@ is closed, as is its `threshold` object, and it contains:
 - `threshold`: an object with `op`, exactly one of `"eq"`, `"lt"`, `"lte"`,
   `"gt"`, or `"gte"`, and a numeric `value`.
 
-Aggregate fields are authored once in `direction.json` and never restated by
-the test block, following §6's per-sample and aggregate discipline.
+Aggregate fields are authoritative in `direction.json`. A covering `property`
+test uses `verdict: "aggregate"`, retains the `metric`, `aggregation`, and
+`threshold` fields required by §6, and MUST mirror the cited claim exactly
+under §6's checked-mirror rule. That duplication is a consistency check, not a
+second source of authority.
 
 The covering replay MUST reach every state named by `scope.states`. It MUST
 NOT narrow what the claim applies to, the states, or the proof obligation.
 The package validator cannot decide replay reach (above), so this obligation
 is delegated to the covering acceptance test's §6 procedure; nothing else in
-v0.5 checks it. A narrower replay, or a sampled result presented as
+this version checks it. A narrower replay, or a sampled result presented as
 exhaustive proof, does not discharge it. The acceptance test cites the
-`direction.json` key, such as `constraints.palette.<key>`, and MUST NOT
+`direction.json` key, such as `constraints.colors.<key>`, and MUST NOT
 restate its value.
 
 #### Self-describing semantics (normative)
@@ -2643,13 +3089,14 @@ declared-but-unused registry. When present, the field sits at
 inside `constraints`. It defines measurement semantics:
 
 - `tolerance`: required, a single string holding one versioned
-  tolerance-math id (not an array). v0.5 defines `"ciede2000-lab-d65-v1"`;
+  tolerance-math id (not an array). This version defines
+  `"ciede2000-lab-d65-v1"`;
   and
 - `metrics`: required, an array with at least one versioned metric id.
-  v0.5 defines `"wcag21-contrast-ratio"`.
+  This version defines `"wcag21-contrast-ratio"`.
 
-The registry is closed: v0.5 recognizes no other ids, and an unrecognized
-id in `semantics.tolerance` or `semantics.metrics` fails schema validation.
+The registry is closed: this version recognizes no other ids, and an
+unrecognized id in `semantics.tolerance` or `semantics.metrics` fails schema validation.
 Separately from that closed registry, one cross-check applies: every
 `thresholds.*.metric` value MUST appear in `semantics.metrics`. The
 `aggregate.metric` inside a `sampling` verdict rule is subject to neither
@@ -2657,9 +3104,14 @@ rule — that field remains a free-form string naming the sampled measurement.
 
 #### Designer-side consistency (normative)
 
-Package validation MUST compute each threshold at the declared value of each
-operand role, and confirm that the direction file's own authored values pass
-it. A direction file that breaks its own threshold is a hard failure.
+Package validation MUST compute each threshold over every pair (`c`,
+`against`) for each `c` in `colors`, at the values the referenced palette
+colors declare, and confirm that every pair passes the threshold. Tolerance
+never enters: the check reads declared values, and a `constraints.colors`
+entry that separately binds one of those colors does not widen it. Each
+failing pair is its own diagnostic. The check runs whether or not the operand
+colors are otherwise constrained. A package whose declared colors break its
+own threshold is a hard failure.
 
 ### 9.6 Evaluation context (`viewing`)
 
@@ -2676,7 +3128,7 @@ Each entry contains:
 - `speed_and_size`: required, non-empty prose stating representative scale
   and speed;
 - `sequence_context`: optional prose. A designer SHOULD include it when an
-  arc matters to a claim that cites this entry; v0.5 defines no machine
+  arc matters to a claim that cites this entry; the format defines no machine
   check for that condition, so its absence is a design-review finding,
   never a validation failure;
 - `calibration`: required, non-empty prose stating calibration assumptions;
@@ -2706,7 +3158,7 @@ explicitly, even when all claims share one entry.
 *For designers. What a build must preserve, and where it is free to differ.*
 
 `must_keep` constrains the recognition-critical features a build MUST
-preserve. Examples include a silhouette rule, a role-color meaning, or a
+preserve. Examples include a silhouette rule, what a signal color means, or a
 motif. The collection is a closed object keyed by stable kebab-case ids. A
 key is cited as `must_keep.<key>`. When present, the `must_keep` collection
 contains one or more entries.
@@ -2734,10 +3186,10 @@ enforces this structurally with `minItems: 1`.
 `observable` follows the same rule as the §9.4 anti-references. Every
 `must_keep` entry is `judged`, unconditionally. The optional `observable`
 field is panel-facing documentation and never elevates the class. The
-required `viewing` field names the context in which the panel scores the
-entry.
+required `viewing` field names the context in which an experimental panel
+would score the entry when an assessment is attempted.
 
-### 9.9 Authority, precision, and boundary rules
+### 9.8 Authority, precision, and boundary rules
 
 *For designers. It says how precise you may get, and what each level costs you.*
 
@@ -2749,51 +3201,38 @@ carries no conformance constraint.
 
 If a direction claim conflicts with a Fixed statement elsewhere in
 `04-presentation.md`, the Fixed statement wins. The conflict is an authoring
-error. v0.5 does not permit `> PERSONALIZATION:` tags inside the direction
-fence. Personalized direction is a recorded KNOWN-LIMITATIONS item.
+error. The format does not permit `> PERSONALIZATION:` tags inside the
+direction fence. Personalized direction is a recorded KNOWN-LIMITATIONS item.
 
 **Precision levels.** Anything a player can see may be written down at one
 of three precisions:
 
 - **described** — plain prose direction. This is the default, and most of a
   direction block stays here. It carries no measurement.
-- **bounded** — a constraint with a stated tolerance, such as a palette role
-  with `tolerance: 8`. Its obligation is the observational `checked` claim
-  §9.5 defines, discharged by its covering acceptance test.
-- **exact** — a palette constraint written with `tolerance: 0`. Every
+- **bounded** — a constraint with a stated tolerance, such as a color
+  constraint with `tolerance: 8`. Its obligation is the observational
+  `checked` claim §9.5 defines, discharged by its covering acceptance test.
+- **exact** — a constraint written with `tolerance: 0`. Every
   builder must reproduce the declared value exactly.
 
 Every visible thing may be **described**; that level is always available.
-**Bounded** and **exact** are defined today for palette entries, and the
+**Bounded** and **exact** are defined today for color entries, and the
 ladder of three levels is the pattern future areas adopt as their own
 mechanisms arrive. A designer may move a claim to a more precise level
 wherever the level is defined. Each level up carries the obligation listed
 with it; nothing forces a claim to move.
 
-A **certified pin** is an exact palette constraint that also declares
-`must_match: true`. The name is the experimental certification
-protocol's (§2d): a certified pin is a pin whose value that protocol would
-audit. When `must_match` is absent or `false`, an exact constraint stays
-outside that audit. A pinned area should have been tested by the designer
+An exact color constraint is a color pin. Like every other observational
+`checked` claim, it is audited through the acceptance test that cites it in
+`direction_claims` (§6). A pinned area should have been tested by the designer
 against a build. That is an authoring obligation carried by the designer, and
 discharged in the spec's own revision history; the §2b lifecycle stages
-advance only as far as the experimental protocol does, and v0.5 defines no
-per-build machine check for it.
+advance only as far as the experimental protocol does, and this version
+defines no per-build machine check for that authoring history.
 
-The optional `must_match` field belongs to the closed palette-role object
-defined in §9.5, wherever that object appears: in
-`constraints.palette.<key>` and in a §8a mood descriptor's `palette`. §4's
-`tuning.json` `meta.must_match` carries the same idea for a tuning key: the
-build must reproduce the declared value exactly. `must_match: true` is legal
-only when `tolerance` is exactly zero, and `direction.schema.json` and
-`manifest.schema.json` each enforce that implication for the palette roles
-they hold. A bounded palette constraint therefore cannot be a certified pin.
-
-In v0.5, a certified pin is available to direction-constraint palette entries
-and to the mood-descriptor palette roles of §8a, which take the same closed
-shape and the same `must_match` implication. A mood role is audited through
-the acceptance test that cites it (§6); an uncited role is judged with its
-mood (§8a).
+Color constraints carry no `must_match` field. §4's `tuning.json`
+`meta.must_match` remains the separate mechanism for requiring a build to
+reproduce a resolved tuning value exactly.
 
 **How each area is proved:**
 
@@ -2801,9 +3240,10 @@ mood (§8a).
   the resolved snapshot (§4).
 - Fixed prose and structured content are proved by acceptance tests, and by
   the experimental protocol's intended audit of Fixed statements.
-- A certified palette pin is verified through the acceptance test that
+- An exact color constraint is verified through the acceptance test that
   cites its claim in `direction_claims` (§6): the captured value is checked
-  against the declared value at ΔE00 = 0.
+  at ΔE00 = 0 against the declared value, which is the one the constraint's
+  `color` reference reaches in the palette (§3).
 
 An area with no existing proof mechanism is recorded as a
 KNOWN-LIMITATIONS item. The format promises nothing about auditing that
@@ -2816,7 +3256,7 @@ faithful builds may differ.
 get. The only hard boundaries are that pinned values bind absolutely and that
 nothing left open may contradict the specification.
 
-### 9.10 The direction file: `direction.json`
+### 9.9 The direction file: `direction.json`
 
 *For tool authors. Designers: your editor writes this file for you.*
 
@@ -2824,7 +3264,7 @@ nothing left open may contradict the specification.
 declared by the bare `direction` field inside the `build` object in
 `manifest.json`, as in `"build": { "direction": "direction.json" }`. The
 file is machine-validated against
-[direction.schema.json](https://opengdd.org/schema/core/v0.5/direction.schema.json).
+[direction.schema.json](https://opengdd.org/schema/core/v0.6/direction.schema.json).
 
 The schema is the authoritative and exhaustive statement of the file's
 legal shape: every field name, entry shape, closed-object rule, and value
@@ -2839,7 +3279,7 @@ together (§9).
 
 Prose cites `direction.json` entries by dotted path, such as
 `pillars.readability-first`, `mood.the-fear`, or
-`constraints.palette.threat`. Array positions cannot be citation targets.
+`constraints.colors.light-flame`. Array positions cannot be citation targets.
 
 **Fence grammar (normative).** The chapter's `direction` fence is a
 line-oriented plain-text block, following the fantasy block convention in
@@ -2871,7 +3311,7 @@ line-oriented plain-text block, following the fantasy block convention in
    continuation lines. When present, rationale MUST NOT restate a
    `direction.json` value under §9.5's single-source rule.
 9. A constraint citation uses a three-part dotted path:
-   `constraints.palette.<key>`, `constraints.thresholds.<key>`, or
+   `constraints.colors.<key>`, `constraints.thresholds.<key>`, or
    `constraints.timing.<key>`.
 
 Example:
@@ -2915,38 +3355,49 @@ both directions for each keyed entry:
   observational class `checked` and carry no fence-completeness obligation.
   A `CONSTRAINTS:` fence section remains optional commentary.
 
-### 9.11 Audit hooks and the certification gate
+### 9.10 Audit hooks and the certification gate
 
 *For auditors and tool authors. Designers: one rule reaches you — every constraint needs a covering acceptance test (§6).*
 
 The `checked` audit class means that a machine or a replay verifies the
-claim. v0.5 has two disjoint kinds of `checked` coverage:
+claim. This version has two disjoint kinds of `checked` coverage:
 
 - **Structural facts.** These are facts inherent in `direction.json`
-  validating against its schema, together with §9.10's per-entry fence
+  validating against its schema, together with §9.9's per-entry fence
   completeness. They include reference, viewing, and may-vary-axis
   completeness, and `direction.json`, scope, and key validity. The validator
   or a `document-check` test verifies these package facts without running the
   game. They require no capture.
-- **Observational `checked` claims.** These are the `constraints.palette.*`,
-  `constraints.thresholds.*`, and `constraints.timing.*` entries, together
-  with any §8a mood palette role that an acceptance test cites at
-  `descriptors.mood.<mood-id>.palette.<role>`. Their closed JSON shapes carry
-  no audit-class field. A `constraints.*` entry's kind fixes its class. A mood
-  palette role is the one construct whose class turns on something outside its
-  own shape: cited, it is observational `checked`; uncited, it is `judged`
-  with its mood (§8a). Neither is written down.
+- **Observational `checked` claims.** These are the `constraints.colors.*`,
+  `constraints.thresholds.*`, and `constraints.timing.*` entries. Their closed
+  JSON shapes carry no audit-class field. A `constraints.*` entry's kind fixes
+  its class, and the class is never written down.
 
 Every `constraints.*` claim is covered by an acceptance test that cites it in
 `direction_claims`. §6 owns that rule and states it once; a claim no test
-cites is a validation failure there. A mood palette role omitted from every
-`direction_claims` array is not: it is judged instead (§8a).
+cites is a validation failure there.
+
+A source-backed build record also carries
+`evidence.direction_observations`, with exactly one `{ claim, context }`
+entry for every declared `constraints.*` claim. `claim` is the same exact
+dotted path used by `direction_claims`; `context` is a non-empty
+plain-language account of the state, subject, capture, or measurement context
+the runner actually observed. Duplicate, dangling, missing, or unexpected
+entries are build-record conformance failures. The context remains evidence
+metadata, not a second declaration of the claim's value or scope.
+
+Because the tests covering these claims use runner-owned runtime and
+observation semantics, §7 also requires the build evidence to name that
+runner's `id` and `version`. The core does not standardize an engine or infer
+equivalence between runner versions. These two fields make a result
+attributable; the experimental audit still decides whether the observation
+really satisfied the claim.
 
 What a validator decides is the citation's presence. The cited forms are
-`constraints.palette.<key>`, `constraints.thresholds.<key>`,
-`constraints.timing.<key>`, and `descriptors.mood.<mood-id>.palette.<role>`;
+`constraints.colors.<key>`, `constraints.thresholds.<key>`, and
+`constraints.timing.<key>`;
 these are full dotted paths rather than bare
-keys. In every form, `<key>`, `<mood-id>`, and `<role>` match
+keys. In every form, `<key>` matches
 `^[a-z0-9]+(-[a-z0-9]+)*$`. Whether the citing test's procedure captures the
 claim over the domain `direction.json` declares — reaching every state named
 in its `scope.states` — is not decidable from package bytes. That remainder is
@@ -2954,17 +3405,18 @@ an obligation of the experimental certification protocol (§2d): the §6
 procedure is what reaches those states, and the protocol is what audits that
 it did (§9.5).
 
-Judged claims require no capture. A panel scores each directly
-against the finished build under the claim's bound `viewing` context.
+Judged claims require no capture. When an assessment is attempted, an
+experimental panel scores each attempted claim directly against the finished
+build under the claim's bound `viewing` context.
 
-**The judged gate.** The complete v0.5 set of `judged` claim paths is
+**The judged gate.** The complete set of `judged` claim paths is
 `pillars.*`, `mood.*`, `anti.*`, and `must_keep.*` (§§9.1, 9.2, 9.4, and
 9.7). An assessment considers every attempted claim under its
-bound `viewing` context (§9.6). v0.5 records assessment coverage and results,
-but does not standardize panel composition, scoring, or an overall adherence
+bound `viewing` context (§9.6). The build record records assessment coverage
+and results, but does not standardize panel composition, scoring, or an overall adherence
 finding. The gate belongs to the experimental certification path (§2d): it
-defines no pass/fail outcome in v0.5, empty `assessed` and `adherent` arrays
-are the legal record of a run with no assessment, and no v0.5 conformance or
+defines no pass/fail outcome, empty `assessed` and `adherent` arrays
+are the legal record of a run with no assessment, and no core conformance or
 certification outcome turns on the gate's contents beyond the validity rules
 stated here.
 
@@ -2977,7 +3429,7 @@ otherwise.
 
 - **`judged`.** This field is required. It is a closed object with exactly
   three required fields: `status`, `assessed`, and `adherent`.
-  `status` is the string `"pending"`, the sole value defined in v0.5. No
+  `status` is the string `"pending"`, the sole value currently defined. No
   certificate can assert that the build followed the direction as a whole
   while the panel protocol remains unintegrated. `assessed` is an array of
   the judged claim paths attempted in this run. `adherent` is an array
@@ -2994,8 +3446,7 @@ The `direction_result` requirement covers only §9 visual-direction claims.
 ever writes its own audit class down: what a construct is fixes its class, so
 `advisory` is assigned, never authored. Every defined judged claim kind has
 the fixed class `judged`, and every checked claim kind has the fixed
-observational class `checked`, the §8a mood palette role being the single
-construct whose class turns on being cited; the one construct whose fixed
+observational class `checked`; the one construct whose fixed
 class is `advisory` is the §8a mood descriptor's `intent`, which states intent
 and decides nothing. The three class names are this document's vocabulary,
 not a field: no schema declares an enum for them, because no file ever carries
@@ -3037,13 +3488,32 @@ answered, and `not-applicable`, where the core offers it, is an answer rather
 than a silence (§10.8).
 
 The word **contract** in this document means this construct and nothing else.
-A collection's pointer to its defining section is `defined_in` (§1b), and what
-the manifest names for the builder are entry points (§3); neither is called a
+A collection's record schema is its label's one field (§1b), and what the
+manifest names for the builder are entry points (§3); neither is called a
 contract.
 
 Adopting one means copying a core into `contracts/<name>.json` unchanged and
 writing the surface underneath — answers, knob values, test inputs, and any
 declared rows (§§10.2, 10.6, 10.7).
+
+**The smallest adoption, once.** The ordinary path, complete:
+
+1. Copy a core — say `health-1` — unchanged into `contracts/hull.json`. The
+   file's presence is the declaration; nothing registers it (§10.2).
+2. Answer its questions in the surface underneath the copy: one option per
+   live question, `not-applicable` where the core offers it being an answer
+   rather than a silence (§10.8).
+3. Give each knob its number, inside the core's declared range (§10.6).
+4. Supply the test inputs the core asks this game for (§10.6).
+5. Regenerate: the instantiated tests land at the end of the build plan
+   inside the instance's marker pair (§10.10), and validation checks every
+   link — answers against options, knobs against ranges, generated bytes
+   against the templates.
+
+That is the whole ordinary path. Rows (§10.7) exist only when an adopted
+core binds a collection; conditional liveness (§10.8) only when a core
+declares conditions; placeholders and the template grammar (§10.9) are
+core-author and tool-author material an adopting designer never writes.
 
 *Non-normative, and the reason a contract stays small.* A contract is as big
 as one thing an experienced designer would call "standard X", and no bigger.
@@ -3053,6 +3523,15 @@ parameters; acceptance tests meaningful without knowing the rest of the game;
 one seam wide, rather than a genre bundled up. What fails them is written as
 prose, not adopted as a contract. No validator decides any of this; the
 format owns the envelope, never the content (§10.13).
+
+*Non-normative, for core authors.* Give one observable fact to one question.
+When two questions touch the same fact, state how their answers compose rather
+than letting both answers define it independently. A redundant, ineffective,
+or even unplayable combination may still be an explicit design; that is not a
+conflict for the format to prevent. Two answers that make incompatible claims
+about the same behaviour are instead an authoring defect in the core. The
+format does not attempt to discover that defect through semantic review
+(§10.13).
 
 ### 10.2 The `contracts/` directory
 
@@ -3142,7 +3621,7 @@ carrying the plain `id`, `version`, and `origin` triple beside the digest, so
 an audit never has to guess which variant of `health-1` a claim covers, and
 recomputing it is the auditor's work as with every other hash in this format.
 The digest's own record shape is published with that protocol at
-`conformance/CERTIFICATION.md`; no v0.5 build-record field carries it.
+`conformance/CERTIFICATION.md`; no core build-record field carries it.
 
 ### 10.4 The instance file
 
@@ -3154,6 +3633,11 @@ An instance file's top-level fields are exactly:
 - **`core`** (object, required): the vendored core (§10.5).
 - **`surface`** (object, required): this game's answers (§10.6).
 - **`rows`** (object, optional): inline collection rows (§10.7).
+- **`about`** (non-empty string, optional): a hand-written introduction to this
+  instance in the designer's voice — what this thing is in this game, and
+  what lies outside the contract. Presentation only: tools display it, but no
+  behavioural, liveness, or instantiation check uses its content, and it is
+  neither interpolated nor rendered into the generated block (§10.10).
 
 Nothing else. **Every object in the envelope is closed** — the three levels
 above and every nested object §§10.5–10.7 shape — so an undeclared field is a
@@ -3183,7 +3667,7 @@ Fixed acceptance tests into someone else's build plan.
 instance ids, flag and knob names, option ids, invariant, template and binding
 ids, `surface_inputs` names, record field names, `options` values,
 collection-schema names, and unit strings. **Kebab-case** here means
-`^[a-z0-9]+(-[a-z0-9]+)*$`, §9.11's segment grammar. All of them are therefore
+`^[a-z0-9]+(-[a-z0-9]+)*$`, §9.10's segment grammar. All of them are therefore
 dot-free, so `contracts.<instance>.<knob>` parses unambiguously as a §4 dotted
 key. What the format names is snake_case: `default_guidance`,
 `surface_inputs`, `test_inputs`. Within one core, flag
@@ -3210,12 +3694,14 @@ The nested shapes, each closed:
 - **`decisions[]` entry** — one **flag**, which is what this document calls a
   question a core forces: `flag` (kebab name, required);
   `question` (string, required — the question as the designer is asked it);
+  `section` (non-empty string, optional — a display heading for this question);
   `options` (array, required, non-empty), each entry carrying `id` (kebab,
   required, unique within the flag), `semantics` (string, required — what
-  choosing it means, precisely enough to build against), and an optional
-  `rationale`. Optional per flag: `default_guidance` (string; SHOULD name an
-  option id where one fits), `rationale` (string), and `when` (the condition
-  above, `flag` domain only). The legal values of `answers.<flag>` are exactly
+  choosing it means, precisely enough to build against), an optional
+  `meaning` (non-empty string — the same choice in the designer's voice), and an
+  optional `rationale`. Optional per flag: `default_guidance` (string; SHOULD
+  name an option id where one fits), `rationale` (string), and `when` (the
+  condition above, `flag` domain only). The legal values of `answers.<flag>` are exactly
   the option ids. The option id **`not-applicable` is reserved**: listing it
   is how a core permits "this design has no such mechanism", and its
   `semantics` says what that absence means. A constitutive flag simply omits
@@ -3223,6 +3709,27 @@ The nested shapes, each closed:
   is not health — and the flag's `rationale` is where the why-no-escape
   reasoning lives. The dependency graph the `flag` conditions induce over
   flags MUST be acyclic.
+
+`section` has no machine meaning beyond display. It changes no answer, contract
+behaviour, liveness, test instantiation, or instance-file shape. The
+`decisions` array remains the question order. A catalogue or authoring tool
+MUST use authored section strings when present, grouping only consecutive
+questions carrying the same string under one heading, and MUST fall back to
+one flat question list when no decision carries `section`. It MUST NOT infer a
+section from a flag name or question wording. If a core uses sections, its
+author SHOULD put one on every question and SHOULD keep every section in one
+continuous block; a tool never merges separated blocks with the same heading.
+
+`meaning` is the designer's voice for an option; `semantics` remains the
+contract. Written well, a `meaning` is example-shaped and plain — concrete
+numbers over variables, the option's consequence over its algorithm. A tool
+presenting options to a designer SHOULD lead with `meaning` where present,
+keeping `semantics` one gesture away, and MUST NOT treat `meaning` as
+behavioural authority: where the two texts disagree, `semantics` binds and the
+disagreement is an authoring defect to fix, not a choice to interpret.
+`meaning` remains part of the closed core and therefore counts for core
+identity and the core digest (§§10.2–10.3). A core intended for publication
+SHOULD carry `meaning` on every option.
 - **`knobs.<name>` entry** — the meta for one number: `kind` (required;
   `tunable` or `constant` — §4's change-authority axis, read by the
   balance-revision rule, by §5 targeting, and by §7's key sets); `unit`
@@ -3335,7 +3842,7 @@ An adopting package's own creative data stays where it always lived: in
 purely the designer's and the contract stays purely conventional; the resolved
 snapshot (§5) is where the two meet.
 
-Contract knob meta carries no §2c `ruleset` field in v0.5. A knob is one
+Contract knob meta carries no §2c `ruleset` field in this version. A knob is one
 number under one authority in every ruleset a package declares; scoping one to
 a ruleset would be a format revision, not a package's choice.
 
@@ -3354,6 +3861,13 @@ and forbidden otherwise); `options` (array, legal on `string` only — a closed
 set of kebab-case values of at most 64 characters); `pattern` (legal on
 `string`; `kebab-case` is the only value defined); `unique` (Boolean, any
 type; uniqueness within the bound rows); and `description`.
+
+This is the one record-schema grammar the format has, and §1b's drawer
+labels write their `record` schemas in it too, each side with one dialect:
+`citation` and the `flag` domain are this layer's, since both read a
+contract instance's context, and `grid` is §1b's, since it reads record
+files. A grammar written twice would drift; a dialect is a stated
+difference.
 
 A row carries exactly the fields its schema declares: the record object is
 closed like every other object of the envelope (§10.4).
@@ -3396,28 +3910,28 @@ closed.
 Everything else a package keeps — its own collections, its own content, its
 own files — is untouched by this section and stays exactly where it lives
 today (§10.6). For every instance file present, every collection schema its
-vendored core declares MUST be bound by exactly one of two homes:
+vendored core declares MUST be bound by exactly one entry of the instance
+file's own top-level `rows` object, keyed by the schema name, whose value is
+one of two forms:
 
-1. a §1b collection whose manifest entry carries the `instance` field —
-   `"instance": "contracts/stamina.json#thresholds"`, the path being exactly
-   `contracts/<instance>.json` and the fragment a bare key of the core's
-   `collections` object; or
-2. an entry of the instance file's own top-level `rows` object, keyed by the
-   same schema name and holding an array of rows.
+1. an array of rows, written inline; or
+2. a row source, the string `collections/<drawer>`, naming a §1b drawer
+   whose records are the rows. Each record's `id` is its filename; the
+   record file itself MUST NOT carry a top-level `id`, because that fact is
+   already written once.
 
-An unbound schema is a validation failure, never a silent zero-expansion; a
-schema bound twice is a validation failure, because two row sets would make
-the expansion ambiguous. An empty bound collection is legal and declares "none
-of these". Inline rows are legal at any size; which home a list wants is a
-question for the guides — its own file when it is big enough to be its own
-artifact, or when other parts of the spec reference it — and never a
-validator's business.
+An unbound schema is a validation failure, never a silent zero-expansion. A
+schema bound twice is unspellable: the instance file is the one binding
+site, and its `rows` keys are unique. An empty bound drawer is legal and
+declares "none of these". Inline rows are legal at any size; which home a
+list wants is a question for the guides — a drawer when it is big enough to
+be its own artifact, or when other parts of the spec reference its records
+— and never a validator's business.
 
-A bound §1b collection MUST carry Fixed authority, and none of its rows — the
-collection records this section reads as rows — may carry an authority of its
-own (§1b). Rows are instantiation inputs, and one personalization-authority
-row would make the generated acceptance tests differ per build. Inline rows
-are Fixed inherently, being statements of the instance file (§10.6).
+A drawer's records are Fixed inherently — statements of the package, as
+inline rows are statements of the instance file (§10.6) — so rows from
+either home are stable instantiation inputs, and the generated acceptance
+tests cannot differ per build.
 
 Three further rules:
 
@@ -3432,10 +3946,10 @@ Three further rules:
   flag answers through a `when`; nothing in the envelope ever reads a row to
   resolve a flag.
 
-A bound collection keeps everything §1b already asks of it. The core's schema
-governs record shape; the collection's `defined_in` section still homes the
-package-specific reference targets and completeness rules, and the `instance`
-field adds a record schema rather than replacing that section.
+A bound drawer keeps everything §1b already asks of it. The core's schema
+governs record shape — the drawer MUST NOT carry a `record` schema of its
+own; one shape, one home — while the package's chapters still home its
+reference targets and completeness rules.
 
 ### 10.8 Answered, not silent
 
@@ -3541,6 +4055,11 @@ live templates, so presence is always visible:
 <!-- opengdd:contracts:generated:end instance=<id> core=<core-id>-<version> -->
 ```
 
+The generated block is generator-owned: a tool derives it from core and
+surface, and the comparison below is byte-exact, so the working practice is
+regenerate, never hand-edit — a hand-maintained block is possible in
+principle and expected of no one.
+
 The marker lines are normative verbatim at column zero, attributes in the
 order and spacing shown, and they are inside the compared bytes. On read-back,
 a marker's `core=` attribute splits at its *last* hyphen: ids may contain
@@ -3642,10 +4161,10 @@ reserved key namespace `contracts.<instance>.<knob>`.
 - **§4.** A contract knob is a rebalance-safe parameter of the machine, and
   the location rule admits it: it lives in the surface rather than in
   `tuning.json` `tunables`, and `contracts.` stays a reserved first segment,
-  so no `tuning.json` key may occupy the namespace. A balance-only revision
-  MAY change a `kind: tunable` knob's value within its range, and MUST NOT
-  touch a `kind: constant` one — exactly the rule §4 already states for
-  `constants`. `range` is legal on tunables only; where a core needs a
+  so no `tuning.json` key may occupy the namespace. Under §4's non-normative
+  versioning guidance, a balance-only revision changes a `kind: tunable`
+  knob's value within its range and leaves a `kind: constant` one untouched
+  — exactly the guidance §4 states for `constants`. `range` is legal on tunables only; where a core needs a
   constant's bounds, it writes an invariant, which keeps every declared range
   inside the machinery that enforces ranges. §4's rule that a test's inputs
   live with the test extends: a template's inputs are declared by the core and
@@ -3665,7 +4184,7 @@ reserved key namespace `contracts.<instance>.<knob>`.
   knob's range is read from the core's knob meta and its `must_match` pin from
   the surface's own `meta`, rather than from `tuning.json` `meta` — otherwise
   the machinery is §5's unchanged, and contract knob meta carries no §2c
-  `ruleset` field in v0.5 (§10.6). Nothing else about a contract is
+  `ruleset` field in this version (§10.6). Nothing else about a contract is
   personalizable: flags, test
   inputs, and rows are Fixed (§10.6). A per-build flag answer would make the
   set of generated tests differ per build, which collides head-on with the
@@ -3676,13 +4195,16 @@ reserved key namespace `contracts.<instance>.<knob>`.
   `contracts.<instance>.<knob>` for every unpruned knob of every instance. A
   pruned knob enters neither the snapshot nor this check. Each contract entry
   carries the bare number and sits in `tunables` or `constants` according to
-  its knob's `kind`.
+  its knob's `kind`. The value comparison is the one §7 states: a live
+  contract surface supplies the source value, the §5 pipeline resolves any
+  legal personalization of a `kind: tunable` knob, and a `kind: constant`
+  value is copied unchanged.
 - **§7, check 5 and check 6.** `acceptance.total` counts game-local
   acceptance tests plus generated ones after liveness and per-row expansion; a
   template that is not live, and a row that does not match, contribute zero.
   Pass equality holds over that same total.
 - **§7, invariants.** A core invariant that fails over the resolved snapshot
-  is a build-record failure of the same rank as checks 1–6 (§10.8).
+  is a build-record failure of the same rank as checks 1–8 (§10.8).
 - **Certification.** A `must_match` pin on a contract knob reads exactly as
   §4's does, against the resolved snapshot. Instantiated tests
   execute as game-local ones do, under the same runner and the same evidence
@@ -3746,11 +4268,11 @@ about uncited keys explicitly.
   format's own first cores are format-published documents rather than a
   privileged namespace.
 
-## 11. What v0 deliberately excludes
+## 11. What this version deliberately excludes
 
 *For everyone. One page, and it may save you designing something the format cannot carry yet.*
 
-v0 deliberately excludes:
+This version deliberately excludes:
 
 - multiplayer and networking;
 - rendered-capture certification for 3D renderers. A `web-3d` package
@@ -3761,7 +4283,7 @@ v0 deliberately excludes:
   against a 3D renderer has no standardized sampling recipe (§7);
 - binary asset pipelines;
 - audio direction — a professional-vocabulary survey exists, but its
-  transmission experiment has not run, so v0 makes no audio-direction
+  transmission experiment has not run, so this version makes no audio-direction
   claims;
 - localization structure;
 - monetization design beyond the optional commerce split, including IAP

@@ -1,0 +1,362 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengdd.org/schema/core/v0.6/direction.schema.json",
+  "title": "OpenGDD v0.6 direction file",
+  "type": "object",
+  "additionalProperties": false,
+  "minProperties": 1,
+  "$comment": "An empty direction.json is illegal (SPEC 9.9): a package declares build.direction and carries the 04-presentation.md fence only to say something, and a file that declares nothing says nothing the fence can cite.",
+  "if": {
+    "required": ["constraints"]
+  },
+  "then": {
+    "required": ["semantics"]
+  },
+  "properties": {
+    "semantics": {
+      "type": "object",
+      "required": ["tolerance", "metrics"],
+      "additionalProperties": false,
+      "properties": {
+        "tolerance": { "const": "ciede2000-lab-d65-v1" },
+        "metrics": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["wcag21-contrast-ratio"] }
+        }
+      },
+      "description": "SPEC 9.5 self-describing semantics registry. v0.6 defines exactly one tolerance-math id and one metric id; widening either is an additive schema change. Required only when constraints (and so, potentially, thresholds) are present; a direction file with no constraints declares no semantics registry."
+    },
+    "pillars": {
+      "type": "object",
+      "minProperties": 2,
+      "maxProperties": 4,
+      "propertyNames": { "$ref": "#/$defs/kebabId" },
+      "additionalProperties": { "$ref": "#/$defs/pillarEntry" },
+      "description": "SPEC 9.1, keyed by stable id, citable as pillars.<key>"
+    },
+    "mood": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/kebabId" },
+      "additionalProperties": { "$ref": "#/$defs/moodEntry" },
+      "description": "SPEC 9.2, keyed by stable local citation id, citable as mood.<key>. Each entry wraps one descriptor:mood:<id> token (SPEC 8a) plus its own viewing binding — two levels of indirection: mood.<key> addresses the citation in this file, descriptor:mood:<id> addresses the descriptor itself, reusable from arbitrary prose."
+    },
+    "references": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/kebabId" },
+      "additionalProperties": { "$ref": "#/$defs/referenceEntry" },
+  "$comment": "Every references.<key> entry MUST be cited by at least one judged claim's own optional references field (pillarEntry/antiEntry/mustKeepEntry/moodEntry, all sharing the referencesCite definition). An uncited entry is an orphaned reference and a hard failure. This is a validator-level rule because it requires resolving citations across the document.",
+      "description": "SPEC 9.3, keyed by stable id, citable as references.<key>. Judged claims cite entries through their own references field. The optional REFERENCES section of the direction fence may also cite them as commentary; those fence citations create no completeness or authority rule (SPEC 9.9)."
+    },
+    "anti": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/kebabId" },
+      "additionalProperties": { "$ref": "#/$defs/antiEntry" },
+      "description": "SPEC 9.4, keyed by stable id, citable as anti.<key>"
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "anyOf": [
+        { "required": ["colors"] },
+        { "required": ["thresholds"] },
+        { "required": ["timing"] }
+      ],
+      "properties": {
+        "colors": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "$ref": "#/$defs/kebabId" },
+          "additionalProperties": { "$ref": "#/$defs/colorConstraint" }
+        },
+        "thresholds": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "$ref": "#/$defs/kebabId" },
+          "additionalProperties": { "$ref": "#/$defs/thresholdEntry" }
+        },
+        "timing": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "$ref": "#/$defs/kebabId" },
+          "additionalProperties": { "$ref": "#/$defs/timingEntry" }
+        }
+      },
+      "description": "SPEC 9.5, keyed by stable id, citable as constraints.colors.<key> / constraints.thresholds.<key> / constraints.timing.<key>. Every entry here is fixed observational checked."
+    },
+    "viewing": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/kebabId" },
+      "additionalProperties": { "$ref": "#/$defs/viewingEntry" },
+      "description": "SPEC 9.6, keyed by stable id, citable as viewing.<key>. Referenced by constraints.thresholds.*.viewing and by every judged claim's required viewing field: pillars.*, mood.*, anti.*, must_keep.*."
+    },
+    "must_keep": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/kebabId" },
+      "additionalProperties": { "$ref": "#/$defs/mustKeepEntry" },
+      "description": "SPEC 9.7, keyed by stable id, citable as must_keep.<key>"
+    }
+  },
+  "$defs": {
+    "kebabId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "moodToken": {
+      "type": "string",
+      "pattern": "^descriptor:mood:[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "SPEC 8a citation grammar: descriptor:<family>:<id>, family fixed to mood in v0.6"
+    },
+    "sha256Hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "packagePath": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Package-relative path that remains inside the package after normalization (SPEC 1)"
+    },
+    "mediaFile": {
+      "type": "object",
+      "required": ["path", "license", "hash", "format"],
+      "additionalProperties": false,
+      "properties": {
+        "path": { "$ref": "#/$defs/packagePath" },
+        "license": { "type": "string", "minLength": 1 },
+        "hash": { "$ref": "#/$defs/sha256Hash" },
+        "format": { "enum": ["png", "jpg", "jpeg", "webp"] }
+      },
+      "description": "SPEC 8a media packaging. Byte-signature-matches-declared-format is a validator-level check not expressible over JSON alone. This version defines no numeric media-size conformance limit."
+    },
+    "referenceEntry": {
+      "type": "object",
+      "required": ["description", "borrows"],
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string", "minLength": 1 },
+        "borrows": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "media": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/mediaFile" }
+        }
+      },
+      "description": "SPEC 9.3 / 8a annotated reference. Annotation presence is inherent in schema validity; property-transfer fidelity is assessed only when a judged claim citing this entry is scored."
+    },
+    "observableCriteria": {
+      "type": "object",
+      "required": ["criteria"],
+      "additionalProperties": false,
+      "properties": {
+        "criteria": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Prose statement of the mechanical test (color space/threshold/domain, or an observable element definition). The test's implementation is validator-level (Stage 2/3), not schema-expressible in v0.6."
+        }
+      }
+    },
+    "referencesCite": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/kebabId" },
+      "description": "SPEC 9.3/9.10 claim-to-reference edge: the top-level references.<key> entries this claim draws on. Optional — a claim may be judged on its statement/tags alone. Every id MUST resolve to a declared references.<key> entry; a dangling id is a hard failure."
+    },
+    "antiEntry": {
+      "type": "object",
+      "required": ["description", "viewing"],
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string", "minLength": 1 },
+        "observable": { "$ref": "#/$defs/observableCriteria" },
+        "media": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/mediaFile" }
+        },
+        "viewing": { "$ref": "#/$defs/kebabId" },
+        "references": { "$ref": "#/$defs/referencesCite" }
+      },
+      "description": "SPEC 9.4. Every entry here is judged. observable is optional panel-facing documentation and never changes that. viewing is required and MUST resolve to a declared viewing.<key> entry: the evaluation context the panel scores this claim under. references is the optional claim-to-reference edge."
+    },
+    "pillarEntry": {
+      "type": "object",
+      "required": ["statement", "viewing"],
+      "additionalProperties": false,
+      "properties": {
+        "statement": { "type": "string", "minLength": 1 },
+        "tie_break_order": { "type": "integer", "minimum": 1 },
+        "viewing": { "$ref": "#/$defs/kebabId" },
+        "references": { "$ref": "#/$defs/referencesCite" }
+      },
+      "description": "SPEC 9.1. Every entry here is judged. viewing is required and MUST resolve to a declared viewing.<key> entry. references is the optional claim-to-reference edge."
+    },
+    "moodEntry": {
+      "type": "object",
+      "required": ["descriptor", "viewing"],
+      "additionalProperties": false,
+      "properties": {
+        "descriptor": { "$ref": "#/$defs/moodToken" },
+        "viewing": { "$ref": "#/$defs/kebabId" },
+        "references": { "$ref": "#/$defs/referencesCite" }
+      },
+      "description": "SPEC 9.2/8a. descriptor MUST resolve to a declared descriptors.mood entry. Every entry here is judged: the referenced descriptor's schema-required anti (SPEC 8a) establishes judged status unconditionally. references are optional supplementary evidence, never a precondition. viewing is required and MUST resolve to a declared viewing.<key> entry. references optionally cites top-level references.<key> entries in addition to, never instead of, the descriptor's own references pool (SPEC 8a); the two reference pools are separate and both optional."
+    },
+    "scope": {
+      "type": "object",
+      "required": ["applies_to", "states", "sampling"],
+      "additionalProperties": false,
+      "properties": {
+        "applies_to": { "type": "string", "minLength": 1 },
+        "states": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "sampling": {
+          "oneOf": [
+            { "const": "exhaustive" },
+            {
+              "type": "object",
+              "required": ["sampled"],
+              "additionalProperties": false,
+              "properties": {
+                "sampled": {
+                  "type": "object",
+                  "required": ["verdict"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "verdict": {
+                      "oneOf": [
+                        { "const": "per-sample" },
+                        {
+                          "type": "object",
+                          "required": ["aggregate"],
+                          "additionalProperties": false,
+                          "properties": {
+                            "aggregate": {
+                              "type": "object",
+                              "required": ["aggregation", "metric", "threshold"],
+                              "additionalProperties": false,
+                              "properties": {
+                                "aggregation": { "enum": ["count", "rate", "min", "max", "mean"] },
+                                "metric": { "type": "string", "minLength": 1 },
+                                "threshold": {
+                                  "type": "object",
+                                  "required": ["op", "value"],
+                                  "additionalProperties": false,
+                                  "properties": {
+                                    "op": { "enum": ["eq", "lt", "lte", "gt", "gte"] },
+                                    "value": { "type": "number" }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "description": "SPEC 9.5 shared scope shape: applicability domain and proof obligation, per §6's per-sample/aggregate discipline"
+    },
+    "paletteRef": {
+      "type": "string",
+      "pattern": "^palette:[a-z0-9-]+(\\.[a-z0-9-]+)+$",
+      "description": "SPEC 9.5 typed palette reference: the palette: prefix, a non-empty palette-key part, a dot, and a non-empty color-name part. The palette key may itself contain dots and a color name may not, so the split point is not textual: the schema carries the alphabet and the validator carries the two-pass resolution that decides where the key ends. The prose spelling palette.<key>.<name> is not accepted here; the JSON channel cites typed, as timing's tuning: key already does."
+    },
+    "colorConstraint": {
+      "type": "object",
+      "required": ["color", "tolerance", "scope"],
+      "additionalProperties": false,
+      "properties": {
+        "color": { "$ref": "#/$defs/paletteRef" },
+        "tolerance": { "type": "number", "minimum": 0 },
+        "scope": { "$ref": "#/$defs/scope" }
+      },
+      "description": "SPEC 9.5 color constraint: which declared color applies, how close a build must stay to it, and where the claim holds. It carries no hex — color binds one named entry of a declared palette, and a reference that resolves to nothing is a hard failure (validator-level). tolerance: 0 is an exact color pin, verified through its covering acceptance test (SPEC 9.8)."
+    },
+    "thresholdEntry": {
+      "type": "object",
+      "required": ["colors", "against", "min_contrast", "metric", "viewing", "scope"],
+      "additionalProperties": false,
+      "properties": {
+        "colors": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/paletteRef" }
+        },
+        "against": { "$ref": "#/$defs/paletteRef" },
+        "min_contrast": { "type": "number", "exclusiveMinimum": 0 },
+        "metric": { "type": "string", "minLength": 1 },
+        "viewing": { "$ref": "#/$defs/kebabId" },
+        "scope": { "$ref": "#/$defs/scope" }
+      },
+      "$comment": "Every element of colors and the single against MUST resolve to a declared, named palette color in manifest.json; a reference that resolves to a palette rather than a color fails as 'names a palette, not a color'. viewing MUST resolve to a declared viewing key; metric MUST appear in semantics.metrics. Package validation MUST also compute the threshold over every (colors element, against) pair at the values the referenced palette colors declare — cross-file, validator-level checks.",
+      "description": "SPEC 9.5 perceptual threshold. Its operands are palette colors, not sibling constraints: a threshold carries its own scope and viewing and is a self-sufficient claim about two declared colors."
+    },
+    "timingEntry": {
+      "type": "object",
+      "required": ["key", "scope"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^tuning:[A-Za-z0-9_.-]+$"
+        },
+        "scope": { "$ref": "#/$defs/scope" }
+      },
+      "description": "SPEC 9.5 timing constraint. Carries no numbers; key is a tuning.json reference (SPEC 4a form)."
+    },
+    "viewingEntry": {
+      "type": "object",
+      "required": ["speed_and_size", "calibration", "hide_builder_name"],
+      "additionalProperties": false,
+      "properties": {
+        "speed_and_size": { "type": "string", "minLength": 1 },
+        "sequence_context": { "type": "string", "minLength": 1 },
+        "calibration": { "type": "string", "minLength": 1 },
+        "hide_builder_name": { "type": "boolean" },
+        "judge_qualifications": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "$comment": "judge_qualifications is required (validator-level, not schema-expressible without resolving citations) whenever this entry is cited by a claim whose SPEC 9.3 cultural-source trigger fired.",
+      "description": "SPEC 9.6 evaluation-context entry. Structural: inherent in schema validity."
+    },
+    "mustKeepEntry": {
+      "type": "object",
+      "required": ["statement", "may_vary", "viewing"],
+      "additionalProperties": false,
+      "properties": {
+        "statement": { "type": "string", "minLength": 1 },
+        "may_vary": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "observable": { "$ref": "#/$defs/observableCriteria" },
+        "viewing": { "$ref": "#/$defs/kebabId" },
+        "references": { "$ref": "#/$defs/referencesCite" }
+      },
+      "description": "SPEC 9.7. may_vary minItems:1 structurally enforces the paint-by-numbers rule. Every entry here is judged; observable is optional documentation only and never changes that. viewing is required. references is the optional claim-to-reference edge."
+    }
+  }
+}

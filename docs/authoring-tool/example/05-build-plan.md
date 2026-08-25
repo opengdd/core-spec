@@ -30,7 +30,7 @@ balance-tunable values.
 
 Scope: the Fixed requirements and the direction block of
 [04-presentation.md](04-presentation.md), including the mark-ink
-palette role declared in [direction.json](direction.json).
+color constraint declared in [direction.json](direction.json).
 
 - Checkpoint: AT-4 passes, and every Fixed requirement in
   [04-presentation.md](04-presentation.md) is reviewed against the
@@ -136,19 +136,21 @@ X O .
   "type": "scenario",
   "given": "a built game rendered at default settings under the table-reading viewing context, played from an empty board to a finished game",
   "when": ["the capture procedure samples the rendered color of every placed mark and every grid line during the in-game state"],
-  "then": ["constraints.palette.mark-ink is satisfied over its declared scope"],
-  "direction_claims": ["constraints.palette.mark-ink"],
+  "then": ["constraints.colors.mark-ink is satisfied over its declared scope"],
+  "direction_claims": ["constraints.colors.mark-ink"],
   "diagnostics": ["per-member-sampled-color", "delta-e-per-member"]
 }
 ```
 
-The claim's value, tolerance, and scope are read from
-[direction.json](direction.json), not repeated here. A member is one
+The claim's color reference, tolerance, and scope are read from
+[direction.json](direction.json), and the color it names from the
+palette [manifest.json](manifest.json) declares; neither is repeated
+here. A member is one
 placed mark or one grid line; the capture procedure samples each member's
 interior pixels, excluding antialiased edges, once, in a stable
 resting frame after any placement animation, and every sampled
 interior pixel must sit within the declared tolerance of the declared
-value. The in-game state ends
+color. The in-game state ends
 the moment the game ends, so a win highlight may recolor the winning
 lines freely. The run records its viewport and rendering environment
 alongside its diagnostics.

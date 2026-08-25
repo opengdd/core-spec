@@ -10,9 +10,9 @@
     }
   },
   "constraints": {
-    "palette": {
+    "colors": {
       "mark-ink": {
-        "value": "#2B2A26",
+        "color": "palette:board.mark-ink",
         "tolerance": 12,
         "scope": {
           "applies_to": "every placed mark and every grid line",

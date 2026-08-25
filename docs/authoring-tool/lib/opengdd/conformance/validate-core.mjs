@@ -1,7 +1,24 @@
 // Pure validation engine. All environment access is supplied by the host.
-import { isObject, markdownSlug, own, slash, unfencedLines } from "./package-syntax.mjs";
+import { directionFenceContinuationLines, isObject, markdownSlug, own, slash, unfencedLines } from "./package-syntax.mjs";
 
-const SPEC_VERSION = "0.5";
+const SPEC_VERSION = "0.6";
+// The revision that reserved the `palette` first segment and moved every hex
+// into the manifest's palette map. §4's versioning clause requires the
+// diagnostics on a newly reserved segment to name their revision, so this is
+// carried separately from SPEC_VERSION rather than folded into it.
+const PALETTE_REVISION = "0.6";
+// The revision that reserved the `references` first segment. §9.3 and §9.9 have
+// always spelled a direction reference `references.<key>`, but the §4 reserved
+// list omitted it, so the citation resolved as a tuning key and dangled. v0.6
+// reserves the segment and resolves the family against `direction.json`, which
+// can invalidate a `references.*` tuning namespace — so, like `palette`, its
+// diagnostics name the revision that took the segment.
+const REFERENCES_REVISION = "0.6";
+// The revision that reserved the `collections` first segment for the
+// collections/ drawers (decision 32). The reservation is what closes the
+// format's last silent-rename gap: a prose citation of a drawer or record is
+// classified as a mechanism path and a dangling one is a hard failure.
+const COLLECTIONS_REVISION = "0.6";
 
 function createValidator(host) {
   const { path } = host;
@@ -18,8 +35,8 @@ function createValidator(host) {
 
   // The injection-surface lint is a review aid, not a conformance requirement.
   // Every finding in this family MUST remain WARNING, never FAIL.
-  const INJECTION_LINT_STATUS = "advisory-v0.5";
-  const INJECTION_LINT_SECTION = "SPEC v0.5 — specs are data (injection-surface lint)";
+  const INJECTION_LINT_STATUS = "advisory-v0.6";
+  const INJECTION_LINT_SECTION = "SPEC v0.6 — specs are data (injection-surface lint)";
   const INJECTION_SCAN_MAX_BYTES = 2 * 1024 * 1024;
   const INJECTION_TEXT_EXTENSIONS = new Set([
     ".csv", ".htm", ".html", ".json", ".jsonl", ".markdown", ".md",
@@ -143,6 +160,10 @@ function createValidator(host) {
       if (isObject(branch)) problems.push(...schemaProblems(instance, branch, schemaRoot, instancePath));
     }
 
+    if (isObject(schema.not) && schemaProblems(instance, schema.not, schemaRoot, instancePath).length === 0) {
+      problems.push({ path: instancePath, message: "matches a forbidden schema shape" });
+    }
+
     if (schema.type && !schemaTypeMatches(instance, schema.type)) {
       problems.push({ path: instancePath, message: `must be ${schema.type}` });
       return problems;
@@ -224,9 +245,13 @@ function createValidator(host) {
         }
       }
       const declared = schema.properties ?? {};
+      const patterns = isObject(schema.patternProperties) ? Object.entries(schema.patternProperties) : [];
       for (const [key, value] of Object.entries(instance)) {
+        const pattern = patterns.find(([expression]) => { try { return new RegExp(expression).test(key); } catch { return false; } });
         if (own(declared, key)) {
           problems.push(...schemaProblems(value, declared[key], schemaRoot, `${instancePath}/${pointerEscape(key)}`));
+        } else if (pattern) {
+          if (isObject(pattern[1])) problems.push(...schemaProblems(value, pattern[1], schemaRoot, `${instancePath}/${pointerEscape(key)}`));
         } else if (schema.additionalProperties === false) {
           problems.push({ path: `${instancePath}/${pointerEscape(key)}`, message: "is not an allowed property" });
         } else if (isObject(schema.additionalProperties)) {
@@ -307,35 +332,43 @@ function createValidator(host) {
     };
   }
 
-  function validateDefinedIn(definedIn, resolvePath) {
-    if (typeof definedIn !== "string" || definedIn.length === 0) return undefined;
-    const hash = definedIn.indexOf("#");
-    if (hash <= 0 || hash === definedIn.length - 1) {
-      error("CONTENT_CONTRACT_SECTION", "§1b", "manifest.json", `content defined_in must point to a chapter section: ${JSON.stringify(definedIn)}`);
-      return undefined;
-    }
-    const filePart = definedIn.slice(0, hash);
-    const fragment = decodeURIComponent(definedIn.slice(hash + 1));
-    const file = resolvePath(filePart, "content defined_in file", "§1b", "CONTENT_CONTRACT_PATH", { mustExist: true, kind: "file" });
-    if (!file) return undefined;
-    const text = host.readText(file);
-    const lines = text.split(/\r?\n/);
-    const headings = lines.map((line, index) => {
+  // ---------------------------------------------------------------------------
+  // SPEC §2 — where an authority tag reaches.
+  //
+  // A tag scopes from its own line to the end of the heading section holding
+  // it, so a section is Fixed only when no tag sits anywhere inside it and no
+  // enclosing section's tag reaches down into it. A tag on the section's first
+  // line and a tag three paragraphs later hand away exactly as much. Both
+  // §1b's `> COLLECTION:` claims and §10.7 citations ask that one question,
+  // so they ask it in one place.
+  // ---------------------------------------------------------------------------
+  function markdownHeadings(lines) {
+    return lines.map((line, index) => {
       const match = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(line);
       return match ? { level: match[1].length, title: match[2], slug: markdownSlug(match[2]), line: index + 1, index } : undefined;
     }).filter(Boolean);
-    const heading = headings.find(item => item.slug === fragment.toLowerCase());
-    if (!heading) {
-      error("CONTENT_CONTRACT_SECTION", "§1b", slash(filePart), `defined_in fragment #${fragment} does not match a Markdown heading`);
-      return { file, text, fragment };
+  }
+
+  function authorityTagReaching(lines, headings, heading) {
+    const sectionEnd = anchor => headings.find(item => item.index > anchor.index && item.level <= anchor.level)?.index ?? lines.length;
+    const end = sectionEnd(heading);
+    let fenced = false;
+    for (let index = 0; index < lines.length; index += 1) {
+      if (/^\s*```/.test(lines[index])) { fenced = !fenced; continue; }
+      if (fenced) continue;
+      const match = /^\s*> (DELEGATED|PERSONALIZATION):\s*(\S*)/.exec(lines[index]);
+      if (!match) continue;
+      const tag = {
+        label: match[1] === "DELEGATED" ? "Delegated" : "a Personalization",
+        level: match[1] === "DELEGATED" ? "delegated" : "personalization",
+        question: match[2] || undefined,
+        line: index + 1
+      };
+      if (index > heading.index && index < end) return { ...tag, where: "inside" };
+      const owner = [...headings].reverse().find(item => item.index < index);
+      if (owner && index < heading.index && heading.index < sectionEnd(owner)) return { ...tag, where: "enclosing" };
     }
-    const next = headings.find(item => item.index > heading.index && item.level <= heading.level);
-    const sectionLines = lines.slice(heading.index + 1, next?.index ?? lines.length);
-    const first = sectionLines.find(line => line.trim().length > 0)?.trim();
-    if (first?.startsWith("> DELEGATED:") || first?.startsWith("> PERSONALIZATION:")) {
-      error("CONTENT_CONTRACT_AUTHORITY", "§1b", slash(filePart), "content defined_in section must be Fixed", heading.line);
-    }
-    return { file, text, fragment, line: heading.line };
+    return undefined;
   }
 
   function loadPersonalization(packageRoot, manifest, resolvePath) {
@@ -366,8 +399,72 @@ function createValidator(host) {
         if (typeof affected === "string") resolvePath(affected, `questions[${questionIndex}].affects[${affectedIndex}]`, "§5", "PERSONALIZATION_PATH", { mustExist: true });
       });
     });
+    const questionIds = new Set();
+    doc.questions.forEach((question, questionIndex) => {
+      if (!isObject(question)) return;
+      const at = `#/questions/${questionIndex}`;
+      if (typeof question.id === "string") {
+        if (questionIds.has(question.id)) error("PERSONALIZATION_QUESTION_ID", "§5", display, `${at}/id duplicates question id ${JSON.stringify(question.id)}`);
+        questionIds.add(question.id);
+      }
+      if (question.type === "choice" && Array.isArray(question.options)) {
+        const optionIds = new Set();
+        question.options.forEach((option, optionIndex) => {
+          if (!isObject(option) || typeof option.id !== "string") return;
+          if (optionIds.has(option.id)) error("PERSONALIZATION_OPTION_ID", "§5", display, `${at}/options/${optionIndex}/id duplicates option id ${JSON.stringify(option.id)} within question ${JSON.stringify(question.id)}`);
+          optionIds.add(option.id);
+        });
+        if (typeof question.default === "string" && !optionIds.has(question.default)) {
+          error("PERSONALIZATION_DEFAULT_OPTION", "§5", display, `${at}/default ${JSON.stringify(question.default)} does not name a declared option id`);
+        }
+      }
+      if (question.type === "number" && Array.isArray(question.affects) && question.affects.includes("tuning.json") && !Array.isArray(question.resolution)) {
+        error("PERSONALIZATION_RESOLUTION_REQUIRED", "§5", display, `${at} is a numeric question that affects tuning.json and therefore requires resolution operations`);
+      }
+    });
     const questions = new Map(doc.questions.filter(isObject).filter(question => typeof question.id === "string").map(question => [question.id, question]));
     return { questions, doc, display, declared: true, readable: true };
+  }
+
+  // ---------------------------------------------------------------------------
+  // One range representation for both declaration sites.
+  //
+  // SPEC §4's `meta.range` is always the two-number form, while SPEC §10.5 lets
+  // a contract knob's range carry `min`, `max`, or both. A missing side of a
+  // contract range is unbounded, not absent: a knob declaring only `min` still
+  // has a declared bound that `clamp` may clamp to and `reject` must reject
+  // against. Reading both shapes into one `{ min, max }` with `undefined` for an
+  // open side is what keeps §5 resolution and §7 record checking from silently
+  // dropping a legal half-bounded knob.
+  // ---------------------------------------------------------------------------
+  function boundsFromPair(range) {
+    return Array.isArray(range) && range.length === 2 && range.every(bound => typeof bound === "number" && Number.isFinite(bound))
+      ? { min: range[0], max: range[1] }
+      : undefined;
+  }
+
+  function boundsFromKnobRange(range) {
+    if (!isObject(range)) return undefined;
+    const min = typeof range.min === "number" && Number.isFinite(range.min) ? range.min : undefined;
+    const max = typeof range.max === "number" && Number.isFinite(range.max) ? range.max : undefined;
+    return min === undefined && max === undefined ? undefined : { min, max };
+  }
+
+  function outsideBounds(bounds, value) {
+    return (bounds.min !== undefined && value < bounds.min) || (bounds.max !== undefined && value > bounds.max);
+  }
+
+  function clampToBounds(bounds, value) {
+    let next = value;
+    if (bounds.min !== undefined) next = Math.max(next, bounds.min);
+    if (bounds.max !== undefined) next = Math.min(next, bounds.max);
+    return next;
+  }
+
+  function describeBounds(bounds) {
+    if (bounds.min !== undefined && bounds.max !== undefined) return `[${bounds.min}, ${bounds.max}]`;
+    if (bounds.min !== undefined) return `[${bounds.min}, unbounded]`;
+    return `[unbounded, ${bounds.max}]`;
   }
 
   // SPEC §5 — a `tuning_overrides` entry replaces a tunables key exactly. It
@@ -414,7 +511,10 @@ function createValidator(host) {
           error("TUNING_OVERRIDE_CONSTANT", "§5", display, `${site} overrides a constants key; personalization may replace tunables only`);
           continue;
         }
-        if (!own(tunables, key)) continue;
+        if (!own(tunables, key)) {
+          error("TUNING_OVERRIDE_TARGET", "§5", display, `${site} names no declared tunables key`);
+          continue;
+        }
         const range = isObject(meta[key]) ? meta[key].range : undefined;
         if (!Array.isArray(range) || range.length !== 2 || !range.every(bound => typeof bound === "number" && Number.isFinite(bound))) continue;
         if (typeof replacement !== "number" || !Number.isFinite(replacement)) continue;
@@ -423,29 +523,40 @@ function createValidator(host) {
         }
       }
     });
-  }
-
-  function validateAuthority(authority, file, pointer, questionsById) {
-    if (!isObject(authority)) {
-      error("CONTENT_AUTHORITY", "§1b", file, `${pointer} authority must be an object`);
-      return;
+    for (let questionIndex = 0; questionIndex < (doc.questions ?? []).length; questionIndex += 1) {
+      const question = doc.questions[questionIndex];
+      if (!isObject(question) || !Array.isArray(question.resolution)) continue;
+      question.resolution.forEach((operation, operationIndex) => {
+        if (!isObject(operation) || typeof operation.key !== "string") return;
+        const at = `#/questions/${questionIndex}/resolution/${operationIndex}/key`;
+        let range;
+        if (operation.key.startsWith("contracts.")) {
+          const knob = contractsCtx?.knobIndex?.get(operation.key);
+          if (!knob) {
+            error("PERSONALIZATION_RESOLUTION_TARGET", "§5", display, `${at} names no live contract knob`);
+            return;
+          }
+          if (knob.meta.kind !== "tunable") {
+            error("PERSONALIZATION_RESOLUTION_CONSTANT", "§5", display, `${at} names a constant contract knob; numeric resolution may change tunables only`);
+            return;
+          }
+          // §10.5 admits `min` alone or `max` alone. Either declares a range,
+          // so either satisfies `clamp`'s requirement that its target have one.
+          range = boundsFromKnobRange(knob.meta.range);
+        } else if (own(constants, operation.key)) {
+          error("PERSONALIZATION_RESOLUTION_CONSTANT", "§5", display, `${at} names a constants key; numeric resolution may change tunables only`);
+          return;
+        } else if (!own(tunables, operation.key)) {
+          error("PERSONALIZATION_RESOLUTION_TARGET", "§5", display, `${at} names no declared tunables key`);
+          return;
+        } else {
+          range = boundsFromPair(meta[operation.key]?.range);
+        }
+        if (operation.out_of_range === "clamp" && !range) {
+          error("PERSONALIZATION_RESOLUTION_RANGE", "§5", display, `${at} uses out_of_range \"clamp\", but its target declares no range`);
+        }
+      });
     }
-    const keys = Object.keys(authority).sort();
-    if (authority.level === "fixed" || authority.level === "delegated") {
-      if (keys.length !== 1 || keys[0] !== "level") {
-        error("CONTENT_AUTHORITY", "§1b", file, `${pointer} ${authority.level} authority must contain only level`);
-      }
-      return;
-    }
-    if (authority.level === "personalization") {
-      if (keys.length !== 2 || keys[0] !== "level" || keys[1] !== "question" || typeof authority.question !== "string" || !authority.question) {
-        error("CONTENT_AUTHORITY", "§1b", file, `${pointer} personalization authority requires exactly level and a non-empty question`);
-      } else if (questionsById.size > 0 && !questionsById.has(authority.question)) {
-        error("CONTENT_AUTHORITY_QUESTION", "§1b", file, `${pointer} names unknown personalization question ${JSON.stringify(authority.question)}`);
-      }
-      return;
-    }
-    error("CONTENT_AUTHORITY", "§1b", file, `${pointer} has illegal authority level ${JSON.stringify(authority.level)}`);
   }
 
   function walk(value, visit, pointer = "#", ancestors = []) {
@@ -466,24 +577,22 @@ function createValidator(host) {
     return ids;
   }
 
-  // SPEC §7a — `parallel-string-layers-1` grid congruence. These are
-  // existence-level package checks over EVERY collection record of a
-  // grid-encoded collection, whatever its source type (catalog or items).
-  function validateGridLayers(collection, recordEntries) {
-    if (collection?.format !== "parallel-string-layers-1") return;
-    const layers = collection?.layout?.layers;
-    if (!Array.isArray(layers) || layers.length === 0) return;
+  // SPEC §7a — grid congruence. A drawer's record schema marks fields with
+  // type "grid" (decision 33 — the label's separate layout block and its
+  // one-value cell_unit field are retired; the format fixes the unit at
+  // Unicode scalar values). These are existence-level package checks over
+  // EVERY record of a drawer whose schema declares at least one grid field.
+  // A grid field's own presence and string-array shape are the record-schema
+  // check's to report; congruence over the fields that are grids is this one's.
+  function validateGridLayers(gridFields, recordEntries) {
+    if (!Array.isArray(gridFields) || gridFields.length === 0) return;
     for (const entry of recordEntries) {
       const record = entry.record;
       if (!isObject(record)) continue;
       const present = [];
-      for (const layer of layers) {
-        if (typeof layer !== "string") continue;
+      for (const layer of gridFields) {
         const value = record[layer];
-        if (!Array.isArray(value) || !value.every(row => typeof row === "string")) {
-          error("CONTENT_LAYER_MISSING", "§7a", entry.display, `${entry.pointer} declared layer ${JSON.stringify(layer)} is missing or is not a string array`, undefined, { diagnostic: "layer-row-mismatch", record: recordLabel(collection, record), field: layer });
-          continue;
-        }
+        if (!Array.isArray(value) || !value.every(row => typeof row === "string")) continue;
         present.push({ layer, rows: value });
       }
       if (present.length === 0) continue;
@@ -493,11 +602,11 @@ function createValidator(host) {
       for (const candidate of present) {
         if (candidate.rows.length !== rowCount) {
           rowsAgree = false;
-          error("CONTENT_LAYER_ROW_MISMATCH", "§7a", entry.display, `${entry.pointer} layer ${JSON.stringify(candidate.layer)} has ${candidate.rows.length} row(s); layer ${JSON.stringify(reference.layer)} has ${rowCount}`, undefined, { diagnostic: "layer-row-mismatch", record: recordLabel(collection, record), field: candidate.layer });
+          error("CONTENT_LAYER_ROW_MISMATCH", "§7a", entry.display, `grid field ${JSON.stringify(candidate.layer)} has ${candidate.rows.length} row(s); grid field ${JSON.stringify(reference.layer)} has ${rowCount}`, undefined, { diagnostic: "layer-row-mismatch", record: entry.id, field: candidate.layer });
         }
       }
       if (rowCount < 1) {
-        error("CONTENT_LAYER_ROW_MISMATCH", "§7a", entry.display, `${entry.pointer} grid has zero rows; every collection-record grid is at least 1×1`, undefined, { diagnostic: "layer-row-mismatch", record: recordLabel(collection, record), field: reference.layer });
+        error("CONTENT_LAYER_ROW_MISMATCH", "§7a", entry.display, `grid has zero rows; every collection-record grid is at least 1×1`, undefined, { diagnostic: "layer-row-mismatch", record: entry.id, field: reference.layer });
         continue;
       }
       if (!rowsAgree) continue;
@@ -506,123 +615,243 @@ function createValidator(host) {
         candidate.rows.forEach((row, rowIndex) => {
           const width = [...row].length;
           if (width !== columns || width < 1) {
-            error("CONTENT_LAYER_COLUMN_MISMATCH", "§7a", entry.display, `${entry.pointer} layer ${JSON.stringify(candidate.layer)} row ${rowIndex} has ${width} column(s); the record's grid is ${columns} wide`, undefined, { diagnostic: "layer-column-mismatch", record: recordLabel(collection, record), field: candidate.layer, row: rowIndex });
+            error("CONTENT_LAYER_COLUMN_MISMATCH", "§7a", entry.display, `grid field ${JSON.stringify(candidate.layer)} row ${rowIndex} has ${width} column(s); the record's grid is ${columns} wide`, undefined, { diagnostic: "layer-column-mismatch", record: entry.id, field: candidate.layer, row: rowIndex });
           }
         });
       }
     }
   }
 
-  function recordLabel(collection, record) {
-    const field = collection?.id_field;
-    const value = typeof field === "string" ? record?.[field] : undefined;
-    return typeof value === "string" || typeof value === "number" ? String(value) : undefined;
+  // ---------------------------------------------------------------------------
+  // SPEC §1b (decision 33) — a collection is a folder with record files in
+  // it, and everything else is opt-in.
+  //
+  // `collections/` is a reserved package-root directory. Each immediate
+  // subdirectory is one collection; the folder name is the collection id, and
+  // presence is the whole declaration. One JSON file per record, the filename
+  // minus `.json` the record's id and address, the body designer data. The
+  // optional `_collection.json` label appears only when it has something to
+  // say, and its one field is `record`: an optional record schema in the
+  // closed field grammar §10.5 and §1b share (with `grid` as §1b's dialect
+  // and `citation`/flag-domain conditions as §10's — the two implementations
+  // below and in the contracts layer must stay verdict-aligned). With a
+  // schema every record is validated against it; without one, records are
+  // free-form and the format says so rather than pretending otherwise.
+  // Drawers are Fixed spec data — statements of the package, like inline
+  // contract rows — so no drawer authority exists; prose delegation about a
+  // game's content is ordinary §2 prose. Prose cites drawers and records
+  // (`collections.<drawer>`, `collections.<drawer>.<record>`); a drawer
+  // nothing reaches is a warning, not an order.
+  // ---------------------------------------------------------------------------
+  const COLLECTION_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+  const COLLECTION_FIELD_TYPES = new Set(["number", "integer", "string", "grid"]);
+
+  // The record schema's own shape: the §10.5 field grammar, row-domain
+  // conditions only (there are no flags to read outside a contract), and
+  // `grid` in place of `citation`. Returns the field map, or undefined when
+  // the schema is too broken to check records against.
+  function validateDrawerSchema(record, display) {
+    if (!isObject(record)) {
+      error("COLLECTION_SCHEMA_SHAPE", "§1b", display, "#/record must map field names to field-shape objects");
+      return undefined;
+    }
+    const fields = new Map();
+    for (const [field, shape] of Object.entries(record)) {
+      if (field.startsWith("_")) continue;
+      const at = `#/record/${field}`;
+      // One grammar with §10.5: record field names are kebab-case there,
+      // so they are kebab-case here — a drawer authored to §1b must be
+      // able to become contract rows without rewriting every record.
+      if (!COLLECTION_ID.test(field)) {
+        error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at} field name ${JSON.stringify(field)} is not lowercase kebab-case; the record-schema grammar is §10.5's, one grammar for both homes`);
+        continue;
+      }
+      if (!isObject(shape)) {
+        error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at} must be a field-shape object`);
+        continue;
+      }
+      for (const key of Object.keys(shape)) {
+        if (!["type", "required", "when", "options", "pattern", "unique", "description"].includes(key)) {
+          error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/${key} is not a field-shape member`);
+        }
+      }
+      if (!COLLECTION_FIELD_TYPES.has(shape.type)) {
+        error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/type must be one of ${[...COLLECTION_FIELD_TYPES].join(", ")}, got ${JSON.stringify(shape.type)}`);
+        continue;
+      }
+      if (own(shape, "required") && own(shape, "when")) {
+        error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at} declares both required and when; at most one is legal (absent both means optional)`);
+      }
+      if (own(shape, "required") && typeof shape.required !== "boolean") {
+        error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/required must be a boolean`);
+      }
+      if (own(shape, "unique") && typeof shape.unique !== "boolean") {
+        error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/unique must be a boolean`);
+      }
+      if (own(shape, "description") && typeof shape.description !== "string") {
+        error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/description must be a string`);
+      }
+      if (own(shape, "pattern")) {
+        if (shape.type !== "string") error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/pattern is legal on a string field only`);
+        if (shape.pattern !== "kebab-case") error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/pattern admits only "kebab-case" today, got ${JSON.stringify(shape.pattern)}`);
+      }
+      if (own(shape, "options")) {
+        if (shape.type !== "string") error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/options is legal on a string field only`);
+        if (!Array.isArray(shape.options) || shape.options.length === 0 || shape.options.some(value => typeof value !== "string" || !COLLECTION_ID.test(value) || value.length > 64)) {
+          error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/options must be a non-empty array of kebab-case values of at most 64 characters (§10.5's closed-choice rule)`);
+        }
+      }
+      if (own(shape, "when")) {
+        // §10.5: an absent or empty `when` is satisfied, so `{}` is legal
+        // here exactly as it is on the contracts side.
+        if (!isObject(shape.when) || Object.keys(shape.when).some(key => key !== "row")) {
+          error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/when must be a condition object with a row domain only; there are no flags outside a contract`);
+        } else if (own(shape.when, "row") && (!isObject(shape.when.row) || Object.entries(shape.when.row).some(([, values]) => !Array.isArray(values) || values.length === 0))) {
+          error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/when/row must map a field name to a non-empty array of values`);
+        }
+      }
+      fields.set(field, shape);
+    }
+    return fields;
+  }
+
+  function validateDrawerRecords(fields, recordEntries) {
+    const uniqueSeen = new Map();
+    for (const entry of recordEntries) {
+      const row = entry.record;
+      for (const key of Object.keys(row)) {
+        if (key.startsWith("_")) continue;
+        if (!fields.has(key)) {
+          error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `carries field ${JSON.stringify(key)}, which the drawer's record schema does not declare`, undefined, { record: entry.id, field: key });
+        }
+      }
+      for (const [field, shape] of fields) {
+        const present = own(row, field);
+        const conditional = own(shape, "when");
+        const required = shape.required === true || (conditional && contractWhenSatisfied(shape.when, {}, undefined, row));
+        if (conditional && !required && present) {
+          error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `${field} is present, but its condition is unsatisfied; a conditioned field is required exactly when its \`when\` holds and forbidden otherwise`, undefined, { record: entry.id, field });
+          continue;
+        }
+        if (!present) {
+          if (required) error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `is missing ${conditional ? "conditionally required" : "required"} field ${JSON.stringify(field)}`, undefined, { record: entry.id, field });
+          continue;
+        }
+        const value = row[field];
+        if (shape.type === "number" && typeof value !== "number") {
+          error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `${field} must be a number, got ${JSON.stringify(value)}`, undefined, { record: entry.id, field });
+        } else if (shape.type === "integer" && !Number.isInteger(value)) {
+          error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `${field} must be an integer, got ${JSON.stringify(value)}`, undefined, { record: entry.id, field });
+        } else if (shape.type === "string" && typeof value !== "string") {
+          error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `${field} must be a string, got ${JSON.stringify(value)}`, undefined, { record: entry.id, field });
+        } else if (shape.type === "grid" && (!Array.isArray(value) || !value.every(item => typeof item === "string"))) {
+          error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `${field} must be a grid: an array of strings, one per row`, undefined, { record: entry.id, field });
+        }
+        if (typeof value === "string") {
+          if (Array.isArray(shape.options) && !shape.options.includes(value)) {
+            error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `${field} is ${JSON.stringify(value)}, outside the field's closed option set (${shape.options.join(", ")})`, undefined, { record: entry.id, field });
+          }
+          if (shape.pattern === "kebab-case" && !COLLECTION_ID.test(value)) {
+            error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `${field} value ${JSON.stringify(value)} is not kebab-case`, undefined, { record: entry.id, field });
+          }
+        }
+        if (shape.unique === true) {
+          const key = `${field}\u0000${JSON.stringify(value)}`;
+          if (uniqueSeen.has(key)) {
+            error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `${field} repeats value ${JSON.stringify(value)}, which the schema declares unique within the drawer`, undefined, { record: entry.id, field });
+          } else uniqueSeen.set(key, entry.id);
+        }
+      }
+    }
   }
 
   function validateContent(packageRoot, manifest, resolvePath, questionsById) {
     const context = { collections: new Map(), stateSets: new Map(), stateNumbers: new Set(), documents: [] };
-    if (!Array.isArray(manifest?.content)) return context;
-    const collectionIds = new Set();
-
-    for (let index = 0; index < manifest.content.length; index += 1) {
-      const collection = manifest.content[index];
-      if (!isObject(collection)) continue;
-      const id = collection.id;
-      if (typeof id === "string") {
-        if (collectionIds.has(id)) error("CONTENT_COLLECTION_ID_DUPLICATE", "§1b", "manifest.json", `content collection id ${JSON.stringify(id)} is duplicated`);
-        collectionIds.add(id);
-      }
-      const definedIn = validateDefinedIn(collection.defined_in, resolvePath);
-      const docs = [];
-      const recordEntries = [];
-      const source = collection.source;
-
-      if (isObject(source) && source.type === "catalog" && typeof source.file === "string") {
-        const file = resolvePath(source.file, `content[${index}].source.file`, "§1b", "CONTENT_SOURCE_MISSING", { mustExist: true, kind: "file" });
-        if (file) {
-          const data = parseJsonFile(file, slash(source.file), "§1b", "CONTENT_JSON");
-          if (data !== undefined) {
-            docs.push({ file, display: slash(source.file), data });
-            let records;
-            if (Array.isArray(data)) records = data;
-            else if (isObject(data) && Array.isArray(data[id])) records = data[id];
-            else if (isObject(data)) {
-              const candidateArrays = Object.values(data).filter(value => Array.isArray(value) && value.every(isObject));
-              if (candidateArrays.length === 1) records = candidateArrays[0];
-            }
-            if (!Array.isArray(records)) {
-              error("CONTENT_CATALOG_RECORDS", "§1b", slash(source.file), `cannot mechanically identify records for catalog collection ${JSON.stringify(id)}`);
-            } else {
-              records.forEach((record, recordIndex) => recordEntries.push({ record, display: slash(source.file), pointer: `#/${pointerEscape(id)}/${recordIndex}` }));
-            }
-          }
-        }
-      } else if (isObject(source) && source.type === "items" && typeof source.directory === "string" && Array.isArray(source.members)) {
-        const directory = resolvePath(source.directory, `content[${index}].source.directory`, "§1b", "CONTENT_SOURCE_MISSING", { mustExist: true, kind: "directory" });
-        for (const member of source.members) {
-          if (typeof member !== "string") continue;
-          const combined = path.join(source.directory, member);
-          const file = resolvePath(combined, `content[${index}] member`, "§1b", "CONTENT_MEMBER_MISSING", {
-            mustExist: true, kind: "file", within: directory
-          });
-          if (!file) continue;
-          const display = slash(combined);
-          const data = parseJsonFile(file, display, "§1b", "CONTENT_JSON");
-          if (data !== undefined) {
-            docs.push({ file, display, data });
-            recordEntries.push({ record: data, display, pointer: "#" });
-          }
-        }
-      }
-
-      const stableIds = new Map();
-      for (const entry of recordEntries) {
-        if (!isObject(entry.record)) {
-          error("CONTENT_RECORD_SHAPE", "§1b", entry.display, `${entry.pointer} collection record must be an object`);
+    const collectionsRoot = path.join(packageRoot, "collections");
+    if (host.exists(collectionsRoot) && host.isDirectory(collectionsRoot)) {
+      const drawerEntries = [...host.readDir(collectionsRoot)].sort((left, right) => (left.name < right.name ? -1 : 1));
+      for (const drawerEntry of drawerEntries) {
+        if (!drawerEntry.isDirectory) {
+          error("COLLECTION_STRAY_FILE", "§1b", `collections/${drawerEntry.name}`, "collections/ holds one directory per collection; a loose file here belongs inside a drawer");
           continue;
         }
-        const field = collection.id_field;
-        if (typeof field !== "string" || !own(entry.record, field) || (typeof entry.record[field] !== "string" && typeof entry.record[field] !== "number") || String(entry.record[field]).length === 0) {
-          error("CONTENT_ID_MEMBER", "§1b", entry.display, `${entry.pointer} must carry a non-empty stable ${JSON.stringify(field)} field`);
+        const id = drawerEntry.name;
+        if (!COLLECTION_ID.test(id)) {
+          error("COLLECTION_ID_GRAMMAR", "§1b", `collections/${id}`, `collection id ${JSON.stringify(id)} is not lowercase kebab-case`);
           continue;
         }
-        const stable = `${typeof entry.record[field]}:${String(entry.record[field])}`;
-        if (stableIds.has(stable)) {
-          error("CONTENT_ID_DUPLICATE", "§1b", entry.display, `stable id ${JSON.stringify(entry.record[field])} duplicates ${stableIds.get(stable)}`);
-        } else stableIds.set(stable, `${entry.display}${entry.pointer}`);
+        const drawerDir = path.join(collectionsRoot, id);
+        const docs = [];
+        const recordEntries = [];
+        let fields;
+        const members = [...host.readDir(drawerDir)].sort((left, right) => (left.name < right.name ? -1 : 1));
+        for (const member of members) {
+          const display = `collections/${id}/${member.name}`;
+          if (member.isDirectory) {
+            error("COLLECTION_SUBDIRECTORY", "§1b", display, "subdirectories inside a drawer are not defined in this revision; organize as sibling drawers with compound kebab names");
+            continue;
+          }
+          if (member.name === "_collection.json") {
+            // The label is optional and appears only when it has something
+            // to say; `record` is its one field (decision 33).
+            const data = parseJsonFile(path.join(drawerDir, member.name), display, "§1b", "COLLECTION_LABEL_JSON");
+            if (data === undefined) continue;
+            const labelSchema = loadSchema("collection.schema.json", "§1b");
+            if (labelSchema) {
+              for (const problem of schemaProblems(data, labelSchema, labelSchema)) {
+                error("COLLECTION_LABEL_SCHEMA", "§1b", display, `${problem.path} ${problem.message}`);
+              }
+            }
+            if (isObject(data) && own(data, "record")) fields = validateDrawerSchema(data.record, display);
+            continue;
+          }
+          if (!member.name.endsWith(".json")) {
+            error("COLLECTION_STRAY_FILE", "§1b", display, "a drawer holds its optional `_collection.json` label and one `.json` file per record; anything else is not defined by this revision");
+            continue;
+          }
+          const recordId = member.name.slice(0, -".json".length);
+          if (!COLLECTION_ID.test(recordId)) {
+            error("COLLECTION_ID_GRAMMAR", "§1b", display, `record id ${JSON.stringify(recordId)} is not lowercase kebab-case; the filename is the record's id and address`);
+            continue;
+          }
+          const file = path.join(drawerDir, member.name);
+          const data = parseJsonFile(file, display, "§1b", "COLLECTION_RECORD_JSON");
+          if (data === undefined) continue;
+          if (!isObject(data)) {
+            error("COLLECTION_RECORD_SHAPE", "§1b", display, "a collection record file holds one JSON object of designer data");
+            continue;
+          }
+          docs.push({ file, display, data });
+          recordEntries.push({ record: data, display, id: recordId });
+        }
+        if (fields) {
+          validateDrawerRecords(fields, recordEntries);
+          validateGridLayers([...fields.entries()].filter(([, shape]) => shape.type === "grid").map(([field]) => field), recordEntries);
+        }
+        const recordIds = new Set(recordEntries.map(entry => entry.id));
+        const allIds = new Set(recordIds);
+        for (const doc of docs) for (const itemId of collectIds(doc.data)) allIds.add(itemId);
+        const info = { id, fields, docs, records: recordEntries, recordIds, allIds, reached: false };
+        context.collections.set(id, info);
+        context.documents.push(...docs.map(doc => ({ ...doc, collection: info })));
       }
-
-      validateGridLayers(collection, recordEntries);
-
-      const allIds = new Set();
-      for (const doc of docs) {
-        for (const itemId of collectIds(doc.data)) allIds.add(itemId);
-        walk(doc.data, (value, pointer, ancestors) => {
-          if (isObject(value) && own(value, "authority")) validateAuthority(value.authority, doc.display, pointer, questionsById);
-        });
-      }
-
-      const info = { collection, definedIn, docs, records: recordEntries, allIds };
-      if (typeof id === "string") context.collections.set(id, info);
-      context.documents.push(...docs.map(doc => ({ ...doc, collection: info })));
     }
 
-    // Defining prose sections may declare state bindings used by structured expressions.
-    for (const info of context.collections.values()) {
-      const text = info.definedIn?.text ?? "";
-      for (const match of text.matchAll(/state:number:([a-zA-Z0-9_.-]+)/g)) context.stateNumbers.add(match[1]);
-      const registryIds = new Set();
-      const registryMatch = /members\s+are\s+exactly\s+the\s+`id`\s+values\s+in\s+`([^`]+\.json)\.([A-Za-z_][A-Za-z0-9_]*)`/i.exec(text);
-      if (registryMatch) {
-        const registryDoc = info.docs.find(doc => slash(doc.display).endsWith(slash(registryMatch[1])) || path.basename(doc.display) === path.basename(registryMatch[1]));
-        const records = registryDoc?.data?.[registryMatch[2]];
-        if (Array.isArray(records)) {
-          for (const record of records) if (isObject(record) && (typeof record.id === "string" || typeof record.id === "number")) registryIds.add(String(record.id));
+    // The `> COLLECTION:` tag is retired (decision 33): presence declares the
+    // drawer, prose cites it, and the label's record schema owns the shape. A
+    // surviving tag is old machinery that would otherwise sit silently.
+    for (const { chapter, text } of chapterTexts(packageRoot, manifest)) {
+      for (const item of unfencedLines(text)) {
+        if (/^\s*>\s*COLLECTION:/.test(item.text)) {
+          error("COLLECTION_TAG_RETIRED", "§1b", slash(chapter), "`> COLLECTION:` is retired (decision 33); presence declares the drawer, prose cites it, and the label's `record` schema owns the shape", item.line);
         }
       }
-      const stateMembers = registryIds.size ? registryIds : info.allIds;
-      for (const match of text.matchAll(/state:member:([a-zA-Z0-9_.-]+):/g)) context.stateSets.set(match[1], stateMembers);
     }
+
+    // Chapters at the package root may declare state bindings used by
+    // structured expressions (§4a). Member sets resolve against every id the
+    // package's drawers hold: record filenames plus the ids records carry in
+    // their own data.
     const allContentIds = new Set([...context.collections.values()].flatMap(info => [...info.allIds]));
     for (const entry of host.readDir(packageRoot)) {
       if (!entry.isFile || !entry.name.endsWith(".md")) continue;
@@ -677,23 +906,23 @@ function createValidator(host) {
       if (!members || !members.has(stateMember[2])) error("EXPR_REFERENCE", "§4a", file, `${pointer} has unresolved runtime-set reference ${JSON.stringify(ref)}`);
       return { type: "boolean", available: false, reference: true };
     }
-    const contentCount = /^content:([^:]+):(.*):count$/.exec(ref);
-    if (contentCount) {
-      const info = context.collections.get(contentCount[1]);
+    // Decision 32: a drawer's record count is a mechanical fact — one file per
+    // record — so the count reference names the drawer and nothing else. The
+    // old `content:<id>:<pointer>:count` form pointed into a catalog file that
+    // no longer exists, and it reports its own migration path.
+    const collectionCount = /^collections:([a-z0-9]+(?:-[a-z0-9]+)*):count$/.exec(ref);
+    if (collectionCount) {
+      const info = context.collections.get(collectionCount[1]);
       if (!info) {
-        error("EXPR_REFERENCE", "§4a", file, `${pointer} names unknown content collection ${JSON.stringify(contentCount[1])}`);
+        error("EXPR_REFERENCE", "§4a", file, `${pointer} names no collections/ drawer: ${JSON.stringify(collectionCount[1])}`);
         return { type: "number", available: false, reference: true };
       }
-      if (info.docs.length !== 1 || info.collection.source?.type !== "catalog") {
-        error("EXPR_REFERENCE", "§4a", file, `${pointer} content count is not mechanically resolvable against a one-file catalog: ${JSON.stringify(ref)}`);
-        return { type: "number", available: false, reference: true };
-      }
-      const target = jsonPointerGet(info.docs[0].data, contentCount[2]);
-      if (!Array.isArray(target)) {
-        error("EXPR_REFERENCE", "§4a", file, `${pointer} content count does not resolve to an array: ${JSON.stringify(ref)}`);
-        return { type: "number", available: false, reference: true };
-      }
-      return { type: "number", value: target.length, available: true, reference: true };
+      info.reached = true;
+      return { type: "number", value: info.records.length, available: true, reference: true };
+    }
+    if (ref.startsWith("content:")) {
+      error("EXPR_REFERENCE", "§4a", file, `${pointer} uses the retired \`content:\` reference ${JSON.stringify(ref)}; a drawer's record count is cited as \`collections:<drawer>:count\``);
+      return { type: "number", available: false, reference: true };
     }
     error("EXPR_REFERENCE", "§4a", file, `${pointer} has invalid or unsupported typed reference ${JSON.stringify(ref)}`);
     return { type: "unknown", available: false, reference: true };
@@ -870,13 +1099,9 @@ function createValidator(host) {
   function graphRecordIndex(info) {
     if (!info.recordIndex) {
       const index = new Map();
-      const field = info.collection?.id_field;
       for (const entry of info.records) {
-        if (!isObject(entry.record) || typeof field !== "string") continue;
-        const value = entry.record[field];
-        if (typeof value !== "string" && typeof value !== "number") continue;
-        const id = String(value);
-        if (!index.has(id)) index.set(id, entry);
+        if (!isObject(entry.record) || typeof entry.id !== "string") continue;
+        if (!index.has(entry.id)) index.set(entry.id, entry);
       }
       info.recordIndex = index;
     }
@@ -920,15 +1145,13 @@ function createValidator(host) {
         const targets = edge.to.filter(target => isObject(target) && typeof target.collection === "string").map(target => target.collection);
         fromCollections.add(edge.from.collection);
         for (const target of targets) toCollections.add(target);
+        for (const name of [edge.from.collection, ...targets]) { const touched = contentContext.collections.get(name); if (touched) touched.reached = true; }
         const source = contentContext.collections.get(edge.from.collection);
         if (!source) return;
-        const idMember = source.collection?.id_field;
         for (const entry of source.records) {
-          if (!isObject(entry.record) || typeof idMember !== "string") continue;
-          const rawId = entry.record[idMember];
-          if (typeof rawId !== "string" && typeof rawId !== "number") continue;
-          const sourceId = String(rawId);
-          const label = `${entry.pointer} graph ${JSON.stringify(set.id)} field ${JSON.stringify(edge.field)}`;
+          if (!isObject(entry.record) || typeof entry.id !== "string") continue;
+          const sourceId = entry.id;
+          const label = `graph ${JSON.stringify(set.id)} field ${JSON.stringify(edge.field)}`;
           for (const site of graphFieldSites(entry.record, edge.field)) {
             const seen = new Set();
             for (const targetId of graphSiteIds(site.value, entry.display, label)) {
@@ -1057,15 +1280,12 @@ function createValidator(host) {
     for (const collection of info.toCollections) {
       const target = ctx.contentContext.collections.get(collection);
       if (!target) continue;
-      const idMember = target.collection?.id_field;
       for (const entry of target.records) {
-        if (!isObject(entry.record) || typeof idMember !== "string") continue;
-        const rawId = entry.record[idMember];
-        if (typeof rawId !== "string" && typeof rawId !== "number") continue;
-        const targetId = String(rawId);
+        if (!isObject(entry.record) || typeof entry.id !== "string") continue;
+        const targetId = entry.id;
         const targetKey = graphNodeKey(collection, targetId);
         if (exempt.has(targetKey)) continue;
-        const label = `${entry.pointer} graph ${JSON.stringify(setId)} inverse field ${JSON.stringify(info.inverse)}`;
+        const label = `graph ${JSON.stringify(setId)} inverse field ${JSON.stringify(info.inverse)}`;
         for (const site of graphFieldSites(entry.record, info.inverse)) {
           const seen = new Set();
           for (const sourceId of graphSiteIds(site.value, entry.display, label)) {
@@ -1132,12 +1352,9 @@ function createValidator(host) {
       const field = fields.get(collection);
       const target = ctx.contentContext.collections.get(collection);
       if (!field || !target) continue;
-      const idMember = target.collection?.id_field;
       for (const entry of target.records) {
-        if (!isObject(entry.record) || typeof idMember !== "string") continue;
-        const rawId = entry.record[idMember];
-        if (typeof rawId !== "string" && typeof rawId !== "number") continue;
-        const recordId = String(rawId);
+        if (!isObject(entry.record) || typeof entry.id !== "string") continue;
+        const recordId = entry.id;
         const value = graphFieldValue(entry.record, field);
         if (typeof value !== "number" || !Number.isFinite(value)) {
           error("GRAPH_MONOTONE", "§1c", file, `${id} collection record ${JSON.stringify(recordId)} in ${JSON.stringify(collection)} has a missing or non-numeric ${JSON.stringify(field)} attribute`, line, { diagnostic: "missing-attribute", edge_set: setId, collection, record: recordId, field: field, file: entry.display });
@@ -1185,10 +1402,9 @@ function createValidator(host) {
   function validateManifestConstructs(manifest, contentContext) {
     const rulesetIds = new Set();
     if (!isObject(manifest)) return { rulesetIds, graphContext: { sets: new Map(), contentContext } };
-    const collectionIds = new Set();
-    if (Array.isArray(manifest.content)) {
-      for (const entry of manifest.content) if (isObject(entry) && typeof entry.id === "string") collectionIds.add(entry.id);
-    }
+    // Decision 32: collections declare by presence, so a graph edge resolves
+    // against the collections/ drawers the package actually holds.
+    const collectionIds = new Set(contentContext?.collections?.keys() ?? []);
     if (Array.isArray(manifest.graphs)) {
       const edgeSetIds = new Set();
       manifest.graphs.forEach((set, index) => {
@@ -1205,7 +1421,7 @@ function createValidator(host) {
             if (isObject(target) && typeof target.collection === "string") sites.push([target.collection, `edges[${edgeIndex}].to[${targetIndex}]`]);
           });
           for (const [collection, label] of sites) {
-            if (!collectionIds.has(collection)) error("GRAPH_COLLECTION", "§1c", "manifest.json", `graphs[${index}].${label} names undeclared collection ${JSON.stringify(collection)}`);
+            if (!collectionIds.has(collection)) error("GRAPH_COLLECTION", "§1c", "manifest.json", `graphs[${index}].${label} names no collections/ drawer: ${JSON.stringify(collection)}`);
           }
         });
       });
@@ -1230,10 +1446,9 @@ function createValidator(host) {
   // meta.ruleset is already checked in validateTuning; this covers prose tags.
   // The five canonical chapter filenames (SPEC §1) plus whatever else the
   // manifest declares as a chapter. Yields readable chapter files only.
-  function* chapterTexts(packageRoot, manifest, includePlan = false) {
+  function* chapterTexts(packageRoot, manifest) {
     const chapters = new Set(["01-overview.md", "02-mechanics.md", "03-content.md", "04-presentation.md", "05-build-plan.md"]);
     for (const declared of manifest?.build?.chapters ?? []) if (typeof declared === "string" && declared.endsWith(".md")) chapters.add(declared);
-    if (includePlan && typeof manifest?.build?.plan === "string" && manifest.build.plan.endsWith(".md")) chapters.add(manifest.build.plan);
     for (const chapter of chapters) {
       if (path.isAbsolute(chapter) || chapter.includes("..")) continue;
       const file = path.join(packageRoot, chapter);
@@ -1243,7 +1458,6 @@ function createValidator(host) {
   }
 
   function validateRulesetTags(packageRoot, manifest, rulesetIds) {
-    if (rulesetIds.size === 0) return;
     for (const { chapter, text } of chapterTexts(packageRoot, manifest)) {
       for (const item of unfencedLines(text)) {
         const match = /^\s*>\s*RULESET:\s*(\S+)\s*$/.exec(item.text);
@@ -1288,7 +1502,7 @@ function createValidator(host) {
   function validateModeTags(packageRoot, manifest, clocksResult) {
     const modes = clocksResult?.modes;
     if (!modes || modes.size === 0) return;
-    for (const { chapter, text } of chapterTexts(packageRoot, manifest, true)) {
+    for (const { chapter, text } of chapterTexts(packageRoot, manifest)) {
       for (const item of unfencedLines(text)) {
         if (!/^\s{0,3}#{1,6}\s/.test(item.text)) continue;
         // A run followed by `(` or `[` is a Markdown link, and an all-digit run
@@ -1305,13 +1519,13 @@ function createValidator(host) {
   const CLOCK_BEHAVIORS = new Set(["advances", "frozen", "discrete-only", "does-not-exist"]);
 
   function validateClocks(doc) {
-    const result = { modes: new Set(), governedBy: new Map(), behaviors: new Map() };
+    const result = { modes: new Set(), clocks: new Set(), governedBy: new Map(), behaviors: new Map() };
     const clocks = doc.clocks;
     if (!isObject(clocks)) {
       error("CLOCKS_SHAPE", "§4b", "tuning.json", "clocks must be an object with modes and clocks fields");
       return result;
     }
-    for (const key of Object.keys(clocks)) if (key !== "modes" && key !== "clocks") error("CLOCKS_SHAPE", "§4b", "tuning.json", `clocks.${key} is not defined by the v0.5 shape`);
+    for (const key of Object.keys(clocks)) if (key !== "modes" && key !== "clocks") error("CLOCKS_SHAPE", "§4b", "tuning.json", `clocks.${key} is not defined by the v0.6 shape`);
     const modeSet = result.modes;
     if (!Array.isArray(clocks.modes) || !clocks.modes.length) {
       error("CLOCKS_REGIMES", "§4b", "tuning.json", "clocks.modes must be a non-empty array of mode ids");
@@ -1335,9 +1549,18 @@ function createValidator(host) {
     // to check a citing AT's `freeze_invariant` for the advances/does-not-exist
     // contradictions the SPEC names.
     for (const [name, clock] of Object.entries(clocks.clocks)) {
+      result.clocks.add(name);
       if (!isObject(clock) || !isObject(clock.behavior)) {
         error("CLOCKS_BEHAVIOR", "§4b", "tuning.json", `clocks.clocks.${name} must declare a behavior object`);
         continue;
+      }
+      // SPEC §4b — every clock declares its own `unit`. There is no
+      // package-level time unit anywhere in v0.6, so an omitted `unit` would
+      // leave a replay amount (§4b) with no declared meaning and two tools free
+      // to read the same legal clock differently. The local field is the whole
+      // declaration site.
+      if (typeof clock.unit !== "string" || !clock.unit.trim()) {
+        error("CLOCKS_UNIT", "§4b", "tuning.json", `clocks.clocks.${name} must declare unit as a non-empty string; a replay amount is read in the clock's declared unit and the format declares no package-level default`);
       }
       for (const [mode, behavior] of Object.entries(clock.behavior)) {
         if (!modeSet.has(mode)) error("CLOCKS_BEHAVIOR", "§4b", "tuning.json", `clocks.clocks.${name}.behavior names undeclared mode ${JSON.stringify(mode)}`);
@@ -1363,7 +1586,11 @@ function createValidator(host) {
 
   // §4b deepening: freeze_invariant contradiction/hard-failure rule.
   function validateFreezeInvariant(freezeInvariant, clocksResult, file, pointer, exprContext) {
-    if (!isObject(freezeInvariant)) return;
+    if (!isObject(freezeInvariant)) {
+      error("FREEZE_INVARIANT_SHAPE", "§4b", file, `${pointer} must be an object`, undefined);
+      return;
+    }
+    for (const key of Object.keys(freezeInvariant)) if (key !== "references" && key !== "modes") error("FREEZE_INVARIANT_SHAPE", "§4b", file, `${pointer} carries unknown field ${JSON.stringify(key)}`);
     if (!clocksResult) {
       error("FREEZE_INVARIANT_NO_CLOCKS", "§4b", file, `${pointer} declares freeze_invariant but the package declares no tuning.json clocks block`);
       return;
@@ -1372,6 +1599,8 @@ function createValidator(host) {
     const modes = Array.isArray(freezeInvariant.modes) ? freezeInvariant.modes : [];
     if (!references.length) error("FREEZE_INVARIANT_SHAPE", "§4b", file, `${pointer} freeze_invariant.references must be a non-empty array`);
     if (!modes.length) error("FREEZE_INVARIANT_SHAPE", "§4b", file, `${pointer} freeze_invariant.modes must be a non-empty array`);
+    if (references.some(ref => typeof ref !== "string" || !ref)) error("FREEZE_INVARIANT_SHAPE", "§4b", file, `${pointer} freeze_invariant.references entries must be non-empty strings`);
+    if (modes.some(mode => typeof mode !== "string" || !mode)) error("FREEZE_INVARIANT_SHAPE", "§4b", file, `${pointer} freeze_invariant.modes entries must be non-empty strings`);
     for (const mode of modes) {
       if (typeof mode === "string" && !clocksResult.modes.has(mode)) {
         error("FREEZE_INVARIANT_REGIME", "§4b", file, `${pointer} freeze_invariant names undeclared mode ${JSON.stringify(mode)}`);
@@ -1409,10 +1638,7 @@ function createValidator(host) {
     const tunables = isObject(doc?.tunables) ? doc.tunables : {};
     const meta = isObject(doc?.meta) ? doc.meta : {};
     const resolved = new Map(base);
-    const rangeOf = key => {
-      const range = isObject(meta[key]) ? meta[key].range : undefined;
-      return Array.isArray(range) && range.length === 2 && range.every(bound => typeof bound === "number" && Number.isFinite(bound)) ? range : undefined;
-    };
+    const rangeOf = key => boundsFromPair(isObject(meta[key]) ? meta[key].range : undefined);
     // Only a declared tunables key is a legal target; the illegal ones are
     // reported by name elsewhere and must not silently enter the snapshot.
     const assign = (key, value) => {
@@ -1441,7 +1667,7 @@ function createValidator(host) {
         const range = rangeOf(operation.key);
         // `reject` deliberately does not clamp: the value the pipeline computed
         // is what the invariant is decided against (SPEC §5).
-        if (range && operation.out_of_range === "clamp") next = Math.min(Math.max(next, range[0]), range[1]);
+        if (range && operation.out_of_range === "clamp") next = clampToBounds(range, next);
         assign(operation.key, next);
       }
     }
@@ -1461,7 +1687,7 @@ function createValidator(host) {
   function validateTuningKeySegments(role, key) {
     const segments = key.split(".");
     if (RESERVED_FIRST_SEGMENTS.has(segments[0])) {
-      error("TUNING_KEY_RESERVED", "§4", "tuning.json", `${role} key ${JSON.stringify(key)} opens with \`${segments[0]}\`, a segment reserved for prose citation in v${SPEC_VERSION}`);
+      error("TUNING_KEY_RESERVED", "§4", "tuning.json", `${role} key ${JSON.stringify(key)} opens with \`${segments[0]}\`, a segment reserved for prose citation in v${reservedIn(segments[0])}`);
     }
     const extension = segments.find(segment => RESERVED_EXTENSIONS.has(segment));
     if (extension !== undefined) {
@@ -1533,7 +1759,7 @@ function createValidator(host) {
           error("TUNING_META", "§4", "tuning.json", `meta.${key} must be an object`);
           continue;
         }
-        for (const metaField of Object.keys(metadata)) if (metaField !== "range" && metaField !== "must_match" && metaField !== "ruleset") error("TUNING_META", "§4", "tuning.json", `meta.${key}.${metaField} is not defined by the v0.5 shape`);
+        for (const metaField of Object.keys(metadata)) if (!TUNING_META_FIELDS.has(metaField)) error("TUNING_META", "§4", "tuning.json", `meta.${key}.${metaField} is not defined by the v0.6 shape`);
         if (own(metadata, "must_match") && typeof metadata.must_match !== "boolean") error("TUNING_META_CERTIFY", "§4", "tuning.json", `meta.${key}.must_match must be Boolean`);
         if (own(metadata, "ruleset") && (typeof metadata.ruleset !== "string" || !rulesetIds.has(metadata.ruleset))) {
           error("TUNING_META_RULESET", "§2c", "tuning.json", `meta.${key}.ruleset must name a declared ruleset id`);
@@ -1564,67 +1790,6 @@ function createValidator(host) {
       });
     }
     return { doc, context };
-  }
-
-  function validateContentReferences(contentContext, exprContext) {
-    for (const info of contentContext.collections.values()) {
-      const definitionText = info.definedIn?.text ?? "";
-      const mechanicallyResolvedFields = new Set();
-      const arrayTargets = new Map();
-      const namespaceTargets = new Map();
-      const referenceVerbs = new Set();
-      for (const match of definitionText.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)`[^.\n]{0,100}(?:MUST\s+)?resolve/gi)) mechanicallyResolvedFields.add(match[1]);
-      for (const match of definitionText.matchAll(/(?:Every\s+[^.\n]{0,80})`([A-Za-z_][A-Za-z0-9_]*)`[^.\n]{0,100}(?:MUST\s+)?resolve/gi)) mechanicallyResolvedFields.add(match[1]);
-      for (const match of definitionText.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)`\s+references\s+MUST\s+resolve\s+to\s+`([A-Za-z_][A-Za-z0-9_]*)\[\]\.id`/gi)) {
-        arrayTargets.set(match[1], match[2]);
-      }
-      for (const match of definitionText.matchAll(/`([A-Za-z_][A-Za-z0-9_]*)`[\s\S]{0,120}?MUST\s+resolve\s+to[\s\S]{0,80}?`([A-Za-z_][A-Za-z0-9_.-]*)\.\*`/gi)) {
-        namespaceTargets.set(match[1], `${match[2]}.`);
-      }
-      for (const match of definitionText.matchAll(/`([a-z][a-z0-9_-]*):<[^`>]*-id>`/gi)) referenceVerbs.add(match[1]);
-      const scheduleUsesTuning = /schedule\s+strings\s+MUST\s+resolve\s+to\s+tuning\s+keys/i.test(definitionText);
-
-      for (const doc of info.docs) {
-        const localIds = collectIds(doc.data);
-        const idsByArray = new Map();
-        for (const arrayName of arrayTargets.values()) {
-          const ids = new Set();
-          walk(doc.data, value => {
-            if (isObject(value) && Array.isArray(value[arrayName])) {
-              for (const record of value[arrayName]) if (isObject(record) && (typeof record.id === "string" || typeof record.id === "number")) ids.add(String(record.id));
-            }
-          });
-          idsByArray.set(arrayName, ids);
-        }
-        walk(doc.data, (value, pointer, ancestors) => {
-          if (isObject(value) && value.language === "opengdd-expr-1" && own(value, "assert")) {
-            validateNamedExpression(value, exprContext, doc.display, pointer, false);
-          }
-          if (typeof value !== "string") return;
-          const last = ancestors.at(-1);
-          const key = isObject(last) && own(last, "key") ? last.key : undefined;
-          if (value.startsWith("tuning:")) referenceInfo(value, exprContext, doc.display, pointer);
-          const verb = /^([a-z][a-z0-9_-]*):(.+)$/.exec(value);
-          if (verb && referenceVerbs.has(verb[1]) && !info.allIds.has(verb[2])) {
-            error("CONTENT_DANGLING_REFERENCE", "§1b", doc.display, `${pointer} ${verb[1]} target ${JSON.stringify(verb[2])} does not resolve in the collection`);
-          }
-          if (key && mechanicallyResolvedFields.has(key)) {
-            const resolved = (key.endsWith("_pointer") || value.startsWith("/"))
-              ? jsonPointerGet(doc.data, value) !== undefined
-              : arrayTargets.has(key)
-                ? idsByArray.get(arrayTargets.get(key))?.has(value)
-                : namespaceTargets.has(key)
-                  ? value.startsWith(namespaceTargets.get(key)) && info.allIds.has(value)
-                  : localIds.has(value) || info.allIds.has(value);
-            if (!resolved) error("CONTENT_DANGLING_REFERENCE", "§1b", doc.display, `${pointer} ${key} reference ${JSON.stringify(value)} is dangling`);
-          }
-          const inSchedule = ancestors.some(item => isObject(item) && item.key === "schedule");
-          if (scheduleUsesTuning && inSchedule && /^[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+$/.test(value) && !exprContext.tuning.has(value)) {
-            error("CONTENT_DANGLING_TUNING", "§1b", doc.display, `${pointer} schedule tuning key ${JSON.stringify(value)} does not resolve`);
-          }
-        });
-      }
-    }
   }
 
   function validateFantasy(packageRoot) {
@@ -1690,14 +1855,19 @@ function createValidator(host) {
     // happens to exist is not what the fence is about.
     const bodyStart = text.slice(0, match.index).split(/\r?\n/).length + 1;
     match[1].split(/\r?\n/).forEach((raw, offset) => {
+      if (isLabelled(raw.trim())) return;
       const at = bodyStart + offset;
-      for (const typed of raw.matchAll(/(?:^|[^A-Za-z0-9_:-])(tuning|state|content|descriptor):([A-Za-z0-9_:-]+(?:\.[A-Za-z0-9_:-]+)*)/g)) {
+      for (const typed of raw.matchAll(/(?:^|[^A-Za-z0-9_:-])(tuning|state|collections|descriptor|palette):([A-Za-z0-9_:-]+(?:\.[A-Za-z0-9_:-]+)*)/g)) {
         error("FANTASY_REFERENCE", "§1a", "01-overview.md", `fantasy line carries the typed reference \`${typed[1]}:${typed[2]}\`; §1a admits no reference in the fantasy block`, at);
       }
       for (const span of raw.matchAll(/`([^`\n]+)`/g)) {
         const token = span[1].trim();
         if (classifyProseToken(token)?.kind !== "tuning") continue;
         error("FANTASY_REFERENCE", "§1a", "01-overview.md", `fantasy line cites the tuning key \`${token}\`; §1a admits no reference in the fantasy block`, at);
+      }
+      const chapterAnchor = /(?:[A-Za-z0-9_./-]+\.md#[a-z0-9]+(?:-[a-z0-9]+)*|(?:^|\s)#[a-z0-9]+(?:-[a-z0-9]+)*(?![a-z0-9-]))/.exec(raw);
+      if (chapterAnchor) {
+        error("FANTASY_REFERENCE", "§1a", "01-overview.md", `fantasy line carries the chapter anchor ${JSON.stringify(chapterAnchor[0].trim())}; §1a admits no reference in the fantasy block`, at);
       }
     });
   }
@@ -1878,8 +2048,14 @@ function createValidator(host) {
     const resolution = /\b(?:tie[- ]?break|lowest|highest|ascending|descending|clockwise|counterclockwise|lexicograph|priority|prioritize|prefer|wins|random|prng|listed order|declared order|fixed order|by id|before|after|then)\b/i;
     const allocationResolution = /\b(?:priority|prioritize|preserve|clamp\s+(?:the\s+)?(?:first|second|[a-z-]+)|remove\s+(?:the\s+)?(?:first|second|[a-z-]+)|reduce\s+(?:the\s+)?(?:first|second|[a-z-]+)|remaining capacity|allocated first|allocated last|wins)\b/i;
     for (const paragraph of proseParagraphs(text)) {
-      const isShared = sharedCeiling.test(paragraph.text);
-      const isChoice = choice.test(paragraph.text);
+      // A backticked token is a citation, not English: under decision 32 a
+      // record id like `first-note` is cited constantly, and reading it as
+      // the word "first" makes every such paragraph choice-shaped. The
+      // resolution scan keeps the full text — a resolution stated anywhere
+      // in the paragraph, cited or prose, settles the choice.
+      const spoken = paragraph.text.replaceAll(/`[^`]*`/g, "`…`");
+      const isShared = sharedCeiling.test(spoken);
+      const isChoice = choice.test(spoken);
       if ((!isChoice && !isShared) || resolution.test(paragraph.text) || (isShared && allocationResolution.test(paragraph.text))) continue;
       const excerpt = paragraph.text.length > 180 ? `${paragraph.text.slice(0, 177)}…` : paragraph.text;
       warning(isShared ? "TIE_BREAK_SHARED_CEILING" : "TIE_BREAK_CHOICE", "§2a", "02-mechanics.md", `choice-shaped rule lacks a mechanically apparent tie-break: ${excerpt}`, paragraph.line);
@@ -1900,7 +2076,6 @@ function createValidator(host) {
     }
     const chapters = new Set(["01-overview.md", "02-mechanics.md", "03-content.md", "04-presentation.md", "05-build-plan.md"]);
     for (const declared of manifest?.build?.chapters ?? []) if (typeof declared === "string" && declared.endsWith(".md")) chapters.add(declared);
-    if (typeof manifest?.build?.plan === "string" && manifest.build.plan.endsWith(".md")) chapters.add(manifest.build.plan);
     const numberPattern = /(?<![A-Za-z0-9_.-])-?(?:\d+\.\d+|\d+)(?![A-Za-z0-9_.-])/g;
     for (const chapter of chapters) {
       if (path.isAbsolute(chapter) || chapter.includes("..")) continue;
@@ -1940,16 +2115,46 @@ function createValidator(host) {
   const RESERVED_FIRST_SEGMENTS = new Set([
     "pillars", "mood", "anti", "must_keep", "constraints", "viewing",
     "semantics", "meta", "tunables", "constants", "invariants", "clocks",
-    "manifest", "build", "descriptors", "contracts"
+    "manifest", "build", "descriptors", "contracts", "palette", "references",
+    "collections"
   ]);
+  // §4's versioning clause: a validator that rejects a key on a newly reserved
+  // segment names the revision that reserved it. Every segment above was
+  // reserved in v0.5 except `palette`, which v0.6 reserves for the manifest's
+  // palette map, `references`, which v0.6 reserves for the direction file's
+  // reference map, and `collections`, which v0.6 reserves for the collections/
+  // drawers (decision 32) — so a key legal under v0.5 learns what changed
+  // under it.
+  const RESERVED_SINCE = new Map([["palette", PALETTE_REVISION], ["references", REFERENCES_REVISION], ["collections", COLLECTIONS_REVISION]]);
+  const reservedIn = segment => RESERVED_SINCE.get(segment) ?? SPEC_VERSION;
   const RESERVED_EXTENSIONS = new Set(["json", "md"]);
-  // The reserved segments whose family exposes a mechanical citation target:
-  // the §9.10 direction families, in the shapes §9.10 declares citable. The
-  // remaining reserved segments name file members (`meta.range`,
-  // `build.chapters`, `invariants.<id>`) rather than declared entries, so a
-  // token opening with one is classified and then resolved against nothing.
-  const DIRECTION_CITABLE_SEGMENTS = new Set(["pillars", "mood", "anti", "must_keep", "constraints", "viewing"]);
+  // The reserved segments whose family exposes a mechanical citation target,
+  // and the file each resolves against:
+  //
+  // - the §9.9 direction families, in the shapes §9.9 declares citable,
+  //   against `direction.json` — `references` among them, since §§9.3 and 9.9
+  //   spell a direction reference `references.<key>`;
+  // - `palette`, against the manifest's palette map (§3), the first citable
+  //   family that does not live in `direction.json`;
+  // - `descriptors`, against the manifest's descriptor families (§8a);
+  // - `meta`, against `tuning.json`'s meta map (§4, which gives
+  //   `meta.hazard.interval_seconds` as its worked example);
+  // - `invariants`, against `tuning.json`'s invariants array by id (§4a);
+  // - `clocks`, against the declared mode ids and clock names of
+  //   `tuning.json`'s clocks block (§4b);
+  // - `contracts`, against the instance file that owns the knob (§10.11),
+  //   handled on its own branch below.
+  //
+  // The remaining reserved segments — `semantics`, `tunables`, `constants`,
+  // `manifest`, `build` — name file members (`build.chapters`) rather than
+  // declared entries, so a token opening with one is classified and then
+  // resolved against nothing.
+  const DIRECTION_CITABLE_SEGMENTS = new Set(["pillars", "mood", "anti", "must_keep", "constraints", "viewing", "references", "palette"]);
   const DOTTED_TOKEN = /^[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+$/;
+  // The closed field set of a `tuning.json` meta entry (§4). It decides both
+  // what a meta entry may carry and what a `meta.<key>.<field>` prose token may
+  // name after its key part.
+  const TUNING_META_FIELDS = new Set(["range", "must_match", "ruleset"]);
 
   function classifyProseToken(token) {
     if (!DOTTED_TOKEN.test(token)) return undefined;
@@ -1960,10 +2165,281 @@ function createValidator(host) {
     return { kind: "tuning", segments };
   }
 
+  // ---------------------------------------------------------------------------
+  // SPEC §3 / §4 — the manifest's `palette` map.
+  //
+  // A palette is a named set of colors declared in manifest.json beside
+  // `descriptors`. It carries no audit class, no scope, and no tolerance: the
+  // promise about a color is a `constraints.colors` entry, and the palette is
+  // only where the color is written down, exactly once. The map is the format's
+  // first citable family outside `direction.json`, so it needs a resolver of
+  // its own beside `resolveDirectionPath`.
+  //
+  // The grammars below are the validator's copy of the schema's patterns. The
+  // schema carries shape — key grammar, name grammar, entry forms — and this
+  // layer carries everything that needs a second document to decide: entry-form
+  // enumeration in plain words, name uniqueness, the declare-time collision
+  // rule, the two-pass resolution order, and reachability.
+  // ---------------------------------------------------------------------------
+
+  const HEX_COLOR = /^#[0-9A-Fa-f]{6}$/;
+  // One segment of a palette key, and equally one color name: kebab-case with
+  // at least one letter. The letter rule is what makes `palette.a.fire.2`
+  // unspellable, and so what makes §9.9's ban on index citations structural
+  // rather than a check.
+  const PALETTE_SEGMENT = /^(?=[a-z0-9-]*[a-z])[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+  // §4 resolution, in the fixed two-pass order, over one reference text: the
+  // prose token minus its `palette.` first segment, or the typed form's text
+  // after `palette:`. Whole text as a palette key first; only then the last
+  // segment as a color name of the remainder. A one-pass split at the last dot
+  // is not verdict-equivalent — it dangles on a legal dotted key — so the order
+  // is normative and this is the one implementation of it.
+  function resolvePaletteReference(paletteCtx, text) {
+    const palettes = paletteCtx?.palettes;
+    if (!palettes) return { kind: "dangling" };
+    if (palettes.has(text)) return { kind: "palette", key: text };
+    const cut = text.lastIndexOf(".");
+    if (cut > 0) {
+      const key = text.slice(0, cut);
+      const name = text.slice(cut + 1);
+      const colors = palettes.get(key);
+      if (colors && colors.has(name)) return { kind: "color", key, name, hex: colors.get(name) };
+    }
+    return { kind: "dangling" };
+  }
+
+  // §9.5's closed list of typed-form grammar failures, raised before resolution
+  // is attempted so that a malformed value reads as a grammar error and never
+  // as a dangling reference. The commonest of them is the raw hex a migration
+  // left behind in what is now a reference field, so it is named first.
+  function typedPaletteRefProblem(value) {
+    if (typeof value !== "string") return "must be a string in the form `palette:<palette-key>.<color-name>`";
+    if (/\s/.test(value)) return `${JSON.stringify(value)} carries whitespace; a typed palette reference admits none`;
+    if (HEX_COLOR.test(value)) return `${JSON.stringify(value)} is a raw hex; a color is written once, in the manifest's palette map, and cited here as \`palette:<palette-key>.<color-name>\``;
+    if (value.startsWith("palette.")) return `${JSON.stringify(value)} is the prose spelling; the JSON channel cites typed, as \`palette:<palette-key>.<color-name>\``;
+    if (!value.startsWith("palette:")) return `${JSON.stringify(value)} carries no \`palette:\` prefix; the form is \`palette:<palette-key>.<color-name>\``;
+    const rest = value.slice("palette:".length);
+    const segments = rest.split(".");
+    if (segments.length < 2) return `${JSON.stringify(value)} carries no dot after the prefix; the form names a palette key and a color name`;
+    if (segments[0] === "") return `${JSON.stringify(value)} carries an empty palette-key part`;
+    if (segments[segments.length - 1] === "") return `${JSON.stringify(value)} carries an empty color-name part`;
+    const bad = segments.find(segment => !PALETTE_SEGMENT.test(segment));
+    if (bad !== undefined) {
+      return bad === ""
+        ? `${JSON.stringify(value)} carries an empty segment`
+        : `${JSON.stringify(value)} carries the segment \`${bad}\`, outside the kebab-case alphabet a palette key segment and a color name share (each MUST carry at least one letter)`;
+    }
+    // §3 forbids a palette key segment spelled `json` or `md`, while a color
+    // name carries no such exclusion. Only the last segment can ever be the
+    // name, so a `json` or `md` segment before it belongs to the key part under
+    // either step of §4's order and can never resolve. That makes it a grammar
+    // failure — "any character outside the key and color-name grammars of §3",
+    // §9.5 — rather than a dangling reference, which is what the schema's
+    // `paletteKey` pattern already says and what the two documents otherwise
+    // disagree about.
+    const reserved = segments.slice(0, -1).find(segment => RESERVED_EXTENSIONS.has(segment));
+    if (reserved !== undefined) {
+      return `${JSON.stringify(value)} carries the segment \`${reserved}\` before its last, where only a palette key can sit; a palette key admits no segment spelled \`json\` or \`md\``;
+    }
+    return undefined;
+  }
+
+  // A typed reference in a position that requires a color: grammar first, then
+  // §4's order, with the step-1 hit reported as "names a palette, not a
+  // color" rather than as a dangling reference — the diagnostic the two-pass
+  // order exists to get right.
+  function resolveTypedPaletteColor(paletteCtx, value, label, section, display) {
+    const problem = typedPaletteRefProblem(value);
+    if (problem !== undefined) {
+      error("DIRECTION_COLOR_REFERENCE", section, display, `${label} ${problem}`);
+      return undefined;
+    }
+    const text = value.slice("palette:".length);
+    const resolved = resolvePaletteReference(paletteCtx, text);
+    if (resolved.kind === "color") {
+      paletteCtx.reached.add(resolved.key);
+      return resolved;
+    }
+    if (resolved.kind === "palette") {
+      // Not reached: §3's reachability list is about references that bind, and
+      // this one has just been rejected. Marking it reached here would let a
+      // failing reference suppress the PALETTE_UNREACHED warning.
+      error("DIRECTION_COLOR_DANGLING", section, display, `${label} ${JSON.stringify(value)} names a palette, not a color`);
+      return undefined;
+    }
+    error("DIRECTION_COLOR_DANGLING", section, display, `${label} ${JSON.stringify(value)} ${paletteDanglingTail(paletteCtx)}`);
+    return undefined;
+  }
+
+  // §4's SHOULD: when a package declares no palette map at all, a dangling
+  // palette reference names the revision that reserved the segment, mirroring
+  // the TUNING_KEY_RESERVED wording. A designer mid-migration otherwise gets a
+  // bare "dangling" from one tool and a versioned explanation from another.
+  // The SHOULD is scoped to "no `palette` map at all", so a package that
+  // declares one and mistyped a key gets the ordinary wording — including when
+  // the map it declared is empty or malformed, which is a declaration with a
+  // fault of its own rather than an absence.
+  function paletteDanglingTail(paletteCtx) {
+    return paletteCtx?.declared
+      ? "resolves to no declared palette and to no named color of one"
+      : `resolves to nothing: this package declares no \`palette\` map, and \`palette\` is a first segment reserved for the manifest's palette map in v${PALETTE_REVISION}`;
+  }
+
+  // §3's closed enumeration of what an entry may be, said in the words a
+  // designer would use. The schema rejects the same set; this layer exists so
+  // the report names the form rather than a JSON Pointer.
+  function paletteEntryProblem(entry) {
+    if (typeof entry === "string") {
+      return HEX_COLOR.test(entry) ? undefined : `${JSON.stringify(entry)} is not a #RRGGBB color (\`#\` plus exactly six hexadecimal digits; three-digit shorthand is invalid)`;
+    }
+    if (Array.isArray(entry)) return "is an array; a palette holds colors, and a palette inside a palette is not a form";
+    if (entry === null) return "is null";
+    if (typeof entry === "number" || typeof entry === "boolean") return `is a ${typeof entry}`;
+    if (!isObject(entry)) return "is outside the two legal entry forms";
+    const keys = Object.keys(entry);
+    if (keys.length === 0) return "is an empty object; a naming entry carries exactly one key, the color's name";
+    if (keys.length > 1) return `carries ${keys.length} keys (${keys.map(key => JSON.stringify(key)).join(", ")}); a naming entry carries exactly one`;
+    const [name] = keys;
+    if (!PALETTE_SEGMENT.test(name)) return `names the color ${JSON.stringify(name)}, outside the kebab-case rule a color name obeys (dot-free, and carrying at least one letter)`;
+    const value = entry[name];
+    if (typeof value !== "string" || !HEX_COLOR.test(value)) return `binds ${JSON.stringify(name)} to ${JSON.stringify(value)}, which is not a #RRGGBB color`;
+    return undefined;
+  }
+
+  // Reads the map, reports every declare-time rule, and returns the resolution
+  // context every later pass shares. It is built before the direction file is
+  // read, because `constraints.colors` binds into it.
+  function validatePalettes(manifest) {
+    const context = {
+      declared: isObject(manifest) && own(manifest, "palette"),
+      palettes: new Map(),
+      reached: new Set()
+    };
+    if (!isObject(manifest?.palette)) return context;
+
+    const declaredNames = new Map();
+    for (const [key, entries] of Object.entries(manifest.palette)) {
+      if (!Array.isArray(entries)) {
+        error("PALETTE_SHAPE", "§3", "manifest.json", `palette.${key} must be a non-empty array of palette entries`);
+        continue;
+      }
+      if (entries.length === 0) {
+        error("PALETTE_SHAPE", "§3", "manifest.json", `palette.${key} is empty; an empty palette declares nothing`);
+        continue;
+      }
+      const colors = new Map();
+      // Every color name this palette spells, whether or not the entry carrying
+      // it is well formed. `colors` is what a reference resolves against, so a
+      // faulted entry must stay out of it; `names` is what §4's collision rule
+      // reads, and that rule is a property of the two keys and the declared name
+      // and of nothing else. Keeping one map for both made the collision
+      // diagnostic order-dependent on an unrelated rule: a malformed hex beside
+      // the name suppressed it, so the designer fixed the hex, revalidated, and
+      // was handed a structural error nothing had mentioned.
+      const names = new Set();
+      entries.forEach((entry, index) => {
+        const problem = paletteEntryProblem(entry);
+        if (problem !== undefined) error("PALETTE_ENTRY_FORM", "§3", "manifest.json", `palette.${key}[${index}] ${problem}`);
+        if (typeof entry === "string" || !isObject(entry)) return; // a bare hex is read, not pointed at
+        const entryKeys = Object.keys(entry);
+        if (entryKeys.length !== 1) return; // a zero- or two-key object names no one color
+        const [name] = entryKeys;
+        if (!PALETTE_SEGMENT.test(name)) return; // no spellable name to collide with
+        // Two entries MAY carry the same hex — a name is a citation handle, not
+        // a claim of distinctness — but two names collide as citation targets.
+        if (names.has(name)) {
+          error("PALETTE_COLOR_DUPLICATE", "§3", "manifest.json", `palette.${key} names the color ${JSON.stringify(name)} twice; a color name is unique within its palette`);
+          return;
+        }
+        names.add(name);
+        if (problem !== undefined) return;
+        colors.set(name, entry[name]);
+      });
+      context.palettes.set(key, colors);
+      declaredNames.set(key, names);
+    }
+
+    // §4's declare-time collision rule, stated there as a MUST NOT: palettes
+    // are machine-declared in one map, so the collision is cheap to detect and
+    // there is no authoring case for it. It reads declared names rather than
+    // resolvable colors, so an entry-form fault elsewhere in the shorter
+    // palette cannot suppress it.
+    for (const key of declaredNames.keys()) {
+      for (const [other, names] of declaredNames) {
+        if (other === key || !key.startsWith(`${other}.`)) continue;
+        const tail = key.slice(other.length + 1);
+        if (names.has(tail)) {
+          error("PALETTE_KEY_COLLISION", "§4", "manifest.json", `palette key ${JSON.stringify(key)} equals palette ${JSON.stringify(other)} plus its color ${JSON.stringify(tail)}; a citation of it would be undecidable`);
+        }
+      }
+    }
+
+    // §8a: a mood descriptor's `palette` is a bare key, resolved by direct
+    // lookup in this map and never by §4's order. A value that order would
+    // have read as a color is dangling here, and dangling is a hard failure.
+    for (const descriptor of Array.isArray(manifest?.descriptors?.mood) ? manifest.descriptors.mood : []) {
+      if (!isObject(descriptor) || !own(descriptor, "palette")) continue;
+      const reference = descriptor.palette;
+      const id = typeof descriptor.id === "string" ? descriptor.id : "?";
+      if (typeof reference !== "string") {
+        error("DESCRIPTOR_MOOD_PALETTE_DANGLING", "§8a", "manifest.json", `descriptors.mood.${id}.palette must be the bare key of a declared palette`);
+        continue;
+      }
+      if (context.palettes.has(reference)) { context.reached.add(reference); continue; }
+      error("DESCRIPTOR_MOOD_PALETTE_DANGLING", "§8a", "manifest.json", `descriptors.mood.${id}.palette ${JSON.stringify(reference)} ${context.declared ? "does not resolve to a declared palette; the field names a palette by bare key and is never read as a palette-plus-color path" : paletteDanglingTail(context)}`);
+    }
+
+    return context;
+  }
+
+  // §3's reachability SHOULD: a palette reachable by nothing is legal
+  // declared-but-unused data, and draws a warning on the `duplicate-edge`
+  // precedent — usually an editing slip, worth seeing, decides nothing. The
+  // four reaching constructs are §3's closed list: a §8a mood descriptor's
+  // `palette` field, a §9.5 color constraint's `color`, a §9.5 threshold
+  // operand, and a §4 prose citation. Granularity is per palette, so
+  // an unused color name inside a reached palette draws nothing.
+  function reportUnreachedPalettes(paletteCtx) {
+    if (!paletteCtx) return;
+    for (const key of paletteCtx.palettes.keys()) {
+      if (paletteCtx.reached.has(key)) continue;
+      warning("PALETTE_UNREACHED", "§3", "manifest.json", `palette.${key} is reached by no mood descriptor, no color constraint, no threshold operand, and no prose citation`);
+    }
+  }
+
+  // WCAG 2.1 relative luminance and contrast ratio over 8-bit sRGB, for §9.5's
+  // threshold consistency check. The formula is the metric `wcag21-contrast-ratio`
+  // names; no other registered metric exists in v0.6.
+  function relativeLuminance(hex) {
+    const channels = [1, 3, 5].map(offset => parseInt(hex.slice(offset, offset + 2), 16) / 255);
+    const [red, green, blue] = channels.map(channel => channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
+    return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+  }
+
+  function contrastRatio(left, right) {
+    const first = relativeLuminance(left);
+    const second = relativeLuminance(right);
+    const [lighter, darker] = first >= second ? [first, second] : [second, first];
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+
   // Inline-code spans only. The citation form §1 mandates is backticked, and a
   // bare dotted word in running text is prose — "i.e.", "U.S." — not a citation.
+  //
+  // §9.9's direction fence is a fenced block, so `unfencedLines` drops it —
+  // but §3 rules that a backticked token on one of its **continuation** lines
+  // is chapter prose like any other, "so it resolves and it reaches". Those
+  // lines rejoin the scan here, for every citation family this walk handles
+  // rather than for palettes alone: the sentence names the palette case because
+  // that is the one it had to settle, and the rationale under a colour is the
+  // same rationale prose wherever it sits. The fence's own citation lines stay
+  // out: they are fence grammar, resolved by the fence machinery, and scanning
+  // them here would report every fence entry twice.
   function* inlineCodeTokens(text) {
-    for (const item of unfencedLines(text)) {
+    const lines = [...unfencedLines(text), ...directionFenceContinuationLines(text)]
+      .sort((left, right) => left.line - right.line);
+    for (const item of lines) {
       for (const match of item.text.matchAll(/`([^`\n]+)`/g)) {
         yield { token: match[1].trim(), line: item.line };
       }
@@ -1989,20 +2465,99 @@ function createValidator(host) {
     return edits + (long.length - longIndex) <= 1;
   }
 
-  function validateProseCitations(packageRoot, manifest, tuningDoc, directionCtx, contractsCtx) {
+  // ---------------------------------------------------------------------------
+  // SPEC §4's reference table, prose side: a typed reference keeps its prefix
+  // in prose and resolves against the same declarations its JSON-channel twin
+  // resolves against. §8a makes a dangling `descriptor:<family>:<id>` a hard
+  // failure in prose specifically; §4a makes a dangling `state:` or `collections:`
+  // form one wherever it is written.
+  //
+  // Two forms deliberately return nothing to report. A `state:number:<id>` in
+  // prose is its own declaration — §4a declares runtime numbers by writing them
+  // in the defining prose, so there is no prior set for it to dangle against.
+  // And a token carrying `<` or `>` is the spec's own metasyntax for a form
+  // (`state:member:case-facts:<state-id>`), not a reference to anything.
+  // ---------------------------------------------------------------------------
+  function proseTypedReferenceProblem(token, ctx) {
+    if (token.includes("<") || token.includes(">")) return undefined;
+    const descriptor = /^descriptor:([^:]+):(.+)$/.exec(token);
+    if (descriptor) {
+      const [, family, id] = descriptor;
+      const entries = ctx.manifest?.descriptors?.[family];
+      if (!Array.isArray(entries)) {
+        return { section: "§8a", message: `names no declared descriptor family \`descriptors.${family}\`` };
+      }
+      if (!entries.some(entry => isObject(entry) && entry.id === id)) {
+        return { section: "§8a", message: `does not resolve to a declared \`descriptors.${family}\` entry` };
+      }
+      return undefined;
+    }
+    // §2c owns the `ruleset` set: its members are the declared ruleset ids,
+    // not content ids, so it is resolved before the general member form.
+    const rulesetMember = /^state:member:ruleset:(.+)$/.exec(token);
+    if (rulesetMember) {
+      return ctx.rulesetIds.has(rulesetMember[1])
+        ? undefined
+        : { section: "§2c", message: "does not name a declared ruleset id" };
+    }
+    const stateMember = /^state:member:([^:]+):(.+)$/.exec(token);
+    if (stateMember) {
+      const members = ctx.stateSets.get(stateMember[1]);
+      return members?.has(stateMember[2])
+        ? undefined
+        : { section: "§4a", message: `does not resolve to a declared member of the runtime set \`${stateMember[1]}\`` };
+    }
+    const collectionCount = /^collections:([a-z0-9]+(?:-[a-z0-9]+)*):count$/.exec(token);
+    if (collectionCount) {
+      if (!ctx.collections.has(collectionCount[1])) {
+        return { section: "§4a", message: `names no collections/ drawer: ${JSON.stringify(collectionCount[1])}` };
+      }
+      ctx.collections.get(collectionCount[1]).reached = true;
+      return undefined;
+    }
+    // Anything else opening with one of these prefixes is prose about the
+    // format rather than a reference in one of §4a's forms. Reporting it would
+    // be grammar policing, and §4's table governs dangling references only.
+    return undefined;
+  }
+
+  function validateProseCitations(packageRoot, manifest, tuningDoc, directionCtx, contractsCtx, paletteCtx, exprContext, rulesetIds) {
     // A tuning.json that is missing, unparsable, or without `tunables` has
     // already reported itself. Resolving citations against nothing would bury
     // that one finding under one dangling report per citation in the package.
-    if (!isObject(tuningDoc) || !isObject(tuningDoc.tunables)) return;
-    const keys = new Set(Object.keys(tuningDoc.tunables));
-    if (isObject(tuningDoc.constants)) for (const key of Object.keys(tuningDoc.constants)) keys.add(key);
+    // The gate covers what resolves in tuning.json — the tuning citations of
+    // §4's rule 4 — and the direction and contract families, which each have a
+    // gate of their own below. It does not cover palettes: that map lives in
+    // manifest.json and resolves whether or not tuning.json parses, and the
+    // batch already routed the palette branch around the sibling
+    // no-direction-file gate for the same reason.
+    const tuningReadable = isObject(tuningDoc) && isObject(tuningDoc.tunables);
+    const keys = new Set(tuningReadable ? Object.keys(tuningDoc.tunables) : []);
+    if (tuningReadable && isObject(tuningDoc.constants)) for (const key of Object.keys(tuningDoc.constants)) keys.add(key);
     const directionDoc = directionCtx?.directionDoc;
     for (const { chapter, text } of chapterTexts(packageRoot, manifest, true)) {
       for (const { token, line } of inlineCodeTokens(text)) {
+        // §4: "a token carrying a colon is not one" of the dotted tokens the
+        // classification rule reads, so the typed forms are resolved first and
+        // on their own terms.
+        if (/^(?:descriptor|state|collections):/.test(token)) {
+          const problem = proseTypedReferenceProblem(token, {
+            manifest,
+            rulesetIds,
+            stateSets: exprContext?.stateSets ?? new Map(),
+            collections: exprContext?.collections ?? new Map()
+          });
+          if (problem) {
+            error("PROSE_REFERENCE_DANGLING", problem.section, slash(chapter), `prose reference \`${token}\` ${problem.message}`, line, { token });
+          }
+          continue;
+        }
         const classified = classifyProseToken(token);
         if (!classified || classified.kind === "version" || classified.kind === "file") continue;
+        if (classified.kind !== "mechanism" && !tuningReadable) continue;
         if (classified.kind === "mechanism") {
           const [first] = classified.segments;
+          if (!tuningReadable && first !== "palette" && first !== "descriptors" && first !== "collections") continue;
           // SPEC §10.11: a backticked `contracts.<instance>.<knob>` is
           // classified by §4's reserved-first-segment rule and resolves as a
           // mechanism path against the instance file that owns it. The typed
@@ -2020,12 +2575,127 @@ function createValidator(host) {
             }
             continue;
           }
-          if (!isObject(directionDoc)) continue;
+          // §4 rule 1's worked example: `meta.hazard.interval_seconds` is a
+          // mechanism path resolved against `tuning.json`, where the meta map
+          // is keyed by tuning key. Every legal tuning key is dotted (§4 rule
+          // 3), so the citable shape opens at three segments — `meta` plus a
+          // key of two or more. That is also what keeps `meta.range` out: it
+          // names the shape of a meta entry, not the meta entry of a key
+          // called `range`, and no such key can exist. Resolution runs in §4's
+          // palette order, whole remainder first, then the remainder minus a
+          // trailing segment that must name one of the entry's own fields.
+          if (first === "meta") {
+            if (classified.segments.length < 3) continue;
+            const metaMap = isObject(tuningDoc?.meta) ? tuningDoc.meta : {};
+            const rest = classified.segments.slice(1);
+            const tail = rest[rest.length - 1];
+            const resolved = own(metaMap, rest.join("."))
+              || (rest.length > 2 && TUNING_META_FIELDS.has(tail) && own(metaMap, rest.slice(0, -1).join(".")));
+            if (!resolved) {
+              error("PROSE_CITATION_DANGLING", "§4", slash(chapter), `prose citation \`${token}\` does not resolve to a declared tuning.json meta entry`, line, { token });
+            }
+            continue;
+          }
+          // §8a: a descriptor family is declared in `manifest.json`, so
+          // `descriptors.<family>` names the family and
+          // `descriptors.<family>.<id>` names one declared entry. A longer
+          // token names a member of that entry — `descriptors.mood.<id>.intent`
+          // — and resolves as far as the entry, which is the declared thing.
+          if (first === "descriptors") {
+            const [, family, id] = classified.segments;
+            const entries = manifest?.descriptors?.[family];
+            if (!Array.isArray(entries)) {
+              error("PROSE_CITATION_DANGLING", "§8a", slash(chapter), `prose citation \`${token}\` names no declared descriptor family in manifest.json`, line, { token });
+              continue;
+            }
+            if (id !== undefined && !entries.some(entry => isObject(entry) && entry.id === id)) {
+              error("PROSE_CITATION_DANGLING", "§8a", slash(chapter), `prose citation \`${token}\` does not resolve to a declared \`descriptors.${family}\` entry`, line, { token });
+            }
+            continue;
+          }
+          // §4a: an invariant is a named expression in tuning.json's
+          // invariants array, so `invariants.<id>` names one declared entry.
+          // A longer token names a member of that entry and resolves as far
+          // as the entry — the same rule descriptors use.
+          if (first === "invariants") {
+            const entries = Array.isArray(tuningDoc?.invariants) ? tuningDoc.invariants : [];
+            const id = classified.segments[1];
+            if (!entries.some(entry => isObject(entry) && entry.id === id)) {
+              error("PROSE_CITATION_DANGLING", "§4a", slash(chapter), `prose citation \`${token}\` does not resolve to a declared tuning.json invariant id`, line, { token });
+            }
+            continue;
+          }
+          // §4b: the clocks block declares mode ids and named clocks, so
+          // `clocks.<name>` names a declared clock or mode,
+          // `clocks.clocks.<name>` names a clock, and `clocks.modes.<id>` a
+          // mode; a longer token resolves as far as the named entry. The
+          // bare member mentions `clocks.modes` and `clocks.clocks` stay
+          // silent for the reason `meta.range` does: they name the shape of
+          // the block, not an entry in it.
+          if (first === "clocks") {
+            const block = isObject(tuningDoc?.clocks) ? tuningDoc.clocks : undefined;
+            const modes = new Set(Array.isArray(block?.modes) ? block.modes.filter(mode => typeof mode === "string") : []);
+            const names = new Set(isObject(block?.clocks) ? Object.keys(block.clocks) : []);
+            const [, second, third] = classified.segments;
+            if ((second === "modes" || second === "clocks") && third === undefined) continue;
+            const resolved = second === "modes" ? modes.has(third)
+              : second === "clocks" ? names.has(third)
+                : names.has(second) || modes.has(second);
+            if (!resolved) {
+              error("PROSE_CITATION_DANGLING", "§4b", slash(chapter), `prose citation \`${token}\` does not resolve to a declared tuning.json clock or mode`, line, { token });
+            }
+            continue;
+          }
+          // §1b (decision 32): `collections.<drawer>` cites the drawer as a
+          // set and `collections.<drawer>.<record>` cites one record; a longer
+          // token names a member of the record's own data and resolves as far
+          // as the record, the rule descriptors and invariants use. A dangling
+          // citation is a hard failure — with graph edges, contract row
+          // sources, and expression references already hard-checked, this
+          // closes the format's last silent-rename gap: renaming a record
+          // makes every stale reference a finding with a file and line.
+          if (first === "collections") {
+            const drawers = exprContext?.collections ?? new Map();
+            const [, drawer, record] = classified.segments;
+            const info = drawers.get(drawer);
+            if (!info) {
+              error("PROSE_CITATION_DANGLING", "§1b", slash(chapter), `prose citation \`${token}\` names no collections/ drawer`, line, { token });
+              continue;
+            }
+            info.reached = true;
+            if (record !== undefined && !info.recordIds.has(record)) {
+              error("PROSE_CITATION_DANGLING", "§1b", slash(chapter), `prose citation \`${token}\` does not resolve to a record of collections/${drawer}; the record's id is its filename`, line, { token });
+            }
+            continue;
+          }
           if (!DIRECTION_CITABLE_SEGMENTS.has(first)) continue;
-          const citableShape = first === "constraints" ? classified.segments.length === 3 : classified.segments.length === 2;
+          // A palette citation is of arbitrary segment count by construction —
+          // `palette.enemies.fire` and `palette.enemies.fire.flame` are three
+          // and four — so the shape gate admits two or more: the `palette`
+          // segment plus one or more key-or-name segments.
+          const citableShape = first === "constraints"
+            ? classified.segments.length === 3
+            : first === "palette"
+              ? classified.segments.length >= 2
+              : classified.segments.length === 2;
           if (!citableShape) continue;
+          // The palette map lives in manifest.json, so the no-direction-file
+          // gate below must not reach it: a package with palettes and no
+          // `build.direction` is exactly the configuration §3 advertises, and
+          // it is the one where a silently legal dangling citation would hurt.
+          if (first === "palette") {
+            const text = classified.segments.slice(1).join(".");
+            const resolved = resolvePaletteReference(paletteCtx, text);
+            if (resolved.kind === "dangling") {
+              error("PROSE_CITATION_DANGLING", "§4", slash(chapter), `prose citation \`${token}\` ${paletteDanglingTail(paletteCtx)}`, line, { token });
+            } else {
+              paletteCtx.reached.add(resolved.key);
+            }
+            continue;
+          }
+          if (!isObject(directionDoc)) continue;
           if (!resolveDirectionPath(directionDoc, token)) {
-            error("PROSE_CITATION_DANGLING", "§9.10", slash(chapter), `prose citation \`${token}\` does not resolve to a declared ${directionCtx.declaredPath} entry`, line, { token });
+            error("PROSE_CITATION_DANGLING", "§9.9", slash(chapter), `prose citation \`${token}\` does not resolve to a declared ${directionCtx.declaredPath} entry`, line, { token });
           }
           continue;
         }
@@ -2090,23 +2760,23 @@ function createValidator(host) {
     }
   }
 
-  const DIRECTION_JUDGED_LABELS = new Map([["PILLARS:", "pillars"], ["MOOD:", "mood"], ["ANTI:", "anti"], ["MUST-KEEP:", "must_keep"], ["MOTION:", "motion"]]);
+  const DIRECTION_JUDGED_LABELS = new Map([["PILLARS:", "pillars"], ["MOOD:", "mood"], ["ANTI:", "anti"], ["MUST-KEEP:", "must_keep"]]);
   const DIRECTION_COMMENTARY_LABELS = new Set(["REFERENCES:", "VIEWING:", "CONSTRAINTS:"]);
 
-  // SPEC §9.10 fence grammar: line 1 the DELEGATED tag, line 2 exactly one
+  // SPEC §9.9 fence grammar: line 1 the DELEGATED tag, line 2 exactly one
   // blank line, then label sections of citation (+ optional continuation)
   // entry blocks, separated by exactly one blank line.
   function parseDirectionFence(fenceLines, startLine, display) {
     const sections = [];
     const at = offset => startLine + offset;
     if ((fenceLines[0] ?? "") !== "> DELEGATED: presentation-direction") {
-      error("DIRECTION_FENCE_HEADER", "§9.10", display, "direction fence must open with exactly '> DELEGATED: presentation-direction'", at(0));
+      error("DIRECTION_FENCE_HEADER", "§9.9", display, "direction fence must open with exactly '> DELEGATED: presentation-direction'", at(0));
     }
     let lines = fenceLines.slice();
     while (lines.length && lines[lines.length - 1].trim() === "") lines = lines.slice(0, -1);
     if (lines.length <= 1) return sections;
     if ((lines[1] ?? "").trim() !== "") {
-      error("DIRECTION_FENCE_SEPARATOR", "§9.10", display, "the line after the DELEGATED tag must be exactly one blank line", at(1));
+      error("DIRECTION_FENCE_SEPARATOR", "§9.9", display, "the line after the DELEGATED tag must be exactly one blank line", at(1));
     }
     const body = lines.slice(2);
     const bodyAt = offset => at(2 + offset);
@@ -2114,16 +2784,16 @@ function createValidator(host) {
     let expectBlankBefore = false;
     while (index < body.length) {
       if (body[index].trim() === "") {
-        error("DIRECTION_FENCE_BLANK", "§9.10", display, "unexpected blank line inside the direction fence", bodyAt(index));
+        error("DIRECTION_FENCE_BLANK", "§9.9", display, "unexpected blank line inside the direction fence", bodyAt(index));
         index += 1;
         continue;
       }
       if (expectBlankBefore) {
-        error("DIRECTION_FENCE_SEPARATOR", "§9.10", display, "section blocks must be separated by exactly one blank line", bodyAt(index));
+        error("DIRECTION_FENCE_SEPARATOR", "§9.9", display, "section blocks must be separated by exactly one blank line", bodyAt(index));
       }
       const labelText = body[index].trim();
       if (!DIRECTION_JUDGED_LABELS.has(labelText) && !DIRECTION_COMMENTARY_LABELS.has(labelText)) {
-        error("DIRECTION_FENCE_LABEL", "§9.10", display, `unrecognized direction fence section label ${JSON.stringify(body[index])}`, bodyAt(index));
+        error("DIRECTION_FENCE_LABEL", "§9.9", display, `unrecognized direction fence section label ${JSON.stringify(body[index])}`, bodyAt(index));
       }
       const labelLine = bodyAt(index);
       index += 1;
@@ -2133,9 +2803,9 @@ function createValidator(host) {
         if (!match) {
           if (/^  \S/.test(body[index])) {
             // continuation line with no preceding citation line
-            error("DIRECTION_FENCE_ENTRY", "§9.10", display, "continuation line has no preceding citation line", bodyAt(index));
+            error("DIRECTION_FENCE_ENTRY", "§9.9", display, "continuation line has no preceding citation line", bodyAt(index));
           } else {
-            error("DIRECTION_FENCE_ENTRY", "§9.10", display, `expected a citation line (- \`dotted.path\`), got ${JSON.stringify(body[index])}`, bodyAt(index));
+            error("DIRECTION_FENCE_ENTRY", "§9.9", display, `expected a citation line (- \`dotted.path\`), got ${JSON.stringify(body[index])}`, bodyAt(index));
           }
           index += 1;
           continue;
@@ -2151,56 +2821,26 @@ function createValidator(host) {
     return sections;
   }
 
-  // Resolves a SPEC §9.10 dotted-path citation against a validated direction.json.
+  // Resolves a SPEC §9.9 dotted-path citation against a validated direction.json.
   function resolveDirectionPath(directionDoc, dotted) {
     if (!isObject(directionDoc)) return undefined;
     const parts = dotted.split(".");
     if (parts[0] === "constraints" && parts.length === 3) {
       const [, group, key] = parts;
-      if (!["palette", "thresholds", "timing"].includes(group)) return undefined;
+      if (!["colors", "thresholds", "timing"].includes(group)) return undefined;
       const entry = directionDoc.constraints?.[group]?.[key];
       return entry ? { kind: `constraints.${group}`, key, entry } : undefined;
     }
-    if (parts.length === 2 && ["pillars", "mood", "references", "anti", "viewing", "must_keep", "motion"].includes(parts[0])) {
+    if (parts.length === 2 && ["pillars", "mood", "references", "anti", "viewing", "must_keep"].includes(parts[0])) {
       const entry = directionDoc[parts[0]]?.[parts[1]];
       return entry ? { kind: parts[0], key: parts[1], entry } : undefined;
     }
     return undefined;
   }
 
-  const DIRECTION_JUDGED_KINDS = new Set(["pillars", "mood", "anti", "must_keep", "motion"]);
+  const DIRECTION_JUDGED_KINDS = new Set(["pillars", "mood", "anti", "must_keep"]);
 
-  // SPEC §8a/§9.11 — a mood descriptor's palette role is citable as a checked
-  // claim at `descriptors.mood.<mood-id>.palette.<role>`. The <mood-id> segment
-  // matches a manifest descriptors.mood entry's `id`; the last segment is a
-  // key of that entry's `palette` object.
-  function resolveMoodPalettePath(manifest, dotted) {
-    const match = /^descriptors\.mood\.([^.]+)\.palette\.(.+)$/.exec(dotted);
-    if (!match) return undefined;
-    const entries = Array.isArray(manifest?.descriptors?.mood) ? manifest.descriptors.mood : [];
-    const descriptor = entries.find(item => isObject(item) && item.id === match[1]);
-    if (!isObject(descriptor) || !isObject(descriptor.palette)) return undefined;
-    const entry = descriptor.palette[match[2]];
-    return isObject(entry) ? { kind: "descriptors.mood.palette", key: `${match[1]}.${match[2]}`, entry } : undefined;
-  }
-
-  // SPEC §9.9 precision rule, applied to mood palette entries exactly as the
-  // direction schema applies it to constraints.palette entries: a pin claims
-  // an exact value, so must_match:true is legal only at tolerance 0.
-  function validateMoodDescriptors(manifest) {
-    const entries = Array.isArray(manifest?.descriptors?.mood) ? manifest.descriptors.mood : [];
-    for (const descriptor of entries) {
-      if (!isObject(descriptor) || !isObject(descriptor.palette) || typeof descriptor.id !== "string") continue;
-      for (const [role, entry] of Object.entries(descriptor.palette)) {
-        if (!isObject(entry) || entry.must_match !== true) continue;
-        if (entry.tolerance !== 0) {
-          error("DESCRIPTOR_MOOD_PALETTE_PIN", "§9.9", "manifest.json", `descriptors.mood.${descriptor.id}.palette.${role} declares must_match: true with tolerance ${JSON.stringify(entry.tolerance)}; a pin requires tolerance 0`);
-        }
-      }
-    }
-  }
-
-  function validateDirection(packageRoot, manifest, resolvePath) {
+  function validateDirection(packageRoot, manifest, resolvePath, paletteCtx) {
     const presentationFile = path.join(packageRoot, "04-presentation.md");
     const presentationText = host.exists(presentationFile) ? host.readText(presentationFile) : undefined;
     const fenceMatch = presentationText ? /```direction[^\r\n]*\r?\n([\s\S]*?)```/i.exec(presentationText) : undefined;
@@ -2232,7 +2872,7 @@ function createValidator(host) {
       for (const entry of manifest.descriptors.mood) if (isObject(entry) && typeof entry.id === "string") descriptorIds.add(entry.id);
     }
 
-    const requiredCoverage = new Set(); // constraints.* and motion.* claim paths an AT must cite
+    const requiredCoverage = new Set(); // constraints.* claim paths an AT must cite
     if (isObject(directionDoc)) {
       // viewing / references / mood-descriptor cross-references.
       const viewingIds = new Set(Object.keys(directionDoc.viewing ?? {}));
@@ -2259,11 +2899,6 @@ function createValidator(host) {
       for (const [key, entry] of Object.entries(directionDoc.pillars ?? {})) if (isObject(entry)) checkClaimEdges("pillars", key, entry);
       for (const [key, entry] of Object.entries(directionDoc.anti ?? {})) if (isObject(entry)) checkClaimEdges("anti", key, entry);
       for (const [key, entry] of Object.entries(directionDoc.must_keep ?? {})) if (isObject(entry)) checkClaimEdges("must_keep", key, entry);
-      for (const [key, entry] of Object.entries(directionDoc.motion ?? {})) {
-        if (!isObject(entry)) continue;
-        checkClaimEdges("motion", key, entry);
-        requiredCoverage.add(`motion.${key}`);
-      }
       for (const [key, entry] of Object.entries(directionDoc.mood ?? {})) {
         if (!isObject(entry)) continue;
         checkClaimEdges("mood", key, entry);
@@ -2276,18 +2911,50 @@ function createValidator(host) {
         if (!citedReferences.has(key)) error("DIRECTION_REFERENCE_ORPHANED", "§9.3", slash(declaredPath), `references.${key} is not cited by any judged claim's references field`);
       }
 
-      // constraints.* cross-references: palette/against/metric/viewing, plus AT coverage set.
-      const paletteKeys = new Set(Object.keys(directionDoc.constraints?.palette ?? {}));
-      for (const key of paletteKeys) requiredCoverage.add(`constraints.palette.${key}`);
+      // constraints.* cross-references: every color reference binds into the
+      // manifest's palette map rather than into a sibling constraint, so this
+      // pass is the format's first cross-file constraint resolution.
+      for (const [key, entry] of Object.entries(directionDoc.constraints?.colors ?? {})) {
+        if (!isObject(entry)) continue;
+        requiredCoverage.add(`constraints.colors.${key}`);
+        if (own(entry, "color")) {
+          resolveTypedPaletteColor(paletteCtx, entry.color, `constraints.colors.${key}.color`, "§9.5", slash(declaredPath));
+        }
+      }
       for (const [key, entry] of Object.entries(directionDoc.constraints?.thresholds ?? {})) {
         if (!isObject(entry)) continue;
         requiredCoverage.add(`constraints.thresholds.${key}`);
-        for (const role of Array.isArray(entry.roles) ? entry.roles : []) {
-          if (typeof role === "string" && !paletteKeys.has(role)) error("DIRECTION_THRESHOLD_ROLE", "§9.5", slash(declaredPath), `constraints.thresholds.${key}.roles cites undeclared palette role ${JSON.stringify(role)}`);
-        }
-        if (typeof entry.against === "string" && !paletteKeys.has(entry.against)) error("DIRECTION_THRESHOLD_ROLE", "§9.5", slash(declaredPath), `constraints.thresholds.${key}.against cites undeclared palette role ${JSON.stringify(entry.against)}`);
+        const operands = [];
+        (Array.isArray(entry.colors) ? entry.colors : []).forEach((color, index) => {
+          operands.push(resolveTypedPaletteColor(paletteCtx, color, `constraints.thresholds.${key}.colors[${index}]`, "§9.5", slash(declaredPath)));
+        });
+        const against = own(entry, "against")
+          ? resolveTypedPaletteColor(paletteCtx, entry.against, `constraints.thresholds.${key}.against`, "§9.5", slash(declaredPath))
+          : undefined;
         if (typeof entry.viewing === "string" && !viewingIds.has(entry.viewing)) error("DIRECTION_VIEWING_DANGLING", "§9.6", slash(declaredPath), `constraints.thresholds.${key}.viewing ${JSON.stringify(entry.viewing)} does not resolve to a declared viewing entry`);
         if (typeof entry.metric === "string" && !semanticsMetrics.has(entry.metric)) error("DIRECTION_METRIC_UNREGISTERED", "§9.5", slash(declaredPath), `constraints.thresholds.${key}.metric ${JSON.stringify(entry.metric)} does not appear in semantics.metrics`);
+        // §9.5's consistency check, now a two-file fact: the operand values
+        // live in manifest.json and the claim lives here. Every (c, against)
+        // pair is computed at the values the referenced colors declare.
+        // Tolerance never enters — a `constraints.colors` entry that separately
+        // binds one of these colors does not widen it — and the check runs
+        // whether or not the operands are otherwise constrained.
+        // §9.5's registry is closed at `wcag21-contrast-ratio` in v0.6, and the
+        // schema rejects any other id, so no conforming package reaches this
+        // skip. It is here so a later revision that registers a second metric
+        // fails loudly at review rather than passing a MUST silently.
+        if (entry.metric !== "wcag21-contrast-ratio") continue;
+        if (typeof entry.min_contrast !== "number" || !Number.isFinite(entry.min_contrast) || !against) continue;
+        for (const operand of operands) {
+          if (!operand) continue;
+          const ratio = contrastRatio(operand.hex, against.hex);
+          // The 1e-9 is float-comparison slop, not a tolerance: §9.5's check
+          // reads declared values and admits no tolerance at all. It exists
+          // because the ratio is computed through two 2.4-power terms, so an
+          // exactly-satisfying pair can land a few ULPs low.
+          if (ratio + 1e-9 >= entry.min_contrast) continue;
+          error("DIRECTION_THRESHOLD_CONTRAST", "§9.5", slash(declaredPath), `constraints.thresholds.${key}: the declared colors \`palette:${operand.key}.${operand.name}\` (${operand.hex}) and \`palette:${against.key}.${against.name}\` (${against.hex}) contrast at ${ratio.toFixed(2)}:1 under ${entry.metric}, below the declared min_contrast ${entry.min_contrast}`);
+        }
       }
       for (const key of Object.keys(directionDoc.constraints?.timing ?? {})) requiredCoverage.add(`constraints.timing.${key}`);
     }
@@ -2304,13 +2971,13 @@ function createValidator(host) {
       for (const entry of section.entries) {
         const resolved = isObject(directionDoc) ? resolveDirectionPath(directionDoc, entry.citation) : undefined;
         if (!resolved) {
-          error("DIRECTION_FENCE_DANGLING", "§9.10", "04-presentation.md", `fence citation ${JSON.stringify(entry.citation)} does not resolve to a declared direction.json entry`, entry.line);
+          error("DIRECTION_FENCE_DANGLING", "§9.9", "04-presentation.md", `fence citation ${JSON.stringify(entry.citation)} does not resolve to a declared direction.json entry`, entry.line);
           continue;
         }
         if (collectionKey) {
           const expectedPrefix = collectionKey === "mood" ? "mood" : collectionKey;
           if (!entry.citation.startsWith(`${expectedPrefix}.`)) {
-            error("DIRECTION_FENCE_LABEL_MISMATCH", "§9.10", "04-presentation.md", `${section.label} section cites ${JSON.stringify(entry.citation)}, outside its own collection`, entry.line);
+            error("DIRECTION_FENCE_LABEL_MISMATCH", "§9.9", "04-presentation.md", `${section.label} section cites ${JSON.stringify(entry.citation)}, outside its own collection`, entry.line);
             continue;
           }
           if (!citedByLabel.has(collectionKey)) citedByLabel.set(collectionKey, new Map());
@@ -2324,11 +2991,11 @@ function createValidator(host) {
       const counts = citedByLabel.get(kind) ?? new Map();
       for (const key of declaredKeys) {
         const count = counts.get(key) ?? 0;
-        if (count === 0) error("DIRECTION_FENCE_UNCITED", "§9.10", "04-presentation.md", `${kind}.${key} has no corresponding citation line in the direction fence`);
-        else if (count > 1) error("DIRECTION_FENCE_DUPLICATE", "§9.10", "04-presentation.md", `${kind}.${key} is cited more than once in the direction fence`);
+        if (count === 0) error("DIRECTION_FENCE_UNCITED", "§9.9", "04-presentation.md", `${kind}.${key} has no corresponding citation line in the direction fence`);
+        else if (count > 1) error("DIRECTION_FENCE_DUPLICATE", "§9.9", "04-presentation.md", `${kind}.${key} is cited more than once in the direction fence`);
       }
       for (const key of counts.keys()) {
-        if (!declaredKeys.has(key)) error("DIRECTION_FENCE_DANGLING", "§9.10", "04-presentation.md", `fence cites ${kind}.${key}, which is not declared in direction.json`);
+        if (!declaredKeys.has(key)) error("DIRECTION_FENCE_DANGLING", "§9.9", "04-presentation.md", `fence cites ${kind}.${key}, which is not declared in direction.json`);
       }
     }
 
@@ -2347,18 +3014,96 @@ function createValidator(host) {
     if (missing.length) error("VERIFICATION_FIELD", "§6", file, `${id} ${descriptor.type} descriptor requires ${missing.join(", ")}`, line);
   }
 
-  function validateDescriptorPaths(descriptor, id, file, line, resolvePath) {
-    walk(descriptor, (value, pointer, ancestors) => {
-      if (typeof value !== "string" || /\s/.test(value) || /^(?:https?:|tuning:|state:|content:)/i.test(value)) return;
-      const last = ancestors.at(-1);
-      const key = isObject(last) && own(last, "key") ? last.key : "";
-      if (/pointer$/i.test(key) || value.includes("*")) return;
-      const filePart = value.split("#", 1)[0];
-      const explicitPathField = /(?:^|_)(?:file|path)$/i.test(key);
-      const knownFile = /\.(?:md|json|txt|csv|tsv|yaml|yml)$/i.test(filePart);
-      const directory = /[\\/]$/.test(filePart);
-      if (!filePart || (!explicitPathField && !knownFile && !directory)) return;
-      resolvePath(filePart, `${id} descriptor ${pointer}`, "§6", "VERIFICATION_PATH", { mustExist: true, display: file });
+  const TEST_COMMON_FIELDS = new Set(["type", "extensions"]);
+  const TEST_FIELDS_BY_TYPE = new Map([
+    ["scenario", new Set(["given", "when", "then", "diagnostics", "direction_claims", "freeze_invariant", "replay", "target", "tolerance"])],
+    ["property", new Set(["domain", "invariant", "verdict", "sampling", "seed_set", "metric", "aggregation", "threshold", "diagnostics", "direction_claims", "freeze_invariant", "replay", "target", "tolerance"])],
+    ["exhaustive-search", new Set(["initial_states", "transitions", "predicate", "complete", "diagnostics", "bound", "finite_state"])],
+    ["document-check", new Set(["artifacts", "rule_set", "rules", "diagnostics"])]
+  ]);
+
+  function stringOrStringArray(value) {
+    return (typeof value === "string" && value.trim().length > 0)
+      || (Array.isArray(value) && value.length > 0 && value.every(item => typeof item === "string" && item.trim().length > 0));
+  }
+
+  function stringArray(value) {
+    return Array.isArray(value) && value.length > 0 && value.every(item => typeof item === "string" && item.trim().length > 0);
+  }
+
+  function validateTestEnvelope(descriptor, id, file, line) {
+    const allowed = TEST_FIELDS_BY_TYPE.get(descriptor.type);
+    if (allowed) {
+      for (const key of Object.keys(descriptor)) {
+        if (!TEST_COMMON_FIELDS.has(key) && !allowed.has(key)) {
+          error("VERIFICATION_FIELD_UNKNOWN", "§6", file, `${id} ${descriptor.type} descriptor carries unknown top-level field ${JSON.stringify(key)}; package-owned data belongs under extensions`, line);
+        }
+      }
+    }
+    if (!own(descriptor, "extensions")) return;
+    if (!isObject(descriptor.extensions)) {
+      error("VERIFICATION_EXTENSIONS", "§6", file, `${id} extensions must be an object keyed by kebab-case extension ids`, line);
+      return;
+    }
+    for (const [key, value] of Object.entries(descriptor.extensions)) {
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(key)) error("VERIFICATION_EXTENSIONS", "§6", file, `${id} extension id ${JSON.stringify(key)} must be kebab-case`, line);
+      if (!isObject(value)) error("VERIFICATION_EXTENSIONS", "§6", file, `${id} extensions.${key} must be an opaque object value`, line);
+    }
+  }
+
+  function validateReplay(replay, id, file, line, clocksResult) {
+    if (!isObject(replay)) {
+      error("VERIFICATION_REPLAY", "§6", file, `${id} replay must be an object`, line);
+      return;
+    }
+    if (!clocksResult || clocksResult.modes.size === 0) return;
+    if (typeof replay.initial_mode !== "string" || !clocksResult.modes.has(replay.initial_mode)) {
+      error("VERIFICATION_REPLAY_MODE", "§4b", file, `${id} replay.initial_mode must name a declared mode`, line);
+    }
+    if (!Array.isArray(replay.schedule)) {
+      error("VERIFICATION_REPLAY", "§4b", file, `${id} replay.schedule must be an array of standard actions`, line);
+      return;
+    }
+    let activeMode = clocksResult.modes.has(replay.initial_mode) ? replay.initial_mode : undefined;
+    replay.schedule.forEach((action, index) => {
+      const at = `${id} replay.schedule[${index}]`;
+      if (!isObject(action) || typeof action.action !== "string") {
+        error("VERIFICATION_REPLAY_ACTION", "§4b", file, `${at} must be a standard action object`, line);
+        return;
+      }
+      const shapes = {
+        "enter-mode": ["action", "mode"],
+        "exit-mode": ["action", "to"],
+        "advance-clock": ["action", "clock", "amount"],
+        "apply-discrete-order": ["action", "clock", "order"]
+      };
+      const fields = shapes[action.action];
+      if (!fields) {
+        error("VERIFICATION_REPLAY_ACTION", "§4b", file, `${at} uses unknown action ${JSON.stringify(action.action)}`, line);
+        return;
+      }
+      for (const key of Object.keys(action)) if (!fields.includes(key)) error("VERIFICATION_REPLAY_ACTION", "§4b", file, `${at} carries field ${JSON.stringify(key)} outside the ${action.action} shape`, line);
+      for (const key of fields) if (!own(action, key)) error("VERIFICATION_REPLAY_ACTION", "§4b", file, `${at} is missing ${key}`, line);
+      if (action.action === "enter-mode" || action.action === "exit-mode") {
+        const key = action.action === "enter-mode" ? "mode" : "to";
+        if (typeof action[key] !== "string" || !clocksResult.modes.has(action[key])) error("VERIFICATION_REPLAY_MODE", "§4b", file, `${at}.${key} must name a declared mode`, line);
+        else activeMode = action[key];
+        return;
+      }
+      if (typeof action.clock !== "string" || !clocksResult.clocks.has(action.clock)) {
+        error("VERIFICATION_REPLAY_CLOCK", "§4b", file, `${at}.clock must name a declared clock`, line);
+        return;
+      }
+      if (action.action === "advance-clock" && (typeof action.amount !== "number" || !Number.isFinite(action.amount) || action.amount <= 0)) {
+        error("VERIFICATION_REPLAY_ACTION", "§4b", file, `${at}.amount must be a finite positive number`, line);
+      }
+      if (action.action === "apply-discrete-order" && (typeof action.order !== "string" || !action.order.trim())) {
+        error("VERIFICATION_REPLAY_ACTION", "§4b", file, `${at}.order must be a non-empty string`, line);
+      }
+      const required = action.action === "advance-clock" ? "advances" : "discrete-only";
+      if (activeMode && clocksResult.behaviors.get(`${action.clock} ${activeMode}`) !== required) {
+        error("VERIFICATION_REPLAY_PRECONDITION", "§4b", file, `${at} requires clock ${JSON.stringify(action.clock)} to be ${required} in active mode ${JSON.stringify(activeMode)}`, line);
+      }
     });
   }
 
@@ -2367,41 +3112,52 @@ function createValidator(host) {
       error("VERIFICATION_SHAPE", "§6", file, `${id} test descriptor must be a JSON object`, line);
       return;
     }
-    validateDescriptorPaths(descriptor, id, file, line, resolvePath);
+    validateTestEnvelope(descriptor, id, file, line);
     if (own(descriptor, "freeze_invariant")) {
+      if (descriptor.type !== "scenario" && descriptor.type !== "property") error("FREEZE_INVARIANT_TYPE", "§4b", file, `${id} freeze_invariant is legal only on scenario or property tests`, line);
       validateFreezeInvariant(descriptor.freeze_invariant, exprContext?.clocks, file, `${id} freeze_invariant`, exprContext);
     }
+    const resolvedDirectionClaims = [];
     if (own(descriptor, "direction_claims")) {
+      if (descriptor.type !== "scenario" && descriptor.type !== "property") error("DIRECTION_CLAIMS_TYPE", "§6", file, `${id} direction_claims is legal only on scenario or property tests`, line);
       const claims = Array.isArray(descriptor.direction_claims) ? descriptor.direction_claims : undefined;
       if (!claims || !claims.length) {
         error("DIRECTION_CLAIMS_SHAPE", "§6", file, `${id} direction_claims must be a non-empty array of dotted-path citations`, line);
       } else {
         for (const claim of claims) {
           if (typeof claim !== "string") { error("DIRECTION_CLAIMS_SHAPE", "§6", file, `${id} direction_claims entries must be strings`, line); continue; }
-          const moodPalette = claim.startsWith("descriptors.") ? resolveMoodPalettePath(manifest, claim) : undefined;
-          if (moodPalette) continue; // §8a checked claim; deliberately outside two-way coverage
           const resolved = directionCtx?.directionDoc ? resolveDirectionPath(directionCtx.directionDoc, claim) : undefined;
-          if (!resolved || !(resolved.kind.startsWith("constraints.") || resolved.kind === "motion")) {
-            error("DIRECTION_CLAIMS_DANGLING", "§6", file, `${id} direction_claims cites ${JSON.stringify(claim)}, which does not resolve to a constraints.* or motion.* direction.json entry or a descriptors.mood.<mood-id>.palette.<role> manifest entry`, line);
+          if (!resolved || !resolved.kind.startsWith("constraints.")) {
+            error("DIRECTION_CLAIMS_DANGLING", "§6", file, `${id} direction_claims cites ${JSON.stringify(claim)}, which does not resolve to a constraints.* direction.json entry`, line);
           } else {
             directionCtx.coveredByAT.add(claim);
+            resolvedDirectionClaims.push({ claim, resolved });
           }
         }
       }
     }
     const legal = new Set(["scenario", "property", "exhaustive-search", "document-check"]);
+    for (const { claim, resolved } of resolvedDirectionClaims) {
+      const declared = resolved.entry?.scope?.sampling?.sampled?.verdict?.aggregate;
+      if (isObject(declared) && (descriptor.type !== "property" || descriptor.verdict !== "aggregate")) {
+        error("DIRECTION_CLAIM_AGGREGATE_TEST_TYPE", "§6/§9.5", file, `${id} cites sampled aggregate direction claim ${JSON.stringify(claim)} and must be an aggregate property test; got type ${JSON.stringify(descriptor.type)}${descriptor.type === "property" ? ` with verdict ${JSON.stringify(descriptor.verdict)}` : ""}`, line);
+      }
+    }
     if (!legal.has(descriptor.type)) {
       error("VERIFICATION_CLASS", "§6", file, `${id} has illegal test type ${JSON.stringify(descriptor.type)}`, line);
       return;
     }
     if (descriptor.type === "scenario") {
       requireFields(descriptor, ["given", "when", "then"], id, file, line);
+      for (const key of ["given", "when", "then"]) if (own(descriptor, key) && !stringOrStringArray(descriptor[key])) error("VERIFICATION_FIELD_TYPE", "§6", file, `${id} scenario ${key} must be a non-empty string or non-empty array of non-empty strings`, line);
     } else if (descriptor.type === "property") {
       requireFields(descriptor, ["domain", "invariant", "verdict"], id, file, line);
+      if (own(descriptor, "domain") && !(typeof descriptor.domain === "string" && descriptor.domain.trim()) && !isObject(descriptor.domain)) error("VERIFICATION_FIELD_TYPE", "§6", file, `${id} property domain must be a non-empty string or object`, line);
+      if (own(descriptor, "invariant") && (typeof descriptor.invariant !== "string" || !descriptor.invariant.trim())) error("VERIFICATION_FIELD_TYPE", "§6", file, `${id} property invariant must be a non-empty string`, line);
       if (!own(descriptor, "sampling")) error("VERIFICATION_PROPERTY_PLAN", "§6", file, `${id} property requires sampling: "exhaustive" or a sampling plan object`, line);
       if (own(descriptor, "sampling")) {
         if (typeof descriptor.sampling === "string") {
-          if (!/exhaustive/i.test(descriptor.sampling)) error("VERIFICATION_PROPERTY_PLAN", "§6", file, `${id} non-sampled property sampling must explicitly be "exhaustive"`, line);
+          if (descriptor.sampling !== "exhaustive") error("VERIFICATION_PROPERTY_PLAN", "§6", file, `${id} non-sampled property sampling must explicitly be "exhaustive"`, line);
         } else if (!isObject(descriptor.sampling)) error("VERIFICATION_PROPERTY_SAMPLING", "§6", file, `${id} sampling must be "exhaustive" or a sampling plan object`, line);
         else {
           if (!Array.isArray(descriptor.sampling.seed_set) || descriptor.sampling.seed_set.length === 0) error("VERIFICATION_PROPERTY_SAMPLING", "§6", file, `${id} sampled property requires a non-empty deterministic seed_set`, line);
@@ -2418,6 +3174,16 @@ function createValidator(host) {
         const simple = new Set(["count", "rate", "min", "max", "mean"]);
         const histogram = isObject(aggregation) && aggregation.type === "histogram" && Array.isArray(aggregation.bins) && aggregation.bins.length > 0;
         if (!simple.has(aggregation) && !histogram) error("VERIFICATION_PROPERTY_ORACLE", "§6", file, `${id} aggregation must be count/rate/min/max/mean or a finite histogram with bins`, line);
+        if (!isObject(descriptor.threshold) || typeof descriptor.threshold.op !== "string" || !own(descriptor.threshold, "value") || Object.keys(descriptor.threshold).some(key => key !== "op" && key !== "value")) error("VERIFICATION_PROPERTY_ORACLE", "§6", file, `${id} aggregate threshold must be exactly {op, value}`, line);
+        for (const { claim, resolved } of resolvedDirectionClaims) {
+          const declared = resolved.entry?.scope?.sampling?.sampled?.verdict?.aggregate;
+          if (!isObject(declared)) continue;
+          for (const field of ["metric", "aggregation", "threshold"]) {
+            if (!own(descriptor, field) || deepKey(descriptor[field]) !== deepKey(declared[field])) {
+              error("DIRECTION_CLAIM_AGGREGATE_MIRROR", "§6/§9.5", file, `${id} cites sampled aggregate direction claim ${JSON.stringify(claim)} and must repeat its ${field} exactly; test has ${JSON.stringify(descriptor[field])}, direction.json declares ${JSON.stringify(declared[field])}`, line);
+            }
+          }
+        }
       }
     } else if (descriptor.type === "exhaustive-search") {
       requireFields(descriptor, ["initial_states", "transitions", "predicate", "diagnostics"], id, file, line);
@@ -2427,8 +3193,35 @@ function createValidator(host) {
         error("VERIFICATION_SEARCH_BOUND", "§6", file, `${id} bound must name its type and an explicit state/depth limit`, line);
       }
       if (!Array.isArray(descriptor.diagnostics) || descriptor.diagnostics.length === 0) error("VERIFICATION_SEARCH_DIAGNOSTICS", "§6", file, `${id} must name solution and/or counterexample diagnostics`, line);
+      if (!stringArray(descriptor.initial_states)) error("VERIFICATION_FIELD_TYPE", "§6", file, `${id} initial_states must be a non-empty array of non-empty strings`, line);
+      for (const key of ["transitions", "predicate"]) if (typeof descriptor[key] !== "string" || !descriptor[key].trim()) error("VERIFICATION_FIELD_TYPE", "§6", file, `${id} ${key} must be a non-empty string`, line);
+      if (!stringArray(descriptor.diagnostics)) error("VERIFICATION_FIELD_TYPE", "§6", file, `${id} diagnostics must be a non-empty array of non-empty strings`, line);
     } else if (descriptor.type === "document-check") {
-      requireFields(descriptor, ["artifacts", "rule_set", "diagnostics"], id, file, line);
+      requireFields(descriptor, ["artifacts", "rule_set", "rules", "diagnostics"], id, file, line);
+      if (!stringArray(descriptor.artifacts)) error("VERIFICATION_FIELD_TYPE", "§6", file, `${id} artifacts must be a non-empty array of package-relative path strings`, line);
+      if (Array.isArray(descriptor.artifacts)) {
+        descriptor.artifacts.forEach((artifact, index) => {
+          if (typeof artifact !== "string" || !artifact.trim()) return;
+          if (/^[A-Za-z][A-Za-z0-9+.-]*:/.test(artifact)) {
+            error("VERIFICATION_PATH", "§6", file, `${id} descriptor #/artifacts/${index} must be a package-relative path, got ${JSON.stringify(artifact)}`, line);
+            return;
+          }
+          // Decision 33: a collections/ drawer is a legal artifact — its
+          // records are the checked documents — a trailing slash is how an
+          // artifact names a directory, and naming a drawer reaches it (§1b).
+          if (artifact.endsWith("/")) {
+            const drawerArtifact = /^collections\/([a-z0-9]+(?:-[a-z0-9]+)*)\/$/.exec(artifact);
+            if (drawerArtifact) { const touched = exprContext?.collections?.get(drawerArtifact[1]); if (touched) touched.reached = true; }
+            resolvePath(artifact.slice(0, -1), `${id} descriptor #/artifacts/${index}`, "§6", "VERIFICATION_PATH", { mustExist: true, kind: "directory", display: file });
+            return;
+          }
+          const recordArtifact = /^collections\/([a-z0-9]+(?:-[a-z0-9]+)*)\/[a-z0-9]+(?:-[a-z0-9]+)*\.json$/.exec(artifact);
+          if (recordArtifact) { const touched = exprContext?.collections?.get(recordArtifact[1]); if (touched) touched.reached = true; }
+          resolvePath(artifact, `${id} descriptor #/artifacts/${index}`, "§6", "VERIFICATION_PATH", { mustExist: true, kind: "file", display: file });
+        });
+      }
+      if (!Array.isArray(descriptor.rules)) error("VERIFICATION_FIELD_TYPE", "§6", file, `${id} rules must be an array`, line);
+      if (!stringArray(descriptor.diagnostics)) error("VERIFICATION_FIELD_TYPE", "§6", file, `${id} diagnostics must be a non-empty array of non-empty strings`, line);
       const ruleSet = descriptor.rule_set;
       const versioned = (typeof ruleSet === "string" && /(?:-v?\d+|\d+\.\d+(?:\.\d+)?)$/i.test(ruleSet)) || (isObject(ruleSet) && nonEmpty(ruleSet.id) && nonEmpty(ruleSet.version));
       if (!versioned) error("VERIFICATION_LINT_RULE_SET", "§6", file, `${id} document-check rule_set must be versioned`, line);
@@ -2455,15 +3248,16 @@ function createValidator(host) {
         }
       }
     }
-    const hasTolerance = own(descriptor, "tolerance") || own(descriptor, "tolerances");
-    const hasTarget = own(descriptor, "target") || own(descriptor, "targets") || own(descriptor, "expected") || own(descriptor, "then");
-    const hasReplay = own(descriptor, "replay") || own(descriptor, "replays") || own(descriptor, "schedule") || own(descriptor, "schedule_set") || own(descriptor, "given") || (isObject(descriptor.domain) && deepKey(descriptor.domain).includes("schedule"));
+    if (own(descriptor, "diagnostics") && !stringArray(descriptor.diagnostics)) error("VERIFICATION_FIELD_TYPE", "§6", file, `${id} diagnostics must be a non-empty array of non-empty strings`, line);
+    if (own(descriptor, "replay")) validateReplay(descriptor.replay, id, file, line, exprContext?.clocks);
+    const hasTolerance = own(descriptor, "tolerance");
+    const hasTarget = own(descriptor, "target");
     if (hasTolerance && !hasTarget) error("VERIFICATION_TOLERANCE_TARGET", "§6", file, `${id} declares tolerance without an expected target`, line);
-    if ((own(descriptor, "target") || own(descriptor, "targets")) && !hasReplay) error("VERIFICATION_TARGET_FIXTURE", "§6", file, `${id} declares a target without an input/schedule replay`, line);
+    if (hasTolerance && (typeof descriptor.tolerance !== "number" || !Number.isFinite(descriptor.tolerance))) error("VERIFICATION_FIELD_TYPE", "§6", file, `${id} tolerance must be a finite number`, line);
   }
 
   function buildPlanAcceptanceHeadings(packageRoot, manifest) {
-    const relative = typeof manifest?.build?.plan === "string" ? manifest.build.plan : "05-build-plan.md";
+    const relative = "05-build-plan.md";
     if (path.isAbsolute(relative) || relative.includes("..")) return undefined;
     const file = path.join(packageRoot, relative);
     if (!host.exists(file)) return undefined;
@@ -2472,8 +3266,29 @@ function createValidator(host) {
     // §10.10: a generated acceptance test carries a derived name rather than a
     // number — `<instance>/<template>[/<row>]` — so it never enters §6's
     // consecutive numbering, and counting it needs its own arm.
-    const generated = [...text.matchAll(/^#{1,6}\s+AT\s+([a-z0-9-]+\/[a-z0-9-]+(?:\/[a-z0-9-]+)?)\s+—/gm)].map(match => ({ name: match[1], index: match.index, line: text.slice(0, match.index).split(/\r?\n/).length }));
+    const generated = [...text.matchAll(/^#{1,6}\s+AT\s+([a-z0-9-]+\/[a-z0-9-]+(?:\/[a-z0-9-]+)?)\s+—.*$/gm)].map(match => ({ name: match[1], index: match.index, after: match.index + match[0].length, line: text.slice(0, match.index).split(/\r?\n/).length }));
     return { relative, text, headings, generated };
+  }
+
+  // Read the descriptor set without assigning execution meaning. Build-record
+  // validation uses it only to decide whether the acceptance result depended
+  // on runner-owned runtime semantics and therefore needs a runner identity.
+  // Package validation owns malformed/missing-block diagnostics, so unreadable
+  // entries are omitted here instead of being reported a second time.
+  function buildPlanAcceptanceDescriptors(plan) {
+    if (!plan) return [];
+    const tests = [
+      ...plan.headings.map(heading => ({ ...heading, name: heading.id })),
+      ...plan.generated
+    ].sort((left, right) => left.index - right.index);
+    return tests.flatMap((test, index) => {
+      const next = tests[index + 1]?.index ?? plan.text.length;
+      const body = plan.text.slice(test.after, next);
+      const block = /^\s*```test[^\r\n]*\r?\n([\s\S]*?)```/.exec(body);
+      if (!block) return [];
+      try { return [{ name: test.name, descriptor: JSON.parse(block[1]) }]; }
+      catch { return []; }
+    });
   }
 
   function validateBuildPlan(packageRoot, manifest, resolvePath, exprContext, directionCtx, graphContext) {
@@ -2515,7 +3330,7 @@ function createValidator(host) {
     if (directionCtx) {
       for (const claim of directionCtx.requiredCoverage) {
         if (!directionCtx.coveredByAT.has(claim)) {
-          error("DIRECTION_CLAIM_UNCOVERED", "§9.11", display, `${claim} is not cited by any AT's direction_claims — every observational-checked constraint needs a covering AT`);
+          error("DIRECTION_CLAIM_UNCOVERED", "§9.10", display, `${claim} is not cited by any AT's direction_claims — every observational-checked constraint needs a covering AT`);
         }
       }
     }
@@ -2875,12 +3690,15 @@ function createValidator(host) {
           error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, `${at} must be an object`);
           return;
         }
-        contractClosed(entry, ["flag", "question", "options", "default_guidance", "rationale", "when"], ["flag", "question", "options"], display, at);
+        contractClosed(entry, ["flag", "question", "section", "options", "default_guidance", "rationale", "when"], ["flag", "question", "options"], display, at);
         if (own(entry, "flag") && contractKebab(entry.flag, display, at, "flag name")) {
           if (seenFlags.has(entry.flag)) error("CONTRACT_NAME_UNIQUE", CONTRACT_SECTION, display, `${at}/flag ${JSON.stringify(entry.flag)} is declared twice; flag and knob names share one namespace and MUST be unique`);
           seenFlags.add(entry.flag);
         }
         if (own(entry, "question")) contractType(entry.question, "string", display, at, "question");
+        if (own(entry, "section") && (typeof entry.section !== "string" || !entry.section.trim())) {
+          error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, `${at}/section must be a non-empty string, got ${JSON.stringify(entry.section)}`);
+        }
         for (const key of ["default_guidance", "rationale"]) {
           if (own(entry, key)) contractType(entry[key], "string", display, at, key);
         }
@@ -2894,13 +3712,16 @@ function createValidator(host) {
               error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, `${optionAt} must be an object with id and semantics`);
               return;
             }
-            contractClosed(option, ["id", "semantics", "rationale"], ["id", "semantics"], display, optionAt);
+            contractClosed(option, ["id", "meaning", "semantics", "rationale"], ["id", "semantics"], display, optionAt);
             if (own(option, "id") && contractKebab(option.id, display, optionAt, "option id")) {
               if (seenOptions.has(option.id)) error("CONTRACT_NAME_UNIQUE", CONTRACT_SECTION, display, `${optionAt}/id ${JSON.stringify(option.id)} is declared twice within flag ${JSON.stringify(entry.flag)}`);
               seenOptions.add(option.id);
             }
             for (const key of ["semantics", "rationale"]) {
               if (own(option, key)) contractType(option[key], "string", display, optionAt, key);
+            }
+            if (own(option, "meaning") && (typeof option.meaning !== "string" || !option.meaning.trim())) {
+              error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, `${optionAt}/meaning must be a non-empty string, got ${JSON.stringify(option.meaning)}`);
             }
           });
         }
@@ -3198,7 +4019,7 @@ function createValidator(host) {
       const resolvePath = makePathResolver(specRoot);
       const questions = loadPersonalization(specRoot, specManifest, resolvePath).questions;
       const contentContext = validateContent(specRoot, specManifest, resolvePath, questions);
-      const specTuningRelative = specManifest?.build?.tuning ?? "tuning.json";
+      const specTuningRelative = "tuning.json";
       const specTuningFile = path.join(specRoot, specTuningRelative);
       const specTuning = host.exists(specTuningFile) && host.isFile(specTuningFile)
         ? (() => { try { return JSON.parse(host.readText(specTuningFile)); } catch { return undefined; } })()
@@ -3206,11 +4027,16 @@ function createValidator(host) {
       const result = validateContracts(specRoot, specManifest, contentContext, resolvePath, specTuning);
       if (!result) return undefined;
       const roles = new Map();
+      const values = new Map();
+      const metas = new Map();
       const invariants = [];
       for (const instance of result.instances) {
         for (const name of instance.liveKnobs) {
           const meta = instance.model.knobs.get(name) ?? {};
-          roles.set(`contracts.${instance.id}.${name}`, meta.kind === "constant" ? "constants" : "tunables");
+          const key = `contracts.${instance.id}.${name}`;
+          roles.set(key, meta.kind === "constant" ? "constants" : "tunables");
+          metas.set(key, meta);
+          if (instance.knobValues.has(name)) values.set(key, instance.knobValues.get(name));
         }
         if (!Array.isArray(instance.core.invariants)) continue;
         for (const invariant of instance.core.invariants) {
@@ -3220,7 +4046,7 @@ function createValidator(host) {
           invariants.push({ instance: instance.id, invariant, referenced });
         }
       }
-      return { roles, invariants, generatedTotal: result.generatedTotal };
+      return { roles, values, metas, invariants, generatedTotal: result.generatedTotal };
     });
   }
 
@@ -3456,10 +4282,7 @@ function createValidator(host) {
     if (!file) return;
     const text = host.readText(file);
     const lines = text.split(/\r?\n/);
-    const headings = lines.map((line, index) => {
-      const match = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(line);
-      return match ? { level: match[1].length, slug: markdownSlug(match[2]), index, line: index + 1 } : undefined;
-    }).filter(Boolean);
+    const headings = markdownHeadings(lines);
     const heading = headings.find(item => item.slug === fragment.toLowerCase());
     if (!heading) {
       error("CONTRACT_CITATION_DANGLING", CONTRACT_SECTION, display, `${at} cites ${JSON.stringify(value)}, whose fragment matches no Markdown heading in ${slash(filePart)}`);
@@ -3479,36 +4302,17 @@ function createValidator(host) {
     // tag scoped above the anchor governs it by inheritance. A tag scoped to a
     // sub-topic *below* the cited anchor is what the reader would land on, so
     // it counts as well; the cure is a finer anchor.
-    const tagged = line => {
-      const trimmed = line.trim();
-      if (trimmed.startsWith("> DELEGATED:")) return "Delegated";
-      if (trimmed.startsWith("> PERSONALIZATION:")) return "a Personalization";
-      return undefined;
-    };
-    const sectionEnd = anchor => headings.find(item => item.index > anchor.index && item.level <= anchor.level)?.index ?? lines.length;
-    const citedEnd = sectionEnd(heading);
-    let fenced = false;
-    for (let index = 0; index < lines.length; index += 1) {
-      if (/^\s*```/.test(lines[index])) { fenced = !fenced; continue; }
-      if (fenced) continue;
-      const found = tagged(lines[index]);
-      if (!found) continue;
-      // Inside the cited section: any tag at all disqualifies it. A section
-      // that hands any part of itself away can no longer be relied on whole,
-      // and the citation does not say which part it meant.
-      if (index > heading.index && index < citedEnd) {
-        error("CONTRACT_CITATION_AUTHORITY", CONTRACT_SECTION, display, `${at} cites ${JSON.stringify(value)}, whose target section carries ${found} authority tag at line ${index + 1}; a legal target carries no tag anywhere inside it`);
-        return;
-      }
-      // Outside it: §2 scopes a tag from its own line to the end of the
-      // heading section holding it, and that section ends at the next heading
-      // of the same or a higher level — so an enclosing section's tag reaches
-      // down into this one, while a sibling's stops short of it.
-      const owner = [...headings].reverse().find(item => item.index < index);
-      if (owner && index < heading.index && heading.index < sectionEnd(owner)) {
-        error("CONTRACT_CITATION_AUTHORITY", CONTRACT_SECTION, display, `${at} cites ${JSON.stringify(value)}, which sits inside the scope of ${found} authority tag at line ${index + 1}; a legal target is covered by no enclosing tag`);
-        return;
-      }
+    // Inside the cited section: any tag at all disqualifies it. A section that
+    // hands any part of itself away can no longer be relied on whole, and the
+    // citation does not say which part it meant. Outside it: §2 scopes a tag
+    // from its own line to the end of the heading section holding it, so an
+    // enclosing section's tag reaches down into this one while a sibling's
+    // stops short of it.
+    const reaching = authorityTagReaching(lines, headings, heading);
+    if (reaching) {
+      error("CONTRACT_CITATION_AUTHORITY", CONTRACT_SECTION, display, reaching.where === "inside"
+        ? `${at} cites ${JSON.stringify(value)}, whose target section carries ${reaching.label} authority tag at line ${reaching.line}; a legal target carries no tag anywhere inside it`
+        : `${at} cites ${JSON.stringify(value)}, which sits inside the scope of ${reaching.label} authority tag at line ${reaching.line}; a legal target is covered by no enclosing tag`);
     }
   }
 
@@ -3653,7 +4457,7 @@ function createValidator(host) {
         // report one absence twice, in two vocabularies.
         if (isObject(template.test) && isObject(testBlock)) {
           if (own(testBlock, "direction_claims")) {
-            // §9.11 coverage runs two ways and a generated test's existence
+            // §9.10 coverage runs two ways and a generated test's existence
             // depends on the answers, so a claim covered only by one could
             // vanish with an edit to a surface. Generated tests make no
             // direction claims; game-local ones carry them. The field is then
@@ -3664,7 +4468,7 @@ function createValidator(host) {
           // The finding names the instance file, not the build plan: the block
           // is machine-written, so the fix is always in the core or the surface.
           // `directionCtx` is deliberately not passed — a generated test earns
-          // no §9.11 coverage credit, per the ban just above.
+          // no §9.10 coverage credit, per the ban just above.
           // The §6 pass reads the block without `direction_claims`: the ban
           // above owns that field, and resolving it here would report the one
           // fault a second time as a dangling claim.
@@ -3682,9 +4486,12 @@ function createValidator(host) {
 
   function contractValidateInstance(entry, ctx) {
     const { display, instance: document } = entry;
-    contractClosed(document, ["format", "instance", "core", "surface", "rows"], ["format", "instance", "core", "surface"], display, "#");
+    contractClosed(document, ["format", "instance", "core", "surface", "rows", "about"], ["format", "instance", "core", "surface"], display, "#");
     if (own(document, "format") && document.format !== CONTRACT_INSTANCE_FORMAT) {
       error("CONTRACT_FORMAT", CONTRACT_SECTION, display, `#/format must be ${JSON.stringify(CONTRACT_INSTANCE_FORMAT)}, got ${JSON.stringify(document.format)}`);
+    }
+    if (own(document, "about") && (typeof document.about !== "string" || !document.about.trim())) {
+      error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, "#/about must be a non-empty string: the instance's hand-written designer introduction");
     }
     const id = entry.fileId;
     if (document.instance !== id) {
@@ -3826,11 +4633,16 @@ function createValidator(host) {
       }
     }
 
-    // Rows: each core-declared schema is bound by exactly one of a manifest
-    // collection's `instance` member or the instance file's inline `rows` entry.
+    // Rows (decision 32): each core-declared schema is bound by exactly one
+    // `rows` entry of the instance file — an inline array of rows, or a
+    // `collections/<drawer>` source string pulling the drawer's records. The
+    // instance file is the one binding site, so a schema bound twice is
+    // unspellable, and the drawer stays pure designer data: for a drawer-bound
+    // row the record's id is its filename, synthesized into the row, never
+    // written inside the record.
     const inlineRows = isObject(document.rows) ? document.rows : undefined;
     if (own(document, "rows") && !isObject(document.rows)) {
-      error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, "#/rows must map a collection-schema name to an array of rows");
+      error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, "#/rows must map a collection-schema name to an array of rows or a `collections/<drawer>` source");
     }
     if (inlineRows) {
       for (const name of Object.keys(inlineRows)) {
@@ -3843,39 +4655,52 @@ function createValidator(host) {
     const boundRows = new Map();
     const rowCtx = { ...ctx, answers, liveFlags, contractKeys: ctx.contractKeys };
     for (const [name, info] of model.collections) {
-      const inline = inlineRows && own(inlineRows, name) ? inlineRows[name] : undefined;
-      const external = ctx.bindings.get(`${id}#${name}`);
-      if (inline !== undefined && external) {
-        error("CONTRACT_ROWS_BINDING", CONTRACT_SECTION, display, `collection schema ${JSON.stringify(name)} is bound twice — inline at #/rows and by manifest collection ${JSON.stringify(external.collectionId)}; two row sets would make the expansion ambiguous`);
-      }
-      if (inline === undefined && !external) {
-        error("CONTRACT_ROWS_BINDING", CONTRACT_SECTION, display, `collection schema ${JSON.stringify(name)} is bound by neither an inline \`rows\` entry nor a manifest collection's \`instance\` field; an unbound schema is a validation failure, never a silent zero-expansion`);
+      const bound = inlineRows && own(inlineRows, name) ? inlineRows[name] : undefined;
+      if (bound === undefined) {
+        error("CONTRACT_ROWS_BINDING", CONTRACT_SECTION, display, `collection schema ${JSON.stringify(name)} has no \`rows\` entry; bind it to an inline array or a \`collections/<drawer>\` source — an unbound schema is a validation failure, never a silent zero-expansion`);
         boundRows.set(name, []);
         continue;
       }
-      if (external) {
-        // §10.7: a bound collection MUST carry Fixed authority and its records
-        // MUST NOT carry per-record authority overrides — rows are
-        // instantiation inputs, and one personalization-authority row would
-        // make the generated AT set per-build. The check reads the binding
-        // itself, so a doubly-bound schema is still held to it.
-        const collection = external.info?.collection;
-        const level = isObject(collection?.authority) ? collection.authority.level : undefined;
-        if (level !== undefined && level !== "fixed") {
-          error("CONTRACT_ROW_AUTHORITY", CONTRACT_SECTION, display, `manifest collection ${JSON.stringify(external.collectionId)} binds schema ${JSON.stringify(name)} but declares ${JSON.stringify(level)} authority; bound rows MUST be Fixed — one personalization-authority row would make the generated test set per-build`);
+      if (typeof bound === "string") {
+        const at = `#/rows/${pointerEscape(name)}`;
+        const match = /^collections\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(bound);
+        if (!match) {
+          error("CONTRACT_ROWS_BINDING", CONTRACT_SECTION, display, `${at} must be an inline array of rows or exactly \`collections/<drawer>\`, got ${JSON.stringify(bound)}`);
+          boundRows.set(name, []);
+          continue;
         }
-        const records = (external.info?.records ?? []).map(record => record.record);
-        for (const record of records) {
-          if (isObject(record) && own(record, "authority")) {
-            error("CONTRACT_ROW_AUTHORITY", CONTRACT_SECTION, display, `a record of manifest collection ${JSON.stringify(external.collectionId)} carries a per-record authority override; bound rows admit none`);
-            break;
+        const drawer = ctx.contentContext?.collections?.get(match[1]);
+        if (!drawer) {
+          error("CONTRACT_ROWS_BINDING", CONTRACT_SECTION, display, `${at} names no collections/ drawer: ${JSON.stringify(match[1])}`);
+          boundRows.set(name, []);
+          continue;
+        }
+        // §10.7 (decision 33): drawers are Fixed spec data — statements of
+        // the package, like inline rows — so no authority gate exists. The
+        // one prohibition the binding adds: a bound drawer takes the
+        // core's schema, so a `record` schema of its own would be a
+        // second shape for one row set.
+        drawer.reached = true;
+        if (drawer.fields) {
+          error("CONTRACT_ROWS_BINDING", CONTRACT_SECTION, display, `${at} binds collections/${match[1]}, whose label carries a record schema of its own; a bound drawer takes the core's schema — one shape, one home`);
+        }
+        const records = [];
+        for (const entry of drawer.records) {
+          if (!isObject(entry.record)) continue;
+          // A drawer-bound row's id is synthesized from the filename, so a
+          // top-level `id` in the record file is always a fact written twice
+          // — redundant when it agrees, contradictory when it does not — and
+          // either way it is the one field a bound record may not carry.
+          if (own(entry.record, "id")) {
+            error("CONTRACT_ROWS_BINDING", CONTRACT_SECTION, entry.display, `record file carries a top-level \`id\` (${JSON.stringify(entry.record.id)}); for a drawer-bound row the filename is the record's id, and a fact is written once`);
+            continue;
           }
+          records.push({ ...entry.record, id: entry.id });
         }
-        if (inline === undefined) boundRows.set(name, contractValidateRows(records, name, info, `${external.collectionId} rows`, display, rowCtx));
+        boundRows.set(name, contractValidateRows(records, name, info, `collections/${match[1]} rows`, display, rowCtx));
+        continue;
       }
-      if (inline !== undefined) {
-        boundRows.set(name, contractValidateRows(inline, name, info, `#/rows/${pointerEscape(name)}`, display, rowCtx));
-      }
+      boundRows.set(name, contractValidateRows(bound, name, info, `#/rows/${pointerEscape(name)}`, display, rowCtx));
     }
 
     // §10.8 steps 3–5: template liveness and per-row expansion.
@@ -4075,42 +4900,9 @@ function createValidator(host) {
     if (files.length === 0) return undefined;
     files.sort((left, right) => (left.fileId < right.fileId ? -1 : left.fileId > right.fileId ? 1 : 0));
 
-    // §10.7's binding field: `contracts/<instance>.json#<schema>`.
-    const bindings = new Map();
-    if (Array.isArray(manifest?.content)) {
-      manifest.content.forEach((collection, index) => {
-        if (!isObject(collection) || typeof collection.instance !== "string") return;
-        const at = `content[${index}].instance`;
-        const match = /^contracts\/([a-z0-9]+(?:-[a-z0-9]+)*)\.json#([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(collection.instance);
-        if (!match) {
-          error("CONTRACT_ROWS_BINDING", CONTRACT_SECTION, "manifest.json", `${at} must be exactly \`contracts/<instance>.json#<schema>\`, got ${JSON.stringify(collection.instance)}`);
-          return;
-        }
-        const [, instanceId, schemaName] = match;
-        const target = files.find(file => file.fileId === instanceId);
-        if (!target) {
-          error("CONTRACT_ROWS_BINDING", CONTRACT_SECTION, "manifest.json", `${at} names instance ${JSON.stringify(instanceId)}, for which contracts/${instanceId}.json does not exist`);
-          return;
-        }
-        // The fragment is a bare key of the vendored core's `collections`
-        // object, not a JSON Pointer, so a typo has a name to be reported by.
-        const declared = target.instance?.core?.collections;
-        if (isObject(declared) && !own(declared, schemaName)) {
-          error("CONTRACT_ROWS_BINDING", CONTRACT_SECTION, "manifest.json", `${at} names collection schema ${JSON.stringify(schemaName)}, which the core vendored by contracts/${instanceId}.json does not declare`);
-          return;
-        }
-        const key = `${instanceId}#${schemaName}`;
-        if (bindings.has(key)) {
-          error("CONTRACT_ROWS_BINDING", CONTRACT_SECTION, "manifest.json", `${at} binds ${JSON.stringify(collection.instance)}, which manifest collection ${JSON.stringify(bindings.get(key).collectionId)} already binds; a schema bound twice makes the expansion ambiguous`);
-          return;
-        }
-        bindings.set(key, { collectionId: collection.id, info: contentContext?.collections?.get(collection.id) });
-      });
-    }
-
     // The generated block's own extent, so no citation may target an anchor
     // inside it, and so block equality has a region to compare.
-    const planRelative = typeof manifest?.build?.plan === "string" ? manifest.build.plan : "05-build-plan.md";
+    const planRelative = "05-build-plan.md";
     const planFile = path.join(packageRoot, planRelative);
     const planText = host.exists(planFile) && host.isFile(planFile) ? host.readText(planFile) : undefined;
     const generatedRegions = new Map();
@@ -4137,7 +4929,7 @@ function createValidator(host) {
       for (const name of liveKnobs) contractKeys.add(`contracts.${file.fileId}.${name}`);
     }
 
-    const ctx = { resolvePath, bindings, generatedRegions, tuningKeys, contractKeys, manifest, exprContext, directionCtx, graphContext };
+    const ctx = { resolvePath, contentContext, generatedRegions, tuningKeys, contractKeys, manifest, exprContext, directionCtx, graphContext };
     const instances = [];
     for (const file of files) {
       const result = contractValidateInstance(file, ctx);
@@ -4245,7 +5037,7 @@ function createValidator(host) {
       if (isObject(manifest.build)) {
         const paths = [];
         if (Array.isArray(manifest.build.chapters)) manifest.build.chapters.forEach((value, index) => paths.push([value, `build.chapters[${index}]`]));
-        for (const key of ["plan", "tuning", "personalization"]) if (own(manifest.build, key)) paths.push([manifest.build[key], `build.${key}`]);
+        if (own(manifest.build, "personalization")) paths.push([manifest.build.personalization, "build.personalization"]);
         for (const [relative, label] of paths) resolvePath(relative, label, "§3", "BUILD_PATH_MISSING", { mustExist: true, kind: "file" });
       }
     }
@@ -4256,19 +5048,28 @@ function createValidator(host) {
     validateRulesetTags(packageRoot, manifest, rulesetIds);
     validatePersonalizationTags(packageRoot, manifest, personalization);
     const { doc: tuningDoc, context: exprContext } = validateTuning(packageRoot, contentContext, rulesetIds, personalization);
-    validateMoodDescriptors(manifest);
-    validateContentReferences(contentContext, exprContext);
+    const paletteCtx = validatePalettes(manifest);
     validateFantasy(packageRoot);
     validateInjectionSurface(packageRoot);
     validateTieBreakLint(packageRoot);
     validateProseLiterals(packageRoot, manifest, tuningDoc);
     if (manifest !== undefined) validateMediaFiles(manifest, "manifest.json", resolvePath);
-    const directionCtx = validateDirection(packageRoot, manifest, resolvePath);
+    const directionCtx = validateDirection(packageRoot, manifest, resolvePath, paletteCtx);
     const contractsCtx = validateContracts(packageRoot, manifest, contentContext, resolvePath, tuningDoc, exprContext, directionCtx, graphContext);
     validatePersonalizationOverrides(personalization, tuningDoc, contractsCtx);
-    validateProseCitations(packageRoot, manifest, tuningDoc, directionCtx, contractsCtx);
+    validateProseCitations(packageRoot, manifest, tuningDoc, directionCtx, contractsCtx, paletteCtx, exprContext, rulesetIds);
     validateModeTags(packageRoot, manifest, exprContext.clocks);
     validateBuildPlan(packageRoot, manifest, resolvePath, exprContext, directionCtx, graphContext);
+    // Reachability is the union of every pass above — mood field, color
+    // binding, threshold operand, prose citation — so the warning is emitted
+    // once they have all run.
+    reportUnreachedPalettes(paletteCtx);
+    // §1b's twin of the palette rule: a drawer nothing reaches — no prose
+    // citation, no count reference, no graph edge set, no contract row
+    // binding, no document-check artifact — is a review lead, not an order.
+    for (const [id, info] of contentContext.collections) {
+      if (!info.reached) warning("COLLECTION_UNCITED", "§1b", `collections/${id}/`, `nothing reaches drawer ${JSON.stringify(id)}: no prose or expression cites it, no graph names it, no contract binds it, and no test names it as an artifact`);
+    }
     return {
       packageRoot,
       packageName: manifest?.id ?? path.basename(packageRoot),
@@ -4281,14 +5082,59 @@ function createValidator(host) {
   // SPEC §7 — opengdd-build.json, validated against a certifying source spec.
   // ---------------------------------------------------------------------------
 
+  function expectedBuildSnapshot(specTuning, sourceQuestions, answers, contractFacts) {
+    const tunables = new Map(Object.entries(isObject(specTuning?.tunables) ? specTuning.tunables : {}));
+    const constants = new Map(Object.entries(isObject(specTuning?.constants) ? specTuning.constants : {}));
+    for (const [key, role] of contractFacts?.roles ?? []) {
+      if (!contractFacts.values?.has(key)) continue;
+      (role === "constants" ? constants : tunables).set(key, contractFacts.values.get(key));
+    }
+    const rangeOf = key => key.startsWith("contracts.")
+      ? boundsFromKnobRange(contractFacts?.metas?.get(key)?.range)
+      : boundsFromPair(specTuning?.meta?.[key]?.range);
+    for (const [questionId, question] of sourceQuestions) {
+      if (!isObject(question)) continue;
+      const answer = own(answers, questionId) ? answers[questionId] : question.default;
+      if (question.type === "choice" && Array.isArray(question.options)) {
+        const option = question.options.find(item => isObject(item) && item.id === answer);
+        if (isObject(option?.tuning_overrides)) {
+          for (const [key, value] of Object.entries(option.tuning_overrides)) if (tunables.has(key) && typeof value === "number" && Number.isFinite(value)) tunables.set(key, value);
+        }
+      }
+      if (!Array.isArray(question.resolution)) continue;
+      for (const operation of question.resolution) {
+        if (!isObject(operation) || typeof operation.key !== "string" || !tunables.has(operation.key)) continue;
+        const operand = operation.operand === "answer" ? answer : operation.operand;
+        if (typeof operand !== "number" || !Number.isFinite(operand)) continue;
+        const current = tunables.get(operation.key);
+        let next;
+        if (operation.operation === "replace") next = operand;
+        else if (operation.operation === "add" && typeof current === "number") next = current + operand;
+        else if (operation.operation === "multiply" && typeof current === "number") next = current * operand;
+        if (typeof next !== "number" || !Number.isFinite(next)) continue;
+        const range = rangeOf(operation.key);
+        if (range && outsideBounds(range, next)) {
+          if (operation.out_of_range === "reject") continue;
+          if (operation.out_of_range === "clamp") next = clampToBounds(range, next);
+        }
+        tunables.set(operation.key, next);
+      }
+    }
+    return { tunables, constants };
+  }
+
   function validateBuildManifest(buildFilePath, specRoot) {
     const buildFile = path.resolve(buildFilePath);
+    // Without a certifying spec directory the mandatory §7 cross-checks cannot
+    // run, so this run cannot reach a conformance verdict at all. The flag
+    // travels to `finish`, which turns it into NOT CHECKED.
+    const indeterminate = !specRoot;
     if (!host.exists(buildFile) || !host.isFile(buildFile)) {
       error("BUILD_FILE_MISSING", "§7", ".", `opengdd-build.json does not exist: ${buildFile}`);
-      return { packageRoot: buildFile, packageName: path.basename(buildFile) };
+      return { packageRoot: buildFile, packageName: path.basename(buildFile), indeterminate };
     }
     const build = parseJsonFile(buildFile, "opengdd-build.json", "§7", "BUILD_JSON");
-    if (build === undefined) return { packageRoot: buildFile, packageName: path.basename(buildFile) };
+    if (build === undefined) return { packageRoot: buildFile, packageName: path.basename(buildFile), indeterminate };
 
     const hasLegacyResolvedValues = isObject(build?.resolved_tuning) && own(build.resolved_tuning, "values");
     const schema = loadSchema("opengdd-build.schema.json");
@@ -4302,7 +5148,14 @@ function createValidator(host) {
       }
     }
     if (hasLegacyResolvedValues) {
-      error("BUILD_SCHEMA", "§7", "opengdd-build.json", "resolved_tuning.values was renamed to resolved_tuning.tunables in v0.5");
+      error("BUILD_SCHEMA", "§7", "opengdd-build.json", "resolved_tuning.values is historical; v0.6 requires resolved_tuning.tunables");
+    }
+    const payloadFile = build?.evidence?.payload?.file;
+    if (typeof payloadFile === "string") {
+      const payloadPath = path.resolve(path.dirname(buildFile), payloadFile.replaceAll("/", path.sep));
+      if (path.isAbsolute(payloadFile) || path.isAbsoluteWindows(payloadFile) || /^[A-Za-z][A-Za-z0-9+.-]*:/.test(payloadFile) || payloadFile.includes("\\") || !isInside(path.dirname(buildFile), payloadPath)) {
+        error("BUILD_PAYLOAD_PATH", "§7", "opengdd-build.json", `evidence.payload.file must be a forward-slash package-relative path that stays inside the build package, got ${JSON.stringify(payloadFile)}`);
+      }
     }
 
     if (!specRoot) {
@@ -4310,7 +5163,7 @@ function createValidator(host) {
         "BUILD_SPEC_CROSS_CHECKS_SKIPPED",
         "§7",
         "opengdd-build.json",
-        "certifying spec directory was not supplied; skipped source-dependent SPEC §7 package-consistency checks 1–5 (spec id/version, designer, personalization answers, resolved_tuning keys/ranges, and acceptance-test total) and source-backed direction-result checks. Supply the optional <spec-dir> argument to enable them"
+        "certifying spec directory was not supplied; skipped source-dependent SPEC §7 package-consistency checks 1–8 (spec id/version, designer, personalization answers, resolved_tuning values, acceptance-test total, completion, runtime runner identity, and direction-observation coverage), optional commerce equality, and source-backed direction-result checks. Supply the optional <spec-dir> argument to enable them; until then this run reports NOT CHECKED rather than any passing verdict, because most of the record's subject was never decided"
       );
     }
 
@@ -4331,6 +5184,9 @@ function createValidator(host) {
               error("BUILD_DESIGNER_FIELD", "§7", "opengdd-build.json", `build designer.${key} does not match the source manifest's designer.${key}`);
             }
           }
+        }
+        if (own(build, "commerce") && deepKey(build.commerce) !== deepKey(specManifest.commerce)) {
+          error("BUILD_COMMERCE_MISMATCH", "§7", "opengdd-build.json", "commerce is optional in the build record, but when present it must equal the source manifest's commerce object");
         }
 
         const specResolvePath = makePathResolver(specResolvedRoot);
@@ -4360,8 +5216,8 @@ function createValidator(host) {
           }
         }
 
-        const specTuningRelative = specManifest.build?.tuning ?? "tuning.json";
-        const specTuningFile = specResolvePath(specTuningRelative, "build.tuning", "§7", "BUILD_SPEC_TUNING_MISSING", { mustExist: true, kind: "file", display: "opengdd-build.json" });
+        const specTuningRelative = "tuning.json";
+        const specTuningFile = specResolvePath(specTuningRelative, "canonical tuning file", "§7", "BUILD_SPEC_TUNING_MISSING", { mustExist: true, kind: "file", display: "opengdd-build.json" });
         const specTuning = specTuningFile ? parseJsonFile(specTuningFile, slash(specTuningRelative), "§7", "TUNING_JSON") : undefined;
         // §10.11 amends check 4: the key set is `tuning.json`'s unioned with
         // the contract key set — `contracts.<instance>.<knob>` for every
@@ -4392,6 +5248,15 @@ function createValidator(host) {
               if (own(specTuning.tunables, key) && typeof value === "number" && Number.isFinite(value) && Array.isArray(range) && range.length === 2 && range.every(bound => typeof bound === "number" && Number.isFinite(bound)) && (value < range[0] || value > range[1])) {
                 error("BUILD_TUNING_RANGE", "§7", "opengdd-build.json", `resolved_tuning.tunables.${key}=${value} is outside the source inclusive range [${range[0]}, ${range[1]}]`);
               }
+            }
+          }
+          const answers = isObject(build?.personalization?.answers) ? build.personalization.answers : {};
+          const expectedSnapshot = expectedBuildSnapshot(specTuning, sourceQuestions, answers, contractFacts);
+          for (const role of ["tunables", "constants"]) {
+            const recorded = isObject(build.resolved_tuning[role]) ? build.resolved_tuning[role] : {};
+            for (const [key, expectedValue] of expectedSnapshot[role]) {
+              if (!own(recorded, key) || recorded[key] === expectedValue) continue;
+              error("BUILD_TUNING_VALUE", "§7", "opengdd-build.json", `resolved_tuning.${role}.${key} is ${JSON.stringify(recorded[key])}; the canonical source-and-answer pipeline resolves it to ${JSON.stringify(expectedValue)}`);
             }
           }
           // §10.8: core invariants are re-evaluated over the resolved
@@ -4432,15 +5297,20 @@ function createValidator(host) {
           const answers = build.personalization.answers;
           const sourceTunables = isObject(specTuning.tunables) ? specTuning.tunables : {};
           const sourceMeta = isObject(specTuning.meta) ? specTuning.meta : {};
-          const running = new Map();
-          const currentValue = key => (running.has(key) ? running.get(key) : sourceTunables[key]);
+          const running = new Map(Object.entries(sourceTunables));
+          for (const [key, role] of contractFacts?.roles ?? []) {
+            if (role === "tunables" && contractFacts.values?.has(key)) running.set(key, contractFacts.values.get(key));
+          }
+          const rangeOf = key => key.startsWith("contracts.")
+            ? boundsFromKnobRange(contractFacts?.metas?.get(key)?.range)
+            : boundsFromPair(sourceMeta[key]?.range);
           for (const [questionId, question] of sourceQuestions) {
             const answer = own(answers, questionId) ? answers[questionId] : question.default;
             if (question.type === "choice" && Array.isArray(question.options)) {
               const option = question.options.find(item => isObject(item) && item.id === answer);
               if (isObject(option) && isObject(option.tuning_overrides)) {
                 for (const [key, value] of Object.entries(option.tuning_overrides)) {
-                  if (typeof value === "number" && Number.isFinite(value)) running.set(key, value);
+                  if (running.has(key) && typeof value === "number" && Number.isFinite(value)) running.set(key, value);
                 }
               }
             }
@@ -4449,19 +5319,19 @@ function createValidator(host) {
               if (!isObject(operation) || typeof operation.key !== "string") continue;
               const operand = operation.operand === "answer" ? answer : operation.operand;
               if (typeof operand !== "number" || !Number.isFinite(operand)) continue;
-              const current = currentValue(operation.key);
+              if (!running.has(operation.key)) continue;
+              const current = running.get(operation.key);
               let next;
               if (operation.operation === "replace") next = operand;
               else if (operation.operation === "add" && typeof current === "number") next = current + operand;
               else if (operation.operation === "multiply" && typeof current === "number") next = current * operand;
               if (typeof next !== "number" || !Number.isFinite(next)) continue;
-              const range = isObject(sourceMeta[operation.key]) ? sourceMeta[operation.key].range : undefined;
-              const bounded = Array.isArray(range) && range.length === 2 && range.every(bound => typeof bound === "number" && Number.isFinite(bound));
-              if (bounded && (next < range[0] || next > range[1])) {
+              const range = rangeOf(operation.key);
+              if (range && outsideBounds(range, next)) {
                 if (operation.out_of_range === "reject") {
-                  error("BUILD_ANSWER_REJECTED", "§7", "opengdd-build.json", `personalization.answers.${questionId} resolves ${JSON.stringify(operation.key)} to ${next}, outside the inclusive range [${range[0]}, ${range[1]}]; the operation declares out_of_range "reject", so the recorded answer is invalid`);
+                  error("BUILD_ANSWER_REJECTED", "§7", "opengdd-build.json", `personalization.answers.${questionId} resolves ${JSON.stringify(operation.key)} to ${next}, outside the inclusive range ${describeBounds(range)}; the operation declares out_of_range "reject", so the recorded answer is invalid`);
                 } else if (operation.out_of_range === "clamp") {
-                  next = Math.min(Math.max(next, range[0]), range[1]);
+                  next = clampToBounds(range, next);
                 }
               }
               running.set(operation.key, next);
@@ -4473,6 +5343,7 @@ function createValidator(host) {
         // plus generated ones after liveness and per-row expansion. A template
         // that is not live, and a row that does not match, contribute zero.
         const plan = buildPlanAcceptanceHeadings(specResolvedRoot, specManifest);
+        const planDescriptors = buildPlanAcceptanceDescriptors(plan);
         if (plan && typeof build?.evidence?.acceptance?.total === "number") {
           const generated = contractFacts?.generatedTotal ?? 0;
           const expectedTotal = plan.headings.length + plan.generated.length;
@@ -4483,6 +5354,13 @@ function createValidator(host) {
             error("BUILD_ACCEPTANCE_TOTAL", "§7", "opengdd-build.json", `evidence.acceptance.total ${build.evidence.acceptance.total} does not match the source package's ${expectedTotal} enumerated acceptance tests${split}`);
           }
         }
+        const runtimeTests = planDescriptors.filter(({ descriptor }) => isObject(descriptor) && (
+          ["scenario", "property", "exhaustive-search"].includes(descriptor.type)
+          || ["replay", "target", "direction_claims"].some(field => own(descriptor, field))
+        ));
+        if (runtimeTests.length > 0 && isObject(build?.evidence) && !own(build.evidence, "runner")) {
+          error("BUILD_RUNNER_REQUIRED", "§7", "opengdd-build.json", `evidence.runner is required because the source package carries runtime acceptance test${runtimeTests.length === 1 ? "" : "s"}: ${runtimeTests.map(test => test.name).join(", ")}`);
+        }
 
         // Enforce direction_result presence and resolve claim paths to their source declarations.
         const directionDeclared = specManifest?.build?.direction;
@@ -4491,23 +5369,49 @@ function createValidator(host) {
           const directionFile = path.join(specResolvedRoot, directionDeclared);
           if (host.exists(directionFile)) directionDoc = parseJsonFile(directionFile, slash(directionDeclared), "§7", "DIRECTION_JSON");
         }
+        const checkedDirectionClaims = new Set();
+        for (const group of ["colors", "thresholds", "timing"]) {
+          for (const key of Object.keys(isObject(directionDoc?.constraints?.[group]) ? directionDoc.constraints[group] : {})) {
+            checkedDirectionClaims.add(`constraints.${group}.${key}`);
+          }
+        }
+        const hasDirectionObservations = isObject(build?.evidence) && own(build.evidence, "direction_observations");
+        const directionObservations = Array.isArray(build?.evidence?.direction_observations) ? build.evidence.direction_observations : undefined;
+        if (checkedDirectionClaims.size > 0 && !hasDirectionObservations) {
+          error("BUILD_DIRECTION_OBSERVATIONS_MISSING", "§7/§9.10", "opengdd-build.json", `evidence.direction_observations is required with one entry per declared observational direction claim: ${[...checkedDirectionClaims].sort().join(", ")}`);
+        } else if (checkedDirectionClaims.size === 0 && hasDirectionObservations) {
+          error("BUILD_DIRECTION_OBSERVATIONS_UNEXPECTED", "§7/§9.10", "opengdd-build.json", "evidence.direction_observations is present but the certifying spec declares no constraints.* direction claims");
+        }
+        if (directionObservations) {
+          const seen = new Set();
+          for (const observation of directionObservations) {
+            if (!isObject(observation) || typeof observation.claim !== "string") continue;
+            if (seen.has(observation.claim)) {
+              error("BUILD_DIRECTION_OBSERVATION_DUPLICATE", "§7/§9.10", "opengdd-build.json", `evidence.direction_observations repeats claim ${JSON.stringify(observation.claim)}; exactly one observation is required per declared constraint`);
+            }
+            seen.add(observation.claim);
+            const resolved = directionDoc ? resolveDirectionPath(directionDoc, observation.claim) : undefined;
+            if (!resolved || !resolved.kind.startsWith("constraints.")) {
+              error("BUILD_DIRECTION_OBSERVATION_DANGLING", "§7/§9.10", "opengdd-build.json", `evidence.direction_observations names ${JSON.stringify(observation.claim)}, which does not resolve to a declared constraints.* claim in the certifying spec's direction.json`);
+            }
+          }
+          for (const claim of checkedDirectionClaims) {
+            if (!seen.has(claim)) error("BUILD_DIRECTION_OBSERVATION_MISSING", "§7/§9.10", "opengdd-build.json", `evidence.direction_observations has no observation for declared claim ${JSON.stringify(claim)}`);
+          }
+        }
         const hasJudgedClaims = isObject(directionDoc) && DIRECTION_JUDGED_KINDS.size &&
           [...DIRECTION_JUDGED_KINDS].some(kind => isObject(directionDoc[kind]) && Object.keys(directionDoc[kind]).length > 0);
-        const hasCertifiedPins = isObject(directionDoc) &&
-          Object.values(directionDoc.constraints?.palette ?? {}).some(entry => isObject(entry) && entry.must_match === true);
-
+        // A `certified_pins` branch used to sit here. It was already dead —
+        // §9.10 makes `direction_result` a closed object whose only legal field
+        // name is `judged`, and `opengdd-build.schema.json` declares no
+        // `certified_pins` — and the palette batch drops it rather than
+        // carrying it forward through the rename.
         const result = build?.direction_result;
         if (hasJudgedClaims && !isObject(result?.judged)) {
           error("BUILD_DIRECTION_RESULT_MISSING", "§7", "opengdd-build.json", "the certifying spec declares judged direction claims; direction_result.judged is required");
         }
         if (!hasJudgedClaims && isObject(result?.judged)) {
           error("BUILD_DIRECTION_RESULT_UNEXPECTED", "§7", "opengdd-build.json", "direction_result.judged is present but the certifying spec declares no judged direction claims");
-        }
-        if (hasCertifiedPins && !Array.isArray(result?.certified_pins)) {
-          error("BUILD_CERTIFIED_PINS_MISSING", "§7", "opengdd-build.json", "the certifying spec declares a must_match:true palette claim; direction_result.certified_pins is required");
-        }
-        if (!hasCertifiedPins && Array.isArray(result?.certified_pins)) {
-          error("BUILD_CERTIFIED_PINS_UNEXPECTED", "§7", "opengdd-build.json", "direction_result.certified_pins is present but the certifying spec declares no must_match:true palette claim");
         }
         if (isObject(result?.judged)) {
           const assessed = new Set(Array.isArray(result.judged.assessed) ? result.judged.assessed : []);
@@ -4521,15 +5425,6 @@ function createValidator(host) {
             if (!assessed.has(claimPath)) error("BUILD_DIRECTION_ADHERENT_NOT_ASSESSED", "§7", "opengdd-build.json", `direction_result.judged.adherent names ${JSON.stringify(claimPath)}, which is not in .assessed`);
           }
         }
-        if (Array.isArray(result?.certified_pins) && isObject(directionDoc)) {
-          for (const pin of result.certified_pins) {
-            if (!isObject(pin) || typeof pin.path !== "string") continue;
-            const resolved = resolveDirectionPath(directionDoc, pin.path);
-            if (!resolved || resolved.kind !== "constraints.palette" || resolved.entry?.must_match !== true) {
-              error("BUILD_CERTIFIED_PIN_DANGLING", "§7", "opengdd-build.json", `direction_result.certified_pins names ${JSON.stringify(pin.path)}, which is not a must_match:true constraints.palette claim in the certifying spec`);
-            }
-          }
-        }
       }
     }
 
@@ -4541,7 +5436,7 @@ function createValidator(host) {
       }
     }
 
-    return { packageRoot: buildFile, packageName: build?.spec?.id ?? path.basename(buildFile) };
+    return { packageRoot: buildFile, packageName: build?.spec?.id ?? path.basename(buildFile), indeterminate };
   }
 
   function finish(result) {
@@ -4551,9 +5446,18 @@ function createValidator(host) {
     });
     const errors = findings.filter(item => item.severity === "error").length;
     const warnings = findings.filter(item => item.severity === "warning").length;
+    // SPEC §2d makes a build record's subject the consistency between the
+    // record and the package bytes, and SPEC §7 makes eight of those checks
+    // mandatory. A run that never read the package could not decide them, so
+    // its result is neither pass nor fail: the verdict is NOT CHECKED and
+    // `valid` is null. Zero errors is not a passing verdict when most of the
+    // subject was never looked at.
+    const indeterminate = result.indeterminate === true && errors === 0;
+    const verdict = errors ? "FAIL" : indeterminate ? "NOT CHECKED" : warnings ? "PASS WITH WARNINGS" : "PASS";
     return {
       ...result,
-      valid: errors === 0,
+      valid: indeterminate ? null : errors === 0,
+      verdict,
       summary: { errors, warnings, findings: findings.length },
       findings,
       skipped
@@ -4589,12 +5493,13 @@ export function formatReport(run, jsonMode) {
     validator: `OpenGDD v${SPEC_VERSION} ${isBuild ? "build" : "package"} conformance`,
     [isBuild ? "build" : "package"]: subject,
     valid: run.valid,
+    verdict: run.verdict,
     summary: run.summary,
     findings: run.findings
   };
   if (jsonMode) return `${JSON.stringify(output, null, 2)}\n`;
 
-  const status = run.summary.errors ? "FAIL" : run.summary.warnings ? "PASS WITH WARNINGS" : "PASS";
+  const status = run.verdict;
   const lines = [
     `OpenGDD v${SPEC_VERSION} ${isBuild ? "build" : "package"} validation`,
     `${isBuild ? "Build" : "Package"}: ${run.packageName} (${run.packageRoot})`,

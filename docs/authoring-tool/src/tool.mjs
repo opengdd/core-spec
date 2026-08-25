@@ -1,35 +1,37 @@
-import { analyzePackage, resolveAnchor } from "opengdd-analysis";
-import { unfencedLines } from "opengdd-syntax";
-import { createFileMapHost } from "opengdd-file-map-host";
-import { validatePackage } from "opengdd-validation";
-import { classifyCreation, insertJsonValue, parseJsonScalar } from "./creation.mjs";
-import { deleteDraft, draftNeedsExampleUpdate, listDrafts, saveDraft } from "./drafts.mjs";
-import { createScaffoldPackage, packageIdFromTitle } from "./package.mjs";
-import { readZip } from "./zip.mjs";
+import { resolveAnchor } from "opengdd-analysis";
+import { createAnalysisSession } from "./analysis-session.mjs";
+import {
+  classifyCreation, collectionNameTaken, collectionRecordNameTaken,
+  collectionRecordText, kebabName, parseJsonScalar, rankCollectionCreationActions
+} from "./creation.mjs";
+import { createEditorSurface } from "./editor-surface.mjs";
+import { minimalTextChange } from "./edits.mjs";
+import { clampedPositionToOffset, lineBounds, offsetToPosition } from "./text-coordinates.mjs";
+import { createScaffoldPackage, nextAvailablePackageId, packageIdFromTitle } from "./package.mjs";
+import { createPackageSession } from "./package-session.mjs";
+import { createPanelHost } from "./panel-host.mjs";
+import { createSelectionBus } from "./selection.mjs";
 import { AUTHORING_TOOL_VERSION } from "opengdd-authoring-version";
-import { writeZip } from "./zip-write.mjs";
+import { CONFORMANCE_SCHEMA_NAMES } from "./loaders.mjs";
+import { CREATION_COPY } from "./copy/creation-copy.mjs";
+import { WIDGET_COPY } from "./copy/widget-copy.mjs";
+import { WORKBENCH_COPY } from "./copy/workbench-copy.mjs";
+import { rollUpCollectionFindings } from "./outline.mjs";
 
 export { AUTHORING_TOOL_VERSION } from "opengdd-authoring-version";
 
-const SCHEMA_NAMES = ["manifest.schema.json", "tuning.schema.json", "personalization.schema.json", "direction.schema.json", "opengdd-build.schema.json"];
-const HIDDEN_LEGACY_DRAFTS = new Set(["lantern-demo"]);
+const SCHEMA_NAMES = CONFORMANCE_SCHEMA_NAMES;
 const MAX_WRAPPED_TEXT_CHARS = 200_000;
-
-// Lines rendered beyond the viewport in the large-file, unwrapped fallback.
-const OVERLAY_MARGIN = 60;
-
-const KIND_LABELS = {
-  tunable: "tunable",
-  constant: "constant",
-  section: "section",
-  "acceptance-test": "acceptance test",
-  descriptor: "descriptor",
-  question: "personalization question",
-  name: "name",
-  "collection-record": "collection record",
-  file: "file",
-  rule: "rule"
-};
+const REGION_OWNERS = new WeakMap();
+const CAPABILITY_NAMES = Object.freeze([
+  "protectedFiles", "workbenchLabels", "hostUndo", "delete", "coldStart"
+]);
+const PROTECTED_PACKAGE_FILES = new Set([
+  "manifest.json", "tuning.json", "01-overview.md", "02-mechanics.md",
+  "03-content.md", "04-presentation.md", "05-build-plan.md"
+]);
+const OUTLINE_GROUPS = WIDGET_COPY.outlineGroups;
+const OUTLINE_CREATE_ITEMS = CREATION_COPY.outlineItems;
 
 const escapeHtml = (value = "") => String(value)
   .replaceAll("&", "&amp;")
@@ -40,173 +42,26 @@ const escapeHtml = (value = "") => String(value)
 
 const parentPath = path => path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "";
 const basename = path => path.slice(path.lastIndexOf("/") + 1);
-const debounce = (action, delay) => {
-  let timer;
-  const debounced = (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => action(...args), typeof delay === "function" ? delay() : delay);
-  };
-  debounced.cancel = () => clearTimeout(timer);
-  return debounced;
-};
-
 function normalizePath(value) {
   const path = value.trim().replaceAll("\\", "/").replace(/^\/+|\/+$/g, "").replace(/\/{2,}/g, "/");
   if (!path || path.includes("\0") || path.split("/").some(part => part === "." || part === "..")) {
-    throw new Error("Use a package-relative path without . or .. segments.");
+    throw new Error(WIDGET_COPY.packageRelativePath);
   }
   return path;
 }
 
-function foldersFor(files, explicit = new Set()) {
-  const folders = new Set(explicit);
-  for (const path of files.keys()) {
-    const parts = path.split("/");
-    for (let index = 1; index < parts.length; index += 1) folders.add(parts.slice(0, index).join("/"));
-  }
-  return folders;
+function outlineIcon(group) {
+  const common = `class="opengdd-author-outline-icon" data-outline-icon="${group.id}" aria-hidden="true" focusable="false" viewBox="0 0 16 16"`;
+  if (group.id === "identifiers") return `<svg ${common}><text x="8" y="12" text-anchor="middle">@</text></svg>`;
+  if (group.id === "tuning-keys") return `<svg ${common}><path d="M2 4h5m3 0h4M2 8h1m3 0h8M2 12h7m3 0h2M7 2v4M3 6v4m6 0v4"/></svg>`;
+  if (group.id === "collections") return `<svg ${common}><path d="M2 3h12v10H2zM2 7h12M6 3v10m4-10v10"/></svg>`;
+  if (group.id === "descriptors") return `<svg ${common}><path d="M8 2l6 6-6 6-6-6z"/></svg>`;
+  if (group.id === "palettes") return `<svg ${common}><path d="M2 3h8v8H2zM6 7h8v6H6z"/></svg>`;
+  return "";
 }
 
-function packageFrom(value, decodeBinary) {
-  // Accepted file shapes: a Map, entry pairs (the browser-draft wire shape),
-  // or {path, text|base64} objects (the serialized wire shape).
-  const files = value.files instanceof Map
-    ? new Map(value.files)
-    : new Map((value.files ?? []).map(file => Array.isArray(file) ? [file[0], file[1]] : [file.path,
-      typeof file.text === "string" ? file.text : typeof file.base64 === "string" ? decodeBinary(file.base64) : null
-    ]));
-  return {
-    id: value.id,
-    title: value.title ?? value.name ?? value.id,
-    // Built-in drafts retain the exact example revision they forked from.
-    // A missing value is intentionally preserved for pre-revision drafts so
-    // the UI can warn instead of silently treating them as current.
-    baseRevision: typeof value.baseRevision === "string" ? value.baseRevision : null,
-    repositoryPath: value.path ?? null,
-    // Reader links point at repository files, so only paths that came from the
-    // repository may offer one — a file created or moved here has no such twin.
-    repositoryFiles: new Set(value.path ? files.keys() : []),
-    files,
-    folders: foldersFor(files, new Set(value.folders ?? []))
-  };
-}
-
-// The engine's kinds are a closed set, but the tool is embeddable and may meet
-// a newer engine; an unrecognised kind falls back to the layer-1 vocabulary.
-function kindClass(kind) {
-  return ["tunable", "constant", "section", "acceptance-test", "descriptor", "question", "collection-record", "rule", "file"].includes(kind)
-    ? kind
-    : "name";
-}
-
-function anchorClass(anchor) {
-  const kind = anchor.classification === "known" ? kindClass(anchor.definitions[0]?.kind) : anchor.classification;
-  return `opengdd-author-anchor opengdd-author-anchor--${anchor.classification} opengdd-author-kind--${kind}`;
-}
-
-function anchorsByLine(anchors) {
-  const byLine = new Map();
-  for (const anchor of anchors) {
-    const line = anchor.range.start.line;
-    const current = byLine.get(line) ?? [];
-    current.push(anchor);
-    byLine.set(line, current);
-  }
-  for (const line of byLine.values()) line.sort((left, right) => left.range.start.character - right.range.start.character);
-  return byLine;
-}
-
-function renderOverlayLine(line, anchors) {
-  if (!anchors) return escapeHtml(line);
-  let cursor = 0;
-  let output = "";
-  for (const anchor of anchors) {
-    const start = anchor.range.start.character;
-    const end = anchor.range.end.character;
-    if (start < cursor) continue;
-    output += escapeHtml(line.slice(cursor, start));
-    output += `<span class="${anchorClass(anchor)}" data-anchor-name="${escapeHtml(anchor.name)}">${escapeHtml(line.slice(start, end))}</span>`;
-    cursor = end;
-  }
-  return output + escapeHtml(line.slice(cursor));
-}
-
-function lineStartsFor(text) {
-  const starts = [0];
-  for (let index = text.indexOf("\n"); index >= 0; index = text.indexOf("\n", index + 1)) starts.push(index + 1);
-  return starts;
-}
-
-function lineAt(text, starts, index) {
-  const end = index + 1 < starts.length ? starts[index + 1] - 1 : text.length;
-  return text.slice(starts[index], end);
-}
-
-function updateLineStarts(starts, previous, next, selection) {
-  if (!starts.length || !selection) return lineStartsFor(next);
-  const { start, end } = selection;
-  const insertedLength = next.length - previous.length + end - start;
-  if (insertedLength < 0
-    || previous.slice(start, end).includes("\n")
-    || next.slice(start, start + insertedLength).includes("\n")) return lineStartsFor(next);
-  let low = 0;
-  let high = starts.length - 1;
-  while (low < high) {
-    const middle = Math.ceil((low + high) / 2);
-    if (starts[middle] <= start) low = middle; else high = middle - 1;
-  }
-  const delta = insertedLength - (end - start);
-  for (let index = low + 1; index < starts.length; index += 1) starts[index] += delta;
-  return starts;
-}
-
-function textRange(text, index, length) {
-  const before = text.slice(0, index);
-  const line = (before.match(/\n/g) ?? []).length;
-  const character = index - before.lastIndexOf("\n") - 1;
-  return {
-    start: { line, character },
-    end: { line, character: character + length }
-  };
-}
-
-// Unknown names the engine does not yet index — the raw material of a
-// quick-fix. Fence handling comes from the shared syntax helper so this can
-// never drift from what the engine and the validator consider prose.
-function creationMentions(text, definitionsByName, file) {
-  const anchors = [];
-  for (const item of unfencedLines(text)) {
-    for (const match of item.text.matchAll(/`([^`\r\n]+)`/g)) {
-      const resolution = resolveAnchor(definitionsByName, match[1]);
-      if (resolution.classification !== "unknown") continue;
-      const character = match.index + 1;
-      anchors.push({
-        ...resolution,
-        file,
-        range: { start: { line: item.line - 1, character }, end: { line: item.line - 1, character: character + match[1].length } }
-      });
-    }
-  }
-  return anchors;
-}
-
-// Scanned backwards from the caret rather than over the text before it: this
-// runs on every keystroke, and a whole chapter must not be copied to find out
-// that the word under the caret is not a name.
-function completionContext(textarea) {
-  const value = textarea.value;
-  const caret = textarea.selectionStart ?? value.length;
-  for (let index = caret - 1; index >= 0; index -= 1) {
-    if (value[index] === "`") return { backtick: index, caret, prefix: value.slice(index + 1, caret) };
-    if (/\s/.test(value[index])) return null;
-  }
-  return null;
-}
-
-function valueText(value) {
-  if (value === undefined) return "";
-  const rendered = JSON.stringify(value);
-  return rendered === undefined ? String(value) : rendered;
+function severityIcon(label) {
+  return `<svg class="opengdd-author-outline-severity-icon" role="img" aria-label="${label}" viewBox="0 0 16 16"><path d="M8 2l6 12H2L8 2zm0 4v4m0 2v.5"/></svg>`;
 }
 
 export function mountAuthoringTool(rootElement, host = {}) {
@@ -220,119 +75,307 @@ export function mountAuthoringTool(rootElement, host = {}) {
   const listeners = new view.AbortController();
   const on = (element, type, listener) => element.addEventListener(type, listener, { signal: listeners.signal });
   const decodeBinary = encoded => Uint8Array.from(view.atob(encoded), character => character.charCodeAt(0));
+  const regions = host.regions;
+  if (host.capabilities !== undefined && (host.capabilities === null || typeof host.capabilities !== "object" || Array.isArray(host.capabilities))) {
+    throw new TypeError("host.capabilities must be an object when supplied.");
+  }
+  const suppliedCapabilities = host.capabilities;
+  if (suppliedCapabilities) {
+    for (const name of Object.keys(suppliedCapabilities)) {
+      if (!CAPABILITY_NAMES.includes(name)) throw new TypeError(`host.capabilities.${name} is not supported.`);
+      if (typeof suppliedCapabilities[name] !== "boolean") throw new TypeError(`host.capabilities.${name} must be a boolean.`);
+    }
+  }
+  const capabilityDefault = suppliedCapabilities === undefined && Boolean(regions);
+  const capabilities = Object.freeze(Object.fromEntries(CAPABILITY_NAMES.map(name => [
+    name, suppliedCapabilities ? suppliedCapabilities[name] === true : capabilityDefault
+  ])));
+  const regionOwner = {};
+  const namedRegions = [];
+  if (regions) {
+    for (const name of ["explorer", "prose", "status"]) {
+      if (!(regions[name] instanceof view.Element)) throw new TypeError(`host.regions.${name} must be an Element.`);
+      namedRegions.push([name, regions[name]]);
+    }
+    if (regions.outline !== undefined && !(regions.outline instanceof view.Element)) {
+      throw new TypeError("host.regions.outline must be an Element when supplied.");
+    }
+    if (regions.outline) namedRegions.push(["outline", regions.outline]);
+    if (regions.context !== undefined && !(regions.context instanceof view.Element)) {
+      throw new TypeError("host.regions.context must be an Element when supplied.");
+    }
+    if (regions.context) namedRegions.push(["context", regions.context]);
+    if (regions.inspector !== undefined && !(regions.inspector instanceof view.Element)) {
+      throw new TypeError("host.regions.inspector must be an Element when supplied.");
+    }
+    if (regions.inspector) namedRegions.push(["inspector", regions.inspector]);
+    if (regions.undo !== undefined && !(regions.undo instanceof view.Element)) {
+      throw new TypeError("host.regions.undo must be an Element when supplied.");
+    }
+    if (regions.undo) namedRegions.push(["undo", regions.undo]);
+    const regionNames = new Map();
+    for (const [name, element] of namedRegions) {
+      const conflict = regionNames.get(element);
+      if (conflict) throw new Error(`host.regions.${name} conflicts with host.regions.${conflict}.`);
+      regionNames.set(element, name);
+    }
+    for (const [name, element] of namedRegions) {
+      if (REGION_OWNERS.has(element)) throw new Error(`host.regions.${name} is already owned by another authoring instance.`);
+    }
+    for (const [, element] of namedRegions) REGION_OWNERS.set(element, regionOwner);
+  }
   let destroyed = false;
+  const ownedChildren = new Map();
   rootElement.classList.add("opengdd-authoring");
   rootElement.innerHTML = `
     <header class="opengdd-author-topbar">
-      <div class="opengdd-author-identity"><p class="opengdd-author-kicker">OpenGDD</p><div class="opengdd-author-heading"><${headingTag} class="opengdd-author-title">Authoring tool</${headingTag}><span class="opengdd-author-version">Preview · v${AUTHORING_TOOL_VERSION}</span></div></div>
-      <div class="opengdd-author-loaders" aria-label="Package controls">
+      <div class="opengdd-author-identity"><p class="opengdd-author-kicker">${WIDGET_COPY.brand}</p><div class="opengdd-author-heading"><${headingTag} class="opengdd-author-title">${WIDGET_COPY.title}</${headingTag}><span class="opengdd-author-version">${WIDGET_COPY.previewVersion(AUTHORING_TOOL_VERSION)}</span></div></div>
+      <div class="opengdd-author-loaders" aria-label="${WIDGET_COPY.packageControls}">
         <div class="opengdd-author-source">
-          <p class="opengdd-author-source-label">Package</p>
+          <p class="opengdd-author-source-label">${WIDGET_COPY.package}</p>
           <div class="opengdd-author-source-row">
-            <select data-role="package" aria-label="Package" disabled><option value="">Loading packages…</option></select>
-            <button type="button" data-action="new-package">New package</button>
-            <button type="button" data-action="package-delete" data-role="package-delete" hidden>Delete</button>
+            <select data-role="package" aria-label="${WIDGET_COPY.package}" disabled><option value="">${WIDGET_COPY.loadingPackages}</option></select>
+            <button type="button" data-action="new-package">${WIDGET_COPY.newPackage}</button>
+            <span class="opengdd-author-delete-anchor">
+              <button type="button" data-action="package-delete" data-role="package-delete" hidden>${WIDGET_COPY.delete}</button>
+              <div class="opengdd-author-draft-confirm" data-role="package-confirm" role="alertdialog" aria-label="${WIDGET_COPY.confirmPackageAction}" hidden></div>
+            </span>
           </div>
         </div>
         <div class="opengdd-author-source">
-          <p class="opengdd-author-source-label">Package file</p>
+          <p class="opengdd-author-source-label">${WIDGET_COPY.packageFile}</p>
           <div class="opengdd-author-source-row">
-            <label class="opengdd-author-import">Import ZIP<input data-role="zip" type="file" accept=".zip,application/zip"></label>
-            <button type="button" data-action="export">Export ZIP</button>
+            <label class="opengdd-author-import">${WIDGET_COPY.importZip}<input data-role="zip" type="file" accept=".zip,application/zip"></label>
+            <button type="button" data-action="export">${WIDGET_COPY.exportZip}</button>
           </div>
         </div>
-        <div class="opengdd-author-draft-confirm" data-role="package-confirm" role="alertdialog" aria-label="Confirm package action" hidden></div>
+        ${regions ? "" : `<div class="opengdd-author-widget-drawer-controls">
+          <button type="button" data-action="widget-outline" aria-expanded="false">${WORKBENCH_COPY.openOutline}</button>
+          <button type="button" data-action="widget-inspector" aria-expanded="false">${WORKBENCH_COPY.openInspector}</button>
+        </div>`}
       </div>
       <form class="opengdd-author-package-form" data-role="package-form" hidden>
-        <label>Package title<input data-role="package-title" required autocomplete="off"></label>
-        <label>Package id<input data-role="package-id" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" autocomplete="off"></label>
-        <button type="submit">Create package</button><button type="button" data-action="package-cancel">Cancel</button>
+        <label>${WIDGET_COPY.packageTitle}<input data-role="package-title" required autocomplete="off"></label>
+        <label>${WIDGET_COPY.packageId}<input data-role="package-id" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" autocomplete="off"></label>
+        <button type="submit">${WIDGET_COPY.createPackage}</button><button type="button" data-action="package-cancel">${WIDGET_COPY.cancel}</button>
       </form>
       <p class="opengdd-author-notice" data-role="notice" aria-live="polite"></p>
     </header>
     <div class="opengdd-author-workspace">
-      <aside class="opengdd-author-tree-panel" aria-label="Package files">
-        <header><div><p class="opengdd-author-kicker">Package</p><h2 data-role="title"></h2></div></header>
+      <aside class="opengdd-author-tree-panel" aria-label="${WIDGET_COPY.packageFiles}">
+        <header><div><p class="opengdd-author-kicker">${WIDGET_COPY.package}</p><h2 data-role="title"></h2></div></header>
         <div class="opengdd-author-tree-actions">
-          <button type="button" data-action="new-file">+ File</button>
-          <button type="button" data-action="new-folder">+ Folder</button>
-          <button type="button" data-action="rename" disabled>Rename</button>
+          <button type="button" data-action="new-file">${capabilities.workbenchLabels ? WORKBENCH_COPY.newFile : WIDGET_COPY.explorerActions.newFile}</button>
+          <button type="button" data-action="new-folder">${capabilities.workbenchLabels ? WORKBENCH_COPY.newFolder : WIDGET_COPY.explorerActions.newFolder}</button>
+          <button type="button" data-action="rename" disabled>${WIDGET_COPY.explorerActions.rename}</button>
         </div>
         <form class="opengdd-author-inline-form" data-role="tree-form" hidden>
           <label><span data-role="tree-prompt"></span><input data-role="tree-input" autocomplete="off"></label>
-          <button type="submit">Save</button><button type="button" data-action="tree-cancel">Cancel</button>
+          <button type="submit">${WIDGET_COPY.explorerActions.save}</button><button type="button" data-action="tree-cancel">${WIDGET_COPY.cancel}</button>
         </form>
-        <div class="opengdd-author-tree" data-role="tree" tabindex="0"><p>Loading package…</p></div>
-        <p class="opengdd-author-drop-note">Drop a zip here, or drag an item onto a folder to move it.</p>
+        <div class="opengdd-author-tree" data-role="tree" tabindex="0"><p>${WIDGET_COPY.loadingPackage}</p></div>
+        <p class="opengdd-author-drop-note">${WIDGET_COPY.dropZip}</p>
       </aside>
-      <section class="opengdd-author-editor-panel" aria-label="File editor">
-        <header class="opengdd-author-file-heading"><span class="opengdd-author-file-path" data-role="path"></span><span class="opengdd-author-file-meta"><a data-role="reader" hidden>Open in reader</a><span data-role="mode"></span></span></header>
+      <section class="opengdd-author-editor-panel" aria-label="${WIDGET_COPY.fileEditor}">
+        <header class="opengdd-author-file-heading"><span class="opengdd-author-file-path" data-role="path"></span><span class="opengdd-author-file-meta"><a data-role="reader" hidden>${WIDGET_COPY.openInReader}</a><span data-role="mode"></span></span></header>
         <div class="opengdd-author-editor" data-role="editor">
           <pre class="opengdd-author-highlight" data-role="highlight" aria-hidden="true"></pre>
-          <textarea data-role="textarea" aria-label="Markdown source" wrap="soft" spellcheck="false"></textarea>
+          <textarea data-role="textarea" aria-label="${WIDGET_COPY.markdownSource}" wrap="soft" spellcheck="false"></textarea>
           <pre class="opengdd-author-json" data-role="json" tabindex="0"></pre>
           <div class="opengdd-author-empty" data-role="empty"></div>
           <div class="opengdd-author-caret-mirror" data-role="mirror" aria-hidden="true"></div>
-          <ul class="opengdd-author-completions" data-role="completions" aria-label="Completion results"></ul>
+          <ul class="opengdd-author-completions" data-role="completions" aria-label="${WIDGET_COPY.completionResults}"></ul>
           <div class="opengdd-author-quickfix" data-role="quickfix" role="dialog" hidden></div>
         </div>
       </section>
-      <aside class="opengdd-author-inspector" aria-label="Context and validation">
-        <section>
-          <p class="opengdd-author-kicker">In context</p>
-          <div data-role="hover" aria-live="polite"><p class="opengdd-author-muted">Hover a colored name, or move the caret into one.</p></div>
-        </section>
+      ${regions ? "" : `<div class="opengdd-author-widget-inspector-slot" data-widget-drawer="inspector">`}
+      <aside class="opengdd-author-inspector" aria-label="${WIDGET_COPY.contextAndValidation}">
+        <section class="opengdd-author-panel-inspector" data-role="panel-inspector" aria-live="polite"></section>
         <details class="opengdd-author-diagnostics" open>
-          <summary><span>Validation</span><span data-role="diagnostic-summary">Checking…</span></summary>
-          <div data-role="diagnostics" aria-live="polite"><p class="opengdd-author-muted">Checking package conformance…</p></div>
+          <summary><span>${WIDGET_COPY.validation}</span><span data-role="diagnostic-summary">${WIDGET_COPY.checkingEllipsis}</span></summary>
+          <div data-role="diagnostics" aria-live="polite"><p class="opengdd-author-muted">${WIDGET_COPY.checkingPackage}</p></div>
         </details>
       </aside>
+      ${regions ? "" : `</div>`}
+      ${regions ? "" : `<aside class="opengdd-author-widget-drawer opengdd-author-widget-drawer--outline" data-widget-drawer="outline" hidden>
+        <div data-widget-region="outline"></div>
+      </aside>`}
     </div>
     <footer class="opengdd-author-status" data-role="status" aria-live="polite"></footer>`;
 
-  const find = role => rootElement.querySelector(`[data-role="${role}"]`);
+  const workspace = rootElement.querySelector(".opengdd-author-workspace");
+  const treePanel = workspace.querySelector(".opengdd-author-tree-panel");
+  const editorPanel = workspace.querySelector(".opengdd-author-editor-panel");
+  const inspector = workspace.querySelector(".opengdd-author-inspector");
+  const internalOutlineRegion = regions ? null : workspace.querySelector('[data-widget-region="outline"]');
+  const internalInspectorDrawer = regions ? null : workspace.querySelector('[data-widget-drawer="inspector"]');
+  const status = rootElement.querySelector('[data-role="status"]');
+  if (capabilities.delete) {
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.dataset.action = "delete";
+    deleteButton.textContent = WIDGET_COPY.deleteAction;
+    treePanel.querySelector(".opengdd-author-tree-actions").append(deleteButton);
+  }
+  const regionalElements = regions ? [regions.explorer, regions.prose, regions.outline, regions.context, regions.inspector, regions.status, regions.undo].filter(Boolean) : [];
+  if (regions) {
+    regions.explorer.replaceChildren(treePanel);
+    inspector.querySelector(".opengdd-author-diagnostics").classList.add("opengdd-author-diagnostics--regional");
+    const panelInspector = inspector.firstElementChild;
+    if (regions.inspector) regions.inspector.replaceChildren(panelInspector);
+    else if (regions.context) regions.context.replaceChildren(panelInspector);
+    regions.prose.replaceChildren(editorPanel, inspector);
+    if (regions.outline) regions.outline.innerHTML = `<nav class="opengdd-author-outline" aria-label="${WIDGET_COPY.outlineLabel}"></nav>`;
+    regions.status.replaceChildren(status);
+    if (regions.undo && capabilities.hostUndo) {
+      regions.undo.innerHTML = `<div class="opengdd-author-history" aria-label="${WORKBENCH_COPY.undoHistory}">
+        <button type="button" data-action="undo" disabled>${WORKBENCH_COPY.nothingToUndo}</button>
+        <span>${WORKBENCH_COPY.undoHelp}</span>
+      </div>`;
+    }
+    workspace.remove();
+    for (const element of regionalElements) element.classList.add("opengdd-authoring", "opengdd-author-region");
+  }
+  if (internalOutlineRegion) internalOutlineRegion.innerHTML = `<nav class="opengdd-author-outline" aria-label="${WIDGET_COPY.outlineLabel}"></nav>`;
+  ownedChildren.set(rootElement, new Set(rootElement.childNodes));
+  for (const element of regionalElements) ownedChildren.set(element, new Set(element.childNodes));
+
+  const mountElements = [rootElement, ...regionalElements];
+  let workbenchScope = rootElement;
+  while (regions && workbenchScope && !mountElements.every(element => workbenchScope.contains(element))) {
+    workbenchScope = workbenchScope.parentElement;
+  }
+  const find = role => mountElements.map(element => element.querySelector(`[data-role="${role}"]`)).find(Boolean);
+  const findAction = action => mountElements.map(element => element.querySelector(`[data-action="${action}"]`)).find(Boolean);
   const ui = {
     packageSelect: find("package"), packageDelete: find("package-delete"), packageConfirm: find("package-confirm"), notice: find("notice"),
     packageForm: find("package-form"), packageTitle: find("package-title"), packageId: find("package-id"),
-    title: find("title"), tree: find("tree"), treeForm: find("tree-form"), treePrompt: find("tree-prompt"),
+    title: find("title"), tree: find("tree"), treeForm: find("tree-form"), treePrompt: find("tree-prompt"), treeParent: null,
     treeInput: find("tree-input"), path: find("path"), reader: find("reader"), mode: find("mode"), editor: find("editor"),
     highlight: find("highlight"), textarea: find("textarea"), json: find("json"), empty: find("empty"),
-    mirror: find("mirror"), completions: find("completions"), quickfix: find("quickfix"), hover: find("hover"), status: find("status"), zip: find("zip"),
-    diagnostics: find("diagnostics"), diagnosticSummary: find("diagnostic-summary")
+    mirror: find("mirror"), completions: find("completions"), quickfix: find("quickfix"), panelInspector: find("panel-inspector"), status: find("status"), zip: find("zip"),
+    diagnostics: find("diagnostics"), diagnosticSummary: find("diagnostic-summary"), collectionDialog: null,
+    outline: (regions?.outline ?? internalOutlineRegion)?.querySelector(".opengdd-author-outline") ?? null,
+    rename: findAction("rename"), delete: findAction("delete"), undo: findAction("undo"),
+    editorPanel,
+    coldStart: null
   };
-  const initialPackage = packageFrom({ id: "", title: "Loading package…", files: [] }, decodeBinary);
+  if (capabilities.coldStart) {
+    ui.coldStart = document.createElement("div");
+    ui.coldStart.className = "opengdd-workbench-cold-start";
+    ui.coldStart.hidden = true;
+    ui.coldStart.innerHTML = `<button type="button" data-action="cold-new">${WORKBENCH_COPY.coldNew}</button>
+      <button type="button" data-action="cold-example">${WORKBENCH_COPY.coldExample}</button>`;
+    const coldStartParent = regions?.prose ?? rootElement;
+    coldStartParent.prepend(ui.coldStart);
+    ownedChildren.get(coldStartParent).add(ui.coldStart);
+  }
   const state = {
-    package: initialPackage,
-    analysis: analyzePackage(initialPackage.files),
+    package: null,
+    authoringView: null,
     openPath: "",
     selected: null,
     collapsed: new Set(),
-    completion: -1,
     formAction: null,
     pendingDelete: null,
     builtins: [],
     drafts: [],
-    packageRevision: 0,
+    options: [],
+    hasDraft: false,
+    isBuiltin: false,
     dragged: null,
-    hoverName: "",
-    quickfix: null,
-    validation: { status: "pending", run: null }
+    validation: { status: "pending", run: null },
+    coldStart: false,
+    saveStatus: WORKBENCH_COPY.notSaved,
+    outlineProblemsOnly: false,
+    outlineMenuOpen: false,
+    panelCreatorPrompt: "",
+    panelCreatorError: "",
+    outlineSelection: "",
+    outlineFallbackOpen: new Set(),
+    outlineCollectionCollapsed: new Set(host.outlineCollections?.collapsed?.() ?? [])
+  };
+  let editController;
+  let editSaveAnnouncements = [];
+  let editorSurface;
+  let editorBeforeInput = null;
+  let composingProse = false;
+  let proseCommitQueue = Promise.resolve();
+  let historyQueue = Promise.resolve();
+  let redoLabels = [];
+  let outlineFrame = 0;
+  let renderedOutlineModel = "";
+  let collectionDialog = null;
+  const selectionBus = createSelectionBus();
+  const packageListeners = new Set();
+  const validationListeners = new Set();
+  const panelAdvice = new Map();
+  let validationRevision = 0;
+  let panelPackageCancel = () => {};
+  let panelHost;
+  const widgetDrawer = regions ? null : {
+    open: "",
+    editorState: null,
+    outline: workspace.querySelector('[data-widget-drawer="outline"]'),
+    inspector: internalInspectorDrawer,
+    outlineToggle: rootElement.querySelector('[data-action="widget-outline"]'),
+    inspectorToggle: rootElement.querySelector('[data-action="widget-inspector"]')
   };
 
-  // One span per logical line keeps wrapping identical to the textarea while
-  // allowing a keystroke to replace only the line that changed. The full file
-  // remains in the overlay, so wrapped lines contribute their real height.
-  const overlay = {
-    lines: [], elements: [], markup: [], analysisLines: [], byLine: new Map(),
-    lineStarts: [], first: 0, last: -1, dirty: true
-  };
-  const overlayWidth = document.createElement("span");
-  overlayWidth.className = "opengdd-author-overlay-width";
-  let overlayFrame = 0;
-  let completionsPending = false;
-  let editorTextRevision = 0;
-  let editorAnchorCache = { analysis: null, path: "", revision: -1, anchors: [] };
-  let editorBeforeInput = null;
+  function captureWidgetEditorState() {
+    if (ui.textarea.hidden) return null;
+    return {
+      selection: {
+        start: ui.textarea.selectionStart ?? 0,
+        end: ui.textarea.selectionEnd ?? 0,
+        direction: ui.textarea.selectionDirection
+      },
+      scroll: { top: ui.textarea.scrollTop, left: ui.textarea.scrollLeft }
+    };
+  }
+
+  function restoreWidgetEditorState(snapshot) {
+    if (ui.textarea.hidden || !snapshot?.selection || !snapshot?.scroll) return;
+    const start = Math.min(Math.max(0, snapshot.selection.start), ui.textarea.value.length);
+    const end = Math.min(Math.max(0, snapshot.selection.end), ui.textarea.value.length);
+    const direction = ["forward", "backward", "none"].includes(snapshot.selection.direction) ? snapshot.selection.direction : "none";
+    ui.textarea.setSelectionRange(start, end, direction);
+    ui.textarea.scrollTop = snapshot.scroll.top;
+    ui.textarea.scrollLeft = snapshot.scroll.left;
+    editorSurface.scrollChanged();
+  }
+
+  function closeWidgetDrawer(returnFocus = false) {
+    if (!widgetDrawer?.open) return;
+    const name = widgetDrawer.open;
+    const toggle = name === "outline" ? widgetDrawer.outlineToggle : widgetDrawer.inspectorToggle;
+    widgetDrawer.outline.hidden = true;
+    widgetDrawer.inspector.classList.remove("opengdd-author-widget-drawer--open");
+    widgetDrawer.outlineToggle.setAttribute("aria-expanded", "false");
+    widgetDrawer.inspectorToggle.setAttribute("aria-expanded", "false");
+    widgetDrawer.open = "";
+    restoreWidgetEditorState(widgetDrawer.editorState);
+    widgetDrawer.editorState = null;
+    if (returnFocus) toggle.focus({ preventScroll: true });
+  }
+
+  function openWidgetDrawer(name) {
+    if (!widgetDrawer) return;
+    if (widgetDrawer.open === name) {
+      closeWidgetDrawer(true);
+      return;
+    }
+    if (!widgetDrawer.open) widgetDrawer.editorState = captureWidgetEditorState();
+    widgetDrawer.open = name;
+    widgetDrawer.outline.hidden = name !== "outline";
+    widgetDrawer.inspector.classList.toggle("opengdd-author-widget-drawer--open", name === "inspector");
+    widgetDrawer.outlineToggle.setAttribute("aria-expanded", String(name === "outline"));
+    widgetDrawer.inspectorToggle.setAttribute("aria-expanded", String(name === "inspector"));
+    if (name === "outline") {
+      renderOutline();
+      widgetDrawer.outline.querySelector("button, input, summary, [tabindex]")?.focus({ preventScroll: true });
+    } else widgetDrawer.inspector.querySelector("button, input, summary, [tabindex]")?.focus({ preventScroll: true });
+  }
 
   function report(message, error = false) {
     if (destroyed) return;
@@ -340,262 +383,443 @@ export function mountAuthoringTool(rootElement, host = {}) {
     ui.notice.classList.toggle("opengdd-author-is-error", error);
   }
 
-  // The pending package is captured at schedule time so a package switch
-  // cannot retarget an in-flight save to the wrong draft.
-  let pendingSave = null;
   let packageConfirmReturnFocus = null;
-  const persistDraft = debounce(async (announce = true) => {
-    const pending = pendingSave;
-    pendingSave = null;
-    if (!pending) return;
-    try {
-      await saveDraft(pending);
-      if (announce) report("Working copy saved in this browser.");
-      await refreshPackages(state.package.id);
-    } catch (error) {
-      report(`Browser draft could not be saved: ${error.message}`, true);
+  const packageSession = createPackageSession({
+    decodeBinary,
+    listBuiltins: typeof host.listPackages === "function" ? () => host.listPackages() : undefined,
+    loadBuiltin: id => host.loadPackage(id),
+    report,
+    isClosed: () => destroyed,
+    onEdit: () => {
+      if (destroyed) return;
+      packageSession.save({ announce: editSaveAnnouncements.shift()?.announce ?? true });
+      renderHistory();
     }
-  }, 450);
-  function saveWorkingCopy(announce = true) {
-    if (!state.package.id) return;
-    pendingSave = state.package;
-    persistDraft(announce);
-  }
-  // Fires a pending save immediately (package switch, destroy) so the last
-  // edits of the previous package are never dropped.
-  function flushWorkingCopy() {
-    if (!pendingSave) return;
-    persistDraft.cancel();
-    const pending = pendingSave;
-    pendingSave = null;
-    saveDraft(pending).then(() => refreshPackages(state.package.id)).catch(() => {});
-  }
+  });
+  Object.assign(state, packageSession.state());
+  editController = state.editController;
 
-  // Analysis and validation run in a worker so that neither can stand in
-  // front of a keystroke. A worker gets no import map, so the page resolves
-  // the module names and the worker imports the same three files. Where a
-  // browser will not give us one, everything runs here exactly as before.
-  const workerFiles = new Map();
-  let worker = null;
-  let postedSchemas = null;
-  try {
-    if (typeof view.Worker === "function" && typeof import.meta.resolve === "function") {
-      const workerUrl = new URL("./worker.mjs", import.meta.url);
-      workerUrl.search = new URL(import.meta.url).search;
-      worker = new view.Worker(workerUrl, { type: "module" });
-      on(worker, "message", event => receiveFromWorker(event.data));
-      on(worker, "error", () => stopWorker("it could not start"));
-      on(worker, "messageerror", () => stopWorker("a result could not be read"));
-      // Posted raw, not through postToWorker: this runs during the mount, and
-      // the catch below is the right handler for it — the fallback the rest of
-      // the mount then follows.
-      worker.postMessage({
-        type: "modules",
-        urls: {
-          analysis: import.meta.resolve("opengdd-analysis"),
-          validation: import.meta.resolve("opengdd-validation"),
-          fileMapHost: import.meta.resolve("opengdd-file-map-host")
+  const packageService = {};
+  Object.defineProperties(packageService, {
+    id: { enumerable: true, get: () => state.package.id },
+    title: { enumerable: true, get: () => state.package.title }
+  });
+  Object.assign(packageService, {
+    list: () => [...state.package.folders, ...state.package.files.keys()],
+    read: path => {
+      const value = state.package.files.get(path);
+      return value instanceof Uint8Array ? value.slice() : value;
+    },
+    revision: path => editController.revision(path),
+    subscribe(listener) {
+      if (typeof listener !== "function") throw new TypeError("A package subscriber must be a function.");
+      packageListeners.add(listener);
+      return () => packageListeners.delete(listener);
+    }
+  });
+
+  const validationService = {
+    current() {
+      const run = state.validation.run;
+      return {
+        status: state.validation.status,
+        findings: run?.findings ?? [], advice: [...panelAdvice.values()].flat(), summary: run?.summary,
+        packageRevision: run?.packageRevision ?? 0, validationRevision
+      };
+    },
+    subscribe(listener) {
+      if (typeof listener !== "function") throw new TypeError("A validation subscriber must be a function.");
+      validationListeners.add(listener);
+      return () => validationListeners.delete(listener);
+    },
+    forFile(path) {
+      const current = this.current();
+      return { findings: current.findings.filter(finding => finding.file === path), advice: current.advice.filter(finding => finding.file === path) };
+    },
+    reveal(finding) {
+      const index = state.validation.run?.findings.indexOf(finding) ?? -1;
+      if (index >= 0) openFinding(index);
+    },
+    contribute(findings, panelId) {
+      if (!Array.isArray(findings) || findings.some(finding => !finding || !["warning", "info"].includes(finding.severity))) {
+        throw new Error("Panel advice must be an array of warning or info findings.");
+      }
+      panelAdvice.set(panelId, findings.map(finding => ({ ...finding, panel: panelId })));
+      validationRevision += 1;
+      const current = this.current();
+      queueMicrotask(() => { for (const listener of [...validationListeners]) listener(current); });
+    }
+  };
+
+  const panelEdits = {
+    begin(...args) {
+      const controller = editController;
+      const transaction = controller.begin(...args);
+      const commit = transaction.commit.bind(transaction);
+      transaction.commit = () => applyEdit(commit).then(value => {
+        if (controller === editController) {
+          analyzeNow();
+          renderAll();
+          validationChanged();
         }
+        return value;
       });
+      return transaction;
     }
-  } catch {
-    // Nothing has been asked of it yet, so there is nothing to recover: the
-    // main-thread path below is the whole fallback.
-    worker?.terminate();
-    worker = null;
-  }
+  };
+  const panelServices = Object.freeze({
+    selection: selectionBus,
+    edits: panelEdits,
+    validation: validationService,
+    references: undefined,
+    forms: undefined,
+    grid: undefined,
+    assets: undefined
+  });
+  const hostSubscribers = new Set();
+  const hostInfo = Object.freeze({
+    kind: regions ? "workbench" : "widget",
+    size: regions ? "full" : "compact",
+    subscribe(listener) {
+      if (typeof listener !== "function") throw new TypeError("A host subscriber must be a function.");
+      hostSubscribers.add(listener);
+      return () => hostSubscribers.delete(listener);
+    }
+  });
 
-  // A post that throws — a package the structured clone cannot carry, a
-  // worker already gone — must hand the work back to the page rather than
-  // leave the designer looking at a verdict that never arrives.
-  function postToWorker(message) {
+  function bindPanelPackageController() {
+    panelPackageCancel();
+    panelPackageCancel = editController.subscribe(event => {
+      for (const listener of [...packageListeners]) listener(event);
+    });
+  }
+  bindPanelPackageController();
+
+  async function applyEdit(action, announce = true, preserveRedo = false) {
+    // Edit-controller notifications run in a microtask: this queue entry must
+    // exist before commit so the session-side edit handler consumes the matching
+    // announcement when it schedules autosave.
+    const pending = { announce };
+    editSaveAnnouncements.push(pending);
     try {
-      worker.postMessage(message);
-      return true;
+      const changed = await action();
+      if (changed === false) {
+        const index = editSaveAnnouncements.indexOf(pending);
+        if (index >= 0) editSaveAnnouncements.splice(index, 1);
+      }
+      if (!preserveRedo) {
+        redoLabels = [];
+        renderHistory();
+      }
+      return changed;
     } catch (error) {
-      stopWorker(error.message);
-      return false;
+      const index = editSaveAnnouncements.indexOf(pending);
+      if (index >= 0) editSaveAnnouncements.splice(index, 1);
+      throw error;
     }
   }
 
-  // Only what changed crosses the boundary: the worker keeps its own copy of
-  // the package between jobs.
-  function sendPackageToWorker() {
-    const set = [];
-    const removed = [];
-    for (const [path, value] of state.package.files) {
-      if (workerFiles.get(path) !== value) set.push([path, value]);
-    }
-    for (const path of workerFiles.keys()) {
-      if (!state.package.files.has(path)) removed.push(path);
-    }
-    if (!set.length && !removed.length) return true;
-    // The mirror only moves once the worker has the change, so a post that
-    // fails cannot make the next delta skip it.
-    if (!postToWorker({ type: "files", set, removed })) return false;
-    for (const [path, value] of set) workerFiles.set(path, value);
-    for (const path of removed) workerFiles.delete(path);
-    return true;
+  function replaceText(controller, label, path, next, { coalesce, announce = true } = {}) {
+    const previous = state.package.files.get(path);
+    if (typeof previous !== "string") throw new Error(WIDGET_COPY.notWritableText(path));
+    if (previous === next) return Promise.resolve(false);
+    const change = minimalTextChange(previous, next);
+    const transaction = controller.begin(label, coalesce ? { coalesce } : undefined);
+    transaction.text(path).replace({
+      start: offsetToPosition(previous, change.start),
+      end: offsetToPosition(previous, change.previousEnd),
+      revision: controller.revision(path)
+    }, next.slice(change.start, change.nextEnd));
+    return applyEdit(() => transaction.commit(), announce).then(() => true);
   }
 
-  function stopWorker(reason) {
-    if (worker) {
-      worker.terminate();
-      worker = null;
+  function queueProseEdit(path, value) {
+    const controller = editController;
+    proseCommitQueue = proseCommitQueue.then(async () => {
+      if (controller !== editController || !state.package.files.has(path)) return;
+      await replaceText(controller, WIDGET_COPY.editProse, path, value, { coalesce: `prose/${path}` });
+      if (controller !== editController) return;
+      analyzeSoon();
+      validationChanged();
+    }).catch(error => {
+      if (controller === editController) {
+        report(error.message, true);
+        renderEditor();
+      }
+    });
+    return proseCommitQueue;
+  }
+
+  function takeHistory(direction) {
+    const controller = editController;
+    historyQueue = historyQueue.then(() => proseCommitQueue).then(async () => {
+      if (controller !== editController) return;
+      const openPath = state.openPath;
+      const previous = !ui.textarea.hidden && typeof ui.textarea.value === "string" ? ui.textarea.value : undefined;
+      const label = direction === "undo" ? controller.history.label : redoLabels.at(-1);
+      const result = await applyEdit(() => controller[direction](), true, true);
+      if (!result || controller !== editController) return;
+      if (direction === "undo" && label) redoLabels.push(label);
+      else if (direction === "redo") redoLabels.pop();
+      editorSurface.closeDialog(false);
+      if (!state.package.files.has(state.openPath)) {
+        const movedPath = result.moves.find(move => move.from === openPath)?.to;
+        state.openPath = movedPath ?? [...state.package.files.keys()].find(path => /\.md$/i.test(path)) ?? [...state.package.files.keys()][0] ?? "";
+        state.selected = state.openPath ? { type: "file", path: state.openPath } : null;
+      }
+      analyzeNow();
+      renderAll();
+      renderHistory();
+      validationChanged();
+      if (state.openPath === openPath && typeof previous === "string") {
+        const next = state.package.files.get(openPath);
+        if (typeof next === "string" && next !== previous && !ui.textarea.hidden) {
+          const change = minimalTextChange(previous, next);
+          ui.textarea.focus({ preventScroll: true });
+          ui.textarea.setSelectionRange(change.nextEnd, change.nextEnd);
+        }
+      }
+    }).catch(error => report(error.message, true));
+    return historyQueue;
+  }
+
+  function renderHistory() {
+    if (!ui.undo) return;
+    const undoLabel = editController.history.label;
+    ui.undo.disabled = !editController.history.canUndo;
+    ui.undo.textContent = undoLabel ? WORKBENCH_COPY.undoAction(undoLabel) : WORKBENCH_COPY.nothingToUndo;
+  }
+
+  // Analysis and validation live behind one framework-free session. Its
+  // deliveries contain only the promised authoring view or validation state.
+  let workerActive = false;
+  const analysisSession = createAnalysisSession({
+    Worker: view.Worker,
+    revisionFor: path => editController.revision(path),
+    folders: () => state.package?.folders ?? [],
+    analysisDelay: () => ui.textarea.value.length > MAX_WRAPPED_TEXT_CHARS ? 300 : 150,
+    schemas: async () => {
+      const schemas = await (typeof host.schemas === "function" ? host.schemas() : host.schemas);
+      const missing = SCHEMA_NAMES.filter(name => !(schemas instanceof Map ? schemas.get(name) : schemas?.[name]));
+      if (missing.length) throw new Error(`missing ${missing.join(", ")}`);
+      return schemas;
     }
-    report(`Background checking is running in the page instead (${reason}).`);
-    // Through applyAnalysis, so the fallback leaves the designer with the same
-    // colors, counts and completions the worker would have.
-    completeAfterAnalysis = true;
-    applyAnalysis(analyzePackage(state.package.files), ++analysisRevision);
-    validationChanged();
-  }
+  });
+  analysisSession.subscribe(delivery => {
+    if (delivery.type === "worker") {
+      workerActive = delivery.active;
+      if (!workerActive) report(WIDGET_COPY.checkingOnPageFallback);
+      renderStatus();
+      return;
+    }
+    if (delivery.type === "view") {
+      state.authoringView = delivery.view;
+      if (!delivery.view) return;
+      editorSurface.analysisChanged();
+      scheduleOutlineRender();
+      renderStatus();
+      if (delivery.complete) editorSurface.offerCompletions();
+      return;
+    }
+    if (delivery.type === "validation") {
+      const renderPending = delivery.validation.status !== "pending" || state.validation.status !== "pending";
+      state.validation = delivery.validation;
+      validationRevision += 1;
+      const current = validationService.current();
+      queueMicrotask(() => {
+        for (const listener of [...validationListeners]) listener(current);
+      });
+      if (renderPending) {
+        renderDiagnostics();
+        scheduleOutlineRender();
+        renderStatus();
+      }
+    }
+  });
 
-  let analysisRevision = 0;
-
-  function applyAnalysis(analysis, revision) {
-    if (destroyed || revision !== analysisRevision) return;
-    state.analysis = analysis;
-    state.hoverName = "";
-    renderEditorAnalysis();
-    renderStatus();
-    // Completions are offered from the analysis they belong to, so they wait
-    // for it rather than repeating the previous one.
-    if (completeAfterAnalysis) complete();
-  }
-
-  // A structural change — a new package, a move, a new file — re-analyzes here
-  // and now: it happens once, the render that follows reads the result, and
-  // any worker result still in flight belongs to the package before it.
+  // Structural changes need a view synchronously for the render that follows.
   function analyzeNow() {
-    analysisRevision += 1;
-    state.analysis = analyzePackage(state.package.files);
+    state.authoringView = analysisSession.fileChanged({ immediate: true, publish: false });
+    return state.authoringView;
   }
 
-  let completeAfterAnalysis = true;
-
-  const analyzeSoon = debounce((showCompletion = true) => {
-    completeAfterAnalysis = showCompletion;
-    const revision = ++analysisRevision;
-    if (!worker) {
-      applyAnalysis(analyzePackage(state.package.files), revision);
-      return;
-    }
-    if (sendPackageToWorker()) postToWorker({ type: "analyze", revision });
-  }, () => ui.textarea.value.length > MAX_WRAPPED_TEXT_CHARS ? 300 : 150);
-
-  function receiveFromWorker(message) {
-    if (message.type === "analysis") {
-      applyAnalysis(message.analysis, message.revision);
-      return;
-    }
-    if (message.type === "validation") {
-      if (destroyed || message.revision !== validationRevision) return;
-      state.validation = message.run
-        ? { status: "ready", run: message.run }
-        : { status: "crashed", run: null, message: message.message };
-      renderDiagnostics();
-      renderStatus();
-      return;
-    }
-    stopWorker(message.message);
+  function analyzeSoon(showCompletion = true) {
+    analysisSession.fileChanged({ complete: showCompletion });
   }
-
-  let validationRevision = 0;
-
-  async function suppliedSchemas() {
-    const schemas = await (typeof host.schemas === "function" ? host.schemas() : host.schemas);
-    const missing = SCHEMA_NAMES.filter(name => !(schemas instanceof Map ? schemas.get(name) : schemas?.[name]));
-    if (missing.length) throw new Error(`missing ${missing.join(", ")}`);
-    return schemas;
-  }
-
-  async function validate(version) {
-    let schemas;
-    try {
-      schemas = await suppliedSchemas();
-    } catch {
-      if (version !== validationRevision) return;
-      state.validation = { status: "unavailable", run: null };
-      renderDiagnostics();
-      renderStatus();
-      return;
-    }
-    if (destroyed || version !== validationRevision) return;
-    if (worker) {
-      // Hosts may replace their schemas — a failed load that later succeeds,
-      // a host that swaps them — so the worker follows whatever this run got.
-      if (postedSchemas !== schemas && !postToWorker({ type: "schemas", schemas })) return;
-      postedSchemas = schemas;
-      if (sendPackageToWorker()) postToWorker({ type: "validate", revision: version });
-      return;
-    }
-    try {
-      const run = validatePackage(createFileMapHost(state.package.files, { schemas, bytes: false }), "/package");
-      if (version !== validationRevision) return;
-      state.validation = { status: "ready", run };
-    } catch (error) {
-      state.validation = { status: "crashed", run: null, message: error.message };
-    }
-    renderDiagnostics();
-    renderStatus();
-  }
-
-  const validateSoon = debounce(validate, 400);
 
   function validationChanged() {
-    const version = ++validationRevision;
-    const renderPending = state.validation.status !== "pending";
-    state.validation = { status: "pending", run: null };
-    if (renderPending) {
-      renderDiagnostics();
-      renderStatus();
-    }
-    validateSoon(version);
+    analysisSession.validateNow();
   }
 
-  function setPackage(value) {
-    if (destroyed) return;
-    flushWorkingCopy();
-    dismissQuickfix(false);
-    state.packageRevision += 1;
-    state.package = packageFrom(value, decodeBinary);
-    analyzeNow();
+  function creationProposal(name, path, currentView) {
+    const core = classifyCreation(name, {
+      files: state.package.files,
+      folders: state.package.folders,
+      manifest: currentView?.manifest,
+      openPath: path
+    });
+    const coreActions = rankCollectionCreationActions(core.actions, state.package.files, file => editController.revision(file));
+    const contributed = (panelHost?.creators({ name, file: path, position: { line: 0, character: 0 } }) ?? []).map(creator => ({
+      kind: creator.kind,
+      label: creator.label,
+      choice: creator.label,
+      target: path,
+      panelCreator: creator.id
+    }));
+    return { ...core, actions: [...coreActions, ...contributed] };
+  }
+
+  editorSurface = createEditorSurface({
+    document,
+    view,
+    elements: ui,
+    on,
+    viewSupplier: () => state.authoringView,
+    pathSupplier: () => state.openPath,
+    revisionSupplier: path => editController.revision(path),
+    textSupplier: path => state.package.files.get(path),
+    queueEdit: ({ label, path, text }) => replaceText(editController, label, path, text),
+    proposeCreation: ({ name, path, view: currentView }) => creationProposal(name, path, currentView),
+    confirmCreation: async ({ name, choice, value, selection, isCurrent }) => {
+      await proseCommitQueue;
+      if (!isCurrent()) return null;
+      const currentView = analysisSession.fileChanged({ immediate: true, publish: false, supersede: false });
+      const currentResolution = resolveAnchor(currentView.definitionsByName, name);
+      if (currentResolution.classification !== "unknown") return { notice: CREATION_COPY.alreadyDeclared(name) };
+      const proposal = creationProposal(name, selection.path, currentView);
+      const action = proposal.actions.flatMap(candidate => candidate.revealActions ?? candidate).find(candidate => candidate.choice === choice);
+      if (!action) throw new Error(proposal.reason || CREATION_COPY.cannotCreateHere(name));
+      if (action.panelCreator) {
+        await panelHost.runCreator(action.panelCreator, {
+          name,
+          file: selection.path,
+          position: offsetToPosition(state.package.files.get(selection.path), selection.start)
+        }, "inspector");
+        return { changed: true, showCompletion: false };
+      }
+      const current = state.package.files.get(action.target);
+      if (action.create === undefined && typeof current !== "string") throw new Error(WIDGET_COPY.notWritableText(action.target));
+      const transaction = editController.begin(CREATION_COPY.createNamed(name));
+      if (typeof action.create === "string") {
+        transaction.file(action.target).create(action.create);
+      } else if (action.operations) {
+        const operationValue = action.needsValue ? parseJsonScalar(value) : undefined;
+        for (const operation of action.operations(operationValue)) {
+          if (operation.type !== "insert") throw new Error(CREATION_COPY.unsupportedOperation(operation.type));
+          transaction.json(action.target).insert(operation.pointer, operation.keyOrIndex, operation.value, operation.options);
+        }
+      } else {
+        const next = action.apply(current);
+        const change = minimalTextChange(current, next);
+        transaction.text(action.target).replace({
+          start: offsetToPosition(current, change.start),
+          end: offsetToPosition(current, change.previousEnd),
+          revision: editController.revision(action.target)
+        }, next.slice(change.start, change.nextEnd));
+      }
+      await applyEdit(() => transaction.commit(), false);
+      const next = state.package.files.get(action.target);
+      return {
+        changed: true,
+        showCompletion: false,
+        notice: action.notice,
+        editorText: action.target === state.openPath ? next : undefined
+      };
+    },
+    creationApplied: outcome => {
+      if (outcome.changed) {
+        analyzeSoon(outcome.showCompletion);
+        validationChanged();
+      }
+      if (outcome.notice) report(outcome.notice);
+    },
+    report,
+    isDestroyed: () => destroyed,
+    publishSelection: next => selectionBus.select(next, { origin: { surface: "prose" } })
+  });
+
+  panelHost = createPanelHost({
+    document,
+    view,
+    panels: host.panels,
+    inspector: ui.panelInspector,
+    sidebar: ui.outline,
+    services: panelServices,
+    packageService,
+    hostInfo,
+    report
+  });
+
+  // Package deliveries are synchronous: the session swaps controllers before
+  // this composition-side render, so editor and analysis handlers never see
+  // the new package paired with the previous package's history.
+  packageSession.subscribe(delivery => {
+    const changed = delivery.editController !== editController;
+    Object.assign(state, delivery);
+    editController = delivery.editController;
+    if (!changed) {
+      renderPackageOptions(state.package.id);
+      renderStatus();
+      return;
+    }
+    bindPanelPackageController();
+    editorSurface.closeDialog(false);
+    hideCollectionDialog(false);
+    state.authoringView = null;
+    panelAdvice.clear();
+    redoLabels = [];
+    editSaveAnnouncements = [];
     state.openPath = [...state.package.files.keys()].find(path => /\.md$/i.test(path)) ?? [...state.package.files.keys()][0] ?? "";
     state.selected = state.openPath ? { type: "file", path: state.openPath } : null;
+    for (const listener of [...packageListeners]) queueMicrotask(() => listener({ type: "opened" }));
+    selectionBus.clear({ surface: "explorer" });
+    if (state.openPath) selectionBus.select({ kind: "file", file: state.openPath }, { origin: { surface: "explorer" } });
     state.collapsed.clear();
+    state.coldStart = false;
+    if (ui.coldStart) ui.coldStart.hidden = true;
+    if (ui.editorPanel) ui.editorPanel.hidden = false;
     ui.packageForm.hidden = true;
-    report(`Opened ${state.package.title}.`);
+    report(WIDGET_COPY.openedPackage(state.package.title));
     syncPackageControls();
     renderAll();
-    validationChanged();
-  }
+    analysisSession.openPackage(state.package.files);
+    panelHost.packageOpened();
+  });
 
   function beginPackage() {
-    ui.packageTitle.value = "Untitled Game";
+    ui.packageTitle.value = WIDGET_COPY.untitledGame;
     ui.packageId.value = packageIdFromTitle(ui.packageTitle.value);
     ui.packageForm.hidden = false;
     ui.packageTitle.focus();
     ui.packageTitle.select();
   }
 
-  function exportPackage() {
-    const id = state.analysis.manifest?.id ?? state.package.id;
-    const name = `${packageIdFromTitle(id)}.zip`;
-    const bytes = writeZip(state.package.files, state.package.folders);
+  function downloadPackage() {
+    const id = state.authoringView?.manifest?.id ?? state.package.id;
+    // A synthetic input followed by export in the same JavaScript turn can
+    // precede the controller's serialized commit microtask. The visible
+    // editor is still the designer's latest value, so the export snapshot
+    // includes it without mutating the working package outside the layer.
+    // The export click depends on snapshot construction being synchronous so
+    // download dispatch remains in the initiating user-activation turn.
+    const snapshot = packageSession.exportSnapshot({
+      id,
+      path: !ui.textarea.hidden ? state.openPath : "",
+      text: ui.textarea.value
+    });
     if (typeof host.downloadPackage === "function") {
-      host.downloadPackage({ name, bytes, type: "application/zip" });
+      host.downloadPackage(snapshot);
     } else {
-      const url = view.URL.createObjectURL(new view.Blob([bytes], { type: "application/zip" }));
+      const url = view.URL.createObjectURL(new view.Blob([snapshot.bytes], { type: snapshot.type }));
       const link = document.createElement("a");
       link.href = url;
-      link.download = name;
+      link.download = snapshot.name;
       rootElement.append(link);
       link.click();
       link.remove();
       view.URL.revokeObjectURL(url);
     }
-    report(`Exported ${name}.`);
+    report(WIDGET_COPY.exportedPackage(snapshot.name));
   }
 
   function treeData() {
@@ -625,33 +849,44 @@ export function mountAuthoringTool(rootElement, host = {}) {
         const collapsed = state.collapsed.has(path);
         return `<li><button type="button" class="opengdd-author-tree-item opengdd-author-tree-folder${selected ? " opengdd-author-is-selected" : ""}" data-tree-type="folder" data-path="${escapeHtml(path)}" draggable="true" aria-expanded="${!collapsed}"><span>${collapsed ? "▸" : "▾"}</span>${escapeHtml(entry.name)}/</button>${collapsed ? "" : renderTreeNode(entry.child, path)}</li>`;
       }
-      return `<li><button type="button" class="opengdd-author-tree-item${selected ? " opengdd-author-is-selected" : ""}${state.openPath === path ? " opengdd-author-is-open" : ""}" data-tree-type="file" data-path="${escapeHtml(path)}" draggable="true">${escapeHtml(entry.name)}</button></li>`;
+      const draggable = !capabilities.protectedFiles || !PROTECTED_PACKAGE_FILES.has(path);
+      return `<li><button type="button" class="opengdd-author-tree-item${selected ? " opengdd-author-is-selected" : ""}${state.openPath === path ? " opengdd-author-is-open" : ""}" data-tree-type="file" data-path="${escapeHtml(path)}" draggable="${draggable}">${escapeHtml(entry.name)}</button></li>`;
     }).join("")}</ul>`;
   }
 
   function renderTree() {
     ui.tree.innerHTML = renderTreeNode(treeData());
-    rootElement.querySelector('[data-action="rename"]').disabled = !state.selected;
+    const protectedFile = Boolean(capabilities.protectedFiles && state.selected?.type === "file" && PROTECTED_PACKAGE_FILES.has(state.selected.path));
+    const renameReason = protectedFile ? WIDGET_COPY.protectedRename(state.selected.path) : "";
+    const deleteReason = protectedFile ? WIDGET_COPY.protectedDelete(state.selected.path) : "";
+    const setActionAvailability = (button, unavailable, reason) => {
+      if (!button) return;
+      if (!capabilities.protectedFiles) {
+        button.disabled = unavailable;
+        return;
+      }
+      button.setAttribute("aria-disabled", String(unavailable));
+      if (reason) {
+        button.setAttribute("aria-description", reason);
+        button.title = reason;
+      } else {
+        button.removeAttribute("aria-description");
+        button.removeAttribute("title");
+      }
+    };
+    setActionAvailability(ui.rename, !state.selected || protectedFile, renameReason);
+    setActionAvailability(ui.delete, !state.selected || protectedFile, deleteReason);
   }
 
   function openFile(path) {
     if (!state.package.files.has(path)) return;
     state.openPath = path;
     state.selected = { type: "file", path };
-    state.completion = -1;
-    ui.completions.replaceChildren();
-    dismissQuickfix(false);
+    selectionBus.select({ kind: "file", file: path }, { origin: { surface: "explorer" } });
+    editorSurface.closePopups(false);
     renderTree();
     renderEditor();
     renderStatus();
-  }
-
-  function lineBounds(text, line) {
-    const lines = text.split("\n");
-    const index = Math.max(0, Math.min(lines.length - 1, line - 1));
-    let start = 0;
-    for (let current = 0; current < index; current += 1) start += lines[current].length + 1;
-    return { index, start, end: start + lines[index].length };
   }
 
   function scrollToLine(element, index) {
@@ -660,14 +895,8 @@ export function mountAuthoringTool(rootElement, host = {}) {
     element.scrollTop = Math.max(0, index * lineHeight - element.clientHeight / 3);
   }
 
-  function scrollEditorToLine(index) {
-    const wrappedLine = ui.editor.classList.contains("opengdd-author-editor--wrapped") ? overlay.elements[index] : null;
-    if (wrappedLine) ui.textarea.scrollTop = Math.max(0, wrappedLine.offsetTop - ui.textarea.clientHeight / 3);
-    else scrollToLine(ui.textarea, index);
-  }
-
   function selectPreLine(line) {
-    const bounds = lineBounds(ui.json.textContent, line);
+    const bounds = lineBounds(ui.json.textContent, line - 1);
     const walker = document.createTreeWalker(ui.json, view.NodeFilter.SHOW_TEXT);
     const points = [];
     let offset = 0;
@@ -696,21 +925,34 @@ export function mountAuthoringTool(rootElement, host = {}) {
     openFile(finding.file);
     if (!Number.isInteger(finding.line) || finding.line < 1) return;
     if (!ui.textarea.hidden) {
-      const bounds = lineBounds(ui.textarea.value, finding.line);
+      const bounds = lineBounds(ui.textarea.value, finding.line - 1);
       ui.textarea.focus({ preventScroll: true });
       ui.textarea.setSelectionRange(bounds.start, bounds.end);
-      scrollEditorToLine(bounds.index);
-      ui.highlight.scrollTop = ui.textarea.scrollTop;
+      editorSurface.scrollToEditorLine(bounds.index);
     } else if (!ui.json.hidden) selectPreLine(finding.line);
   }
 
+  function safelyOpenFinding(index) {
+    try {
+      openFinding(index);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   function renderEditor() {
+    if (state.coldStart) {
+      ui.coldStart.hidden = false;
+      ui.editorPanel.hidden = true;
+      return;
+    }
     const path = state.openPath;
     const text = state.package.files.get(path);
     const markdown = /\.md$/i.test(path);
     const json = /\.json$/i.test(path);
     const wrapped = (markdown || json) && typeof text === "string" && text.length <= MAX_WRAPPED_TEXT_CHARS;
-    ui.path.textContent = path || "No file open";
+    ui.path.textContent = path || WIDGET_COPY.noFileOpen;
     const readerUrl = path && /\.md$/i.test(path) && state.package.repositoryFiles.has(path) && typeof host.readerUrl === "function"
       ? host.readerUrl(state.package.repositoryPath, path)
       : "";
@@ -722,270 +964,615 @@ export function mountAuthoringTool(rootElement, host = {}) {
     ui.empty.hidden = true;
     ui.editor.classList.toggle("opengdd-author-editor--wrapped", wrapped);
     ui.textarea.setAttribute("wrap", wrapped ? "soft" : "off");
-    resetOverlay();
+    editorSurface.reset();
     if (!path) {
       ui.mode.textContent = "";
       ui.empty.hidden = false;
-      ui.empty.textContent = "Create or import a file to begin.";
+      ui.empty.textContent = WIDGET_COPY.noFileBody;
       return;
     }
     if (typeof text !== "string") {
-      ui.mode.textContent = "binary asset";
+      ui.mode.textContent = WIDGET_COPY.binaryAsset;
       ui.empty.hidden = false;
-      ui.empty.textContent = "Binary assets are kept in the package but are not previewed here.";
+      ui.empty.textContent = WIDGET_COPY.binaryAssetBody;
       return;
     }
     if (markdown) {
-      ui.mode.textContent = wrapped ? "Markdown · editing" : "Markdown · editing · wrap off for large file";
-      ui.textarea.setAttribute("aria-label", "Markdown source");
+      ui.mode.textContent = wrapped ? WIDGET_COPY.markdownEditing : WIDGET_COPY.markdownEditingLarge;
+      ui.textarea.setAttribute("aria-label", WIDGET_COPY.markdownSource);
       ui.textarea.hidden = false;
       ui.highlight.hidden = false;
-      ui.textarea.value = text;
-      editorTextRevision += 1;
-      ui.textarea.scrollTop = ui.highlight.scrollTop = 0;
-      ui.textarea.scrollLeft = ui.highlight.scrollLeft = 0;
-      renderEditorAnalysis();
+      editorSurface.loadText(text);
       return;
     }
     ui.json.hidden = false;
     if (json) {
-      ui.mode.textContent = wrapped ? "JSON · editing" : "JSON · editing · wrap off for large file";
+      ui.mode.textContent = wrapped ? WIDGET_COPY.jsonEditing : WIDGET_COPY.jsonEditingLarge;
       ui.json.hidden = true;
       ui.textarea.hidden = false;
       ui.highlight.hidden = false;
-      ui.textarea.setAttribute("aria-label", "JSON source");
-      ui.textarea.value = text;
-      editorTextRevision += 1;
-      ui.textarea.scrollTop = ui.highlight.scrollTop = 0;
-      ui.textarea.scrollLeft = ui.highlight.scrollLeft = 0;
-      renderEditorAnalysis();
+      ui.textarea.setAttribute("aria-label", WIDGET_COPY.jsonSource);
+      editorSurface.loadText(text);
     } else {
-      ui.mode.textContent = "text · read only";
+      ui.mode.textContent = WIDGET_COPY.textReadOnly;
       ui.json.textContent = text;
     }
   }
 
-  function resetOverlay() {
-    overlay.lines = [];
-    overlay.elements = [];
-    overlay.markup = [];
-    overlay.analysisLines = [];
-    overlay.byLine = new Map();
-    overlay.lineStarts = [];
-    overlay.first = 0;
-    overlay.last = -1;
-    overlay.dirty = true;
-    ui.highlight.replaceChildren();
-  }
-
-  function overlayElement(markup) {
-    const element = document.createElement("span");
-    element.className = "opengdd-author-overlay-line";
-    element.innerHTML = markup;
-    return element;
-  }
-
-  // The highlight layer is the text the designer sees — the textarea's own
-  // glyphs are transparent — so it follows every keystroke. Unchanged line
-  // nodes stay in place; changed lines render plain until analysis returns.
-  function reconcileOverlay(lines) {
-    const previous = overlay.lines;
-    let first = 0;
-    while (first < previous.length && first < lines.length && previous[first] === lines[first]) first += 1;
-    let tail = 0;
-    while (tail < previous.length - first && tail < lines.length - first
-      && previous[previous.length - 1 - tail] === lines[lines.length - 1 - tail]) tail += 1;
-    if (first === previous.length && first === lines.length) return;
-
-    const oldEnd = previous.length - tail;
-    const newEnd = lines.length - tail;
-    const reference = overlay.elements[oldEnd] ?? null;
-    for (const element of overlay.elements.slice(first, oldEnd)) {
-      const newline = element.nextSibling;
-      element.remove();
-      newline?.remove();
-    }
-
-    const fragment = document.createDocumentFragment();
-    const elements = [];
-    const markup = [];
-    for (let index = first; index < newEnd; index += 1) {
-      const rendered = escapeHtml(lines[index]);
-      const element = overlayElement(rendered);
-      fragment.append(element, document.createTextNode("\n"));
-      elements.push(element);
-      markup.push(rendered);
-    }
-    ui.highlight.insertBefore(fragment, reference);
-    overlay.elements = [...overlay.elements.slice(0, first), ...elements, ...overlay.elements.slice(oldEnd)];
-    overlay.markup = [...overlay.markup.slice(0, first), ...markup, ...overlay.markup.slice(oldEnd)];
-    overlay.lines = lines;
-  }
-
-  function paintOverlay() {
-    if (ui.textarea.hidden) return;
-    if (ui.editor.classList.contains("opengdd-author-editor--wrapped")) {
-      reconcileOverlay(ui.textarea.value.split("\n"));
-    } else {
-      const text = ui.textarea.value;
-      if (!overlay.lineStarts.length) overlay.lineStarts = lineStartsFor(text);
-      const starts = overlay.lineStarts;
-      const style = view.getComputedStyle(ui.textarea);
-      const lineHeight = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.5;
-      const top = Math.floor(ui.textarea.scrollTop / lineHeight);
-      const last = Math.min(starts.length - 1, top + Math.ceil(ui.textarea.clientHeight / lineHeight) + OVERLAY_MARGIN);
-      const first = Math.min(Math.max(0, top - OVERLAY_MARGIN), last);
-      if (overlay.dirty || first < overlay.first || last > overlay.last) {
-        const width = ui.textarea.scrollWidth;
-        const shift = starts.length - overlay.analysisLines.length;
-        let output = "\n".repeat(first);
-        for (let index = first; index <= last; index += 1) {
-          const line = lineAt(text, starts, index);
-          const source = overlay.analysisLines[index] === line
-            ? index
-            : overlay.analysisLines[index - shift] === line ? index - shift : -1;
-          if (index > first) output += "\n";
-          output += renderOverlayLine(line, source < 0 ? null : overlay.byLine.get(source));
-        }
-        const tail = starts.length - 1 - last;
-        overlayWidth.style.width = first === 0 && tail === 0 ? "0" : `${width}px`;
-        ui.highlight.innerHTML = `${output}${"\n".repeat(tail)}`;
-        ui.highlight.append(overlayWidth, document.createTextNode("\n"));
-        overlay.first = first;
-        overlay.last = last;
-        overlay.dirty = false;
-      }
-    }
-    ui.highlight.scrollTop = ui.textarea.scrollTop;
-    ui.highlight.scrollLeft = ui.textarea.scrollLeft;
-  }
-
-  // The character goes up first; the completion list follows in the same
-  // frame. Offering completions reads layout back out of the DOM, and doing
-  // that from the input handler makes the browser lay out the whole file
-  // before it can paint a single keystroke.
-  function paintSoon({ changed = false, completions = false } = {}) {
-    overlay.dirty ||= changed;
-    completionsPending ||= completions;
-    if (overlayFrame || destroyed) return;
-    overlayFrame = view.requestAnimationFrame(() => {
-      overlayFrame = 0;
-      paintOverlay();
-      completeNow();
-    });
-  }
-
-  // A key that acts on the list — accept, move, dismiss — must act on the
-  // list the text deserves, not the one left over from the keystroke before
-  // it. Typing never comes through here, so the keystroke path stays clear.
-  function completeNow() {
-    if (!completionsPending) return;
-    completionsPending = false;
-    complete();
-  }
-
-  function renderEditorAnalysis() {
-    if (ui.textarea.hidden) return;
-    const lines = ui.textarea.value.split("\n");
-    const byLine = anchorsByLine(editorAnchors());
-    if (ui.editor.classList.contains("opengdd-author-editor--wrapped")) {
-      reconcileOverlay(lines);
-      for (let index = 0; index < lines.length; index += 1) {
-        const markup = renderOverlayLine(lines[index], byLine.get(index));
-        if (markup === overlay.markup[index]) continue;
-        overlay.elements[index].innerHTML = markup;
-        overlay.markup[index] = markup;
-      }
-    } else {
-      overlay.analysisLines = lines;
-      overlay.byLine = byLine;
-      overlay.lineStarts = lineStartsFor(ui.textarea.value);
-      overlay.dirty = true;
-      paintOverlay();
-    }
-    ui.highlight.scrollTop = ui.textarea.scrollTop;
-    ui.highlight.scrollLeft = ui.textarea.scrollLeft;
-  }
-
-  function editorAnchors() {
-    if (editorAnchorCache.analysis === state.analysis
-      && editorAnchorCache.path === state.openPath
-      && editorAnchorCache.revision === editorTextRevision) return editorAnchorCache.anchors;
-    let anchors;
-    if (/\.md$/i.test(state.openPath)) {
-      const analyzed = state.analysis.anchors.filter(anchor => anchor.file === state.openPath);
-      const keys = new Set(analyzed.map(anchor => `${anchor.range.start.line}:${anchor.range.start.character}`));
-      const mentions = creationMentions(ui.textarea.value, state.analysis.definitionsByName, state.openPath)
-        .filter(anchor => !keys.has(`${anchor.range.start.line}:${anchor.range.start.character}`));
-      anchors = [...analyzed, ...mentions];
-    } else if (/\.json$/i.test(state.openPath)) {
-      try { JSON.parse(ui.textarea.value); } catch {
-        anchors = [];
-      }
-      if (!anchors) {
-        anchors = [];
-        for (const match of ui.textarea.value.matchAll(/"(?:\\.|[^"\\])*"/g)) {
-          let name;
-          try { name = JSON.parse(match[0]); } catch { continue; }
-          const resolution = resolveAnchor(state.analysis.definitionsByName, name);
-          if (resolution.classification !== "unknown") {
-            anchors.push({ ...resolution, file: state.openPath, range: textRange(ui.textarea.value, match.index, match[0].length) });
-          }
-        }
-      }
-    } else anchors = [];
-    editorAnchorCache = { analysis: state.analysis, path: state.openPath, revision: editorTextRevision, anchors };
-    return anchors;
-  }
-
   function renderDiagnostics() {
     const { status, run, message } = state.validation;
+    const setDiagnosticSummary = text => {
+      ui.diagnosticSummary.textContent = text;
+      if (capabilities.workbenchLabels) ui.diagnosticSummary.parentElement.setAttribute("aria-label", WIDGET_COPY.validationAccessible(text));
+    };
+    if (capabilities.workbenchLabels) ui.diagnosticSummary.classList.remove("opengdd-author-verdict--pass", "opengdd-author-verdict--warnings", "opengdd-author-verdict--fail");
     if (status === "pending") {
-      ui.diagnosticSummary.textContent = "Checking…";
-      ui.diagnostics.innerHTML = '<p class="opengdd-author-muted">Checking package conformance…</p>';
+      setDiagnosticSummary(WIDGET_COPY.checkingEllipsis);
+      ui.diagnostics.innerHTML = `<p class="opengdd-author-muted">${WIDGET_COPY.checkingPackage}</p>`;
       return;
     }
     if (status === "unavailable") {
-      ui.diagnosticSummary.textContent = "Unavailable";
-      ui.diagnostics.innerHTML = '<p class="opengdd-author-validation-unavailable">Validation unavailable — the conformance schemas could not be loaded.</p>';
+      setDiagnosticSummary(WIDGET_COPY.unavailable);
+      ui.diagnostics.innerHTML = `<p class="opengdd-author-validation-unavailable">${WIDGET_COPY.validationUnavailable}</p>`;
       return;
     }
     if (status === "crashed") {
-      ui.diagnosticSummary.textContent = "Crashed";
-      ui.diagnostics.innerHTML = `<p class="opengdd-author-validation-unavailable">Validation crashed: ${escapeHtml(message || "unknown error")}. The editor is still available.</p>`;
+      setDiagnosticSummary(WIDGET_COPY.crashed);
+      ui.diagnostics.innerHTML = `<p class="opengdd-author-validation-unavailable">${WIDGET_COPY.validationCrashed(escapeHtml(message || WIDGET_COPY.unknownError))}</p>`;
       return;
     }
 
-    const verdict = run.summary.errors ? "FAIL" : run.summary.warnings ? "PASS WITH WARNINGS" : "PASS";
+    const verdict = run.summary.errors ? WIDGET_COPY.fail : run.summary.warnings ? WIDGET_COPY.passWithWarnings : WIDGET_COPY.pass;
     const verdictClass = run.summary.errors ? "fail" : run.summary.warnings ? "warnings" : "pass";
-    ui.diagnosticSummary.textContent = `${verdict} · ${run.summary.errors}E ${run.summary.warnings}W`;
+    setDiagnosticSummary(capabilities.workbenchLabels
+      ? WIDGET_COPY.validationSummaryFull(verdict, run.summary.errors, run.summary.warnings)
+      : WIDGET_COPY.validationSummary(verdict, run.summary.errors, run.summary.warnings));
+    if (capabilities.workbenchLabels) {
+      ui.diagnosticSummary.classList.add(`opengdd-author-verdict--${verdictClass}`);
+    }
     const groups = [
-      ["error", "Errors"],
-      ["warning", "Warnings"]
+      ["error", WIDGET_COPY.errors],
+      ["warning", WIDGET_COPY.warnings]
     ].map(([severity, label]) => {
       const findings = run.findings.map((finding, index) => ({ finding, index })).filter(item => item.finding.severity === severity);
       if (!findings.length) return "";
       return `<section class="opengdd-author-diagnostic-group"><h3>${label} (${findings.length})</h3><ul>${findings.map(({ finding, index }) => {
         const location = `${finding.file}${finding.line ? `:${finding.line}` : ""}`;
+        if (capabilities.workbenchLabels) {
+          const accessible = `${severity}: ${finding.message} (${finding.code}) ${location}`;
+          return `<li><button type="button" class="opengdd-author-diagnostic-line" data-finding="${index}" aria-label="${escapeHtml(accessible)}" title="${escapeHtml(finding.message)}"><span class="opengdd-author-diagnostic-severity opengdd-author-diagnostic-severity--${severity}" aria-hidden="true">${severity}</span><span class="opengdd-author-diagnostic-message">${escapeHtml(finding.message)}</span><span class="opengdd-author-diagnostic-location">${escapeHtml(location)}</span></button></li>`;
+        }
         return `<li><button type="button" data-finding="${index}"><span class="opengdd-author-diagnostic-severity opengdd-author-diagnostic-severity--${severity}">${severity}</span><code>${escapeHtml(finding.code)}</code><span class="opengdd-author-diagnostic-location">${escapeHtml(location)}</span><span class="opengdd-author-diagnostic-message">${escapeHtml(finding.message)}</span></button></li>`;
       }).join("")}</ul></section>`;
     }).join("");
-    const empty = run.findings.length ? "" : '<p class="opengdd-author-validation-empty">No findings. This package passes conformance validation.</p>';
+    const empty = run.findings.length ? "" : `<p class="opengdd-author-validation-empty">${WIDGET_COPY.noFindings}</p>`;
     const skipped = run.skipped.length
-      ? '<p class="opengdd-author-validation-skipped">Some byte-level media evidence checks were skipped in this browser; the CLI checks them.</p>'
+      ? `<p class="opengdd-author-validation-skipped">${WIDGET_COPY.skippedMediaChecks}</p>`
       : "";
-    ui.diagnostics.innerHTML = `<p class="opengdd-author-verdict opengdd-author-verdict--${verdictClass}">${verdict} — ${run.summary.errors} error(s), ${run.summary.warnings} warning(s)</p>${empty}${groups}${skipped}`;
+    const verdictLine = capabilities.workbenchLabels ? "" : `<p class="opengdd-author-verdict opengdd-author-verdict--${verdictClass}">${WIDGET_COPY.validationSummaryFull(verdict, run.summary.errors, run.summary.warnings)}</p>`;
+    ui.diagnostics.innerHTML = `${verdictLine}${empty}${groups}${skipped}`;
+  }
+
+  function outlineModel() {
+    const viewGroups = state.authoringView?.groups ?? [];
+    const copyArtifact = (entry, parentIdentity = "") => ({
+      ...entry,
+      parentIdentity,
+      citations: entry.citations.map(citation => ({ ...citation })),
+      findings: [],
+      children: (entry.children ?? []).map(child => copyArtifact(child, entry.identity)),
+      expanded: entry.kind === "collection" ? !state.outlineCollectionCollapsed.has(entry.name) : undefined
+    });
+    const artifacts = viewGroups.flatMap(group => group.entries).map(entry => copyArtifact(entry));
+    const flatArtifacts = artifacts.flatMap(artifact => [artifact, ...(artifact.children ?? [])]);
+    const fallback = new Map(OUTLINE_GROUPS.map(group => [group.id, []]));
+    for (const [index, finding] of (state.validation.run?.findings ?? []).entries()) {
+      if (finding.code === "COLLECTION_UNCITED") {
+        const collection = flatArtifacts.find(artifact => artifact.kind === "collection" && artifact.location === finding.file);
+        if (collection) {
+          collection.findings.push(index);
+          continue;
+        }
+      }
+      const line = Number.isInteger(finding.line) ? finding.line - 1 : null;
+      const inRange = flatArtifacts.filter(artifact => artifact.kind !== "collection" && artifact.file === finding.file && line !== null
+        && line >= artifact.range.start.line && line <= artifact.range.end.line);
+      if (inRange.length) {
+        inRange.sort((left, right) => (left.range.end.line - left.range.start.line) - (right.range.end.line - right.range.start.line));
+        inRange[0].findings.push(index);
+        continue;
+      }
+      const fileArtifacts = flatArtifacts.filter(artifact => (artifact.kind !== "collection" && artifact.file === finding.file)
+        || artifact.citations.some(citation => citation.file === finding.file));
+      if (!fileArtifacts.length) continue;
+      const nearestLine = artifact => {
+        const locations = artifact.file === finding.file ? [artifact.range.start.line]
+          : artifact.citations.filter(citation => citation.file === finding.file).map(citation => citation.range.start.line);
+        return line === null ? 0 : Math.min(...locations.map(location => Math.abs(location - line)));
+      };
+      fileArtifacts.sort((left, right) => nearestLine(left) - nearestLine(right));
+      const group = OUTLINE_GROUPS.find(item => item.kinds.includes(fileArtifacts[0].kind));
+      if (group) fallback.get(group.id).push(index);
+    }
+    // A child problem also belongs to its collection for filtering and the
+    // parent badge, while the record keeps its own normal problem behavior.
+    rollUpCollectionFindings(flatArtifacts);
+    return {
+      problemsOnly: state.outlineProblemsOnly,
+      menuOpen: state.outlineMenuOpen,
+      selection: state.outlineSelection,
+      noProblems: state.outlineProblemsOnly && state.validation.status === "ready" && !(state.validation.run?.findings.length),
+      groups: OUTLINE_GROUPS.map(group => ({
+        ...group,
+        kinds: group.kinds,
+        artifacts: artifacts.filter(artifact => group.kinds.includes(artifact.kind)),
+        fallback: fallback.get(group.id),
+        fallbackOpen: state.outlineFallbackOpen.has(group.id)
+      }))
+    };
+  }
+
+  function findingBadge(findingIndexes, target = "") {
+    if (!findingIndexes.length) return "";
+    const uncited = findingIndexes.filter(index => state.validation.run.findings[index].code === "COLLECTION_UNCITED");
+    const ordinary = findingIndexes.filter(index => !uncited.includes(index));
+    const uncitedBadge = uncited.map(index => `<button type="button" class="opengdd-author-outline-badge opengdd-author-outline-badge--warning opengdd-author-outline-badge--sentence" data-outline-finding="${index}" aria-label="${escapeHtml(WIDGET_COPY.collectionUnmentioned)}">${severityIcon("warning")}<span>${escapeHtml(WIDGET_COPY.collectionUnmentioned)}</span></button>`).join("");
+    if (!ordinary.length) return uncitedBadge;
+    const findings = ordinary.map(index => state.validation.run.findings[index]);
+    const errors = findings.filter(finding => finding.severity === "error").length;
+    const warnings = findings.filter(finding => finding.severity === "warning").length;
+    const severity = errors ? "error" : "warning";
+    const label = WIDGET_COPY.problemCounts(ordinary.length, errors, warnings);
+    const attribute = target ? ` data-outline-finding="${ordinary[0]}"` : "";
+    const tag = target ? "button" : "span";
+    const type = target ? ' type="button"' : "";
+    return `${uncitedBadge}<${tag}${type} class="opengdd-author-outline-badge opengdd-author-outline-badge--${severity}"${attribute} aria-label="${label}">${severityIcon(severity)}<span>${ordinary.length}</span></${tag}>`;
+  }
+
+  const outlineData = value => encodeURIComponent(value);
+  const findingBadgeLabel = findingIndexes => {
+    const findings = findingIndexes.map(index => state.validation.run.findings[index]);
+    const errors = findings.filter(finding => finding.severity === "error").length;
+    const warnings = findings.filter(finding => finding.severity === "warning").length;
+    return WIDGET_COPY.problemCounts(findingIndexes.length, errors, warnings);
+  };
+
+  function renderOutline() {
+    if (!ui.outline || (widgetDrawer && widgetDrawer.outline.hidden)) return;
+    const model = outlineModel();
+    const serialized = JSON.stringify(model);
+    if (serialized === renderedOutlineModel) return;
+    renderedOutlineModel = serialized;
+    const active = ui.outline.contains(document.activeElement) ? document.activeElement.dataset.outlineFocus : "";
+    const groups = model.groups.map(group => {
+      const all = group.artifacts;
+      const shown = state.outlineProblemsOnly ? all.filter(artifact => artifact.findings.length).map(artifact => ({
+        ...artifact,
+        children: artifact.children.filter(child => child.findings.length)
+      })) : all;
+      const groupFallback = group.fallback;
+      if (state.outlineProblemsOnly && !shown.length && !groupFallback.length) return "";
+      const visibleTreeIdentities = group.id === "collections" ? shown.flatMap(artifact => [
+        artifact.identity,
+        ...(artifact.expanded ? artifact.children.map(child => child.identity) : [])
+      ]) : [];
+      const treeTabStop = visibleTreeIdentities.includes(state.outlineSelection)
+        ? state.outlineSelection
+        : visibleTreeIdentities[0];
+      const renderArtifact = (artifact, level = 1) => {
+        const kind = artifact.kind;
+        const entryKey = outlineData(artifact.identity);
+        const citations = artifact.citations.length ? `<details class="opengdd-author-outline-citations"><summary>${WIDGET_COPY.citations(artifact.citations.length)}</summary><ul role="list">${artifact.citations.map(citation => `<li><button type="button" data-outline-entry="${entryKey}" data-outline-citation="${outlineData(citation.identity)}" data-outline-focus="citation-${outlineData(citation.identity)}">${escapeHtml(citation.file)} · ${WIDGET_COPY.line(citation.range.start.line + 1)}</button></li>`).join("")}</ul></details>` : "";
+        const kindTagValue = artifact.kind === "collection" ? WIDGET_COPY.collectionKind : artifact.kindTag;
+        const kindTag = kindTagValue ? `<span class="opengdd-author-outline-kind-tag">${kindTagValue}</span>` : "";
+        const accessibleKind = kindTagValue ? `, ${kindTagValue}` : "";
+        if (kind === "collection") {
+          const count = artifact.count ? WIDGET_COPY.collectionCount(artifact.count) : WIDGET_COPY.collectionEmptyCount;
+          const location = WIDGET_COPY.collectionLocation(artifact.name);
+          const children = artifact.expanded && artifact.children.length
+            ? `<ul class="opengdd-author-outline-children" role="group">${artifact.children.map(child => renderArtifact(child, 2)).join("")}</ul>`
+            : "";
+          return `<li role="treeitem" aria-level="1" aria-expanded="${artifact.expanded}" tabindex="${treeTabStop === artifact.identity ? 0 : -1}" data-outline-treeitem="${entryKey}" data-outline-focus="entry-${entryKey}" class="opengdd-author-outline-entry opengdd-author-outline-entry--collection${state.outlineSelection === artifact.identity ? " opengdd-author-is-selected" : ""}"><div data-outline-entry="${entryKey}"><button type="button" class="opengdd-author-outline-toggle" data-outline-toggle="${entryKey}" data-outline-focus="toggle-${entryKey}" aria-label="${escapeHtml(artifact.expanded ? WIDGET_COPY.collapseCollection(artifact.name) : WIDGET_COPY.expandCollection(artifact.name))}" aria-expanded="${artifact.expanded}">${artifact.expanded ? "▾" : "▸"}</button><button type="button" tabindex="-1" class="opengdd-author-outline-jump opengdd-author-kind--collection" aria-label="${escapeHtml(`${artifact.name}${accessibleKind}, ${count}, ${location}`)}"><span class="opengdd-author-outline-name">${escapeHtml(artifact.name)}</span>${kindTag}<span class="opengdd-author-outline-count">${escapeHtml(count)}</span><span class="opengdd-author-outline-location">${escapeHtml(location)}</span></button>${findingBadge(artifact.findings, "finding")}<button type="button" class="opengdd-author-outline-add-record" data-outline-add-record="${escapeHtml(artifact.name)}" data-outline-focus="add-${entryKey}">${WIDGET_COPY.addRecord}</button></div>${citations}${children}</li>`;
+        }
+        if (level === 2) return `<li role="treeitem" aria-level="2" tabindex="${treeTabStop === artifact.identity ? 0 : -1}" data-outline-treeitem="${entryKey}" data-outline-parent="${outlineData(artifact.parentIdentity)}" data-outline-focus="entry-${entryKey}" class="opengdd-author-outline-entry opengdd-author-outline-entry--child${state.outlineSelection === artifact.identity ? " opengdd-author-is-selected" : ""}"><div data-outline-entry="${entryKey}"><button type="button" tabindex="-1" class="opengdd-author-outline-jump opengdd-author-kind--${kind}" aria-label="${escapeHtml(`${artifact.name}${accessibleKind}, ${artifact.file}, ${WIDGET_COPY.line(artifact.range.start.line + 1)}`)}"><span class="opengdd-author-outline-name">${escapeHtml(artifact.name)}</span>${kindTag}<span class="opengdd-author-outline-location">${escapeHtml(artifact.file)} · ${WIDGET_COPY.line(artifact.range.start.line + 1)}</span></button>${findingBadge(artifact.findings, "finding")}</div>${citations}</li>`;
+        return `<li class="opengdd-author-outline-entry${state.outlineSelection === artifact.identity ? " opengdd-author-is-selected" : ""}"><div><button type="button" class="opengdd-author-outline-jump opengdd-author-kind--${kind}" data-outline-entry="${entryKey}" data-outline-focus="entry-${entryKey}" aria-label="${escapeHtml(`${artifact.name}${accessibleKind}, ${artifact.file}, ${WIDGET_COPY.line(artifact.range.start.line + 1)}`)}"><span class="opengdd-author-outline-name">${escapeHtml(artifact.name)}</span>${kindTag}<span class="opengdd-author-outline-location">${escapeHtml(artifact.file)} · ${WIDGET_COPY.line(artifact.range.start.line + 1)}</span></button>${findingBadge(artifact.findings, "finding")}</div>${citations}</li>`;
+      };
+      const entries = shown.map(artifact => renderArtifact(artifact)).join("");
+      const empty = shown.length ? "" : state.outlineProblemsOnly ? "" : `<div class="opengdd-author-outline-empty"><p>${group.empty}</p><button type="button" data-outline-create="${group.create}" data-outline-focus="create-${outlineData(group.create)}">${group.action}</button></div>`;
+      const severity = groupFallback.some(index => state.validation.run.findings[index].severity === "error") ? "error" : "warning";
+      const fallbackId = `opengdd-outline-${group.id}-fallback`;
+      const disclosure = groupFallback.length ? `<button type="button" class="opengdd-author-outline-badge opengdd-author-outline-badge--${severity}" data-outline-disclosure="${group.id}" data-outline-focus="fallback-${group.id}" aria-expanded="${group.fallbackOpen}" aria-controls="${fallbackId}" aria-label="${findingBadgeLabel(groupFallback)}">${severityIcon(severity)}<span>${groupFallback.length}</span></button>` : "";
+      const fallbackList = group.fallbackOpen && groupFallback.length ? `<ul class="opengdd-author-outline-fallback" id="${fallbackId}" role="list">${groupFallback.map(index => {
+        const finding = state.validation.run.findings[index];
+        return `<li><button type="button" data-outline-finding="${index}" data-outline-focus="fallback-${group.id}-${index}"><span>${escapeHtml(finding.message)}</span><span>${escapeHtml(finding.file)}${finding.line ? ` · ${WIDGET_COPY.line(finding.line)}` : ""}</span></button></li>`;
+      }).join("")}</ul>` : "";
+      const headerCreate = group.id === "collections" ? `<button type="button" class="opengdd-author-outline-group-create" data-outline-create="Collection" data-outline-focus="group-create-collections">${group.action}</button>` : "";
+      const entryList = group.id === "collections" ? `<ul role="tree">${entries}</ul>` : `<ul role="list">${entries}</ul>`;
+      return `<section class="opengdd-author-outline-group opengdd-author-kind--${group.kinds[0] === "name" ? "name" : group.kinds[0]}" role="group" aria-labelledby="opengdd-outline-${group.id}"><h3 id="opengdd-outline-${group.id}">${outlineIcon(group)}<span>${group.label}</span>${headerCreate}${disclosure}</h3>${fallbackList}${entries ? entryList : empty}</section>`;
+    }).join("");
+    const artifacts = model.groups.flatMap(group => group.artifacts);
+    const nothing = artifacts.length || state.outlineProblemsOnly ? "" : `<p class="opengdd-author-outline-nothing"><strong>${WIDGET_COPY.outlineNothing}</strong><span>${WIDGET_COPY.outlineNothingAction}</span></p>`;
+    const noProblems = model.noProblems ? `<p class="opengdd-author-outline-nothing" role="status">${WIDGET_COPY.noValidationProblems}</p>` : "";
+    const selectedFile = state.selected?.type === "file" ? state.selected.path : "";
+    const panelCreators = panelHost?.creators({ file: selectedFile }, { menu: true }) ?? [];
+    const promptedCreator = panelCreators.find(creator => creator.id === state.panelCreatorPrompt);
+    const panelCreatorMarkup = panelCreators.map(creator => `<button type="button" role="menuitem" tabindex="-1" data-panel-creator="${escapeHtml(creator.id)}" data-outline-focus="panel-creator-${outlineData(creator.id)}">${escapeHtml(creator.label)}</button>`).join("");
+    const creatorError = state.panelCreatorError ? `<p class="opengdd-author-quickfix-error" aria-live="polite">${escapeHtml(state.panelCreatorError)}</p>` : "";
+    const promptMarkup = promptedCreator ? `<div class="opengdd-author-panel-creator-prompt"><strong>${escapeHtml(promptedCreator.label)}</strong><p>${escapeHtml(promptedCreator.help)}</p><input data-panel-creator-name autocomplete="off"><button type="button" data-panel-creator-confirm="${escapeHtml(promptedCreator.id)}">${WIDGET_COPY.create}</button>${creatorError}</div>` : creatorError;
+    ui.outline.innerHTML = `<div class="opengdd-author-outline-controls"><div class="opengdd-author-outline-create"><button type="button" data-action="outline-menu" data-outline-focus="menu" aria-label="${WIDGET_COPY.create}" aria-haspopup="menu" aria-expanded="${state.outlineMenuOpen}">+</button>${state.outlineMenuOpen ? `<div role="menu" aria-label="${WIDGET_COPY.create}"><span>${WIDGET_COPY.create}</span>${OUTLINE_CREATE_ITEMS.map((item, index) => `<button type="button" role="menuitem" tabindex="${index ? -1 : 0}" data-outline-create="${item}" data-outline-focus="menuitem-${outlineData(item)}">${item}</button>`).join("")}${panelCreatorMarkup}${promptMarkup}</div>` : ""}</div><label><input type="checkbox" data-outline-filter data-outline-focus="filter"${state.outlineProblemsOnly ? " checked" : ""}> ${WIDGET_COPY.problemsOnly}</label></div>${noProblems}${nothing}${groups}<div data-panel-sidebar></div>`;
+    panelHost?.refreshSidebar();
+    if (active) [...ui.outline.querySelectorAll("[data-outline-focus]")].find(element => element.dataset.outlineFocus === active)?.focus({ preventScroll: true });
+  }
+
+  function scheduleOutlineRender() {
+    if (!ui.outline || outlineFrame) return;
+    outlineFrame = view.requestAnimationFrame(() => {
+      outlineFrame = 0;
+      renderOutline();
+    });
+  }
+
+  function openOutlineLocation(location) {
+    if (location.kind === "collection") {
+      const path = location.location.replace(/\/$/, "");
+      const exists = state.package.folders.has(path) || [...state.package.files.keys()].some(file => file.startsWith(`${path}/`));
+      if (!exists) return false;
+      state.selected = { type: "folder", path };
+      const parts = path.split("/");
+      for (let index = 1; index <= parts.length; index += 1) state.collapsed.delete(parts.slice(0, index).join("/"));
+      renderTree();
+      return true;
+    }
+    if (!state.package.files.has(location.file) || editController.revision(location.file) !== location.revision) return false;
+    openFile(location.file);
+    if (!ui.textarea.hidden) {
+      const text = ui.textarea.value;
+      const line = lineBounds(text, location.range.start.line);
+      const start = clampedPositionToOffset(text, location.range.start);
+      const end = Math.max(start, clampedPositionToOffset(text, location.range.end));
+      ui.textarea.focus({ preventScroll: true });
+      ui.textarea.setSelectionRange(start, end);
+      editorSurface.scrollToEditorLine(line.index);
+    }
+    return true;
+  }
+
+  const parsedObject = path => {
+    const text = state.package.files.get(path);
+    if (typeof text !== "string") return null;
+    const value = JSON.parse(text);
+    if (!value || Array.isArray(value) || typeof value !== "object") throw new Error(WIDGET_COPY.jsonObjectRequired(path));
+    return value;
+  };
+  const availableKey = (object, base) => {
+    if (!Object.hasOwn(object ?? {}, base)) return base;
+    for (let suffix = 2; ; suffix += 1) if (!Object.hasOwn(object, `${base}-${suffix}`)) return `${base}-${suffix}`;
+  };
+
+  const authoringEntries = () => (state.authoringView?.groups ?? []).flatMap(group => group.entries)
+    .flatMap(entry => [entry, ...(entry.children ?? [])]);
+
+  function positionCollectionDialog() {
+    if (!collectionDialog || ui.collectionDialog.hidden) return;
+    const rectangle = collectionDialog.anchor?.getBoundingClientRect();
+    if (!rectangle) return;
+    const box = ui.collectionDialog.getBoundingClientRect();
+    const gap = 6;
+    const top = rectangle.bottom + gap + box.height <= view.innerHeight - gap
+      ? rectangle.bottom + gap
+      : Math.max(gap, rectangle.top - box.height - gap);
+    const left = Math.min(Math.max(gap, rectangle.left), Math.max(gap, view.innerWidth - box.width - gap));
+    ui.collectionDialog.style.top = `${top}px`;
+    ui.collectionDialog.style.left = `${left}px`;
+  }
+
+  function updateCollectionDialog() {
+    if (!collectionDialog) return;
+    const copy = CREATION_COPY.collectionDialog;
+    const collectionName = collectionDialog.mode === "collection"
+      ? kebabName(collectionDialog.collectionValue)
+      : collectionDialog.collection;
+    const recordName = kebabName(collectionDialog.recordValue);
+    const collectionTaken = collectionDialog.mode === "collection"
+      && collectionNameTaken(state.package.files, state.package.folders, collectionName);
+    const recordTaken = recordName && collectionRecordNameTaken(
+      state.package.files, state.package.folders, collectionName, recordName
+    );
+    const collectionPreview = ui.collectionDialog.querySelector("[data-collection-preview]");
+    const recordPreview = ui.collectionDialog.querySelector("[data-record-preview]");
+    const collectionError = ui.collectionDialog.querySelector("[data-collection-error]");
+    const recordError = ui.collectionDialog.querySelector("[data-record-error]");
+    if (collectionPreview) collectionPreview.textContent = copy.collectionPreview(collectionName);
+    if (recordPreview) recordPreview.textContent = copy.recordPreview(recordName);
+    if (collectionError) collectionError.textContent = collectionTaken ? copy.collectionTaken(collectionName) : "";
+    if (recordError) recordError.textContent = recordTaken ? copy.recordTaken(recordName, collectionName) : "";
+    const create = ui.collectionDialog.querySelector("[data-collection-confirm]");
+    create.disabled = !collectionName || collectionTaken || !recordName || recordTaken;
+  }
+
+  function renderCollectionDialog(focus = true) {
+    if (!collectionDialog) return;
+    const copy = CREATION_COPY.collectionDialog;
+    const collectionQuestion = collectionDialog.mode === "collection" ? `<label for="opengdd-collection-name">${copy.collectionQuestion}</label><p class="opengdd-author-create-help">${escapeHtml(copy.collectionHelp)}</p><input id="opengdd-collection-name" data-collection-name autocomplete="off" value="${escapeHtml(collectionDialog.collectionValue)}"><p class="opengdd-author-create-preview" data-collection-preview></p><p class="opengdd-author-create-error" data-collection-error aria-live="polite"></p>` : "";
+    const recordQuestion = collectionDialog.mode === "collection" ? copy.firstRecordQuestion : copy.recordQuestion;
+    const skip = collectionDialog.mode === "collection" ? `<button type="button" class="opengdd-author-create-skip" data-collection-skip>${copy.skipFirstRecord}</button>` : "";
+    ui.collectionDialog.setAttribute("aria-labelledby", "opengdd-collection-dialog-title");
+    ui.collectionDialog.innerHTML = `<h3 id="opengdd-collection-dialog-title">${collectionDialog.mode === "collection" ? copy.title : WIDGET_COPY.addRecord}</h3>${collectionQuestion}<label for="opengdd-record-name">${recordQuestion}</label><p class="opengdd-author-create-help">${escapeHtml(copy.recordHelp)}</p><input id="opengdd-record-name" data-record-name autocomplete="off" value="${escapeHtml(collectionDialog.recordValue)}"><p class="opengdd-author-create-preview" data-record-preview></p><p class="opengdd-author-create-error" data-record-error aria-live="polite"></p>${skip}<div class="opengdd-author-create-actions"><button type="button" data-collection-confirm>${copy.create}</button><button type="button" data-collection-cancel>${copy.cancel}</button></div>`;
+    ui.collectionDialog.hidden = false;
+    updateCollectionDialog();
+    positionCollectionDialog();
+    if (focus) ui.collectionDialog.querySelector(collectionDialog.mode === "collection" ? "[data-collection-name]" : "[data-record-name]")?.focus({ preventScroll: true });
+  }
+
+  function ensureCollectionDialog() {
+    if (ui.collectionDialog) return;
+    ui.collectionDialog = document.createElement("div");
+    ui.collectionDialog.className = "opengdd-author-create-dialog";
+    ui.collectionDialog.dataset.role = "collection-dialog";
+    ui.collectionDialog.setAttribute("role", "dialog");
+    ui.collectionDialog.hidden = true;
+    rootElement.append(ui.collectionDialog);
+    ownedChildren.get(rootElement).add(ui.collectionDialog);
+    on(ui.collectionDialog, "input", event => {
+      if (!collectionDialog) return;
+      if (event.target.matches("[data-collection-name]")) collectionDialog.collectionValue = event.target.value;
+      if (event.target.matches("[data-record-name]")) collectionDialog.recordValue = event.target.value;
+      updateCollectionDialog();
+    });
+    on(ui.collectionDialog, "click", event => {
+      event.stopPropagation();
+      if (!collectionDialog) return;
+      if (event.target.closest("[data-collection-skip]")) {
+        commitCollectionDialog({ skip: true }).catch(error => report(error.message, true));
+      } else if (event.target.closest("[data-collection-confirm]")) {
+        commitCollectionDialog().catch(error => report(error.message, true));
+      } else if (event.target.closest("[data-collection-cancel]")) hideCollectionDialog(true);
+    });
+    on(ui.collectionDialog, "keydown", event => {
+      if (!collectionDialog) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        hideCollectionDialog(true);
+      } else if (event.key === "Enter" && event.target.matches("input")) {
+        event.preventDefault();
+        commitCollectionDialog().catch(error => report(error.message, true));
+      } else if (event.key === "Tab") {
+        const focusable = [...ui.collectionDialog.querySelectorAll("button:not([disabled]), input:not([disabled])")];
+        const current = focusable.indexOf(document.activeElement);
+        if (!focusable.length || (!event.shiftKey && current < focusable.length - 1) || (event.shiftKey && current > 0)) return;
+        event.preventDefault();
+        focusable[event.shiftKey ? focusable.length - 1 : 0].focus();
+      }
+    });
+  }
+
+  function openCollectionDialog(anchor, mode = "collection", collection = "") {
+    ensureCollectionDialog();
+    collectionDialog = {
+      anchor,
+      returnFocus: anchor,
+      mode,
+      collection,
+      collectionValue: "",
+      recordValue: ""
+    };
+    renderCollectionDialog();
+  }
+
+  function hideCollectionDialog(restoreFocus = false) {
+    const returnFocus = collectionDialog?.returnFocus;
+    collectionDialog = null;
+    if (ui.collectionDialog) {
+      ui.collectionDialog.hidden = true;
+      ui.collectionDialog.replaceChildren();
+    }
+    if (!restoreFocus || !returnFocus) return;
+    // The outline re-renders wholesale whenever analysis publishes, so the
+    // opener captured at open time may be a detached node by the time the
+    // dialog closes; its focus key names the surviving control.
+    const key = returnFocus.dataset?.outlineFocus;
+    const target = (key && [...ui.outline.querySelectorAll("[data-outline-focus]")].find(element => element.dataset.outlineFocus === key))
+      ?? (returnFocus.isConnected ? returnFocus : null);
+    target?.focus({ preventScroll: true });
+  }
+
+  async function commitCollectionDialog({ skip = false } = {}) {
+    if (!collectionDialog) return;
+    const pending = collectionDialog;
+    const collection = pending.mode === "collection" ? kebabName(pending.collectionValue) : pending.collection;
+    const record = kebabName(pending.recordValue);
+    if (!collection || collectionNameTaken(state.package.files, state.package.folders, pending.mode === "collection" ? collection : "")) {
+      updateCollectionDialog();
+      return;
+    }
+    if (!skip && (!record || collectionRecordNameTaken(state.package.files, state.package.folders, collection, record))) {
+      updateCollectionDialog();
+      return;
+    }
+    const label = pending.mode === "collection"
+      ? CREATION_COPY.collectionDialog.createUndo
+      : CREATION_COPY.collectionDialog.addRecordUndo;
+    const transaction = editController.begin(label);
+    if (pending.mode === "collection") transaction.folder(`collections/${collection}`).create();
+    if (!skip) transaction.file(`collections/${collection}/${record}.json`).create(collectionRecordText(state.package.files, collection));
+    await applyEdit(() => transaction.commit());
+    state.outlineCollectionCollapsed.delete(collection);
+    host.outlineCollections?.setCollapsed?.([...state.outlineCollectionCollapsed]);
+    state.outlineMenuOpen = false;
+    hideCollectionDialog(false);
+    analyzeNow();
+    validationChanged();
+    renderAll();
+    const selected = authoringEntries().find(entry => entry.kind === (skip ? "collection" : "collection-record")
+      && entry.name === (skip ? collection : record)
+      && (skip || entry.file === `collections/${collection}/${record}.json`));
+    if (!selected || !openOutlineLocation(selected)) {
+      report(WIDGET_COPY.declarationGone(skip ? collection : record), true);
+      return;
+    }
+    state.outlineSelection = selected.identity;
+    selectionBus.select({
+      kind: selected.kind,
+      name: selected.name,
+      file: selected.kind === "collection" ? selected.location.replace(/\/$/, "") : selected.file,
+      range: selected.range
+    }, { origin: { surface: "sidebar" } });
+    renderedOutlineModel = "";
+    renderOutline();
+  }
+
+  async function createFromOutline(item) {
+    state.outlineMenuOpen = false;
+    const transaction = editController.begin(CREATION_COPY.createNamed(item));
+    let selected;
+    const insert = (path, pointer, key, value) => transaction.json(path).insert(pointer, key, value);
+    const replaceInTransaction = (path, next) => {
+      const previous = state.package.files.get(path);
+      const change = minimalTextChange(previous, next);
+      transaction.text(path).replace({
+        start: offsetToPosition(previous, change.start),
+        end: offsetToPosition(previous, change.previousEnd),
+        revision: editController.revision(path)
+      }, next.slice(change.start, change.nextEnd));
+    };
+    const insertRoot = (path, key, value) => insert(path, "", key, value);
+
+    if (item === "Tuning key") {
+      const tuning = parsedObject("tuning.json");
+      const key = availableKey(tuning?.tunables, "new.tuning_key");
+      if (!tuning) transaction.file("tuning.json").create(`${JSON.stringify({ tunables: { [key]: 0 } }, null, 2)}\n`);
+      else if (tuning.tunables && !Array.isArray(tuning.tunables) && typeof tuning.tunables === "object") insert("tuning.json", "/tunables", key, 0);
+      else if (tuning.tunables === undefined) insertRoot("tuning.json", "tunables", { [key]: 0 });
+      else throw new Error(CREATION_COPY.outlineErrors.tuningObject);
+      selected = { kind: "tunable", name: key, file: "tuning.json" };
+    } else if (item === "Descriptor") {
+      const manifest = parsedObject("manifest.json");
+      if (!manifest) throw new Error(CREATION_COPY.outlineErrors.descriptorManifest);
+      const descriptors = manifest.descriptors;
+      const moods = Array.isArray(descriptors?.mood) ? descriptors.mood : [];
+      if (descriptors !== undefined && (!descriptors || Array.isArray(descriptors) || typeof descriptors !== "object")) throw new Error(CREATION_COPY.outlineErrors.descriptorsObject);
+      if (descriptors?.mood !== undefined && !Array.isArray(descriptors.mood)) throw new Error(CREATION_COPY.outlineErrors.descriptorMoodsArray);
+      const ids = Object.fromEntries(moods.map(entry => [entry?.id, true]));
+      const id = availableKey(ids, "new-mood");
+      const stub = { id, intent: "Describe the intended mood.", anti: [{ description: "Not yet specified." }] };
+      if (descriptors === undefined) insertRoot("manifest.json", "descriptors", { mood: [stub] });
+      else if (descriptors.mood === undefined) insert("manifest.json", "/descriptors", "mood", [stub]);
+      else insert("manifest.json", "/descriptors/mood", "-", stub);
+      selected = { kind: "descriptor", name: id, file: "manifest.json" };
+    } else if (item === "Palette") {
+      const manifest = parsedObject("manifest.json");
+      if (!manifest) throw new Error(CREATION_COPY.outlineErrors.paletteManifest);
+      if (manifest.palette !== undefined && (!manifest.palette || Array.isArray(manifest.palette) || typeof manifest.palette !== "object")) throw new Error(CREATION_COPY.outlineErrors.paletteObject);
+      const key = availableKey(manifest.palette, "new-palette");
+      const stub = [{ "new-color": "#000000" }];
+      if (manifest.palette === undefined) insertRoot("manifest.json", "palette", { [key]: stub });
+      else insert("manifest.json", "/palette", key, stub);
+      selected = { kind: "palette", name: `palette.${key}`, file: "manifest.json" };
+    } else if (item === "Identifier") {
+      const manifest = parsedObject("manifest.json");
+      if (!manifest) throw new Error(CREATION_COPY.outlineErrors.identifierManifest);
+      const direction = parsedObject("direction.json");
+      const viewingStub = { speed_and_size: "Normal play view.", calibration: "Standard display.", hide_builder_name: true };
+      let pillar;
+      let viewingName = "outline-view";
+      if (!direction) {
+        pillar = "new-pillar";
+        transaction.file("direction.json").create(`${JSON.stringify({
+          pillars: {
+            [pillar]: { statement: "Describe this design pillar.", viewing: "outline-view" },
+            "supporting-pillar": { statement: "Describe the supporting design pillar.", viewing: "outline-view" }
+          },
+          viewing: { "outline-view": viewingStub }
+        }, null, 2)}\n`);
+      } else {
+        if (direction.viewing !== undefined && (!direction.viewing || Array.isArray(direction.viewing) || typeof direction.viewing !== "object")) throw new Error(CREATION_COPY.outlineErrors.viewingObject);
+        const viewing = Object.keys(direction.viewing ?? {})[0] ?? "outline-view";
+        viewingName = viewing;
+        if (direction.pillars !== undefined && (!direction.pillars || Array.isArray(direction.pillars) || typeof direction.pillars !== "object")) throw new Error(CREATION_COPY.outlineErrors.pillarsObject);
+        pillar = availableKey(direction.pillars, "new-pillar");
+        const stub = { statement: "Describe this design pillar.", viewing };
+        const count = Object.keys(direction.pillars ?? {}).length;
+        if (direction.viewing === undefined || direction.pillars === undefined) {
+          const nextDirection = JSON.parse(JSON.stringify(direction));
+          nextDirection.viewing ??= { [viewing]: viewingStub };
+          nextDirection.pillars ??= {
+            [pillar]: stub,
+            "supporting-pillar": { statement: "Describe the supporting design pillar.", viewing }
+          };
+          if (direction.pillars !== undefined) {
+            nextDirection.pillars[pillar] = stub;
+            if (count === 0) nextDirection.pillars["supporting-pillar"] = { statement: "Describe the supporting design pillar.", viewing };
+          }
+          replaceInTransaction("direction.json", `${JSON.stringify(nextDirection, null, 2)}\n`);
+        } else {
+          insert("direction.json", "/pillars", pillar, stub);
+          if (count === 0) insert("direction.json", "/pillars", availableKey({ [pillar]: true }, "supporting-pillar"), { statement: "Describe the supporting design pillar.", viewing });
+        }
+      }
+      if (!manifest.build?.direction) insert("manifest.json", "/build", "direction", "direction.json");
+      const presentationPath = "04-presentation.md";
+      const presentation = state.package.files.get(presentationPath);
+      const directionFence = `\n\n\`\`\`direction\n> DELEGATED: presentation-direction\n\nPILLARS:\n- \`pillars.${pillar}\`\n  Describe this design pillar.\n${direction ? "" : "- `pillars.supporting-pillar`\n  Describe the supporting design pillar.\n"}\nVIEWING:\n- \`viewing.${viewingName}\`\n  Normal play view on a standard display.\n\`\`\`\n`;
+      if (typeof presentation !== "string") {
+        transaction.file(presentationPath).create(`# Presentation${directionFence}`);
+        if (!manifest.build?.chapters?.includes(presentationPath)) insert("manifest.json", "/build/chapters", "-", presentationPath);
+      } else if (!presentation.includes("```direction")) {
+        transaction.text(presentationPath).append(directionFence);
+      } else {
+        const fenceStart = presentation.indexOf("```direction");
+        const pillarsAt = presentation.indexOf("PILLARS:", fenceStart);
+        const nextSection = pillarsAt < 0 ? -1 : presentation.slice(pillarsAt + 8).search(/\n(?:[A-Z][A-Z-]*:|```)/);
+        if (pillarsAt < 0 || nextSection < 0) throw new Error(CREATION_COPY.outlineErrors.pillarsSection);
+        const at = pillarsAt + 8 + nextSection;
+        const block = `\n- \`pillars.${pillar}\`\n  Describe this design pillar.`;
+        transaction.text(presentationPath).replace({
+          start: offsetToPosition(presentation, at),
+          end: offsetToPosition(presentation, at),
+          revision: editController.revision(presentationPath)
+        }, block);
+      }
+      selected = { kind: "name", name: `pillars.${pillar}`, file: "direction.json" };
+    } else return;
+
+    await applyEdit(() => transaction.commit());
+    analyzeNow();
+    validationChanged();
+    renderAll();
+    const entry = authoringEntries().find(candidate => candidate.kind === selected.kind
+      && candidate.name === selected.name && candidate.file === selected.file);
+    if (!entry || !openOutlineLocation(entry)) {
+      report(WIDGET_COPY.declarationGone(selected.name), true);
+      return;
+    }
+    state.outlineSelection = entry.identity;
+    renderedOutlineModel = "";
+    renderOutline();
   }
 
   function renderStatus() {
-    const anchors = ui.textarea.hidden ? [] : editorAnchors();
+    const anchors = ui.textarea.hidden || !editorSurface ? [] : editorSurface.anchors();
     const count = classification => anchors.filter(anchor => anchor.classification === classification).length;
-    // A zero count is good news and must not be dressed as an alarm.
-    const tally = (kind, total) => `<span class="${total ? `opengdd-author-status-${kind}` : ""}">${total} ${kind}</span>`;
+    const tally = (kind, total) => `<span class="${total ? `opengdd-author-status-${kind}` : ""}">${WIDGET_COPY.classifiedCount(total, kind)}</span>`;
     const validation = state.validation.run
       ? tally("errors", state.validation.run.summary.errors) + tally("warnings", state.validation.run.summary.warnings)
-      : `<span>${state.validation.status === "pending" ? "validation pending" : "validation unavailable"}</span>`;
-    ui.status.innerHTML = `<span>${escapeHtml(state.package.title)}</span><span>${state.package.files.size} files</span><span>${state.analysis.nameIndex.length} names</span><span class="opengdd-author-status-known">${count("known")} known</span><span class="opengdd-author-status-unknown">${count("unknown")} unknown</span><span class="opengdd-author-status-ambiguous">${count("ambiguous")} ambiguous</span>${validation}`;
+      : `<span>${state.validation.status === "pending" ? WIDGET_COPY.validationPending : WIDGET_COPY.validationUnavailableStatus}</span>`;
+    if (!capabilities.workbenchLabels) {
+      ui.status.innerHTML = `<span>${escapeHtml(state.package.title)}</span><span>${WIDGET_COPY.fileCount(state.package.files.size)}</span><span>${WIDGET_COPY.nameCount(state.authoringView?.nameCount ?? 0)}</span><span class="opengdd-author-status-known">${WIDGET_COPY.classifiedCount(count("known"), "known")}</span><span class="opengdd-author-status-unknown">${WIDGET_COPY.classifiedCount(count("unknown"), "unknown")}</span><span class="opengdd-author-status-ambiguous">${WIDGET_COPY.classifiedCount(count("ambiguous"), "ambiguous")}</span>${validation}`;
+      return;
+    }
+    const summary = state.validation.run?.summary;
+    const words = state.authoringView?.wordCounts?.[state.openPath] ?? 0;
+    const declarations = state.authoringView?.declarationCount ?? 0;
+    const validationState = {
+      pending: WORKBENCH_COPY.validationChecking,
+      unavailable: WORKBENCH_COPY.validationUnavailable,
+      crashed: WORKBENCH_COPY.validationStopped,
+      ready: WORKBENCH_COPY.validationDone
+    }[state.validation.status];
+    const errors = summary ? summary.errors : "—";
+    const warnings = summary ? summary.warnings : "—";
+    ui.status.innerHTML = `<button type="button" data-outline-problems>${WORKBENCH_COPY.errors(errors)}</button><button type="button" data-outline-problems>${WORKBENCH_COPY.warnings(warnings)}</button><span>${WORKBENCH_COPY.words(words)}</span><span>${WORKBENCH_COPY.declarations(declarations)}</span><span>${workerActive ? WORKBENCH_COPY.checkingInWorker : WORKBENCH_COPY.checkingOnPage}</span><span>${WORKBENCH_COPY.validationStatus(validationState)}</span><span>${escapeHtml(state.saveStatus)}</span>`;
   }
 
   function renderAll() {
@@ -993,262 +1580,9 @@ export function mountAuthoringTool(rootElement, host = {}) {
     renderTree();
     renderEditor();
     renderDiagnostics();
+    renderOutline();
     renderStatus();
-  }
-
-  function showHover(name) {
-    if (!name || state.hoverName === name) return;
-    state.hoverName = name;
-    const resolution = resolveAnchor(state.analysis.definitionsByName, name);
-    const definitions = resolution.definitions.map(definition => {
-      const value = valueText(definition.value);
-      return `<li><strong>${escapeHtml(KIND_LABELS[definition.kind] ?? "name")}</strong><span>${escapeHtml(definition.detail)}</span><span>${escapeHtml(definition.file)} · line ${definition.range.start.line + 1}</span>${value ? `<span class="opengdd-author-definition-value"><span>Value</span><code>${escapeHtml(value)}</code></span>` : ""}</li>`;
-    }).join("");
-    ui.hover.innerHTML = `<h2><code>${escapeHtml(name)}</code></h2><p class="opengdd-author-classification opengdd-author-classification--${resolution.classification}">${resolution.classification}</p>${definitions ? `<ul>${definitions}</ul>` : '<p class="opengdd-author-muted">No definition is present in this package.</p>'}`;
-  }
-
-  function anchorAt(line, character) {
-    return editorAnchors().find(anchor => anchor.file === state.openPath
-      && anchor.range.start.line === line
-      && character >= anchor.range.start.character
-      && character <= anchor.range.end.character);
-  }
-
-  function anchorNameAtPoint(x, y) {
-    for (const anchor of ui.highlight.querySelectorAll("[data-anchor-name]")) {
-      for (const rect of anchor.getClientRects()) {
-        if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) return anchor.dataset.anchorName;
-      }
-    }
-    return "";
-  }
-
-  function showCaretAnchor() {
-    const before = ui.textarea.value.slice(0, ui.textarea.selectionStart ?? 0).split("\n");
-    const anchor = anchorAt(before.length - 1, before.at(-1).length);
-    if (anchor) showHover(anchor.name);
-    return anchor;
-  }
-
-  function completionButtons() {
-    return [...ui.completions.querySelectorAll("[data-completion]")];
-  }
-
-  function activateCompletion(index) {
-    const buttons = completionButtons();
-    if (!buttons.length) { state.completion = -1; return; }
-    state.completion = (index + buttons.length) % buttons.length;
-    buttons.forEach((button, position) => button.classList.toggle("opengdd-author-is-active", position === state.completion));
-    buttons[state.completion].scrollIntoView({ block: "nearest" });
-  }
-
-  function positionPopup(element) {
-    const style = view.getComputedStyle(ui.textarea);
-    for (const property of ["fontFamily", "fontSize", "fontWeight", "lineHeight", "letterSpacing", "padding", "borderWidth", "boxSizing", "whiteSpace", "overflowWrap", "wordBreak", "tabSize"]) {
-      ui.mirror.style[property] = style[property];
-    }
-    ui.mirror.style.width = `${ui.textarea.clientWidth}px`;
-    const value = ui.textarea.value;
-    const caret = ui.textarea.selectionStart ?? value.length;
-    const wrapped = ui.editor.classList.contains("opengdd-author-editor--wrapped");
-    let line = 0;
-    if (wrapped) ui.mirror.textContent = value.slice(0, caret);
-    else {
-      // The unwrapped large-file fallback can use a cheap one-line mirror.
-      for (let index = value.indexOf("\n"); index >= 0 && index < caret; index = value.indexOf("\n", index + 1)) line += 1;
-      ui.mirror.textContent = value.slice(value.lastIndexOf("\n", caret - 1) + 1, caret);
-    }
-    const marker = document.createElement("span");
-    marker.textContent = "\u200b";
-    ui.mirror.appendChild(marker);
-    const lineHeight = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.4;
-    const top = marker.offsetTop + (wrapped ? lineHeight : (line + 1) * lineHeight) - ui.textarea.scrollTop;
-    const maxLeft = ui.textarea.clientWidth - element.offsetWidth;
-    const left = Math.max(0, Math.min(marker.offsetLeft - ui.textarea.scrollLeft, maxLeft));
-    element.style.top = `${Math.max(0, Math.min(top, ui.textarea.clientHeight))}px`;
-    element.style.left = `${left}px`;
-  }
-
-  const positionCompletions = () => positionPopup(ui.completions);
-
-  // Matching is case-insensitive, so the folded names are kept for as long as
-  // the analysis they came from lasts, rather than rebuilt per keystroke.
-  let folded = { analysis: null, names: [] };
-  function lowercaseNames() {
-    if (folded.analysis !== state.analysis) {
-      folded = { analysis: state.analysis, names: state.analysis.nameIndex.map(entry => entry.name.toLowerCase()) };
-    }
-    return folded.names;
-  }
-
-  function complete() {
-    const context = completionContext(ui.textarea);
-    if (!context || ui.textarea.hidden || !/\.md$/i.test(state.openPath)) {
-      ui.completions.replaceChildren();
-      state.completion = -1;
-      return;
-    }
-    const prefix = context.prefix.toLowerCase();
-  // The name index already arrives in name order, so keeping the two
-    // groups in table order gives the same list a sort would — without
-    // comparing every name against every other on every keystroke.
-    const table = state.analysis.nameIndex;
-    const names = lowercaseNames();
-    const opening = [];
-    const containing = [];
-    for (let index = 0; index < table.length; index += 1) {
-      const at = names[index].indexOf(prefix);
-      if (at === 0) opening.push(table[index]);
-      else if (at > 0) containing.push(table[index]);
-    }
-    const matches = opening.concat(containing);
-    const visible = matches.slice(0, 60);
-    const countLine = visible.length
-      ? `<li class="opengdd-author-completion-count">${visible.length < matches.length ? `${visible.length} of ${matches.length} matches — keep typing to narrow` : `${matches.length} match${matches.length === 1 ? "" : "es"}`}</li>`
-      : "";
-    ui.completions.innerHTML = countLine + visible.map(entry => {
-      const definition = entry.definitions[0] ?? {};
-      const label = KIND_LABELS[definition.kind] ?? "name";
-      const detail = definition.kind === "section" ? definition.detail : `${label} · ${definition.detail ?? "package name"}`;
-      return `<li><button type="button" data-completion="${escapeHtml(entry.name)}"><code>${escapeHtml(entry.name)}</code><span>${escapeHtml(detail)}</span></button></li>`;
-    }).join("");
-    if (visible.length) {
-      positionCompletions();
-      activateCompletion(0);
-    } else state.completion = -1;
-  }
-
-  function acceptCompletion(name) {
-    const context = completionContext(ui.textarea);
-    if (!context) return;
-    const after = ui.textarea.value.slice(context.caret);
-    const value = `${ui.textarea.value.slice(0, context.backtick + 1)}${name}\`${after}`;
-    const caret = context.backtick + name.length + 2;
-    ui.textarea.value = value;
-    editorTextRevision += 1;
-    overlay.lineStarts = [];
-    state.package.files.set(state.openPath, value);
-    paintSoon({ changed: true });
-    ui.textarea.focus();
-    ui.textarea.setSelectionRange(caret, caret);
-    ui.completions.replaceChildren();
-    state.completion = -1;
-    analyzeSoon();
-    validationChanged();
-    saveWorkingCopy();
-  }
-
-  function restoreEditor(snapshot) {
-    if (!snapshot || snapshot.path !== state.openPath || ui.textarea.hidden) return;
-    const start = Math.min(snapshot.start, ui.textarea.value.length);
-    const end = Math.min(snapshot.end, ui.textarea.value.length);
-    ui.textarea.focus({ preventScroll: true });
-    ui.textarea.setSelectionRange(start, end);
-    ui.textarea.scrollTop = snapshot.scrollTop;
-    ui.textarea.scrollLeft = snapshot.scrollLeft;
-    ui.highlight.scrollTop = snapshot.scrollTop;
-    ui.highlight.scrollLeft = snapshot.scrollLeft;
-  }
-
-  function dismissQuickfix(restore = true) {
-    const snapshot = state.quickfix?.selection;
-    state.quickfix = null;
-    ui.quickfix.hidden = true;
-    ui.quickfix.replaceChildren();
-    if (restore) restoreEditor(snapshot);
-  }
-
-  function renderQuickfix(focus = false) {
-    const quickfix = state.quickfix;
-    if (!quickfix) return;
-    const selected = quickfix.actions[quickfix.index];
-    const actions = quickfix.actions.map((action, index) => `<button type="button" data-quickfix-action="${index}" class="${index === quickfix.index ? "opengdd-author-is-active" : ""}">${escapeHtml(action.label)}</button>`).join("");
-    const value = selected.needsValue
-      ? `<label>JSON value<input data-role="quickfix-value" value="${escapeHtml(quickfix.value)}" autocomplete="off" spellcheck="false"></label>`
-      : "";
-    ui.quickfix.innerHTML = `<p>Create <code>${escapeHtml(quickfix.name)}</code></p><div class="opengdd-author-quickfix-actions">${actions}</div>${value}<p class="opengdd-author-quickfix-error">${escapeHtml(quickfix.error)}</p><p class="opengdd-author-quickfix-hint">↑↓ choose · Enter create · Esc dismiss</p>`;
-    ui.quickfix.setAttribute("aria-label", `Create ${quickfix.name}`);
-    ui.quickfix.hidden = false;
-    positionPopup(ui.quickfix);
-    if (!focus) return;
-    const target = selected.needsValue ? ui.quickfix.querySelector('[data-role="quickfix-value"]') : ui.quickfix.querySelector(`[data-quickfix-action="${quickfix.index}"]`);
-    target?.focus({ preventScroll: true });
-  }
-
-  function activateQuickfix(index) {
-    if (!state.quickfix) return;
-    const input = ui.quickfix.querySelector('[data-role="quickfix-value"]');
-    if (input) state.quickfix.value = input.value;
-    state.quickfix.index = (index + state.quickfix.actions.length) % state.quickfix.actions.length;
-    state.quickfix.error = "";
-    renderQuickfix(true);
-  }
-
-  function openQuickfix(anchor) {
-    if (!anchor || anchor.classification !== "unknown" || !/\.md$/i.test(state.openPath)) return;
-    dismissQuickfix(false);
-    const proposal = classifyCreation(anchor.name, {
-      files: state.package.files,
-      manifest: state.analysis.manifest,
-      openPath: state.openPath
-    });
-    if (!proposal.actions.length) { report(proposal.reason || `Cannot create ${anchor.name} here.`, true); return; }
-    ui.completions.replaceChildren();
-    state.completion = -1;
-    state.quickfix = {
-      name: anchor.name,
-      actions: proposal.actions,
-      index: 0,
-      value: "",
-      error: "",
-      selection: {
-        path: state.openPath,
-        start: ui.textarea.selectionStart ?? 0,
-        end: ui.textarea.selectionEnd ?? 0,
-        scrollTop: ui.textarea.scrollTop,
-        scrollLeft: ui.textarea.scrollLeft
-      }
-    };
-    renderQuickfix(true);
-  }
-
-  function commitQuickfix() {
-    const quickfix = state.quickfix;
-    if (!quickfix) return;
-    const action = quickfix.actions[quickfix.index];
-    try {
-      const current = state.package.files.get(action.target);
-      if (typeof current !== "string") throw new Error(`${action.target} is not writable text.`);
-      let next;
-      if (action.needsValue) {
-        const input = ui.quickfix.querySelector('[data-role="quickfix-value"]');
-        quickfix.value = input?.value ?? quickfix.value;
-        const value = parseJsonScalar(quickfix.value);
-        const targetText = action.createContainer
-          ? insertJsonValue(current, null, { key: action.container, value: {} })
-          : current;
-        next = insertJsonValue(targetText, action.container, { key: quickfix.name, value });
-      } else if (action.record) {
-        next = insertJsonValue(current, action.container, { value: action.record });
-      } else next = action.apply(current);
-      state.package.files.set(action.target, next);
-      if (action.target === state.openPath) {
-        ui.textarea.value = next;
-        editorTextRevision += 1;
-        overlay.lineStarts = [];
-        paintSoon({ changed: true });
-      }
-      const snapshot = quickfix.selection;
-      dismissQuickfix(false);
-      analyzeSoon(false);
-      validationChanged();
-      saveWorkingCopy(false);
-      report(action.notice);
-      restoreEditor(snapshot);
-    } catch (error) {
-      quickfix.error = error.message;
-      renderQuickfix(true);
-    }
+    renderHistory();
   }
 
   function targetFolder() {
@@ -1257,10 +1591,22 @@ export function mountAuthoringTool(rootElement, host = {}) {
   }
 
   function beginTreeAction(action) {
+    if (capabilities.protectedFiles && action === "rename" && state.selected?.type === "file" && PROTECTED_PACKAGE_FILES.has(state.selected.path)) {
+      report(WIDGET_COPY.protectedRename(state.selected.path));
+      return;
+    }
     state.formAction = action;
     const current = state.selected?.path ?? "";
-    ui.treePrompt.textContent = action === "new-file" ? "New file path" : action === "new-folder" ? "New folder path" : "New path";
-    ui.treeInput.value = action === "rename" ? current : action === "new-file" ? "notes.md" : "folder";
+    ui.treePrompt.textContent = action === "new-file" ? WIDGET_COPY.newFilePath : action === "new-folder" ? WIDGET_COPY.newFolderPath : WIDGET_COPY.newPath;
+    const renameParent = action === "rename" ? parentPath(current) : "";
+    if (!ui.treeParent) {
+      ui.treeParent = document.createElement("span");
+      ui.treeParent.className = "opengdd-author-tree-parent";
+      ui.treeInput.before(ui.treeParent);
+    }
+    ui.treeParent.hidden = !renameParent;
+    ui.treeParent.textContent = renameParent ? `${renameParent}/` : "";
+    ui.treeInput.value = action === "rename" ? basename(current) : action === "new-file" ? WIDGET_COPY.defaultFilePath : WIDGET_COPY.defaultFolderPath;
     ui.treeForm.hidden = false;
     ui.treeInput.focus();
     ui.treeInput.select();
@@ -1272,60 +1618,88 @@ export function mountAuthoringTool(rootElement, host = {}) {
     const key = path.toLowerCase();
     const taken = [...state.package.files.keys(), ...state.package.folders]
       .find(existing => existing !== except && existing.toLowerCase() === key);
-    if (taken) throw new Error(`A package item already exists at ${taken}.`);
+    if (taken) throw new Error(WIDGET_COPY.pathExists(taken));
   }
 
-  function movePath(type, from, requested) {
+  async function movePath(type, from, requested, label = WIDGET_COPY.moveAction(from)) {
+    if (capabilities.protectedFiles && type === "file" && PROTECTED_PACKAGE_FILES.has(from)) {
+      report(WIDGET_COPY.protectedRename(from));
+      return false;
+    }
     const to = normalizePath(requested);
     if (from === to) return;
-    dismissQuickfix(false);
+    editorSurface.closeDialog(false);
+    const transaction = editController.begin(label);
     if (type === "file") {
       claimPath(to, from);
-      const text = state.package.files.get(from);
-      state.package.files.delete(from);
-      state.package.files.set(to, text);
-      if (state.openPath === from) state.openPath = to;
+      transaction.file(from).move(to);
     } else {
-      if (to.startsWith(`${from}/`)) throw new Error("A folder cannot be moved inside itself.");
+      if (to.startsWith(`${from}/`)) throw new Error(WIDGET_COPY.folderInsideItself);
       const affectedFiles = [...state.package.files].filter(([path]) => path.startsWith(`${from}/`));
       const affectedFolders = [...state.package.folders].filter(path => path === from || path.startsWith(`${from}/`));
       const destinationExists = state.package.folders.has(to) && !affectedFolders.includes(to);
       if (destinationExists || [...state.package.files.keys()].some(path => path === to || path.startsWith(`${to}/`))) {
-        throw new Error(`The destination ${to} is not empty.`);
+        throw new Error(WIDGET_COPY.destinationNotEmpty(to));
       }
-      for (const [path] of affectedFiles) state.package.files.delete(path);
-      for (const folder of affectedFolders) state.package.folders.delete(folder);
-      for (const [path, text] of affectedFiles) state.package.files.set(`${to}${path.slice(from.length)}`, text);
-      for (const folder of affectedFolders) state.package.folders.add(`${to}${folder.slice(from.length)}`);
-      if (state.openPath.startsWith(`${from}/`)) state.openPath = `${to}${state.openPath.slice(from.length)}`;
+      transaction.folder(from).move(to);
     }
-    state.package.folders = foldersFor(state.package.files, state.package.folders);
+    await applyEdit(() => transaction.commit());
+    if (type === "file" && state.openPath === from) state.openPath = to;
+    else if (type === "folder" && state.openPath.startsWith(`${from}/`)) state.openPath = `${to}${state.openPath.slice(from.length)}`;
     state.selected = { type, path: to };
     analyzeNow();
     renderAll();
     validationChanged();
-    saveWorkingCopy();
+    return true;
   }
 
-  function submitTreeAction() {
+  async function deleteTreeSelection() {
+    if (!state.selected) return false;
+    const { type, path } = state.selected;
+    if (capabilities.protectedFiles && type === "file" && PROTECTED_PACKAGE_FILES.has(path)) {
+      report(WIDGET_COPY.protectedDelete(path));
+      return false;
+    }
+    const transaction = editController.begin(WIDGET_COPY.deletePathAction(path));
+    if (type === "file") transaction.file(path).remove();
+    else transaction.folder(path).remove();
+    await applyEdit(() => transaction.commit());
+    if (type === "file" ? state.openPath === path : state.openPath.startsWith(`${path}/`)) {
+      state.openPath = [...state.package.files.keys()].find(item => /\.md$/i.test(item)) ?? [...state.package.files.keys()][0] ?? "";
+    }
+    state.selected = state.openPath ? { type: "file", path: state.openPath } : null;
+    analyzeNow();
+    renderAll();
+    validationChanged();
+    return true;
+  }
+
+  async function submitTreeAction() {
     const action = state.formAction;
     let path = normalizePath(ui.treeInput.value);
-    if (action !== "rename" && !ui.treeInput.value.includes("/")) {
+    if (action === "rename" && state.selected) {
+      if (/[\\/]/.test(ui.treeInput.value)) throw new Error(WIDGET_COPY.renameLeafOnly);
+      const folder = parentPath(state.selected.path);
+      path = folder ? `${folder}/${path}` : path;
+    } else if (!ui.treeInput.value.includes("/")) {
       const folder = targetFolder();
       path = folder ? `${folder}/${path}` : path;
     }
     if (action === "new-file") {
       claimPath(path);
-      state.package.files.set(path, "");
-      state.package.folders = foldersFor(state.package.files, state.package.folders);
+      const transaction = editController.begin(WIDGET_COPY.createPathAction(path));
+      transaction.file(path).create("");
+      await applyEdit(() => transaction.commit());
       state.openPath = path;
       state.selected = { type: "file", path };
     } else if (action === "new-folder") {
       claimPath(path);
-      state.package.folders.add(path);
+      const transaction = editController.begin(WIDGET_COPY.createPathAction(path));
+      transaction.folder(path).create();
+      await applyEdit(() => transaction.commit());
       state.selected = { type: "folder", path };
     } else if (state.selected) {
-      movePath(state.selected.type, state.selected.path, path);
+      await movePath(state.selected.type, state.selected.path, path, WIDGET_COPY.renamePathAction(state.selected.path));
       ui.treeForm.hidden = true;
       return;
     }
@@ -1333,19 +1707,12 @@ export function mountAuthoringTool(rootElement, host = {}) {
     analyzeNow();
     renderAll();
     validationChanged();
-    saveWorkingCopy();
   }
 
-  function builtinFor(id) {
-    return state.builtins.find(item => item.id === id);
-  }
-
-  function draftFor(id) {
-    return state.drafts.find(item => item.id === id);
-  }
-
-  function closePackageConfirmation(restoreFocus = false) {
-    state.pendingDelete = null;
+  function hidePackageConfirmation(restoreFocus = false) {
+    // Confirmation key/click handlers update the session first; its synchronous
+    // cancellation delivery clears the pinned target before this DOM-only hide
+    // restores focus to the control that opened the dialog.
     ui.packageConfirm.hidden = true;
     ui.packageConfirm.replaceChildren();
     const returnFocus = packageConfirmReturnFocus;
@@ -1356,30 +1723,17 @@ export function mountAuthoringTool(rootElement, host = {}) {
   function syncPackageControls() {
     const id = state.package.id;
     if ([...ui.packageSelect.options].some(option => option.value === id)) ui.packageSelect.value = id;
-    const hasDraft = Boolean(draftFor(id));
-    const isBuiltin = Boolean(builtinFor(id));
-    ui.packageDelete.disabled = !hasDraft;
-    ui.packageDelete.hidden = !hasDraft;
-    ui.packageDelete.textContent = hasDraft && isBuiltin ? "Reset example" : "Delete";
-    ui.packageDelete.setAttribute("aria-label", isBuiltin ? "Reset example to its original files" : "Delete local package");
+    ui.packageDelete.disabled = !state.hasDraft;
+    ui.packageDelete.hidden = !state.hasDraft;
+    ui.packageDelete.textContent = state.hasDraft && state.isBuiltin ? WIDGET_COPY.resetExample : WIDGET_COPY.delete;
+    ui.packageDelete.setAttribute("aria-label", state.isBuiltin ? WIDGET_COPY.resetExampleLabel : WIDGET_COPY.deleteLocalPackage);
   }
 
-  async function refreshPackages(preferredId = state.package.id) {
-    const drafts = await listDrafts();
-    if (destroyed) return "";
-    state.drafts = drafts.filter(draft => !HIDDEN_LEGACY_DRAFTS.has(draft.id));
-    const builtinIds = new Set(state.builtins.map(item => item.id));
-    const entries = [
-      ...state.builtins.map(item => {
-        const draft = draftFor(item.id);
-        const update = draftNeedsExampleUpdate(draft, item) ? " · update available" : "";
-        return { id: item.id, label: `${draft?.title ?? item.title} — ${draft ? "local draft" : "example"}${update}` };
-      }),
-      ...state.drafts.filter(draft => !builtinIds.has(draft.id)).map(draft => ({ id: draft.id, label: `${draft.title} — local draft` }))
-    ];
+  function renderPackageOptions(preferredId = state.package.id) {
+    const entries = state.options;
     ui.packageSelect.innerHTML = entries.length
       ? entries.map(item => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.label)}</option>`).join("")
-      : '<option value="">No packages yet</option>';
+      : `<option value="">${WIDGET_COPY.noPackages}</option>`;
     ui.packageSelect.disabled = !entries.length;
     const selected = entries.some(item => item.id === preferredId) ? preferredId : entries[0]?.id ?? "";
     ui.packageSelect.value = selected;
@@ -1387,31 +1741,16 @@ export function mountAuthoringTool(rootElement, host = {}) {
     return selected;
   }
 
-  let packageRequest = 0;
-  async function choosePackage(id) {
-    if (!id) return;
-    const request = ++packageRequest;
-    flushWorkingCopy();
-    const draft = draftFor(id);
-    const builtin = builtinFor(id);
-    if (!draft && !builtin) throw new Error(`Unknown package: ${id}`);
-    const value = draft ?? { ...await host.loadPackage(id), baseRevision: builtin?.revision ?? null };
-    if (destroyed || request !== packageRequest) return;
-    setPackage(value);
-    if (draftNeedsExampleUpdate(draft, builtin)) {
-      report("This local draft predates the current example. Export it before Reset example if you want to keep its changes.");
-    }
-  }
-
-  async function importZip(file) {
+  let builtinDiscovery = Promise.resolve([]);
+  let builtinDiscoveryError = null;
+  async function handleZipImport(file) {
     if (!file) return;
     try {
-      const imported = await readZip(file);
-      if (draftFor(imported.id)) throw new Error(`A local package already uses the id ${imported.id}. Delete it first, or change the imported manifest id.`);
-      setPackage(imported);
-      await saveDraft(state.package);
-      await refreshPackages(state.package.id);
-      report(`Imported ${state.package.title} and saved it in this browser.`);
+      // Both ZIP input and tree-drop handlers enter here. Session import
+      // publishes the opened package before its save settles, so this report
+      // reads the imported title only after the composition render has run.
+      await packageSession.importZip(file);
+      report(WIDGET_COPY.importedPackage(state.package.title));
     }
     catch (error) { report(error.message, true); }
     ui.zip.value = "";
@@ -1420,10 +1759,122 @@ export function mountAuthoringTool(rootElement, host = {}) {
   async function handleClick(event) {
     // Any click outside the editor and the panel means the designer has moved
     // on; a decision about text they are no longer looking at must not linger.
-    if (state.quickfix && !ui.quickfix.contains(event.target) && event.target !== ui.textarea) dismissQuickfix(false);
+    // A detached target is a dialog control the surface re-rendered mid-click
+    // (kind selection), never an outside click.
+    if (editorSurface.dialogOpen() && event.target.isConnected && !editorSurface.dialogContains(event.target) && event.target !== ui.textarea) editorSurface.closeDialog(false);
     const finding = event.target.closest("[data-finding]");
     if (finding) {
-      try { openFinding(Number(finding.dataset.finding)); } catch { /* A diagnostic must never interrupt editing. */ }
+      safelyOpenFinding(Number(finding.dataset.finding));
+      return;
+    }
+    const outlineFinding = event.target.closest("[data-outline-finding]");
+    if (outlineFinding) {
+      openFinding(Number(outlineFinding.dataset.outlineFinding));
+      return;
+    }
+    const outlineToggle = event.target.closest("[data-outline-toggle]");
+    if (outlineToggle) {
+      const identity = decodeURIComponent(outlineToggle.dataset.outlineToggle);
+      const collection = authoringEntries().find(entry => entry.identity === identity && entry.kind === "collection");
+      if (!collection) return;
+      if (state.outlineCollectionCollapsed.has(collection.name)) state.outlineCollectionCollapsed.delete(collection.name);
+      else state.outlineCollectionCollapsed.add(collection.name);
+      host.outlineCollections?.setCollapsed?.([...state.outlineCollectionCollapsed]);
+      renderOutline();
+      return;
+    }
+    const addRecord = event.target.closest("[data-outline-add-record]");
+    if (addRecord) {
+      openCollectionDialog(addRecord, "record", addRecord.dataset.outlineAddRecord);
+      return;
+    }
+    const outlineEntry = event.target.closest("[data-outline-entry]");
+    if (outlineEntry) {
+      await proseCommitQueue;
+      analyzeNow();
+      const identity = decodeURIComponent(outlineEntry.dataset.outlineEntry);
+      const artifact = authoringEntries().find(entry => entry.identity === identity);
+      const citationIdentity = outlineEntry.dataset.outlineCitation === undefined ? "" : decodeURIComponent(outlineEntry.dataset.outlineCitation);
+      const location = citationIdentity ? artifact?.citations.find(citation => citation.identity === citationIdentity) : artifact;
+      if (!artifact || !location || !openOutlineLocation(location)) {
+        const name = artifact?.name ?? identity.split("\0")[1] ?? WIDGET_COPY.thisDeclaration;
+        report(WIDGET_COPY.declarationGone(name), true);
+        renderedOutlineModel = "";
+        renderOutline();
+        return;
+      }
+      state.outlineSelection = artifact.identity;
+      selectionBus.select({
+        kind: artifact.kind === "name" ? "identifier" : artifact.kind,
+        name: artifact.name,
+        file: artifact.kind === "collection" && !citationIdentity ? artifact.location.replace(/\/$/, "") : location.file,
+        range: location.range
+      }, { origin: { surface: "sidebar" } });
+      renderOutline();
+      return;
+    }
+    const outlineDisclosure = event.target.closest("[data-outline-disclosure]");
+    if (outlineDisclosure) {
+      const group = outlineDisclosure.dataset.outlineDisclosure;
+      if (state.outlineFallbackOpen.has(group)) state.outlineFallbackOpen.delete(group);
+      else state.outlineFallbackOpen.add(group);
+      renderOutline();
+      return;
+    }
+    const outlineCreate = event.target.closest("[data-outline-create]");
+    if (outlineCreate) {
+      if (outlineCreate.dataset.outlineCreate === "Collection") {
+        const focus = outlineCreate.dataset.outlineFocus;
+        state.outlineMenuOpen = false;
+        renderOutline();
+        const anchor = [...ui.outline.querySelectorAll("[data-outline-focus]")]
+          .find(element => element.dataset.outlineFocus === focus)
+          ?? ui.outline.querySelector('[data-action="outline-menu"]');
+        openCollectionDialog(anchor);
+        return;
+      }
+      await createFromOutline(outlineCreate.dataset.outlineCreate);
+      renderOutline();
+      return;
+    }
+    const panelCreator = event.target.closest("[data-panel-creator]");
+    if (panelCreator) {
+      const creator = panelHost.creators({ file: state.selected?.type === "file" ? state.selected.path : "" }, { menu: true })
+        .find(candidate => candidate.id === panelCreator.dataset.panelCreator);
+      if (!creator) return;
+      if (creator.requires.includes("name")) {
+        state.panelCreatorPrompt = creator.id;
+        state.panelCreatorError = "";
+        renderedOutlineModel = "";
+        renderOutline();
+        ui.outline.querySelector("[data-panel-creator-name]")?.focus();
+      } else {
+        try {
+          await panelHost.runCreator(creator.id, { file: state.selected?.type === "file" ? state.selected.path : undefined }, "sidebar");
+          state.outlineMenuOpen = false;
+          state.panelCreatorError = "";
+        } catch (error) { state.panelCreatorError = error.message; }
+        renderedOutlineModel = "";
+        renderOutline();
+        ui.outline.querySelector('[data-action="outline-menu"]')?.focus({ preventScroll: true });
+      }
+      return;
+    }
+    const panelCreatorConfirm = event.target.closest("[data-panel-creator-confirm]");
+    if (panelCreatorConfirm) {
+      const name = ui.outline.querySelector("[data-panel-creator-name]")?.value ?? "";
+      try {
+        await panelHost.runCreator(panelCreatorConfirm.dataset.panelCreatorConfirm, {
+          name,
+          file: state.selected?.type === "file" ? state.selected.path : undefined
+        }, "sidebar");
+        state.panelCreatorPrompt = "";
+        state.outlineMenuOpen = false;
+        state.panelCreatorError = "";
+      } catch (error) { state.panelCreatorError = error.message; }
+      renderedOutlineModel = "";
+      renderOutline();
+      (state.panelCreatorPrompt ? ui.outline.querySelector("[data-panel-creator-name]") : ui.outline.querySelector('[data-action="outline-menu"]'))?.focus({ preventScroll: true });
       return;
     }
     const treeItem = event.target.closest("[data-tree-type]");
@@ -1432,67 +1883,198 @@ export function mountAuthoringTool(rootElement, host = {}) {
       const path = treeItem.dataset.path;
       state.selected = { type, path };
       if (type === "folder") {
+        selectionBus.select({ kind: "folder", file: path }, { origin: { surface: "explorer" } });
         if (state.collapsed.has(path)) state.collapsed.delete(path); else state.collapsed.add(path);
         renderTree();
       } else openFile(path);
       return;
     }
-    const completion = event.target.closest("[data-completion]");
-    if (completion) { acceptCompletion(completion.dataset.completion); return; }
-    const quickfixAction = event.target.closest("[data-quickfix-action]");
-    if (quickfixAction && state.quickfix) {
-      activateQuickfix(Number(quickfixAction.dataset.quickfixAction));
-      if (!state.quickfix.actions[state.quickfix.index].needsValue) commitQuickfix();
-      return;
-    }
     const action = event.target.closest("[data-action]")?.dataset.action;
     if (!action) return;
+    const actionControl = event.target.closest("[data-action]");
+    if (actionControl.getAttribute("aria-disabled") === "true") {
+      const reason = actionControl.getAttribute("aria-description");
+      if (reason) report(reason, true);
+      return;
+    }
     try {
-      if (action === "new-package") beginPackage();
-      else if (action === "export") exportPackage();
-      else if (action === "package-delete" && draftFor(state.package.id)) {
+      if (action === "outline-menu") {
+        state.outlineMenuOpen = !state.outlineMenuOpen;
+        if (!state.outlineMenuOpen) {
+          state.panelCreatorPrompt = "";
+          state.panelCreatorError = "";
+        }
+        renderOutline();
+        if (state.outlineMenuOpen) ui.outline.querySelector('[role="menu"] [role="menuitem"]')?.focus();
+      } else if (action === "widget-outline") openWidgetDrawer("outline");
+      else if (action === "widget-inspector") openWidgetDrawer("inspector");
+      else if (action === "new-package") beginPackage();
+      else if (action === "export") downloadPackage();
+      else if (action === "package-delete" && state.hasDraft) {
         // Pin the package being shown: autosave can refresh the selector while
-        // the confirmation is open, and must not retarget the deletion.
-        const reset = Boolean(builtinFor(state.package.id));
-        state.pendingDelete = { id: state.package.id, title: state.package.title, reset };
+        // the confirmation is open. The session publishes its pinned target
+        // synchronously before this click handler renders the dialog from it.
+        await packageSession.deleteDraft({ request: true });
+        const reset = state.pendingDelete.reset;
         packageConfirmReturnFocus = document.activeElement;
-        ui.packageConfirm.setAttribute("aria-label", `${reset ? "Reset example" : "Delete package"}: ${state.package.title}`);
+        ui.packageConfirm.setAttribute("aria-label", reset ? WIDGET_COPY.resetPackageLabel(state.package.title) : WIDGET_COPY.deletePackageLabel(state.package.title));
         ui.packageConfirm.hidden = false;
-        ui.packageConfirm.innerHTML = `${reset ? "Reset" : "Delete"} ${escapeHtml(state.pendingDelete.title)}? <button type="button" data-action="package-confirm-yes">Yes, ${reset ? "reset" : "delete"}</button> <button type="button" data-action="package-confirm-no">Cancel</button>`;
+        ui.packageConfirm.innerHTML = `<p>${reset ? WIDGET_COPY.resetQuestion(escapeHtml(state.pendingDelete.title)) : WIDGET_COPY.deleteQuestion(escapeHtml(state.pendingDelete.title))}</p><div class="opengdd-author-draft-confirm-actions"><button type="button" data-action="package-confirm-yes">${reset ? WIDGET_COPY.yesReset : WIDGET_COPY.yesDelete}</button><button type="button" data-action="package-confirm-no">${WIDGET_COPY.cancel}</button></div>`;
         ui.packageConfirm.querySelector('[data-action="package-confirm-no"]').focus();
       } else if (action === "package-confirm-yes" && state.pendingDelete) {
-        const removed = state.pendingDelete;
-        if (pendingSave?.id === removed.id) {
-          persistDraft.cancel();
-          pendingSave = null;
-        }
-        await deleteDraft(removed.id);
-        closePackageConfirmation();
-        const selected = await refreshPackages(removed.reset ? removed.id : state.builtins[0]?.id);
-        if (selected) await choosePackage(selected);
-        else setPackage({ id: "", title: "No package selected", files: [] });
-        report(removed.reset ? "Example reset to its original files." : "Local package deleted.");
+        const removed = await packageSession.deleteDraft({ confirm: true });
+        hidePackageConfirmation();
+        report(removed.reset ? WIDGET_COPY.exampleReset : WIDGET_COPY.localPackageDeleted);
         ui.packageSelect.focus();
       } else if (action === "package-confirm-no") {
-        closePackageConfirmation(true);
+        await packageSession.deleteDraft({ cancel: true });
+        hidePackageConfirmation(true);
       } else if (["new-file", "new-folder", "rename"].includes(action)) beginTreeAction(action);
+      else if (action === "delete") await deleteTreeSelection();
+      else if (action === "undo" || action === "redo") takeHistory(action);
+      else if (action === "cold-new") {
+        await packageSession.list({ publish: false });
+        if (destroyed) return;
+        const available = packageSession.state();
+        const id = nextAvailablePackageId("untitled-game", [
+          ...available.drafts.map(draft => draft.id),
+          ...available.builtins.map(item => item.id)
+        ]);
+        // The session publishes open synchronously; the click handler depends
+        // on that render before locating and selecting the starter sentence.
+        packageSession.open(createScaffoldPackage(id, WIDGET_COPY.untitledGameTitle));
+        const starter = "You are an explorer charting a pocket world that rearranges itself as you walk.";
+        const starterAt = ui.textarea.value.indexOf(starter);
+        if (starterAt >= 0) {
+          ui.textarea.focus({ preventScroll: true });
+          ui.textarea.setSelectionRange(starterAt, starterAt + starter.length);
+        }
+        await packageSession.save({ immediate: true, markSaved: true });
+      } else if (action === "cold-example") {
+        await builtinDiscovery;
+        if (builtinDiscoveryError) throw new Error(WIDGET_COPY.exampleUnavailable(builtinDiscoveryError.message));
+        try { await packageSession.open("tic-tac-toe"); }
+        catch (error) { throw new Error(WIDGET_COPY.exampleUnavailable(error.message)); }
+      }
       else if (action === "tree-cancel") ui.treeForm.hidden = true;
       else if (action === "package-cancel") ui.packageForm.hidden = true;
     } catch (error) { report(error.message, true); }
   }
 
   on(rootElement, "click", handleClick);
+  for (const element of regionalElements) on(element, "click", handleClick);
+  if (widgetDrawer) {
+    on(rootElement, "keydown", event => {
+      if (event.key !== "Escape" || !widgetDrawer.open) return;
+      event.preventDefault();
+      event.stopPropagation();
+      closeWidgetDrawer(true);
+    });
+  }
+  if (ui.outline) {
+    on(ui.outline, "change", event => {
+      if (!event.target.matches("[data-outline-filter]")) return;
+      state.outlineProblemsOnly = event.target.checked;
+      renderOutline();
+    });
+    on(ui.outline, "keydown", event => {
+      const menuItem = event.target.closest('[role="menuitem"]');
+      if (menuItem && ["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+        event.preventDefault();
+        const items = [...ui.outline.querySelectorAll('[role="menuitem"]')];
+        const current = items.indexOf(menuItem);
+        const next = event.key === "Home" ? 0 : event.key === "End" ? items.length - 1
+          : (current + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+        items.forEach((item, index) => { item.tabIndex = index === next ? 0 : -1; });
+        items[next].focus();
+        return;
+      }
+      if (event.key === "Escape" && state.outlineMenuOpen) {
+        event.preventDefault();
+        event.stopPropagation();
+        state.outlineMenuOpen = false;
+        renderOutline();
+        ui.outline.querySelector('[data-action="outline-menu"]')?.focus();
+        return;
+      }
+      const tree = event.target.closest('[role="tree"]');
+      const treeItem = event.target.closest("[data-outline-treeitem]");
+      if (!tree || !treeItem || !tree.contains(treeItem)) return;
+      const focusTreeItem = identity => {
+        const liveTree = ui.outline.querySelector('[role="tree"]');
+        const item = liveTree?.querySelector(`[data-outline-treeitem="${outlineData(identity)}"]`);
+        for (const candidate of liveTree?.querySelectorAll("[data-outline-treeitem]") ?? []) candidate.tabIndex = candidate === item ? 0 : -1;
+        item?.focus({ preventScroll: true });
+      };
+      if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
+        event.preventDefault();
+        const items = [...tree.querySelectorAll("[data-outline-treeitem]")];
+        const current = items.indexOf(treeItem);
+        const next = event.key === "Home" ? 0 : event.key === "End" ? items.length - 1
+          : Math.min(items.length - 1, Math.max(0, current + (event.key === "ArrowDown" ? 1 : -1)));
+        focusTreeItem(decodeURIComponent(items[next].dataset.outlineTreeitem));
+      } else if (event.key === "ArrowLeft") {
+        const identity = decodeURIComponent(treeItem.dataset.outlineTreeitem);
+        const collection = authoringEntries().find(entry => entry.identity === identity && entry.kind === "collection");
+        if (collection && !state.outlineCollectionCollapsed.has(collection.name)) {
+          event.preventDefault();
+          state.outlineCollectionCollapsed.add(collection.name);
+          host.outlineCollections?.setCollapsed?.([...state.outlineCollectionCollapsed]);
+          renderOutline();
+          focusTreeItem(identity);
+        } else if (treeItem.dataset.outlineParent) {
+          event.preventDefault();
+          focusTreeItem(decodeURIComponent(treeItem.dataset.outlineParent));
+        }
+      } else if (event.key === "ArrowRight") {
+        const identity = decodeURIComponent(treeItem.dataset.outlineTreeitem);
+        const collection = authoringEntries().find(entry => entry.identity === identity && entry.kind === "collection");
+        if (!collection) return;
+        if (state.outlineCollectionCollapsed.has(collection.name)) {
+          event.preventDefault();
+          state.outlineCollectionCollapsed.delete(collection.name);
+          host.outlineCollections?.setCollapsed?.([...state.outlineCollectionCollapsed]);
+          renderOutline();
+          focusTreeItem(identity);
+        } else {
+          const child = ui.outline.querySelector(`[data-outline-treeitem][data-outline-parent="${outlineData(identity)}"]`);
+          if (child) {
+            event.preventDefault();
+            focusTreeItem(decodeURIComponent(child.dataset.outlineTreeitem));
+          }
+        }
+      }
+    });
+  }
+
+  if (capabilities.hostUndo && workbenchScope) {
+    on(workbenchScope, "keydown", event => {
+      const key = event.key.toLowerCase();
+      if (!(event.ctrlKey || event.metaKey) || event.altKey || (key !== "z" && key !== "y")) return;
+      if (event.target.closest('[data-role="package-form"], [data-role="tree-form"]')) return;
+      event.preventDefault();
+      takeHistory(key === "y" || event.shiftKey ? "redo" : "undo");
+    });
+  }
 
   on(ui.packageConfirm, "keydown", event => {
     if (event.key === "Escape" && state.pendingDelete) {
       event.preventDefault();
-      closePackageConfirmation(true);
+      packageSession.deleteDraft({ cancel: true });
+      hidePackageConfirmation(true);
     }
   });
 
   on(ui.packageSelect, "change", async () => {
-    closePackageConfirmation();
-    try { await choosePackage(ui.packageSelect.value); }
+    // Captured before anything runs: cancelling a pending delete publishes,
+    // and that render re-syncs the select to the still-open package.
+    const selected = ui.packageSelect.value;
+    packageSession.deleteDraft({ cancel: true });
+    hidePackageConfirmation();
+    // The change handler awaits the session open; its synchronous package
+    // delivery completes the composition-side render before this handler can
+    // report an error or restore selector controls.
+    try { await packageSession.open(selected); }
     catch (error) {
       report(error.message, true);
       syncPackageControls();
@@ -1504,158 +2086,222 @@ export function mountAuthoringTool(rootElement, host = {}) {
     const title = ui.packageTitle.value.trim();
     const id = ui.packageId.value.trim();
     if (!title || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) {
-      report("Enter a title and a kebab-case package id.", true);
+      report(WIDGET_COPY.enterPackageIdentity, true);
       return;
     }
     // Drafts are keyed by package id and this browser is the only copy, so a
     // reused id would silently overwrite someone's work. Refuse instead.
-    const drafts = await listDrafts().catch(() => []);
-    if (drafts.some(draft => draft.id === id) || builtinFor(id)) {
-      report(`A package already uses the id ${id}. Choose another id, or delete the local package first.`, true);
+    const drafts = await packageSession.list({ publish: false })
+      .then(() => packageSession.state().drafts).catch(() => []);
+    if (drafts.some(draft => draft.id === id) || state.builtins.some(item => item.id === id)) {
+      report(WIDGET_COPY.duplicatePackageId(id), true);
       ui.packageId.focus();
       ui.packageId.select();
       return;
     }
     if (destroyed) return;
-    setPackage(createScaffoldPackage(id, title));
+    // The session open delivery is synchronous, so the submit handler can hide
+    // the form and persist only after the new controller and package are live.
+    packageSession.open(createScaffoldPackage(id, title));
     ui.packageForm.hidden = true;
     try {
-      await saveDraft(state.package);
-      await refreshPackages(id);
-      report(`Created ${title} and saved it in this browser.`);
+      await packageSession.save({ immediate: true });
+      report(WIDGET_COPY.createdPackage(title));
     } catch (error) {
-      report(`The package was created but could not be saved: ${error.message}`, true);
+      report(WIDGET_COPY.packageSaveFailure(error.message), true);
     }
   });
-  on(ui.treeForm, "submit", event => {
+  on(ui.treeForm, "submit", async event => {
     event.preventDefault();
-    try { submitTreeAction(); } catch (error) { report(error.message, true); }
+    try { await submitTreeAction(); } catch (error) { report(error.message, true); }
   });
-  on(ui.textarea, "beforeinput", () => {
-    editorBeforeInput = { path: state.openPath, start: ui.textarea.selectionStart ?? 0, end: ui.textarea.selectionEnd ?? 0 };
-  });
-  on(ui.textarea, "input", () => {
-    const previous = state.package.files.get(state.openPath);
-    if (!ui.editor.classList.contains("opengdd-author-editor--wrapped") && typeof previous === "string") {
-      const selection = editorBeforeInput?.path === state.openPath ? editorBeforeInput : null;
-      overlay.lineStarts = updateLineStarts(overlay.lineStarts, previous, ui.textarea.value, selection);
-    }
-    editorBeforeInput = null;
-    editorTextRevision += 1;
-    state.package.files.set(state.openPath, ui.textarea.value);
-    paintSoon({ changed: true, completions: true });
-    analyzeSoon();
-    validationChanged();
-    saveWorkingCopy();
-  });
-  on(ui.textarea, "scroll", () => {
-    ui.highlight.scrollTop = ui.textarea.scrollTop;
-    ui.highlight.scrollLeft = ui.textarea.scrollLeft;
-    paintSoon();
-    if (completionButtons().length) positionCompletions();
-    if (state.quickfix) positionPopup(ui.quickfix);
-  });
-  on(ui.textarea, "keydown", event => {
-    if (["Enter", "ArrowDown", "ArrowUp", "Escape"].includes(event.key)) completeNow();
-    if ((event.ctrlKey && event.key === ".") || (event.altKey && event.key === "Enter")) {
-      const anchor = showCaretAnchor();
-      if (anchor?.classification === "unknown") {
+  on(ui.textarea, "beforeinput", event => {
+    if (capabilities.hostUndo && (event.inputType === "historyUndo" || event.inputType === "historyRedo")) {
+      if (event.cancelable) {
         event.preventDefault();
-        openQuickfix(anchor);
+        takeHistory(event.inputType === "historyUndo" ? "undo" : "redo");
       }
       return;
     }
-    const buttons = completionButtons();
-    if (!buttons.length) return;
-    if (event.key === "ArrowDown") { event.preventDefault(); activateCompletion(state.completion + 1); }
-    else if (event.key === "ArrowUp") { event.preventDefault(); activateCompletion(state.completion - 1); }
-    else if (event.key === "Enter" && state.completion >= 0) {
-      event.preventDefault();
-      acceptCompletion(buttons[state.completion].dataset.completion);
-    } else if (event.key === "Escape") {
-      ui.completions.replaceChildren();
-      state.completion = -1;
+    editorBeforeInput = { path: state.openPath, start: ui.textarea.selectionStart ?? 0, end: ui.textarea.selectionEnd ?? 0 };
+  });
+  on(ui.textarea, "compositionstart", () => {
+    composingProse = true;
+  });
+  on(ui.textarea, "compositionend", () => {
+    composingProse = false;
+    editorBeforeInput = null;
+    editorSurface.invalidateInput();
+    queueProseEdit(state.openPath, ui.textarea.value);
+  });
+  on(ui.textarea, "input", event => {
+    const previous = state.package.files.get(state.openPath);
+    if (capabilities.hostUndo && (event.inputType === "historyUndo" || event.inputType === "historyRedo")) {
+      editorBeforeInput = null;
+      if (typeof previous === "string") ui.textarea.value = previous;
+      editorSurface.invalidateInput();
+      editorSurface.inputChanged(previous, null, false);
+      takeHistory(event.inputType === "historyUndo" ? "undo" : "redo");
+      return;
     }
+    const selection = editorBeforeInput?.path === state.openPath ? editorBeforeInput : null;
+    editorBeforeInput = null;
+    editorSurface.inputChanged(previous, selection, !composingProse && !event.isComposing);
+    if (!composingProse && !event.isComposing) queueProseEdit(state.openPath, ui.textarea.value);
   });
-  on(ui.textarea, "keyup", showCaretAnchor);
-  on(ui.textarea, "click", () => {
-    const anchor = showCaretAnchor();
-    if (anchor?.classification === "unknown") openQuickfix(anchor);
-    // The click already placed the caret; restoring the snapshot would drag it
-    // back to the mention the designer just left.
-    else if (state.quickfix) dismissQuickfix(false);
-  });
-  on(ui.quickfix, "keydown", event => {
-    if (!state.quickfix) return;
-    if (event.key === "ArrowDown") { event.preventDefault(); activateQuickfix(state.quickfix.index + 1); }
-    else if (event.key === "ArrowUp") { event.preventDefault(); activateQuickfix(state.quickfix.index - 1); }
-    else if (event.key === "Enter") { event.preventDefault(); commitQuickfix(); }
-    else if (event.key === "Escape") { event.preventDefault(); dismissQuickfix(); }
-  });
-  on(ui.textarea, "mousemove", event => {
-    const name = anchorNameAtPoint(event.clientX, event.clientY);
-    if (name) showHover(name);
-  });
-  // A resize changes wrapping in both stacked layers; a frame keeps their
-  // scroll positions and any open popup aligned after layout settles.
-  const editorResize = new view.ResizeObserver(() => paintSoon({ changed: true }));
-  editorResize.observe(ui.editor);
-  on(ui.zip, "change", () => importZip(ui.zip.files[0]));
+  on(ui.zip, "change", () => handleZipImport(ui.zip.files[0]));
   on(ui.tree, "dragstart", event => {
     const item = event.target.closest("[data-tree-type]");
-    if (item) state.dragged = { type: item.dataset.treeType, path: item.dataset.path };
+    if (!item) return;
+    if (capabilities.protectedFiles && item.dataset.treeType === "file" && PROTECTED_PACKAGE_FILES.has(item.dataset.path)) {
+      event.preventDefault();
+      state.dragged = null;
+      return;
+    }
+    state.dragged = { type: item.dataset.treeType, path: item.dataset.path };
   });
   on(ui.tree, "dragover", event => event.preventDefault());
-  on(ui.tree, "drop", event => {
+  if (capabilities.delete) {
+    on(ui.tree, "keydown", event => {
+      if (event.key !== "Delete") return;
+      event.preventDefault();
+      if (ui.delete?.getAttribute("aria-disabled") === "true") {
+        const reason = ui.delete.getAttribute("aria-description");
+        if (reason) report(reason, true);
+        return;
+      }
+      deleteTreeSelection().catch(error => report(error.message, true));
+    });
+  }
+  on(ui.tree, "drop", async event => {
     event.preventDefault();
     const zip = [...(event.dataTransfer?.files ?? [])].find(file => /\.zip$/i.test(file.name));
-    if (zip) { importZip(zip); return; }
+    if (zip) { handleZipImport(zip); return; }
     if (!state.dragged) return;
     const folder = event.target.closest('[data-tree-type="folder"]')?.dataset.path ?? "";
     const destination = folder ? `${folder}/${basename(state.dragged.path)}` : basename(state.dragged.path);
-    try { movePath(state.dragged.type, state.dragged.path, destination); }
+    try { await movePath(state.dragged.type, state.dragged.path, destination); }
     catch (error) { report(error.message, true); }
     state.dragged = null;
   });
 
   renderAll();
   (async () => {
-    const revision = state.packageRevision;
+    const revision = state.revision;
+    if (capabilities.coldStart) {
+      const draftDiscovery = packageSession.list();
+      builtinDiscovery = packageSession.discoverBuiltins().catch(error => {
+        builtinDiscoveryError = error;
+        return [];
+      });
+      try {
+        await draftDiscovery;
+        if (destroyed || revision !== state.revision) return;
+        renderPackageOptions(state.drafts[0]?.id ?? "");
+      } catch (error) {
+        if (!destroyed) report(WIDGET_COPY.browserPackagesUnavailable(error.message), true);
+        return;
+      }
+      if (state.drafts.length) {
+        try { await packageSession.open(state.drafts[0].id); }
+        catch (error) { report(WIDGET_COPY.selectedPackageOpenFailure(error.message), true); }
+        return;
+      }
+      packageSession.open({ id: "", title: WIDGET_COPY.noPackageSelected, files: [] });
+      state.coldStart = true;
+      ui.coldStart.hidden = false;
+      ui.editorPanel.hidden = true;
+      renderStatus();
+      report(WORKBENCH_COPY.chooseHowToBegin);
+      return;
+    }
     if (typeof host.listPackages === "function") {
-      try { state.builtins = await host.listPackages(); }
-      catch (error) { report(`The example package is unavailable: ${error.message}`, true); }
+      try { await packageSession.discoverBuiltins(); }
+      catch (error) { report(WIDGET_COPY.exampleUnavailable(error.message), true); }
     }
     let selected = "";
-    try { selected = await refreshPackages(host.defaultPackageId ?? state.builtins[0]?.id); }
-    catch (error) { report(`Browser packages are unavailable: ${error.message}`, true); }
-    if (destroyed || revision !== state.packageRevision) return;
+    try { selected = await packageSession.list({ preferredId: host.defaultPackageId ?? state.builtins[0]?.id }); }
+    catch (error) { report(WIDGET_COPY.browserPackagesUnavailable(error.message), true); }
+    if (destroyed || revision !== state.revision) return;
     if (selected) {
-      try { await choosePackage(selected); }
-      catch (error) { report(`The selected package could not be opened: ${error.message}`, true); }
+      try { await packageSession.open(selected); }
+      catch (error) { report(WIDGET_COPY.selectedPackageOpenFailure(error.message), true); }
     } else {
-      state.package = packageFrom({ id: "", title: "No package selected", files: [] }, decodeBinary);
-      state.analysis = analyzePackage(state.package.files);
-      renderAll();
-      report("Create a package or import a ZIP to begin.");
+      packageSession.open({ id: "", title: WIDGET_COPY.noPackageSelected, files: [] });
+      report(WIDGET_COPY.createOrImport);
     }
   })();
 
   return {
-    openPackage: setPackage,
+    openPackage: packageSession.open,
+    testHooks: Object.freeze({
+      analysisView() { return state.authoringView; },
+      editorRevision(path = state.openPath) { return editController.revision(path); },
+      panelDescriptors() { return panelHost.descriptors(); },
+      selection() { return selectionBus.current(); }
+    }),
+    editorState() {
+      if (destroyed || ui.textarea.hidden) return null;
+      return {
+        selection: {
+          start: ui.textarea.selectionStart ?? 0,
+          end: ui.textarea.selectionEnd ?? 0,
+          direction: ui.textarea.selectionDirection
+        },
+        scroll: { top: ui.textarea.scrollTop, left: ui.textarea.scrollLeft }
+      };
+    },
+    restoreEditorState(snapshot) {
+      if (destroyed || ui.textarea.hidden || !snapshot?.selection || !snapshot?.scroll) return false;
+      const start = Number.isFinite(snapshot.selection.start) ? snapshot.selection.start : 0;
+      const end = Number.isFinite(snapshot.selection.end) ? snapshot.selection.end : start;
+      const direction = ["forward", "backward", "none"].includes(snapshot.selection.direction)
+        ? snapshot.selection.direction
+        : "none";
+      ui.textarea.focus({ preventScroll: true });
+      ui.textarea.setSelectionRange(
+        Math.min(Math.max(0, start), ui.textarea.value.length),
+        Math.min(Math.max(0, end), ui.textarea.value.length),
+        direction
+      );
+      ui.textarea.scrollTop = Number.isFinite(snapshot.scroll.top) ? snapshot.scroll.top : 0;
+      ui.textarea.scrollLeft = Number.isFinite(snapshot.scroll.left) ? snapshot.scroll.left : 0;
+      editorSurface.scrollChanged();
+      return true;
+    },
+    focusEditor() {
+      if (destroyed || ui.textarea.hidden) return false;
+      ui.textarea.focus({ preventScroll: true });
+      return true;
+    },
+    outlineProblemsOnly(value) {
+      if (arguments.length === 0) return state.outlineProblemsOnly;
+      state.outlineProblemsOnly = Boolean(value);
+      renderOutline();
+      return state.outlineProblemsOnly;
+    },
     destroy() {
       if (destroyed) return;
       destroyed = true;
-      flushWorkingCopy();
-      worker?.terminate();
-      editorResize.disconnect();
-      view.cancelAnimationFrame(overlayFrame);
-      analyzeSoon.cancel();
-      validateSoon.cancel();
-      validationRevision += 1;
-      persistDraft.cancel();
+      panelHost.destroy();
+      panelPackageCancel();
+      packageSession.close();
+      analysisSession.destroy();
+      editorSurface.destroy();
+      view.cancelAnimationFrame(outlineFrame);
       listeners.abort();
-      rootElement.replaceChildren();
+      for (const child of ownedChildren.get(rootElement) ?? []) {
+        if (child.parentNode === rootElement) child.remove();
+      }
       rootElement.classList.remove("opengdd-authoring");
+      for (const element of regionalElements) {
+        if (REGION_OWNERS.get(element) !== regionOwner) continue;
+        for (const child of ownedChildren.get(element) ?? []) {
+          if (child.parentNode === element) child.remove();
+        }
+        REGION_OWNERS.delete(element);
+        element.classList.remove("opengdd-authoring", "opengdd-author-region");
+      }
     }
   };
 }

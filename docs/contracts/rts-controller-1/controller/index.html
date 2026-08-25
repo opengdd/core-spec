@@ -1,0 +1,877 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Controller — RTS controller worked example — OpenGDD</title>
+<meta name="description" content="Controller is a worked RTS controller contract with saved answers, values, rows, and resolved acceptance tests.">
+<link rel="canonical" href="https://opengdd.org/contracts/rts-controller-1/controller/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Controller — RTS controller worked example — OpenGDD">
+<meta property="og:description" content="Controller is a worked RTS controller contract with saved answers, values, rows, and resolved acceptance tests.">
+<meta property="og:url" content="https://opengdd.org/contracts/rts-controller-1/controller/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Controller — RTS controller worked example — OpenGDD">
+<meta name="twitter:description" content="Controller is a worked RTS controller contract with saved answers, values, rows, and resolved acceptance tests.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=c3e02089d176">
+<script type="module" src="/assets/contracts.mjs?v=c3e02089d176"></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Spec</a>
+      <a href="/standard/">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="doc-layout contract-catalogue contract-entry-page" data-contract-root data-core-id="rts-controller" data-contract-preset="{&quot;selection-model&quot;:&quot;permanent-single&quot;,&quot;primary-button-role&quot;:&quot;none&quot;,&quot;secondary-button-role&quot;:&quot;smart&quot;,&quot;out-of-range-command&quot;:&quot;approach-then-interact&quot;,&quot;unreachable-destination&quot;:&quot;nearest-reachable-point&quot;,&quot;command-queueing&quot;:&quot;none-replace&quot;,&quot;camera-model&quot;:&quot;follow-loose&quot;,&quot;manual-camera-pan&quot;:&quot;not-applicable&quot;,&quot;inspect-channel&quot;:&quot;hover-tooltip&quot;,&quot;inspect-staging&quot;:&quot;two-stage&quot;,&quot;cursor-context&quot;:&quot;context-cursor&quot;,&quot;cursor-magnetism&quot;:&quot;snap-radius&quot;}">
+<nav class="doc-toc contract-nav" aria-label="Contract shelves">
+<p class="toc-title">Contracts</p>
+<ul>
+<li class="toc-h2"><a href="/contracts/">Browse all</a></li>
+<li class="toc-h2"><a href="/contracts/#pools-meters">Pools &amp; meters</a></li>
+<li class="toc-h3"><a href="/contracts/ranged-value-1/">Ranged value</a></li>
+<li class="toc-h3"><a href="/contracts/ranged-value-1/stamina/">↳ Stamina (worked)</a></li>
+<li class="toc-h2"><a href="/contracts/#inventories-holdings">Inventories &amp; holdings</a></li>
+<li class="toc-h3 contract-nav-empty">no entries yet</li>
+<li class="toc-h2"><a href="/contracts/#crafting-exchange">Crafting &amp; exchange</a></li>
+<li class="toc-h3 contract-nav-empty">no entries yet</li>
+<li class="toc-h2"><a href="/contracts/#ordering-resolution">Ordering &amp; resolution</a></li>
+<li class="toc-h3 contract-nav-empty">no entries yet</li>
+<li class="toc-h2"><a href="/contracts/#world-space-grids">World space &amp; grids</a></li>
+<li class="toc-h3 contract-nav-empty">no entries yet</li>
+<li class="toc-h2"><a href="/contracts/#controls-camera">Controls &amp; camera</a></li>
+<li class="toc-h3"><a href="/contracts/rts-controller-1/">RTS controller</a></li>
+<li class="toc-h3"><a href="/contracts/rts-controller-1/controller/" aria-current="page">↳ Controller (worked)</a></li>
+<li class="toc-h2"><a href="/contracts/#determinism-replay">Determinism &amp; replay</a></li>
+<li class="toc-h3 contract-nav-empty">no entries yet</li>
+</ul>
+</nav>
+<article class="doc-body contract-entry-body">
+<p class="label">Controls &amp; camera · worked example</p>
+<div class="contract-entry-title-row">
+  <div><h1>Controller</h1><p class="contract-core-name"><code>controller</code> · uses the <a href="/contracts/rts-controller-1/">RTS controller</a> contract</p></div>
+  <span class="contract-badge is-draft">worked example</span>
+</div>
+<p class="contract-entry-hook">The RTS controller contract resolved for one real instance, with every question answered and its tests generated.</p>
+<div class="note contract-explore-note"><strong>Explore freely.</strong> Controller's saved answers are preloaded below. Click any other option to see what it would mean — nothing is saved, and the generated tests shown further down stay true to the saved answers.
+  <div class="contract-explore-actions"><span>Marked choices are this instance's recorded answers.</span><button type="button" class="cta-quiet contract-reset" data-reset-choices>Back to Controller's answers</button></div>
+</div>
+<section class="contract-overview">
+  <p class="label">What controller is</p>
+  <h2>Built on RTS controller: stage2-delay-ms = 400, magnetism-radius-px = 24, with 9 interactables rows.</h2>
+  <p><a href="/contracts/rts-controller-1/">Read the exact contract wording →</a></p>
+</section>
+<section class="contract-form-section" id="questions">
+  <p class="label">The decisions</p>
+  <h2>12 questions, answered for controller</h2>
+  <section class="contract-question-section">
+<h3>Selection</h3>
+<article class="contract-question" data-contract-question data-flag="selection-model" data-when="null">
+  <div class="contract-question-copy">
+    <p class="contract-exact-name"><code>selection-model</code></p>
+    <h4>What does the player select, and how does selection work?</h4>
+    <div class="contract-choice-output" aria-live="polite" aria-atomic="true" data-choice-output>
+      <p class="contract-choice-prompt">Choose an option to explore what it means. Nothing will be saved.</p>
+      <div class="contract-choice-explanation" data-choice-explanation="permanent-single" hidden>
+  <p class="contract-exploring-label">Exploring: Permanent single</p>
+  <p>One hero, always selected. There is no select action at all — every command goes to them. The ARPG way.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>Exactly one avatar exists and is always selected. No selection action exists, no selection indicator is required, and no input can deselect. Every world command addresses the avatar.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="click-single" hidden>
+  <p class="contract-exploring-label">Exploring: Click single</p>
+  <p>Click a unit to select it; click empty ground to deselect. A command with nothing selected is refused.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>One unit is selected at a time by a selection input on it; a selection input on empty ground deselects. Commands with nothing selected are rejected.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="multi-group" hidden>
+  <p class="contract-exploring-label">Exploring: Multi group</p>
+  <p>Drag a box, add to the selection, save numbered control groups. Commands go to the whole selection. The classic RTS way.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>Multiple units select via drag-box and additive selection, with numbered control groups up to the group-count knob. Commands address the whole selection.</p></details>
+</div>
+    </div>
+    <details class="contract-rationale"><summary>Why this question matters</summary><p>A controller with no selection model has no one to command. One always-selected hero is the ARPG convention; groups are the classic RTS one.</p></details>
+    <noscript><div class="contract-noscript-options"><div><strong>Permanent single:</strong> One hero, always selected. There is no select action at all — every command goes to them. The ARPG way.</div>
+<div><strong>Click single:</strong> Click a unit to select it; click empty ground to deselect. A command with nothing selected is refused.</div>
+<div><strong>Multi group:</strong> Drag a box, add to the selection, save numbered control groups. Commands go to the whole selection. The classic RTS way.</div></div></noscript>
+  </div>
+  <fieldset class="contract-options">
+    <legend>Explore the choices</legend>
+    <label class="contract-option-button">
+  <input type="radio" name="rts-controller-selection-model" value="permanent-single" data-contract-choice>
+  <span class="contract-option-label">Permanent single</span>
+  <code>permanent-single</code>
+  <span class="contract-suggested">Controller&#39;s answer</span>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-selection-model" value="click-single" data-contract-choice>
+  <span class="contract-option-label">Click single</span>
+  <code>click-single</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-selection-model" value="multi-group" data-contract-choice>
+  <span class="contract-option-label">Multi group</span>
+  <code>multi-group</code>
+</label>
+  </fieldset>
+</article>
+</section>
+<section class="contract-question-section">
+<h3>Commands and movement</h3>
+<article class="contract-question" data-contract-question data-flag="primary-button-role" data-when="null">
+  <div class="contract-question-copy">
+    <p class="contract-exact-name"><code>primary-button-role</code></p>
+    <h4>What does the primary pointer button do when pressed over the world?</h4>
+    <div class="contract-choice-output" aria-live="polite" aria-atomic="true" data-choice-output>
+      <p class="contract-choice-prompt">Choose an option to explore what it means. Nothing will be saved.</p>
+      <div class="contract-choice-explanation" data-choice-explanation="smart" hidden>
+  <p class="contract-exploring-label">Exploring: Smart</p>
+  <p>On ground it asks the avatar to move; on an interactable it requests that interaction. The thing under the pointer decides which command is issued.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>Over ground, the primary button issues a move command toward the pointer position. Over an interactable, it requests that interaction and issues no move-only command.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="move" hidden>
+  <p class="contract-exploring-label">Exploring: Move</p>
+  <p>It always issues a move command. Pressing it on an interactable requests movement there without requesting interaction.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>The primary button always issues a move command toward the pointer position. Over an interactable it still moves there and issues no interaction request.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="interact" hidden>
+  <p class="contract-exploring-label">Exploring: Interact</p>
+  <p>It always requests interaction. On empty ground the request is refused and nothing moves.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>Over an interactable, the primary button requests that interaction and issues no move command. Over ground, the press is rejected with observable feedback and changes no world state.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="none" hidden>
+  <p class="contract-exploring-label">Exploring: None</p>
+  <p>Over the world it does nothing at all. It may still work inside menus and UI.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>Pressed over the world, the primary button changes no state, changes no selection, and issues no command. It may still act inside UI surfaces.</p></details>
+</div>
+    </div>
+    <details class="contract-rationale"><summary>Why this question matters</summary><p>This answer owns the primary button&#39;s world role. It does not judge whether the two buttons together make the game playable, and it does not constrain the button inside UI surfaces.</p></details>
+    <noscript><div class="contract-noscript-options"><div><strong>Smart:</strong> On ground it asks the avatar to move; on an interactable it requests that interaction. The thing under the pointer decides which command is issued.</div>
+<div><strong>Move:</strong> It always issues a move command. Pressing it on an interactable requests movement there without requesting interaction.</div>
+<div><strong>Interact:</strong> It always requests interaction. On empty ground the request is refused and nothing moves.</div>
+<div><strong>None:</strong> Over the world it does nothing at all. It may still work inside menus and UI.</div></div></noscript>
+  </div>
+  <fieldset class="contract-options">
+    <legend>Explore the choices</legend>
+    <label class="contract-option-button">
+  <input type="radio" name="rts-controller-primary-button-role" value="smart" data-contract-choice>
+  <span class="contract-option-label">Smart</span>
+  <code>smart</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-primary-button-role" value="move" data-contract-choice>
+  <span class="contract-option-label">Move</span>
+  <code>move</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-primary-button-role" value="interact" data-contract-choice>
+  <span class="contract-option-label">Interact</span>
+  <code>interact</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-primary-button-role" value="none" data-contract-choice>
+  <span class="contract-option-label">None</span>
+  <code>none</code>
+  <span class="contract-suggested">Controller&#39;s answer</span>
+</label>
+  </fieldset>
+</article>
+<article class="contract-question" data-contract-question data-flag="secondary-button-role" data-when="null">
+  <div class="contract-question-copy">
+    <p class="contract-exact-name"><code>secondary-button-role</code></p>
+    <h4>What does the secondary pointer button do when pressed over the world?</h4>
+    <div class="contract-choice-output" aria-live="polite" aria-atomic="true" data-choice-output>
+      <p class="contract-choice-prompt">Choose an option to explore what it means. Nothing will be saved.</p>
+      <div class="contract-choice-explanation" data-choice-explanation="smart" hidden>
+  <p class="contract-exploring-label">Exploring: Smart</p>
+  <p>On ground it asks the avatar to move; on an interactable it requests that interaction. The thing under the pointer decides which command is issued.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>Over ground, the secondary button issues a move command toward the pointer position. Over an interactable, it requests that interaction and issues no move-only command.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="move" hidden>
+  <p class="contract-exploring-label">Exploring: Move</p>
+  <p>It always issues a move command. Pressing it on an interactable requests movement there without requesting interaction.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>The secondary button always issues a move command toward the pointer position. Over an interactable it still moves there and issues no interaction request.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="interact" hidden>
+  <p class="contract-exploring-label">Exploring: Interact</p>
+  <p>It always requests interaction. On empty ground the request is refused and nothing moves.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>Over an interactable, the secondary button requests that interaction and issues no move command. Over ground, the press is rejected with observable feedback and changes no world state.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="none" hidden>
+  <p class="contract-exploring-label">Exploring: None</p>
+  <p>Over the world it does nothing at all. It may still work inside menus and UI.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>Pressed over the world, the secondary button changes no state, changes no selection, and issues no command. It may still act inside UI surfaces.</p></details>
+</div>
+    </div>
+    <details class="contract-rationale"><summary>Why this question matters</summary><p>This answer owns the secondary button&#39;s world role. Any pairing with the primary answer is legal, including two identical roles or two none answers; the contract records the design rather than judging it.</p></details>
+    <noscript><div class="contract-noscript-options"><div><strong>Smart:</strong> On ground it asks the avatar to move; on an interactable it requests that interaction. The thing under the pointer decides which command is issued.</div>
+<div><strong>Move:</strong> It always issues a move command. Pressing it on an interactable requests movement there without requesting interaction.</div>
+<div><strong>Interact:</strong> It always requests interaction. On empty ground the request is refused and nothing moves.</div>
+<div><strong>None:</strong> Over the world it does nothing at all. It may still work inside menus and UI.</div></div></noscript>
+  </div>
+  <fieldset class="contract-options">
+    <legend>Explore the choices</legend>
+    <label class="contract-option-button">
+  <input type="radio" name="rts-controller-secondary-button-role" value="smart" data-contract-choice>
+  <span class="contract-option-label">Smart</span>
+  <code>smart</code>
+  <span class="contract-suggested">Controller&#39;s answer</span>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-secondary-button-role" value="move" data-contract-choice>
+  <span class="contract-option-label">Move</span>
+  <code>move</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-secondary-button-role" value="interact" data-contract-choice>
+  <span class="contract-option-label">Interact</span>
+  <code>interact</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-secondary-button-role" value="none" data-contract-choice>
+  <span class="contract-option-label">None</span>
+  <code>none</code>
+</label>
+  </fieldset>
+</article>
+<article class="contract-question" data-contract-question data-flag="out-of-range-command" data-when="null">
+  <div class="contract-question-copy">
+    <p class="contract-exact-name"><code>out-of-range-command</code></p>
+    <h4>What happens when the player commands an interactable that is too far away?</h4>
+    <div class="contract-choice-output" aria-live="polite" aria-atomic="true" data-choice-output>
+      <p class="contract-choice-prompt">Choose an option to explore what it means. Nothing will be saved.</p>
+      <div class="contract-choice-explanation" data-choice-explanation="not-applicable" hidden>
+  <p class="contract-exploring-label">Exploring: Not applicable</p>
+  <p>Nothing has a range: anything can be commanded from anywhere, or interactions happen only through menus.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>No interaction has a range: every interactable is commandable from anywhere or interactions happen only through UI. All range templates are pruned.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="approach-then-interact" hidden>
+  <p class="contract-exploring-label">Exploring: Approach then interact</p>
+  <p>Click it from across the map: the avatar walks over and does it on arrival. Distance is never a refusal.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>The command is accepted from any distance: the avatar paths toward the interactable and performs the interaction on arrival. Distance is never grounds for rejection.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="reject-out-of-range" hidden>
+  <p class="contract-exploring-label">Exploring: Reject out of range</p>
+  <p>Too far means no: the command is refused with visible feedback and the player must move closer first.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>The command is rejected with observable feedback and no state change. The player must move first.</p></details>
+</div>
+    </div>
+    <noscript><div class="contract-noscript-options"><div><strong>Not applicable:</strong> Nothing has a range: anything can be commanded from anywhere, or interactions happen only through menus.</div>
+<div><strong>Approach then interact:</strong> Click it from across the map: the avatar walks over and does it on arrival. Distance is never a refusal.</div>
+<div><strong>Reject out of range:</strong> Too far means no: the command is refused with visible feedback and the player must move closer first.</div></div></noscript>
+  </div>
+  <fieldset class="contract-options">
+    <legend>Explore the choices</legend>
+    <label class="contract-option-button">
+  <input type="radio" name="rts-controller-out-of-range-command" value="not-applicable" data-contract-choice>
+  <span class="contract-option-label">Not applicable</span>
+  <code>not-applicable</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-out-of-range-command" value="approach-then-interact" data-contract-choice>
+  <span class="contract-option-label">Approach then interact</span>
+  <code>approach-then-interact</code>
+  <span class="contract-suggested">Controller&#39;s answer</span>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-out-of-range-command" value="reject-out-of-range" data-contract-choice>
+  <span class="contract-option-label">Reject out of range</span>
+  <code>reject-out-of-range</code>
+</label>
+  </fieldset>
+</article>
+<article class="contract-question" data-contract-question data-flag="unreachable-destination" data-when="null">
+  <div class="contract-question-copy">
+    <p class="contract-exact-name"><code>unreachable-destination</code></p>
+    <h4>What happens when the player clicks somewhere no path can reach?</h4>
+    <div class="contract-choice-output" aria-live="polite" aria-atomic="true" data-choice-output>
+      <p class="contract-choice-prompt">Choose an option to explore what it means. Nothing will be saved.</p>
+      <div class="contract-choice-explanation" data-choice-explanation="nearest-reachable-point" hidden>
+  <p class="contract-exploring-label">Exploring: Nearest reachable point</p>
+  <p>Click across the river: the avatar walks to the closest spot a path reaches and stops there.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>The command is accepted and the avatar travels to the reachable point nearest the target, then stops. Nearest is measured in path distance; ties resolve by the game&#39;s declared tie-break.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="reject-command" hidden>
+  <p class="contract-exploring-label">Exploring: Reject command</p>
+  <p>The click is refused with visible feedback; the avatar does not move.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>The command is rejected with observable feedback and no motion.</p></details>
+</div>
+    </div>
+    <details class="contract-rationale"><summary>Why this question matters</summary><p>Every pathing game meets an unreachable click; without an answer, two faithful builds diverge on the first blocked dune.</p></details>
+    <noscript><div class="contract-noscript-options"><div><strong>Nearest reachable point:</strong> Click across the river: the avatar walks to the closest spot a path reaches and stops there.</div>
+<div><strong>Reject command:</strong> The click is refused with visible feedback; the avatar does not move.</div></div></noscript>
+  </div>
+  <fieldset class="contract-options">
+    <legend>Explore the choices</legend>
+    <label class="contract-option-button">
+  <input type="radio" name="rts-controller-unreachable-destination" value="nearest-reachable-point" data-contract-choice>
+  <span class="contract-option-label">Nearest reachable point</span>
+  <code>nearest-reachable-point</code>
+  <span class="contract-suggested">Controller&#39;s answer</span>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-unreachable-destination" value="reject-command" data-contract-choice>
+  <span class="contract-option-label">Reject command</span>
+  <code>reject-command</code>
+</label>
+  </fieldset>
+</article>
+<article class="contract-question" data-contract-question data-flag="command-queueing" data-when="null">
+  <div class="contract-question-copy">
+    <p class="contract-exact-name"><code>command-queueing</code></p>
+    <h4>Does a new command replace the current one, or queue behind it?</h4>
+    <div class="contract-choice-output" aria-live="polite" aria-atomic="true" data-choice-output>
+      <p class="contract-choice-prompt">Choose an option to explore what it means. Nothing will be saved.</p>
+      <div class="contract-choice-explanation" data-choice-explanation="none-replace" hidden>
+  <p class="contract-exploring-label">Exploring: None replace</p>
+  <p>A new click wins instantly: the old path is dropped. No queue exists, ever.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>A new command replaces the current one immediately: the path is abandoned, no queue exists, and no queued command is ever observable.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="bounded-queue" hidden>
+  <p class="contract-exploring-label">Exploring: Bounded queue</p>
+  <p>Hold the declared modifier to line commands up, capped by the queue-max knob. A plain click clears the line and takes over. The player can see the queue.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>A declared modifier input appends commands up to the queue-max knob; an unmodified command clears the queue and replaces. Queue contents are observable to the player.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="unbounded-queue" hidden>
+  <p class="contract-exploring-label">Exploring: Unbounded queue</p>
+  <p>Same, with no cap.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>A declared modifier input appends commands with no maximum queue length; an unmodified command clears the queue and replaces it. Queue contents are observable to the player.</p></details>
+</div>
+    </div>
+    <details class="contract-rationale"><summary>Why this question matters</summary><p>Every controller answers this the moment a second click lands mid-travel. The guidance leans on the single-avatar case; queueing is the RTS production convention.</p></details>
+    <noscript><div class="contract-noscript-options"><div><strong>None replace:</strong> A new click wins instantly: the old path is dropped. No queue exists, ever.</div>
+<div><strong>Bounded queue:</strong> Hold the declared modifier to line commands up, capped by the queue-max knob. A plain click clears the line and takes over. The player can see the queue.</div>
+<div><strong>Unbounded queue:</strong> Same, with no cap.</div></div></noscript>
+  </div>
+  <fieldset class="contract-options">
+    <legend>Explore the choices</legend>
+    <label class="contract-option-button">
+  <input type="radio" name="rts-controller-command-queueing" value="none-replace" data-contract-choice>
+  <span class="contract-option-label">None replace</span>
+  <code>none-replace</code>
+  <span class="contract-suggested">Controller&#39;s answer</span>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-command-queueing" value="bounded-queue" data-contract-choice>
+  <span class="contract-option-label">Bounded queue</span>
+  <code>bounded-queue</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-command-queueing" value="unbounded-queue" data-contract-choice>
+  <span class="contract-option-label">Unbounded queue</span>
+  <code>unbounded-queue</code>
+</label>
+  </fieldset>
+</article>
+</section>
+<section class="contract-question-section">
+<h3>Camera</h3>
+<article class="contract-question" data-contract-question data-flag="camera-model" data-when="null">
+  <div class="contract-question-copy">
+    <p class="contract-exact-name"><code>camera-model</code></p>
+    <h4>What does the camera do — follow the avatar, or move freely?</h4>
+    <div class="contract-choice-output" aria-live="polite" aria-atomic="true" data-choice-output>
+      <p class="contract-choice-prompt">Choose an option to explore what it means. Nothing will be saved.</p>
+      <div class="contract-choice-explanation" data-choice-explanation="follow-locked" hidden>
+  <p class="contract-exploring-label">Exploring: Follow locked</p>
+  <p>Glued dead-center on the avatar (or the middle of the selection), always.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>The camera is rigidly centered on the avatar (or selection centroid) at all times.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="follow-loose" hidden>
+  <p class="contract-exploring-label">Exploring: Follow loose</p>
+  <p>The camera trails the avatar with some give — they never leave the screen, and nothing can detach it. How the trailing feels is the builder&#39;s craft.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>The camera follows the avatar continuously with craft-defined slack; the avatar never leaves the view, and no input detaches the camera from it.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="free-camera" hidden>
+  <p class="contract-exploring-label">Exploring: Free camera</p>
+  <p>The player drives the camera; it follows no one.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>The camera is player-driven and does not follow.</p></details>
+  <p class="contract-option-rationale"><strong>Additional context:</strong> If you pick this, give manual-camera-pan a real answer — with not-applicable there, nothing can move the camera at all. The machine cannot enforce this; the reviewer does.</p>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="free-with-recenter" hidden>
+  <p class="contract-exploring-label">Exploring: Free with recenter</p>
+  <p>Player-driven, plus a declared input that snaps back to the avatar or selection.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>The camera is player-driven and does not follow. A declared input recenters it on the avatar or selection.</p></details>
+</div>
+    </div>
+    <details class="contract-rationale"><summary>Why this question matters</summary><p>Something has to frame the world.</p></details>
+    <noscript><div class="contract-noscript-options"><div><strong>Follow locked:</strong> Glued dead-center on the avatar (or the middle of the selection), always.</div>
+<div><strong>Follow loose:</strong> The camera trails the avatar with some give — they never leave the screen, and nothing can detach it. How the trailing feels is the builder&#39;s craft.</div>
+<div><strong>Free camera:</strong> The player drives the camera; it follows no one.</div>
+<div><strong>Free with recenter:</strong> Player-driven, plus a declared input that snaps back to the avatar or selection.</div></div></noscript>
+  </div>
+  <fieldset class="contract-options">
+    <legend>Explore the choices</legend>
+    <label class="contract-option-button">
+  <input type="radio" name="rts-controller-camera-model" value="follow-locked" data-contract-choice>
+  <span class="contract-option-label">Follow locked</span>
+  <code>follow-locked</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-camera-model" value="follow-loose" data-contract-choice>
+  <span class="contract-option-label">Follow loose</span>
+  <code>follow-loose</code>
+  <span class="contract-suggested">Controller&#39;s answer</span>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-camera-model" value="free-camera" data-contract-choice>
+  <span class="contract-option-label">Free camera</span>
+  <code>free-camera</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-camera-model" value="free-with-recenter" data-contract-choice>
+  <span class="contract-option-label">Free with recenter</span>
+  <code>free-with-recenter</code>
+</label>
+  </fieldset>
+</article>
+<article class="contract-question" data-contract-question data-flag="manual-camera-pan" data-when="null">
+  <div class="contract-question-copy">
+    <p class="contract-exact-name"><code>manual-camera-pan</code></p>
+    <h4>How can the player move the camera by hand?</h4>
+    <div class="contract-choice-output" aria-live="polite" aria-atomic="true" data-choice-output>
+      <p class="contract-choice-prompt">Choose an option to explore what it means. Nothing will be saved.</p>
+      <div class="contract-choice-explanation" data-choice-explanation="not-applicable" hidden>
+  <p class="contract-exploring-label">Exploring: Not applicable</p>
+  <p>No manual camera at all — it is fully automatic. Only coherent with the follow modes.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>No manual pan: the camera is fully automatic and no input moves it. Coherent only with the follow modes.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="edge-scroll" hidden>
+  <p class="contract-exploring-label">Exploring: Edge scroll</p>
+  <p>Push the pointer to the screen edge and the camera pans.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>The pointer at the view edge pans the camera.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="drag-pan" hidden>
+  <p class="contract-exploring-label">Exploring: Drag pan</p>
+  <p>Hold a declared button and drag the world.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>A declared button drags the camera.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="keys" hidden>
+  <p class="contract-exploring-label">Exploring: Keys</p>
+  <p>Declared keys pan the camera — WASD, arrows, whatever the game names.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>Declared keys pan the camera.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="combined" hidden>
+  <p class="contract-exploring-label">Exploring: Combined</p>
+  <p>Two or more of the above, listed in your game&#39;s prose.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>Two or more of the above, enumerated in game prose.</p></details>
+</div>
+    </div>
+    <noscript><div class="contract-noscript-options"><div><strong>Not applicable:</strong> No manual camera at all — it is fully automatic. Only coherent with the follow modes.</div>
+<div><strong>Edge scroll:</strong> Push the pointer to the screen edge and the camera pans.</div>
+<div><strong>Drag pan:</strong> Hold a declared button and drag the world.</div>
+<div><strong>Keys:</strong> Declared keys pan the camera — WASD, arrows, whatever the game names.</div>
+<div><strong>Combined:</strong> Two or more of the above, listed in your game&#39;s prose.</div></div></noscript>
+  </div>
+  <fieldset class="contract-options">
+    <legend>Explore the choices</legend>
+    <label class="contract-option-button">
+  <input type="radio" name="rts-controller-manual-camera-pan" value="not-applicable" data-contract-choice>
+  <span class="contract-option-label">Not applicable</span>
+  <code>not-applicable</code>
+  <span class="contract-suggested">Controller&#39;s answer</span>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-manual-camera-pan" value="edge-scroll" data-contract-choice>
+  <span class="contract-option-label">Edge scroll</span>
+  <code>edge-scroll</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-manual-camera-pan" value="drag-pan" data-contract-choice>
+  <span class="contract-option-label">Drag pan</span>
+  <code>drag-pan</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-manual-camera-pan" value="keys" data-contract-choice>
+  <span class="contract-option-label">Keys</span>
+  <code>keys</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-manual-camera-pan" value="combined" data-contract-choice>
+  <span class="contract-option-label">Combined</span>
+  <code>combined</code>
+</label>
+  </fieldset>
+</article>
+</section>
+<section class="contract-question-section">
+<h3>Inspecting objects</h3>
+<article class="contract-question" data-contract-question data-flag="inspect-channel" data-when="null">
+  <div class="contract-question-copy">
+    <p class="contract-exact-name"><code>inspect-channel</code></p>
+    <h4>How does the player read a world object without acting on it?</h4>
+    <div class="contract-choice-output" aria-live="polite" aria-atomic="true" data-choice-output>
+      <p class="contract-choice-prompt">Choose an option to explore what it means. Nothing will be saved.</p>
+      <div class="contract-choice-explanation" data-choice-explanation="not-applicable" hidden>
+  <p class="contract-exploring-label">Exploring: Not applicable</p>
+  <p>No per-object readout exists in this game.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>No inspect channel: the world offers no per-object readout. All inspect templates are pruned.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="hover-tooltip" hidden>
+  <p class="contract-exploring-label">Exploring: Hover tooltip</p>
+  <p>Rest the pointer on a thing and its readout appears right there — no click, and nothing in the world changes.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>Resting the pointer on an object shows its readout in place, with no click and no world-state change. Staging per inspect-staging.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="click-inspect" hidden>
+  <p class="contract-exploring-label">Exploring: Click inspect</p>
+  <p>A declared input opens the object&#39;s readout in a declared panel. That input does nothing else.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>A declared input on an object opens its readout in a declared surface. The input carries no other verb.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="dedicated-mode" hidden>
+  <p class="contract-exploring-label">Exploring: Dedicated mode</p>
+  <p>A toggle enters inspect mode: pointing reads instead of commanding.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>A declared toggle enters an inspect mode in which pointing reads instead of commanding.</p></details>
+</div>
+    </div>
+    <noscript><div class="contract-noscript-options"><div><strong>Not applicable:</strong> No per-object readout exists in this game.</div>
+<div><strong>Hover tooltip:</strong> Rest the pointer on a thing and its readout appears right there — no click, and nothing in the world changes.</div>
+<div><strong>Click inspect:</strong> A declared input opens the object&#39;s readout in a declared panel. That input does nothing else.</div>
+<div><strong>Dedicated mode:</strong> A toggle enters inspect mode: pointing reads instead of commanding.</div></div></noscript>
+  </div>
+  <fieldset class="contract-options">
+    <legend>Explore the choices</legend>
+    <label class="contract-option-button">
+  <input type="radio" name="rts-controller-inspect-channel" value="not-applicable" data-contract-choice>
+  <span class="contract-option-label">Not applicable</span>
+  <code>not-applicable</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-inspect-channel" value="hover-tooltip" data-contract-choice>
+  <span class="contract-option-label">Hover tooltip</span>
+  <code>hover-tooltip</code>
+  <span class="contract-suggested">Controller&#39;s answer</span>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-inspect-channel" value="click-inspect" data-contract-choice>
+  <span class="contract-option-label">Click inspect</span>
+  <code>click-inspect</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-inspect-channel" value="dedicated-mode" data-contract-choice>
+  <span class="contract-option-label">Dedicated mode</span>
+  <code>dedicated-mode</code>
+</label>
+  </fieldset>
+</article>
+<article class="contract-question" data-contract-question data-flag="inspect-staging" data-when="{&quot;flag&quot;:{&quot;inspect-channel&quot;:[&quot;hover-tooltip&quot;]}}">
+  <div class="contract-question-copy">
+    <p class="contract-exact-name"><code>inspect-staging</code></p>
+    <h4>Does the hover readout arrive all at once, or in stages?</h4>
+    <p class="contract-condition">Applies when Inspect channel is Hover tooltip.</p>
+    <div class="contract-choice-output" aria-live="polite" aria-atomic="true" data-choice-output>
+      <p class="contract-choice-prompt">Choose an option to explore what it means. Nothing will be saved.</p>
+      <div class="contract-choice-explanation" data-choice-explanation="single-stage" hidden>
+  <p class="contract-exploring-label">Exploring: Single stage</p>
+  <p>Everything appears at once on hover.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>The full readout appears on hover at once.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="two-stage" hidden>
+  <p class="contract-exploring-label">Exploring: Two stage</p>
+  <p>Name and the key live number appear instantly; stats and flavor arrive after the stage2-delay-ms dwell. Live values tick in both stages.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>A compact stage (name and the key live value) appears immediately; the full stage (stats, flavor) appears after the stage2-delay-ms knob of continuous hover. Live values tick in both stages.</p></details>
+</div>
+    </div>
+    <details class="contract-rationale"><summary>Why this question matters</summary><p>Staging is a property of hover, so this question is only asked when the inspect channel is hover — otherwise it is pruned, unasked.</p></details>
+    <noscript><div class="contract-noscript-options"><div><strong>Single stage:</strong> Everything appears at once on hover.</div>
+<div><strong>Two stage:</strong> Name and the key live number appear instantly; stats and flavor arrive after the stage2-delay-ms dwell. Live values tick in both stages.</div></div></noscript>
+  </div>
+  <fieldset class="contract-options">
+    <legend>Explore the choices</legend>
+    <label class="contract-option-button">
+  <input type="radio" name="rts-controller-inspect-staging" value="single-stage" data-contract-choice>
+  <span class="contract-option-label">Single stage</span>
+  <code>single-stage</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-inspect-staging" value="two-stage" data-contract-choice>
+  <span class="contract-option-label">Two stage</span>
+  <code>two-stage</code>
+  <span class="contract-suggested">Controller&#39;s answer</span>
+</label>
+  </fieldset>
+</article>
+</section>
+<section class="contract-question-section">
+<h3>Cursor feedback</h3>
+<article class="contract-question" data-contract-question data-flag="cursor-context" data-when="null">
+  <div class="contract-question-copy">
+    <p class="contract-exact-name"><code>cursor-context</code></p>
+    <h4>Does the cursor change to show what a click here would do?</h4>
+    <div class="contract-choice-output" aria-live="polite" aria-atomic="true" data-choice-output>
+      <p class="contract-choice-prompt">Choose an option to explore what it means. Nothing will be saved.</p>
+      <div class="contract-choice-explanation" data-choice-explanation="static-cursor" hidden>
+  <p class="contract-exploring-label">Exploring: Static cursor</p>
+  <p>One cursor everywhere; the game signals what things do some other way.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>One cursor everywhere; affordances are communicated by other means.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="context-cursor" hidden>
+  <p class="contract-exploring-label">Exploring: Context cursor</p>
+  <p>The cursor changes over each interactable class — each row declares its form — and over plain ground shows the ground form your game&#39;s prose declares.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>The cursor&#39;s form follows what is under it, per the cursor member of the interactables collection. Over plain ground it takes a ground form the game MUST declare in its own prose; an undeclared ground form is the scope-by-implication this option forbids.</p></details>
+</div>
+    </div>
+    <details class="contract-rationale"><summary>Why this question matters</summary><p>Even a never-changing cursor is a decision.</p></details>
+    <noscript><div class="contract-noscript-options"><div><strong>Static cursor:</strong> One cursor everywhere; the game signals what things do some other way.</div>
+<div><strong>Context cursor:</strong> The cursor changes over each interactable class — each row declares its form — and over plain ground shows the ground form your game&#39;s prose declares.</div></div></noscript>
+  </div>
+  <fieldset class="contract-options">
+    <legend>Explore the choices</legend>
+    <label class="contract-option-button">
+  <input type="radio" name="rts-controller-cursor-context" value="static-cursor" data-contract-choice>
+  <span class="contract-option-label">Static cursor</span>
+  <code>static-cursor</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-cursor-context" value="context-cursor" data-contract-choice>
+  <span class="contract-option-label">Context cursor</span>
+  <code>context-cursor</code>
+  <span class="contract-suggested">Controller&#39;s answer</span>
+</label>
+  </fieldset>
+</article>
+<article class="contract-question" data-contract-question data-flag="cursor-magnetism" data-when="null">
+  <div class="contract-question-copy">
+    <p class="contract-exact-name"><code>cursor-magnetism</code></p>
+    <h4>Does a click just beside an interactable still count as hitting it?</h4>
+    <div class="contract-choice-output" aria-live="polite" aria-atomic="true" data-choice-output>
+      <p class="contract-choice-prompt">Choose an option to explore what it means. Nothing will be saved.</p>
+      <div class="contract-choice-explanation" data-choice-explanation="none" hidden>
+  <p class="contract-exploring-label">Exploring: None</p>
+  <p>What you see is what you hit: a click beside a crate is a ground click.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>Hitboxes match visual bounds; a click beside an interactable is a ground command.</p></details>
+</div>
+<div class="contract-choice-explanation" data-choice-explanation="snap-radius" hidden>
+  <p class="contract-exploring-label">Exploring: Snap radius</p>
+  <p>A click within the magnetism-radius-px of something interactable snaps to it — nearest wins. Ground clicks need clear space.</p>
+  <details class="contract-rationale"><summary>Exact wording</summary><p>A pointer within the magnetism-radius-px knob of an interactable&#39;s bounds resolves to that interactable, nearest-first; ties resolve by the game&#39;s declared tie-break. Ground commands require clearing the radius.</p></details>
+</div>
+    </div>
+    <details class="contract-rationale"><summary>Why this question matters</summary><p>Two builds that disagree here disagree on every near-miss click.</p></details>
+    <noscript><div class="contract-noscript-options"><div><strong>None:</strong> What you see is what you hit: a click beside a crate is a ground click.</div>
+<div><strong>Snap radius:</strong> A click within the magnetism-radius-px of something interactable snaps to it — nearest wins. Ground clicks need clear space.</div></div></noscript>
+  </div>
+  <fieldset class="contract-options">
+    <legend>Explore the choices</legend>
+    <label class="contract-option-button">
+  <input type="radio" name="rts-controller-cursor-magnetism" value="none" data-contract-choice>
+  <span class="contract-option-label">None</span>
+  <code>none</code>
+</label>
+<label class="contract-option-button">
+  <input type="radio" name="rts-controller-cursor-magnetism" value="snap-radius" data-contract-choice>
+  <span class="contract-option-label">Snap radius</span>
+  <code>snap-radius</code>
+  <span class="contract-suggested">Controller&#39;s answer</span>
+</label>
+  </fieldset>
+</article>
+</section>
+</section>
+<section class="contract-form-section" id="values">
+  <p class="label">The numbers</p>
+  <h2>Knobs, with this instance's values</h2>
+  <div class="contract-detail-grid"><article class="contract-detail-card">
+  <div class="contract-detail-heading"><h3>Stage2 delay ms = 400</h3><span class="contract-badge ">tunable</span></div>
+  <p class="contract-exact-name"><code>stage2-delay-ms</code></p>
+  <p>Continuous-hover dwell before the full readout stage appears. Rebalance-safe feel timing.</p>
+  <dl class="contract-inline-facts">
+    <div><dt>Number</dt><dd>number</dd></div>
+    <div><dt>Unit</dt><dd>Milliseconds</dd></div>
+  </dl>
+</article>
+<article class="contract-detail-card">
+  <div class="contract-detail-heading"><h3>Magnetism radius px = 24</h3><span class="contract-badge ">tunable</span></div>
+  <p class="contract-exact-name"><code>magnetism-radius-px</code></p>
+  <p>Pointer-to-bounds distance within which a click resolves to the interactable, in device-independent pixels at reference zoom. Rebalance-safe.</p>
+  <dl class="contract-inline-facts">
+    <div><dt>Number</dt><dd>number</dd></div>
+    <div><dt>Unit</dt><dd>Device independent pixels</dd></div>
+  </dl>
+</article></div><p>2 conditional knobs do not apply to these saved answers.</p>
+</section>
+<section class="contract-form-section" id="rules">
+  <p class="label">Rules that must always hold</p>
+  <h2>Invariants</h2>
+  <div class="contract-detail-grid"><article class="contract-detail-card">
+  <p class="contract-exact-name"><code>magnetism-radius-positive</code></p>
+  <h3>a declared snap radius must be positive</h3>
+  <p class="contract-expression">Magnetism radius px &gt; 0</p>
+</article></div><p>1 conditional invariant does not apply to these saved answers.</p>
+</section>
+<section class="contract-form-section" id="lists">
+  <p class="label">This instance's rows</p>
+  <h2>Collections, filled in</h2>
+  <article class="contract-collection">
+<p class="contract-exact-name"><code>interactables</code></p>
+<h3>Interactables</h3>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Interaction</th><th>Cursor</th></tr></thead>
+<tbody>
+<tr><td><code>ground</code></td><td><code>02-mechanics.md#controls</code></td><td><code>track-mark</code></td></tr>
+<tr><td><code>material-mound</code></td><td><code>02-mechanics.md#sandfield</code></td><td><code>scoop</code></td></tr>
+<tr><td><code>droid-shell</code></td><td><code>02-mechanics.md#salvage</code></td><td><code>scoop</code></td></tr>
+<tr><td><code>vault-elevator</code></td><td><code>02-mechanics.md#vaults</code></td><td><code>crate</code></td></tr>
+<tr><td><code>dew-collector</code></td><td><code>02-mechanics.md#water</code></td><td><code>tap</code></td></tr>
+<tr><td><code>dock</code></td><td><code>02-mechanics.md#the-droid</code></td><td><code>bolt</code></td></tr>
+<tr><td><code>bench</code></td><td><code>02-mechanics.md#crafting</code></td><td><code>wrench</code></td></tr>
+<tr><td><code>grave-marker</code></td><td><code>04-presentation.md#fixed-principles</code></td><td><code>hand</code></td></tr>
+<tr><td><code>body</code></td><td><code>02-mechanics.md#vaults</code></td><td><code>hand</code></td></tr>
+</tbody></table></div>
+</article>
+</section>
+<section class="contract-form-section" id="tests">
+  <p class="label">The generated checklist</p>
+  <h2>8 live tests for controller</h2>
+  <p>Generated from the saved answers and rows. Templates whose option was not chosen are shown pruned, so nothing disappears silently.</p>
+  <div class="contract-test-list"><article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>primary-button-role</code></p>
+      <h3>the primary button carries its declared world role</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Live for controller.</p>
+  <p class="contract-test-text">The primary button&#39;s world role is fixed by its answer: neither press issues a command or changes any state; the button may retain a declared function inside UI surfaces.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the avatar idle, open ground at one pointer position and a declared interactable at another</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the primary button is pressed over the ground position</li><li>the primary button is pressed over the interactable</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>neither press issues a command or changes any state; the button may retain a declared function inside UI surfaces</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li>command-log</li><li>cursor-target-resolution</li><li>state-diff</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>secondary-button-role</code></p>
+      <h3>the secondary button carries its declared world role</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Live for controller.</p>
+  <p class="contract-test-text">The secondary button&#39;s world role is fixed by its answer: the ground press issues exactly one move command toward that position, and the interactable press issues exactly one interaction request with no move-only command.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the avatar idle, open ground at one pointer position and a declared interactable at another</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the secondary button is pressed over the ground position</li><li>the secondary button is pressed over the interactable</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the ground press issues exactly one move command toward that position, and the interactable press issues exactly one interaction request with no move-only command</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li>command-log</li><li>cursor-target-resolution</li><li>state-diff</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>approach-then-interact</code></p>
+      <h3>distance never refuses a command</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Live for controller.</p>
+  <p class="contract-test-text">Distance never refuses a command: the avatar approaches and interacts on arrival, and a mid-approach command resolves per the queueing answer.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>an interactable far beyond interaction range with a valid path to it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an interaction command is issued on it from that distance</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the command is accepted with no range rejection</li><li>the avatar paths to the interactable and performs its row&#39;s interaction on arrival</li><li>issuing a new command mid-approach resolves per the command-queueing answer</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li>command-log</li><li>path-trace</li><li>interaction-event</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unreachable-resolves</code></p>
+      <h3>an unreachable target resolves without partial motion</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Live for controller.</p>
+  <p class="contract-test-text">On an unreachable target, the avatar travels to the nearest reachable point by path distance and stops there.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a move command targeting a position no path reaches</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the command is issued</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the avatar travels to the nearest reachable point by path distance and stops there</li><li>no partial or oscillating motion toward the unreachable target is observable afterward</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li>path-result</li><li>final-position</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>replace-not-queue</code></p>
+      <h3>a second command replaces the first</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Live for controller.</p>
+  <p class="contract-test-text">A second command replaces the first immediately; no queue is ever observable.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the avatar mid-travel on a first command</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a second world command is issued</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the first command is abandoned immediately and the second takes effect</li><li>no queued command is observable in any state before, during, or after</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li>command-log</li><li>path-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>hover-two-stage</code></p>
+      <h3>hover reads in two stages and changes nothing</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Live for controller.</p>
+  <p class="contract-test-text">Hover reads instantly; depth arrives at the dwell named by <code class="contract-placeholder">stage2-delay-ms = 400</code>; reading never changes the world.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the pointer brought to rest on an inspectable object</p></dd></div>
+<div><dt>When</dt><dd><ul><li>hover begins and continues past the dwell named by <code class="contract-placeholder">stage2-delay-ms = 400</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the compact stage appears immediately on hover</li><li>the full stage appears when continuous hover reaches the key&#39;s dwell, and not before</li><li>live values tick in both stages</li><li>no world state changes at any point in the hover</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li>stage-timestamps</li><li>state-diff</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>magnetism-resolves-near-miss</code></p>
+      <h3>a near-miss inside the snap radius resolves to the interactable</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Live for controller.</p>
+  <p class="contract-test-text">A near-miss inside the radius named by <code class="contract-placeholder">magnetism-radius-px = 24</code> snaps to the interactable; beyond it, the ground receives the command; among candidates the nearest wins.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a pointer position outside an interactable&#39;s visual bounds but within the distance named by <code class="contract-placeholder">magnetism-radius-px = 24</code>, and a second position just beyond that distance</p></dd></div>
+<div><dt>When</dt><dd><ul><li>command target resolution is evaluated at each pointer position</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the within-radius position resolves to the interactable</li><li>the beyond-radius position resolves to ground</li><li>with two interactables in radius the nearer wins, ties per the game&#39;s declared tie-break</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li>cursor-target-resolution</li><li>distance-computed</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>follow-never-loses-avatar</code></p>
+      <h3>the follow camera never loses the avatar</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Live for controller.</p>
+  <p class="contract-test-text">Under a follow mode the avatar never leaves the view and nothing detaches the camera; how the follow feels is the builder&#39;s craft and is not tested here.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the avatar traveling continuously across the world for a fixture route</p></dd></div>
+<div><dt>When</dt><dd><ul><li>no manual camera input is given (and none exists when manual-camera-pan is not-applicable)</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the avatar remains within the view at every frame of the route</li><li>no input event detaches the camera from the avatar</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li>avatar-view-position-trace</li></ul></dd></div></dl></details>
+</article></div>
+</section>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

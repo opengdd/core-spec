@@ -1,10 +1,16 @@
 const DATABASE = "opengdd-authoring";
 const STORE = "drafts";
+const DATABASE_VERSION = 2;
 
 function database() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DATABASE, 1);
-    request.onupgradeneeded = () => request.result.createObjectStore(STORE, { keyPath: "id" });
+    const request = indexedDB.open(DATABASE, DATABASE_VERSION);
+    request.onupgradeneeded = event => {
+      const store = event.oldVersion < 1
+        ? request.result.createObjectStore(STORE, { keyPath: "id" })
+        : request.transaction.objectStore(STORE);
+      if (event.oldVersion < 2) store.delete("lantern-demo");
+    };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
   });

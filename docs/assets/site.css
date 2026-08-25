@@ -416,13 +416,18 @@ main.flush { padding-top: 0; }
   transition: border-color 0.15s, transform 0.15s;
 }
 .card:hover { border-color: var(--orange); text-decoration: none; transform: translateY(-2px); }
-.card h2 { margin: 0 0 0.35rem; font-size: 1rem; color: inherit; }
+.card h2, .card h3 { margin: 0 0 0.35rem; font-size: 1rem; color: inherit; }
 .card p { margin: 0; font-size: 0.9rem; color: color-mix(in srgb, var(--card-ink) 72%, var(--card-bg)); }
 .card-grid {
   display: grid; gap: 1rem;
   grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
   margin: 1.6rem 0;
 }
+.handbook-groups { margin-top: 2.5rem; }
+.handbook-group { margin: 0 0 3rem; }
+.handbook-group > h2 { margin-bottom: 0.35rem; }
+.handbook-group-intro { max-width: 44rem; margin: 0; color: var(--muted); }
+.handbook-group .card-grid { margin-top: 1rem; }
 .doc-body > .card { margin: 0 0 1rem; }
 
 .label {
@@ -843,7 +848,8 @@ main.flush { padding-top: 0; }
   color: var(--accent); margin-right: 0.35rem;
 }
 .doc-toc a:hover { color: var(--ink); background: var(--accent-soft); }
-.doc-toc a.here {
+.doc-toc a.here,
+.doc-toc a[aria-current="page"] {
   color: var(--ink); font-weight: 500;
   border-left-color: var(--orange);
   background: var(--accent-soft);
@@ -853,6 +859,15 @@ main.flush { padding-top: 0; }
   font-family: var(--font-head); font-weight: 600; font-size: 0.78rem;
   letter-spacing: 0.05em; text-transform: uppercase;
   color: var(--ink); margin: 0 0 0.6rem; padding-left: 0.7rem;
+}
+.doc-toc .toc-group { margin: 0 0 0.8rem; }
+.doc-toc .learn-resources { margin-bottom: 1rem; }
+.doc-toc .learn-resources a { color: var(--ink); font-family: var(--font-head); }
+.doc-toc a.toc-resource-current { color: var(--ink); font-weight: 600; }
+.doc-toc .toc-group-title {
+  margin: 0.75rem 0 0.2rem; padding-left: 0.7rem;
+  color: var(--ink); font-family: var(--font-head); font-size: 0.68rem;
+  font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
 }
 .doc-body { min-width: 0; max-width: 46rem; font-size: 0.94rem; line-height: 1.75; }
 .doc-shot { display: block; max-width: 100%; height: auto; margin: 1.1rem 0; border: 1px solid var(--line); border-radius: 6px; }

@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Authority — OpenGDD handbook</title>
-<meta name="description" content="You control the creative boundaries of your game: what is settled, and what a builder is free to decide. One authority tag above a paragraph says which is which.">
+<title>Authority | OpenGDD handbook</title>
+<meta name="description" content="Authority states who decides each part of the game: you, the builder, or a question answered for each build.">
 <link rel="canonical" href="https://opengdd.org/handbook/authority/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Authority — OpenGDD handbook">
-<meta property="og:description" content="You control the creative boundaries of your game: what is settled, and what a builder is free to decide. One authority tag above a paragraph says which is which.">
+<meta property="og:title" content="Authority | OpenGDD handbook">
+<meta property="og:description" content="Authority states who decides each part of the game: you, the builder, or a question answered for each build.">
 <meta property="og:url" content="https://opengdd.org/handbook/authority/">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Authority — OpenGDD handbook">
-<meta name="twitter:description" content="You control the creative boundaries of your game: what is settled, and what a builder is free to decide. One authority tag above a paragraph says which is which.">
+<meta name="twitter:title" content="Authority | OpenGDD handbook">
+<meta name="twitter:description" content="Authority states who decides each part of the game: you, the builder, or a question answered for each build.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -27,8 +27,8 @@
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
-      <a href="/get-started/">Get Started</a>
-      <a href="/handbook/" aria-current="page">Handbook</a>
+      <a href="/learn/" aria-current="page">Learn</a>
+      <a href="/contracts/">Contracts</a>
       <a href="/spec/">Spec</a>
       <a href="/standard/">Standard</a>
       <a href="/authoring-tool/">Authoring tool</a>
@@ -39,42 +39,76 @@
 </header>
 <main>
 <div class="doc-layout">
-<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Handbook</p><ul>
-<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">1. The shape of a spec</a></li>
-<li class="toc-h2"><a href="/handbook/fantasy-block/">2. The fantasy block</a></li>
-<li class="toc-h2"><a href="/handbook/authority/" aria-current="page">3. Authority</a></li>
-<li class="toc-h2"><a href="/handbook/identifiers/">4. Identifiers</a></li>
-<li class="toc-h2"><a href="/handbook/tuning/">5. Tuning</a></li>
-<li class="toc-h2"><a href="/handbook/collections/">6. Collections</a></li>
-<li class="toc-h2"><a href="/handbook/graphs/">7. Graphs</a></li>
-<li class="toc-h2"><a href="/handbook/modes-and-states/">8. Modes &amp; states</a></li>
-<li class="toc-h2"><a href="/handbook/acceptance-tests/">9. Acceptance tests</a></li>
-<li class="toc-h2"><a href="/handbook/contracts/">10. Contracts</a></li>
-<li class="toc-h2"><a href="/handbook/direction/">11. Direction: pillars, mood, must_keep</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-pinning/">12. Palette &amp; pinning</a></li>
-<li class="toc-h2"><a href="/handbook/personalization/">13. Personalization</a></li>
-<li class="toc-h2"><a href="/handbook/rulebook/">14. The rulebook</a></li>
-<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
-</ul></nav>
-<article class="doc-body">
-<h1>3. Authority</h1>
-<p>You control the creative boundaries of your game: what is settled, and what a builder is free to decide. One <strong>authority</strong> tag above a paragraph says which is which.</p>
-<p><em><code>02-mechanics.md</code>, a prose chapter</em></p>
-<pre><code class="lang-markdown">Ore feeds into a furnace one piece at a time. A furnace runs one job,
-and anything else dropped in waits its turn. A finished bar sits in the
-furnace until someone takes it.
-
-&gt; DELEGATED: how a running furnace and a finished one look and sound.
-&gt; A player crossing the room should be able to tell the two apart
-&gt; without stopping.</code></pre>
-<p>Prose without a tag is your explicit decision. The <code>&gt; DELEGATED:</code> tag hands some direction to the builder: a blockquote line, followed by any label that helps a reader. It holds until the next tag or the end of the section.</p>
-<ul>
-<li><strong>Fixed</strong> is the default. Untagged prose is Fixed, and the builder changes nothing.</li>
-<li><strong>Delegated</strong> hands the stated area to the builder, to decide within the intent you wrote.</li>
-<li><strong>Personalization</strong> asks a question the builder can answer on their own; its machinery is the personalization chapter's subject.</li>
+<nav class="doc-toc" aria-label="Learn"><p class="toc-title">Learn</p>
+<ul class="learn-resources">
+<li><a href="/get-started/">Get started</a></li>
+<li><a href="/handbook/" class="toc-resource-current">Handbook</a></li>
 </ul>
-<p>Delegated is not abandoned. The intent around the tag still binds: a builder may choose the animation, but cannot leave a finished furnace hard to spot. Untagged needs no ceremony either. What you simply write is yours.</p>
-<p><em>Full rules: Reference §2 and §2a.</em></p>
+<div class="toc-group">
+<p class="toc-group-title">Start and foundations</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/an-afternoon-spec/">An afternoon spec</a></li>
+<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">The shape of a spec</a></li>
+<li class="toc-h2"><a href="/handbook/fantasy-block/">The fantasy block</a></li>
+<li class="toc-h2"><a href="/handbook/authority/" class="here" aria-current="page">Authority</a></li>
+<li class="toc-h2"><a href="/handbook/identifiers/">Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/tuning/">Tuning</a></li>
+<li class="toc-h2"><a href="/handbook/acceptance-tests/">Acceptance tests</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Game systems and content</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/collections/">Collections</a></li>
+<li class="toc-h2"><a href="/handbook/graphs/">Graphs</a></li>
+<li class="toc-h2"><a href="/handbook/runtime-state/">Runtime state</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes &amp; clocks</a></li>
+<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
+<li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Art direction and variation</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-pinning/">Palette &amp; pinning</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">Personalization</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Checking and handoff</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/promises-and-proof/">Promises and proof</a></li>
+<li class="toc-h2"><a href="/handbook/rulebook/">Preflight checklist</a></li>
+</ul>
+</div>
+</nav>
+<article class="doc-body">
+<h1>Authority</h1>
+<p><em>Required: every spec has this.</em></p>
+<p><strong>Authority</strong> states who decides each part of the game: you, the builder, or a question answered for each build.</p>
+<p><em><code>02-mechanics.md</code>, a prose chapter</em></p>
+<pre><code class="lang-markdown">The furnace processes one piece of ore at a time. Any additional ore
+waits in a queue. A finished bar remains in the furnace until the player
+collects it.
+
+&gt; DELEGATED: Decide how the furnace looks and sounds while processing
+&gt; ore. A player crossing the room must be able to tell that it is still
+&gt; running.
+
+&gt; PERSONALIZATION: furnace_signal
+&gt; Choose how the furnace signals that a bar is ready: a steady glow, or
+&gt; a glow with a soft chime. Either choice must be clear from across the
+&gt; room.</code></pre>
+<p>The first paragraph has no tag, so it is <strong>Fixed</strong>. The builder follows it as written.</p>
+<ul>
+<li><strong>Delegated</strong> asks the builder to decide within the limits you provide.</li>
+<li><strong>Personalization</strong> connects the prose to a declared question. Each build records one answer.</li>
+</ul>
+<p>Each tag applies until the next authority tag or the end of the section. Its limits still apply: the builder can choose the running animation, but it must remain readable from across the room.</p>
+<p>The Personalization example changes presentation. Personalization can also offer gameplay alternatives that you define. A Delegated choice may not change how the game plays.</p>
+<p>The <a href="/handbook/personalization/">personalization chapter</a> explains how to declare the question and its answers.</p>
+<p><em>Full rules: <a href="/spec/">OpenGDD specification</a>, §2 and §2a.</em></p>
 <p class="note chapter-pager"><a href="/handbook/fantasy-block/">← The fantasy block</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/identifiers/">Identifiers →</a></p>
 </article>
 </div>

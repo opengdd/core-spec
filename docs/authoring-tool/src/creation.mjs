@@ -1,129 +1,30 @@
 const DOTTED_KEY = /^[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+$/;
+const COLLECTION_RECORD_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const SECTION_NAME = /^(?:(.+\.md))?#([A-Za-z0-9._-]+)$/i;
 const ACCEPTANCE_TEST = /^AT-(\d+)$/;
 const RULE = /^(?:RULE|INV)-[A-Za-z0-9._-]+$/i;
 const CREATABLE_NAME = /^[A-Za-z0-9._-]+$/;
+const DESCRIPTOR_ID = /^(?=[a-z0-9-]*[a-z])[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const PALETTE_NAME = /^palette\.((?!(?:json|md)(?:\.|$))(?=[a-z0-9-]*[a-z])[a-z0-9]+(?:-[a-z0-9]+)*(?:\.(?!(?:json|md)(?:\.|$))(?=[a-z0-9-]*[a-z])[a-z0-9]+(?:-[a-z0-9]+)*)*)$/;
+const RESERVED_FIRST_SEGMENTS = new Set([
+  "pillars", "mood", "anti", "must_keep", "constraints", "viewing",
+  "semantics", "meta", "tunables", "constants", "invariants", "clocks",
+  "manifest", "build", "descriptors", "contracts", "palette"
+]);
+const RESERVED_EXTENSIONS = new Set(["json", "md"]);
 
 function parseJson(text) {
   try { return JSON.parse(text); }
   catch { return undefined; }
 }
 
-function scanTokens(text) {
-  const tokens = [];
-  for (let index = 0; index < text.length;) {
-    if (/\s/.test(text[index])) { index += 1; continue; }
-    const start = index;
-    if (text[index] === '"') {
-      index += 1;
-      while (index < text.length) {
-        if (text[index] === "\\") { index += 2; continue; }
-        if (text[index++] === '"') break;
-      }
-      const raw = text.slice(start, index);
-      let value;
-      try { value = JSON.parse(raw); } catch { value = undefined; }
-      tokens.push({ raw, value, start, end: index });
-      continue;
-    }
-    if ("{}[]:,".includes(text[index])) {
-      tokens.push({ raw: text[index], start, end: ++index });
-      continue;
-    }
-    while (index < text.length && !/[\s{}\[\]:,]/.test(text[index])) index += 1;
-    tokens.push({ raw: text.slice(start, index), start, end: index });
-  }
-  return tokens;
-}
-
-function namedContainer(text, name, expectedOpen) {
-  const tokens = scanTokens(text);
-  const shape = expectedOpen === "{" ? "object" : "array";
-  const closeFrom = index => {
-    let depth = 0;
-    for (let cursor = index; cursor < tokens.length; cursor += 1) {
-      if (tokens[cursor].raw === "{" || tokens[cursor].raw === "[") depth += 1;
-      else if (tokens[cursor].raw === "}" || tokens[cursor].raw === "]") depth -= 1;
-      if (depth === 0) return tokens[cursor];
-    }
-    return undefined;
-  };
-
-  if (name === null) {
-    const close = tokens[0]?.raw === expectedOpen ? closeFrom(0) : undefined;
-    if (close) return { open: tokens[0], close };
-    throw new Error(`JSON root is not a writable ${shape}.`);
-  }
-
-  // Only a direct member of the root object counts. A same-named container
-  // nested anywhere else must never absorb the write.
-  let depth = 0;
-  for (let index = 0; index < tokens.length; index += 1) {
-    const raw = tokens[index].raw;
-    if (raw === "{" || raw === "[") { depth += 1; continue; }
-    if (raw === "}" || raw === "]") { depth -= 1; continue; }
-    if (depth !== 1 || tokens[index].value !== name) continue;
-    if (tokens[index + 1]?.raw !== ":" || tokens[index + 2]?.raw !== expectedOpen) continue;
-    const close = closeFrom(index + 2);
-    if (close) return { key: tokens[index], open: tokens[index + 2], close };
-  }
-  throw new Error(`${name} is not a writable ${shape} at the top level of this file.`);
-}
-
-function lineIndent(text, index) {
-  const start = text.lastIndexOf("\n", index - 1) + 1;
-  const prefix = text.slice(start, index);
-  return /^\s*$/.test(prefix) ? prefix : "";
-}
-
-// The indent of the file's first member is one level, whatever width that is.
-function indentUnit(text) {
-  return /\r?\n([ \t]+)"/.exec(text)?.[1] ?? "  ";
-}
-
-function insertIntoContainer(text, container, snippet) {
-  const inside = text.slice(container.open.end, container.close.start);
-  const newline = text.includes("\r\n") ? "\r\n" : "\n";
-  if (!inside.trim()) {
-    if (!/[\r\n]/.test(inside)) return `${text.slice(0, container.close.start)}${snippet}${text.slice(container.close.start)}`;
-    const closeIndent = lineIndent(text, container.close.start);
-    const insertionAt = container.close.start - closeIndent.length;
-    const memberIndent = closeIndent + indentUnit(text);
-    return `${text.slice(0, insertionAt)}${memberIndent}${snippet}${newline}${text.slice(insertionAt)}`;
-  }
-
-  let insertionAt = container.close.start;
-  while (insertionAt > container.open.end && /\s/.test(text[insertionAt - 1])) insertionAt -= 1;
-  const inline = !/[\r\n]/.test(inside);
-  const first = container.open.end + inside.search(/\S/);
-  const memberIndent = inline ? "" : lineIndent(text, first);
-  const separator = inline ? ", " : `,${newline}${memberIndent}`;
-  return `${text.slice(0, insertionAt)}${separator}${snippet}${text.slice(insertionAt)}`;
-}
-
-export function insertJsonValue(text, containerName, entry) {
-  if (typeof text !== "string") throw new TypeError("JSON text is required.");
-  // Refuse to edit a file that is already broken: the insertion would succeed
-  // and leave the designer with a still-broken file and a success message.
-  if (parseJson(text) === undefined) throw new Error("This file is not valid JSON yet; fix it before creating names in it.");
-  const isMember = Object.hasOwn(entry, "key");
-  const container = namedContainer(text, containerName, isMember ? "{" : "[");
-  const parsedContainer = parseJson(text.slice(container.open.start, container.close.end));
-  if (parsedContainer === undefined) throw new Error(`${containerName} contains invalid JSON.`);
-  if (isMember && Object.hasOwn(parsedContainer, entry.key)) throw new Error(`${entry.key} already exists in ${containerName}.`);
-  // Match hand-authored spacing (`{"id": "mira"}`), which JSON.stringify drops.
-  const record = value => `{${Object.entries(value).map(([key, item]) => `${JSON.stringify(key)}: ${JSON.stringify(item)}`).join(", ")}}`;
-  const snippet = isMember
-    ? `${JSON.stringify(entry.key)}: ${JSON.stringify(entry.value)}`
-    : record(entry.value);
-  return insertIntoContainer(text, container, snippet);
-}
+const insertion = (at, keyOrIndex, value, options) => ({ type: "insert", pointer: at, keyOrIndex, value, options });
 
 export function parseJsonScalar(text) {
   let value;
   try { value = JSON.parse(text); }
-  catch { throw new Error("Enter a valid JSON scalar."); }
-  if (value !== null && typeof value === "object") throw new Error("Enter a JSON scalar, not an object or array.");
+  catch { throw new Error(CREATION_COPY.validJsonScalar); }
+  if (value !== null && typeof value === "object") throw new Error(CREATION_COPY.jsonScalarOnly);
   return value;
 }
 
@@ -144,45 +45,108 @@ function markdownTarget(files, requested, openPath) {
   return matches.length === 1 ? matches[0] : undefined;
 }
 
-function catalogArray(collection, files) {
-  if (collection?.source?.kind !== "catalog" || typeof collection.source.file !== "string") return undefined;
-  const text = files.get(collection.source.file);
-  const document = typeof text === "string" ? parseJson(text) : undefined;
-  if (!document || Array.isArray(document) || typeof document !== "object") return undefined;
-  const arrays = Object.entries(document).filter(([, value]) => Array.isArray(value));
-  const named = arrays.find(([member]) => member === collection.id);
-  const candidates = named ? [named] : arrays.filter(([, records]) => records.every(record => record
-    && typeof record === "object"
-    && !Array.isArray(record)
-    && typeof record[collection.id_member] === "string"));
-  if (candidates.length !== 1) return undefined;
-  const [member, records] = candidates[0];
-  return { file: collection.source.file, member, records };
+function collectionDrawers(files, folders) {
+  const drawers = new Set();
+  // Invalid drawer ids stay unavailable here because validation owns their correction.
+  for (const path of folders ?? []) {
+    const match = /^collections\/([a-z0-9]+(?:-[a-z0-9]+)*)(?:\/|$)/.exec(path);
+    if (match) drawers.add(match[1]);
+  }
+  // Direct callers can omit implied folders, so files independently reveal drawers.
+  for (const path of files.keys()) {
+    const match = /^collections\/([a-z0-9]+(?:-[a-z0-9]+)*)\//.exec(path);
+    if (match) drawers.add(match[1]);
+  }
+  return [...drawers].sort((left, right) => left.localeCompare(right));
 }
 
-function idStyle(id) {
-  if (/^[a-z0-9]+$/.test(id)) return "plain";
-  if (/^[a-z0-9]+(?:-[a-z0-9]+)+$/.test(id)) return "kebab";
-  if (/^[a-z0-9]+(?:_[a-z0-9]+)+$/.test(id)) return "snake";
-  return "other";
+function seedCollectionField(record, field, definition) {
+  if (Object.hasOwn(definition, "pattern") || definition.unique === true || definition.type === "grid") return;
+  if (Array.isArray(definition.options) && definition.options.length) record[field] = definition.options[0];
+  else if (definition.type === "string") record[field] = "";
+  else if (definition.type === "integer" || definition.type === "number") record[field] = 0;
 }
 
-function matchesRecordIds(name, records, idMember) {
-  const styles = new Set(records.map(record => idStyle(record[idMember])).filter(style => style !== "other"));
-  if (!styles.size) return /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/.test(name);
-  return (styles.has("plain") && /^[a-z0-9]+$/.test(name))
-    || (styles.has("kebab") && /^[a-z0-9]+(?:-[a-z0-9]+)+$/.test(name))
-    || (styles.has("snake") && /^[a-z0-9]+(?:_[a-z0-9]+)+$/.test(name));
+function collectionRowWhenSatisfied(when, row) {
+  // This mirrors the validator's legal subset; validation owns malformed when shapes.
+  if (!when || Array.isArray(when) || typeof when !== "object") return false;
+  if (!Object.hasOwn(when, "row")) return true;
+  if (!when.row || Array.isArray(when.row) || typeof when.row !== "object") return false;
+  return Object.entries(when.row).every(([field, values]) => Array.isArray(values) && values.includes(row[field]));
+}
+
+export function collectionRecordText(files, drawer) {
+  const label = parseJson(files.get(`collections/${drawer}/_collection.json`));
+  const schema = label?.record;
+  if (!schema || Array.isArray(schema) || typeof schema !== "object") return "{}\n";
+  const record = {};
+  for (const [field, definition] of Object.entries(schema)) {
+    if (!definition || Array.isArray(definition) || typeof definition !== "object" || definition.required !== true) continue;
+    seedCollectionField(record, field, definition);
+  }
+  for (let pass = 0; pass < Object.keys(schema).length; pass += 1) {
+    let added = false;
+    for (const [field, definition] of Object.entries(schema)) {
+      if (!definition || Array.isArray(definition) || typeof definition !== "object") continue;
+      if (!Object.hasOwn(definition, "when") || Object.hasOwn(record, field)) continue;
+      if (!collectionRowWhenSatisfied(definition.when, record)) continue;
+      seedCollectionField(record, field, definition);
+      added = Object.hasOwn(record, field);
+    }
+    if (!added) break;
+  }
+  return `${JSON.stringify(record, null, 2)}\n`;
+}
+
+export function kebabName(value) {
+  return String(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+export function collectionNameTaken(files, folders, name) {
+  const target = kebabName(name).toLowerCase();
+  if (!target) return false;
+  return [...files.keys(), ...(folders ?? [])].some(path => {
+    const match = /^collections\/([^/]+)(?:\/|$)/i.exec(path);
+    return match?.[1].toLowerCase() === target;
+  });
+}
+
+export function collectionRecordNameTaken(files, folders, drawer, name) {
+  const target = `collections/${drawer}/${kebabName(name)}.json`.toLowerCase();
+  if (!kebabName(name)) return false;
+  return [...files.keys(), ...(folders ?? [])].some(path => path.toLowerCase() === target);
+}
+
+export function rankCollectionCreationActions(actions, files, revisionFor, limit = 3) {
+  const collectionActions = actions.filter(action => action.kind === "collection-record")
+    .sort((left, right) => {
+      const revision = action => Math.max(-1, ...[...files.keys()]
+        .filter(file => file.startsWith(`collections/${action.drawer}/`))
+        .map(file => revisionFor(file) ?? -1));
+      return revision(right) - revision(left) || left.drawer.localeCompare(right.drawer);
+    });
+  if (collectionActions.length <= limit) return actions;
+  const first = actions.findIndex(action => action.kind === "collection-record");
+  const ranked = actions.filter(action => action.kind !== "collection-record");
+  ranked.splice(first, 0, ...collectionActions.slice(0, limit), {
+    kind: "more",
+    label: CREATION_COPY.more,
+    choice: CREATION_COPY.more,
+    revealActions: collectionActions.slice(limit)
+  });
+  return ranked;
 }
 
 function planAction(name, number, manifest, files) {
-  const target = manifest?.build?.plan;
-  const text = typeof target === "string" ? files.get(target) : undefined;
-  if (typeof text !== "string" || !/\.md$/i.test(target)) return { actions: [], reason: `Cannot add ${name}: this package has no declared writable plan file.` };
+  // v0.6 fixed the canonical paths: the build plan is always this file,
+  // and the manifest no longer carries a redirect.
+  const target = "05-build-plan.md";
+  const text = files.get(target);
+  if (typeof text !== "string") return { actions: [], reason: CREATION_COPY.cannotAddNoPlan(name) };
   const numbers = [...text.matchAll(/^#{1,6}\s+AT-(\d+)\b/gim)].map(match => Number(match[1]));
-  if (numbers.includes(number)) return { actions: [], reason: `Cannot add ${name}: ${name} already has a heading in ${target}.` };
+  if (numbers.includes(number)) return { actions: [], reason: CREATION_COPY.cannotAddExistingHeading(name, target) };
   const next = Math.max(0, ...numbers) + 1;
-  if (number !== next) return { actions: [], reason: `Cannot add ${name}: the next acceptance test must be AT-${next}.` };
+  if (number !== next) return { actions: [], reason: CREATION_COPY.cannotAddNextAcceptance(name, next) };
   const block = `## ${name.toUpperCase()} — Acceptance test
 
 \`\`\`test
@@ -195,31 +159,66 @@ function planAction(name, number, manifest, files) {
 \`\`\`
 
 Describe what this acceptance test proves.`;
-  return { actions: [{ kind: "acceptance-test", label: "Create acceptance test", target, apply: text => appendBlock(text, block), notice: `Added \`${name}\` to ${target}.` }] };
+  return { actions: [{ kind: "acceptance-test", label: CREATION_COPY.createAcceptanceTest, choice: CREATION_COPY.choices.identifier, target, apply: text => appendBlock(text, block), notice: CREATION_COPY.addedTo(name, target) }] };
 }
 
-export function classifyCreation(name, { files, manifest, openPath }) {
+export function classifyCreation(name, { files, folders, manifest, openPath }) {
+  const palette = PALETTE_NAME.exec(name);
+  if (palette) {
+    const text = files.get("manifest.json");
+    const document = typeof text === "string" ? parseJson(text) : undefined;
+    if (!document || Array.isArray(document) || typeof document !== "object") {
+      return { actions: [], reason: CREATION_COPY.cannotAddManifestObject(name) };
+    }
+    if (document.palette !== undefined && (!document.palette || Array.isArray(document.palette) || typeof document.palette !== "object")) {
+      return { actions: [], reason: CREATION_COPY.cannotAddPaletteObject(name) };
+    }
+    return { actions: [{
+      kind: "palette",
+      label: CREATION_COPY.createPalette,
+      choice: CREATION_COPY.choices.palette,
+      target: "manifest.json",
+      container: "palette",
+      createContainer: document.palette === undefined,
+      entryValue: [{ "new-color": "#000000" }],
+      operations: () => [
+        ...(document.palette === undefined ? [insertion("", "palette", {})] : []),
+        insertion("/palette", palette[1], [{ "new-color": "#000000" }])
+      ],
+      notice: CREATION_COPY.addedPalette(name)
+    }] };
+  }
+
   if (DOTTED_KEY.test(name)) {
+    const segments = name.split(".");
+    if (RESERVED_FIRST_SEGMENTS.has(segments[0]) || segments.some(segment => RESERVED_EXTENSIONS.has(segment)) || segments.every(segment => /^\d+$/.test(segment))) {
+      return { actions: [], reason: CREATION_COPY.cannotAddReserved(name) };
+    }
     const target = "tuning.json";
     const document = parseJson(files.get(target));
     const actions = [];
     if (document?.tunables && typeof document.tunables === "object" && !Array.isArray(document.tunables)) {
-      actions.push({ kind: "tunable", label: "Create tunable", target, container: "tunables", needsValue: true, notice: `Added \`${name}\` to tuning.json tunables.` });
+      actions.push({ kind: "tunable", label: CREATION_COPY.createTunable, choice: CREATION_COPY.choices.tunable, target, container: "tunables", needsValue: true,
+        operations: value => [insertion("/tunables", name, value)], notice: CREATION_COPY.addedTunable(name) });
     }
     if (document && typeof document === "object" && !Array.isArray(document)
       && (document.constants === undefined || (document.constants && typeof document.constants === "object" && !Array.isArray(document.constants)))) {
-      actions.push({ kind: "constant", label: "Create constant", target, container: "constants", createContainer: document.constants === undefined, needsValue: true, notice: `Added \`${name}\` to tuning.json constants.` });
+      actions.push({ kind: "constant", label: CREATION_COPY.createConstant, choice: CREATION_COPY.choices.constant, target, container: "constants", createContainer: document.constants === undefined, needsValue: true,
+        operations: value => [
+          ...(document.constants === undefined ? [insertion("", "constants", {})] : []),
+          insertion("/constants", name, value)
+        ], notice: CREATION_COPY.addedConstant(name) });
     }
-    return actions.length ? { actions } : { actions, reason: `Cannot add ${name}: tuning.json has no writable tunables or constants object.` };
+    return actions.length ? { actions } : { actions, reason: CREATION_COPY.cannotAddTuningObjects(name) };
   }
 
   const section = SECTION_NAME.exec(name);
   if (section) {
     const target = markdownTarget(files, section[1], openPath);
-    if (!target) return { actions: [], reason: `Cannot add ${name}: its Markdown target is not uniquely writable.` };
+    if (!target) return { actions: [], reason: CREATION_COPY.cannotAddMarkdownTarget(name) };
     const slug = section[2];
     const block = `## ${titleFromSlug(slug)} {#${slug}}`;
-    return { actions: [{ kind: "section", label: "Create section", target, apply: text => appendBlock(text, block), notice: `Added \`${name}\` to ${target}.` }] };
+    return { actions: [{ kind: "section", label: CREATION_COPY.createSection, choice: CREATION_COPY.choices.identifier, target, apply: text => appendBlock(text, block), notice: CREATION_COPY.addedTo(name, target) }] };
   }
 
   const acceptance = ACCEPTANCE_TEST.exec(name);
@@ -227,35 +226,55 @@ export function classifyCreation(name, { files, manifest, openPath }) {
 
   if (RULE.test(name)) {
     const target = markdownTarget(files, null, openPath);
-    if (!target) return { actions: [], reason: `Cannot add ${name}: no Markdown chapter is open.` };
-    return { actions: [{ kind: "rule", label: "Create rule", target, apply: text => appendBlock(text, `## ${name}`), notice: `Added \`${name}\` to ${target}.` }] };
+    if (!target) return { actions: [], reason: CREATION_COPY.cannotAddNoMarkdown(name) };
+    return { actions: [{ kind: "rule", label: CREATION_COPY.createRule, choice: CREATION_COPY.choices.identifier, target, apply: text => appendBlock(text, `## ${name}`), notice: CREATION_COPY.addedTo(name, target) }] };
   }
 
   const target = markdownTarget(files, null, openPath);
-  if (!target) return { actions: [], reason: `Cannot add ${name}: no Markdown chapter is open.` };
-  if (!CREATABLE_NAME.test(name)) return { actions: [], reason: `Cannot add ${name}: a name may contain only letters, numbers, dot, underscore, and hyphen.` };
+  if (!target) return { actions: [], reason: CREATION_COPY.cannotAddNoMarkdown(name) };
+  if (!CREATABLE_NAME.test(name)) return { actions: [], reason: CREATION_COPY.cannotAddNameShape(name) };
   const actions = [];
-  for (const collection of manifest?.content ?? []) {
-    if (!collection || typeof collection.id !== "string" || typeof collection.id_member !== "string") continue;
-    const catalog = catalogArray(collection, files);
-    if (!catalog || !matchesRecordIds(name, catalog.records, collection.id_member)) continue;
+  const descriptors = manifest?.descriptors;
+  const moods = descriptors?.mood;
+  if (DESCRIPTOR_ID.test(name)
+    && manifest?.opengdd === "0.6" && !Array.isArray(manifest) && typeof manifest === "object"
+    && (descriptors === undefined || (descriptors && !Array.isArray(descriptors) && typeof descriptors === "object"))
+    && (moods === undefined || Array.isArray(moods))) {
+    const stub = { id: name, intent: "Describe the intended mood.", anti: [{ description: "Not yet specified." }] };
     actions.push({
-      kind: "collection-record",
-      label: `Add ${collection.id} record`,
-      target: catalog.file,
-      container: catalog.member,
-      record: { [collection.id_member]: name },
-      notice: `Added \`${name}\` to ${catalog.file} ${catalog.member}.`
+      kind: "descriptor",
+      label: CREATION_COPY.createDescriptor,
+      choice: CREATION_COPY.choices.descriptor,
+      target: "manifest.json",
+      operations: () => descriptors === undefined
+        ? [insertion("", "descriptors", { mood: [stub] })]
+        : moods === undefined
+          ? [insertion("/descriptors", "mood", [stub])]
+          : [insertion("/descriptors/mood", "-", stub, { recordSpacing: true })],
+      notice: CREATION_COPY.addedDescriptor(name)
     });
   }
-  // This route writes a section carrying the name. When prose sub-files land
-  // in a later revision, the action can gain another writable home.
+  if (COLLECTION_RECORD_ID.test(name)) for (const drawer of collectionDrawers(files, folders)) {
+    const collectionTarget = `collections/${drawer}/${name}.json`;
+    if ([...files.keys(), ...(folders ?? [])].some(path => path.toLowerCase() === collectionTarget.toLowerCase())) continue;
+    actions.push({
+      kind: "collection-record",
+      drawer,
+      label: CREATION_COPY.addCollectionRecord(drawer),
+      choice: CREATION_COPY.addCollectionRecord(drawer),
+      target: collectionTarget,
+      create: collectionRecordText(files, drawer),
+      notice: CREATION_COPY.addedCollection(name, drawer)
+    });
+  }
   actions.push({
     kind: "section",
-    label: "Give it a section here",
+    label: CREATION_COPY.giveSectionHere,
+    choice: CREATION_COPY.choices.identifier,
     target,
     apply: text => appendBlock(text, `## ${name} {#${name}}`),
-    notice: `Gave \`${name}\` a section in ${target}.`
+    notice: CREATION_COPY.gaveSection(name, target)
   });
   return { actions };
 }
+import { CREATION_COPY } from "./copy/creation-copy.mjs";

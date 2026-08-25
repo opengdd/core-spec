@@ -1,34 +1,42 @@
 // Package analysis and conformance validation run here, off the thread that
 // paints keystrokes. The tool ships as static files with no build step, and a
 // worker gets no import map, so the page resolves the three module names and
-// posts the resolved URLs; everything this worker uses is imported from those.
+// posts the resolved URLs; everything else this worker uses is imported by
+// relative path, which needs no map.
 
 let analyzePackage;
 let validatePackage;
 let createFileMapHost;
 let schemas = null;
 const files = new Map();
+let folders = [];
+let withExplicitFolders;
+let collectionDrawerFolders;
 
 async function loadModules(urls) {
-  const [analysis, validation, host] = await Promise.all([
+  const [analysis, validation, host, folderHost] = await Promise.all([
     import(urls.analysis),
     import(urls.validation),
-    import(urls.fileMapHost)
+    import(urls.fileMapHost),
+    import("./folder-aware-host.mjs")
   ]);
   analyzePackage = analysis.analyzePackage;
   validatePackage = validation.validatePackage;
   createFileMapHost = host.createFileMapHost;
+  withExplicitFolders = folderHost.withExplicitFolders;
+  collectionDrawerFolders = folderHost.collectionDrawerFolders;
 }
 
-// Only what the page reads goes back: `documents` is the whole package over
-// again, the name index's helpers do not survive a structured clone, and
-// nothing in the page looks at `files` or `problems`.
+// The full documents map would send the package text over the worker boundary
+// again, while the page only needs one count per file.
 function analysisFor(revision) {
-  const result = analyzePackage(files);
+  const result = analyzePackage(files, { folders: collectionDrawerFolders(folders) });
   return {
     type: "analysis",
     revision,
     analysis: {
+      // Keep this rule aligned with authoring-view's on-page fallback.
+      wordCounts: Object.fromEntries([...result.documents].map(([file, text]) => [file, text.trim() ? text.trim().split(/\s+/u).length : 0])),
       definitionsByName: result.definitionsByName,
       nameIndex: result.nameIndex,
       anchors: result.anchors,
@@ -42,6 +50,7 @@ async function handle(message) {
   if (message.type === "files") {
     for (const path of message.removed) files.delete(path);
     for (const [path, value] of message.set) files.set(path, value);
+    folders = message.folders ?? [];
     return;
   }
   if (message.type === "schemas") {
@@ -51,7 +60,8 @@ async function handle(message) {
   if (message.type === "analyze") return postMessage(analysisFor(message.revision));
   if (message.type === "validate") {
     try {
-      const run = validatePackage(createFileMapHost(files, { schemas, bytes: false }), "/package");
+      const host = withExplicitFolders(createFileMapHost(files, { schemas, bytes: false }), folders);
+      const run = validatePackage(host, "/package");
       postMessage({ type: "validation", revision: message.revision, run });
     } catch (error) {
       // A validator crash is the page's to report, not this worker's to die of.

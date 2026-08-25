@@ -1,0 +1,18 @@
+{
+  "tunables": {
+    "snake.tick_seconds": 0.4,
+    "snake.speedup_every_apples": 5,
+    "snake.speedup_step_seconds": 0.025,
+    "snake.minimum_tick_seconds": 0.15
+  },
+  "constants": {
+    "garden.size": 13,
+    "snake.start_length": 3
+  },
+  "meta": {
+    "snake.tick_seconds": { "range": [0.3, 0.8] },
+    "snake.speedup_every_apples": { "range": [2, 12] },
+    "snake.speedup_step_seconds": { "range": [0.01, 0.05] },
+    "snake.minimum_tick_seconds": { "range": [0.1, 0.2] }
+  }
+}

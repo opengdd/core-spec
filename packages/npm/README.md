@@ -1,13 +1,20 @@
-# OpenGDD
+# opengdd
 
-OpenGDD is an open format for game design documents. Designers write in prose
-for creative control; structured data supports validation.
+The conformance validator for [OpenGDD](https://opengdd.org), an open
+format for game design documents written in prose and structured data.
 
-This package is a registry placeholder and contains no functional code. Read
-the working specification at [opengdd.org](https://opengdd.org/) or in the
-[core-spec repository](https://github.com/opengdd/core-spec).
+```
+npx opengdd validate .
+```
 
-- Steward: Starphase Lab
-- Contact: steward@opengdd.org
+Validates an OpenGDD package directory against the specification's
+mechanically testable requirements and reports errors and warnings,
+each with the specification section it enforces. Exit code 0 means no
+errors; warnings never fail a run. `--json` emits the report as one
+JSON object. `validate --build <opengdd-build.json> [<spec-dir>]`
+validates a build manifest instead.
 
-Licensed MIT.
+No dependencies. The specification, schemas, and everything else live
+at [opengdd.org](https://opengdd.org).
+
+License: MIT. Specification prose: CC-BY 4.0.

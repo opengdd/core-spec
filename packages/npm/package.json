@@ -1,26 +1,31 @@
 {
   "name": "opengdd",
-  "version": "0.0.0",
-  "description": "OpenGDD — an open format for game design documents. Registry placeholder; see opengdd.org.",
-  "license": "MIT",
-  "author": "Starphase Lab <steward@opengdd.org>",
-  "homepage": "https://opengdd.org/",
+  "version": "0.6.0",
+  "description": "Conformance validator for OpenGDD game design documents.",
+  "keywords": [
+    "opengdd",
+    "game-design",
+    "gdd",
+    "validator"
+  ],
+  "homepage": "https://opengdd.org",
+  "bugs": "https://github.com/opengdd/core-spec/issues",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/opengdd/core-spec.git"
   },
-  "bugs": {
-    "url": "https://github.com/opengdd/core-spec/issues"
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "opengdd": "./bin/opengdd.mjs"
   },
-  "keywords": [
-    "opengdd",
-    "gdd",
-    "game-design-document",
-    "game-design",
-    "specification"
-  ],
   "files": [
-    "README.md",
-    "LICENSE"
-  ]
+    "bin",
+    "lib",
+    "*.schema.json",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
 }

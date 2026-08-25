@@ -4,10 +4,14 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
-import { formatReport, validateBuildManifest, validatePackage } from "./validate-core.mjs";
+import { emitContractsBlock, formatReport, validateBuildManifest, validatePackage } from "./validate-core.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const USAGE = "node opengdd/conformance/validate.mjs [--json] <package-dir> | --build <opengdd-build.json> [<spec-dir>]";
+const USAGE = [
+  "node conformance/validate.mjs [--json] <package-dir>",
+  "node conformance/validate.mjs --build <opengdd-build.json> [<spec-dir>]",
+  "node conformance/validate.mjs --emit-contracts-block <package-dir>"
+].join("\n");
 
 export function createNodeHost() {
   return {
@@ -39,7 +43,7 @@ export function createNodeHost() {
     loadSchema: name => {
       const file = [
         path.resolve(HERE, "..", name),
-        path.resolve(HERE, "..", "schema", "core", "v0.5", name)
+        path.resolve(HERE, "..", "schema", "core", "v0.6", name)
       ].find(candidate => fs.existsSync(candidate));
       return file ? JSON.parse(fs.readFileSync(file, "utf8")) : undefined;
     }
@@ -59,8 +63,31 @@ function usage(jsonMode, message) {
 function main(args) {
   const jsonMode = args.includes("--json");
   const buildMode = args.includes("--build");
-  const positional = args.filter(arg => arg !== "--json" && arg !== "--build");
+  const emitMode = args.includes("--emit-contracts-block");
+  const positional = args.filter(arg => arg !== "--json" && arg !== "--build" && arg !== "--emit-contracts-block");
   const unknownOptions = positional.filter(arg => arg.startsWith("-"));
+  // SPEC §10.10: the generated block is machine-written, and this is the
+  // machine. It prints the canonical instantiation of a package's contracts —
+  // paste it over the block in the build plan and byte equality holds by
+  // construction. It writes nothing itself, so a bad regeneration is a diff.
+  if (emitMode) {
+    if (unknownOptions.length || buildMode || positional.length !== 1) {
+      usage(jsonMode, unknownOptions.length ? `unknown option: ${unknownOptions[0]}` : "--emit-contracts-block requires exactly one package directory");
+      return;
+    }
+    const run = emitContractsBlock(createNodeHost(), positional[0]);
+    if (run.block === undefined) {
+      console.error("the package declares no contract instance that could be instantiated");
+      process.exitCode = 1;
+      return;
+    }
+    // The block is a function of the surface, so a package that does not
+    // validate can still be instantiated — but its bytes are only as sound as
+    // the answers behind them, and that is worth saying out loud.
+    if (run.summary.errors) console.error(`note: the package reports ${run.summary.errors} validation error(s); the block below is the instantiation of what it currently declares`);
+    process.stdout.write(run.block);
+    return;
+  }
   if (buildMode) {
     if (unknownOptions.length || positional.length < 1 || positional.length > 2) {
       usage(jsonMode, unknownOptions.length ? `unknown option: ${unknownOptions[0]}` : "--build requires <opengdd-build.json> and an optional <spec-dir>");

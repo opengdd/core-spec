@@ -1,4 +1,4 @@
-import { isObject, markdownSlug, unfencedLines } from "../../../opengdd/conformance/package-syntax.mjs";
+import { isObject, markdownSlug, unfencedLines, directionFenceContinuationLines } from "../../../opengdd/conformance/package-syntax.mjs";
 
 const DOTTED_KEY = /^[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+$/;
 const FILE_ANCHOR = /^(?:[^`\s#]+\/)*[^`\s#]+\.(?:json|md|txt|csv|tsv|ya?ml)(?:#[A-Za-z0-9._-]+)?$/i;
@@ -101,6 +101,62 @@ function addManifestNames(index, text, manifest) {
   }
 }
 
+// SPEC §3/§4 — the manifest's `palette` map. This is the format's first citable
+// family resolved from manifest.json rather than direction.json, so it is read
+// here beside the manifest's other names rather than in addDirectionNames.
+//
+// The names added mirror conformance/validate-core.mjs's resolvePaletteReference
+// exactly: `palette.<key>` names a palette, `palette.<key>.<name>` names one
+// color in one, and the two-pass order tries the whole reference text as a
+// palette key BEFORE splitting its last segment off as a color name. Palette
+// keys are dotted (a package may declare `floor.lit`), so the order is what
+// keeps `palette.floor.lit` naming the palette instead of a `lit` color of a
+// `floor` palette. Every palette key is therefore indexed first, and a color
+// name is skipped when `<key>.<name>` is itself a declared key — the validator
+// forbids that collision at declare time, but the editor must not invent an
+// ambiguity where resolution has a fixed answer.
+function addPaletteNames(index, text, manifest) {
+  if (!isObject(manifest?.palette)) return;
+  const palettes = Object.entries(manifest.palette).filter(([, entries]) => Array.isArray(entries));
+  const declaredKeys = new Set(palettes.map(([key]) => key));
+  let cursor = Math.max(text.indexOf('"palette"'), 0);
+  for (const [key, entries] of palettes) {
+    const keyRange = jsonKeyRange(text, key, Math.max(cursor, 0));
+    cursor = text.indexOf(JSON.stringify(key), Math.max(cursor, 0)) + 1;
+    index.add({
+      name: `palette.${key}`,
+      kind: "palette",
+      value: entries,
+      file: "manifest.json",
+      range: keyRange,
+      detail: "manifest palette"
+    });
+    const named = new Set();
+    for (const entry of entries) {
+      // A bare hex string is read, not pointed at: only a one-key object names
+      // a color, and only a named color is citable.
+      if (!isObject(entry)) continue;
+      const keys = Object.keys(entry);
+      if (keys.length !== 1) continue;
+      const [name] = keys;
+      if (typeof entry[name] !== "string") continue;
+      if (named.has(name)) continue;
+      named.add(name);
+      if (declaredKeys.has(`${key}.${name}`)) continue;
+      const range = jsonKeyRange(text, name, Math.max(cursor, 0));
+      cursor = text.indexOf(JSON.stringify(name), Math.max(cursor, 0)) + 1;
+      index.add({
+        name: `palette.${key}.${name}`,
+        kind: "color",
+        value: entry[name],
+        file: "manifest.json",
+        range,
+        detail: `palette.${key} color`
+      });
+    }
+  }
+}
+
 function addDirectionNames(index, text, direction) {
   if (!isObject(direction)) return;
   const addEntries = (prefix, entries) => {
@@ -176,47 +232,52 @@ function parsedDocument(documents, relative) {
   catch { return undefined; }
 }
 
-function addCollectionRecord(index, collection, relative, text, record, cursor) {
-  const id = record[collection.id_member];
-  if (typeof id !== "string") return cursor;
-  const range = jsonKeyRange(text, id, Math.max(cursor, 0));
-  index.add({
-    name: id,
-    kind: "collection-record",
-    file: relative,
-    range,
-    detail: `${collection.id} record`
-  });
-  return text.indexOf(JSON.stringify(id), Math.max(cursor, 0)) + 1;
-}
-
-function addCollectionNames(index, documents, manifest) {
-  if (!Array.isArray(manifest?.content)) return;
-  for (const collection of manifest.content) {
-    if (!isObject(collection) || typeof collection.id !== "string" || typeof collection.id_member !== "string" || !isObject(collection.source)) continue;
-    if (collection.source.kind === "catalog" && typeof collection.source.file === "string") {
-      const relative = collection.source.file;
-      const parsed = parsedDocument(documents, relative);
-      if (!parsed || !isObject(parsed.value)) continue;
-      let cursor = 0;
-      for (const [member, records] of Object.entries(parsed.value)) {
-        if (!Array.isArray(records)) continue;
-        cursor = parsed.text.indexOf(JSON.stringify(member), Math.max(cursor, 0));
-        for (const record of records) {
-          if (isObject(record)) cursor = addCollectionRecord(index, collection, relative, parsed.text, record, cursor);
-        }
-      }
+// Decision 32: collections declare by presence. Each collections/<drawer>/
+// subdirectory is one collection, each record is one JSON file, and the
+// filename minus .json is the record's id — so a record name's definition
+// site is its own file, at the top, and no manifest is consulted.
+function addCollectionNames(index, documents, folders) {
+  const recordPattern = /^collections\/([a-z0-9]+(?:-[a-z0-9]+)*)\/([a-z0-9]+(?:-[a-z0-9]+)*)\.json$/;
+  const labelPattern = /^collections\/([a-z0-9]+(?:-[a-z0-9]+)*)\/_collection\.json$/;
+  const folderPattern = /^collections\/([a-z0-9]+(?:-[a-z0-9]+)*)\/?$/;
+  const drawerFiles = new Map();
+  const drawersWithRecords = new Set();
+  for (const relative of [...documents.keys()].sort()) {
+    const label = labelPattern.exec(relative);
+    if (label) {
+      drawerFiles.set(label[1], relative);
       continue;
     }
-    if (collection.source.kind !== "items" || typeof collection.source.directory !== "string" || !Array.isArray(collection.source.members)) continue;
-    const directory = collection.source.directory.replace(/\/+$/, "");
-    for (const member of collection.source.members) {
-      if (typeof member !== "string") continue;
-      const relative = directory ? `${directory}/${member}` : member;
-      const parsed = parsedDocument(documents, relative);
-      if (!parsed || !isObject(parsed.value)) continue;
-      addCollectionRecord(index, collection, relative, parsed.text, parsed.value, 0);
-    }
+    const record = recordPattern.exec(relative);
+    if (!record) continue;
+    drawersWithRecords.add(record[1]);
+    if (!drawerFiles.has(record[1])) drawerFiles.set(record[1], relative);
+    index.add({
+      name: record[2],
+      kind: "collection-record",
+      file: relative,
+      range: zeroRange(),
+      detail: `${record[1]} record`
+    });
+    index.add({
+      name: `collections.${record[1]}.${record[2]}`,
+      kind: "collection-record",
+      file: relative,
+      range: zeroRange(),
+      detail: `${record[1]} record`
+    });
+  }
+  for (const folder of [...folders].map(String).sort()) {
+    const match = folderPattern.exec(folder.replaceAll("\\", "/"));
+    if (!match || drawersWithRecords.has(match[1])) continue;
+    drawerFiles.set(match[1], `collections/${match[1]}/`);
+  }
+  for (const [drawer, file] of drawerFiles) {
+    const range = file.endsWith("/")
+      ? { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } }
+      : zeroRange();
+    index.add({ name: drawer, kind: "collection", file, range, detail: "collection drawer" });
+    index.add({ name: `collections.${drawer}`, kind: "collection", file, range, detail: "collection drawer" });
   }
 }
 
@@ -239,7 +300,15 @@ function addPersonalizationNames(index, documents) {
 }
 
 export function resolveAnchor(definitionsByName, name) {
-  const definitions = definitionsByName.get(name) ?? [];
+  // SPEC §1b lets prose cite into record fields without making fields a
+  // separate name kind. The stable address is the record, so longer
+  // collection citations deliberately stop at their three-segment prefix.
+  const segments = name.split(".");
+  const resolvedName = segments[0] === "collections" && segments.length >= 4
+    && definitionsByName.has(segments.slice(0, 3).join("."))
+    ? segments.slice(0, 3).join(".")
+    : name;
+  const definitions = definitionsByName.get(resolvedName) ?? [];
   if (definitions.length === 0) return { classification: "unknown", name, definitions: [] };
   if (definitions.length === 1) {
     const { identity, ...definition } = definitions[0];
@@ -261,7 +330,8 @@ function isAnchorCandidate(name, definitionsByName, namespaces) {
 
 function collectAnchors(relative, text, definitionsByName, namespaces) {
   const anchors = [];
-  for (const item of unfencedLines(text)) {
+  const proseLines = [...unfencedLines(text), ...directionFenceContinuationLines(text)];
+  for (const item of proseLines) {
     for (const match of item.text.matchAll(/`([^`\r\n]+)`/g)) {
       const name = match[1];
       if (!isAnchorCandidate(name, definitionsByName, namespaces)) continue;
@@ -276,7 +346,7 @@ function collectAnchors(relative, text, definitionsByName, namespaces) {
   return anchors;
 }
 
-export function analyzePackage(fileMap) {
+export function analyzePackage(fileMap, { folders = [] } = {}) {
   const problems = [];
   const index = makeNameIndex();
   const files = [...fileMap.keys()].sort((left, right) => left.localeCompare(right));
@@ -296,16 +366,27 @@ export function analyzePackage(fileMap) {
   if (tuningText !== undefined) addJsonNames(index, "tuning.json", tuningText, parseJson("tuning.json", tuningText, problems), problems);
   const manifestText = documents.get("manifest.json");
   const manifest = manifestText === undefined ? undefined : parseJson("manifest.json", manifestText, problems);
-  if (manifestText !== undefined) addManifestNames(index, manifestText, manifest);
+  if (manifestText !== undefined) {
+    addManifestNames(index, manifestText, manifest);
+    addPaletteNames(index, manifestText, manifest);
+  }
   const directionText = documents.get("direction.json");
   if (directionText !== undefined) addDirectionNames(index, directionText, parseJson("direction.json", directionText, problems));
-  addCollectionNames(index, documents, manifest);
+  addCollectionNames(index, documents, folders);
   addPersonalizationNames(index, documents);
 
   const namespaces = new Set();
   for (const { name, definitions } of index.entries()) {
     if (definitions.some(item => item.kind === "tunable" || item.kind === "constant")) namespaces.add(name.split(".", 1)[0]);
   }
+  // `palette` is a reserved first segment format-wide (SPEC §4), not a namespace
+  // a package opts into by declaring one. A `palette.*` citation is therefore
+  // always an anchor: it resolves against the manifest map or it dangles, which
+  // is the verdict the core validator reports for the same token.
+  namespaces.add("palette");
+  // Like palette, collections is reserved format-wide: a dangling prose
+  // citation must be collected so the language tools can report it.
+  namespaces.add("collections");
   const anchors = [];
   for (const [relative, text] of documents) {
     if (/\.md$/i.test(relative)) anchors.push(...collectAnchors(relative, text, index.byName, namespaces));

@@ -1,0 +1,58 @@
+export const WORKBENCH_COPY = Object.freeze({
+  explorer: "File explorer",
+  prose: "Prose editor",
+  outline: "Outline",
+  inspector: "Inspector",
+  noPackageFiles: "No package files yet",
+  createMinimalPackage: "Create a minimal package",
+  nothingDeclared: "Nothing declared yet",
+  createIdentifier: "Create an identifier",
+  nothingSelected: "Nothing selected",
+  chooseOutlineItem: "Choose something in the outline",
+  collapsePanel: label => `Collapse ${label.toLowerCase()}`,
+  resizePanel: label => `Resize ${label}`,
+  collapsedColumns: "Collapsed columns",
+  openExplorer: "Open file explorer",
+  openOutline: "Open outline",
+  openInspector: "Open inspector",
+  persistenceDenied: "This browser may clear this draft when space is low. Export a ZIP to keep a copy.",
+  theme: "Theme",
+  themes: Object.freeze(["Light", "Dark", "System"]),
+  packageStatus: "Package status",
+  // provisional [for Kazimir]
+  errorsPending: "Errors: —",
+  // provisional [for Kazimir]
+  warningsPending: "Warnings: —",
+  // provisional [for Kazimir]
+  validationChecking: "checking",
+  // provisional [for Kazimir]
+  validationUnavailable: "unavailable",
+  // provisional [for Kazimir]
+  validationStopped: "stopped",
+  // provisional [for Kazimir]
+  validationDone: "done",
+  errors: count => `Errors: ${count}`,
+  warnings: count => `Warnings: ${count}`,
+  words: count => `Words: ${count}`,
+  declarations: count => `Declarations: ${count}`,
+  checkingInWorker: "Checking in worker",
+  checkingOnPage: "Checking on this page",
+  validationStatus: state => `Validation: ${state}`,
+  storageStatus: state => `Storage: ${state}`,
+  storageProtected: "Browser storage protected",
+  storageMayBeCleared: "Browser storage may be cleared",
+  notSaved: "Not saved",
+  // provisional [for Kazimir]
+  version: (tool, spec) => `v${tool} · OpenGDD ${spec}`,
+  undoHistory: "Undo history",
+  undoAction: action => `Undo ${action}`,
+  nothingToUndo: "Nothing to undo",
+  undoHelp: "Undo reaches back 200 actions. Continuous typing may count as one action; older work is still safe in the file.",
+  newFile: "New file",
+  newFolder: "New folder",
+  coldNew: "New package from a minimal template",
+  coldExample: "Open the Tic-Tac-Toe example",
+  chooseHowToBegin: "Choose how to begin.",
+  narrowTitle: "This screen is too narrow for the workbench",
+  narrowAction: "Make the window at least 760 pixels wide"
+});

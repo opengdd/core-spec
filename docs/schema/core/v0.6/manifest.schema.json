@@ -1,0 +1,366 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengdd.org/schema/core/v0.6/manifest.schema.json",
+  "title": "OpenGDD v0.6 manifest",
+  "type": "object",
+  "required": ["opengdd", "id", "version", "title", "designer", "target", "build"],
+  "additionalProperties": false,
+  "properties": {
+    "opengdd": { "const": "0.6" },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "Package id, kebab-case. Catalogues may impose uniqueness within their own declared domain."
+    },
+    "version": { "$ref": "#/$defs/specVersion" },
+    "title": { "type": "string", "minLength": 1 },
+    "designer": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "handle": { "type": "string", "description": "Registry handle" },
+        "contact": { "type": "string" }
+      }
+    },
+    "target": {
+      "type": "object",
+      "required": ["platform", "genre"],
+      "additionalProperties": false,
+      "properties": {
+        "platform": { "enum": ["web-2d", "web-3d"] },
+        "genre": { "type": "string", "minLength": 1 },
+        "session_minutes": { "type": "number", "minimum": 0 },
+        "audience": { "type": "string" }
+      }
+    },
+    "build": {
+      "type": "object",
+      "required": ["chapters"],
+      "additionalProperties": false,
+      "properties": {
+        "chapters": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/packagePath" },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "personalization": { "$ref": "#/$defs/packagePath" },
+        "direction": {
+          "$ref": "#/$defs/packagePath",
+          "description": "Path to direction.json (SPEC 9). MUST be declared exactly when 04-presentation.md carries a direction block, and MUST NOT be declared otherwise (validator-level cross-check)."
+        }
+      }
+    },
+    "graphs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/graphEdgeSet" },
+      "uniqueItems": true,
+      "$comment": "Edge-set-id uniqueness, drawer resolution, and predicate satisfaction are validator-level checks (SPEC 1c).",
+      "description": "Declared graph edge sets over collections/ drawers (SPEC 1c)"
+    },
+"ruleset_state": { "$ref": "#/$defs/rulesetState" },
+    "palette": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/$defs/paletteKey" },
+      "additionalProperties": { "$ref": "#/$defs/palette" },
+      "$comment": "Name uniqueness within a palette, the declare-time collision rule (no palette key equals another palette's key plus one of that palette's color names), reference resolution, and the unreached-palette warning are validator-level checks beyond JSON Schema (SPEC 3 and SPEC 4).",
+      "description": "The package's named color sets (SPEC 3), keyed by palette key and citable in prose as palette.<palette-key> or palette.<palette-key>.<color-name>. Optional and independent of the direction block: a package MAY declare palettes with no build.direction."
+    },
+    "descriptors": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mood": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/moodDescriptor" }
+        }
+      },
+      "$comment": "Only 'mood' is a populated descriptor family in v0.6 (SPEC 8/8a). character, cutscene, storyboard, and space-atmosphere are named-but-empty candidate-family chairs and MUST NOT appear as keys here until a future revision admits them; additionalProperties:false enforces that.",
+      "description": "Named descriptor families (SPEC 8). Descriptor-id uniqueness within a family is a validator-level check."
+    },
+    "commerce": {
+      "type": "object",
+      "required": ["license", "split"],
+      "additionalProperties": false,
+      "properties": {
+        "license": { "enum": ["opengdd-share-v0"] },
+        "split": {
+          "type": "object",
+          "required": ["designer", "builder"],
+          "additionalProperties": false,
+          "properties": {
+            "designer": { "type": "number", "minimum": 0, "maximum": 100 },
+            "builder": { "type": "number", "minimum": 0, "maximum": 100 }
+          },
+          "description": "Percentages; validator must additionally check they sum to 100"
+        },
+        "derived_from": {
+          "type": "object",
+          "required": ["id", "version"],
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+            },
+            "version": { "$ref": "#/$defs/specVersion" }
+          }
+        }
+      },
+      "description": "Optional commerce metadata. Publication or commerce profiles may impose additional requirements outside core package conformance."
+    }
+  },
+  "$defs": {
+    "specVersion": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$",
+      "description": "Design-spec version: numeric MAJOR.MINOR.PATCH with no leading zero except 0 and no prerelease or build suffix"
+    },
+    "kebabId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "sha256Hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "mediaFile": {
+      "type": "object",
+      "required": ["path", "license", "hash", "format"],
+      "additionalProperties": false,
+      "properties": {
+        "path": { "$ref": "#/$defs/packagePath" },
+        "license": { "type": "string", "minLength": 1 },
+        "hash": { "$ref": "#/$defs/sha256Hash" },
+        "format": { "enum": ["png", "jpg", "jpeg", "webp"] }
+      },
+      "$comment": "SPEC 8a media packaging: license presence (not truth), hash pin, and format allowlist. Byte-signature-matches-declared-format is a required validator-level check. v0.6 defines no per-file size cap, so none is encoded here.",
+      "description": "One package-relative media file attached to a reference or anti-reference (SPEC 8a/9.3)"
+    },
+    "annotatedReference": {
+      "type": "object",
+      "required": ["description", "borrows"],
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string", "minLength": 1 },
+        "borrows": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "media": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/mediaFile" }
+        }
+      },
+      "description": "SPEC 8a/9.3 annotated reference: every entry MUST name the borrowed property"
+    },
+    "antiReference": {
+      "type": "object",
+      "required": ["description"],
+      "additionalProperties": false,
+      "properties": {
+        "description": { "type": "string", "minLength": 1 },
+        "observable": { "$ref": "#/$defs/observableCriteria" },
+        "media": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/mediaFile" }
+        }
+      },
+      "description": "SPEC 8a mood-descriptor anti-reference. An anti-reference MAY attach a labeled 'not this' board, matching §8a's normative media rule for references and anti-references. No class field appears here: a mood descriptor's audit class is derived at the descriptor level (SPEC 9.2), unlike §9.4's direction-block anti entries."
+    },
+    "observableCriteria": {
+      "type": "object",
+      "required": ["criteria"],
+      "additionalProperties": false,
+      "properties": {
+        "criteria": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Prose statement of the mechanical test a ban states (SPEC 9.4)"
+        }
+      }
+    },
+    "paletteKey": {
+      "type": "string",
+      "pattern": "^(?!(?:json|md)(?:\\.|$))(?=[a-z0-9-]*[a-z])[a-z0-9]+(?:-[a-z0-9]+)*(?:\\.(?!(?:json|md)(?:\\.|$))(?=[a-z0-9-]*[a-z])[a-z0-9]+(?:-[a-z0-9]+)*)*$",
+      "description": "SPEC 3 palette key: one or more dot-separated segments, each kebab-case, each carrying at least one letter, and none spelled json or md. The dots are spelling, not structure; single-segment keys are legal. The letter rule is per segment, so an index-lookalike such as palette.enemies.fire.2 can never be spelled as a key."
+    },
+    "paletteColorName": {
+      "type": "string",
+      "pattern": "^(?=[a-z0-9-]*[a-z])[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "description": "SPEC 3 color name: dot-free kebab-case carrying at least one letter, unique within its palette (uniqueness is a validator-level check). A color is named only when something needs to point at it."
+    },
+    "hexColor": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{6}$",
+      "description": "SPEC 3 color literal: # plus exactly six hexadecimal digits, either case. Three-digit shorthand is invalid. Nothing in the format turns on the case of a hex's digits, and no tool may normalize the authored spelling."
+    },
+    "paletteEntry": {
+      "oneOf": [
+        { "$ref": "#/$defs/hexColor" },
+        {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 1,
+          "propertyNames": { "$ref": "#/$defs/paletteColorName" },
+          "additionalProperties": { "$ref": "#/$defs/hexColor" }
+        }
+      ],
+      "description": "SPEC 3 palette entry: either a bare #RRGGBB string — the paste-from-any-palette-tool form, read but not pointed at — or a one-key object whose single key is the color's name and whose value is a #RRGGBB string. The enumeration is closed: a zero-key object, a two-key object, a number, a Boolean, a null, and an array are each a failure."
+    },
+    "palette": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/paletteEntry" },
+      "description": "SPEC 3 palette: an ordered, non-empty array of palette entries with no upper bound. Ordering carries no normative semantics, and two entries MAY carry the same hex — a name is a citation handle, not a claim of distinctness."
+    },
+    "moodBehavior": {
+      "type": "object",
+      "required": ["trigger", "response"],
+      "additionalProperties": false,
+      "properties": {
+        "trigger": { "type": "string", "minLength": 1 },
+        "response": { "enum": ["this mood becomes active", "this mood becomes inactive"] },
+        "timing": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "max_latency_ms": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        }
+      },
+      "description": "SPEC 8a minimal reactivity rule: onset/offset only"
+    },
+    "moodDescriptor": {
+      "type": "object",
+      "required": ["id", "intent", "anti"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/kebabId" },
+        "intent": { "type": "string", "minLength": 1 },
+        "references": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/annotatedReference" }
+        },
+        "anti": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/antiReference" }
+        },
+        "palette": {
+          "$ref": "#/$defs/paletteKey",
+          "description": "SPEC 8a: optional, the bare key of one declared palette — \"enemies.fire\", never \"palette.enemies.fire\" — following the format's bare-key convention for same-file JSON cross-references. It is resolved by direct lookup in the manifest's palette map, never by the two-pass citation order, and a value naming no declared palette is a hard failure (validator-level). A mood carries no per-color tolerance or scope: that machinery has one home, constraints.colors."
+        },
+        "behaviors": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/moodBehavior" }
+        }
+      }
+    },
+    "graphEdgeSet": {
+      "type": "object",
+      "required": ["id", "edges"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/kebabId" },
+        "edges": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["from", "field", "to"],
+            "additionalProperties": false,
+            "properties": {
+              "from": {
+                "type": "object",
+                "required": ["collection"],
+                "additionalProperties": false,
+                "properties": { "collection": { "$ref": "#/$defs/kebabId" } }
+              },
+              "field": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Record field name or JSON Pointer carrying target ids"
+              },
+              "to": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "object",
+                  "required": ["collection"],
+                  "additionalProperties": false,
+                  "properties": { "collection": { "$ref": "#/$defs/kebabId" } }
+                }
+              },
+              "discriminator": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Required when a site's target collection varies per record"
+              },
+              "discriminator_map": {
+                "type": "object",
+                "minProperties": 1,
+                "additionalProperties": { "$ref": "#/$defs/kebabId" },
+                "description": "Maps discriminator values to target collection ids when values are domain vocabulary rather than collection ids"
+              }
+            }
+          }
+        },
+        "inverse": {
+          "type": "object",
+          "required": ["field"],
+          "additionalProperties": false,
+          "properties": {
+            "field": { "type": "string", "minLength": 1 }
+          },
+          "description": "Back-pointer field on target records, for reciprocity checks"
+        }
+      }
+    },
+"rulesetState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rulesets"],
+      "properties": {
+        "rulesets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "$ref": "#/$defs/kebabId" },
+              "initial": { "type": "boolean" }
+            }
+          },
+          "$comment": "Ruleset-id uniqueness and the exactly-one-initial rule are validator-level checks (SPEC 2c)."
+        }
+      }
+    },
+    "packagePath": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Package-relative path that remains inside the package after normalization"
+    },
+    "tuningRef": {
+      "type": "object",
+      "required": ["ref"],
+      "additionalProperties": false,
+      "properties": {
+        "ref": { "type": "string", "pattern": "^tuning:[A-Za-z0-9_.-]+$" }
+      }
+    }
+  }
+}

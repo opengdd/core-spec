@@ -11,7 +11,7 @@ A hardened specification has evidence that its published text and data—not
 shared private context—are sufficient to produce faithful implementations.
 At least two builders start from the same specification package, produce
 separately certified builds, and agree on the document's resolved numeric
-surfaces.
+values.
 
 Hardening is evidence about the document. It is not a promise that every
 future build will be correct, visually identical, or certified.
@@ -27,16 +27,17 @@ future build will be correct, visually identical, or certified.
    verdict on its own build.
 4. **Independent re-verification.** Reported test runs, hashes, and checkpoint
    counts are reproduced rather than accepted as assertions.
-5. **Varied review surface.** Across rounds, audits examine engine fidelity,
-   test-oracle strength, serialization and hash discipline, and presentation
-   so that repeated verdicts do not come from repeating one narrow check.
+5. **Varied review area.** Across rounds, audits examine engine fidelity,
+   the strength of each test's check, serialization and hash discipline, and
+   presentation, so that repeated verdicts do not come from repeating one
+   narrow check.
 
 ## The audit loop
 
 Each build goes through the certification protocol:
 
 1. An auditor derives obligations from the specification and its fenced
-   `verification` descriptors, then re-runs the relevant evidence.
+   `test` blocks, then re-runs the build's `evidence` record.
 2. The verdict is `certify`, `certify-with-notes`, or `do-not-certify`.
    A negative verdict is a normal result that identifies work still needed.
 3. The builder remediates findings. A later round checks both those changes
@@ -51,7 +52,7 @@ snapshot—`tunables` and Fixed `constants`—using the canonical serialization 
 agree exactly. A divergence is evidence of ambiguity and routes back to the
 designer; it is not resolved by choosing a preferred implementation.
 
-Aesthetic and presentational surfaces are excluded from byte-exact agreement
+Aesthetic and presentational areas are excluded from byte-exact agreement
 unless the specification explicitly pins them through a certifiable
 mechanism. OpenGDD transmits creative direction while allowing faithful
 implementations to interpret that direction differently.
@@ -69,6 +70,6 @@ it exposes a reusable format gap, it becomes input to a later OpenGDD revision.
 ## Reporting status
 
 A public hardening claim should name the specification version, the qualifying
-builds, their certification evidence, the comparison surface, and any accepted
+builds, their `evidence` records, the comparison area, and any accepted
 notes. If organizational or implementation independence is limited, disclose
 that limitation alongside the claim rather than hiding it in private records.

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengdd.org/schema/core/v0.6/collection.schema.json",
+  "title": "OpenGDD v0.6 drawer label (_collection.json)",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "record": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      },
+      "$comment": "The optional record schema, in the closed field grammar SPEC 10.5 and 1b share: type (number, integer, string, grid), required or when (row domain), options, pattern, unique, description. The grammar's own rules are validator-level checks; with a schema present every record in the drawer is validated against it.",
+      "description": "Optional record schema; field name to field shape",
+      "patternProperties": {
+        "^_": {}
+      }
+    }
+  },
+  "$comment": "The label is optional and appears only when it has something to say (decision 33). record is its one field; a drawer with no label holds free-form designer data.",
+  "patternProperties": {
+    "^_": {}
+  }
+}

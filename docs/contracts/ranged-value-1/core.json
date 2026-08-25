@@ -1,0 +1,818 @@
+{
+  "format": "opengdd-contract-core-1",
+  "id": "ranged-value",
+  "version": 1,
+  "origin": {
+    "author": "opengdd core-spec workbench",
+    "status": "draft-unpublished"
+  },
+  "summary": "A bounded number with named thresholds: the decisions behind every health bar, stamina meter, heat gauge, or currency floor, written down once.",
+  "mechanism": [
+    "The pool holds one number, its value, with declared limits min and max. A limit constrains the value only as far as its own effect policy says; under unbounded it is a named landmark, not a limit.",
+    "The value changes only through deltas: signed numbers applied by single events. A delta applies as one step — the value before and the value after are observable, a partially applied value never is. The raw pre-correction value is not hidden: under raw-result the pool's own threshold tests read it, and a game may expose it as a declared observable.",
+    "Deltas come in two kinds. An effect is imposed: the pool is not asked, and the policy of the limit the delta would leave — at-max-effect above, at-min-effect below — decides what happens. A cost is voluntary: an actor proposes to spend a positive amount downward, and insufficient-cost decides whether the spend and its action proceed.",
+    "A threshold is a named value inside [min, max] with a direction. A crossing happens when one delta takes the value from not-reached to reached in that direction, where reached is defined by boundary-comparison.",
+    "A crossing is reported as a named event carrying the threshold id and the value before and after. What the game does with it is game prose; how often it fires is the row's own refire answer."
+  ],
+  "decisions": [
+    {
+      "flag": "boundary-comparison",
+      "section": "Thresholds and limits",
+      "question": "When the value lands exactly on a line — a threshold, or min or max — does that count as reaching it?",
+      "rationale": "Every check in this contract asks whether a value has been reached; without an answer there are no defined crossings. In practice, counting the exact landing is near-universal.",
+      "default_guidance": "inclusive",
+      "options": [
+        {
+          "id": "inclusive",
+          "meaning": "Landing exactly on the line counts. If a threshold sits at 25, dropping to exactly 25 reaches it; filling to exactly max counts as full.",
+          "semantics": "A threshold is reached when the value is at or past it in the threshold's direction: for a rising threshold at t, value >= t; for a falling one, value <= t. A limit (min or max) is met when the value equals it."
+        },
+        {
+          "id": "exclusive",
+          "meaning": "Exactly on the line is not there yet — only strictly past it counts. A value resting right on a threshold has not reached it.",
+          "semantics": "A threshold or limit is reached only when the value is strictly past it in its direction: rising means value > t, falling means value < t. A value resting exactly on a threshold, min, or max has not reached it.",
+          "rationale": "Rare in practice, and it changes which values fire a threshold sitting exactly on min or max — answer the overshoot question with this one in mind."
+        }
+      ]
+    },
+    {
+      "flag": "threshold-checks-read",
+      "section": "Thresholds and limits",
+      "question": "When a change overshoots min or max, do threshold checks read the number the player ends up seeing, or the raw result from before it was pulled back into range?",
+      "rationale": "An overshooting change produces two candidate numbers to check — the raw result and the corrected one — and codebases routinely check both ways inside one game without noticing, so this question deliberately offers no default. The difference is visible: with exclusive counting and an empty-pool threshold at min, one order fires the empty event on an overshooting hit and the other never does.",
+      "options": [
+        {
+          "id": "final-value",
+          "meaning": "Checks read the number the player sees. A hit that would land at −20 shows 0, and every threshold check reads that 0.",
+          "semantics": "Apply the delta, bring the result into range as the limit's effect answer directs, and test every threshold against that final value. The value tested is always a value the pool holds."
+        },
+        {
+          "id": "raw-result",
+          "meaning": "Checks read the raw result first — that −20 — and only then does the value snap back into range. Rules can react to how far past the limit the hit went.",
+          "semantics": "Apply the delta, test every threshold against the raw post-delta value even when it lies outside the range, then bring the value into range. The value tested may be a value the pool never holds."
+        }
+      ]
+    },
+    {
+      "flag": "at-max-effect",
+      "section": "Effects at the limits",
+      "question": "When a gain would push the value past max, what happens?",
+      "rationale": "The range is the mechanism: a pool with no answer for changes that would leave it is the silent-clamp hole this contract exists to close. A pool with no real ceiling answers unbounded — a recorded decision, not a silence.",
+      "options": [
+        {
+          "id": "clamp",
+          "meaning": "The value stops at max. The extra is thrown away — nothing is told about it, and nothing else happens.",
+          "semantics": "The value saturates at max. The excess is discarded, reported to no one, and carries no further consequence from this contract; the event otherwise applies in full."
+        },
+        {
+          "id": "reject-delta",
+          "meaning": "The gain doesn't happen at all; the value stays put.",
+          "semantics": "The delta is not applied at all and the value is unchanged. Whether the causing event has consequences elsewhere is outside this contract."
+        },
+        {
+          "id": "return-remainder",
+          "meaning": "The value fills to max, and the part that didn't fit is handed back to whatever caused it — yours to use, not silently lost.",
+          "semantics": "The delta applies up to max, the value ends exactly at max, and the excess is reported back to the source of the causing event as a value. What the source does with it is game prose. The one observable difference from clamp: there the excess is destroyed and nobody is told; here the caller is handed it and becomes responsible for it."
+        },
+        {
+          "id": "unbounded",
+          "meaning": "No ceiling. The value keeps climbing past max; max stays a marked line thresholds can sit on.",
+          "semantics": "max does not constrain the value upward: the delta applies in full and the result is stored, even above max. max stays declared and citable — thresholds may sit at or below it and are tested normally — but it is a landmark, not a ceiling. at-min-effect is answered independently."
+        }
+      ]
+    },
+    {
+      "flag": "at-min-effect",
+      "section": "Effects at the limits",
+      "question": "When a loss would drag the value below min, what happens?",
+      "rationale": "Same reason as the max question: an unanswered floor is the silent-clamp hole, and the empty-pool edge is where real implementations diverge most.",
+      "options": [
+        {
+          "id": "clamp",
+          "meaning": "The value stops at min. The overkill is thrown away — nothing is told about it, and nothing else happens.",
+          "semantics": "The value saturates at min. The excess is discarded, reported to no one, and carries no further consequence from this contract; the event otherwise applies in full."
+        },
+        {
+          "id": "reject-delta",
+          "meaning": "The loss doesn't happen at all; the value stays put.",
+          "semantics": "The delta is not applied at all and the value is unchanged. Whether the causing event has consequences elsewhere is outside this contract."
+        },
+        {
+          "id": "unbounded",
+          "meaning": "No floor. The value keeps falling below min, and your rules may read how far it went.",
+          "semantics": "min does not constrain the value downward: the delta applies in full and the result is stored, even below min, where game rules may read it. min stays declared and citable, and thresholds at or above it are tested normally."
+        }
+      ]
+    },
+    {
+      "flag": "insufficient-cost",
+      "section": "Spending",
+      "question": "When something tries to spend more than the pool has left above min, what happens?",
+      "rationale": "The one question that permits not-applicable: a pool nothing ever spends from is a smaller pool, not an underdetermined one. No default is offered — rejecting the action is the commonest answer, but partial spending is genuinely common too.",
+      "options": [
+        {
+          "id": "reject-action",
+          "meaning": "Can't afford it, can't do it. The action is refused and nothing is deducted.",
+          "semantics": "The spend is rejected and the action it would have paid for does not occur. The value is unchanged and no threshold fires."
+        },
+        {
+          "id": "partial-spend",
+          "meaning": "The pool empties to min and reports how much it actually got. What a partly-paid action does is your call.",
+          "semantics": "The value is set to min and the spend reports the amount actually spent: the headroom above min before the spend. What the action does with a partial spend is game prose; the contract fixes only the end state and the reported amount."
+        },
+        {
+          "id": "not-applicable",
+          "meaning": "Nothing in this game ever pays from this pool — every change is imposed on it.",
+          "semantics": "This pool has no voluntary-spend verb: every change is an imposed effect. All cost templates are pruned."
+        }
+      ]
+    }
+  ],
+  "knobs": {
+    "min": {
+      "kind": "constant",
+      "unit": "instance-defined",
+      "type": "number",
+      "description": "The pool's floor. Identity-bearing: moving a floor is a mechanics change, not a rebalance. Declared even when at-min-effect is unbounded, where it is a landmark.",
+      "default_guidance": 0
+    },
+    "max": {
+      "kind": "tunable",
+      "unit": "instance-defined",
+      "type": "number",
+      "description": "The pool's ceiling. Rebalance-safe: pool size is the commonest thing a balance pass moves. Declared even when at-max-effect is unbounded, where it is a landmark."
+    },
+    "initial": {
+      "kind": "tunable",
+      "unit": "instance-defined",
+      "type": "number",
+      "description": "The value the pool holds at the start of a run.",
+      "default_guidance": "max for depleting pools, min for accumulating ones"
+    }
+  },
+  "invariants": [
+    {
+      "language": "opengdd-expr-1",
+      "id": "range-nonempty",
+      "assert": {
+        "op": "gt",
+        "args": [
+          {
+            "ref": "knob:max"
+          },
+          {
+            "ref": "knob:min"
+          }
+        ]
+      },
+      "message": "max must be strictly greater than min"
+    },
+    {
+      "language": "opengdd-expr-1",
+      "id": "initial-in-range",
+      "assert": {
+        "op": "and",
+        "args": [
+          {
+            "op": "gte",
+            "args": [
+              {
+                "ref": "knob:initial"
+              },
+              {
+                "ref": "knob:min"
+              }
+            ]
+          },
+          {
+            "op": "lte",
+            "args": [
+              {
+                "ref": "knob:initial"
+              },
+              {
+                "ref": "knob:max"
+              }
+            ]
+          }
+        ]
+      },
+      "message": "initial must lie within [min, max]"
+    }
+  ],
+  "collections": {
+    "thresholds": {
+      "description": "The named thresholds this pool reports crossings for, each row deciding how often it fires. Rows live inline in the instance file or in a declared collection. An empty collection is legal: no threshold template expands and the pool reports no crossings.",
+      "record": {
+        "id": {
+          "type": "string",
+          "required": true,
+          "pattern": "kebab-case",
+          "unique": true,
+          "description": "Stable name, unique in the collection; the id the crossing event carries."
+        },
+        "value": {
+          "type": "number",
+          "required": true,
+          "description": "Where the threshold sits; MUST lie within [min, max]. A row at min or max is how an empty-pool or full-pool event is declared — exactly where the landing and overshoot questions become observable together."
+        },
+        "direction": {
+          "type": "string",
+          "required": true,
+          "options": [
+            "rising",
+            "falling",
+            "both"
+          ],
+          "description": "The direction of travel in which a crossing of this threshold fires."
+        },
+        "refire": {
+          "type": "string",
+          "required": true,
+          "options": [
+            "every-crossing",
+            "once"
+          ],
+          "description": "every-crossing: fires each time it is crossed. once: fires the first time, then waits until it re-arms. Per-row because real pools mix both — progression thresholds fire once, continuous-state ones fire every time."
+        },
+        "rearm": {
+          "type": "string",
+          "when": {
+            "row": {
+              "refire": [
+                "once"
+              ]
+            }
+          },
+          "options": [
+            "run-reset",
+            "declared-event"
+          ],
+          "description": "MUST be present exactly when refire is once. run-reset: the threshold re-arms at run reset and at no other time. declared-event: it re-arms when a game event named by this row occurs, and also at run reset."
+        },
+        "rearm-event": {
+          "type": "citation",
+          "when": {
+            "row": {
+              "rearm": [
+                "declared-event"
+              ]
+            }
+          },
+          "description": "MUST be present exactly when rearm is declared-event: a citation to where this game's own prose declares the re-arming event, so the scope is never implied."
+        }
+      }
+    }
+  },
+  "templates": [
+    {
+      "id": "effect-applies",
+      "title": "an in-range effect applies exactly",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} pool holding a value strictly between {{knob-cite:min}} and {{knob-cite:max}}, with headroom for the delta below",
+        "when": [
+          "one effect with a signed delta d is applied to {{instance}}"
+        ],
+        "then": [
+          "the {{instance}} value changes by exactly d",
+          "no partially-applied value is observable during the change",
+          "no threshold whose reached state did not change reports a crossing"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-before-after",
+          "{{instance}}-crossing-log"
+        ]
+      },
+      "text": "An in-range effect moves {{instance}} by exactly its delta, in one step, and no threshold whose reached state did not change reports a crossing."
+    },
+    {
+      "id": "excess-clamps-at-max",
+      "title": "a gain that overshoots stops at max",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-max-effect": [
+            "clamp"
+          ]
+        }
+      },
+      "bindings": {
+        "order-phrase": {
+          "flag": "threshold-checks-read",
+          "map": {
+            "final-value": "against the corrected value the pool now holds",
+            "raw-result": "against the raw result, before it was pulled back into range"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} pool holding any legal value",
+        "when": [
+          "an effect is applied whose delta would take {{instance}} above {{knob-cite:max}}"
+        ],
+        "then": [
+          "the {{instance}} value is exactly {{knob-cite:max}}",
+          "the discarded excess causes no further change and is reported to no one",
+          "threshold checks for the event read {{bind:order-phrase}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-after",
+          "{{instance}}-clamp-log"
+        ]
+      },
+      "text": "A gain that overshoots {{knob-cite:max}} leaves {{instance}} exactly at that limit; the extra is thrown away and reported to no one. Threshold checks read {{bind:order-phrase}}."
+    },
+    {
+      "id": "excess-clamps-at-min",
+      "title": "a loss that overshoots stops at min",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-min-effect": [
+            "clamp"
+          ]
+        }
+      },
+      "bindings": {
+        "order-phrase": {
+          "flag": "threshold-checks-read",
+          "map": {
+            "final-value": "against the corrected value the pool now holds",
+            "raw-result": "against the raw result, before it was pulled back into range"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} pool holding any legal value",
+        "when": [
+          "an effect is applied whose delta would take {{instance}} below {{knob-cite:min}}"
+        ],
+        "then": [
+          "the {{instance}} value is exactly {{knob-cite:min}}",
+          "the discarded excess causes no further change and is reported to no one",
+          "threshold checks for the event read {{bind:order-phrase}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-after",
+          "{{instance}}-clamp-log"
+        ]
+      },
+      "text": "A loss that overshoots {{knob-cite:min}} leaves {{instance}} exactly at that limit; the overkill is thrown away and reported to no one. Threshold checks read {{bind:order-phrase}}."
+    },
+    {
+      "id": "excess-rejects-at-max",
+      "title": "an overshooting gain is refused whole",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-max-effect": [
+            "reject-delta"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} pool holding any legal value v",
+        "when": [
+          "an effect is applied whose delta would take {{instance}} above {{knob-cite:max}}"
+        ],
+        "then": [
+          "the {{instance}} value is still v",
+          "no threshold reports a crossing"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-before-after",
+          "{{instance}}-crossing-log"
+        ]
+      },
+      "text": "A gain that would carry {{instance}} above {{knob-cite:max}} does not move it at all and fires no crossing — not even partway to the limit."
+    },
+    {
+      "id": "excess-rejects-at-min",
+      "title": "an overshooting loss is refused whole",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-min-effect": [
+            "reject-delta"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} pool holding any legal value v",
+        "when": [
+          "an effect is applied whose delta would take {{instance}} below {{knob-cite:min}}"
+        ],
+        "then": [
+          "the {{instance}} value is still v",
+          "no threshold reports a crossing"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-before-after",
+          "{{instance}}-crossing-log"
+        ]
+      },
+      "text": "A loss that would carry {{instance}} below {{knob-cite:min}} does not move it at all and fires no crossing — not even partway to the limit."
+    },
+    {
+      "id": "excess-returns-remainder",
+      "title": "what didn't fit is handed back",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-max-effect": [
+            "return-remainder"
+          ]
+        }
+      },
+      "bindings": {
+        "order-phrase": {
+          "flag": "threshold-checks-read",
+          "map": {
+            "final-value": "against the value the pool now holds",
+            "raw-result": "against the raw result, before the value was brought to the limit"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} pool holding a value v whose headroom h below {{knob-cite:max}} is less than the positive delta d of the effect below",
+        "when": [
+          "an effect with delta d is applied to {{instance}}"
+        ],
+        "then": [
+          "the {{instance}} value is exactly {{knob-cite:max}}",
+          "the remainder d minus h is reported back to the source of the causing event as a value",
+          "the remainder is not discarded and not applied to {{instance}}",
+          "threshold checks for the event read {{bind:order-phrase}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-after",
+          "{{instance}}-remainder-report"
+        ]
+      },
+      "text": "A gain that would overfill {{instance}} fills it to {{knob-cite:max}} and hands the part that did not fit back to the source as a reported remainder — handed back, not destroyed. Threshold checks read {{bind:order-phrase}}."
+    },
+    {
+      "id": "unbounded-above",
+      "title": "no ceiling constrains the pool",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-max-effect": [
+            "unbounded"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} pool holding a value v",
+        "when": [
+          "an effect with a positive delta d is applied to {{instance}} such that v plus d exceeds {{knob-cite:max}}"
+        ],
+        "then": [
+          "the {{instance}} value is exactly v plus d",
+          "no correction, rejection, or remainder report occurs in the rising direction",
+          "{{knob-cite:max}} remains a declared landmark and every threshold at or below it is tested as in a limited pool"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-after",
+          "{{instance}}-crossing-log"
+        ]
+      },
+      "text": "{{knob-cite:max}} does not constrain {{instance}} from above: the effect applies in full and the pool holds the result. The key stays declared and citable; nothing enforces it upward — a recorded decision, not an omission."
+    },
+    {
+      "id": "unbounded-below",
+      "title": "no floor constrains the pool",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-min-effect": [
+            "unbounded"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} pool holding a value v",
+        "when": [
+          "an effect with a negative delta d is applied to {{instance}} such that v plus d falls below {{knob-cite:min}}"
+        ],
+        "then": [
+          "the {{instance}} value is exactly v plus d",
+          "no correction or rejection occurs in the falling direction",
+          "{{knob-cite:min}} remains a declared landmark and every threshold at or above it is tested as in a limited pool"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-after",
+          "{{instance}}-crossing-log"
+        ]
+      },
+      "text": "{{knob-cite:min}} does not constrain {{instance}} from below: the effect applies in full and the pool holds the result, which game rules may read. The key stays declared and citable; nothing enforces it downward — a recorded decision, not an omission."
+    },
+    {
+      "id": "cost-spends",
+      "title": "an affordable spend costs exactly its price",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "insufficient-cost": [
+            "reject-action",
+            "partial-spend"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} pool holding a value with headroom above {{knob-cite:min}} of at least c",
+        "when": [
+          "an actor spends a cost of c from {{instance}} and the spend is affordable"
+        ],
+        "then": [
+          "the {{instance}} value is reduced by exactly c",
+          "the spend reports c as the amount spent",
+          "the action the cost paid for occurs"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-before-after",
+          "{{instance}}-spend-report"
+        ]
+      },
+      "text": "An affordable spend reduces {{instance}} by exactly its cost, reports that cost as spent, and lets its action occur. The floor is the key {{knob-cite:min}}."
+    },
+    {
+      "id": "insufficient-rejects",
+      "title": "an unaffordable spend is refused whole",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "insufficient-cost": [
+            "reject-action"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} pool holding a value v whose headroom above {{knob-cite:min}} is less than c",
+        "when": [
+          "an actor attempts to spend a cost of c from {{instance}}"
+        ],
+        "then": [
+          "the spend is rejected",
+          "the action the cost would have paid for does not occur",
+          "the {{instance}} value is still v",
+          "no threshold reports a crossing"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-before-after",
+          "{{instance}}-spend-report",
+          "{{instance}}-crossing-log"
+        ]
+      },
+      "text": "A spend larger than the headroom above {{knob-cite:min}} is refused whole: {{instance}} is unchanged, the action does not occur, and nothing fires."
+    },
+    {
+      "id": "insufficient-partial",
+      "title": "an unaffordable spend empties the pool and reports what it took",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "insufficient-cost": [
+            "partial-spend"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} pool holding a value v whose headroom h above {{knob-cite:min}} is less than c",
+        "when": [
+          "an actor attempts to spend a cost of c from {{instance}}"
+        ],
+        "then": [
+          "the {{instance}} value is exactly {{knob-cite:min}}",
+          "the spend reports h as the amount actually spent"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-after",
+          "{{instance}}-spend-report"
+        ]
+      },
+      "text": "A spend larger than the available headroom empties {{instance}} to {{knob-cite:min}} and reports the prior headroom as the amount actually spent. What the action does with a partial spend is game prose."
+    },
+    {
+      "id": "threshold-fires",
+      "title": "the {{row.id}} threshold fires on crossing",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "thresholds",
+      "bindings": {
+        "reach-phrase": {
+          "flag": "boundary-comparison",
+          "map": {
+            "inclusive": "at or past",
+            "exclusive": "strictly past"
+          }
+        },
+        "order-phrase": {
+          "flag": "threshold-checks-read",
+          "map": {
+            "final-value": "the value the pool now holds",
+            "raw-result": "the raw result, before the limits were applied"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} pool holding a value that has not reached the {{row.id}} threshold at {{row.value}}",
+        "when": [
+          "a single {{row.direction}} change takes {{instance}} to a value {{bind:reach-phrase}} {{row.value}}"
+        ],
+        "then": [
+          "the {{row.id}} crossing is reported exactly once for that change",
+          "the reported crossing carries the value before the change and the value after it",
+          "the reached check reads {{bind:order-phrase}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-crossing-log",
+          "{{instance}}-value-before-after"
+        ]
+      },
+      "text": "When a single {{row.direction}} change takes {{instance}} to a value {{bind:reach-phrase}} {{row.value}}, the {{row.id}} crossing is reported exactly once. Reached is checked against {{bind:order-phrase}}."
+    },
+    {
+      "id": "threshold-refires",
+      "title": "{{row.id}} fires every time",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "thresholds",
+      "when": {
+        "row": {
+          "refire": [
+            "every-crossing"
+          ]
+        }
+      },
+      "bindings": {
+        "reach-phrase": {
+          "flag": "boundary-comparison",
+          "map": {
+            "inclusive": "at or past",
+            "exclusive": "strictly past"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} pool holding a value that has not reached the {{row.id}} threshold at {{row.value}}",
+        "when": [
+          "{{instance}} crosses {{row.id}} in the {{row.direction}} direction, returns to a value that has not reached {{row.value}}, and crosses {{row.id}} again in the {{row.direction}} direction"
+        ],
+        "then": [
+          "the {{row.id}} crossing is reported twice over the sequence, once per qualifying crossing",
+          "the return leg reports no {{row.id}} crossing"
+        ],
+        "diagnostics": [
+          "{{instance}}-crossing-log"
+        ]
+      },
+      "text": "{{row.id}} fires every time: one report per qualifying {{row.direction}} crossing across a cross, return, cross-again sequence, and none on the return leg. Reached means {{bind:reach-phrase}} {{row.value}}."
+    },
+    {
+      "id": "threshold-fires-once",
+      "title": "{{row.id}} fires once, then waits to re-arm",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "thresholds",
+      "when": {
+        "row": {
+          "refire": [
+            "once"
+          ]
+        }
+      },
+      "bindings": {
+        "reach-phrase": {
+          "flag": "boundary-comparison",
+          "map": {
+            "inclusive": "at or past",
+            "exclusive": "strictly past"
+          }
+        },
+        "rearm-phrase": {
+          "row_field": "rearm",
+          "map": {
+            "run-reset": "at run reset and at no other time",
+            "declared-event": "when the re-arming event this row cites occurs, and also at run reset"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} pool holding a value that has not reached the {{row.id}} threshold at {{row.value}}, with {{row.id}} armed",
+        "when": [
+          "{{instance}} crosses {{row.id}} in the {{row.direction}} direction, returns to a value that has not reached {{row.value}}, and crosses {{row.id}} again in the {{row.direction}} direction, with no re-arming occurrence in the sequence"
+        ],
+        "then": [
+          "the {{row.id}} crossing is reported exactly once over the whole sequence, on the first qualifying crossing",
+          "the second crossing reports nothing",
+          "the return leg reports nothing",
+          "after {{row.id}} re-arms {{bind:rearm-phrase}}, a further qualifying crossing reports once again"
+        ],
+        "diagnostics": [
+          "{{instance}}-crossing-log",
+          "{{instance}}-arm-state"
+        ]
+      },
+      "text": "{{row.id}} fires once: across a cross, return, cross-again sequence it reports exactly one crossing — the first — and then waits. It re-arms {{bind:rearm-phrase}}; once re-armed, the next qualifying {{row.direction}} crossing reports once again. Reached means {{bind:reach-phrase}} {{row.value}}."
+    },
+    {
+      "id": "limits-hold",
+      "title": "min and max hold after every event",
+      "type": "property",
+      "expand": "once",
+      "bindings": {
+        "min-clause": {
+          "flag": "at-min-effect",
+          "map": {
+            "clamp": "the {{instance}} value is greater than or equal to {{knob-cite:min}}",
+            "reject-delta": "the {{instance}} value is greater than or equal to {{knob-cite:min}}",
+            "unbounded": "no floor is asserted: the {{instance}} value MAY lie below {{knob-cite:min}}, a declared landmark and not a floor"
+          }
+        },
+        "max-clause": {
+          "flag": "at-max-effect",
+          "map": {
+            "clamp": "the {{instance}} value is less than or equal to {{knob-cite:max}}",
+            "reject-delta": "the {{instance}} value is less than or equal to {{knob-cite:max}}",
+            "return-remainder": "the {{instance}} value is less than or equal to {{knob-cite:max}}",
+            "unbounded": "no ceiling is asserted: the {{instance}} value MAY lie above {{knob-cite:max}}, a declared landmark and not a ceiling"
+          }
+        }
+      },
+      "surface_inputs": [
+        {
+          "name": "domain",
+          "type": "string",
+          "description": "One sentence naming the event sequences this property is sampled over. A Fixed design statement: write what the game actually does, not what is convenient to sample.",
+          "example": "sequences of legal heat-gain and cooling events over one run",
+          "default_guidance": "sequences of legal effect and cost events over one run"
+        },
+        {
+          "name": "sampling",
+          "type": "object",
+          "description": "An object with seed_set (named seeds, so a failing sample is reproducible and traceable to this pool) and samples_per_seed.",
+          "example": {
+            "seed_set": [
+              "heat-audit-a"
+            ],
+            "samples_per_seed": 200
+          },
+          "default_guidance": {
+            "seed_set": [
+              "audit-a",
+              "audit-b"
+            ],
+            "samples_per_seed": 200
+          }
+        }
+      ],
+      "test": {
+        "type": "property",
+        "domain": "{{surface:domain}}",
+        "sampling": "{{surface:sampling}}",
+        "invariant": "after every event, {{bind:min-clause}}, and {{bind:max-clause}}",
+        "verdict": "per-sample",
+        "diagnostics": [
+          "{{instance}}-value-trace",
+          "first-violating-event"
+        ]
+      },
+      "text": "Over the sampled event sequences, after every event {{bind:min-clause}}, and {{bind:max-clause}} — no exception. The game supplies the domain and sampling plan through the surface's verification channel; the invariant and the verdict are the core's."
+    }
+  ]
+}

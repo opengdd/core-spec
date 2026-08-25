@@ -1,0 +1,21 @@
+{
+  "opengdd": "0.6",
+  "id": "garden-snake",
+  "version": "1.0.0",
+  "title": "Garden Snake",
+  "designer": {
+    "name": "OpenGDD Examples"
+  },
+  "target": {
+    "platform": "web-2d",
+    "genre": "arcade",
+    "session_minutes": 5,
+    "audience": "anyone; one player and one garden"
+  },
+  "build": {
+    "chapters": [
+      "01-overview.md",
+      "02-mechanics.md"
+    ]
+  }
+}

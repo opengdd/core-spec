@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengdd.org/schema/core/v0.6/personalization.schema.json",
+  "title": "OpenGDD v0.6 personalization file",
+  "type": "object",
+  "required": ["questions"],
+  "additionalProperties": false,
+  "properties": {
+    "questions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/question" },
+      "description": "SPEC 5. The ordered question list. Order is normative: the resolution pipeline applies questions in this order, then each question's operations in their own order, so two files with the same questions in a different order are two different pipelines. An empty list is legal and means the file declares nothing."
+    }
+  },
+  "$defs": {
+    "question": {
+      "type": "object",
+      "required": ["id", "prompt", "type", "default"],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "choice" } }, "required": ["type"] },
+          "then": {
+            "required": ["options"],
+            "properties": { "default": { "type": "string" } }
+          },
+          "else": { "not": { "required": ["options"] } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "number" } }, "required": ["type"] },
+          "then": { "properties": { "default": { "type": "number" } } },
+          "else": {
+            "not": { "required": ["resolution"] },
+            "properties": { "default": { "type": "string" } }
+          }
+        }
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Package-unique question id. It is what a `> PERSONALIZATION: <id>` chapter tag (SPEC 2), a collection record's authority.question (SPEC 1b), and a build record's personalization.answers key (SPEC 7) all name. Uniqueness is validator-level."
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The question as a human is asked it."
+        },
+        "type": {
+          "enum": ["choice", "text", "number"],
+          "description": "SPEC 5. The closed set of question types. choice and text answers are strings; number answers are numbers."
+        },
+        "default": {
+          "type": ["string", "number"],
+          "description": "SPEC 5. Required. A question is optional for each build, and a skipped question with no default would have no defined outcome. For a choice question the default MUST name a declared option id, and for a number question it MUST be a number — both validator-level, since they read siblings. The defaults are also what the package's own invariants are decided at (SPEC 4a)."
+        },
+        "affects": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?![/\\\\])[^\\\\]+$",
+            "description": "A package-relative path, forward-slash separated. Existence is validator-level (PERSONALIZATION_PATH)."
+          },
+          "description": "SPEC 5. Declares which package files this question's answer may influence. Every path MUST exist. It carries no other machine meaning in v0.6: it is a disclosure a reader and a reviewer can use, not a selector."
+        },
+        "options": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/option" },
+          "description": "SPEC 5. Required for a choice question, meaningless for the other two types. The declared option ids are the whole answer space: an undeclared id is a validation failure, in the default and in a recorded answer alike."
+        },
+        "resolution": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/resolutionOperation" },
+          "description": "SPEC 5. The numeric pipeline. A number question that affects tuning MUST declare it; operations apply in list order."
+        },
+        "notes": {
+          "type": "string",
+          "description": "SPEC 5. Concrete instructions a builder can act on. Notes MUST NOT be the only authority for a numeric change — a number that matters gets a resolution operation or a tuning_overrides entry."
+        }
+      },
+      "description": "SPEC 5 question."
+    },
+    "option": {
+      "type": "object",
+      "required": ["id", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Question-unique option id. This is what a build record records, never the label."
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The option as a human is offered it."
+        },
+        "notes": {
+          "type": "string",
+          "description": "SPEC 5. Concrete instructions for this option, under the same rule as a question's notes."
+        },
+        "tuning_overrides": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "$ref": "#/$defs/tuningKey" },
+          "additionalProperties": { "type": "number" },
+          "description": "SPEC 5. Exact target-key replacements applied when this option is selected. Each key MUST name a declared tunables key — never a constants key — and each value MUST lie inside that key's declared meta.range: both validator-level, since the keys live in tuning.json. There is no out_of_range choice here, because the designer wrote the number, not the player."
+        }
+      },
+      "description": "SPEC 5 enumerated answer."
+    },
+    "resolutionOperation": {
+      "type": "object",
+      "required": ["key", "operation", "operand", "bounds", "out_of_range"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "$ref": "#/$defs/tuningKey",
+          "description": "The target tunables key. A constants key is never legal — validator-level, since the roles live in tuning.json."
+        },
+        "operation": { "enum": ["replace", "add", "multiply"] },
+        "operand": {
+          "anyOf": [{ "const": "answer" }, { "type": "number" }],
+          "description": "Either the literal \"answer\", meaning the value the builder supplied or the question's default, or a fixed finite number."
+        },
+        "bounds": {
+          "const": "target-meta-range",
+          "description": "v0.6 defines exactly one bounds source: the target key's own inclusive meta.range. A key without that range cannot use clamp."
+        },
+        "out_of_range": {
+          "enum": ["clamp", "reject"],
+          "description": "What happens when the computed value leaves the range. clamp pins it to the nearer bound. reject makes the ANSWER invalid: nothing fires at package validation, because an answer is not package bytes, but a build record carrying that answer fails build-record conformance (SPEC 7 check 4)."
+        }
+      },
+      "description": "SPEC 5 numeric resolution operation."
+    },
+    "tuningKey": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+$",
+      "description": "A flat dotted tuning.json key, spelled exactly as tuning.schema.json spells it."
+    }
+  }
+}

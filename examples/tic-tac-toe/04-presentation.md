@@ -9,7 +9,7 @@ MOOD:
   nearby.
 
 CONSTRAINTS:
-- `constraints.palette.mark-ink`
+- `constraints.colors.mark-ink`
   One shared ink; the players stay distinguishable by mark shape
   alone.
 ```

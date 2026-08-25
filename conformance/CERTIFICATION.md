@@ -7,8 +7,8 @@ implements that specification. Between the two sits build-record conformance
 (SPEC §2d, §7): the machine-checked validity of `opengdd-build.json` itself
 and its consistency with the source package.
 
-This is a public draft protocol. Under SPEC §2d it is experimental in v0.5:
-its verdicts are the draft's own, no v0.5 conformance outcome turns on them,
+This is a public draft protocol. Under SPEC §2d it is experimental in v0.6:
+its verdicts are the draft's own, no v0.6 conformance outcome turns on them,
 and the specification defines no normative certification verdict. The
 protocol does not add requirements to package conformance and does not grant
 or imply authorization to use a certification mark. No OpenGDD
@@ -19,22 +19,32 @@ certification-mark program operates today.
 A build is eligible for a certification verdict only when all of these are
 true:
 
-1. **The package is valid.** Run the version-matched OpenGDD validator before
-   interpreting build evidence.
-2. **Every declared acceptance test is reported.** Execute each `AT-n`
-   obligation according to its fenced `verification` descriptor. v0.5 does
-   not define a complete machine grammar for these descriptors (SPEC §2d),
-   so executing them is this protocol's obligation, and the runner is a
-   person or a capable agent rather than a generic harness. Report
+1. **The package conforms.** Run the version-matched OpenGDD validator, then
+   review every applicable package-level prose obligation under SPEC §2d,
+   before interpreting build evidence. A clean CLI run establishes the
+   implemented machine checks, not the human review.
+2. **Every declared acceptance test is reported.** Execute each acceptance-test
+   obligation according to its fenced `test` block: the package's own `AT-n`
+   tests, and the generated tests an adopted contract contributes, named
+   `AT <instance>/<template>` or `AT <instance>/<template>/<row>` (SPEC
+   §10.10). Generated tests execute exactly as game-local ones do, and only
+   after package validation — block equality included — has passed. The core
+   defines the block grammar but not its runtime execution semantics (SPEC
+   §§2d, 6), so executing it is this protocol's obligation. Use the exact
+   runner profile id and version named by `evidence.runner`; the runner may be
+   a person, a capable agent, or a versioned harness. Report
    non-acceptance checkpoints separately; do not silently count them as tests
    or hide them when they fail.
 3. **Runtime data matches the resolved snapshot.** Resolve personalization in
-   declared order. For every `meta.<key>.certify: true` entry in `tunables` or
-   `constants`, compare the value actually consumed at runtime with the
+   declared order. For every `meta.<key>.must_match: true` entry in `tunables` or
+   `constants`, and every contract knob a surface pins the same way (SPEC
+   §10.6), compare the value actually consumed at runtime with the
    corresponding resolved value. Source-file equality alone is insufficient.
 4. **`opengdd-build.json` is complete.** The build record identifies the
    format revision, spec and build, designer and builder, personalization
-   answers, full resolved tuning snapshot, evidence counts, and result hash.
+   answers, full resolved tuning snapshot, the `evidence` record's counts,
+   result hash, conditional runner identity, and one observation context for
+   every measured direction constraint.
 5. **The result hash is reproducible.** The evidence defines exactly which
    payload is hashed and uses the canonical serialization below.
 6. **A separate audit supports the verdict.** The builder's own green result
@@ -73,7 +83,42 @@ bytes has no defined digest under this protocol.
 The hashed payload must include enough identity to prevent evidence for one
 spec or build from being replayed as another. At minimum it identifies the
 spec, build, canonical acceptance-test records, and declared checkpoint
-records. Any fixture or layout digest separately states its own payload scope.
+records. Any replay, capture, or layout digest separately states what its own
+payload `covers`.
+
+## Adopted contract records
+
+A build of a package that adopts contracts (SPEC §10) pins which cores it was
+tested against. The certification record carries one entry per contract
+instance:
+
+```json
+{
+  "instance": "stamina",
+  "id": "ranged-value",
+  "version": 1,
+  "origin": { "author": "…" },
+  "digest": "<64 lowercase hex>"
+}
+```
+
+`instance` is the instance id. `id` and `version` name the core, and `origin`
+repeats the core's own `origin` object, absent where the core declares none.
+`digest` is the SHA-256 of the UTF-8 bytes of that instance's vendored `core`
+object serialized in SPEC §10.10's canonical form — two-space indentation,
+authored field order, `_`-prefixed annotations included, LF line
+endings — recorded as lowercase hexadecimal.
+
+That is a deliberate departure from the canonical hash serialization above,
+and the only one this protocol defines: a core's digest covers the bytes a
+package actually carries and a reader actually diffs, not a re-sorted compact
+form. Every field is covered, so editing `origin` or an annotation moves the
+digest, which is the point — two unrelated cores may both call themselves
+`health-1` (SPEC §10.3), and a certificate has to say which one it covers.
+
+The digest is the builder's claim. Recomputing it is the auditor's work, under
+audit question 5 below; no package-conformance or record-conformance check
+reproduces it (SPEC §2d).
 
 ## Separate audit
 
@@ -81,8 +126,8 @@ An auditor works from the published package, build, and evidence. The audit
 should answer these questions:
 
 1. **Do the tests test the right thing?** Re-run the suite, reproduce counts
-   and hashes, and sample high-risk tests against both their verification
-   descriptors and Fixed prose.
+   and hashes, and sample high-risk tests against both their `test`
+   blocks and Fixed prose.
 2. **Does tuning flow by reference?** Trace representative certified values
    from the resolved snapshot to runtime consumption and look for re-hardcoded
    literals.
@@ -96,12 +141,23 @@ should answer these questions:
    resolved values, attribution, totals, and digests with the source package
    and a fresh run.
 6. **Are ambiguities disclosed honestly?** Distinguish a genuine document gap
-   from permissible builder choice, lint, or implementation error.
+   from permissible builder choice, an advisory finding, or implementation
+   error.
 7. **What falls outside the sampled tests?** Record weak diagnostics,
    tautological checkpoints, unsupported assertions, and overclaimed report
    language.
+8. **Are opaque replay claims grounded?** Confirm that every runner-interpreted
+   replay-input path stays inside the package, that structured replay content
+   is declared through SPEC §1b, and that every expected `target` is grounded
+   in an input or schedule the runner actually supplies. These are audit
+   obligations because SPEC §6 leaves replay entries other than its §4b clock
+   fields runner-defined.
+9. **Is the result attributable?** Re-run with the exact `evidence.runner`
+   id and version. For every `evidence.direction_observations` entry, confirm
+   that its context describes what the run actually observed and that the
+   observation covers the cited claim's full declared scope.
 
-Judged direction claims (SPEC §9.11) are outside this draft's audit scope:
+Judged direction claims (SPEC §9.10) are outside this draft's audit scope:
 their panel protocol is not yet integrated, `direction_result.judged.status`
 stays `"pending"`, and no verdict below asserts whole-direction adherence.
 

@@ -6,6 +6,8 @@ const CHAPTER_PATHS = [
   "05-build-plan.md"
 ];
 
+export const SUPPORTED_OPENGDD_VERSION = "0.6";
+
 const json = value => `${JSON.stringify(value, null, 2)}\n`;
 
 export function packageIdFromTitle(title) {
@@ -15,6 +17,15 @@ export function packageIdFromTitle(title) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "") || "untitled-package";
+}
+
+export function nextAvailablePackageId(base, occupiedIds) {
+  const occupied = new Set(occupiedIds);
+  if (!occupied.has(base)) return base;
+  for (let suffix = 2; ; suffix += 1) {
+    const candidate = base + "-" + suffix;
+    if (!occupied.has(candidate)) return candidate;
+  }
 }
 
 export function createFiveChapterPackage({
@@ -33,7 +44,7 @@ export function createFiveChapterPackage({
   }
   const packageFiles = new Map(CHAPTER_PATHS.map((path, index) => [path, chapters[index]]));
   packageFiles.set("manifest.json", json({
-    opengdd: "0.5",
+    opengdd: SUPPORTED_OPENGDD_VERSION,
     id,
     version: "0.1.0",
     title,
@@ -41,8 +52,6 @@ export function createFiveChapterPackage({
     target,
     build: {
       chapters: CHAPTER_PATHS.slice(0, 4),
-      plan: CHAPTER_PATHS[4],
-      tuning: "tuning.json",
       ...build
     },
     ...manifest
@@ -53,21 +62,22 @@ export function createFiveChapterPackage({
 }
 
 export function createScaffoldPackage(id, title) {
-  return createFiveChapterPackage({
-    id,
-    title,
-    designer: { name: "[DESIGNER: replace with your name]" },
-    target: { platform: "web-2d", genre: "[DESIGNER: replace with your genre]" },
-    chapters: [
-      `# ${title}\n\n\`\`\`fantasy\nDESIGNER PLACEHOLDER: Replace this with one sentence describing the player's central promise.\nFeel: curious, capable, surprised\nNOT: DESIGNER PLACEHOLDER — replace with a nearby experience this game must avoid\n\`\`\`\n\n[DESIGNER: Replace every bracketed prompt and every DESIGNER PLACEHOLDER with your own design. Delete this note when the package is ready.]\n\n[DESIGNER: Describe the game and its player.] A first session is planned for \`play.session_minutes\` minutes.\n`,
-      `# Mechanics\n\n[DESIGNER: Explain the rules and how the player changes the game state.]\n\n## Core loop {#core-loop}\n\n[DESIGNER: Replace this with the repeated decisions and feedback that form the game.] The build follows \`#core-loop\`.\n\n## AT-1 — Core loop can be completed\n\n[DESIGNER: State the observable behavior this acceptance test protects.]\n`,
-      `# Content\n\n[DESIGNER: List the authored places, characters, objects, encounters, or other content the build needs.]\n`,
-      `# Presentation\n\n[DESIGNER: Describe the visual, audio, motion, and interface direction. Include concrete anti-goals.]\n`,
-      `# Build plan\n\n[DESIGNER: Replace this with the build order and checkpoints.] Start with \`#core-loop\`, then run \`AT-1\`.\n\n## AT-1 — Core loop can be completed\n\n\`\`\`test\n{\n  "type": "scenario",\n  "given": "[DESIGNER: replace with the starting state]",\n  "when": "[DESIGNER: replace with the player action]",\n  "then": "[DESIGNER: replace with the observable result]"\n}\n\`\`\`\n\nDESIGNER PLACEHOLDER: Explain in plain language how the builder should run and judge this test.\n`
-    ],
-    tuning: {
-      tunables: { "play.session_minutes": 10 },
-      constants: {}
-    }
-  });
+  const files = new Map([
+    ["01-overview.md", `# ${title}\n\n\`\`\`fantasy\nYou are an explorer charting a pocket world that rearranges itself as you walk.\nFeel: curious, playful, surprising.\nNOT: grim.\n\`\`\`\n`],
+    ["02-mechanics.md", "# Mechanics\n\nFixed: State the complete rules of the game here.\n"],
+    ["05-build-plan.md", `# Build plan\n\n## Phase 1: core-loop\n\n## Phase 2: content\n\n## Phase 3: tuning\n\n## Phase 4: presentation\n\n## Phase 5: polish\n\n## AT-1 — The starter behavior works\n\n\`\`\`test\n{\n  "type": "scenario",\n  "given": "the game is ready to test",\n  "when": "the designer performs the central action",\n  "then": "the game shows the intended result"\n}\n\`\`\`\n\nThe plain-language check performs the central action and observes whether the intended result is visible.\n`],
+    ["manifest.json", json({
+      opengdd: SUPPORTED_OPENGDD_VERSION,
+      id,
+      version: "0.1.0",
+      title,
+      designer: { name: "Designer" },
+      target: { platform: "web-2d", genre: "game" },
+      build: {
+        chapters: ["01-overview.md", "02-mechanics.md"]
+      }
+    })],
+    ["tuning.json", json({ tunables: {} })]
+  ]);
+  return { id, title, files, folders: new Set() };
 }

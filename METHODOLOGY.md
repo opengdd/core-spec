@@ -61,8 +61,9 @@ failure remains a limitation until a revision actually closes it.
 ## What the evidence can and cannot show
 
 Passing validation proves structural conformance, not that a game is good or
-that a build is faithful. Passing certification supports a claim about a
-specific build, not every future implementation. Agreement between multiple
+that a build is faithful. A favorable experimental audit result supports a
+claim about a specific build, not every future implementation; certification
+itself remains experimental, with no normative outcome yet defined. Agreement between multiple
 builds strengthens confidence in a design document, but it does not turn
 aesthetic interpretation into a byte-for-byte requirement.
 

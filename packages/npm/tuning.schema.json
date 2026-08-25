@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengdd.org/schema/core/v0.6/tuning.schema.json",
+  "title": "OpenGDD v0.6 tuning file",
+  "type": "object",
+  "required": ["tunables"],
+  "additionalProperties": false,
+  "$comment": "Two SPEC 4 rules are cross-field and stay validator-level: a key MUST NOT appear in both tunables and constants, and every meta key MUST name a key declared in exactly one of them. A third, `tunables.<key>` lying inside its own `meta.<key>.range`, is the same kind of rule — a value constrained by a sibling object — and is likewise checked by the validator (TUNING_RANGE_VALUE), not here.",
+  "properties": {
+    "tunables": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/tuningKey" },
+      "additionalProperties": { "type": "number" },
+      "description": "SPEC 4. Required. A flat map of dotted keys to finite JSON numbers: the rebalance-safe knobs. Flat means one level — a nested object is not a namespace here, the dots in the key are."
+    },
+    "constants": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/tuningKey" },
+      "additionalProperties": { "type": "number" },
+      "description": "SPEC 4. Optional. Same flat shape as tunables, holding the numbers the game's identity rests on. A rebalance, an enumerated tuning_overrides entry, and a numeric resolution operation may none of them name a key here (SPEC 5)."
+    },
+    "meta": {
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/tuningKey" },
+      "additionalProperties": { "$ref": "#/$defs/metaEntry" },
+      "description": "SPEC 4. Optional. Per-key metadata, keyed by the tunables or constants key it describes. Absent metadata is not a defect: a key with no meta entry declares no range and makes no must_match claim."
+    },
+    "invariants": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/expressionDeclaration" },
+      "description": "SPEC 4a. Optional. Named opengdd-expr-1 declarations that MUST evaluate true at package defaults — the resolved tuning snapshot produced by applying every question's default through the SPEC 5 pipeline. Evaluation, id uniqueness, and reference resolution are validator-level."
+    },
+    "clocks": {
+      "type": "object",
+      "required": ["modes", "clocks"],
+      "additionalProperties": false,
+      "properties": {
+        "modes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "SPEC 4b. The package's finite closed list of resolution-mode ids. The reserved tag value `all` MUST NOT be declared here; that is a validator-level check."
+        },
+        "clocks": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/clockEntry" },
+          "description": "SPEC 4b. Named clocks. Every clock declares exactly one behavior for every declared mode; the covers-all-modes check is validator-level because it compares two siblings."
+        }
+      },
+      "description": "SPEC 4b. Optional. The clocks block: what advances, what is frozen, and what has no value at all, per declared mode."
+    }
+  },
+  "$defs": {
+    "tuningKey": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+(?:\\.[A-Za-z0-9_-]+)+$",
+      "$comment": "SPEC 4 rule 3's second half stays validator-level (TUNING_KEY_RESERVED): a key MUST NOT open with a segment reserved for prose citation, and MUST NOT carry a reserved extension segment in any position. Both are expressible here only as a lookahead-and-lookbehind pattern no reader can check by eye, and the reserved list is versioned, so the diagnostic has to name the revision that reserved the segment — which a pattern cannot do.",
+      "description": "A flat dotted key: at least two dot-separated segments, so every number sits in a namespace."
+    },
+    "metaEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "range": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "number" },
+          "description": "SPEC 4. The key's inclusive [minimum, maximum]. Legal only on a tunables key, and the minimum MUST NOT exceed the maximum: both are validator-level, the first because it reads a sibling object. This range is what SPEC 5 clamps to and what a rejecting resolution is measured against."
+        },
+        "must_match": {
+          "type": "boolean",
+          "description": "SPEC 2d. Declares that the built value would be evaluated against the resolved snapshot under the experimental certification protocol. It changes no package-validation outcome."
+        },
+        "ruleset": {
+          "type": "string",
+          "description": "SPEC 2c. Names the ruleset id under which this key's value applies. The id MUST be a declared manifest ruleset_state id — validator-level, since the ids live in another file."
+        }
+      },
+      "description": "SPEC 4. The closed v0.6 metadata shape. A field outside this set is a hard failure rather than a note: unknown metadata that a validator ignores is a claim nobody checks."
+    },
+    "expressionDeclaration": {
+      "type": "object",
+      "required": ["language", "id", "assert", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "language": { "const": "opengdd-expr-1" },
+        "id": { "type": "string", "minLength": 1 },
+        "assert": {
+          "description": "SPEC 4a expression node: a finite Boolean, number, or string literal, or { \"ref\": ... }, or { \"op\": ..., \"args\": [...] }. The node grammar, the closed operator set, arity, typing, and reference resolution are validator-level: JSON Schema can state that the field is present, not that the tree it holds is a well-typed Boolean expression."
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "description": "What a reader is told when the invariant fails. It is the whole diagnostic, so it says what broke, not that something broke."
+        }
+      },
+      "description": "SPEC 4a named expression declaration, closed to exactly these four fields."
+    },
+    "clockEntry": {
+      "type": "object",
+      "required": ["behavior"],
+      "additionalProperties": false,
+      "properties": {
+        "behavior": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "enum": ["advances", "frozen", "discrete-only", "does-not-exist"] },
+          "description": "SPEC 4b. Keyed by declared mode id, valued by the closed behavior set. The object shape is what makes two contradictory behaviors for one clock in one mode unrepresentable."
+        },
+        "governs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string" },
+          "description": "SPEC 4b. A closed list of SPEC 4a typed state references this clock owns. Governs lists MUST be disjoint across clocks — validator-level, since it compares clocks."
+        },
+        "unit": {
+          "type": "string",
+          "description": "Optional free-text unit label for readers, such as \"seconds\". v0.6 gives it no machine meaning and no validator reads it."
+        }
+      },
+      "description": "SPEC 4b clock."
+    }
+  }
+}
