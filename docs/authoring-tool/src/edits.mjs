@@ -205,6 +205,32 @@ export function createEditController(pkg) {
       abort() {
         if (state === "open") state = "aborted";
       },
+      async preview() {
+        if (state !== "open") throw new Error("This edit transaction is no longer open.");
+        if (packageRevision !== baseRevision) throw new Error("This edit was based on an older package revision; refresh it and try again.");
+        const previewPackage = {
+          files: new Map([...pkg.files].map(([path, value]) => [path, copyValue(value)])),
+          folders: new Set(pkg.folders)
+        };
+        const preview = createEditController(previewPackage).begin(label);
+        for (const operation of operations) {
+          if (operation.type === "json-set") preview.json(operation.path).set(operation.pointer, operation.value);
+          else if (operation.type === "json-insert") preview.json(operation.path).insert(operation.pointer, operation.keyOrIndex, operation.value, operation.options);
+          else if (operation.type === "json-remove") preview.json(operation.path).remove(operation.pointer);
+          else if (operation.type === "json-rename") preview.json(operation.path).renameKey(operation.pointer, operation.nextKey);
+          else if (operation.type === "text-replace") preview.text(operation.path).replace({ ...operation.range, revision: 0 }, operation.text);
+          else if (operation.type === "text-append") preview.text(operation.path).append(operation.block);
+          else if (operation.type === "file-create") preview.file(operation.path).create(operation.value);
+          else if (operation.type === "file-move") preview.file(operation.path).move(operation.nextPath);
+          else if (operation.type === "file-remove") preview.file(operation.path).remove();
+          else if (operation.type === "folder-create") preview.folder(operation.path).create();
+          else if (operation.type === "folder-move") preview.folder(operation.path).move(operation.nextPath);
+          else if (operation.type === "folder-remove") preview.folder(operation.path).remove();
+          else throw new Error(`Preview cannot replay a ${operation.type} operation.`);
+        }
+        await preview.commit();
+        return previewPackage;
+      },
       commit() {
         if (state !== "open") return Promise.reject(new Error("This edit transaction is no longer open."));
         state = "committing";
@@ -359,7 +385,9 @@ export function createEditController(pkg) {
 
   return {
     begin,
-    revision(path) { return fileRevisions.get(normalizePath(path)); },
+    // With no path this is the package revision used to bind cross-file plans;
+    // the existing path form remains the public per-file revision contract.
+    revision(path) { return arguments.length ? fileRevisions.get(normalizePath(path)) : packageRevision; },
     subscribe(listener) {
       if (typeof listener !== "function") throw new TypeError("An edit subscriber must be a function.");
       listeners.add(listener);

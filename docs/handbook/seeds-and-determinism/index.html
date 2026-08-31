@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Seeds &amp; determinism | OpenGDD handbook</title>
-<meta name="description" content="A seed is a text value used to reproduce random results. An address adds locations and a stream name so different parts of the game use separate, repeatable random …">
+<meta name="description" content="A seed is a text value used to reproduce random results. A seed address is an address for a repeatable random sequence. It includes locations and a stream name so …">
 <link rel="canonical" href="https://opengdd.org/handbook/seeds-and-determinism/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Seeds &amp; determinism | OpenGDD handbook">
-<meta property="og:description" content="A seed is a text value used to reproduce random results. An address adds locations and a stream name so different parts of the game use separate, repeatable random …">
+<meta property="og:description" content="A seed is a text value used to reproduce random results. A seed address is an address for a repeatable random sequence. It includes locations and a stream name so …">
 <meta property="og:url" content="https://opengdd.org/handbook/seeds-and-determinism/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Seeds &amp; determinism | OpenGDD handbook">
-<meta name="twitter:description" content="A seed is a text value used to reproduce random results. An address adds locations and a stream name so different parts of the game use separate, repeatable random …">
+<meta name="twitter:description" content="A seed is a text value used to reproduce random results. A seed address is an address for a repeatable random sequence. It includes locations and a stream name so …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -28,7 +28,6 @@
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/" aria-current="page">Learn</a>
-      <a href="/contracts/">Contracts</a>
       <a href="/spec/">Spec</a>
       <a href="/standard/">Standard</a>
       <a href="/authoring-tool/">Authoring tool</a>
@@ -57,43 +56,48 @@
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Game systems and content</p>
+<p class="toc-group-title">Content, links, and time</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/collections/">Collections</a></li>
-<li class="toc-h2"><a href="/handbook/graphs/">Graphs</a></li>
-<li class="toc-h2"><a href="/handbook/runtime-state/">Runtime state</a></li>
+<li class="toc-h2"><a href="/handbook/links/">Links</a></li>
+<li class="toc-h2"><a href="/handbook/runtime-values/">Runtime values</a></li>
 <li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes &amp; clocks</a></li>
 <li class="toc-h2"><a href="/handbook/seeds-and-determinism/" class="here" aria-current="page">Seeds &amp; determinism</a></li>
-<li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
 </div>
 <div class="toc-group">
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-pinning/">Palette &amp; pinning</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette &amp; colour promises</a></li>
 <li class="toc-h2"><a href="/handbook/personalization/">Personalization</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Reusable mechanisms</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
 </div>
 <div class="toc-group">
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/promises-and-proof/">Promises and proof</a></li>
-<li class="toc-h2"><a href="/handbook/rulebook/">Preflight checklist</a></li>
+<li class="toc-h2"><a href="/handbook/preflight-checklist/">Preflight checklist</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
 <h1>Seeds &amp; determinism</h1>
 <p><em>Opt-in: add this when your game needs it.</em></p>
-<p>A <strong>seed</strong> is a text value used to reproduce random results. An <strong>address</strong> adds locations and a stream name so different parts of the game use separate, repeatable random sequences.</p>
+<p>A <strong>seed</strong> is a text value used to reproduce random results. A <strong>seed address</strong> is an <a href="/handbook/identifiers/">address</a> for a repeatable random sequence. It includes locations and a stream name so different parts of the game use separate sequences.</p>
 <p><em><code>03-content.md</code>, where the floor generator is described</em></p>
 <blockquote>
-<p>Every floor draws its layout from the address <code>{seed}:floor:{n}:stream:layout</code>. Here <code>n</code> counts floors from 1 at the entrance and never goes negative, and the stream's draws are consumed in room order, outward from the stairs.</p>
+<p>Every floor draws its layout from the seed address <code>{seed}:floor:{n}:stream:layout</code>. Here <code>n</code> counts floors from 1 at the entrance and never goes negative, and the stream's draws are consumed in room order, outward from the stairs.</p>
 </blockquote>
 <p><code>{seed}</code> stands for the seed used for this run, and <code>{n}</code> stands for the floor number. A <strong>draw</strong> is one request for the next random value in the sequence.</p>
-<p>The format fixes the random algorithm. The same seed and address, used by the same Fixed procedure, produce the same sequence in every build. The <a href="/spec/">OpenGDD specification</a> defines the algorithm; your chapter defines what each address means.</p>
-<p>For each address, state:</p>
+<p>The format fixes the random algorithm. The same seed and seed address, used by the same Fixed procedure, produce the same sequence in every build. The <a href="/spec/">OpenGDD specification</a> defines the algorithm; your chapter defines what each seed address means.</p>
+<p>For each seed address, state:</p>
 <ul>
 <li>what labels such as <code>floor</code> and <code>layout</code> mean;</li>
 <li>what each number counts, and whether counting starts at 0 or 1;</li>
@@ -101,9 +105,10 @@
 <li>which game events request draws, and in what order.</li>
 </ul>
 <p>These declarations stay in your prose. There is no separate JSON file for them.</p>
+<p>When an acceptance test uses seeds, list them in that test. A <strong>runner</strong> is the tool or person that executes the tests. The <strong>build record</strong>, the builder's JSON report of what was built, names it. Its published description, the experimental <strong>runner profile</strong>, states how it samples or walks the test's scope and how many cases it checks for each seed.</p>
 <p>If the generating procedure is Delegated, different builds may produce different results. Keep it Fixed when every build must reproduce the same world.</p>
-<p><em>Full rules: <a href="/spec/">OpenGDD specification</a>, §2a.</em></p>
-<p class="note chapter-pager"><a href="/handbook/modes-and-clocks/">← Modes &amp; clocks</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/contracts/">Contracts →</a></p>
+<p><em>Full rules: <a href="/spec/">OpenGDD specification</a>, §§2a, 6.</em></p>
+<p class="note chapter-pager"><a href="/handbook/modes-and-clocks/">← Modes &amp; clocks</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/direction/">Art direction →</a></p>
 </article>
 </div>
 </main>

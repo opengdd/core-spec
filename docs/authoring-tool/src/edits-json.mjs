@@ -196,9 +196,26 @@ export function setJsonValue(text, pointer, value) {
 
 export function insertJsonValue(text, pointer, keyOrIndex, value, options = {}) {
   const container = resolve(parseDocument(text), pointer);
-  const valueText = options.recordSpacing
-    ? `{${Object.entries(value).map(([key, item]) => `${JSON.stringify(key)}: ${rendered(item)}`).join(", ")}}`
-    : rendered(value);
+  const spaced = item => Array.isArray(item)
+    ? `[${item.map(entry => rendered(entry)).join(", ")}]`
+    : rendered(item);
+  // `pretty`: render an object or array the way a pretty-printed container
+  // already lays out its members — the member's own indent, two-space steps —
+  // so an inserted row does not land as one collapsed line among indented ones.
+  const prettyText = () => {
+    if (!options.pretty || value === null || typeof value !== "object") return undefined;
+    const items = containerItems(container);
+    const sample = items.at(-1) ?? items[0];
+    const before = sample ? text.slice(text.lastIndexOf("\n", sample.start) + 1, sample.start) : "";
+    const containerLineStart = text.lastIndexOf("\n", container.start) + 1;
+    const containerIndent = /^\s*/u.exec(text.slice(containerLineStart, container.start))?.[0] ?? "";
+    if (!sample || !/^\s*$/u.test(before) || !text.slice(container.start, sample.start).includes("\n")) return undefined;
+    const unit = before.length > containerIndent.length ? before.slice(containerIndent.length) : "  ";
+    return JSON.stringify(value, null, unit).split("\n").map((line, index) => index ? `${before}${line}` : line).join("\n");
+  };
+  const valueText = prettyText() ?? (options.recordSpacing
+    ? `{${Object.entries(value).map(([key, item]) => `${JSON.stringify(key)}: ${options.arraySpacing ? spaced(item) : rendered(item)}`).join(", ")}}`
+    : options.arraySpacing ? spaced(value) : rendered(value));
   if (container.type === "object") {
     if (typeof keyOrIndex !== "string") throw new Error("An object insertion requires a member name.");
     if (container.properties.some(property => property.key === keyOrIndex)) throw new Error(`Object member ${JSON.stringify(keyOrIndex)} already exists.`);

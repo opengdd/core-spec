@@ -1,9 +1,30 @@
+import { kindsForOutlineGroup } from "../kinds.mjs";
+import { CONTRACT_COPY } from "./contract-copy.mjs";
+
+const outlineGroup = definition => Object.freeze({
+  ...definition,
+  kinds: kindsForOutlineGroup(definition.id)
+});
+
 const OUTLINE_GROUPS = Object.freeze([
-  Object.freeze({ id: "identifiers", label: "Identifiers", empty: "No identifiers yet", action: "Create an identifier", create: "Identifier", kinds: Object.freeze(["name"]) }),
-  Object.freeze({ id: "tuning-keys", label: "Tuning keys", empty: "No tuning keys yet", action: "Create a tuning key", create: "Tuning key", kinds: Object.freeze(["tunable", "constant"]) }),
-  Object.freeze({ id: "collections", label: "Collections", empty: "No collections yet", action: "Create a collection", create: "Collection", kinds: Object.freeze(["collection", "collection-record"]) }),
-  Object.freeze({ id: "descriptors", label: "Descriptors", empty: "No descriptors yet", action: "Create a descriptor", create: "Descriptor", kinds: Object.freeze(["descriptor"]) }),
-  Object.freeze({ id: "palettes", label: "Palettes", empty: "No palettes yet", action: "Create a palette", create: "Palette", kinds: Object.freeze(["palette"]) })
+  outlineGroup({ id: "pillars", label: "pillars", address: true, empty: "No pillars yet", action: "Create a pillar", create: "Pillar" }),
+  outlineGroup({ id: "anti", label: "anti", address: true, empty: "No anti-references yet" }),
+  outlineGroup({ id: "must_keep", label: "must_keep", address: true, empty: "Nothing that must stay yet" }),
+  outlineGroup({ id: "mood", label: "mood", address: true, empty: "No moods yet", action: "Create a mood", create: "Mood" }),
+  outlineGroup({ id: "palette", label: "palette", address: true, empty: "No palettes yet", action: "Create a palette", create: "Palette" }),
+  outlineGroup({ id: "colors", label: "colors", address: true, empty: "No colour promises yet" }),
+  outlineGroup({ id: "contrast", label: "contrast", address: true, empty: "No contrast promises yet" }),
+  outlineGroup({ id: "timing", label: "timing", address: true, empty: "No timing promises yet" }),
+  outlineGroup({ id: "values", label: "values", address: true, empty: "No values yet", action: "Add a value", create: "Value" }),
+  outlineGroup({ id: "rules", label: "rules", address: true, empty: "No tuning rules yet", action: "Add a rule", create: "Rule" }),
+  outlineGroup({ id: "runtime", label: "runtime", address: true, empty: "Write `runtime.<name>` in a chapter" }),
+  outlineGroup({ id: "clocks", label: "clocks", address: true, empty: "No clocks yet", action: "Add a clock", create: "Clock" }),
+  outlineGroup({ id: "rulesets", label: "Rulesets", address: false, empty: "Add a `> RULESET: <id>` line to a chapter" }),
+  outlineGroup({ id: "sections", label: "Sections", address: false, empty: "No sections yet", action: "Add a chapter", create: "Chapter" }),
+  outlineGroup({ id: "acceptance-tests", label: "Acceptance tests", address: false, empty: "No acceptance tests yet", action: "Add an acceptance test", create: "Acceptance test" }),
+  outlineGroup({ id: "collections", label: "collections", address: true, empty: "No collections yet", action: "Create a collection", create: "Collection" }),
+  outlineGroup({ id: "contracts", label: "contracts", address: true, empty: CONTRACT_COPY.groupEmpty, action: CONTRACT_COPY.addAction, create: CONTRACT_COPY.create }),
+  outlineGroup({ id: "questions", label: "Questions", address: false, empty: "No questions yet" })
 ]);
 
 export const WIDGET_COPY = Object.freeze({
@@ -62,6 +83,28 @@ export const WIDGET_COPY = Object.freeze({
   validationAccessible: text => `Validation ${text}`,
   noFindings: "No findings. This package passes conformance validation.",
   skippedMediaChecks: "Some byte-level media evidence checks were skipped in this browser; the CLI checks them.",
+  migrationBanner: "This package is written for OpenGDD 0.6. The tool can migrate it to 0.7 — it does the mechanical part and lists what only you can decide.",
+  previewMigration: "Preview the migration",
+  preparingMigration: "Preparing the migration preview…",
+  migrationChanges: "Files the tool will change",
+  migrationManual: "Only you can decide these",
+  migrationRefused: "The migration would leave errors behind, so nothing was changed. Fix these and try again.",
+  migrationNoOp: "Nothing to migrate.",
+  dismissMigrationNoOp: "Dismiss",
+  applyMigration: "Apply migration",
+  notNow: "Not now",
+  migrationUndo: "Migrate to OpenGDD 0.7",
+  migrationAfter: "Left for you after migration",
+  dismissMigrationManual: "Dismiss this list",
+  migrationPreviewFailed: "The migration preview could not run.",
+  migrationChanged: "The package changed while the preview was being prepared. Preview it again.",
+  migrationStale: "The package changed since you looked; here is the new list.",
+  migrationSchemaUnavailable: "This host did not supply `clocks.schema.json`, so the migration cannot be checked here; run `npx opengdd migrate` instead.",
+  migrationNoOutputs: "There are no file changes to apply. Nothing was changed.",
+  migrationUnsafeOutput: "This preview contains a file change the tool cannot apply safely. Nothing was changed.",
+  migrationBinaryOutput: path => `The preview would replace \`${path}\`, but this package has it as a binary file. Nothing was changed.`,
+  migrationCreated: "created",
+  migrationRewritten: "rewritten",
   value: "Value",
   packageName: "package name",
   matches: count => `${count} match${count === 1 ? "" : "es"}`,
@@ -72,6 +115,11 @@ export const WIDGET_COPY = Object.freeze({
   exportedPackage: name => `Exported ${name}.`,
   protectedRename: name => `This name belongs to the OpenGDD package. Keep it as ${name}, or create a new file.`,
   protectedDelete: name => `This file belongs to the OpenGDD package. Keep ${name}, or clear its contents.`,
+  protectedDeleteConfirm: Object.freeze({
+    "direction.json": "Deleting direction.json switches off art direction for this package.",
+    "personalization.json": "Deleting personalization.json switches off build personalization for this package.",
+    "clocks.json": "Deleting clocks.json switches off declared time modes and clocks for this package."
+  }),
   packageRelativePath: "Use a package-relative path without . or .. segments.",
   notWritableText: path => `${path} is not writable text.`,
   jsonObjectRequired: path => `${path} must contain a JSON object.`,
@@ -130,10 +178,16 @@ export const WIDGET_COPY = Object.freeze({
   expandCollection: name => `Expand ${name}`,
   addRecord: "Add a record",
   collectionUnmentioned: "Nothing in your chapters mentions this yet. Write its name in a chapter to clear this.",
+  addRange: "Add a range",
+  removeRange: "Remove range",
+  linkOffer: (field, drawer) => `\`${field}\` looks like links to \`${drawer}\`. Describe it as a link?`,
+  noFieldForm: field => `\`${field}\` has no field form yet; describe the fields by hand first`,
+  describeLinkUndo: field => `Describe ${field} as a link`,
+  stagedWriteUnavailable: "This change could not be validated, so it was not written.",
   line: number => `line ${number}`,
   outlineGroups: OUTLINE_GROUPS,
   outlineNothing: "Nothing declared yet",
-  outlineNothingAction: "Create an identifier",
+  outlineNothingAction: "Create a pillar",
   noValidationProblems: "No validation problems",
   create: "Create",
   problemsOnly: "Problems only"

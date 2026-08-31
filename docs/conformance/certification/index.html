@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Experimental certification protocol — OpenGDD</title>
+<meta name="description" content="The experimental OpenGDD runner and audit protocol for evaluating a particular build and its evidence.">
+<link rel="canonical" href="https://opengdd.org/conformance/certification/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Experimental certification protocol — OpenGDD">
+<meta property="og:description" content="The experimental OpenGDD runner and audit protocol for evaluating a particular build and its evidence.">
+<meta property="og:url" content="https://opengdd.org/conformance/certification/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Experimental certification protocol — OpenGDD">
+<meta name="twitter:description" content="The experimental OpenGDD runner and audit protocol for evaluating a particular build and its evidence.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/spec/">Spec</a>
+      <a href="/standard/" aria-current="page">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main>
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Protocol</p><ul>
+<li class="toc-h2"><a href="#certification-gate">Certification gate</a></li>
+<li class="toc-h2"><a href="#canonical-hash-serialization">Canonical hash serialization</a></li>
+<li class="toc-h2"><a href="#adopted-contract-records">Adopted contract records</a></li>
+<li class="toc-h2"><a href="#runner-profile">Runner profile</a></li>
+<li class="toc-h2"><a href="#audit-profile">Audit profile</a></li>
+<li class="toc-h2"><a href="#separate-audit">Separate audit</a></li>
+<li class="toc-h2"><a href="#verdict-and-evidence">Verdict and evidence</a></li>
+</ul></nav>
+<article class="doc-body">
+<h1>Experimental certification protocol</h1>
+<p>Package conformance and build certification are separate protocols. The package validator establishes that a game specification has a mechanically valid OpenGDD envelope. Certification evaluates whether one particular build implements that specification. Between the two sits build-record conformance (SPEC §2d, §7): the machine-checked validity of <code class="anchor">opengdd-build.json</code> itself and its consistency with the source package.</p>
+<p>This is a public draft protocol. Under SPEC §2d it is experimental in v0.7: its verdicts are the draft's own, no v0.7 conformance outcome turns on them, and the specification defines no normative certification verdict. The protocol does not add requirements to package conformance and does not grant or imply authorization to use a certification mark. No OpenGDD certification-mark program operates today.</p>
+<h2 id="certification-gate">Certification gate<a class="heading-anchor" href="#certification-gate" aria-label="Link to this section">#</a></h2>
+<p>A build is eligible for a certification verdict only when all of these are true:</p>
+<ol>
+<li><strong>The package conforms.</strong> Run the version-matched OpenGDD validator, then review every applicable package-level prose obligation under SPEC §2d, before interpreting build evidence. A clean CLI run establishes the implemented machine checks, not the human review.</li>
+<li><strong>Every declared acceptance test is reported.</strong> Execute each acceptance-test obligation according to its fenced <code>test</code> block: the package's own <code>AT-n</code> tests and the tests rendered from every checked contract pack, named <code>AT &lt;adoption&gt;/&lt;template&gt;</code> or <code>AT &lt;adoption&gt;/&lt;template&gt;/&lt;row&gt;</code> (SPEC §§6, 10.5). Rendered tests execute exactly as game-local ones do, after the package and pack have passed package validation. The format defines their package shape but not their runtime execution semantics (SPEC §§2d, 6), so executing them is this protocol's obligation. Use the exact runner profile id and version named by <code class="anchor">evidence.runner</code>; the runner may be a person, a capable agent, or a versioned harness. Report non-acceptance checkpoints separately; do not silently count them as tests or hide them when they fail. The <a href="#runner-profile">Runner profile</a> states the execution meanings the format leaves open. For each game-local general test, record its id in <code class="anchor">evidence.acceptance.sampled</code> when the runner checked a sample rather than the whole scope.</li>
+<li><strong>Runtime data matches the resolved snapshot.</strong> Resolve personalization in declared order. For every key in <code class="anchor">resolved_tuning.values</code> the audit chooses to check, including each fixed contract value at <code>contracts.&lt;adoption&gt;.&lt;value&gt;</code> (SPEC §10.6), compare the value actually consumed at runtime with the corresponding resolved value. Source-file equality alone is insufficient. The <a href="#audit-profile">Audit profile</a> owns this selection and comparison.</li>
+<li><strong><code class="anchor">opengdd-build.json</code> is complete.</strong> The build record identifies the format revision, spec and build, designer and builder, personalization answers, full resolved tuning snapshot, the <code>evidence</code> record's counts, result hash, and conditional runner identity. The runner identity resolves to the <a href="#runner-profile">Runner profile</a>.</li>
+<li><strong>The result hash is reproducible.</strong> The evidence defines exactly which payload is hashed and uses the canonical serialization below.</li>
+<li><strong>A separate audit supports the verdict.</strong> The builder's own green result is evidence, not the final judgment. Apply the <a href="#audit-profile">Audit profile</a>.</li>
+</ol>
+<h2 id="canonical-hash-serialization">Canonical hash serialization<a class="heading-anchor" href="#canonical-hash-serialization" aria-label="Link to this section">#</a></h2>
+<p>Certification hashes use this byte representation:</p>
+<ol>
+<li>Recursively sort every JSON object's keys, comparing keys as sequences of UTF-16 code units.</li>
+<li>Preserve array order exactly; array order is data.</li>
+<li>Serialize the transformed value as compact JSON with no indentation or trailing newline, using minimal string escaping (escape only the characters JSON requires: <code>&quot;</code>, <code>\</code>, and control characters, as short escapes where defined and lowercase <code>\u00XX</code> otherwise) and rendering numbers with the ECMAScript number-to-string algorithm (so <code class="anchor">1.0</code> serializes as <code>1</code>).</li>
+<li>Encode those exact characters as UTF-8.</li>
+<li>Hash the bytes with SHA-256 and record the lowercase hexadecimal digest.</li>
+</ol>
+<p>For payloads within JSON's interoperable range this byte representation matches RFC 8785 (JSON Canonicalization Scheme); implementations may use a conforming RFC 8785 serializer.</p>
+<p>Hash payloads MUST stay within that interoperable range (I-JSON, RFC 7493): numbers exactly representable as IEEE-754 doubles and strings of well-formed Unicode with no unpaired surrogates. Outside that range the byte representation is undefined.</p>
+<p><code>result_hash</code> is the SHA-256 digest of the exact bytes of the file named by the build record's <code class="anchor">payload.file</code>, and those bytes MUST already be in this canonical representation. A file that parses to the same JSON but different bytes has no defined digest under this protocol.</p>
+<p>The hashed payload must include enough identity to prevent evidence for one spec or build from being replayed as another. At minimum it identifies the spec, build, canonical acceptance-test records, and declared checkpoint records. Any replay, capture, or layout digest separately states what its own payload <code>covers</code>.</p>
+<h2 id="adopted-contract-records">Adopted contract records<a class="heading-anchor" href="#adopted-contract-records" aria-label="Link to this section">#</a></h2>
+<p>A checked adoption is pinned in the build record by the verification pack's content hash. <code class="anchor">evidence.contracts</code> carries one closed entry per checked adoption and no promised adoption:</p>
+<pre><code class="lang-json">{
+  &quot;adoption&quot;: &quot;stamina&quot;,
+  &quot;pack&quot;: &quot;sha256:&lt;64 lowercase hex&gt;&quot;
+}</code></pre>
+<p><code>pack</code> is the SHA-256 of the exact bytes of <code>contracts/&lt;contract&gt;-&lt;version&gt;.pack.json</code>. The source-backed record check requires the adoption ids and hashes to equal the source package exactly (SPEC §§7, 10.5). The pack is immutable under that hash, so this record says which rendered tests the reported acceptance count used.</p>
+<p>The audit separately records the identity it actually judged for every adoption, promised or checked:</p>
+<pre><code class="lang-json">{
+  &quot;adoption&quot;: &quot;stamina&quot;,
+  &quot;contract&quot;: &quot;ranged-value&quot;,
+  &quot;version&quot;: 1,
+  &quot;origin&quot;: &quot;https://opengdd.org/contracts/ranged-value-1&quot;,
+  &quot;definition_digest&quot;: &quot;&lt;64 lowercase hex&gt;&quot;
+}</code></pre>
+<p><code>definition_digest</code> uses the <strong>audit identity serialization</strong>: omit <code>answers</code>, <code>values</code>, <code>rows</code>, and <code>verification</code>; keep <code>_</code>-prefixed annotations; serialize the remaining object with two-space indentation and authored member order; use LF endings and no trailing newline; encode as UTF-8; and record the lowercase hexadecimal SHA-256. The validator's <strong>definition-comparison form</strong> is different: it strips annotations and emits the top-level definition fields in SPEC §10.2 order before comparing adoptions, while preserving member order inside them. The audit keeps annotations because they are part of what the auditor actually judged. The audit serialization exposes a fork without making an online catalogue lookup a package check (SPEC §10.9).</p>
+<p>Both digests are claims. The source-backed record validator checks the pack hash; the auditor recomputes the definition digest under audit question 5.</p>
+<h2 id="runner-profile">Runner profile<a class="heading-anchor" href="#runner-profile" aria-label="Link to this section">#</a></h2>
+<p>This profile is experimental; nothing in the package validator reads it. A runtime result names the runner profile through the non-empty <code>id</code> and <code>version</code> strings in <code class="anchor">evidence.runner</code>. The runner's published description must give those exact strings and state the execution meanings below.</p>
+<p>For a general test, the description states how the runner samples or walks the declared <code>scope</code>. When <code>seeds</code> is present, it states that method and its sample count for each seed. The package owns <code>scope</code>, <code>holds</code>, and <code>seeds</code>; a runner never narrows them.</p>
+<p>When the runner samples a game-local general test, the build record names it in <code class="anchor">evidence.acceptance.sampled</code>. The runner may report that the checked cases met the claim, including a measure bounded by the test's <code>holds</code> sentence. It MUST NOT report that a sample established absence, a minimum, or a universal. When the whole declared scope was walked, the result may establish those claims.</p>
+<p>The description also states the replay schedule and action vocabulary it accepts, and how it takes observations for <code>target</code> and <code>tolerance</code>. Those meanings belong to that named runner and do not become format vocabulary.</p>
+<h2 id="audit-profile">Audit profile<a class="heading-anchor" href="#audit-profile" aria-label="Link to this section">#</a></h2>
+<p>This profile is experimental; nothing in the package validator reads it. In its own record, the audit records the id of the capture recipe it used under <code>capture_profile</code>; <code>capture_profile</code> is not a field in <code class="anchor">opengdd-build.json</code>. The one existing recipe id is <code>web-1</code>:</p>
+<ul>
+<li>advance gameplay on a synthetic 60 Hz clock;</li>
+<li>sample full-viewport frames at 12 fps; and</li>
+<li>record the input hash, duration, rates and counts, determinism checks, and artifact paths in the capture manifest.</li>
+</ul>
+<p>The builder may attach any further evidence the audit asks for. The format does not name that evidence or give it a fixed shape.</p>
+<p>The audit chooses and records its scope over <code class="anchor">resolved_tuning.values</code>, then compares those values with what the build consumes. For judged direction it reviews pillars, mood, anti-references, and what must stay under the package's <code>viewing</code> conditions, blind to the builder's identity; uses qualified judges where a borrow reaches a real place, people, culture, or living tradition; and records per-claim observations. Its result reports adherence and coverage as two separate axes.</p>
+<h2 id="separate-audit">Separate audit<a class="heading-anchor" href="#separate-audit" aria-label="Link to this section">#</a></h2>
+<p>An auditor works from the published package, build, and evidence. The audit should answer these questions:</p>
+<ol>
+<li><strong>Do the tests test the right thing?</strong> Re-run the suite, reproduce counts and hashes, and sample high-risk tests against both their <code>test</code> blocks and Fixed prose.</li>
+<li><strong>Does tuning flow by reference?</strong> Trace representative certified values from the resolved snapshot to runtime consumption and look for re-hardcoded literals.</li>
+<li><strong>Are Fixed rules faithfully implemented?</strong> Inspect representative rules, including ordering, precedence, exceptions, lifecycle, and observable outcomes. Passing weak tests does not close a stronger obligation.</li>
+<li><strong>Are determinism and hash claims real?</strong> Re-derive declared random vectors where applicable, reproduce hashes, and confirm Delegated generation has not become an undeclared cross-build identity promise.</li>
+<li><strong>Is the build record internally consistent?</strong> Compare identity, answers, resolved values, attribution, totals, and digests with the source package and a fresh run.</li>
+<li><strong>Are ambiguities disclosed honestly?</strong> Distinguish a genuine document gap from permissible builder choice, an advisory finding, or implementation error.</li>
+<li><strong>What falls outside the sampled tests?</strong> Record weak diagnostics, tautological checkpoints, unsupported assertions, and overclaimed report language.</li>
+<li><strong>Are opaque replay claims grounded?</strong> The whole <code>replay</code> object is runner-defined. Confirm that every runner-interpreted replay-input path stays inside the package, that structured replay content is declared through SPEC §1b, and that every expected <code>target</code> is grounded in input the runner actually supplies. The runner profile names the schedule and action vocabulary it accepts; that vocabulary is not yet standardized.</li>
+<li><strong>Is the result attributable?</strong> Re-run with the exact <code class="anchor">evidence.runner</code> id and version.</li>
+</ol>
+<h2 id="verdict-and-evidence">Verdict and evidence<a class="heading-anchor" href="#verdict-and-evidence" aria-label="Link to this section">#</a></h2>
+<p>The audit ends with a reasoned <code>certify</code>, <code>certify-with-notes</code>, or <code>do-not-certify</code> verdict. A failed acceptance test, certified runtime mismatch, a Fixed-statement deviation established by the audit, evidence narrower than its claimed scope, incomplete required build record, or unreproducible result hash blocks certification. Other release gates may still block distribution, but their status must not be folded into the acceptance-test result.</p>
+<p>Certification evidence belongs to the build: validator output, test records, hash payload definition, <code class="anchor">opengdd-build.json</code>, the separate audit, and any ambiguity reports. It must not be rewritten as a claim that every future build of the same specification is certified.</p>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

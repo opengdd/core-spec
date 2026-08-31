@@ -28,7 +28,6 @@
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/" aria-current="page">Learn</a>
-      <a href="/contracts/">Contracts</a>
       <a href="/spec/">Spec</a>
       <a href="/standard/">Standard</a>
       <a href="/authoring-tool/">Authoring tool</a>
@@ -57,29 +56,34 @@
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Game systems and content</p>
+<p class="toc-group-title">Content, links, and time</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/collections/">Collections</a></li>
-<li class="toc-h2"><a href="/handbook/graphs/">Graphs</a></li>
-<li class="toc-h2"><a href="/handbook/runtime-state/">Runtime state</a></li>
+<li class="toc-h2"><a href="/handbook/links/">Links</a></li>
+<li class="toc-h2"><a href="/handbook/runtime-values/">Runtime values</a></li>
 <li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes &amp; clocks</a></li>
 <li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
-<li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
 </div>
 <div class="toc-group">
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-pinning/">Palette &amp; pinning</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette &amp; colour promises</a></li>
 <li class="toc-h2"><a href="/handbook/personalization/">Personalization</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Reusable mechanisms</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
 </div>
 <div class="toc-group">
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/promises-and-proof/">Promises and proof</a></li>
-<li class="toc-h2"><a href="/handbook/rulebook/">Preflight checklist</a></li>
+<li class="toc-h2"><a href="/handbook/preflight-checklist/">Preflight checklist</a></li>
 </ul>
 </div>
 </nav>
@@ -107,7 +111,7 @@ The <a href="/spec/">specification</a> remains the exact rulebook.</p>
   </a>
   <a class="card" href="/handbook/fantasy-block/">
     <h3>The fantasy block</h3>
-    <p>Every game idea starts with the experience it should create. The fantasy block states that experience before the rules. It must be the first substantive content in …</p>
+    <p>Every game idea starts with the experience it should create. The fantasy block states that experience before the rules. It must be the first substantive content in the …</p>
   </a>
   <a class="card" href="/handbook/authority/">
     <h3>Authority</h3>
@@ -115,45 +119,41 @@ The <a href="/spec/">specification</a> remains the exact rulebook.</p>
   </a>
   <a class="card" href="/handbook/identifiers/">
     <h3>Identifiers</h3>
-    <p>An identifier is a stable name for a value in your design. Define the value once, then write its name in backticks wherever the prose refers to it.</p>
+    <p>An identifier is a stable name for a value in your design. Define the value once, then write its name in backticks wherever the prose refers to it. An address is the …</p>
   </a>
   <a class="card" href="/handbook/tuning/">
     <h3>Tuning</h3>
-    <p>Shared gameplay numbers that a build needs to read as data live in tuning.json, grouped into two categories: tunables and constants.</p>
+    <p>One file holds the shared numbers a build reads. A range says how far a number may move, with both ends included. A rule is a line of arithmetic about those numbers that …</p>
   </a>
   <a class="card" href="/handbook/acceptance-tests/">
     <h3>Acceptance tests</h3>
-    <p>An acceptance test turns an important design promise into something a builder can demonstrate. You place each numbered test beside the build-plan phase it belongs to.</p>
+    <p>An acceptance test turns an important design promise into something the builder, the person, team, studio, AI system, or combination that turns your package into a game, …</p>
   </a>
 </div>
 </section>
 <section class="handbook-group" aria-labelledby="group-systems">
-<h2 id="group-systems">Game systems and content</h2>
-<p class="handbook-group-intro">Organize repeated content, progression, time, randomness, and reusable mechanics.</p>
+<h2 id="group-systems">Content, links, and time</h2>
+<p class="handbook-group-intro">Organize repeated content, connect records, name changing values, and describe how time passes.</p>
 <div class="card-grid">
   <a class="card" href="/handbook/collections/">
     <h3>Collections</h3>
     <p>Games are full of lists: technologies, recipes, cards, levels. A collection keeps one kind of content in one folder, with one JSON file per item.</p>
   </a>
-  <a class="card" href="/handbook/graphs/">
-    <h3>Graphs</h3>
-    <p>A graph records links between collection entries, such as the recipes in a technology tree. Once declared, every target id can be validated.</p>
+  <a class="card" href="/handbook/links/">
+    <h3>Links</h3>
+    <p>A link is a field holding another record's id. It connects items in your collections and lets validation report a missing target where the link is defined.</p>
   </a>
-  <a class="card" href="/handbook/runtime-state/">
-    <h3>Runtime state</h3>
-    <p>Some design rules need to name a value that changes during play, such as oxygen left, the current score, or progress toward an objective. Runtime state gives that …</p>
+  <a class="card" href="/handbook/runtime-values/">
+    <h3>Runtime values</h3>
+    <p>Some design rules need to name a value that changes during play, such as oxygen left, the current score, or progress toward an objective. A runtime value gives that …</p>
   </a>
   <a class="card" href="/handbook/modes-and-clocks/">
     <h3>Modes &amp; clocks</h3>
-    <p>Most games can describe time in prose. Add modes and clocks when the game mixes timing rules, such as real-time play with a planning screen that pauses some values but …</p>
+    <p>When real time meets a pause or a turn structure, time modes and clocks say which clocks run in each situation. A time mode is one timing situation, such as diving or …</p>
   </a>
   <a class="card" href="/handbook/seeds-and-determinism/">
     <h3>Seeds &amp; determinism</h3>
-    <p>A seed is a text value used to reproduce random results. An address adds locations and a stream name so different parts of the game use separate, repeatable random …</p>
-  </a>
-  <a class="card" href="/handbook/contracts/">
-    <h3>Contracts</h3>
-    <p>A contract provides reusable questions, values, and tests for a familiar game system, such as a health pool or a strategy-game camera. Adopt the contract and record this …</p>
+    <p>A seed is a text value used to reproduce random results. A seed address is an address for a repeatable random sequence. It includes locations and a stream name so …</p>
   </a>
 </div>
 </section>
@@ -163,15 +163,25 @@ The <a href="/spec/">specification</a> remains the exact rulebook.</p>
 <div class="card-grid">
   <a class="card" href="/handbook/direction/">
     <h3>Art direction</h3>
-    <p>Presentation prose is enough for many games. Add structured art direction when a build must preserve visual ideas while leaving room for interpretation. It uses three …</p>
+    <p>Art direction says what the game should look and feel like in a way the builder can be held to, while leaving the craft of making it to them. The builder is the person, …</p>
   </a>
-  <a class="card" href="/handbook/palette-and-pinning/">
-    <h3>Palette &amp; pinning</h3>
-    <p>A palette records colors used by the game's visual direction. It lives in manifest.json and can contain unnamed colors or colors with stable names.</p>
+  <a class="card" href="/handbook/palette-and-colour-promises/">
+    <h3>Palette &amp; colour promises</h3>
+    <p>A palette keeps the colours that define a game's look in one named place. You can point to the whole set or to one named colour without copying its hex value into prose.</p>
   </a>
   <a class="card" href="/handbook/personalization/">
     <h3>Personalization</h3>
-    <p>Personalization lets the designer define a question and its allowed answers. Before or while making a particular build, the builder answers the question or receives an …</p>
+    <p>Personalization lets you ask the builder, the person, team, studio, AI system, or combination that turns your package into a game, a question for one particular build. …</p>
+  </a>
+</div>
+</section>
+<section class="handbook-group" aria-labelledby="group-contracts">
+<h2 id="group-contracts">Reusable mechanisms</h2>
+<p class="handbook-group-intro">Adopt a familiar game mechanism through one filled form and its named tests.</p>
+<div class="card-grid">
+  <a class="card" href="/handbook/contracts/">
+    <h3>Contracts</h3>
+    <p>A contract brings a proven game mechanic into your design: a health bar, a backpack, a crafting recipe. It is a ready-made list of the decisions behind that mechanic — …</p>
   </a>
 </div>
 </section>
@@ -181,9 +191,9 @@ The <a href="/spec/">specification</a> remains the exact rulebook.</p>
 <div class="card-grid">
   <a class="card" href="/handbook/promises-and-proof/">
     <h3>Promises and proof</h3>
-    <p>Validation of source files is not proof that the finished game works. OpenGDD separates checks of the package, the build record, and the game itself. A build record is …</p>
+    <p>Package checking checks the paper: its names, links, rules, and prose. Record checking compares the builder's report with the package. Audit checking judges whether the …</p>
   </a>
-  <a class="card" href="/handbook/rulebook/">
+  <a class="card" href="/handbook/preflight-checklist/">
     <h3>Preflight checklist</h3>
     <p>The validator checks what it can prove from files. A final human read checks the part only a designer can see: whether the package says one clear, coherent thing. Use …</p>
   </a>

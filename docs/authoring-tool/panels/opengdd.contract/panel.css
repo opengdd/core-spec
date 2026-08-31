@@ -1,0 +1,106 @@
+.opengdd-author-contract-updates label { display: flex; align-items: center; gap: 0.35rem; }
+.opengdd-author-contract-updates input[type="checkbox"] { width: auto; flex: 0 0 auto; }
+
+[data-panel="opengdd.contract"] .opengdd-author-contract {
+  display: grid;
+  gap: 1rem;
+  color: var(--opengdd-author-ink);
+}
+
+[data-panel="opengdd.contract"] .opengdd-author-contract-intro,
+[data-panel="opengdd.contract"] .opengdd-author-contract-changelog,
+[data-panel="opengdd.contract"] .opengdd-author-contract-duplicates,
+[data-panel="opengdd.contract"] .opengdd-author-contract-left,
+[data-panel="opengdd.contract"] .opengdd-author-contract-inputs,
+[data-panel="opengdd.contract"] .opengdd-author-contract-rows,
+[data-panel="opengdd.contract"] .opengdd-author-contract-tests {
+  padding: 0.75rem;
+  border: 1px solid var(--opengdd-author-line);
+  border-radius: 0.35rem;
+  background: var(--opengdd-author-surface);
+}
+
+[data-panel="opengdd.contract"] .opengdd-author-contract-intro p { margin: 0 0 0.45rem; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-mode { font-weight: 650; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-version { color: var(--opengdd-author-muted); font-size: 0.82rem; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-fresh-answer {
+  display: inline-block;
+  margin-block-end: 0.45rem;
+  padding: 0.12rem 0.42rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  color: var(--opengdd-author-warning);
+}
+[data-panel="opengdd.contract"] .opengdd-author-contract-fresh-answer-reason { margin-block-start: 0; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-duplicate {
+  padding-inline-start: 0.65rem;
+  border-inline-start: 0.25rem solid var(--opengdd-author-warning);
+}
+[data-panel="opengdd.contract"] .opengdd-author-contract-duplicate + .opengdd-author-contract-duplicate { margin-block-start: 0.75rem; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-duplicate p { margin-block: 0 0.45rem; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-duplicate-actions { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-duplicate-actions .opengdd-author-confirmation { flex-basis: 100%; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-duplicate-status:empty { display: none; }
+
+[data-panel="opengdd.contract"] .opengdd-author-contract-questions { display: grid; gap: 0.8rem; }
+[data-panel="opengdd.contract"] [data-question-card] {
+  padding: 0.75rem;
+  border: 1px solid var(--opengdd-author-line);
+  border-radius: 0.35rem;
+}
+[data-panel="opengdd.contract"] .opengdd-author-contract-question--not-asked { opacity: 0.68; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-not-asked-badge {
+  display: inline-block;
+  margin-block-end: 0.45rem;
+  padding: 0.12rem 0.42rem;
+  border-radius: 999px;
+  background: var(--opengdd-author-line);
+}
+
+/* `button` keeps this ahead of the kit's chosen rule in authoring.css. */
+[data-panel="opengdd.contract"] .opengdd-author-form-choice button.opengdd-author-form-choice--chosen { border-color: var(--opengdd-author-kind-contract); }
+[data-panel="opengdd.contract"] [data-choice-tag] { font-weight: 700; color: var(--opengdd-author-kind-contract); }
+[data-panel="opengdd.contract"] details { margin-block-start: 0.5rem; }
+[data-panel="opengdd.contract"] summary,
+[data-panel="opengdd.contract"] .opengdd-author-contract-jump { text-transform: none; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-disclosure-heading { font-style: italic; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-consequence-tail { color: var(--opengdd-author-muted); }
+[data-panel="opengdd.contract"] dl { margin-block-end: 0; }
+[data-panel="opengdd.contract"] dt { font-weight: 700; }
+[data-panel="opengdd.contract"] dd { margin: 0.2rem 0 0.65rem; }
+
+[data-panel="opengdd.contract"] .opengdd-author-contract-values .opengdd-author-form-field { position: relative; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-range { margin-inline-start: 0.45rem; color: var(--opengdd-author-muted); }
+[data-panel="opengdd.contract"] .opengdd-author-contract-values h3,
+[data-panel="opengdd.contract"] .opengdd-author-contract-inputs h3,
+[data-panel="opengdd.contract"] .opengdd-author-contract-rows h3,
+[data-panel="opengdd.contract"] .opengdd-author-contract-left h3 { margin-block-start: 0; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-rows-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+  align-items: center;
+  justify-content: space-between;
+}
+[data-panel="opengdd.contract"] .opengdd-author-contract-rows-heading h3 { margin-block-end: 0; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-rows-about { margin-block: 0.35rem 0.55rem; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-rows-about p { margin-block-end: 0; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-rows > [aria-live]:empty { display: none; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-row-table { overflow-x: auto; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-row-table thead th {
+  /* Whole words: the table scrolls sideways rather than breaking "value" in two. */
+  white-space: nowrap;
+  font-size: 0.68rem;
+  line-height: 1.1;
+}
+[data-panel="opengdd.contract"] .opengdd-author-contract-row-table td[data-record-cell="__actions__"] button {
+  padding: 0.16rem 0.25rem;
+  font-size: 0.68rem;
+}
+[data-panel="opengdd.contract"] .opengdd-author-contract-row-table [data-row-error] { min-width: 12rem; }
+[data-panel="opengdd.contract"] .opengdd-author-contract-tests pre {
+  overflow: auto;
+  max-block-size: 28rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

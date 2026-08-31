@@ -5,10 +5,12 @@
   <url><loc>https://opengdd.org/get-started/</loc></url>
   <url><loc>https://opengdd.org/spec/</loc></url>
   <url><loc>https://opengdd.org/spec/changelog/</loc></url>
+  <url><loc>https://opengdd.org/spec/changelog/technical/</loc></url>
   <url><loc>https://opengdd.org/spec/limitations/</loc></url>
   <url><loc>https://opengdd.org/standard/</loc></url>
   <url><loc>https://opengdd.org/schema/</loc></url>
   <url><loc>https://opengdd.org/conformance/</loc></url>
+  <url><loc>https://opengdd.org/conformance/certification/</loc></url>
   <url><loc>https://opengdd.org/evolution/</loc></url>
   <url><loc>https://opengdd.org/authoring-tool/</loc></url>
   <url><loc>https://opengdd.org/about/</loc></url>
@@ -21,18 +23,15 @@
   <url><loc>https://opengdd.org/handbook/tuning/</loc></url>
   <url><loc>https://opengdd.org/handbook/acceptance-tests/</loc></url>
   <url><loc>https://opengdd.org/handbook/collections/</loc></url>
-  <url><loc>https://opengdd.org/handbook/graphs/</loc></url>
-  <url><loc>https://opengdd.org/handbook/runtime-state/</loc></url>
+  <url><loc>https://opengdd.org/handbook/links/</loc></url>
+  <url><loc>https://opengdd.org/handbook/runtime-values/</loc></url>
   <url><loc>https://opengdd.org/handbook/modes-and-clocks/</loc></url>
   <url><loc>https://opengdd.org/handbook/seeds-and-determinism/</loc></url>
-  <url><loc>https://opengdd.org/handbook/contracts/</loc></url>
   <url><loc>https://opengdd.org/handbook/direction/</loc></url>
-  <url><loc>https://opengdd.org/handbook/palette-and-pinning/</loc></url>
+  <url><loc>https://opengdd.org/handbook/palette-and-colour-promises/</loc></url>
   <url><loc>https://opengdd.org/handbook/personalization/</loc></url>
+  <url><loc>https://opengdd.org/handbook/contracts/</loc></url>
   <url><loc>https://opengdd.org/handbook/promises-and-proof/</loc></url>
-  <url><loc>https://opengdd.org/handbook/rulebook/</loc></url>
+  <url><loc>https://opengdd.org/handbook/preflight-checklist/</loc></url>
   <url><loc>https://opengdd.org/handbook/an-afternoon-spec/package/</loc></url>
-  <url><loc>https://opengdd.org/contracts/</loc></url>
-  <url><loc>https://opengdd.org/contracts/ranged-value-1/</loc></url>
-  <url><loc>https://opengdd.org/contracts/rts-controller-1/</loc></url>
 </urlset>

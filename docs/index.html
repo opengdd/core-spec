@@ -4,17 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OpenGDD — Open format for game design documents</title>
-<meta name="description" content="OpenGDD is an open format for game design documents, written in prose for creative control and blended with data for validation. v0.6 is a working draft.">
+<meta name="description" content="OpenGDD is an open format for game design documents, written in prose for creative control and blended with data for validation. v0.7 is a working draft.">
 <link rel="canonical" href="https://opengdd.org/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="OpenGDD — Open format for game design documents">
-<meta property="og:description" content="OpenGDD is an open format for game design documents, written in prose for creative control and blended with data for validation. v0.6 is a working draft.">
+<meta property="og:description" content="OpenGDD is an open format for game design documents, written in prose for creative control and blended with data for validation. v0.7 is a working draft.">
 <meta property="og:url" content="https://opengdd.org/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="OpenGDD — Open format for game design documents">
-<meta name="twitter:description" content="OpenGDD is an open format for game design documents, written in prose for creative control and blended with data for validation. v0.6 is a working draft.">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://opengdd.org/#website","url":"https://opengdd.org/","name":"OpenGDD","description":"OpenGDD is an open format for game design documents, written in prose for creative control and blended with data for validation. v0.6 is a working draft.","publisher":{"@type":"Organization","@id":"https://opengdd.org/#steward","name":"OpenGDD Project"},"sameAs":["https://github.com/opengdd/core-spec"]}</script>
+<meta name="twitter:description" content="OpenGDD is an open format for game design documents, written in prose for creative control and blended with data for validation. v0.7 is a working draft.">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","@id":"https://opengdd.org/#website","url":"https://opengdd.org/","name":"OpenGDD","description":"OpenGDD is an open format for game design documents, written in prose for creative control and blended with data for validation. v0.7 is a working draft.","publisher":{"@type":"Organization","@id":"https://opengdd.org/#steward","name":"OpenGDD Project"},"sameAs":["https://github.com/opengdd/core-spec"]}</script>
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -29,7 +29,6 @@
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/">Learn</a>
-      <a href="/contracts/">Contracts</a>
       <a href="/spec/">Spec</a>
       <a href="/standard/">Standard</a>
       <a href="/authoring-tool/">Authoring tool</a>
@@ -43,7 +42,7 @@
   <div class="hero-grid">
     <div class="hero-mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg></div>
     <div class="hero-copy">
-      <p class="hero-kicker">Version 0.6 · Working draft</p>
+      <p class="hero-kicker">Version 0.7 · Working draft</p>
       <h1 id="landing-title">OpenGDD</h1>
       <p class="tagline">An open format for game design documents.</p>
       <p class="hero-summary">Written in prose for creative control.
@@ -165,8 +164,8 @@
     <div class="landing-section-head">
       <h2 id="evidence-path">Validated packages, experimental build audits</h2>
       <p>The validator checks the package itself, before any build exists.
-      The certification protocol is experimental: it describes evidence
-      an audit would inspect, but defines no normative certification outcome.</p>
+      Normative certification does not exist yet. The experimental protocol says what
+      an audit would look at.</p>
     </div>
 
     <ol class="evidence-flow">
@@ -178,8 +177,8 @@
       <li>
         <span class="evidence-number">2</span>
         <h3>Validate</h3>
-        <p>The validator checks every package requirement that is
-        mechanically testable.</p>
+        <p>The validator checks the package requirements it can decide from
+        the files.</p>
       </li>
       <li>
         <span class="evidence-number">3</span>
@@ -226,7 +225,7 @@
 
   <section class="landing-band" aria-labelledby="working-draft">
     <div class="landing-band-copy">
-      <h2 id="working-draft">Version 0.6 is a working draft</h2>
+      <h2 id="working-draft">Version 0.7 is a working draft</h2>
       <p>The format is being tested against real games and clean-room builds.
       A clean-room build starts from the package alone, without access to an
       earlier implementation. Findings that expose a missing rule or weak
@@ -237,7 +236,7 @@
       </div>
     </div>
     <dl class="draft-facts">
-      <div><dt>Current version</dt><dd>0.6</dd></div>
+      <div><dt>Current version</dt><dd>0.7</dd></div>
       <div><dt>Change policy</dt><dd>0.x constructs may change</dd></div>
       <div><dt>Public materials</dt><dd>Specification, handbook, schemas, validator, changelog, and limitations</dd></div>
     </dl>
@@ -264,7 +263,7 @@
     <div class="explore-grid">
       <a class="explore-card" href="/get-started/">
         <h3>Get started</h3>
-        <p>Six short chapters teach the format with small platforming
+        <p>Seven short chapters teach the format with small platforming
         examples.</p>
       </a>
       <a class="explore-card" href="/handbook/">

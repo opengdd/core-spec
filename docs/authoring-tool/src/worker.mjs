@@ -1,12 +1,15 @@
 // Package analysis and conformance validation run here, off the thread that
 // paints keystrokes. The tool ships as static files with no build step, and a
-// worker gets no import map, so the page resolves the three module names and
+// worker gets no import map, so the page resolves the four module names and
 // posts the resolved URLs; everything else this worker uses is imported by
 // relative path, which needs no map.
+
+import { createPackageSha256, sha256Hex } from "./package-hashes.mjs";
 
 let analyzePackage;
 let validatePackage;
 let createFileMapHost;
+let migratePackage;
 let schemas = null;
 const files = new Map();
 let folders = [];
@@ -14,15 +17,17 @@ let withExplicitFolders;
 let collectionDrawerFolders;
 
 async function loadModules(urls) {
-  const [analysis, validation, host, folderHost] = await Promise.all([
+  const [analysis, validation, host, migration, folderHost] = await Promise.all([
     import(urls.analysis),
     import(urls.validation),
     import(urls.fileMapHost),
+    import(urls.migration),
     import("./folder-aware-host.mjs")
   ]);
   analyzePackage = analysis.analyzePackage;
   validatePackage = validation.validatePackage;
   createFileMapHost = host.createFileMapHost;
+  migratePackage = migration.migratePackage;
   withExplicitFolders = folderHost.withExplicitFolders;
   collectionDrawerFolders = folderHost.collectionDrawerFolders;
 }
@@ -60,12 +65,22 @@ async function handle(message) {
   if (message.type === "analyze") return postMessage(analysisFor(message.revision));
   if (message.type === "validate") {
     try {
-      const host = withExplicitFolders(createFileMapHost(files, { schemas, bytes: false }), folders);
+      const sha256 = await createPackageSha256(files);
+      const host = withExplicitFolders(createFileMapHost(files, { schemas, bytes: false, sha256 }), folders);
       const run = validatePackage(host, "/package");
       postMessage({ type: "validation", revision: message.revision, run });
     } catch (error) {
       // A validator crash is the page's to report, not this worker's to die of.
       postMessage({ type: "validation", revision: message.revision, message: error.message });
+    }
+  }
+  if (message.type === "migrate") {
+    try {
+      const host = withExplicitFolders(createFileMapHost(files, { schemas, bytes: true, sha256: sha256Hex }), folders);
+      const report = migratePackage(host, "/package", { dryRun: true, collectOutputs: true });
+      postMessage({ type: "migration", request: message.request, report });
+    } catch (error) {
+      postMessage({ type: "migration", request: message.request, message: error.message });
     }
   }
 }

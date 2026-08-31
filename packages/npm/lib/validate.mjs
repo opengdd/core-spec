@@ -4,13 +4,13 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
-import { emitContractsBlock, formatReport, validateBuildManifest, validatePackage } from "./validate-core.mjs";
+import { formatReport, renderContractTests, validateBuildManifest, validatePackage } from "./validate-core.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const USAGE = [
   "node conformance/validate.mjs [--json] <package-dir>",
   "node conformance/validate.mjs --build <opengdd-build.json> [<spec-dir>]",
-  "node conformance/validate.mjs --emit-contracts-block <package-dir>"
+  "node conformance/validate.mjs --render-contract-tests <package-dir>"
 ].join("\n");
 
 export function createNodeHost() {
@@ -60,29 +60,26 @@ function usage(jsonMode, message) {
 function main(args) {
   const jsonMode = args.includes("--json");
   const buildMode = args.includes("--build");
-  const emitMode = args.includes("--emit-contracts-block");
-  const positional = args.filter(arg => arg !== "--json" && arg !== "--build" && arg !== "--emit-contracts-block");
+  const renderMode = args.includes("--render-contract-tests");
+  const positional = args.filter(arg => arg !== "--json" && arg !== "--build" && arg !== "--render-contract-tests");
   const unknownOptions = positional.filter(arg => arg.startsWith("-"));
-  // SPEC §10.10: the generated block is machine-written, and this is the
-  // machine. It prints the canonical instantiation of a package's contracts —
-  // paste it over the block in the build plan and byte equality holds by
-  // construction. It writes nothing itself, so a bad regeneration is a diff.
-  if (emitMode) {
+  // Render checked contract tests for reading. The list exists only in memory;
+  // it is never pasted into or compared with the build plan.
+  if (renderMode) {
     if (unknownOptions.length || buildMode || positional.length !== 1) {
-      usage(jsonMode, unknownOptions.length ? `unknown option: ${unknownOptions[0]}` : "--emit-contracts-block requires exactly one package directory");
+      usage(jsonMode, unknownOptions.length ? `unknown option: ${unknownOptions[0]}` : "--render-contract-tests requires exactly one package directory");
       return;
     }
-    const run = emitContractsBlock(createNodeHost(), positional[0]);
-    if (run.block === undefined) {
-      console.error("the package declares no contract instance that could be instantiated");
+    const run = renderContractTests(createNodeHost(), positional[0]);
+    if (run.markdown === undefined) {
+      console.error("the package declares no contract adoption");
       process.exitCode = 1;
       return;
     }
-    // The block is a function of the surface, so a package that does not
-    // validate can still be instantiated — but its bytes are only as sound as
-    // the answers behind them, and that is worth saying out loud.
-    if (run.summary.errors) console.error(`note: the package reports ${run.summary.errors} validation error(s); the block below is the instantiation of what it currently declares`);
-    process.stdout.write(run.block);
+    if (run.summary.errors) console.error(`note: the package reports ${run.summary.errors} validation error(s)${run.summary.dependent ? ` (${run.summary.dependent} waiting on designer input)` : ""}; the Markdown below renders what it currently declares`);
+    else if (run.markdown === "" && run.contractAdoptions > 0 && run.checkedContractAdoptions === 0) console.error("every adoption is promised; no tests are generated");
+    process.stdout.write(run.markdown);
+    process.exitCode = run.summary.errors ? 1 : 0;
     return;
   }
   if (buildMode) {

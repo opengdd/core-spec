@@ -7,8 +7,8 @@ implements that specification. Between the two sits build-record conformance
 (SPEC §2d, §7): the machine-checked validity of `opengdd-build.json` itself
 and its consistency with the source package.
 
-This is a public draft protocol. Under SPEC §2d it is experimental in v0.6:
-its verdicts are the draft's own, no v0.6 conformance outcome turns on them,
+This is a public draft protocol. Under SPEC §2d it is experimental in v0.7:
+its verdicts are the draft's own, no v0.7 conformance outcome turns on them,
 and the specification defines no normative certification verdict. The
 protocol does not add requirements to package conformance and does not grant
 or imply authorization to use a certification mark. No OpenGDD
@@ -25,30 +25,34 @@ true:
    implemented machine checks, not the human review.
 2. **Every declared acceptance test is reported.** Execute each acceptance-test
    obligation according to its fenced `test` block: the package's own `AT-n`
-   tests, and the generated tests an adopted contract contributes, named
-   `AT <instance>/<template>` or `AT <instance>/<template>/<row>` (SPEC
-   §10.10). Generated tests execute exactly as game-local ones do, and only
-   after package validation — block equality included — has passed. The core
-   defines the block grammar but not its runtime execution semantics (SPEC
-   §§2d, 6), so executing it is this protocol's obligation. Use the exact
+   tests and the tests rendered from every checked contract pack, named
+   `AT <adoption>/<template>` or `AT <adoption>/<template>/<row>` (SPEC
+   §§6, 10.5). Rendered tests execute exactly as game-local ones do, after the
+   package and pack have passed package validation. The format defines their
+   package shape but not their runtime execution semantics (SPEC §§2d, 6), so
+   executing them is this protocol's obligation. Use the exact
    runner profile id and version named by `evidence.runner`; the runner may be
    a person, a capable agent, or a versioned harness. Report
    non-acceptance checkpoints separately; do not silently count them as tests
-   or hide them when they fail.
+   or hide them when they fail. The [Runner profile](#runner-profile) states
+   the execution meanings the format leaves open. For each game-local general
+   test, record its id in `evidence.acceptance.sampled` when the runner checked
+   a sample rather than the whole scope.
 3. **Runtime data matches the resolved snapshot.** Resolve personalization in
-   declared order. For every `meta.<key>.must_match: true` entry in `tunables` or
-   `constants`, and every contract knob a surface pins the same way (SPEC
-   §10.6), compare the value actually consumed at runtime with the
+   declared order. For every key in `resolved_tuning.values` the audit chooses
+   to check, including each fixed contract value at
+   `contracts.<adoption>.<value>` (SPEC §10.6), compare the value actually consumed at runtime with the
    corresponding resolved value. Source-file equality alone is insufficient.
+   The [Audit profile](#audit-profile) owns this selection and comparison.
 4. **`opengdd-build.json` is complete.** The build record identifies the
    format revision, spec and build, designer and builder, personalization
    answers, full resolved tuning snapshot, the `evidence` record's counts,
-   result hash, conditional runner identity, and one observation context for
-   every measured direction constraint.
+   result hash, and conditional runner identity. The runner identity resolves
+   to the [Runner profile](#runner-profile).
 5. **The result hash is reproducible.** The evidence defines exactly which
    payload is hashed and uses the canonical serialization below.
 6. **A separate audit supports the verdict.** The builder's own green result
-   is evidence, not the final judgment.
+   is evidence, not the final judgment. Apply the [Audit profile](#audit-profile).
 
 ## Canonical hash serialization
 
@@ -88,37 +92,95 @@ payload `covers`.
 
 ## Adopted contract records
 
-A build of a package that adopts contracts (SPEC §10) pins which cores it was
-tested against. The certification record carries one entry per contract
-instance:
+A checked adoption is pinned in the build record by the verification pack's
+content hash. `evidence.contracts` carries one closed entry per checked
+adoption and no promised adoption:
 
 ```json
 {
-  "instance": "stamina",
-  "id": "ranged-value",
-  "version": 1,
-  "origin": { "author": "…" },
-  "digest": "<64 lowercase hex>"
+  "adoption": "stamina",
+  "pack": "sha256:<64 lowercase hex>"
 }
 ```
 
-`instance` is the instance id. `id` and `version` name the core, and `origin`
-repeats the core's own `origin` object, absent where the core declares none.
-`digest` is the SHA-256 of the UTF-8 bytes of that instance's vendored `core`
-object serialized in SPEC §10.10's canonical form — two-space indentation,
-authored field order, `_`-prefixed annotations included, LF line
-endings — recorded as lowercase hexadecimal.
+`pack` is the SHA-256 of the exact bytes of
+`contracts/<contract>-<version>.pack.json`. The
+source-backed record check requires the adoption ids and hashes to equal the
+source package exactly (SPEC §§7, 10.5). The pack is immutable under that hash,
+so this record says which rendered tests the reported acceptance count used.
 
-That is a deliberate departure from the canonical hash serialization above,
-and the only one this protocol defines: a core's digest covers the bytes a
-package actually carries and a reader actually diffs, not a re-sorted compact
-form. Every field is covered, so editing `origin` or an annotation moves the
-digest, which is the point — two unrelated cores may both call themselves
-`health-1` (SPEC §10.3), and a certificate has to say which one it covers.
+The audit separately records the identity it actually judged for every
+adoption, promised or checked:
 
-The digest is the builder's claim. Recomputing it is the auditor's work, under
-audit question 5 below; no package-conformance or record-conformance check
-reproduces it (SPEC §2d).
+```json
+{
+  "adoption": "stamina",
+  "contract": "ranged-value",
+  "version": 1,
+  "origin": "https://opengdd.org/contracts/ranged-value-1",
+  "definition_digest": "<64 lowercase hex>"
+}
+```
+
+`definition_digest` uses the **audit identity serialization**: omit `answers`,
+`values`, `rows`, and `verification`; keep `_`-prefixed annotations; serialize
+the remaining object with two-space indentation and authored member order; use
+LF endings and no trailing newline; encode as UTF-8; and record the lowercase
+hexadecimal SHA-256. The validator's **definition-comparison form** is
+different: it strips annotations and emits the top-level definition fields in
+SPEC §10.2 order before comparing adoptions, while preserving member order
+inside them. The audit keeps annotations because they are part of what the
+auditor actually judged. The audit serialization exposes a fork without
+making an online catalogue lookup a package check (SPEC §10.9).
+
+Both digests are claims. The source-backed record validator checks the pack
+hash; the auditor recomputes the definition digest under audit question 5.
+
+## Runner profile
+
+This profile is experimental; nothing in the package validator reads it. A
+runtime result names the runner profile through the non-empty `id` and
+`version` strings in `evidence.runner`. The runner's published description
+must give those exact strings and state the execution meanings below.
+
+For a general test, the description states how the runner samples or walks the
+declared `scope`. When `seeds` is present, it states that method and its sample
+count for each seed. The package owns `scope`, `holds`, and `seeds`; a runner
+never narrows them.
+
+When the runner samples a game-local general test, the build record names it
+in `evidence.acceptance.sampled`. The runner may report that the checked cases
+met the claim, including a measure bounded by the test's `holds` sentence. It
+MUST NOT report that a sample established absence, a minimum, or a universal.
+When the whole declared scope was walked, the result may establish those
+claims.
+
+The description also states the replay schedule and action vocabulary it
+accepts, and how it takes observations for `target` and `tolerance`. Those
+meanings belong to that named runner and do not become format vocabulary.
+
+## Audit profile
+
+This profile is experimental; nothing in the package validator reads it. In its
+own record, the audit records the id of the capture recipe it used under
+`capture_profile`; `capture_profile` is not a field in `opengdd-build.json`.
+The one existing recipe id is `web-1`:
+
+- advance gameplay on a synthetic 60 Hz clock;
+- sample full-viewport frames at 12 fps; and
+- record the input hash, duration, rates and counts, determinism checks, and
+  artifact paths in the capture manifest.
+
+The builder may attach any further evidence the audit asks for. The format
+does not name that evidence or give it a fixed shape.
+
+The audit chooses and records its scope over `resolved_tuning.values`, then
+compares those values with what the build consumes. For judged direction it
+reviews pillars, mood, anti-references, and what must stay under the package's
+`viewing` conditions, blind to the builder's identity; uses qualified judges
+where a borrow reaches a real place, people, culture, or living tradition;
+and records per-claim observations. Its result reports adherence and coverage
+as two separate axes.
 
 ## Separate audit
 
@@ -146,20 +208,14 @@ should answer these questions:
 7. **What falls outside the sampled tests?** Record weak diagnostics,
    tautological checkpoints, unsupported assertions, and overclaimed report
    language.
-8. **Are opaque replay claims grounded?** Confirm that every runner-interpreted
-   replay-input path stays inside the package, that structured replay content
-   is declared through SPEC §1b, and that every expected `target` is grounded
-   in an input or schedule the runner actually supplies. These are audit
-   obligations because SPEC §6 leaves replay entries other than its §4b clock
-   fields runner-defined.
+8. **Are opaque replay claims grounded?** The whole `replay` object is
+   runner-defined. Confirm that every runner-interpreted replay-input path
+   stays inside the package, that structured replay content is declared
+   through SPEC §1b, and that every expected `target` is grounded in input the
+   runner actually supplies. The runner profile names the schedule and action
+   vocabulary it accepts; that vocabulary is not yet standardized.
 9. **Is the result attributable?** Re-run with the exact `evidence.runner`
-   id and version. For every `evidence.direction_observations` entry, confirm
-   that its context describes what the run actually observed and that the
-   observation covers the cited claim's full declared scope.
-
-Judged direction claims (SPEC §9.10) are outside this draft's audit scope:
-their panel protocol is not yet integrated, `direction_result.judged.status`
-stays `"pending"`, and no verdict below asserts whole-direction adherence.
+   id and version.
 
 ## Verdict and evidence
 

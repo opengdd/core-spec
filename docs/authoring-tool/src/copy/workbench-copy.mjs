@@ -6,30 +6,24 @@ export const WORKBENCH_COPY = Object.freeze({
   noPackageFiles: "No package files yet",
   createMinimalPackage: "Create a minimal package",
   nothingDeclared: "Nothing declared yet",
-  createIdentifier: "Create an identifier",
+  createIdentifier: "Create a pillar",
   nothingSelected: "Nothing selected",
-  chooseOutlineItem: "Choose something in the outline",
   collapsePanel: label => `Collapse ${label.toLowerCase()}`,
   resizePanel: label => `Resize ${label}`,
   collapsedColumns: "Collapsed columns",
   openExplorer: "Open file explorer",
   openOutline: "Open outline",
   openInspector: "Open inspector",
+  backToText: "Back to your text",
   persistenceDenied: "This browser may clear this draft when space is low. Export a ZIP to keep a copy.",
   theme: "Theme",
   themes: Object.freeze(["Light", "Dark", "System"]),
   packageStatus: "Package status",
-  // provisional [for Kazimir]
   errorsPending: "Errors: —",
-  // provisional [for Kazimir]
   warningsPending: "Warnings: —",
-  // provisional [for Kazimir]
   validationChecking: "checking",
-  // provisional [for Kazimir]
   validationUnavailable: "unavailable",
-  // provisional [for Kazimir]
   validationStopped: "stopped",
-  // provisional [for Kazimir]
   validationDone: "done",
   errors: count => `Errors: ${count}`,
   warnings: count => `Warnings: ${count}`,
@@ -42,7 +36,6 @@ export const WORKBENCH_COPY = Object.freeze({
   storageProtected: "Browser storage protected",
   storageMayBeCleared: "Browser storage may be cleared",
   notSaved: "Not saved",
-  // provisional [for Kazimir]
   version: (tool, spec) => `v${tool} · OpenGDD ${spec}`,
   undoHistory: "Undo history",
   undoAction: action => `Undo ${action}`,

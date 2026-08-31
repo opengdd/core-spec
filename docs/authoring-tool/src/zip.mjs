@@ -32,7 +32,7 @@ function stripCommonRoot(entries) {
     .map(entry => ({ ...entry, path: entry.path.startsWith(root) ? entry.path.slice(root.length) : entry.path }));
 }
 
-export async function readZip(file) {
+export async function readZip(file, { preserveTextBytes = false } = {}) {
   const buffer = await file.arrayBuffer();
   const view = new DataView(buffer);
   const end = endRecord(view);
@@ -98,7 +98,9 @@ export async function readZip(file) {
     } else {
       if (files.has(path)) throw new Error(`Duplicate zip path: ${path}`);
       claim(path, "file");
-      files.set(path, TEXT_FILE.test(path) ? decoder.decode(entry.bytes) : new Uint8Array(entry.bytes));
+      // Contract packs identify their exact bytes. Their import path asks for
+      // text entries as bytes so decoding cannot discard a leading BOM.
+      files.set(path, TEXT_FILE.test(path) && !preserveTextBytes ? decoder.decode(entry.bytes) : new Uint8Array(entry.bytes));
     }
   }
   if (!files.size) throw new Error("The zip contains no package files.");

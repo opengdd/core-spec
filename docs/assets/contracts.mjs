@@ -30,37 +30,6 @@ function setupSearch() {
   input.addEventListener("input", update);
 }
 
-function setupTabs(root) {
-  const tabs = [...root.querySelectorAll("[data-contract-tab]")];
-  const panels = [...root.querySelectorAll("[data-contract-panel]")];
-  if (!tabs.length) return;
-
-  const activate = (tab, moveFocus = false) => {
-    for (const candidate of tabs) {
-      const active = candidate === tab;
-      candidate.setAttribute("aria-selected", String(active));
-      candidate.tabIndex = active ? 0 : -1;
-    }
-    for (const panel of panels) panel.hidden = panel.dataset.contractPanel !== tab.dataset.contractTab;
-    if (moveFocus) tab.focus();
-  };
-
-  tabs.forEach((tab, index) => {
-    tab.addEventListener("click", () => activate(tab));
-    tab.addEventListener("keydown", (event) => {
-      let next = null;
-      if (event.key === "ArrowRight") next = (index + 1) % tabs.length;
-      if (event.key === "ArrowLeft") next = (index - 1 + tabs.length) % tabs.length;
-      if (event.key === "Home") next = 0;
-      if (event.key === "End") next = tabs.length - 1;
-      if (next === null) return;
-      event.preventDefault();
-      activate(tabs[next], true);
-    });
-  });
-  activate(tabs.find((tab) => tab.getAttribute("aria-selected") === "true") || tabs[0]);
-}
-
 function flagCondition(when, selections) {
   const flags = when?.flag ?? {};
   let unresolved = false;
@@ -110,10 +79,6 @@ function setupExploration(root) {
     for (const input of question.querySelectorAll("[data-contract-choice]")) {
       input.addEventListener("change", () => {
         selections.set(flag, input.value);
-        question.querySelector(".contract-choice-prompt")?.setAttribute("hidden", "");
-        for (const explanation of question.querySelectorAll("[data-choice-explanation]")) {
-          explanation.hidden = explanation.dataset.choiceExplanation !== input.value;
-        }
         update();
       });
     }
@@ -122,10 +87,6 @@ function setupExploration(root) {
   root.querySelector("[data-reset-choices]")?.addEventListener("click", () => {
     selections.clear();
     for (const input of root.querySelectorAll("[data-contract-choice]")) input.checked = false;
-    for (const question of questions) {
-      question.querySelector(".contract-choice-prompt")?.removeAttribute("hidden");
-      for (const explanation of question.querySelectorAll("[data-choice-explanation]")) explanation.hidden = true;
-    }
     update();
   });
   update();
@@ -152,23 +113,36 @@ function setupPreset(root) {
 }
 
 function setupCopy(root) {
-  const button = root.querySelector("[data-copy-core]");
-  if (!button) return;
-  const status = root.querySelector("[data-copy-status]");
-  button.addEventListener("click", async () => {
+  const buttons = [...root.querySelectorAll("[data-copy-core]")];
+  if (!buttons.length) return;
+  for (const button of buttons) button.addEventListener("click", async () => {
+    const status = button.closest(".contract-actions")?.querySelector("[data-copy-status]");
     try {
-      await navigator.clipboard.writeText(root.querySelector("[data-core-json]").textContent);
-      status.textContent = "Original JSON copied.";
+      const response = await fetch(button.dataset.coreUrl);
+      if (!response.ok) throw new Error("Definition could not be loaded.");
+      await navigator.clipboard.writeText(await response.text());
+      if (status) status.textContent = "Definition copied.";
     } catch {
-      status.textContent = "Copy was blocked by the browser. The download still works.";
+      if (status) status.textContent = "Copy failed — use Download.";
     }
   });
 }
 
+function setupNav() {
+  // The nav disclosure ships closed. Wide screens reveal it in CSS through
+  // ::details-content; browsers without that pseudo-element get it opened here.
+  const disclosure = document.querySelector(".contract-nav-disclosure");
+  if (!disclosure || typeof matchMedia !== "function") return;
+  const wide = matchMedia("(min-width: 901px)");
+  const sync = () => { disclosure.open = wide.matches; };
+  sync();
+  wide.addEventListener("change", sync);
+}
+
 setupSearch();
+setupNav();
 const contractRoot = document.querySelector("[data-contract-root]");
 if (contractRoot) {
-  setupTabs(contractRoot);
   setupExploration(contractRoot);
   setupPreset(contractRoot);
   setupCopy(contractRoot);

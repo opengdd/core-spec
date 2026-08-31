@@ -6,7 +6,7 @@ const CHAPTER_PATHS = [
   "05-build-plan.md"
 ];
 
-export const SUPPORTED_OPENGDD_VERSION = "0.6";
+export const SUPPORTED_OPENGDD_VERSION = "0.7";
 
 const json = value => `${JSON.stringify(value, null, 2)}\n`;
 
@@ -35,7 +35,6 @@ export function createFiveChapterPackage({
   target,
   chapters,
   tuning,
-  build = {},
   manifest = {},
   files = []
 }) {
@@ -50,10 +49,6 @@ export function createFiveChapterPackage({
     title,
     designer,
     target,
-    build: {
-      chapters: CHAPTER_PATHS.slice(0, 4),
-      ...build
-    },
     ...manifest
   }));
   packageFiles.set("tuning.json", json(tuning));
@@ -65,19 +60,16 @@ export function createScaffoldPackage(id, title) {
   const files = new Map([
     ["01-overview.md", `# ${title}\n\n\`\`\`fantasy\nYou are an explorer charting a pocket world that rearranges itself as you walk.\nFeel: curious, playful, surprising.\nNOT: grim.\n\`\`\`\n`],
     ["02-mechanics.md", "# Mechanics\n\nFixed: State the complete rules of the game here.\n"],
-    ["05-build-plan.md", `# Build plan\n\n## Phase 1: core-loop\n\n## Phase 2: content\n\n## Phase 3: tuning\n\n## Phase 4: presentation\n\n## Phase 5: polish\n\n## AT-1 — The starter behavior works\n\n\`\`\`test\n{\n  "type": "scenario",\n  "given": "the game is ready to test",\n  "when": "the designer performs the central action",\n  "then": "the game shows the intended result"\n}\n\`\`\`\n\nThe plain-language check performs the central action and observes whether the intended result is visible.\n`],
+    ["05-build-plan.md", `# Build plan\n\n## Phase 1: core-loop\n\n## Phase 2: content\n\n## Phase 3: tuning\n\n## Phase 4: presentation\n\n## Phase 5: polish\n\n## AT-1 — The starter behavior works\n\n\`\`\`test\n{\n  "type": "scenario",\n  "given": "the game is ready to test",\n  "when": "the designer performs the central action",\n  "then": "the game shows the intended result"\n}\n\`\`\`\n`],
     ["manifest.json", json({
       opengdd: SUPPORTED_OPENGDD_VERSION,
       id,
       version: "0.1.0",
       title,
       designer: { name: "Designer" },
-      target: { platform: "web-2d", genre: "game" },
-      build: {
-        chapters: ["01-overview.md", "02-mechanics.md"]
-      }
+      target: { platform: "web-2d", genre: "game" }
     })],
-    ["tuning.json", json({ tunables: {} })]
+    ["tuning.json", json({ values: {} })]
   ]);
   return { id, title, files, folders: new Set() };
 }

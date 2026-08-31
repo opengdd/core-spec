@@ -7,10 +7,14 @@ import { AUTHORING_TOOL_VERSION } from "opengdd-authoring-version";
 const THEME_KEY = "opengdd-workbench-theme";
 const LAYOUT_KEY = "opengdd-workbench-layout";
 const STORAGE_KEY = "opengdd-workbench-storage-protected";
-const COLUMN_ORDER = ["inspector", "explorer", "outline"];
-const SIDE_COLUMNS = ["explorer", "outline", "inspector"];
-const DEFAULT_WIDTHS = { explorer: 256, outline: 256, inspector: 288 };
+const COLUMN_ORDER = ["explorer", "outline"];
+const SIDE_COLUMNS = ["explorer", "outline"];
+const COLLAPSIBLE_REGIONS = [...SIDE_COLUMNS, "inspector"];
+const DEFAULT_WIDTHS = { explorer: 256, outline: 256 };
 const WIDE_BREAKPOINT_REM = 64;
+const INSPECTOR_FLOOR_REM = 12;
+const EDITOR_FLOOR_REM = 8;
+const SHEET_AUTO_OPEN_SURFACES = new Set(["sidebar", "panel"]);
 
 function readLocal(key, fallback = null) {
   try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; }
@@ -23,16 +27,20 @@ function writeLocal(key, value) {
 function readLayout() {
   try {
     const value = JSON.parse(readLocal(LAYOUT_KEY, "{}"));
+    const inspectorHeight = Number(value.inspectorHeight);
     return {
-      widths: { ...DEFAULT_WIDTHS, ...value.widths },
-      userCollapsed: value.userCollapsed?.filter(name => SIDE_COLUMNS.includes(name)) ?? [],
+      widths: Object.fromEntries(SIDE_COLUMNS.map(name => [name,
+        Number.isFinite(Number(value.widths?.[name])) ? Number(value.widths[name]) : DEFAULT_WIDTHS[name]
+      ])),
+      inspectorHeight: Number.isFinite(inspectorHeight) && inspectorHeight > 0 ? inspectorHeight : null,
+      userCollapsed: value.userCollapsed?.filter(name => COLLAPSIBLE_REGIONS.includes(name)) ?? [],
       fitCollapsed: value.fitCollapsed?.filter(name => SIDE_COLUMNS.includes(name)) ?? [],
       collectionCollapsed: Array.isArray(value.collectionCollapsed)
         ? value.collectionCollapsed.filter(name => typeof name === "string")
         : []
     };
   } catch {
-    return { widths: { ...DEFAULT_WIDTHS }, userCollapsed: [], fitCollapsed: [], collectionCollapsed: [] };
+    return { widths: { ...DEFAULT_WIDTHS }, inspectorHeight: null, userCollapsed: [], fitCollapsed: [], collectionCollapsed: [] };
   }
 }
 
@@ -88,12 +96,26 @@ function shellMarkup() {
         <div class="opengdd-workbench-resizer" data-resize="explorer" role="separator" aria-label="${WORKBENCH_COPY.resizePanel(WORKBENCH_COPY.explorer)}" aria-orientation="vertical" tabindex="0"></div>
         <section id="workbench-prose" class="opengdd-workbench-panel opengdd-workbench-panel--prose" data-panel="prose" aria-label="${WORKBENCH_COPY.prose}" tabindex="0">
           <header class="opengdd-workbench-panel-header"><h2>${WORKBENCH_COPY.prose}</h2></header>
-          <div class="opengdd-workbench-author-region" data-author-region="prose"></div>
+          <div class="opengdd-workbench-prose-content" data-prose-content>
+            <div class="opengdd-workbench-prose-editor"><div class="opengdd-workbench-author-region" data-author-region="prose"></div></div>
+            <section class="opengdd-workbench-inspector-band" data-inspector-band aria-label="${WORKBENCH_COPY.inspector}">
+              <div class="opengdd-workbench-resizer opengdd-workbench-resizer--horizontal" data-resize="inspector" role="separator" aria-label="${WORKBENCH_COPY.resizePanel(WORKBENCH_COPY.inspector)}" aria-orientation="horizontal" tabindex="0"></div>
+              <header class="opengdd-workbench-panel-header opengdd-workbench-inspector-band-header" data-inspector-strip tabindex="-1">
+                <h2>${WORKBENCH_COPY.inspector}</h2>
+                <button type="button" class="opengdd-workbench-collapse" data-collapse="inspector" aria-label="${WORKBENCH_COPY.collapsePanel(WORKBENCH_COPY.inspector)}">×</button>
+              </header>
+        <div class="opengdd-workbench-author-region" data-author-region="inspector"></div>
+            </section>
+            <section class="opengdd-workbench-inspector-sheet" data-inspector-sheet aria-label="${WORKBENCH_COPY.inspector}" hidden>
+              <header class="opengdd-workbench-panel-header opengdd-workbench-inspector-sheet-header">
+                <button type="button" data-inspector-back>${WORKBENCH_COPY.backToText}</button>
+                <h2>${WORKBENCH_COPY.inspector}</h2>
+              </header>
+            </section>
+          </div>
         </section>
         <div class="opengdd-workbench-resizer" data-resize="outline" role="separator" aria-label="${WORKBENCH_COPY.resizePanel(WORKBENCH_COPY.outline)}" aria-orientation="vertical" tabindex="0"></div>
         ${panelMarkup("outline", WORKBENCH_COPY.outline, WORKBENCH_COPY.nothingDeclared, WORKBENCH_COPY.createIdentifier)}
-        <div class="opengdd-workbench-resizer" data-resize="inspector" role="separator" aria-label="${WORKBENCH_COPY.resizePanel(WORKBENCH_COPY.inspector)}" aria-orientation="vertical" tabindex="0"></div>
-        ${panelMarkup("inspector", WORKBENCH_COPY.inspector, WORKBENCH_COPY.nothingSelected, WORKBENCH_COPY.chooseOutlineItem)}
       </main>
       <footer class="opengdd-workbench-status" aria-label="${WORKBENCH_COPY.packageStatus}" tabindex="0">
         <div class="opengdd-workbench-component-status" data-author-region="status">
@@ -117,6 +139,15 @@ export function mountWorkbenchShell(target, { panels } = {}) {
   const state = readLayout();
   function saveLayout() { writeLocal(LAYOUT_KEY, JSON.stringify(state)); }
   const grid = target.querySelector(".opengdd-workbench-grid");
+  const proseContent = target.querySelector("[data-prose-content]");
+  const proseEditor = target.querySelector(".opengdd-workbench-prose-editor");
+  const inspectorBand = target.querySelector("[data-inspector-band]");
+  const inspectorSheet = target.querySelector("[data-inspector-sheet]");
+  const inspectorStrip = target.querySelector("[data-inspector-strip]");
+  const inspectorCollapse = target.querySelector('[data-collapse="inspector"]');
+  const inspectorBack = target.querySelector("[data-inspector-back]");
+  const inspectorOpen = target.querySelector('[data-open="inspector"]');
+  const inspectorResize = target.querySelector('[data-resize="inspector"]');
   const storageStatus = target.querySelector("[data-storage-status]");
   const storageNotice = target.querySelector(".opengdd-workbench-storage-notice");
   const regions = {
@@ -128,6 +159,148 @@ export function mountWorkbenchShell(target, { panels } = {}) {
     status: target.querySelector('[data-author-region="status"]'),
     undo: target.querySelector('[data-author-region="undo"]')
   };
+  let authoring;
+  let savedEditorState = null;
+  let inspectorMode = "band";
+  let sheetOpen = false;
+  let inspectorSelection = null;
+  let bandHeaderRatio = 0;
+  let bandHeaderHeight = 0;
+  let bandHeight = 0;
+  let drawer = null;
+  let drawerButton = null;
+  let inspectorObserver;
+  let layoutObserver;
+  let selectionCancel = () => {};
+
+  const collapsed = name => state.userCollapsed.includes(name) || state.fitCollapsed.includes(name);
+  const inspectorCollapsed = () => state.userCollapsed.includes("inspector");
+  const rootSize = () => Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  const hasInspectorSelection = () => authoring?.inspectorMatches(inspectorSelection) ?? false;
+  const selectionOpensSheet = selection => SHEET_AUTO_OPEN_SURFACES.has(selection?.origin?.surface);
+  const saveEditorState = () => { savedEditorState = authoring?.editorState() ?? savedEditorState; };
+  const restoreEditorState = () => authoring?.restoreEditorState(savedEditorState) ?? false;
+
+  function measureBandHeader(currentRootSize = rootSize()) {
+    const measured = inspectorStrip.getBoundingClientRect().height;
+    if (measured > 0) bandHeaderRatio = measured / currentRootSize;
+    bandHeaderHeight = (bandHeaderRatio || 2.7) * currentRootSize;
+    inspectorBand.style.setProperty("--opengdd-workbench-inspector-header-height", `${bandHeaderHeight}px`);
+    return bandHeaderHeight;
+  }
+
+  function inspectorLimits() {
+    const currentRootSize = rootSize();
+    const headerHeight = measureBandHeader(currentRootSize);
+    return {
+      floor: INSPECTOR_FLOOR_REM * currentRootSize + headerHeight,
+      ceiling: proseContent.getBoundingClientRect().height - EDITOR_FLOOR_REM * currentRootSize
+    };
+  }
+
+  measureBandHeader();
+  bandHeight = INSPECTOR_FLOOR_REM * rootSize() + bandHeaderHeight;
+
+  function clearDrawer() {
+    drawer = null;
+    drawerButton = null;
+  }
+
+  function renderInspectorLayout() {
+    const selectionPresent = hasInspectorSelection();
+    const collapsedBand = inspectorMode === "band" && inspectorCollapsed();
+    inspectorOpen.hidden = !(collapsedBand || (inspectorMode === "sheet" && !sheetOpen && selectionPresent));
+
+    if (inspectorMode === "band") {
+      sheetOpen = false;
+      inspectorSheet.hidden = true;
+      proseEditor.hidden = false;
+      inspectorBand.hidden = false;
+      if (regions.inspector.parentElement !== inspectorBand) inspectorBand.append(regions.inspector);
+      inspectorBand.classList.toggle("opengdd-workbench-inspector-band--collapsed", collapsedBand);
+      inspectorBand.style.height = collapsedBand ? "" : `${bandHeight}px`;
+      inspectorResize.hidden = collapsedBand;
+      inspectorStrip.tabIndex = collapsedBand ? 0 : -1;
+      if (collapsedBand) {
+        inspectorStrip.setAttribute("role", "button");
+        inspectorStrip.setAttribute("aria-label", WORKBENCH_COPY.openInspector);
+        inspectorStrip.setAttribute("aria-expanded", "false");
+      } else {
+        inspectorStrip.removeAttribute("role");
+        inspectorStrip.removeAttribute("aria-label");
+        inspectorStrip.removeAttribute("aria-expanded");
+      }
+      inspectorCollapse.hidden = collapsedBand;
+      inspectorCollapse.setAttribute("aria-expanded", String(!collapsedBand));
+      regions.inspector.hidden = collapsedBand;
+      return;
+    }
+
+    inspectorBand.hidden = true;
+    if (sheetOpen && selectionPresent) {
+      proseEditor.hidden = true;
+      inspectorSheet.hidden = false;
+      if (regions.inspector.parentElement !== inspectorSheet) inspectorSheet.append(regions.inspector);
+      regions.inspector.hidden = false;
+    } else {
+      sheetOpen = false;
+      proseEditor.hidden = false;
+      inspectorSheet.hidden = true;
+      if (regions.inspector.parentElement !== inspectorBand) inspectorBand.append(regions.inspector);
+      regions.inspector.hidden = true;
+    }
+  }
+
+  function closeDrawer(returnFocus = false) {
+    if (!drawer) return;
+    const invokingButton = drawerButton;
+    clearDrawer();
+    renderLayout();
+    if (returnFocus) invokingButton?.focus();
+  }
+
+  function openInspector() {
+    if (inspectorMode === "band") {
+      state.userCollapsed = state.userCollapsed.filter(name => name !== "inspector");
+      renderInspectorLayout();
+      saveLayout();
+      target.querySelector('[data-collapse="inspector"]')?.focus();
+      return;
+    }
+    if (!hasInspectorSelection()) return;
+    saveEditorState();
+    if (drawer) closeDrawer(false);
+    sheetOpen = true;
+    renderInspectorLayout();
+    inspectorBack.focus();
+  }
+
+  function closeSheet(returnFocus = true) {
+    if (inspectorMode !== "sheet" || !sheetOpen) return;
+    sheetOpen = false;
+    renderInspectorLayout();
+    if (returnFocus && !restoreEditorState()) authoring.focusEditor();
+  }
+
+  function selectionChanged(selection) {
+    inspectorSelection = selection;
+    let focusSheetBack = false;
+    if (inspectorMode === "sheet") {
+      if (!hasInspectorSelection()) {
+        sheetOpen = false;
+      // The sheet auto-opens only from the outline or an inspector panel.
+      // Explorer navigation asks for the editor, just like prose selection.
+      } else if (!sheetOpen && selectionOpensSheet(selection)) {
+        saveEditorState();
+        if (drawer) closeDrawer(false);
+        sheetOpen = true;
+        focusSheetBack = true;
+      }
+    }
+    renderInspectorLayout();
+    if (focusSheetBack) inspectorBack.focus();
+  }
+
   const encodePath = value => value.split("/").map(encodeURIComponent).join("/");
   let schemaRequest;
   let exampleRequest;
@@ -135,7 +308,7 @@ export function mountWorkbenchShell(target, { panels } = {}) {
     .catch(error => { schemaRequest = undefined; throw error; });
   const loadExample = () => exampleRequest ??= requestJson("/api/authoring/package?package=tic-tac-toe")
     .catch(error => { exampleRequest = undefined; throw error; });
-  const authoring = mountAuthoringTool(target.querySelector("[data-author-root]"), {
+  authoring = mountAuthoringTool(target.querySelector("[data-author-root]"), {
     schemas: loadSchemas,
     defaultPackageId: "tic-tac-toe",
     regions,
@@ -165,46 +338,25 @@ export function mountWorkbenchShell(target, { panels } = {}) {
       return `/read/${encodePath(`${packagePath}${file}`)}`;
     }
   });
-  let savedEditorState = null;
-  const saveEditorState = () => { savedEditorState = authoring.editorState() ?? savedEditorState; };
-  const restoreEditorState = () => {
-    return authoring.restoreEditorState(savedEditorState);
-  };
+  selectionCancel = authoring.selection.subscribe(selectionChanged);
+  selectionChanged(authoring.selection.current());
   for (const type of ["focusin", "focusout", "select", "input", "keyup", "pointerup", "scroll"]) {
     target.addEventListener(type, saveEditorState, true);
   }
-  let drawer = null;
-  let drawerButton = null;
-  let inspectorObserver;
-  let layoutObserver;
   const filterOutlineFromStatus = event => {
     if (event.target instanceof HTMLButtonElement) authoring.outlineProblemsOnly(true);
   };
   regions.status.addEventListener("click", filterOutlineFromStatus);
 
-  const collapsed = name => state.userCollapsed.includes(name) || state.fitCollapsed.includes(name);
   const isWideMode = () => {
     const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
     return target.querySelector(".opengdd-workbench-supported").getBoundingClientRect().width >= WIDE_BREAKPOINT_REM * rootSize;
   };
   let wideMode = isWideMode();
 
-  function clearDrawer() {
-    drawer = null;
-    drawerButton = null;
-  }
-
-  function closeDrawer(returnFocus = false) {
-    if (!drawer) return;
-    const invokingButton = drawerButton;
-    clearDrawer();
-    renderLayout();
-    if (returnFocus) invokingButton?.focus();
-  }
-
   function renderLayout() {
     const columns = [];
-    for (const name of ["explorer", "prose", "outline", "inspector"]) {
+    for (const name of ["explorer", "prose", "outline"]) {
       const panel = target.querySelector(`[data-panel=${name}]`);
       const shownAsDrawer = !wideMode && drawer === name;
       const shown = name === "prose" || !collapsed(name) || shownAsDrawer;
@@ -219,10 +371,11 @@ export function mountWorkbenchShell(target, { panels } = {}) {
     }
     grid.dataset.layoutMode = wideMode ? "wide" : "narrow";
     grid.style.gridTemplateColumns = columns.join(" ");
-    for (const handle of target.querySelectorAll("[data-resize]")) {
+    for (const handle of target.querySelectorAll('[data-resize]:not([data-resize="inspector"])')) {
       const name = handle.dataset.resize;
       handle.hidden = collapsed(name) || (!wideMode && drawer === name);
     }
+    renderInspectorLayout();
   }
 
   function fitColumns() {
@@ -280,6 +433,10 @@ export function mountWorkbenchShell(target, { panels } = {}) {
 
   for (const button of target.querySelectorAll("[data-open]")) {
     button.addEventListener("click", () => {
+      if (button.dataset.open === "inspector") {
+        openInspector();
+        return;
+      }
       if (wideMode) {
         const name = button.dataset.open;
         state.userCollapsed = state.userCollapsed.filter(column => column !== name);
@@ -301,6 +458,13 @@ export function mountWorkbenchShell(target, { panels } = {}) {
   for (const button of target.querySelectorAll("[data-collapse]")) {
     button.addEventListener("click", () => {
       const name = button.dataset.collapse;
+      if (name === "inspector") {
+        if (!state.userCollapsed.includes(name)) state.userCollapsed.push(name);
+        renderInspectorLayout();
+        saveLayout();
+        inspectorOpen.focus();
+        return;
+      }
       if (!state.userCollapsed.includes(name)) state.userCollapsed.push(name);
       closeDrawer();
       renderLayout();
@@ -310,44 +474,89 @@ export function mountWorkbenchShell(target, { panels } = {}) {
     });
   }
 
-  target.addEventListener("keydown", event => {
+  inspectorStrip.addEventListener("click", event => {
+    if (!inspectorCollapsed() || event.target.closest("button")) return;
+    openInspector();
+  });
+  inspectorStrip.addEventListener("keydown", event => {
+    if (!inspectorCollapsed() || !["Enter", " "].includes(event.key)) return;
+    event.preventDefault();
+    openInspector();
+  });
+  inspectorBack.addEventListener("click", () => closeSheet(true));
+
+  // Named so destroy() can remove it: a destroyed shell's Escape handler left
+  // on the host would preventDefault first and the live shell would then
+  // ignore the key (found by the harness's destroy-and-remount case).
+  const onEscape = event => {
     if (event.key !== "Escape") return;
     // A component surface that already handled this Escape (the delete
     // confirmation returning focus to its trigger) owns the focus outcome.
     if (event.defaultPrevented) return;
     if (event.target.closest('[data-author-region="prose"]')) return;
     event.preventDefault();
+    if (sheetOpen) {
+      if (drawer) closeDrawer(false);
+      inspectorBack.click();
+      return;
+    }
     if (drawer) closeDrawer(false);
     if (!restoreEditorState()) authoring.focusEditor();
-  });
+  };
+  target.addEventListener("keydown", onEscape);
 
   for (const handle of target.querySelectorAll("[data-resize]")) {
     handle.addEventListener("keydown", event => {
-      if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+      const horizontal = handle.dataset.resize === "inspector";
+      if (!(horizontal ? ["ArrowUp", "ArrowDown"] : ["ArrowLeft", "ArrowRight"]).includes(event.key)) return;
       event.preventDefault();
       const name = handle.dataset.resize;
-      const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      const currentRootSize = rootSize();
+      if (horizontal) {
+        const delta = event.key === "ArrowUp" ? 16 : -16;
+        const { floor, ceiling } = inspectorLimits();
+        state.inspectorHeight = Math.min(
+          ceiling,
+          Math.max(floor, bandHeight + delta)
+        );
+        bandHeight = state.inspectorHeight;
+        renderInspectorLayout();
+        saveLayout();
+        return;
+      }
       const direction = name === "explorer" ? 1 : -1;
       const delta = event.key === "ArrowRight" ? 16 : -16;
-      state.widths[name] = Math.max(12 * rootSize, state.widths[name] + direction * delta);
+      state.widths[name] = Math.max(12 * currentRootSize, state.widths[name] + direction * delta);
       renderLayout();
       saveLayout();
       fitColumns();
     });
     handle.addEventListener("pointerdown", event => {
       const name = handle.dataset.resize;
+      const horizontal = name === "inspector";
       const startX = event.clientX;
-      const startWidth = state.widths[name];
-      handle.setPointerCapture(event.pointerId);
+      const startY = event.clientY;
+      const startSize = horizontal ? bandHeight : state.widths[name];
+      try { handle.setPointerCapture(event.pointerId); } catch {}
       const move = moveEvent => {
+        if (horizontal) {
+          const { floor, ceiling } = inspectorLimits();
+          state.inspectorHeight = Math.min(
+            ceiling,
+            Math.max(floor, startSize - (moveEvent.clientY - startY))
+          );
+          bandHeight = state.inspectorHeight;
+          renderInspectorLayout();
+          return;
+        }
         const direction = name === "explorer" ? 1 : -1;
-        state.widths[name] = Math.max(12 * parseFloat(getComputedStyle(document.documentElement).fontSize), startWidth + direction * (moveEvent.clientX - startX));
+        state.widths[name] = Math.max(12 * parseFloat(getComputedStyle(document.documentElement).fontSize), startSize + direction * (moveEvent.clientX - startX));
         renderLayout();
       };
       const up = () => {
         handle.removeEventListener("pointermove", move);
         saveLayout();
-        fitColumns();
+        if (!horizontal) fitColumns();
       };
       handle.addEventListener("pointermove", move);
       handle.addEventListener("pointerup", up, { once: true });
@@ -356,19 +565,32 @@ export function mountWorkbenchShell(target, { panels } = {}) {
   }
 
   const measureInspector = () => {
-    const inspector = target.querySelector("[data-panel=inspector]");
-    if (inspector.hidden || inspector.classList.contains("opengdd-workbench-is-drawer")) return;
-    const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-    const box = inspector.getBoundingClientRect();
-    if (box.width < 16 * rootSize || box.height < 12 * rootSize) {
-      if (!state.fitCollapsed.includes("inspector")) state.fitCollapsed.unshift("inspector");
-      renderLayout();
-      saveLayout();
+    const currentRootSize = rootSize();
+    const contentHeight = proseContent.getBoundingClientRect().height;
+    if (contentHeight <= 0) return;
+    const headerHeight = measureBandHeader(currentRootSize);
+    const defaultPanelHeight = contentHeight / 3;
+    const defaultHeight = defaultPanelHeight + headerHeight;
+    const floor = INSPECTOR_FLOOR_REM * currentRootSize + headerHeight;
+    const defaultClearsFloor = defaultHeight >= floor;
+    const editorClearsFloor = contentHeight - defaultHeight >= EDITOR_FLOOR_REM * currentRootSize;
+    const nextMode = defaultClearsFloor && editorClearsFloor ? "band" : "sheet";
+    const modeChanged = nextMode !== inspectorMode;
+    inspectorMode = nextMode;
+    if (inspectorMode === "band") {
+      const ceiling = contentHeight - EDITOR_FLOOR_REM * currentRootSize;
+      bandHeight = Math.min(ceiling, Math.max(floor, state.inspectorHeight ?? defaultHeight));
+      sheetOpen = false;
+    } else if (modeChanged) {
+      sheetOpen = hasInspectorSelection() && selectionOpensSheet(inspectorSelection);
+      if (sheetOpen && drawer) closeDrawer(false);
     }
+    renderInspectorLayout();
   };
   if ("ResizeObserver" in window) {
     inspectorObserver = new ResizeObserver(measureInspector);
-    inspectorObserver.observe(target.querySelector("[data-panel=inspector]"));
+    inspectorObserver.observe(proseContent);
+    inspectorObserver.observe(document.documentElement);
   } else {
     window.addEventListener("resize", measureInspector);
   }
@@ -390,6 +612,7 @@ export function mountWorkbenchShell(target, { panels } = {}) {
 
   renderLayout();
   fitColumns();
+  measureInspector();
   requestPersistentStorage();
   if ("ResizeObserver" in window) {
     layoutObserver = new ResizeObserver(reconcileLayoutMode);
@@ -399,14 +622,20 @@ export function mountWorkbenchShell(target, { panels } = {}) {
   }
   // Test hook, not API: resize observers never fire in hidden tabs, so the
   // browser harness reconciles the layout mode itself after resizing.
-  const testHooks = { reconcileLayoutMode };
+  const testHooks = {
+    openPackage: authoring.openPackage,
+    reconcileLayoutMode,
+    resize() { reconcileLayoutMode(); measureInspector(); }
+  };
 
   return { testHooks, destroy() {
+    selectionCancel();
     authoring.destroy();
     for (const type of ["focusin", "focusout", "select", "input", "keyup", "pointerup", "scroll"]) {
       target.removeEventListener(type, saveEditorState, true);
     }
     regions.status.removeEventListener("click", filterOutlineFromStatus);
+    target.removeEventListener("keydown", onEscape);
     inspectorObserver?.disconnect();
     layoutObserver?.disconnect();
     window.removeEventListener("resize", reconcileLayoutMode);

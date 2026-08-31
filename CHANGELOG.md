@@ -1,545 +1,196 @@
 # OpenGDD changelog
 
+The format's early drafts carried a great deal of machinery that v0.6 and
+v0.7 removed. The full record of that, with diagnostic codes and schema
+changes, is in [the technical changelog](CHANGELOG-TECHNICAL.md).
+
+## v0.7 working draft — unreleased
+
+v0.7 asked where the format made a designer think like a programmer. The specification fell from 35,188 words to 17,988, schema properties from 178 to 91, and validator codes from 255 to 189.
+
+If you have a v0.6 package, run `npx opengdd migrate <package-dir>`. The tool
+does the mechanical part and hands back a short list only a designer can
+decide: most often, an `or` rule, a `document-check` test, or a graph claim
+that has no field form. `opengdd migrate --build <opengdd-build.json>`
+rewrites a v0.6 build record.
+
+**Numbers.** Three tables separate current values, allowed build choices, and required relationships (decision 36).
+
+- `tuning.json` now has `values`, optional `ranges`, and optional `rules`. Clocks moved to `clocks.json`.
+- A build records one snapshot of the values it resolved instead of separate tunable and constant maps.
+- Each rule is one comparison between two sums. It can use arithmetic, parentheses, `min`, `max`, and `floor`; write two rules when both comparisons must hold.
+- The validator checks ranges and rules in both the package and the build record.
+- You cannot start a tuning key with `colors`, `contrast`, `timing`, `values`, `ranges`, `rules`, or `runtime`. The validator names the word and suggests a new start. `references` and `viewing` work again.
+
+**Chapters.**
+
+- The validator reads numbered root chapters in filename order. `01` to `05` keep their standard names; designer chapters begin at `06`.
+- An unnumbered root Markdown file is not a chapter, but safety checks still read it.
+- The presence of `direction.json` or `personalization.json` declares that mechanism.
+- If chapters switch between sets of rules, mark each set with `> RULESET: <id>`. Exactly one tag carries `(initial)`.
+- One `#` title may appear before the fantasy block. In `target`, `platform` and `genre` are required; `session_minutes` and `audience` are optional.
+
+**Art direction.** Art direction moved into one `direction.json` (decision 39).
+
+- Palettes and moods moved from `manifest.json` into `direction.json`.
+- Pillars, results to avoid, and things that must stay are named sentences. Colors, contrast, and timing are direct lists, with one viewing context for the file.
+- Palette and mood references use dotted names such as `palette.ui.warning` and `mood.uneasy`. A timing promise names its tuning key without a `tuning:` prefix.
+- You no longer record media hashes, formats, per-claim audit fields, test mirrors, or a direction fence. Images still use package paths and licences. `may_vary` retired, so you no longer write it.
+- Build records no longer carry direction judgments.
+
+**Collections and links.** A link now states its target and rules on the record field that carries it (decision 41).
+
+- A record schema can define a `link` field, a list of links, a mirrored field, and whether several links are allowed.
+- `loops: false` forbids a cycle. Omission or `true` permits one.
+- Validation checks link types, targets, missing records, mirrors, and opted-in loop rules. Duplicate links produce a warning.
+- You no longer declare a graph registry or write separate graph tests. Migration moves simple links onto their record fields and lists graph claims that have no field form for a designer to restate in prose.
+
+**Time.**
+
+- `runtime.<name>` replaces the old addresses that named a changing value by its type.
+- Each entry in `clocks.json` gives its unit, a complete mode table using `running`, `paused`, `steps`, or `none`, and, where it drives a runtime value, what it advances.
+- Write `unchanged` when a value must not change during a replay; the old expression form is no longer used.
+- The package stores replay data without interpreting it. A named runner profile defines its schedule, actions, and observations.
+
+**Tests.** An acceptance test is one test block in one of two forms, with no prose restatement (decision 43).
+
+- A `scenario` test uses `given`, `when`, and `then`.
+- A `general` test states its `scope` and what `holds`, with optional reproducible `seeds`. It replaces the separate property, exhaustive-search, and document-check forms.
+- Direction measurements use ordinary tests instead of a separate direction-check channel.
+
+**Personalization.** Personalization now changes only numbers whose ranges state that a build may choose them.
+
+- A v0.6 personalization file survives migration. Numeric pipelines become `sets` when the tool can rewrite them; otherwise they appear on the designer's short list.
+- A choice option assigns ranged values through `sets`.
+- A number question names one ranged target, and the answer given for a build becomes its value.
+- A build refuses an answer outside the declared range. Choice and text answers remain recorded instructions for the builder.
+
+**Contracts.** Each adoption is one self-contained `contracts/<adoption>.json` with its copied definition, answers, fixed values, inline rows, and optional verification (decision 35).
+
+- `when` decides which questions are asked. Contract rules use the same one-comparison grammar as number rules.
+- A matching `.pack.json` turns an adoption from promised to checked and supplies its reusable tests.
+- A contract's number rows can say which two values they must stay between (`within`), and the validator checks it. An error that exists only because an answer or a number is still missing is marked as waiting, so a freshly added contract's to-do count is honest.
+- You no longer paste rendered contract tests into `05-build-plan.md`; the validator renders them on demand with `--render-contract-tests`. A package that still contains the generated block fails validation, and migration removes it.
+- The build record lists every checked adoption and the exact pack it used.
+
+**The build record.** Runtime evidence names its runner and version (decision 30).
+
+- You no longer add renderer, resource, capture-recipe, direction-result, direction-observation, or algorithm fields to a build record. The audit may request further evidence.
+
+**Tools.** v0.6 shapes get focused migration messages.
+
 ## v0.6 working draft — 2026-08-18
 
-**Collections declare by presence (decisions 32 and 33, 2026-08-23).** §1b
-is rewritten twice in one day, the second pass simplifying the first. The
-manifest `content` array is gone, and with it `format`, `defined_in`,
-`source`, the catalog/items duality and the three-shape catalog envelope,
-`id_field`, the members list, the collection `authority` field, per-record
-authority, and the collection `instance` binding. The final form: a
-collection is a folder with record files in it, under the reserved
-`collections/` package-root directory — the folder name the collection id,
-the filename each record's id and address, the body pure designer data.
-Everything else is opt-in: `_collection.json` is an optional label whose
-one field `record` is a record schema in the closed field grammar contract
-cores use (validated by the new `collection.schema.json`; with a schema
-every record is checked, without one records are free-form and the format
-says so); `grid` joins the field grammar as §1b's dialect, replacing the
-old §7a `layout` block and its one-value `cell_unit` field. Drawers are
-Fixed spec data, so no drawer authority exists and the interim
-`> COLLECTION:` prose tag of decision 32 is retired (a survivor reports
-itself); the §1b prose-inference reference scan is deleted with it.
-`collections` is a reserved prose first segment (`collections.<drawer>`,
-`collections.<drawer>.<record>`, dangling hard), a drawer nothing reaches
-is a warning, and `collections:<drawer>:count` replaces the retired
-`content:<id>:<pointer>:count`. §10.7 binds rows from the instance file's
-`rows` map, by inline array or a `collections/<drawer>` source string,
-with double binding and per-record dissent unspellable and a bound drawer
-taking the core's schema. §6 document-check artifacts may name a drawer
-with a trailing slash. Schemas: `manifest.schema.json` shrinks;
-`collection.schema.json` is new. Evidence:
-`forge/findings/collections-prototype-2026-08-23.md` (the decision-32
-prototype), `forge/findings/collections-final-form-2026-08-23.md` (the
-decision-33 pass), and the review records beside them.
+v0.6 replaced format-invented vocabulary with words designers already use, published the Handbook and closed schemas, and removed experimental machinery that had no outside demand. It also introduced the first contract and palette forms that v0.7 later simplified.
 
-The v0.6 working draft withdraws constructs whose abstractions are still
-emerging — where this format invented an encoding that no settled industry
-practice and no real package has yet confirmed. Withdrawn, preserved with
-their research evidence, and eligible to return when their abstraction
-settles or a real package exercises them: the material-simulation envelope
-profile (former §6a) and `verification_profiles`; the motion rubric (former
-§9.8);
-certified palette-pin build evidence (`direction_result.certified_pins`) and
-the color-constraint `must_match` field — exact color constraints remain as
-`tolerance: 0` pins, verified through covering acceptance tests; ruleset-state
-rule hooks, derived predicates,
-and identity sets (§2c — `rulesets` and `> RULESET:` tags remain); the
-open solver profile and the deduction solution (§7a — the
-`parallel-string-layers-1` encoding remains); and the audio direction
-annex (former §10). §9.10's prose restatement of `direction.schema.json` is
-replaced by a pointer: the schema is authoritative; the fence grammar and
-completeness rules remain normative. Declared graph edge sets (§1c) remain in
-core: tech trees, recipe chains, and prerequisite graphs are
-industry-settled abstractions with decades of practice behind them.
+**Collections and links.** Collections became folders under `collections/`, with one record per file. Decisions 32 and 33 removed the manifest catalogue, members lists, authority fields, prose declaration tags, and the catalogue/items split.
 
-A standing rule accompanies the withdrawal: patterns proven by industry
-practice belong in the core — the research program exists to establish
-exactly that, and internal test coverage cannot overrule it. Withdrawal
-applies to abstractions this format invented that remain unconfirmed by
-settled practice or real packages. A construct with neither industry
-grounding nor usage is deleted.
+- The folder and filename are the collection and record ids. Record bodies contain designer data only.
+- An optional `_collection.json` supplies a closed record schema. Without it, records are free-form.
+- The record grammar gained a checked grid shape. Contract rows can be inline or come from a collection folder.
+- Dotted `collections.<collection>.<record>` references became checked, while an unused collection produces a warning.
 
-### Attributable runtime evidence and newcomer repair — 2026-08-22
+**Chapters.** The required fantasy block widened to any number of player-fantasy lines within 280 trimmed characters. At least one line and closing punctuation remain required; digits are allowed, while typed references and tuning citations are not.
 
-Runtime build evidence now names its runner id and version whenever the source
-package contains a scenario, property, exhaustive search, replay, target, or
-direction claim. Build evidence also carries one plain-language observation
-context for each measured direction constraint. These fields identify the
-profile relative to which a pass is claimed; they do not standardize an engine
-or turn the experimental audit into a core verdict.
+- Chapter prose cites tuning keys by bare dotted name. Reserved mechanism paths, file mentions, numeric tokens, and tuning citations became mechanically distinguishable.
+- A tuning key cannot use a reserved first segment or reserved extension. State bindings gained explicit declaration locations, and chapter mode tags became checked.
+- v0.6 replaced format-invented terms with designer words: `regime` became `mode`, `population` became `applies_to`, and the fidelity ladder became the precision levels `described`, `bounded`, and `exact`. The full list is in the technical changelog. There are no aliases; v0.5 spellings are rejected.
 
-Sampled aggregate direction claims now use the ordinary aggregate-property
-test shape as a checked mirror: `metric`, `aggregation`, and `threshold` remain
-authoritative in `direction.json` and must match the covering test exactly.
-Two living candidate packages split their per-sample and incompatible
-aggregate claims into honest separate tests.
+**Art direction.** v0.6 made palettes named color sets and made color constraints point to them.
 
-The public beginner path now leads with the five-file kernel, uses the
-canonical `tuning.json` and `05-build-plan.md` paths without obsolete manifest
-redirects, links the maintained Garden Snake package, shows a complete small
-build plan, and ends with an offline validation and handoff checklist. A
-generated-route guard keeps the handbook and downloadable package aligned with
-their sources. The fantasy-block prose now says unambiguously that the minimum
-is one player-fantasy line plus the required `Feel:` and anti-reference lines.
+- `manifest.json` gained palettes with ordered colors and optional color names. Dotted palette references resolve by whole key first; ambiguous keys and dangling colors fail validation.
+- `constraints.colors` replaced palette roles. Exactness uses `tolerance: 0`; contrast thresholds name palette colors directly.
+- Mood entries point to a palette but no longer carry their own colors. Unused palettes warn, and a construct's shape now fixes its audit class.
+- Migrating from the earlier draft requires moving hex colors into the palette, renaming color and threshold fields, rewriting mood claims, and rechecking every contrast floor. Old palette shapes are rejected rather than converted silently.
+- You no longer write the old motion rubric, certified palette-pin evidence, color `must_match`, or audio-direction annex. Exact colors remain testable.
 
-### Terminology pass (breaking)
+**Tests.** Test blocks gained closed shapes for scenario, property, exhaustive-search, and document-check tests. Package-owned extra fields remain allowed but have no format meaning.
 
-v0.6 renames the format's vocabulary to words a designer already owns. The
-final spellings after the draft's cold-read rounds are: regime → **mode**;
-fixture → **replay** (the test member is `replay`; recorded footage remains a
-**capture**); oracle → **verdict**; witness → **solution**; closure →
-**completeness**; discharge → **satisfy**; symbol → **identifier**; deciding
-lint → **check**, advisory lint → **advice**; JSON *member*/*key* → **field**
-(a *key* is a dotted lookup identifier); §5 `target` → `key`; "build
-contract" → **entry points**; "verification descriptor" → **test block**;
-and the former §9.9 fidelity ladder and descent rule → **precision levels:
-described → bounded → exact**. The attempted intermediate term *sheet* was dropped
-without replacement. The fenced infostring is `test`, and a test block's
-kind field is `type`, not `class`.
+- Graph declarations made link existence and type checks unconditional, with optional checks for cycles, reciprocal links, and values that move in one direction along a path. Rates, capacities, runtime graph state, and bounded reachability remained outside the format.
+- Aggregate art-direction claims had to match their covering property test. Grid records gained checked row and column congruence.
+- A build record became a completion claim: its passed count must equal the expanded acceptance-test count.
 
-Data: direction `invariants` → `must_keep` and its fence label `INVARIANTS:`
-→ `MUST-KEEP:` (`tuning.json` `invariants` is unchanged); `open_axes` →
-`may_vary`; `population` → `applies_to`; the §9.5 `coverage` shape →
-`sampling`, sharing §6's exhaustive/per-sample/aggregate verdict discipline;
-tuning `certify` → `must_match`; the color-constraint `certify` Boolean is
-removed rather than renamed;
-`id_member` → `id_field`; graph-edge `member` → `field` (including the
-diagnostic payload field), and graph-rule `direction` → `trend` with the
-self-describing values `target-at-most-source` and
-`target-at-least-source`; `blind_builder_identity` → `hide_builder_name`;
-`scale_speed` → `speed_and_size`; build-record `harness` → `evidence` and
-`payload.scope` → `payload.covers`; `clocks.regimes` → `clocks.modes` with
-`enter-regime`/`exit-regime` → `enter-mode`/`exit-mode`; test kind
-`static-lint` → `document-check`; graph rule `existence-closure` →
-`existence-completeness`; and a collection's `contract` → `defined_in`.
-§9.7's heading becomes "What must stay, what may vary". Direction entries no
-longer carry a `class` field: the entry kind fixes the audit class. No
-deprecation aliases — v0.5 spellings are rejected. Unchanged on purpose: the
-`harness/` directory and the runner sense of the word, `tuning.json`
-`invariants`, and existing error-code identifiers (message text changed).
-§2a's former "advice rule" is now the **tie-break rule**.
+**Personalization.** Choice and text answers remained builder instructions. Numeric questions gained a deterministic pipeline over tunable numbers and contract knobs; `clamp` limits an answer and `reject` refuses it.
 
-### Fantasy-block widening — 2026-08-18
+- Defaults follow the same pipeline before number rules are checked.
+- `affects` names what an answer can reach but does not define selector or replacement behavior.
+- Choice answers and defaults must name declared option ids. Authority tags gained exact scope and grammar.
 
-The player-fantasy portion of the required `fantasy` block now has one hard
-size limit: all unlabeled fantasy lines together MUST fit within 280
-characters after per-line trimming, with newlines excluded. At least one line
-is still required, and each joined statement ends in `.`, `!`, or `?`.
-Further lines SHOULD add distinct facets — role, action, world, and emotion
-are guidance, not a closed checklist. The intermediate one-to-three-line cap
-and digit ban were rejected; digits are legal, and the character budget
-permits any line count that fits. Typed references, bare tuning citations,
-and chapter anchors remain forbidden in fantasy lines.
+**Contracts.** The first contract layer let a package copy a reusable convention into `contracts/`, fill its questions and knobs, bind rows, and generate named acceptance tests. The directory and `contracts.*` tuning prefix became reserved; silence was invalid and `not-applicable` was an explicit answer.
 
-### Declared graph predicates — 2026-08-18
+- Adopted contract statements were Fixed, knobs entered the resolved tuning snapshot, and the experimental certification record preserved the adopted core digest.
+- Two authored cores, four byte-identical generated blocks, a blind build, and a two-arm probe supplied the evidence for the mechanism.
 
-The retained §1c graph layer is now executable rather than only declarative.
-The optional manifest `graphs` array declares edge sites over §1b collections,
-including plain fields, nested JSON Pointers, one-segment array wildcards such
-as `/inputs/*/item_id`, multi-collection discriminators and maps, and optional
-inverse back-pointers. Declaring a graph makes edge type and
-existence-completeness unconditional package checks. Duplicate ids at one
-site warn; dangling, ambiguous, or wrongly typed edges fail with `GRAPH_*`
-diagnostics.
+**The build record.** Runtime evidence gained a runner id and version plus plain-language observation contexts for measured art direction. These identify how a pass was produced; they do not create a core certification verdict.
 
-Three closed `opengdd-graph-1` predicates are citable from a §6
-`document-check` test's `rules` field: `acyclic`, `reciprocal` with optional
-record exemptions, and `monotone-attribute-along-path`. The last accepts one
-shared attribute field or a per-collection field map and states orientation
-through `trend: "target-at-most-source" | "target-at-least-source"`.
-Predicate declarations and results are checked by the `GRAPH_*` validator
-family; rates, capacities, flow, runtime graph state, and bounded reachability
-remain outside the layer.
+- Package conformance and build-record conformance became closed schema checks. Experimental execution and judgment remained outside both.
+- Versioned schemas were published without a floating alias, including new tuning, personalization, and collection schemas.
 
-### Published shapes and structural conformance (breaking) — 2026-08-19
+**Tools.** The public Handbook became the designer's task-oriented route, while `SPEC.md` remained the exact OpenGDD specification. The beginner path gained the five-file kernel, a complete build plan, the maintained Garden Snake package, offline validation, and a builder handoff checklist.
 
-The core now publishes five schemas at explicit `/schema/core/v0.6/` URLs:
-`manifest.schema.json`, the newly published `tuning.schema.json` and
-`personalization.schema.json`, `direction.schema.json`, and
-`opengdd-build.schema.json`. There is no floating schema alias. The validator
-reports the two new schema families as `TUNING_SCHEMA` and
-`PERSONALIZATION_SCHEMA`; shapes previously stated only in prose are now
-closed and schema failures are package-conformance failures.
-
-Personalization's machine effect is deliberately limited. Choice and text
-answers outside tuning remain recorded instructions with no include, exclude,
-replace, or selector semantics. Numeric questions alone have a deterministic
-resolution pipeline over tunables and unpruned contract knobs; defaults run
-through that same pipeline to form the package-default snapshot on which
-invariants are decided. `out_of_range: "clamp"` clamps, while `"reject"`
-refuses that answer and a build record carrying it fails with
-`BUILD_ANSWER_REJECTED`. `affects` declares reach and requires existing paths;
-it does not confine the answer's effect. A dangling `> PERSONALIZATION: <id>`
-tag is a hard `PERSONALIZATION_TAG_DANGLING` package failure. Authority tags
-now have an exact grammar and scope: a tag runs until the next authority tag
-in the same heading section or that section's end, whichever comes first;
-untagged statements are Fixed, and only `PERSONALIZATION:` requires its
-declared question id (`DELEGATED:` otherwise accepts an optional label).
-
-The §6 test-block field grammar is closed at the format-defined names and
-shapes for `scenario`, `property`, `exhaustive-search`, and `document-check`;
-package-owned fields remain permitted but acquire no format meaning. A build
-record is a completion claim: `acceptance.total` must equal the expanded
-package AT count and `acceptance.passed` MUST equal `acceptance.total`.
-A shortfall is the hard build-conformance error
-`BUILD_ACCEPTANCE_INCOMPLETE`, even though the JSON record remains an honest,
-schema-valid report of an incomplete build.
-
-The retained `parallel-string-layers-1` grid encoding now has machine-decided
-congruence. Every declared layer must exist as a non-empty string array, and
-all layers and rows in one collection record must share row and Unicode-scalar
-column counts. Violations report `CONTENT_LAYER_MISSING`,
-`CONTENT_LAYER_ROW_MISMATCH`, or `CONTENT_LAYER_COLUMN_MISMATCH`.
-
-### Prose citations and reserved key segments — 2026-08-19
-
-A draft revision settles how chapter prose cites a tuning key. §1's bare-key
-rule stands, and §4 now carries the classification rule that makes it
-decidable: a backticked dotted token is a mechanism path when its first
-segment is reserved, not a citation when every segment is digits, a file or
-file-member mention when any segment is `json` or `md`, and otherwise a tuning
-citation that MUST resolve in `tuning.json`. A dangling citation is a hard
-failure. §4 lists the reserved first segments, and the list is versioned, so a
-later revision may claim a segment as new mechanisms arrive and a rejection
-names the revision that reserved it; `content` is deliberately left
-unreserved, being a natural key namespace for a designer. The same lists bind
-keys: a `tuning.json` key MUST NOT open with a reserved segment, and no
-segment of it may be a reserved extension. `tuning.schema.json` and the
-validator enforce both.
-
-Three sections that leaned on the old ambiguity are corrected. §1a's fantasy
-fence now bans a bare tuning citation alongside the typed references it
-already banned, and the fence is machine-checked for the first time — it had
-claimed validation failure with no check behind it. §8a no longer calls the
-`descriptor:<family>:<id>` prose form "parallel to" prefixes that exist only
-inside §4a expressions, and states the real rule: descriptor references always
-carry the family-qualified form, a tuning key is cited bare, and `state:` and
-`collections:` keep their prefixes. §4a states where a package declares a
-`state:number` binding — a §4b clock's `governs` list, or the prose that
-defines it in a package-root chapter or a §1b collection's defining
-section — a path that until now existed only in validator code. §4 no longer
-sends discrete choices to "declared sets": a discrete choice belongs to a §1b
-collection record or a §5 personalization option, and the one declared set
-v0.5 defines is §2c's ruleset ids. §4b's chapter mode tags, normative since
-their introduction, are now checked as well.
-
-### Contracts: the convention layer (breaking) — 2026-08-19
-
-A draft revision lands the contracts layer from
-`forge/rfcs/RFC-contracts-convention-layer.md` as normative text in a new
-§10 — the number the withdrawn audio-direction annex vacated, so §11 stays the
-document's last section and nothing renumbers. Prose carries the design and
-data makes selected claims checkable; contracts carry convention, meaning the
-decisions a mechanism forces on every designer and almost every spec leaves
-silent. A package MAY carry a `contracts/` directory, one file per adopted
-contract, and the directory's contents are the declaration: no manifest field
-names it. Every other rule of the layer waits until a package adopts
-something. The word *contract* is now this construct's alone: the collection
-pointer is its `> COLLECTION:` claim, and what a manifest names are entry points.
-
-Two names are reserved by this revision, and an existing package migrates by
-renaming:
-
-- a designer-owned `contracts/` directory at the package root, which is now a
-  format-reserved name; and
-- any `contracts.*` key in `tuning.json`, or any backticked `contracts.x.y`
-  token in chapter prose, which now reads as a contract mechanism path (§4)
-  rather than as a tuning citation.
-
-Each instance file vendors its core in full and records a surface against it:
-an answer for every live flag, a value for every unpruned knob, and
-the test inputs its templates declare. Silence is a validation failure,
-`not-applicable` is an answer, the surface is closed, and every statement it
-records is Fixed — §8 names an adopted contract beside descriptors as a
-construct the format reads, with its scope stated rather than assumed. Knobs
-join §4's change-authority axis under the
-reserved `contracts.<instance>.<knob>` namespace, enter the resolved snapshot,
-and are cited bare in prose and typed in a test block. Instantiating a core's
-live templates appends a generated block to the build plan whose acceptance
-tests are named rather than numbered — `AT <instance>/<template-id>` — so
-nothing renumbers, and which a validator recomputes and compares byte for
-byte. Cross-references land in §§1, 1b, 2a, 2d, 3, 4, 4a, 5, 6, 7, and 8,
-carrying the contract row binding (now §10.7's `rows` source string, after
-decision 32), the core-scoped `knob:` reference
-scheme, contract keys in §7's checks 4, 5, and 6 plus the re-evaluation of
-core invariants over the resolved snapshot, and the reserved seed-stream name.
-The certification protocol gains the per-instance contract record its core
-digest lands in. The RFC's own spellings were translated into the vocabulary
-this draft now uses: a template declares its `type` from §6's four test types,
-carries its `test` block behind a `test` fence, the surface records
-`test_inputs`, and a surface pin is `must_match`, as in `tuning.json`.
-The layer arrives with its evidence — two authored cores, four byte-identical
-instantiations of one generated block, the last of them blind, and a two-arm
-probe whose contract arm matched its spec 14 of 14 while the prose-only arm
-diverged on exactly the two decisions prose left silent; the RFC holds the
-record.
-
-### Handbook and Reference split — 2026-08-20
-
-The task-oriented Handbook is now published on the site as the authoring
-route for designers. `SPEC.md` remains the normative Reference and the source
-of conformance rules; Handbook explanations and examples do not add or narrow
-those rules. Site navigation and chapter pointers distinguish the two roles.
-
-### Palettes: the designer's colors become a construct (breaking) — 2026-08-20
-
-A draft revision lands the palette layer from `forge/rfcs/RFC-palettes.md`. The
-word *palette* moves to the artifact designers already mean by it: a named set
-of colors. `manifest.json` gains an optional `palette` map, a fifth top-level
-declaration beside `descriptors`, whose flat dotted keys each hold an ordered
-array of colors. An entry is a bare `#RRGGBB` string or a one-key object naming
-one color, and a color is named only when something cites it. Ordering carries
-no semantics, duplicate hexes are legal, hex case decides nothing, and a
-validator MUST NOT normalize an authored spelling. `palette` joins §4's
-reserved first segments, so prose cites `palette.<key>` for a set and
-`palette.<key>.<name>` for one color; resolution tries the whole reference as a
-key first and only then splits the last segment as a color name, and a
-declare-time collision rule forbids the one pair of keys that could make the
-order ambiguous. Dangling is a hard failure, which is what makes the authoring
-tool's coin-on-mention flow safe. Index citations stay rejected: every key
-segment and every color name MUST contain a letter, so `palette.a.b.2` can
-match nothing.
-
-What was called a palette role is now a **color constraint**, and *role*
-returns to people. The construct keeps its home beside thresholds and timings
-and stops carrying a hex: `constraints.palette` becomes `constraints.colors`,
-and the entry's `value` becomes `color`, a typed `palette:<key>.<name>`
-reference into the manifest. Tolerance and scope are unchanged, the former
-color `must_match` field is removed, exactness is expressed by `tolerance: 0`,
-scope stays on the constraint rather than moving to a test, and there is no
-raw-hex escape: a deliberate off-palette accent is just another palette.
-Thresholds bind palette colors directly, `roles` becoming `colors` with both
-operands typed, and §9.5's consistency check now reads declared palette values
-across two files. A mood descriptor's `palette` becomes a bare palette key and
-carries no colors, tolerances, or scopes of its own; the
-`descriptors.mood.<id>.palette.<role>` claim path is deleted with the rules
-that served it. A palette carries no audit class of its own, on the viewing-entry
-and reference precedent, and is read through the mood entry that names it under
-that entry's bound viewing context. An unreached palette draws a warning.
-Deleting the mood role removes the format's single audit-class exception: after
-this revision, what a construct is fixes its class, with nothing outside its own
-shape able to move it. `palette:` joins the typed references banned from a
-fantasy line, and the schemas publish at `/core/v0.6/`; the frozen v0.5 URLs are
-untouched.
-
-#### Migrating to the palette layer
-
-- Declare a `palette` map in `manifest.json` and move every color constraint's
-  hex into it, naming the colors something cites.
-- Rename `constraints.palette` to `constraints.colors` in `direction.json`, and
-  every `constraints.palette.<key>` path in a direction fence, a
-  `direction_claims` array, or an instantiated contract surface.
-- Replace each constraint's `value` hex with `color`, a typed
-  `palette:<key>.<name>` reference. A constraint MUST NOT carry a hex.
-- Rename a threshold's `roles` to `colors`, and write both `colors` and
-  `against` as typed `palette:` references instead of bare sibling keys.
-- Replace a mood descriptor's `palette` object with the bare key of a declared
-  palette, and rewrite any `descriptors.mood.<id>.palette.<role>` claim as a
-  `constraints.colors` entry the covering test cites.
-- Re-check every threshold against its own floor after respelling it. §9.5's
-  designer-side check computes each threshold over the declared palette values,
-  so a threshold whose old operands never satisfied its own `min_contrast`
-  fails the moment it migrates, and re-aiming it at the colors it was always
-  about is the fix. One living candidate is the live case: `glyph-legibility` and
-  `headlamp-vs-night` computed 1.20:1 and 2.90:1 against declared floors of 4.5
-  and 5.0, and now name three colors authored with this batch, `#F6E3C0`
-  headlamp-pool, `#CFC4AE` plaque-face, and `#2A2722` glyph-ink. That re-aiming
-  is an authoring judgment on the package's art direction, ruled by the steward
-  2026-08-20 (approved); `forge/rename/MAP.md` §m carries the record.
-- Set `"opengdd"` to `"0.6"` and point the package's schema URLs at
-  `/core/v0.6/`.
-
-This is a hard version cut: the v0.6 validator rejects `constraints.palette`, a
-constraint carrying `value`, and a mood carrying palette entries, rather than
-migrating them implicitly.
+- You no longer write unconfirmed material simulation, verification profiles, ruleset hooks and derived predicates, the open solver profile, or its deduction solution. The grid encoding, ruleset ids and tags, and industry-settled graph capability remained.
+- Schema checks now cover tuning, personalization, test headings, option ids, build completion, grids, prose references, and fantasy placement.
 
 ## v0.5 draft — 2026-08-12
 
-OpenGDD v0.5 renames named objects to **symbols** and defines symbol identity
-as scoped, while keeping descriptors as format-owned shapes and reserving
-**collection** for §1b. The `tuning.json.values` and
-`opengdd-build.json.resolved_tuning.values` members become `tunables` and
-`resolved_tuning.tunables` in a hard version cut. The names now express the
-change-authority axis; numeric-only tuning remains because rebalancing is
-change by degree.
+v0.5 renamed named objects as scoped symbols while keeping descriptor shapes and reserving “collection” for structured content. It separated delivery platform from rendering technique and drew the first firm line between checking a package, checking a build record, and experimentally auditing a finished build.
 
-v0.5 also separates the platform family from the renderer. §3's
-`target.platform` names the delivery target and accepts `web-2d` and `web-3d`.
-Rendering technique remains builder craft, while `opengdd-build.json` can
-carry an optional free-text `renderer` declaration for a particular build.
-Rendered-capture certification for 3D remains outside v0.5 because the only
-defined capture profile is `web-1`.
+**Numbers.** The `values` table in `tuning.json` became `tunables`, and the build snapshot followed the same rename. This was a hard version cut.
 
-### Migrating from v0.4
+**The build record.** The delivery target began naming `web-2d` or `web-3d`; a build could separately record its renderer. Three-dimensional capture certification remained undefined.
 
-- Rename `tuning.json`'s `values` member to `tunables`.
-- Rename `opengdd-build.json`'s `resolved_tuning.values` member to
-  `resolved_tuning.tunables`.
-- Replace the term **named object** with **symbol** in format-facing prose and
-  tools.
+- Package and record conformance gained exact schema and check sets, severity rules, and ownership for prose obligations and per-build evaluations.
+- Build certification was marked experimental. The draft protocol defined reproducible canonical payloads and hashes, but no normative certification verdict.
+- A build record became a completion claim, with incomplete work reported through ambiguity records. Passing tests remained necessary evidence, not proof by itself.
+- Choice answers and defaults had to name declared option ids. The experimental audit owned fixture reach, execution semantics, judged art direction, and narrowed-evidence review.
 
-This is a hard version cut: the v0.5 validator rejects the old `values`
-members rather than migrating them implicitly.
-
-### Conformance layers and certification status — 2026-08-16
-
-A draft revision adds §2d, which names v0.5's two normative conformance
-subjects — package conformance and build-record conformance — and declares
-build certification **experimental** in v0.5. The acceptance-test execution
-semantics, the complete `verification` descriptor machine grammar, the
-harness hash audit, and the judged-direction gate belong to the experimental
-certification protocol, whose draft is published with the conformance suite
-as `conformance/CERTIFICATION.md` and is now referenced from the
-specification. v0.5 defines no normative certification verdict. Carrier
-shapes are unchanged: no schema member was added, removed, or made optional,
-and existing conforming packages and build records remain conforming. Fixed
-authority is unchanged; passing acceptance tests remains necessary evidence
-and never sufficient. Standardizing certification — including binding the
-complete source-package bytes into build receipts — continues as a v0.6
-track.
-
-An independent re-review of the same revision drove a hardening pass: the
-package- and record-conformance definitions in §2d now name their exact
-schema and check sets, package-level MUSTs are defined as those decidable
-from package bytes alone, the build record is defined as a completion claim
-so honest failure reporting travels through §2b ambiguity reports, the
-fixture-reach obligations in §9.5 and §9.11 are typed as experimental-audit
-obligations rather than validation failures, and the draft certification
-protocol now carries the experimental marking and an RFC 8785-aligned
-byte-reproducible canonical serialization.
-
-A second review round then closed the implementability gaps: §6 states the
-machine-checked surface grammar for acceptance-test headings and types phase
-structure as a prose obligation, §5 and §7 require `choice` answers and
-defaults to name declared option ids (with a matching `BUILD_ANSWER_OPTION`
-validator check), §7 states the error-versus-warning reporting contract for
-its cross-document checks, §2d distinguishes machine-decidable rules from
-prose obligations and defines the severity vocabulary, the remaining
-per-build evaluations (§1c predicates, §4/§4a defaults-versus-snapshot,
-§6a `claim_scale`) are each assigned a conformance layer, and the
-certification protocol restricts hash payloads to I-JSON, defines
-`result_hash` as the digest of `payload.file`'s exact canonical bytes, and
-adds Fixed-statement deviation and narrowed evidence to its verdict-blocking
-list.
+**Tools.** Migrating from v0.4 means renaming both number maps and replacing “named object” with “symbol”. The v0.5 validator rejects the old map names.
 
 ## v0.4 draft — 2026-08-09
 
-v0.4 adds a structured art-direction surface while preserving the designer's
-ability to communicate through prose. It also adds a portable grid-layout
-encoding and more complete build provenance.
+v0.4 added structured art direction without replacing designer prose. It also added a portable grid encoding and fuller build provenance.
 
-- **Direction block and schema (§9):** a package can declare `direction.json`
-  through `manifest.json.build.direction`. The block carries pillars, mood,
-  anti-references, constraints, viewing contexts, invariants, and a narrow
-  material/wet-motion vocabulary. Claim paths bind to their viewing context;
-  checked constraints cite acceptance tests. Whole-direction judged status is
-  recordable but remains `pending` in v0.4.
-- **Certified palette pins (§§7 and 9):** an exact palette constraint can opt
-  into build evidence with `certify: true`. The source path, captured value,
-  and cross-document requirements are schema- and validator-checked.
-- **Mood descriptors (§8a):** format-owned mood objects carry intent,
-  references, anti-references, palette roles, behaviors, and an optional inert
-  audio sketch. References identify exactly which annotated properties are
-  borrowed. Media paths, licenses, hashes, and byte signatures are validated.
-- **`parallel-string-layers-1` (§7a):** a closed encoding for rectangular,
-  same-shape string layers with alphabet, role, dimensions, and fill policy.
-  It is a layout carrier, not a universal puzzle-solver interface.
-- **Build provenance (§7):** `opengdd-build.json` gains optional
-  `capture_profile`, `resources`, and `direction_result` members. Resource
-  digests cover one explicitly named artifact; presence is a disclosure, not
-  a claim that every consumed resource is listed.
-- **Audio direction (§10):** a non-normative planning annex. It creates no
-  validation or certification consequence in v0.4.
-- **Prose/schema alignment:** cardinalities, identifier grammar, claim classes,
-  certified-pin ownership, and cross-document presence rules are stated
-  consistently in the specification, schemas, and validator.
+**Art direction.** A manifest could declare `direction.json` with pillars, mood, results to avoid, constraints, viewing contexts, things that must stay, and a narrow material and wet-motion vocabulary.
 
-### Migrating from v0.3
+- Checked claims named their viewing context and acceptance tests. Exact palette constraints could opt into build evidence.
+- Mood descriptors recorded intent, references, palette roles, behavior, and an inert audio sketch. Referenced media carried licences, hashes, and byte checks.
+- Whole-direction judgment could be recorded but remained pending.
 
-Most v0.4 constructs are additive. A package that adopts none of them normally
-needs only a version bump, subject to two namespace collisions that v0.3
-deliberately left open:
+**Collections and links.** `parallel-string-layers-1` provided rectangular, same-shape string layers with an alphabet, roles, dimensions, and fill policy. It was a layout carrier, not a universal puzzle interface.
 
-- **`build.direction`:** v0.3 reserved this member but did not validate the
-  target. In v0.4 it names a real direction block and the referenced file must
-  exist and validate.
-- **`parallel-string-layers-1`:** a v0.3 package that independently used this
-  format id for another shape must rename its local format before upgrading.
+**The build record.** Optional capture profile, resource digests, and direction results recorded more provenance. A resource digest covered one named artifact and did not claim a complete inventory.
 
-Change the source manifest's `opengdd` value from `"0.3"` to `"0.4"`.
-Any retained `opengdd-build.json` being certified against v0.4 must also use
-`"0.4"`; a historical build record can remain associated with v0.3.
+**Tools.** Prose, schemas, and validation aligned on counts, identifier grammar, claim classes, palette-pin ownership, and cross-file presence. The audio annex was planning guidance only.
+
+- Most v0.3 packages needed only a version bump. A package already using the reserved art-direction slot or `parallel-string-layers-1` name for something else had to rename it or supply the new valid shape.
+- Current source and build records move to `"0.4"`; historical v0.3 build records may remain with v0.3.
 
 ## v0.3 draft — 2026-08-08
 
-v0.3 adds reusable structure for graphs, rule-state systems, mixed clock
-regimes, macroscopic material simulation, and build evidence.
+v0.3 added reusable structures for connected records, changing rulesets, mixed clocks, material experiments, and build evidence.
 
-- **Declared graph edge sets (§1c):** typed cross-record edges plus the
-  `opengdd-graph-1` static-lint predicates for existence closure, acyclicity,
-  reciprocity, bounded reachability, and monotone attributes.
-- **Ruleset state (§2c):** finite rule registries, applicability tags, closed
-  hook and derived-predicate universes, and state bindings. Open-ended
-  player-authored rule vocabularies remain outside v0.x certification.
-- **Clocks and resolution regimes (§4b):** optional clock behavior across
-  declared regimes and standard replay transitions. Atomic transaction and
-  snapshot semantics remain deferred.
-- **Material-simulation envelope (§6a):** declared minimum feature width,
-  observation schedule, interaction table, macroscopic measures, and bounded
-  outcome models. It does not certify sub-envelope or universal-emergence
-  claims.
-- **Solver-interface problem statement (§7a):** documents the open layout and
-  predicate questions and provides a finite-domain exhaustive-search idiom;
-  it does not lock a universal puzzle profile.
-- **Build-manifest schema (§7):** `opengdd-build.json` gains a schema and
-  validator-level cross-document checks for identity, parties,
-  personalization, resolved tuning, evidence payload, digest, and acceptance
-  counts.
-- **`build.direction` reserved:** namespace is set aside for the v0.4
-  direction block and remains inert in v0.3.
+**Collections and links.** Declared graph edge sets added cross-record links and checks for existence, cycles, reciprocity, bounded reachability, and values that move in one direction along a path.
 
-### Migrating from v0.2
+**Time.** Rulesets gained finite registries, applicability tags, hooks, derived predicates, and state bindings. Clocks described several regimes and replay transitions; atomic transactions and snapshots remained deferred.
 
-Package-side constructs are additive; a package that declares none of them is
-valid after changing manifest `opengdd` from `"0.2"` to `"0.3"`.
+**Tests.** The material-simulation envelope described feature width, observation schedules, interactions, measures, and bounded outcomes. It did not certify universal emergence. A solver note supplied a finite-domain exhaustive-search pattern without fixing a universal puzzle profile.
 
-Builds certifying against v0.3 must ship an `opengdd-build.json` matching the
-new schema: personalization answers, both resolved-tuning sections, and the
-evidence algorithm, digest, payload, and acceptance counts. Existing v0.2
-build records remain associated with v0.2.
+**The build record.** `opengdd-build.json` gained a schema and checks for identity, parties, personalization, resolved tuning, evidence payloads, digests, and acceptance counts. The manifest reserved an art-direction slot for v0.4 but did not use it yet.
+
+**Tools.** Package mechanisms were additive, so migration usually meant changing `"0.2"` to `"0.3"`. New builds needed the v0.3 build-record shape; historical v0.2 records stayed with v0.2.
 
 ## v0.2 draft — 2026-08-06
 
-- **Numeric authority homes:** separates mutable `values`, Fixed `constants`,
-  per-content facts, and verification inputs.
-- **Typed expressions:** adds closed `opengdd-expr-1` expressions for declared
-  numeric, Boolean, finite-list, and runtime-state operations.
-- **Structured-content envelope:** adds declared collections, format ids,
-  stable record ids, reference closure, and authority.
-- **Verification classes:** standardizes `scenario`, `property`,
-  `exhaustive-search`, and `static-lint`, including bounded evidence.
-- **PRNG stream addresses:** defines canonical nested unit and named-stream
-  addressing over FNV-1a-derived Mulberry32 sub-seeds.
-- **Numeric personalization:** adds ordered target operations, bound policy,
-  and a resolved tuning snapshot in `opengdd-build.json`.
-- **Commerce profile:** moves licensing, split, and derivation metadata into an
-  optional profile used only when relevant to third-party building or listing.
-- **Package safety:** defines path normalization and archive traversal guards.
+v0.2 introduced the first structured mechanisms around the prose document. It separated kinds of numeric authority, reusable content, tests, personalization, and package safety.
 
-The general grid-replay solver profile is not part of v0.2 and remains
-deferred.
+**Numbers.** Mutable values, Fixed constants, per-record facts, and test inputs gained distinct homes. Closed typed expressions covered numbers, Booleans, finite lists, and runtime state.
 
-### Migrating from v0.1
+**Collections and links.** Collections gained format ids, stable record ids, checked references, and authority. Package paths and archives gained normalization and traversal guards.
 
-v0.2 is a breaking revision and does not accept a v0.1 package unchanged.
+**Tests.** Scenario, property, exhaustive-search, and static-lint tests gained standard shapes and bounded evidence. Deterministic random streams gained nested unit and named-stream addresses based on FNV-1a and Mulberry32.
 
-- Change manifest `opengdd` from `"0"` to `"0.2"`.
-- Move top-level `license`, `split`, and any `derived_from` value into the
-  optional `commerce` block.
-- Declare legacy structured-content directories as §1b collections when they
-  need machine discovery and validation.
-- Keep mutable tuning in `values`, move Fixed numeric values to `constants`,
-  and keep metadata under `meta`.
-- Replace personalization notes that change numeric tuning with explicit
-  `tuning_overrides` or numeric-question resolution operations.
+**Personalization.** Ordered numeric changes, bound policies, and a resolved tuning snapshot made player-selected tuning explicit.
+
+**Contracts.** Licensing, revenue split, and derivation metadata moved into an optional commerce profile used only for third-party building or listing. The general grid-replay solver remained deferred.
+
+**Tools.** v0.2 did not accept a v0.1 package unchanged. Migration moves commerce fields, declares structured directories as collections, separates mutable values from Fixed constants and metadata, and replaces numeric personalization notes with explicit operations.

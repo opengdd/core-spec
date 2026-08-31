@@ -1,11 +1,6 @@
 {
-  "tunables": {},
-  "constants": {
+  "values": {
     "board.size": 3,
     "win.line_length": 3
-  },
-  "meta": {
-    "board.size": { "must_match": true },
-    "win.line_length": { "must_match": true }
   }
 }

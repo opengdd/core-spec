@@ -21,7 +21,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
 <link rel="stylesheet" href="/assets/site.css">
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
-<link rel="stylesheet" href="/authoring-tool/authoring.css?v=d3d40624535f">
+<link rel="stylesheet" href="/authoring-tool/authoring.css?v=de258b84a459">
 <style>
 .opengdd-authoring,
 .opengdd-author-file-meta a { font-family: var(--font-body); }
@@ -67,20 +67,6 @@
 .site-tool-panel-inspector .site-tool-region { display: grid; }
 .site-tool-panel-inspector .opengdd-author-panel-inspector { box-sizing: border-box; min-height: 100%; overflow: auto; padding: 1rem; }
 .site-tool-status.opengdd-author-region { height: auto; min-height: 0; }
-/* Steward ruling 2026-08-25: the outline's collection workflow is not
-   ready for the public page. The site hides the Collections group and its
-   create entries; collections still validate, and their files stay
-   editable in the explorer. Remove when the tool track ships the flow. */
-.site-tool .opengdd-author-outline-group.opengdd-author-kind--collection,
-.site-tool [data-outline-create="Collection"],
-.site-tool [data-outline-add-record] { display: none; }
-/* Host-side guards for two widget stylesheet gaps (reported to the tool
-   track): outline rows may wrap so a sentence badge takes its own line
-   instead of collapsing to a sliver, and the badge keeps its small size
-   against the widget's own "button { font: inherit }". */
-.site-tool .opengdd-author-outline-entry > div { flex-wrap: wrap; }
-.site-tool .opengdd-author-outline-badge--sentence { flex: 1 1 100%; max-width: none; }
-.site-tool .opengdd-authoring .opengdd-author-outline-badge { font-size: 0.62rem; }
 /* Extension panels render plain headings and paragraphs; keep the site's
    page-level heading scale out of them. */
 .site-tool-panel-inspector .opengdd-author-panel-inspector h2 { margin: 0 0 0.5rem; font: 600 0.92rem/1.4 var(--font-body); }
@@ -100,11 +86,12 @@
 </style>
 <script type="importmap">
 { "imports": {
-  "opengdd-analysis": "/authoring-tool/lib/lang/tools/src/analysis.mjs?v=d3d40624535f",
-  "opengdd-syntax": "/authoring-tool/lib/opengdd/conformance/package-syntax.mjs?v=d3d40624535f",
-  "opengdd-file-map-host": "/authoring-tool/lib/opengdd/conformance/file-map-host.mjs?v=d3d40624535f",
-  "opengdd-validation": "/authoring-tool/lib/opengdd/conformance/validate-core.mjs?v=d3d40624535f",
-  "opengdd-authoring-version": "/authoring-tool/src/version.mjs?v=d3d40624535f"
+  "opengdd-analysis": "/authoring-tool/lib/lang/tools/src/analysis.mjs?v=de258b84a459",
+  "opengdd-syntax": "/authoring-tool/lib/opengdd/conformance/package-syntax.mjs?v=de258b84a459",
+  "opengdd-file-map-host": "/authoring-tool/lib/opengdd/conformance/file-map-host.mjs?v=de258b84a459",
+  "opengdd-migrate": "/authoring-tool/lib/opengdd/conformance/migrate.mjs?v=de258b84a459",
+  "opengdd-validation": "/authoring-tool/lib/opengdd/conformance/validate-core.mjs?v=de258b84a459",
+  "opengdd-authoring-version": "/authoring-tool/src/version.mjs?v=de258b84a459"
 } }
 </script>
 </head>
@@ -114,7 +101,6 @@
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/">Learn</a>
-      <a href="/contracts/">Contracts</a>
       <a href="/spec/">Spec</a>
       <a href="/standard/">Standard</a>
       <a href="/authoring-tool/" aria-current="page">Authoring tool</a>
@@ -126,7 +112,7 @@
 <main>
 <div class="wrap-tool">
 <h1>The authoring tool</h1>
-<p class="note"><strong>Preview v0.2 · for OpenGDD 0.6 · local-first.</strong> Everything on this page
+<p class="note"><strong>Preview v0.2 · for OpenGDD 0.7 · local-first.</strong> Everything on this page
 runs in your browser: your files never leave it. Drafts save in this
 browser, the tool checks conformance as you write, and "Export ZIP"
 downloads a portable copy. Tic-tac-toe opens as a safe example to
@@ -157,9 +143,12 @@ package selector.</p>
 <footer class="site-tool-status" data-tool-region="status" aria-label="Package status"></footer>
 </div>
 <script type="module">
-import { mountAuthoringTool } from "/authoring-tool/src/tool.mjs?v=d3d40624535f";
-import inContextPanel from "/authoring-tool/panels/opengdd.in-context/panel.mjs?v=d3d40624535f";
-import notesPanel from "/authoring-tool/panels/example.notes/notes.mjs?v=d3d40624535f";
+import { mountAuthoringTool } from "/authoring-tool/src/tool.mjs?v=de258b84a459";
+import contractPanel from "/authoring-tool/panels/opengdd.contract/panel.mjs?v=de258b84a459";
+import collectionPanel from "/authoring-tool/panels/opengdd.collection/panel.mjs?v=de258b84a459";
+import recordFormPanel from "/authoring-tool/panels/opengdd.record-form/panel.mjs?v=de258b84a459";
+import inContextPanel from "/authoring-tool/panels/opengdd.in-context/panel.mjs?v=de258b84a459";
+import notesPanel from "/authoring-tool/panels/example.notes/notes.mjs?v=de258b84a459";
 
 const fetchJson = async (url) => {
   const response = await fetch(url);
@@ -172,16 +161,22 @@ const fetchText = async (url) => {
   return response.text();
 };
 
-const SCHEMA_BASE = "/schema/core/v0.6/";
-const schemaNames = [
+const SCHEMA_BASE = "/schema/core/v0.7/";
+const requiredSchemaNames = [
   "manifest.schema.json", "tuning.schema.json", "personalization.schema.json",
   "collection.schema.json", "direction.schema.json", "opengdd-build.schema.json",
 ];
+const optionalMigrationSchemaName = "clocks.schema.json";
 let schemaRequest;
-// Cache the schemas, but never cache a failure.
+// Cache the required schemas, but never cache a required failure. Migration's
+// optional clock schema joins the map only when this host can supply it.
 const loadSchemas = () => schemaRequest ??= Promise.all(
-  schemaNames.map(async (name) => [name, await fetchJson(SCHEMA_BASE + name)]),
-).then(Object.fromEntries).catch((error) => { schemaRequest = undefined; throw error; });
+  requiredSchemaNames.map(async (name) => [name, await fetchJson(SCHEMA_BASE + name)]),
+).then(async (entries) => {
+  try { entries.push([optionalMigrationSchemaName, await fetchJson(SCHEMA_BASE + optionalMigrationSchemaName)]); }
+  catch {}
+  return Object.fromEntries(entries);
+}).catch((error) => { schemaRequest = undefined; throw error; });
 
 const EXAMPLE_BASE = "/authoring-tool/example/";
 const exampleFiles = ["manifest.json","tuning.json","01-overview.md","02-mechanics.md","04-presentation.md","direction.json","05-build-plan.md"];
@@ -199,7 +194,23 @@ const syncTheme = () => {
 syncTheme();
 new MutationObserver(syncTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
+// A catalogue "Open in the authoring tool" link arrives as ?contract=<slug>.
+// The definition and its pack live on this same site; the tool opens its
+// Add-a-contract dialog with them once the package is ready.
+const contractSlug = new URLSearchParams(location.search).get("contract") || "";
+const initialContract = /^[a-z0-9][a-z0-9-]{0,63}$/.test(contractSlug) ? async () => {
+  const definitionText = await fetchText("/contracts/" + contractSlug + "/core.json");
+  let packText;
+  try {
+    const definition = JSON.parse(definitionText);
+    const packResponse = await fetch("/contracts/" + contractSlug + "/" + definition.contract + "-" + definition.version + ".pack.json");
+    if (packResponse.ok) packText = new Uint8Array(await packResponse.arrayBuffer());
+  } catch {}
+  return { definitionText, packText };
+} : undefined;
+
 mountAuthoringTool(document.querySelector("#authoring-tool"), {
+  initialContract,
   headingLevel: 2,
   regions: {
     explorer: region("explorer"),
@@ -212,21 +223,21 @@ mountAuthoringTool(document.querySelector("#authoring-tool"), {
   // Policy stated explicitly: the site host keeps the widget's simple
   // package flow (tic-tac-toe opens; no cold-start chooser, no host undo).
   capabilities: { protectedFiles: true, workbenchLabels: true, hostUndo: false, delete: true, coldStart: false },
-  panels: [inContextPanel, notesPanel],
+  panels: [contractPanel, collectionPanel, recordFormPanel, inContextPanel, notesPanel],
   schemas: loadSchemas,
   defaultPackageId: "tic-tac-toe",
   async listPackages() {
-    return [{ id: "tic-tac-toe", title: "Tic-Tac-Toe", revision: "37c1f5a74ea2" }];
+    return [{ id: "tic-tac-toe", title: "Tic-Tac-Toe", revision: "13a2faecafb7" }];
   },
   async loadPackage(id) {
     if (id !== "tic-tac-toe") throw new Error("Unknown package: " + id);
     const files = await Promise.all(exampleFiles.map(async (path) => ({
-      path, text: await fetchText(EXAMPLE_BASE + path + "?v=d3d40624535f"),
+      path, text: await fetchText(EXAMPLE_BASE + path + "?v=de258b84a459"),
     })));
     return { id, title: "Tic-Tac-Toe", path: EXAMPLE_BASE, files };
   },
   readerUrl(_packagePath, file) {
-    return EXAMPLE_BASE + file + "?v=d3d40624535f";
+    return EXAMPLE_BASE + file + "?v=de258b84a459";
   },
 });
 </script>

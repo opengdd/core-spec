@@ -20,17 +20,18 @@ collections.
 
 Scope: the build consumes `board.size` and `win.line_length` from
 [tuning.json](tuning.json) as data rather than embedding their
-numbers. Both are certified constants; this package declares no
-balance-tunable values.
+numbers. Both keys are fixed as written; this package declares no
+ranges.
 
-- Checkpoint: at certification, the resolved tuning snapshot matches
-  both certified constants for exact runtime equality.
+- Checkpoint: the built board's width and the marks a win needs are read
+  from the resolved snapshot's `board.size` and `win.line_length`; no
+  literal `3` stands in for either.
 
 ## Phase 4: presentation
 
-Scope: the Fixed requirements and the direction block of
+Scope: the Fixed requirements in
 [04-presentation.md](04-presentation.md), including the mark-ink
-color constraint declared in [direction.json](direction.json).
+colour promise declared in [direction.json](direction.json).
 
 - Checkpoint: AT-4 passes, and every Fixed requirement in
   [04-presentation.md](04-presentation.md) is reviewed against the
@@ -129,28 +130,27 @@ O X X
 X O .
 ```
 
-### AT-4: Direction constraint capture
+### AT-4: Direction promise capture
 
 ```test
 {
   "type": "scenario",
-  "given": "a built game rendered at default settings under the table-reading viewing context, played from an empty board to a finished game",
+  "given": "a built game rendered at default settings under the viewing conditions direction.json states, played from an empty board to a finished game",
   "when": ["the capture procedure samples the rendered color of every placed mark and every grid line during the in-game state"],
-  "then": ["constraints.colors.mark-ink is satisfied over its declared scope"],
-  "direction_claims": ["constraints.colors.mark-ink"],
+  "then": ["colors.mark-ink is satisfied over its declared scope"],
+  "direction_claims": ["colors.mark-ink"],
   "diagnostics": ["per-member-sampled-color", "delta-e-per-member"]
 }
 ```
 
-The claim's color reference, tolerance, and scope are read from
-[direction.json](direction.json), and the color it names from the
-palette [manifest.json](manifest.json) declares; neither is repeated
-here. A member is one
+The claim's colour reference, tolerance, and scope, and the palette colour it
+names, are read from [direction.json](direction.json); none is repeated here.
+A member is one
 placed mark or one grid line; the capture procedure samples each member's
 interior pixels, excluding antialiased edges, once, in a stable
 resting frame after any placement animation, and every sampled
 interior pixel must sit within the declared tolerance of the declared
-color. The in-game state ends
-the moment the game ends, so a win highlight may recolor the winning
+colour. The in-game state ends
+the moment the game ends, so a win highlight may recolour the winning
 lines freely. The run records its viewport and rendering environment
 alongside its diagnostics.

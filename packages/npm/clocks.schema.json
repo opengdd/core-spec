@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengdd.org/schema/core/v0.7/clocks.schema.json",
+  "title": "OpenGDD v0.7 clocks",
+  "type": "object",
+  "minProperties": 1,
+  "propertyNames": {
+    "pattern": "^[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?$"
+  },
+  "additionalProperties": { "$ref": "#/$defs/clock" },
+  "$comment": "Cross-clock advances disjointness and complete mode coverage are validator-level checks.",
+  "$defs": {
+    "runtimeAddress": {
+      "type": "string",
+      "pattern": "^runtime\\.[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?(?:\\.[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?)*$"
+    },
+    "clock": {
+      "type": "object",
+      "required": ["unit", "modes"],
+      "additionalProperties": false,
+      "properties": {
+        "unit": { "type": "string", "minLength": 1 },
+        "advances": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/runtimeAddress" }
+        },
+        "modes": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "additionalProperties": {
+            "enum": ["running", "paused", "steps", "none"]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "opengdd": "0.6",
+  "opengdd": "0.7",
   "id": "garden-snake",
   "version": "1.0.0",
   "title": "Garden Snake",
@@ -11,11 +11,5 @@
     "genre": "arcade",
     "session_minutes": 5,
     "audience": "anyone; one player and one garden"
-  },
-  "build": {
-    "chapters": [
-      "01-overview.md",
-      "02-mechanics.md"
-    ]
   }
 }

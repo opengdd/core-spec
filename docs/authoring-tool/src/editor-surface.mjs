@@ -1,7 +1,9 @@
 import { resolveAnchor } from "opengdd-analysis";
 import { unfencedLines } from "opengdd-syntax";
+import { RESERVED_EXTENSIONS, RESERVED_FIRST_SEGMENTS } from "opengdd-validation";
 import { CREATION_COPY } from "./copy/creation-copy.mjs";
 import { WIDGET_COPY } from "./copy/widget-copy.mjs";
+import { kindClass } from "./kinds.mjs";
 import {
   lineBounds, lineStarts, lineText, offsetToPosition, rangeFromOffsets, updateLineStarts
 } from "./text-coordinates.mjs";
@@ -10,12 +12,9 @@ const OVERLAY_MARGIN = 60;
 const RESERVED_CREATION_TOKENS = new Set(["true", "false", "null"]);
 const CREATION_TOKEN_SHAPE = /^(?:(?:[A-Za-z0-9._-]+\.md)?#[A-Za-z0-9._-]+|[A-Za-z0-9._-]+)$/i;
 const CREATION_PALETTE_TOKEN = /^palette\.(?:(?!(?:json|md)(?:\.|$))(?=[a-z0-9-]*[a-z])[a-z0-9]+(?:-[a-z0-9]+)*)(?:\.(?:(?!(?:json|md)(?:\.|$))(?=[a-z0-9-]*[a-z])[a-z0-9]+(?:-[a-z0-9]+)*))*$/;
-const RESERVED_CREATION_FIRST_SEGMENTS = new Set([
-  "pillars", "mood", "anti", "must_keep", "constraints", "viewing",
-  "semantics", "meta", "tunables", "constants", "invariants", "clocks",
-  "manifest", "build", "descriptors", "contracts", "palette"
-]);
-const RESERVED_CREATION_EXTENSIONS = new Set(["json", "md"]);
+const CREATION_MECHANISM_TOKEN = /^(?:clocks\.[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?|rules\.[a-z0-9]+(?:-[a-z0-9]+)*)$/;
+const RESERVED_CREATION_FIRST_SEGMENTS = new Set(RESERVED_FIRST_SEGMENTS);
+const RESERVED_CREATION_EXTENSIONS = new Set(RESERVED_EXTENSIONS);
 
 const escapeHtml = (value = "") => String(value)
   .replaceAll("&", "&amp;")
@@ -23,12 +22,6 @@ const escapeHtml = (value = "") => String(value)
   .replaceAll(">", "&gt;")
   .replaceAll('"', "&quot;")
   .replaceAll("'", "&#039;");
-
-function kindClass(kind) {
-  return ["tunable", "constant", "section", "acceptance-test", "descriptor", "question", "collection", "collection-record", "rule", "file", "palette"].includes(kind)
-    ? kind
-    : "name";
-}
 
 function anchorClass(anchor) {
   const kind = anchor.classification === "known" ? kindClass(anchor.definitions[0]?.kind) : anchor.classification;
@@ -81,7 +74,7 @@ function creationTokens(text, definitionsByName, file) {
       if (!name || !CREATION_TOKEN_SHAPE.test(name) || RESERVED_CREATION_TOKENS.has(name) || /[\\/]/.test(name)) continue;
       if (!name.includes("#") && name.includes(".")) {
         const segments = name.split(".");
-        if ((RESERVED_CREATION_FIRST_SEGMENTS.has(segments[0]) && !CREATION_PALETTE_TOKEN.test(name))
+        if ((RESERVED_CREATION_FIRST_SEGMENTS.has(segments[0]) && !CREATION_PALETTE_TOKEN.test(name) && !CREATION_MECHANISM_TOKEN.test(name))
           || segments.some(segment => RESERVED_CREATION_EXTENSIONS.has(segment))
           || segments.every(segment => /^\d+$/.test(segment))) continue;
       }
@@ -471,9 +464,11 @@ export function createEditorSurface({
   function renderDialog(focus = false) {
     if (!quickfix) return;
     const selected = quickfix.actions[quickfix.index];
-    const actions = quickfix.actions.map((action, index) => `<button type="button" role="radio" aria-checked="${index === quickfix.index}" tabindex="${index === quickfix.index ? 0 : -1}" data-quickfix-action="${index}" class="${index === quickfix.index ? "opengdd-author-is-active" : ""}">${escapeHtml(action.choice)}</button>`).join("");
+    const actions = quickfix.actions.map((action, index) => ({ action, index }))
+      .filter(({ action }) => !action.hiddenUntilError || quickfix.revealAnyway)
+      .map(({ action, index }) => `<button type="button" role="radio" aria-checked="${index === quickfix.index}" tabindex="${index === quickfix.index ? 0 : -1}" data-quickfix-action="${index}" class="${index === quickfix.index ? "opengdd-author-is-active" : ""}">${escapeHtml(action.choice)}</button>`).join("");
     const value = selected.needsValue
-      ? `<label>${CREATION_COPY.jsonValue}<input data-role="quickfix-value" value="${escapeHtml(quickfix.value)}" autocomplete="off" spellcheck="false"></label>`
+      ? `<label>${escapeHtml(selected.valueLabel ?? CREATION_COPY.jsonValue)}<input data-role="quickfix-value" value="${escapeHtml(quickfix.value)}" autocomplete="off" spellcheck="false"></label>`
       : "";
     ui.quickfix.innerHTML = `<p>${CREATION_COPY.createNew} <code>${escapeHtml(quickfix.name)}</code> ${CREATION_COPY.as}</p><div class="opengdd-author-quickfix-actions" role="radiogroup" aria-label="${CREATION_COPY.kind}">${actions}</div><div class="opengdd-author-quickfix-confirm">${value}<button type="button" data-quickfix-confirm>${CREATION_COPY.confirm}</button><button type="button" data-quickfix-cancel>${CREATION_COPY.cancelEsc}</button></div><p class="opengdd-author-quickfix-error" aria-live="polite">${escapeHtml(quickfix.error)}</p>`;
     ui.quickfix.setAttribute("aria-label", CREATION_COPY.createNamed(quickfix.name));
@@ -488,7 +483,15 @@ export function createEditorSurface({
     if (!quickfix) return;
     const input = ui.quickfix.querySelector('[data-role="quickfix-value"]');
     if (input) quickfix.value = input.value;
-    quickfix.index = (index + quickfix.actions.length) % quickfix.actions.length;
+    const visible = quickfix.actions.map((action, actionIndex) => ({ action, actionIndex }))
+      .filter(({ action }) => !action.hiddenUntilError || quickfix.revealAnyway)
+      .map(({ actionIndex }) => actionIndex);
+    if (visible.includes(index)) quickfix.index = index;
+    else {
+      const direction = index < quickfix.index ? -1 : 1;
+      const current = Math.max(0, visible.indexOf(quickfix.index));
+      quickfix.index = visible[(current + direction + visible.length) % visible.length];
+    }
     quickfix.error = "";
     renderDialog(true);
   }
@@ -515,8 +518,9 @@ export function createEditorSurface({
       name: anchor.name,
       actions: proposal.actions,
       index: 0,
-      value: "",
+      value: proposal.actions[0]?.defaultValue ?? "",
       error: "",
+      revealAnyway: false,
       selection: {
         path,
         start: ui.textarea.selectionStart ?? 0,
@@ -573,6 +577,7 @@ export function createEditorSurface({
     } catch (error) {
       if (quickfix !== pending) return;
       pending.error = error.message;
+      if (error.writeAnyway) pending.revealAnyway = true;
       renderDialog(true);
     }
   }
@@ -704,6 +709,7 @@ export function createEditorSurface({
       dismissDialog(restore);
     },
     dialogOpen() { return Boolean(quickfix); },
+    openCreation(name) { openDialog({ name, classification: "unknown" }); },
     dialogContains(target) { return ui.quickfix.contains(target); },
     destroy() {
       resize.disconnect();

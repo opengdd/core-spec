@@ -1,3 +1,6 @@
+import { WORKBENCH_COPY } from "./copy/workbench-copy.mjs";
+import { plainObject } from "./json-path.mjs";
+
 export const PANEL_API_REVISION = 1;
 
 const SERVICES = Object.freeze(["selection", "edits", "validation", "references", "forms", "grid", "assets"]);
@@ -5,7 +8,8 @@ const CAPABILITIES = Object.freeze({
   selection: ["current", "subscribe", "select"],
   edits: ["begin"],
   validation: ["current", "subscribe", "forFile", "reveal", "contribute"],
-  references: ["families", "resolve", "usages", "pick", "planRename", "applyRename"],
+  references: ["families", "resolve", "usages", "planRename", "applyRename",
+    "planUseContractValue", "applyUseContractValue"],
   forms: ["create"], grid: ["create"], assets: ["list", "pick", "add", "url"]
 });
 const SURFACES = new Set(["inspector", "sidebar"]);
@@ -14,7 +18,6 @@ const ID = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*)*$/;
 
 const panelName = panel => typeof panel?.id === "string" && panel.id ? panel.id : "unknown panel";
 const fail = (panel, field, detail) => { throw new Error(`Panel ${panelName(panel)} has an invalid ${field}${detail ? `: ${detail}` : "."}`); };
-const plainObject = value => value && typeof value === "object" && !Array.isArray(value);
 
 function validateNeeds(panel, needs, field) {
   if (needs === undefined) return [];
@@ -70,14 +73,14 @@ function matchScore(panel, selection) {
   return 0;
 }
 
-export function createPanelHost({ document, view, panels, inspector, sidebar, services, packageService, hostInfo, report }) {
+export function createPanelHost({ document, view, panels, inspector, sidebar, services, packageService, hostInfo, internal = {}, report }) {
   const registered = [];
   const ids = new Set();
   const links = [];
   const sidebarGroups = [];
   const subscriptionCancels = new Set();
   let destroyed = false;
-  let chosenId = "";
+  const chosenByKind = new Map();
   let fit = true;
 
   inspector.innerHTML = `<header class="opengdd-author-panel-header"><p class="opengdd-author-kicker" data-panel-title></p><select data-panel-switcher hidden></select></header><div class="opengdd-author-panel-stage" data-panel-stage></div>`;
@@ -238,6 +241,9 @@ export function createPanelHost({ document, view, panels, inspector, sidebar, se
         empty(value) { instance.empty = Boolean(value); renderEmpty(panel, instance, instance.empty); }
       }),
       api: Object.freeze({ revision: PANEL_API_REVISION, provisional: false }),
+      // Own-property lookup only: a panel id such as "constructor" must not
+      // reach the host-private channel through Object.prototype.
+      internal: Object.hasOwn(internal, panel.descriptor.id) ? internal[panel.descriptor.id] : undefined,
       services: null
     };
     instance.context = context;
@@ -289,17 +295,26 @@ export function createPanelHost({ document, view, panels, inspector, sidebar, se
     const matches = registered.filter(panel => panel.descriptor.surfaces.includes("inspector") && matchScore(panel, selection) > 0)
       .sort((left, right) => matchScore(right, selection) - matchScore(left, selection) || left.order - right.order);
     if (!matches.length) {
-      chosenId = "";
       title.textContent = "";
       switcher.hidden = true;
       stage.replaceChildren();
       const placeholder = document.createElement("p");
       placeholder.className = "opengdd-author-muted";
-      placeholder.textContent = "Nothing selected";
+      placeholder.textContent = WORKBENCH_COPY.nothingSelected;
       stage.append(placeholder);
       return;
     }
-    if (!matches.some(panel => panel.descriptor.id === chosenId)) chosenId = matches[0].descriptor.id;
+    const rememberedId = chosenByKind.get(selection.kind);
+    // Hovering a prose citation is a reading act. Give the generic context
+    // reader that delivery even when an editing panel also owns the kind;
+    // outline selections keep the remembered editing panel.
+    const proseContext = selection.origin?.surface === "prose" && ["contract", "contract-value"].includes(selection.kind)
+      ? matches.find(panel => panel.descriptor.id === "opengdd.in-context") : undefined;
+    // Only an explicit switcher choice populates chosenByKind, so it outranks
+    // the one-time prose reading default and leaves the switcher usable.
+    const chosenId = matches.some(panel => panel.descriptor.id === rememberedId)
+      ? rememberedId
+      : proseContext?.descriptor.id ?? matches[0].descriptor.id;
     switcher.replaceChildren(...matches.map(panel => {
       const option = document.createElement("option");
       option.value = panel.descriptor.id;
@@ -315,7 +330,11 @@ export function createPanelHost({ document, view, panels, inspector, sidebar, se
   }
 
   switcher.setAttribute("aria-label", "Inspector");
-  switcher.addEventListener("change", () => { chosenId = switcher.value; renderInspector(); });
+  switcher.addEventListener("change", () => {
+    const kind = services.selection.current()?.kind;
+    if (kind) chosenByKind.set(kind, switcher.value);
+    renderInspector();
+  });
   const selectionCancel = services.selection.subscribe(renderInspector);
   subscriptionCancels.add(selectionCancel);
 
@@ -345,7 +364,19 @@ export function createPanelHost({ document, view, panels, inspector, sidebar, se
   }
 
   registerAll(panels);
-  const observer = typeof view.ResizeObserver === "function" ? new view.ResizeObserver(() => renderInspector()) : null;
+  // Re-render only when the region crosses the floor: a panel whose own
+  // content changes height (a worksheet re-rendering its tests) would
+  // otherwise be re-mounted on every change and lose the designer's focus.
+  const observer = typeof view.ResizeObserver === "function" ? new view.ResizeObserver(() => {
+    const box = (inspector.parentElement ?? inspector).getBoundingClientRect();
+    const rootSize = parseFloat(view.getComputedStyle(document.documentElement).fontSize) || 16;
+    const nextFit = box.width > 0 && box.height > 0 ? box.width >= 16 * rootSize && box.height >= 12 * rootSize : fit;
+    if (nextFit !== fit) renderInspector();
+  }) : null;
+  // The region itself changes from zero-sized to fit when a workbench band is
+  // expanded. Observing it makes that transition render the current selection
+  // even when the selection arrived while the region was hidden.
+  observer?.observe(inspector);
   observer?.observe(inspector.parentElement ?? inspector);
   observer?.observe(document.documentElement);
   return {
@@ -359,6 +390,9 @@ export function createPanelHost({ document, view, panels, inspector, sidebar, se
       for (const panel of registered) for (const instance of panel.instances.values()) instance.element.dataset.size = size;
     },
     descriptors: () => registered.map(panel => panel.descriptor),
+    inspectorMatches(selection) {
+      return registered.some(panel => panel.descriptor.surfaces.includes("inspector") && matchScore(panel, selection) > 0);
+    },
     creators(request = {}, { menu = false } = {}) {
       return registered.flatMap(panel => (panel.descriptor.creates ?? []).map((creator, index) => ({ panel, creator, index })))
         .filter(({ creator }) => (creator.needs ?? []).every(serviceAvailable))

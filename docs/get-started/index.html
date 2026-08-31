@@ -28,7 +28,6 @@
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/" aria-current="page">Learn</a>
-      <a href="/contracts/">Contracts</a>
       <a href="/spec/">Spec</a>
       <a href="/standard/">Standard</a>
       <a href="/authoring-tool/">Authoring tool</a>
@@ -44,10 +43,11 @@
 <li><a href="/get-started/" aria-current="page">Get started</a></li>
 <li class="toc-h2"><a href="#rules"><span class="toc-num">1</span>Write the game in plain language</a></li>
 <li class="toc-h2"><a href="#tuning-keys"><span class="toc-num">2</span>Give important values a name</a></li>
-<li class="toc-h2"><a href="#the-package"><span class="toc-num">3</span>Make your first package</a></li>
-<li class="toc-h2"><a href="#collections"><span class="toc-num">4</span>Make lists with collections</a></li>
-<li class="toc-h2"><a href="#collection-meaning"><span class="toc-num">5</span>Keep collection items consistent</a></li>
-<li class="toc-h2"><a href="#try-it"><span class="toc-num">6</span>Check and share your package</a></li>
+<li class="toc-h2"><a href="#authority"><span class="toc-num">3</span>Decide who decides</a></li>
+<li class="toc-h2"><a href="#the-package"><span class="toc-num">4</span>Make your first package</a></li>
+<li class="toc-h2"><a href="#collections"><span class="toc-num">5</span>Make lists with collections</a></li>
+<li class="toc-h2"><a href="#collection-meaning"><span class="toc-num">6</span>Keep collection items consistent</a></li>
+<li class="toc-h2"><a href="#try-it"><span class="toc-num">7</span>Check and share your package</a></li>
 <li><a href="/handbook/">Handbook</a></li>
 </ul></nav>
 <article class="doc-body">
@@ -59,6 +59,12 @@ use small JSON files for values and lists that benefit from consistent names.
 Together they form one portable design package, with a clear route from the
 first rule to the final check. This guide calls the person, team, or AI system
 making the game the <strong>builder</strong>.</p>
+
+<aside class="note"><strong>Coming from v0.6?</strong> Run
+<code>npx opengdd migrate &lt;package-dir&gt;</code>. It rewrites the package's
+numbers, chapters, direction, clocks, tests, links, contracts, and current
+addresses into their v0.7 forms, then hands back a list of anything that still
+needs a manual decision.</aside>
 <section class="chapter">
 <h2 id="rules"><span class="chapter-num">1</span>Write the game in plain language<a class="heading-anchor" href="#rules" aria-label="Link to this section">#</a></h2>
 <p>Start by describing the game as you would to a
@@ -70,10 +76,11 @@ The player moves sideways and can jump to traverse platforms.
 Touching a spike costs a heart.
 </div>
 
-<p>These rules live in <code>02-mechanics.md</code>. Write them as clear
-instructions for the builder, with each rule stated once. OpenGDD keeps
-the prose readable while checking the named values and references you
-add later.</p>
+<p>These rules live in <code>02-mechanics.md</code>, the rules chapter. The
+<a href="#the-package">package section</a> names all five required files.
+Write the rules as clear instructions for the builder, with each rule stated
+once. OpenGDD keeps the prose readable while checking the named values and
+references you add later.</p>
 
 <p>A rule can also describe how something should feel while leaving its
 implementation open.</p>
@@ -97,96 +104,166 @@ data, give it a <strong>tuning key</strong>. Use that name wherever the value
 matters, set it once in <code>tuning.json</code>, and you can change it without
 searching through the prose.</p>
 
+<p>Write a tuning key in Markdown by placing backticks around it:</p>
+
+<pre><code class="lang-markdown">The player jumps `jump.height_tiles` tiles from standing.</code></pre>
+
 <div class="spec">
 The player jumps <span class="key">jump.height_tiles</span> tiles
 from standing. After walking off a ledge, the player may still begin a
 full jump for <span class="key">jump.coyote_seconds</span>.
 </div>
 
-<p><code>tuning.json</code> keeps two kinds of value:</p>
+<p><code>tuning.json</code> keeps each shared number in
+<code>values</code>. A range gives a number its allowed movement, with both
+ends included. The builder, or you during balancing, may move the number
+within it. The validator, the checker you run in step 7, refuses a number
+outside it.</p>
 
 <ul>
-<li>a <strong>tunable</strong> is a value you expect to retune as the
-game is balanced over time;</li>
-<li>a <strong>constant</strong> is a value that helps define the game
-itself. Changing one is a design change, not a rebalance.</li>
+<li><code>jump.coyote_seconds</code> has a range, so it may be adjusted between
+<code>0.05</code> and <code>0.2</code> seconds;</li>
+<li><code>jump.height_tiles</code> and <code>player.hearts</code> have no
+range, so they remain fixed as written.</li>
 </ul>
 
 <pre><code class="lang-json">{
-  "tunables": {
+  "values": {
     "jump.height_tiles": 3.2,
-    "jump.coyote_seconds": 0.12
-  },
-  "constants": {
+    "jump.coyote_seconds": 0.12,
     "player.hearts": 3
   },
-  "meta": {
-    "jump.coyote_seconds": { "range": [0.05, 0.2] }
+  "ranges": {
+    "jump.coyote_seconds": [0.05, 0.2]
+  },
+  "rules": {
+    "jump-clears-one-tile": "jump.height_tiles >= 1"
   }
 }</code></pre>
 
 <p>You can add a key to the JSON first or use a new name while writing.
 Like an IDE that tracks names in code, the authoring tool tracks your
 tuning keys, shows where each one is defined, and offers to add a missing
-entry to <code>tuning.json</code>. The files remain ordinary Markdown and
-JSON.</p>
+entry to <code>tuning.json</code>. If a backticked dotted name points to no
+declared value or other named part of the package, validation fails. The files
+remain ordinary Markdown and JSON.</p>
+
+<p>A tuning key has at least two dot-separated segments. Its first word cannot
+be one of OpenGDD's seventeen reserved words; the
+<a href="/handbook/tuning/">Tuning chapter</a> lists them. Start the key with
+anything else.</p>
 
 <img class="doc-shot" src="/assets/symbol-authoring.png" width="1024" height="278"
-  alt="The authoring tool showing a mechanics sentence citing jump.height_tiles, with a side panel classifying the key as a known tunable defined in tuning.json with value 3.2"
+  alt="The authoring tool showing a mechanics sentence citing jump.height_tiles, with a side panel classifying the key as a known value defined in tuning.json with value 3.2"
   loading="lazy">
 
-<p>For tunable values, the <code>meta</code> block can add a guardrail.
-Coyote time, the grace period after a ledge when a jump still works, is
-currently <code>0.12</code> seconds. Its allowed <code>range</code> is
-<code>0.05</code> to <code>0.2</code>, so the validator reports any later
-tuning outside those values.</p>
+<p>Coyote time, the grace period after a ledge when a jump still works, is
+currently <code>0.12</code> seconds.</p>
+
+<p>The optional <code>rules</code> table records arithmetic that must stay true.
+Here it requires a full jump to clear one tile. The plain <code>1</code> means
+one tile because the cited height is measured in tiles; the format does not
+track units for you.</p>
+
+<pre><code class="lang-text">"jump-clears-one-tile":
+  "jump.height_tiles >= 1"</code></pre>
+
+<p>A rule is one comparison between two sums. Each side combines plain
+numbers and keys from <code>values</code> with <code>+ - * /</code> and the
+functions <code>min</code>, <code>max</code>, and <code>floor</code>; a rule
+reads keys from <code>values</code> only. Multiplication and division happen
+before addition and subtraction; use parentheses when unsure, as in
+<code>floor((jump.height_tiles + 1) / 2) >= 1</code>. A false rule is an
+error, so the package does not validate until it holds.</p>
 
 <p>The prose explains what each value does. <code>tuning.json</code>
 keeps shared gameplay numbers together so they are easy to find, tune, and
-check. A number belonging to one collection item stays with that item, and a
-number used only by a test stays with the test.</p>
+check. A number used only by an acceptance test, written in step 4, stays
+with that test, for example a list of seeds it replays.</p>
 </section>
 <section class="chapter">
-<h2 id="the-package"><span class="chapter-num">3</span>Make your first package<a class="heading-anchor" href="#the-package" aria-label="Link to this section">#</a></h2>
-<p>Now bring the design together in five files. This small
+<h2 id="authority"><span class="chapter-num">3</span>Decide who decides<a class="heading-anchor" href="#authority" aria-label="Link to this section">#</a></h2>
+<p>Every rule is <strong>Fixed</strong> unless you say otherwise, so
+the builder follows untagged prose as written. Use an authority tag when you
+want to hand over a decision without leaving its limits vague.</p>
+
+<p class="file-label">a Delegated section in <code>02-mechanics.md</code></p>
+<pre><code class="lang-markdown">&gt; DELEGATED: landing-feedback
+&gt;
+&gt; Choose the landing animation and sound. A landing must remain readable
+&gt; without hiding the next hazard.</code></pre>
+
+<div class="spec">
+<strong>DELEGATED: landing-feedback</strong><br>
+Choose the landing animation and sound. A landing must remain readable
+without hiding the next hazard.
+</div>
+
+<p><code>&gt; DELEGATED:</code> hands this decision to the builder within the
+section's stated limits. The builder chooses the animation and sound, while
+readability and the clear view of the next hazard stay required.</p>
+
+<p><code>&gt; PERSONALIZATION: &lt;id&gt;</code> ties a section to a declared
+question that the builder answers for each build; the
+<a href="/handbook/personalization/">Personalization chapter</a> explains
+the question file.</p>
+
+<p>Before assembling the package, mark each open builder decision as
+Delegated and leave every decision you have settled untagged.</p>
+</section>
+<section class="chapter">
+<h2 id="the-package"><span class="chapter-num">4</span>Make your first package<a class="heading-anchor" href="#the-package" aria-label="Link to this section">#</a></h2>
+<p>Now bring the design together in five required files. This small
 folder is a complete, portable design document that you can hand to the
 builder.</p>
 
 <pre><code class="lang-text">platformer/
-  manifest.json      the game's identity and reading order
+  manifest.json      the game's identity and target
   tuning.json        the named values
   01-overview.md     the fantasy and feel
   02-mechanics.md    the rules
   05-build-plan.md   the route from design to finished game</code></pre>
 
+<p><code>03-content.md</code> and <code>04-presentation.md</code> are the two
+optional standard chapters. Add either when the game needs it.</p>
+
 <p class="file-label"><code>manifest.json</code>, complete</p>
 <pre><code class="lang-json">{
-  "opengdd": "0.6",
+  "opengdd": "0.7",
   "id": "platformer",
   "version": "0.1.0",
   "title": "Platformer",
   "designer": { "name": "You" },
   "target": {
     "platform": "web-2d",
-    "genre": "platformer",
-    "session_minutes": 20,
-    "audience": "anyone who has played a platformer"
-  },
-  "build": {
-    "chapters": ["01-overview.md", "02-mechanics.md"]
+    "genre": "platformer"
   }
 }</code></pre>
 
 <p><code>manifest.json</code> introduces the package: what the game is
-called, who designed it, who it is for, and what kind of game to build.
-Choose <code>web-2d</code> or <code>web-3d</code> for the platform. The
-<code>build.chapters</code> list gives the builder a reading order for
-your prose.</p>
+called, who designed it, and what kind of game to build. The
+<code>opengdd</code> value selects the format version; <code>version</code> is
+the version of your design. The target requires <code>platform</code> and
+<code>genre</code>; <code>session_minutes</code> and <code>audience</code> are
+optional. Choose <code>web-2d</code> or <code>web-3d</code> for the platform.
+They are the complete platform list in this version.
+The folder name does not have to match <code>id</code>; the id inside the
+manifest is the package's identity.</p>
+
+<p>The numbered chapter filenames give the builder a reading order. OpenGDD
+reads every root Markdown file named <code>NN-name.md</code> in filename
+order. Numbers <code>01</code>–<code>05</code> keep their standard names:
+<code>01-overview.md</code>, <code>02-mechanics.md</code>,
+<code>03-content.md</code>, <code>04-presentation.md</code>, and
+<code>05-build-plan.md</code>. Another name in that number range fails
+validation. Keep notes beside the design under an unnumbered name so they are
+not read as chapters.</p>
 
 <p><code>01-overview.md</code> opens with a <strong>fantasy block</strong>:
-one line capturing the player's fantasy, a <code>Feel:</code> line naming the
-experience to create, and a <code>NOT:</code> line guarding against the wrong
-direction.</p>
+one or more lines capturing the player's fantasy, up to 280 characters
+together and ending with a full stop, exclamation mark, or question mark; a
+<code>Feel:</code> line with three to five adjectives; and a non-empty
+<code>NOT:</code> line guarding against the wrong direction.</p>
 
 <p class="file-label">the opening of <code>01-overview.md</code></p>
 <pre><code class="lang-text"># Platformer
@@ -224,8 +301,6 @@ Checkpoint: The player can traverse one test room and take damage.
 }
 ```
 
-In plain language: a full jump reaches the specified height, and touching a spike removes exactly one heart.
-
 ## Phase 2: content
 Scope: Build one short level and give it readable visuals and sound.
 Chapters: 01-overview.md and 02-mechanics.md.
@@ -238,7 +313,14 @@ Checkpoint: AT-1 passes and no known blocking defect remains.</code></pre>
 
 <p>Each checkpoint gives its phase a clear finish line. The first phase also
 has an acceptance test. Its diagnostics name the evidence to return if the
-test fails.</p>
+test fails. The stage labels and the <code>Scope</code>, <code>Chapters</code>,
+and <code>Checkpoint</code> lines are a useful convention, not a shape the
+validator checks.</p>
+
+<p>The names inside <code>given</code>, <code>when</code>, and
+<code>then</code> are instructions for the runner, the tool or person that
+executes the test. The package validator does not scan those test sentences
+as citations.</p>
 
 <p>These five files are already enough to describe a finished game. If
 you would rather start from files than copy snippets, open the
@@ -249,11 +331,11 @@ warnings.</p>
 
 <p>The full OpenGDD format offers optional tools for common design work:
 collections for lists of content, art direction and palettes for visual
-intent, and more. Add them when they help your game. The next chapter
-starts with collections.</p>
+intent, and more. Add them when they help your game. The later collection
+sections show one such addition.</p>
 </section>
 <section class="chapter">
-<h2 id="collections"><span class="chapter-num">4</span>Make lists with collections<a class="heading-anchor" href="#collections" aria-label="Link to this section">#</a></h2>
+<h2 id="collections"><span class="chapter-num">5</span>Make lists with collections<a class="heading-anchor" href="#collections" aria-label="Link to this section">#</a></h2>
 <p>Games are full of lists of similar things: three enemies,
 fifty cards, or a dozen levels. A <strong>collection</strong> makes each
 list easy to grow and browse. Create one folder per list under
@@ -291,6 +373,9 @@ in <code>manifest.json</code>.</p>
   "behavior": "stands still and fires along the direction it faces"
 }</code></pre>
 
+<p>A number that belongs to one collection item stays in that item's record.
+The walker and spitter speeds stay in their respective files.</p>
+
 <p><code>title</code> is the name the player sees. The filenames
 <code>walker</code> and <code>spitter</code> are the names the package uses
 to refer to those enemies, so they must be unique inside
@@ -310,10 +395,10 @@ Only one spitter appears in a level.</code></pre>
 
 <p>That is already a complete collection. Each item can use the fields
 that make sense for your game. If you want every enemy file to follow
-the same pattern, the next chapter adds one small schema.</p>
+the same pattern, the next section adds one small schema.</p>
 </section>
 <section class="chapter">
-<h2 id="collection-meaning"><span class="chapter-num">5</span>Keep collection items consistent<a class="heading-anchor" href="#collection-meaning" aria-label="Link to this section">#</a></h2>
+<h2 id="collection-meaning"><span class="chapter-num">6</span>Keep collection items consistent<a class="heading-anchor" href="#collection-meaning" aria-label="Link to this section">#</a></h2>
 <a id="defining-sections"></a><p>As a list grows, a
 consistent pattern makes it easier to work with. A collection schema is a
 small template describing the fields that every item should share. Add one as
@@ -361,13 +446,13 @@ are both complete.</p>
 <p>This example describes enemy behavior but leaves appearance open.
 When color, mood, or visual consistency matters, OpenGDD also offers
 <a href="/handbook/direction/">art direction</a> and
-<a href="/handbook/palette-and-pinning/">palette</a> tools.</p>
+<a href="/handbook/palette-and-colour-promises/">palette</a> tools.</p>
 
 <p>The schema keeps the list consistent. Your prose brings its items
 into the game.</p>
 </section>
 <section class="chapter">
-<h2 id="try-it"><span class="chapter-num">6</span>Check and share your package<a class="heading-anchor" href="#try-it" aria-label="Link to this section">#</a></h2>
+<h2 id="try-it"><span class="chapter-num">7</span>Check and share your package<a class="heading-anchor" href="#try-it" aria-label="Link to this section">#</a></h2>
 <p>When the design is ready, the validator checks that its
 files, named values, and references fit together. You can then hand the
 same folder to a builder with a clear route through the work.</p>
@@ -384,6 +469,10 @@ Git repository.</li>
 the phases in <code>05-build-plan.md</code>, and return the build plus the
 test evidence that plan requests.</li>
 </ol>
+
+<p>A clean run ends with a line like this:</p>
+
+<pre><code class="lang-text">Result: PASS — 0 error(s), 0 warning(s)</code></pre>
 
 <div class="cta-row">
   <a class="cta" href="/handbook/an-afternoon-spec/package/">Open the five-file example</a>

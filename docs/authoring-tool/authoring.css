@@ -13,17 +13,27 @@
   --opengdd-author-warning: var(--_opengdd-author-theme-warning, #8a5a08);
   --opengdd-author-selection: var(--_opengdd-author-theme-selection, #b8ddcf);
   --opengdd-author-shadow: var(--_opengdd-author-theme-shadow, rgb(26 34 30 / 18%));
-  --opengdd-author-kind-tunable: var(--_opengdd-author-theme-kind-tunable, #08769a);
-  --opengdd-author-kind-constant: var(--_opengdd-author-theme-kind-constant, #6d52a4);
+  --opengdd-author-kind-value: var(--_opengdd-author-theme-kind-value, #08769a);
   --opengdd-author-kind-section: var(--_opengdd-author-theme-kind-section, #23714a);
   --opengdd-author-kind-acceptance-test: var(--_opengdd-author-theme-kind-acceptance-test, #9a5c0a);
-  --opengdd-author-kind-descriptor: var(--_opengdd-author-theme-kind-descriptor, #a23b6f);
+  --opengdd-author-kind-mood: var(--_opengdd-author-theme-kind-mood, #a23b6f);
   --opengdd-author-kind-question: var(--_opengdd-author-theme-kind-question, #a23b6f);
   --opengdd-author-kind-name: var(--_opengdd-author-theme-kind-name, #a23b6f);
   --opengdd-author-kind-collection: var(--_opengdd-author-theme-kind-collection, #6b5d1f);
   --opengdd-author-kind-collection-record: var(--_opengdd-author-theme-kind-collection-record, #9a442a);
+  --opengdd-author-kind-contract: var(--_opengdd-author-theme-kind-contract, #6a4c93);
   --opengdd-author-kind-rule: var(--_opengdd-author-theme-kind-rule, #486a9c);
+  --opengdd-author-kind-runtime: var(--_opengdd-author-theme-kind-runtime, #315d9b);
+  --opengdd-author-kind-clock: var(--_opengdd-author-theme-kind-clock, #7a4b9e);
+  --opengdd-author-kind-ruleset: var(--_opengdd-author-theme-kind-ruleset, #7d3d55);
   --opengdd-author-kind-palette: var(--_opengdd-author-theme-kind-palette, #00736b);
+  --opengdd-author-kind-color: var(--_opengdd-author-theme-kind-color, #a0520d);
+  --opengdd-author-kind-pillars: var(--_opengdd-author-theme-kind-pillars, #725b1b);
+  --opengdd-author-kind-anti: var(--_opengdd-author-theme-kind-anti, #725b1b);
+  --opengdd-author-kind-must_keep: var(--_opengdd-author-theme-kind-must_keep, #725b1b);
+  --opengdd-author-kind-colors: var(--_opengdd-author-theme-kind-colors, #2e6d68);
+  --opengdd-author-kind-contrast: var(--_opengdd-author-theme-kind-contrast, #2e6d68);
+  --opengdd-author-kind-timing: var(--_opengdd-author-theme-kind-timing, #2e6d68);
   --opengdd-author-kind-file: var(--_opengdd-author-theme-kind-file, #666d68);
   --opengdd-author-kind-unknown: var(--_opengdd-author-theme-kind-unknown, #d1281c);
   --opengdd-author-kind-ambiguous: var(--_opengdd-author-theme-kind-ambiguous, #8150b4);
@@ -41,17 +51,27 @@
   --_opengdd-author-dark-warning: #f5c168;
   --_opengdd-author-dark-selection: #315c4d;
   --_opengdd-author-dark-shadow: rgb(0 0 0 / 42%);
-  --_opengdd-author-dark-kind-tunable: #63c8e8;
-  --_opengdd-author-dark-kind-constant: #c2a3ff;
+  --_opengdd-author-dark-kind-value: #63c8e8;
   --_opengdd-author-dark-kind-section: #82dba7;
   --_opengdd-author-dark-kind-acceptance-test: #f5c168;
-  --_opengdd-author-dark-kind-descriptor: #f298c4;
+  --_opengdd-author-dark-kind-mood: #f298c4;
   --_opengdd-author-dark-kind-question: #f298c4;
   --_opengdd-author-dark-kind-name: #f298c4;
   --_opengdd-author-dark-kind-collection: #d9c66a;
   --_opengdd-author-dark-kind-collection-record: #f39a79;
+  --_opengdd-author-dark-kind-contract: #c7a7f2;
   --_opengdd-author-dark-kind-rule: #92b4e6;
+  --_opengdd-author-dark-kind-runtime: #8bb8ff;
+  --_opengdd-author-dark-kind-clock: #cf9cf3;
+  --_opengdd-author-dark-kind-ruleset: #ed9bb9;
   --_opengdd-author-dark-kind-palette: #62d1c7;
+  --_opengdd-author-dark-kind-color: #ffb066;
+  --_opengdd-author-dark-kind-pillars: #e4cb70;
+  --_opengdd-author-dark-kind-anti: #e4cb70;
+  --_opengdd-author-dark-kind-must_keep: #e4cb70;
+  --_opengdd-author-dark-kind-colors: #7ed0c7;
+  --_opengdd-author-dark-kind-contrast: #7ed0c7;
+  --_opengdd-author-dark-kind-timing: #7ed0c7;
   --_opengdd-author-dark-kind-file: #aeb5ae;
   --_opengdd-author-dark-kind-unknown: #ff6154;
   --_opengdd-author-dark-kind-ambiguous: #d19aff;
@@ -309,13 +329,27 @@
   font-weight: 700;
 }
 
-.opengdd-author-create-dialog input {
+.opengdd-author-create-dialog input,
+.opengdd-author-create-dialog textarea {
   width: 100%;
   box-sizing: border-box;
   padding: 0.4rem 0.45rem;
   border: 1px solid var(--opengdd-author-line-strong);
   background: var(--opengdd-author-surface);
   color: var(--opengdd-author-ink);
+}
+
+.opengdd-author-create-dialog textarea {
+  min-height: 5rem;
+  resize: vertical;
+  font: 0.68rem/1.35 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.opengdd-author-contract-drop {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.55rem;
+  border: 1px dashed var(--opengdd-author-line-strong);
 }
 
 .opengdd-author-create-help,
@@ -360,6 +394,18 @@
 .opengdd-author-notice.opengdd-author-is-error {
   color: var(--opengdd-author-danger);
 }
+
+.opengdd-author-file-notice {
+  margin: 0;
+  padding: 0.45rem 0.65rem;
+  border-bottom: 1px solid var(--opengdd-author-line);
+  background: var(--opengdd-author-surface-muted);
+  color: var(--opengdd-author-muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.opengdd-author-file-notice[hidden] { display: none; }
 
 .opengdd-author-package-form {
   display: flex;
@@ -446,6 +492,342 @@
 .opengdd-author-panel-group .opengdd-author-panel-badge {
   margin-left: auto;
   color: var(--opengdd-author-muted);
+}
+
+.opengdd-author-form,
+.opengdd-author-record-form,
+.opengdd-author-record-unknown,
+.opengdd-author-record-not-checked {
+  display: grid;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.opengdd-author-form-field,
+.opengdd-author-record-free-row,
+.opengdd-author-record-unknown-row {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  margin: 0;
+}
+
+.opengdd-author-form-field > label,
+.opengdd-author-record-free-row > label {
+  display: grid;
+  gap: 0.2rem;
+  font-weight: 650;
+}
+
+.opengdd-author-form input:not([type="checkbox"]),
+.opengdd-author-form textarea,
+.opengdd-author-form select,
+.opengdd-author-record-free-row input,
+.opengdd-author-record-free-row select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid var(--opengdd-author-line-strong);
+  border-radius: 0.25rem;
+  background: var(--opengdd-author-surface-raised);
+  color: var(--opengdd-author-ink);
+  font: inherit;
+}
+
+.opengdd-author-form textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.opengdd-author-form-monospace,
+.opengdd-author-form-link code,
+.opengdd-author-record-form code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+.opengdd-author-form-help,
+.opengdd-author-form-note,
+.opengdd-author-form-error {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.opengdd-author-form-help,
+.opengdd-author-form-note,
+.opengdd-author-form-required {
+  color: var(--opengdd-author-muted);
+  font-weight: 400;
+}
+
+.opengdd-author-form-error,
+.opengdd-author-form-field--error > label,
+.opengdd-author-record-unknown {
+  color: var(--opengdd-author-danger);
+}
+
+.opengdd-author-form-field--error input,
+.opengdd-author-form-field--error textarea,
+.opengdd-author-form-field--error select {
+  border-color: var(--opengdd-author-danger);
+}
+
+.opengdd-author-form-enum,
+.opengdd-author-record-breadcrumb,
+.opengdd-author-form-link-row,
+.opengdd-author-record-unknown-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.opengdd-author-form-enum--chosen {
+  border-color: var(--opengdd-author-accent);
+  background: var(--opengdd-author-accent-soft);
+}
+
+.opengdd-author-form-enum--chosen::before {
+  content: "\2713  ";
+}
+
+.opengdd-author-form-choice {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.opengdd-author-form-choice button {
+  inline-size: 100%;
+  padding: 0.65rem;
+  border: 1px solid var(--opengdd-author-line);
+  border-radius: 0.3rem;
+  color: inherit;
+  background: var(--opengdd-author-surface);
+  text-align: start;
+  white-space: normal;
+}
+
+.opengdd-author-form-choice button.opengdd-author-form-choice--chosen {
+  border-width: 3px;
+  border-color: var(--opengdd-author-accent);
+  background: var(--opengdd-author-accent-soft);
+}
+
+[data-choice-tag] {
+  font-weight: 700;
+  color: var(--opengdd-author-accent);
+}
+
+.opengdd-author-form-link,
+.opengdd-author-form-lines {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.opengdd-author-form-link-row {
+  justify-content: space-between;
+}
+
+.opengdd-author-form-lines {
+  overflow-x: auto;
+}
+
+.opengdd-author-form-lines table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.opengdd-author-form-lines th,
+.opengdd-author-form-lines td {
+  padding: 0.3rem;
+  border: 1px solid var(--opengdd-author-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+.opengdd-author-collection,
+[data-collection-fields],
+[data-collection-fields-host] {
+  min-width: 0;
+  max-width: 100%;
+}
+
+[data-collection-header] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid var(--opengdd-author-line);
+}
+
+[data-collection-header] label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+[data-fields-table] {
+  table-layout: auto;
+  width: 100%;
+  max-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+}
+
+[data-fields-table] th,
+[data-fields-table] td {
+  position: relative;
+  min-width: 0;
+  padding: 0.12rem 0.18rem;
+  border: 0;
+  border-bottom: 1px solid var(--opengdd-author-line);
+  text-align: left;
+  vertical-align: middle;
+}
+
+[data-fields-table] thead th {
+  color: var(--opengdd-author-muted);
+  font-size: 0.65rem;
+  font-weight: 600;
+}
+
+[data-collection-field] {
+  height: 2.2rem;
+}
+
+[data-collection-field][data-field-depth="1"] > th,
+[data-field-extras][data-field-depth="1"] > td {
+  padding-inline-start: 1rem;
+}
+
+[data-fields-table] input[type="text"],
+[data-fields-table] input:not([type]),
+[data-fields-table] select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 1.75rem;
+  padding: 0.12rem 0.2rem;
+}
+
+[data-fields-table] [data-field-name] {
+  width: auto;
+  max-width: 9rem;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+[data-fields-table] button {
+  padding: 0.16rem 0.28rem;
+  white-space: nowrap;
+}
+
+[data-fields-table] [data-field-error]:empty,
+[data-record-table] [data-row-error]:empty {
+  display: none;
+}
+
+[data-field-extras] td {
+  position: relative;
+  padding-block: 0.08rem 0.2rem;
+  color: var(--opengdd-author-muted);
+}
+
+[data-field-extras-button] {
+  max-width: 100%;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+}
+
+.opengdd-author-field-popover,
+[data-choices-editor],
+[data-when-editor] {
+  position: absolute;
+  z-index: 4;
+  display: grid;
+  width: min(20rem, calc(100vw - 2rem));
+  gap: 0.4rem;
+  padding: 0.6rem;
+  border: 1px solid var(--opengdd-author-line-strong);
+  border-radius: 0.3rem;
+  background: var(--opengdd-author-surface-raised);
+  box-shadow: 0 0.35rem 1rem var(--opengdd-author-shadow);
+  color: var(--opengdd-author-ink);
+}
+
+[data-fields-kind-legend] {
+  margin: 0.35rem 0;
+  color: var(--opengdd-author-muted);
+  font-size: 0.72rem;
+}
+
+[data-record-table] {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+[data-record-table] th,
+[data-record-table] td {
+  padding: 0.25rem 0.3rem;
+  border: 0;
+  border-bottom: 1px solid var(--opengdd-author-line);
+  text-align: left;
+  vertical-align: top;
+}
+
+[data-record-table] [data-cell-button],
+[data-record-table] th[scope="row"] > button {
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+}
+
+[data-record-table] small {
+  display: block;
+  color: var(--opengdd-author-muted);
+  font-size: 0.65rem;
+}
+
+.opengdd-author-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.opengdd-author-record-breadcrumb {
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--opengdd-author-line);
+}
+
+.opengdd-author-record-breadcrumb code {
+  margin-right: auto;
+}
+
+.opengdd-author-record-free-row,
+.opengdd-author-record-unknown-row {
+  padding: 0.65rem;
+  border: 1px solid var(--opengdd-author-line);
+  border-radius: 0.3rem;
+}
+
+.opengdd-author-record-free-value {
+  min-width: 0;
 }
 
 .opengdd-author-tree-panel {
@@ -863,17 +1245,27 @@
   font-weight: 700;
 }
 
-.opengdd-author-kind--tunable { color: var(--opengdd-author-kind-tunable); }
-.opengdd-author-kind--constant { color: var(--opengdd-author-kind-constant); }
+.opengdd-author-kind--value { color: var(--opengdd-author-kind-value); }
 .opengdd-author-kind--section { color: var(--opengdd-author-kind-section); }
 .opengdd-author-kind--acceptance-test { color: var(--opengdd-author-kind-acceptance-test); }
-.opengdd-author-kind--descriptor { color: var(--opengdd-author-kind-descriptor); }
+.opengdd-author-kind--mood { color: var(--opengdd-author-kind-mood); }
 .opengdd-author-kind--question { color: var(--opengdd-author-kind-question); }
 .opengdd-author-kind--name { color: var(--opengdd-author-kind-name); }
 .opengdd-author-kind--collection { color: var(--opengdd-author-kind-collection); }
 .opengdd-author-kind--collection-record { color: var(--opengdd-author-kind-collection-record); }
+.opengdd-author-kind--contract { color: var(--opengdd-author-kind-contract); }
 .opengdd-author-kind--rule { color: var(--opengdd-author-kind-rule); }
+.opengdd-author-kind--runtime { color: var(--opengdd-author-kind-runtime); }
+.opengdd-author-kind--clock { color: var(--opengdd-author-kind-clock); }
+.opengdd-author-kind--ruleset { color: var(--opengdd-author-kind-ruleset); }
 .opengdd-author-kind--palette { color: var(--opengdd-author-kind-palette); }
+.opengdd-author-kind--color { color: var(--opengdd-author-kind-color); }
+.opengdd-author-kind--pillars { color: var(--opengdd-author-kind-pillars); }
+.opengdd-author-kind--anti { color: var(--opengdd-author-kind-anti); }
+.opengdd-author-kind--must_keep { color: var(--opengdd-author-kind-must_keep); }
+.opengdd-author-kind--colors { color: var(--opengdd-author-kind-colors); }
+.opengdd-author-kind--contrast { color: var(--opengdd-author-kind-contrast); }
+.opengdd-author-kind--timing { color: var(--opengdd-author-kind-timing); }
 .opengdd-author-kind--file { color: var(--opengdd-author-kind-file); }
 .opengdd-author-kind--unknown { color: var(--opengdd-author-kind-unknown); }
 .opengdd-author-kind--ambiguous { color: var(--opengdd-author-kind-ambiguous); }
@@ -1033,6 +1425,50 @@
 .opengdd-author-validation-skipped,
 .opengdd-author-validation-unavailable {
   font-size: 0.74rem;
+}
+
+.opengdd-author-migration {
+  margin: 0 0 0.8rem;
+  padding: 0.6rem;
+  border: 1px solid var(--opengdd-author-line-strong);
+  border-radius: 0.45rem;
+  background: var(--opengdd-author-surface-muted);
+  font-size: 0.74rem;
+}
+
+.opengdd-author-migration h3 {
+  margin: 0.55rem 0 0.2rem;
+  font-size: 0.72rem;
+}
+
+.opengdd-author-migration p,
+.opengdd-author-migration ul {
+  margin: 0 0 0.45rem;
+}
+
+.opengdd-author-migration ul {
+  padding-inline-start: 1.2rem;
+}
+
+/* The inspector styles every li as a finding row (grid, tall padding, a
+   rule above); the migration lists are plain lines, one per file. */
+.opengdd-author-inspector .opengdd-author-migration li,
+.opengdd-author-migration li {
+  display: block;
+  margin: 0;
+  padding: 0.1rem 0;
+  border-top: 0;
+  overflow-wrap: anywhere;
+}
+
+.opengdd-author-migration-detail {
+  color: var(--opengdd-author-muted);
+}
+
+.opengdd-author-migration-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
 }
 
 .opengdd-author-diagnostic-group h3 {
@@ -1254,6 +1690,7 @@
 
 .opengdd-author-outline-group h3 {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem;
   margin: 0;
@@ -1262,12 +1699,15 @@
   font-size: 0.75rem;
 }
 
-.opengdd-author-outline-group h3 > span:nth-child(2) {
-  flex: 1;
+.opengdd-author-outline-group h3 > span:nth-child(2),
+.opengdd-author-outline-group h3 > code {
+  flex: 1 0 auto;
+  white-space: nowrap;
 }
 
 .opengdd-author-outline-group-create,
 .opengdd-author-outline-add-record {
+  margin-inline-start: auto;
   padding: 0.15rem 0.3rem;
   color: var(--opengdd-author-muted);
   font-size: 0.6rem;
@@ -1304,6 +1744,7 @@
 
 .opengdd-author-outline-entry > div {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem;
   padding: 0.15rem 0.45rem;
@@ -1352,6 +1793,53 @@
   white-space: nowrap;
 }
 
+.opengdd-author-outline-entry--contract .opengdd-author-outline-jump {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  flex: 1 1 100%;
+}
+
+.opengdd-author-outline-entry--contract .opengdd-author-outline-name {
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
+.opengdd-author-outline-contract-actions {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.opengdd-author-outline-contract-actions .opengdd-author-outline-badge--sentence {
+  /* The whole line, so the grey tail follows the counts instead of sitting beside them. */
+  flex: 1 1 100%;
+}
+
+.opengdd-author-outline-contract-consequences {
+  color: var(--opengdd-author-muted);
+  font-weight: normal;
+}
+
+.opengdd-author-outline-mode,
+.opengdd-author-outline-complete {
+  color: var(--opengdd-author-muted);
+  font-size: 0.68rem;
+}
+
+.opengdd-author-outline-complete {
+  padding-inline: 0.25rem;
+}
+
+.opengdd-author-outline-contract-rename {
+  flex: 0 0 auto;
+  padding: 0.05rem 0.3rem;
+  border-color: var(--opengdd-author-line);
+  background: transparent;
+  color: var(--opengdd-author-muted);
+  font-size: 0.62rem;
+}
+
 .opengdd-author-is-selected .opengdd-author-outline-jump {
   border-color: var(--opengdd-author-accent-soft);
   background: var(--opengdd-author-accent-soft);
@@ -1361,11 +1849,38 @@
   grid-column: 1 / -1;
   color: var(--opengdd-author-muted);
   font-size: 0.62rem;
+  overflow-wrap: anywhere;
 }
 
 .opengdd-author-outline-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.opengdd-author-outline-value-meta {
+  display: flex;
+  flex: 0 0 100%;
+  align-items: baseline;
+  gap: 0.35rem;
+  padding: 0 0.45rem 0.25rem;
+}
+
+.opengdd-author-outline-value-meta .opengdd-author-outline-location {
+  flex: 1;
+}
+
+/* The widget's own button rule sets font: inherit and a full padding; the
+   range control is a small inline affordance the size of a badge, so the
+   size is stated at the same specificity the badge uses. */
+.opengdd-authoring .opengdd-author-outline-range-action,
+.opengdd-author-region .opengdd-author-outline-range-action {
+  flex: 0 0 auto;
+  padding: 0.05rem 0.3rem;
+  border-color: var(--opengdd-author-line);
+  background: transparent;
+  color: var(--opengdd-author-muted);
+  font-size: 0.62rem;
+  line-height: 1.3;
 }
 
 .opengdd-author-outline-kind-tag {
@@ -1380,6 +1895,13 @@
   text-transform: lowercase;
 }
 
+.opengdd-author-outline-range-tag {
+  align-self: center;
+  color: var(--opengdd-author-muted);
+  font: 600 0.56rem/1.2 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  white-space: nowrap;
+}
+
 .opengdd-author-outline-badge {
   display: inline-flex;
   min-width: 1.7rem;
@@ -1392,6 +1914,11 @@
   font-size: 0.62rem;
 }
 
+.opengdd-authoring .opengdd-author-outline-badge,
+.opengdd-author-region .opengdd-author-outline-badge {
+  font-size: 0.62rem;
+}
+
 .opengdd-author-outline-badge--error {
   color: var(--opengdd-author-danger);
 }
@@ -1401,7 +1928,8 @@
 }
 
 .opengdd-author-outline-badge--sentence {
-  max-width: 12rem;
+  flex: 1 1 100%;
+  max-width: none;
   justify-content: start;
   text-align: left;
 }
@@ -1543,17 +2071,27 @@
     --_opengdd-author-theme-warning: var(--_opengdd-author-dark-warning);
     --_opengdd-author-theme-selection: var(--_opengdd-author-dark-selection);
     --_opengdd-author-theme-shadow: var(--_opengdd-author-dark-shadow);
-    --_opengdd-author-theme-kind-tunable: var(--_opengdd-author-dark-kind-tunable);
-    --_opengdd-author-theme-kind-constant: var(--_opengdd-author-dark-kind-constant);
+    --_opengdd-author-theme-kind-value: var(--_opengdd-author-dark-kind-value);
     --_opengdd-author-theme-kind-section: var(--_opengdd-author-dark-kind-section);
     --_opengdd-author-theme-kind-acceptance-test: var(--_opengdd-author-dark-kind-acceptance-test);
-    --_opengdd-author-theme-kind-descriptor: var(--_opengdd-author-dark-kind-descriptor);
+    --_opengdd-author-theme-kind-mood: var(--_opengdd-author-dark-kind-mood);
     --_opengdd-author-theme-kind-question: var(--_opengdd-author-dark-kind-question);
     --_opengdd-author-theme-kind-name: var(--_opengdd-author-dark-kind-name);
     --_opengdd-author-theme-kind-collection: var(--_opengdd-author-dark-kind-collection);
     --_opengdd-author-theme-kind-collection-record: var(--_opengdd-author-dark-kind-collection-record);
+    --_opengdd-author-theme-kind-contract: var(--_opengdd-author-dark-kind-contract);
     --_opengdd-author-theme-kind-rule: var(--_opengdd-author-dark-kind-rule);
+    --_opengdd-author-theme-kind-runtime: var(--_opengdd-author-dark-kind-runtime);
+    --_opengdd-author-theme-kind-clock: var(--_opengdd-author-dark-kind-clock);
+    --_opengdd-author-theme-kind-ruleset: var(--_opengdd-author-dark-kind-ruleset);
     --_opengdd-author-theme-kind-palette: var(--_opengdd-author-dark-kind-palette);
+    --_opengdd-author-theme-kind-color: var(--_opengdd-author-dark-kind-color);
+    --_opengdd-author-theme-kind-pillars: var(--_opengdd-author-dark-kind-pillars);
+    --_opengdd-author-theme-kind-anti: var(--_opengdd-author-dark-kind-anti);
+    --_opengdd-author-theme-kind-must_keep: var(--_opengdd-author-dark-kind-must_keep);
+    --_opengdd-author-theme-kind-colors: var(--_opengdd-author-dark-kind-colors);
+    --_opengdd-author-theme-kind-contrast: var(--_opengdd-author-dark-kind-contrast);
+    --_opengdd-author-theme-kind-timing: var(--_opengdd-author-dark-kind-timing);
     --_opengdd-author-theme-kind-file: var(--_opengdd-author-dark-kind-file);
     --_opengdd-author-theme-kind-unknown: var(--_opengdd-author-dark-kind-unknown);
     --_opengdd-author-theme-kind-ambiguous: var(--_opengdd-author-dark-kind-ambiguous);
@@ -1576,17 +2114,27 @@
   --_opengdd-author-theme-warning: initial;
   --_opengdd-author-theme-selection: initial;
   --_opengdd-author-theme-shadow: initial;
-  --_opengdd-author-theme-kind-tunable: initial;
-  --_opengdd-author-theme-kind-constant: initial;
+  --_opengdd-author-theme-kind-value: initial;
   --_opengdd-author-theme-kind-section: initial;
   --_opengdd-author-theme-kind-acceptance-test: initial;
-  --_opengdd-author-theme-kind-descriptor: initial;
+  --_opengdd-author-theme-kind-mood: initial;
   --_opengdd-author-theme-kind-question: initial;
   --_opengdd-author-theme-kind-name: initial;
   --_opengdd-author-theme-kind-collection: initial;
   --_opengdd-author-theme-kind-collection-record: initial;
+  --_opengdd-author-theme-kind-contract: initial;
   --_opengdd-author-theme-kind-rule: initial;
+  --_opengdd-author-theme-kind-runtime: initial;
+  --_opengdd-author-theme-kind-clock: initial;
+  --_opengdd-author-theme-kind-ruleset: initial;
   --_opengdd-author-theme-kind-palette: initial;
+  --_opengdd-author-theme-kind-color: initial;
+  --_opengdd-author-theme-kind-pillars: initial;
+  --_opengdd-author-theme-kind-anti: initial;
+  --_opengdd-author-theme-kind-must_keep: initial;
+  --_opengdd-author-theme-kind-colors: initial;
+  --_opengdd-author-theme-kind-contrast: initial;
+  --_opengdd-author-theme-kind-timing: initial;
   --_opengdd-author-theme-kind-file: initial;
   --_opengdd-author-theme-kind-unknown: initial;
   --_opengdd-author-theme-kind-ambiguous: initial;
@@ -1608,17 +2156,27 @@
   --_opengdd-author-theme-warning: var(--_opengdd-author-dark-warning);
   --_opengdd-author-theme-selection: var(--_opengdd-author-dark-selection);
   --_opengdd-author-theme-shadow: var(--_opengdd-author-dark-shadow);
-  --_opengdd-author-theme-kind-tunable: var(--_opengdd-author-dark-kind-tunable);
-  --_opengdd-author-theme-kind-constant: var(--_opengdd-author-dark-kind-constant);
+  --_opengdd-author-theme-kind-value: var(--_opengdd-author-dark-kind-value);
   --_opengdd-author-theme-kind-section: var(--_opengdd-author-dark-kind-section);
   --_opengdd-author-theme-kind-acceptance-test: var(--_opengdd-author-dark-kind-acceptance-test);
-  --_opengdd-author-theme-kind-descriptor: var(--_opengdd-author-dark-kind-descriptor);
+  --_opengdd-author-theme-kind-mood: var(--_opengdd-author-dark-kind-mood);
   --_opengdd-author-theme-kind-question: var(--_opengdd-author-dark-kind-question);
   --_opengdd-author-theme-kind-name: var(--_opengdd-author-dark-kind-name);
   --_opengdd-author-theme-kind-collection: var(--_opengdd-author-dark-kind-collection);
   --_opengdd-author-theme-kind-collection-record: var(--_opengdd-author-dark-kind-collection-record);
+  --_opengdd-author-theme-kind-contract: var(--_opengdd-author-dark-kind-contract);
   --_opengdd-author-theme-kind-rule: var(--_opengdd-author-dark-kind-rule);
+  --_opengdd-author-theme-kind-runtime: var(--_opengdd-author-dark-kind-runtime);
+  --_opengdd-author-theme-kind-clock: var(--_opengdd-author-dark-kind-clock);
+  --_opengdd-author-theme-kind-ruleset: var(--_opengdd-author-dark-kind-ruleset);
   --_opengdd-author-theme-kind-palette: var(--_opengdd-author-dark-kind-palette);
+  --_opengdd-author-theme-kind-color: var(--_opengdd-author-dark-kind-color);
+  --_opengdd-author-theme-kind-pillars: var(--_opengdd-author-dark-kind-pillars);
+  --_opengdd-author-theme-kind-anti: var(--_opengdd-author-dark-kind-anti);
+  --_opengdd-author-theme-kind-must_keep: var(--_opengdd-author-dark-kind-must_keep);
+  --_opengdd-author-theme-kind-colors: var(--_opengdd-author-dark-kind-colors);
+  --_opengdd-author-theme-kind-contrast: var(--_opengdd-author-dark-kind-contrast);
+  --_opengdd-author-theme-kind-timing: var(--_opengdd-author-dark-kind-timing);
   --_opengdd-author-theme-kind-file: var(--_opengdd-author-dark-kind-file);
   --_opengdd-author-theme-kind-unknown: var(--_opengdd-author-dark-kind-unknown);
   --_opengdd-author-theme-kind-ambiguous: var(--_opengdd-author-dark-kind-ambiguous);

@@ -28,7 +28,6 @@
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/">Learn</a>
-      <a href="/contracts/">Contracts</a>
       <a href="/spec/">Spec</a>
       <a href="/standard/" aria-current="page">Standard</a>
       <a href="/authoring-tool/">Authoring tool</a>
@@ -43,7 +42,7 @@
 <p>The machine-readable half of the standard. Every schema lives at a
 canonical URL that doubles as its JSON Schema <code>$id</code>:</p>
 <pre><code>https://opengdd.org/schema/&lt;layer&gt;/v&lt;minor&gt;/&lt;file&gt;.schema.json</code></pre>
-<p>Today there is one layer, <code>core</code>, at <code>v0.6</code>.
+<p>Today there is one layer, <code>core</code>, at <code>v0.7</code>.
 A schema URL is never repurposed: when a construct changes, the version
 segment changes with it, and superseded URLs keep serving what they
 always served. Corrections appear as errata at the same URL, and never
@@ -52,32 +51,43 @@ silently change a validation outcome.</p>
 <thead><tr><th>Schema</th><th>What it validates</th></tr></thead>
 <tbody>
 <tr>
-<td><a href="/schema/core/v0.6/manifest.schema.json"><code>manifest.schema.json</code></a></td>
-<td>The package manifest: identity, target, build contract, graph edge sets, ruleset state, palettes, descriptor families.</td>
+<td><a href="/schema/core/v0.7/manifest.schema.json"><code>manifest.schema.json</code></a></td>
+<td>The package manifest: identity, delivery target, and optional commerce metadata.</td>
 </tr>
 <tr>
-<td><a href="/schema/core/v0.6/direction.schema.json"><code>direction.schema.json</code></a></td>
-<td>The art-direction block in machine form: pillars, mood, references, constraints, audit hooks.</td>
+<td><a href="/schema/core/v0.7/clocks.schema.json"><code>clocks.schema.json</code></a></td>
+<td>The optional clock map: each clock's unit, time-mode behavior, and runtime values advanced.</td>
 </tr>
 <tr>
-<td><a href="/schema/core/v0.6/tuning.schema.json"><code>tuning.schema.json</code></a></td>
-<td>The tuning file: tunables with ranges and constants, the numbers a build may and may not move.</td>
+<td><a href="/schema/core/v0.7/direction.schema.json"><code>direction.schema.json</code></a></td>
+<td>The optional art-direction file: palettes, priorities, mood, negative direction, measurable promises, and viewing conditions.</td>
 </tr>
 <tr>
-<td><a href="/schema/core/v0.6/personalization.schema.json"><code>personalization.schema.json</code></a></td>
-<td>The personalization file: declared questions, answer shapes, and what each answer may touch.</td>
+<td><a href="/schema/core/v0.7/tuning.schema.json"><code>tuning.schema.json</code></a></td>
+<td>The tuning file: shared values, their inclusive ranges, and one-comparison arithmetic rules between them.</td>
 </tr>
 <tr>
-<td><a href="/schema/core/v0.6/collection.schema.json"><code>collection.schema.json</code></a></td>
-<td>The drawer's optional label, _collection.json: closed, carrying the record schema a drawer declares when it wants its records checked.</td>
+<td><a href="/schema/core/v0.7/personalization.schema.json"><code>personalization.schema.json</code></a></td>
+<td>The optional personalization file: questions, defaults, choice-option assignments, and one-key numeric assignments.</td>
 </tr>
 <tr>
-<td><a href="/schema/core/v0.6/opengdd-build.schema.json"><code>opengdd-build.schema.json</code></a></td>
-<td>The manifest a finished build ships: builder, resolved tuning, acceptance outcomes, result hash.</td>
+<td><a href="/schema/core/v0.7/collection.schema.json"><code>collection.schema.json</code></a></td>
+<td>The drawer's optional label, _collection.json: the closed record schema, including links to other records when declared.</td>
+</tr>
+<tr>
+<td><a href="/schema/core/v0.7/opengdd-build.schema.json"><code>opengdd-build.schema.json</code></a></td>
+<td>The record a finished build ships: builder, answers, resolved values, acceptance outcomes and sampled scopes, result hash, checked pack bytes, and runner identity.</td>
 </tr>
 </tbody>
 </table></div>
 <h2>Superseded</h2>
+<p>OpenGDD core v0.6 remains available at its permanent URLs:
+<a href="/schema/core/v0.6/manifest.schema.json"><code>manifest.schema.json</code></a>,
+<a href="/schema/core/v0.6/tuning.schema.json"><code>tuning.schema.json</code></a>,
+<a href="/schema/core/v0.6/personalization.schema.json"><code>personalization.schema.json</code></a>,
+<a href="/schema/core/v0.6/direction.schema.json"><code>direction.schema.json</code></a>,
+<a href="/schema/core/v0.6/collection.schema.json"><code>collection.schema.json</code></a>, and
+<a href="/schema/core/v0.6/opengdd-build.schema.json"><code>opengdd-build.schema.json</code></a>.</p>
 <p>OpenGDD core v0.5 remains available at its permanent URLs:
 <a href="/schema/core/v0.5/manifest.schema.json"><code>manifest.schema.json</code></a>,
 <a href="/schema/core/v0.5/direction.schema.json"><code>direction.schema.json</code></a>, and

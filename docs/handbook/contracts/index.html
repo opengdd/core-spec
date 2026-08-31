@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Contracts | OpenGDD handbook</title>
-<meta name="description" content="A contract provides reusable questions, values, and tests for a familiar game system, such as a health pool or a strategy-game camera. Adopt the contract and record this …">
+<meta name="description" content="A contract brings a proven game mechanic into your design: a health bar, a backpack, a crafting recipe. It is a ready-made list of the decisions behind that mechanic — …">
 <link rel="canonical" href="https://opengdd.org/handbook/contracts/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Contracts | OpenGDD handbook">
-<meta property="og:description" content="A contract provides reusable questions, values, and tests for a familiar game system, such as a health pool or a strategy-game camera. Adopt the contract and record this …">
+<meta property="og:description" content="A contract brings a proven game mechanic into your design: a health bar, a backpack, a crafting recipe. It is a ready-made list of the decisions behind that mechanic — …">
 <meta property="og:url" content="https://opengdd.org/handbook/contracts/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Contracts | OpenGDD handbook">
-<meta name="twitter:description" content="A contract provides reusable questions, values, and tests for a familiar game system, such as a health pool or a strategy-game camera. Adopt the contract and record this …">
+<meta name="twitter:description" content="A contract brings a proven game mechanic into your design: a health bar, a backpack, a crafting recipe. It is a ready-made list of the decisions behind that mechanic — …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -28,7 +28,6 @@
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/" aria-current="page">Learn</a>
-      <a href="/contracts/">Contracts</a>
       <a href="/spec/">Spec</a>
       <a href="/standard/">Standard</a>
       <a href="/authoring-tool/">Authoring tool</a>
@@ -57,66 +56,135 @@
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Game systems and content</p>
+<p class="toc-group-title">Content, links, and time</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/collections/">Collections</a></li>
-<li class="toc-h2"><a href="/handbook/graphs/">Graphs</a></li>
-<li class="toc-h2"><a href="/handbook/runtime-state/">Runtime state</a></li>
+<li class="toc-h2"><a href="/handbook/links/">Links</a></li>
+<li class="toc-h2"><a href="/handbook/runtime-values/">Runtime values</a></li>
 <li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes &amp; clocks</a></li>
 <li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
-<li class="toc-h2"><a href="/handbook/contracts/" class="here" aria-current="page">Contracts</a></li>
 </ul>
 </div>
 <div class="toc-group">
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-pinning/">Palette &amp; pinning</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette &amp; colour promises</a></li>
 <li class="toc-h2"><a href="/handbook/personalization/">Personalization</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Reusable mechanisms</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/contracts/" class="here" aria-current="page">Contracts</a></li>
 </ul>
 </div>
 <div class="toc-group">
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/promises-and-proof/">Promises and proof</a></li>
-<li class="toc-h2"><a href="/handbook/rulebook/">Preflight checklist</a></li>
+<li class="toc-h2"><a href="/handbook/preflight-checklist/">Preflight checklist</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
 <h1>Contracts</h1>
 <p><em>Opt-in: add this when your game needs it.</em></p>
-<p>A <strong>contract</strong> provides reusable questions, values, and tests for a familiar game system, such as a health pool or a strategy-game camera. Adopt the contract and record this game's answers.</p>
-<p><em><code>contracts/stamina.json</code>, one adopted contract</em></p>
+<p>A <strong>contract</strong> brings a proven game mechanic into your design: a health bar, a backpack, a crafting recipe. It is a ready-made list of the decisions behind that mechanic — decisions thousands of games have made before yours, each in its own way. You answer them once, on purpose, instead of finding them later as bugs.</p>
+<p>Pick a contract definition and copy it into your package. Answer its questions, then write the values, rows, and verification inputs it asks for. A public catalogue of ready contracts opens with a later release; a contract file from any source works the same way today.</p>
+<p>You can also use a contract as a checklist, without copying any file: read each question, settle the answer in your design prose, and stop there. This gives you the decisions without the structured form and its named tests.</p>
+<p>Your copy of a contract, with your answers, is an <strong>adoption</strong>. One contract serves many adoptions, and every adoption answers the same set of questions. Health and stamina are both Ranged value adoptions; they answer some questions differently, so they behave differently. The same holds for every contract: a backpack and a store are both Container adoptions, each with its own answers and numbers.</p>
+<p><em><code>contracts/stamina.json</code>, an excerpt from one filled adoption</em></p>
 <pre><code class="lang-json">{
-  &quot;format&quot;: &quot;opengdd-contract-instance-1&quot;,
-  &quot;instance&quot;: &quot;stamina&quot;,
-  &quot;about&quot;: &quot;Stamina powers sprinting and dodging. Drain rates and refill sources stay in this game's chapters.&quot;,
-  &quot;core&quot;: {
-    …
-  },
-  &quot;surface&quot;: {
-    &quot;answers&quot;: {
-      &quot;at-min-effect&quot;: &quot;clamp&quot;
+  &quot;contract&quot;: &quot;ranged-value&quot;,
+  &quot;version&quot;: 1,
+  …
+  &quot;questions&quot;: {
+    &quot;at-min-effect&quot;: {
+      &quot;asks&quot;: &quot;When a loss would drag the value below min, what happens?&quot;,
+      …
+      &quot;options&quot;: {
+        &quot;clamp&quot;: {
+          &quot;meaning&quot;: &quot;The value stops at min. The overkill is thrown away. Nothing is told about it, and nothing else happens.&quot;,
+          &quot;semantics&quot;: &quot;The value saturates at min. The excess is discarded, reported to no one, and carries no further consequence from this contract; the event otherwise applies in full.&quot;
+        },
+        …
+        &quot;unbounded&quot;: {
+          &quot;meaning&quot;: &quot;No floor. The value keeps falling below min, and your rules may read how far it went.&quot;,
+          &quot;semantics&quot;: &quot;min does not constrain the value downward: the delta applies in full and the result is stored, even below min, where game rules may read it. min stays declared and citable, and thresholds at or above it are tested normally.&quot;
+        }
+      }
     },
-    &quot;knobs&quot;: {
-      &quot;min&quot;: { &quot;value&quot;: 0, &quot;unit&quot;: &quot;stamina-points&quot; },
-      &quot;max&quot;: { &quot;value&quot;: 100, &quot;unit&quot;: &quot;stamina-points&quot; }
+    …
+    &quot;insufficient-cost&quot;: {
+      &quot;asks&quot;: &quot;When something tries to spend more than the pool has left above min, what happens?&quot;,
+      …
+      &quot;options&quot;: {
+        &quot;reject-action&quot;: {
+          &quot;meaning&quot;: &quot;Can't afford it, can't do it. The action is refused and nothing is deducted.&quot;,
+          &quot;semantics&quot;: &quot;The spend is rejected and the action it would have paid for does not occur. The value is unchanged and no threshold fires.&quot;
+        },
+        &quot;partial-spend&quot;: {
+          &quot;meaning&quot;: &quot;The pool empties to min and reports how much it actually got. What a partly-paid action does is your call.&quot;,
+          &quot;semantics&quot;: &quot;The value is set to min and the spend reports the amount actually spent: the headroom above min before the spend. What the action does with a partial spend is game prose; the contract fixes only the end state and the reported amount.&quot;
+        },
+        …
+      }
     }
+  },
+  &quot;declares&quot;: {
+    &quot;values&quot;: {
+      &quot;min&quot;: { &quot;description&quot;: &quot;The pool's floor. Moving the floor changes the mechanism, not just its balance. Declared even when at-min-effect is unbounded, where it is a landmark.&quot; },
+      &quot;max&quot;: { &quot;description&quot;: &quot;The pool's ceiling. Pool size is a common number to change during a balance pass. Declared even when at-max-effect is unbounded, where it is a landmark.&quot; },
+      &quot;initial&quot;: { &quot;description&quot;: &quot;The value the pool holds at the start of a run.&quot; }
+    }
+  },
+  …
+  &quot;answers&quot;: {
+    &quot;at-min-effect&quot;: &quot;clamp&quot;,
+    &quot;insufficient-cost&quot;: &quot;reject-action&quot;
+  },
+  &quot;values&quot;: {
+    &quot;min&quot;: 0,
+    &quot;max&quot;: 100,
+    &quot;initial&quot;: 100
+  },
+  &quot;rows&quot;: {
+    &quot;thresholds&quot;: [
+      {
+        &quot;id&quot;: &quot;exhausted&quot;,
+        &quot;value&quot;: 0,
+        &quot;direction&quot;: &quot;falling&quot;,
+        &quot;refire&quot;: &quot;once&quot;,
+        &quot;rearm&quot;: &quot;run-reset&quot;
+      }
+    ]
   }
 }</code></pre>
-<p>The file has two parts:</p>
-<ul>
-<li>the <strong>core</strong> declares the system, its questions, and reusable acceptance-test patterns. Copy the chosen core unchanged.</li>
-<li>the <strong>surface</strong> records this game's answers. One line per question, plus one value per <strong>knob</strong>, which is a number defined by the core.</li>
-</ul>
-<p>This excerpt shows one answer and two knobs. A complete surface answers every question that applies. <code>format</code> identifies the kind of file. <code>instance</code> is this game's name for the adopted contract and matches the filename.</p>
-<p>The core asks what happens when stamina would fall below its minimum. This game answers <code>clamp</code>, so the value stops at the minimum. Every applicable question gets one answer.</p>
-<p>The <code>about</code> line explains how this game uses stamina. Game-specific rules, such as which actions drain it, remain in your chapters.</p>
-<p>When the core includes test templates, the authoring tool generates their acceptance tests in the build plan. After changing an answer, regenerate the tests instead of editing them by hand.</p>
-<p><a href="/contracts/">Browse the contracts catalogue</a> to compare the questions and answers before adopting one.</p>
+<p>Every option has a <code>meaning</code> sentence: the promise you make as the designer. Some options add <code>semantics</code>, a more precise sentence that binds the builder and the acceptance tests.</p>
+<p>The copied part above <code>answers</code> is the <strong>definition</strong>, the blank form. The two <code>…</code> lines hide the rest of the definition: more questions, value names, numeric rules, and the pack hash. The visible <code>declares.values</code> block shows the three number names this adoption must fill.</p>
+<p>When two adoptions use one definition, the validator compares their copied definitions after parsing the JSON. Reformatting is safe; reordering members is not, so preserve the definition's member order.</p>
+<p>In your filled adoption, you write <code>answers</code>, <code>values</code>, any rows, and any requested verification inputs below the definition. Some questions only apply after another answer; the file says which, and the validator does not ask for the rest.</p>
+<p>The filename is the address that prose cites. <code>contracts.stamina</code> names this adoption and <code>contracts.stamina.max</code> names its <code>max</code> value. Renaming the file renames those addresses, and the validator reports every citation left dangling.</p>
+<p>The validator checks that every asked question has an answer, each value is inside its declared range, every row has the declared fields, and all numeric rules hold. In the example, <code>exhausted</code> fires once and re-arms at run reset. The common bug this prevents: a warning that fires again on every crossing while the pool sits at zero.</p>
+<p>Without its pack file, the adoption is <strong>promised</strong>: it binds the builder the same way Fixed chapter prose does. An audit — a review of the finished game — judges whether the build kept it. To make the adoption <strong>checked</strong>, put <code>ranged-value-1.pack.json</code> next to it and copy the hash from the contract's catalogue page into the adoption's <code>pack</code> field. The catalogue page prints this SHA-256 fingerprint beside the pack download.</p>
+<p>Some tests in a pack ask you where they apply. A general-test template names that designer-supplied scope through <code>inputs:scope</code>:</p>
+<pre><code class="lang-json">{
+  …
+  &quot;inputs&quot;: { &quot;scope&quot;: {} },
+  &quot;test&quot;: {
+    &quot;type&quot;: &quot;general&quot;,
+    &quot;scope&quot;: &quot;{{inputs:scope}}&quot;,
+    &quot;holds&quot;: &quot;the threshold behavior matches the answered contract&quot;
+  }
+}</code></pre>
+<p>Checked answers become named acceptance tests the build must pass. If the build behaves differently, it fails the test by name. Run <code>npx opengdd render-contract-tests &lt;package-dir&gt;</code> to print the named tests again after an answer changes. The command prints a read-only view; do not paste it into <code>05-build-plan.md</code>. For this row, the rendered test includes:</p>
+<pre><code class="lang-text">### AT stamina/threshold-fires-once/exhausted — exhausted fires once, then waits to re-arm
+&quot;then&quot;: [&quot;the exhausted crossing is reported exactly once over the whole sequence, on the first qualifying crossing&quot;]</code></pre>
+<p>A contract records decisions and tests. It does not choose how the builder implements the mechanism, and package validation does not run the finished game.</p>
+<p>A public catalogue of ready contract definitions opens with a later release. Until then, any contract definition file you hold works the same way: copy it into your package and answer it.</p>
 <p><em>Full rules: <a href="/spec/">OpenGDD specification</a>, §10.</em></p>
-<p class="note chapter-pager"><a href="/handbook/seeds-and-determinism/">← Seeds &amp; determinism</a> · <a href="/handbook/">All chapters</a></p>
+<p class="note chapter-pager"><a href="/handbook/personalization/">← Personalization</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/promises-and-proof/">Promises and proof →</a></p>
 </article>
 </div>
 </main>

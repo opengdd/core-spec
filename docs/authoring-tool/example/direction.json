@@ -1,32 +1,33 @@
 {
-  "semantics": {
-    "tolerance": "ciede2000-lab-d65-v1",
-    "metrics": ["wcag21-contrast-ratio"]
+  "palette": {
+    "board": [
+      {
+        "mark-ink": "#2B2A26"
+      }
+    ]
   },
   "mood": {
     "paper-quiet": {
-      "descriptor": "descriptor:mood:paper-quiet",
-      "viewing": "table-reading"
+      "intent": "The quiet of a game drawn on scrap paper between two people who happen to be nearby. Friendly, unhurried, low stakes; losing costs nothing but the pleasure of drawing the next grid.",
+      "anti": [
+        "not an arena: no announcers, no glow, no dramatic stings, no victory fanfare",
+        "not a casino: no chance imagery, no jackpot celebration, nothing that implies luck was involved",
+        "not a children's toy: no wobbling mascots or candy gloss; the game is casual, not infantile"
+      ]
     }
   },
-  "constraints": {
-    "colors": {
-      "mark-ink": {
-        "color": "palette:board.mark-ink",
-        "tolerance": 12,
-        "scope": {
-          "applies_to": "every placed mark and every grid line",
-          "states": ["in-game"],
-          "sampling": "exhaustive"
-        }
-      }
+  "colors": {
+    "mark-ink": {
+      "is": "palette.board.mark-ink",
+      "within": 12,
+      "where": "every placed mark and every grid line",
+      "while": [
+        "in-game"
+      ]
     }
   },
   "viewing": {
-    "table-reading": {
-      "speed_and_size": "the whole board on screen at once, at real play speed",
-      "calibration": "sRGB display at standard desktop viewing distance",
-      "hide_builder_name": true
-    }
+    "speed_and_size": "the whole board on screen at once, at real play speed",
+    "calibration": "sRGB display at standard desktop viewing distance"
   }
 }

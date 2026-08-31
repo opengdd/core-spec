@@ -7,6 +7,10 @@ export const CONFORMANCE_SCHEMA_NAMES = Object.freeze([
   "opengdd-build.schema.json"
 ]);
 
+export const OPTIONAL_MIGRATION_SCHEMA_NAMES = Object.freeze([
+  "clocks.schema.json"
+]);
+
 async function checkedResponse(url, request) {
   const response = await request(url);
   if (response.ok) return response;
@@ -24,7 +28,12 @@ export async function requestText(url, request = fetch) {
 }
 
 export async function loadConformanceSchemas(load = name => requestJson(`/file/${name}`)) {
-  return Object.fromEntries(await Promise.all(
+  const entries = await Promise.all(
     CONFORMANCE_SCHEMA_NAMES.map(async name => [name, await load(name)])
-  ));
+  );
+  for (const name of OPTIONAL_MIGRATION_SCHEMA_NAMES) {
+    try { entries.push([name, await load(name)]); }
+    catch {}
+  }
+  return Object.fromEntries(entries);
 }

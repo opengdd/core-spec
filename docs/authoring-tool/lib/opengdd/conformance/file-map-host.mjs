@@ -135,11 +135,11 @@ export function createFileMapHost(fileMap, options = {}) {
     },
     readBytes: file => {
       const entry = requireFile(file);
-      if (options.bytes === false) return undefined;
-      if (entry.bytes instanceof Uint8Array) return entry.bytes;
+      if (entry.bytes instanceof Uint8Array && options.bytes !== false) return entry.bytes;
       return typeof entry.text === "string" ? new TextEncoder().encode(entry.text) : undefined;
     },
-    // Optional capability: without it the core skips hash checks rather than failing them.
+    // Optional capability: without it the core skips verification-pack hash
+    // checks rather than failing validation.
     sha256: options.sha256,
     loadSchema: name => options.schemas instanceof Map ? options.schemas.get(name) : options.schemas?.[name]
   };

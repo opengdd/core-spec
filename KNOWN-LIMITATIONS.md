@@ -1,10 +1,10 @@
-# OpenGDD v0.6 — known limitations
+# OpenGDD v0.7 — known limitations
 
 
-This document describes the OpenGDD v0.6 working draft. An honest format
+This document describes the OpenGDD v0.7 working draft. An honest format
 states what it cannot yet do. "Expressible" never means "uniformly
 machine-discoverable or portably machine-verifiable," and this page keeps
-those ideas apart. Certification is experimental in v0.6: nothing below
+those ideas apart. Certification is experimental in v0.7: nothing below
 grants or withholds a certification outcome.
 
 ## Deliberately out of scope
@@ -15,8 +15,8 @@ The current OpenGDD core does not define:
 - rendered-capture checks for 3D renderers — a `web-3d` package validates,
   but no 3D capture profile defines how to sample rendered output;
 - binary asset pipelines;
-- audio direction — the transmission experiment has not run, so v0 makes no
-  audio-direction claims;
+- audio direction — the transmission experiment has not run, so this version
+  makes no audio-direction claims;
 - localization structure;
 - monetization design beyond the optional commerce split, including IAP
   design;
@@ -48,7 +48,7 @@ private-view non-leakage. Those facilities need a future profile.
 ### Authored-puzzle solver interfaces
 
 The working draft defines the `parallel-string-layers-1` grid layout and can
-carry finite domains, replays, and exhaustive-search tests. It does not define
+carry finite domains, replays, and general tests. It does not define
 a shared solver adapter or predicate vocabulary. Until one exists, the
 package defines its own command alphabet and predicates.
 
@@ -71,14 +71,14 @@ Macroscopic outcomes can be specified without fixing implementation grain.
 Below a declared feature width, or between declared observation times, visible
 outcomes may depend on cell size, neighborhood, update order, or another
 architectural choice. OpenGDD can state a bounded observable requirement and
-the test that checks it, but v0.6 defines no general material-simulation
+the test that checks it, but v0.7 defines no general material-simulation
 profile and does not standardize every grain or intermediate state.
 
 ### Personalized presentation
 
-The direction block does not define how player-selected presentation, such as
-a player's own color choices, composes with the package's palette and color
-constraints. Exact visual properties have an audit path only where a test and
+The direction file does not define how player-selected presentation, such as
+a player's own colour choices, composes with the package's palette and colour
+promises. Exact visual properties have an audit path only where a test and
 machine-checkable evidence expose the result; prose direction remains
 interpretive.
 
@@ -88,7 +88,7 @@ Text, named palettes, and annotated reference imagery can communicate
 decomposable features such as shape, stitches, edge treatments, and shadows.
 Continuous qualities such as fiber, translucency, sheen, glisten, drip, ooze,
 and deformation remain harder to transmit consistently. The direction format
-has claims, annotated references, color and timing constraints, and an
+has claims, annotated references, colour and timing promises, and an
 experimental judged-evidence shape, but no general material-rendering
 solution.
 
@@ -115,13 +115,15 @@ honest disclosure of claims the available evidence cannot support.
 
 ## Art direction
 
-The art-direction block is normative in the v0.6 working draft. The manifest
-holds palettes as ordered non-empty arrays of bare `#RRGGBB` strings and
-one-key named-color objects. A mood descriptor may name one palette by its
-bare key; it does not contain its own colors. Exact color obligations live in
-`constraints.colors`, and contrast thresholds name palette colors directly.
-For `wcag21-contrast-ratio`, package validation computes the declared pairs
-and fails a threshold the declared colors do not meet.
+Art direction is optional in the v0.7 working draft. When it is used, one
+`direction.json` file at the package root carries palettes, pillars, mood,
+anti-references, `must_keep` requirements, measured `colors`, `contrast`, and
+`timing` promises, and the package's `viewing` conditions. Colour promises use
+CIEDE2000 distance, contrast promises use the
+WCAG 2.1 contrast ratio, and timing promises cite a value in `tuning.json`.
+Those metrics are fixed by the format rather than chosen per entry. Every
+`colors`, `contrast`, and `timing` entry must be covered by at least one
+acceptance test through its `direction_claims` field.
 
 Palette and shape language transmit more exactly than continuous material
 feel. Not every exact visual surface has a machine-checkable evidence path;
@@ -130,5 +132,6 @@ requirement whose truth package validation cannot decide.
 
 ## Audio
 
-Audio direction remains draft material in v0.6. It can be described in prose,
-but v0 makes no audio-direction claims and defines no audio judgment protocol.
+Audio direction remains draft material in v0.7. It can be described in prose,
+but this version makes no audio-direction claims and defines no audio judgment
+protocol.

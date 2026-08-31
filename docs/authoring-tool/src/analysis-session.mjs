@@ -1,8 +1,12 @@
 import { analyzePackage } from "opengdd-analysis";
 import { createFileMapHost } from "opengdd-file-map-host";
+import { migratePackage } from "opengdd-migrate";
 import { validatePackage } from "opengdd-validation";
 import { buildAuthoringView } from "./authoring-view.mjs";
+import { linkOffers, rangeRemovalRefusal } from "./creation.mjs";
 import { collectionDrawerFolders, withExplicitFolders } from "./folder-aware-host.mjs";
+import { OPTIONAL_MIGRATION_SCHEMA_NAMES } from "./loaders.mjs";
+import { createPackageSha256, sha256Hex } from "./package-hashes.mjs";
 
 const debounce = (action, delay) => {
   let timer;
@@ -32,6 +36,8 @@ export function createAnalysisSession({
   let validationRevision = 0;
   let completeAfterAnalysis = true;
   let destroyed = false;
+  let migrationRequest = 0;
+  const pendingMigrations = new Map();
 
   const publish = delivery => {
     if (destroyed) return;
@@ -40,7 +46,7 @@ export function createAnalysisSession({
 
   function applyAnalysis(analysis, revision, shouldPublish = true) {
     if (destroyed || revision !== analysisRevision) return null;
-    const authoringView = buildAuthoringView(analysis, revisionFor, files.keys());
+    const authoringView = buildAuthoringView(analysis, revisionFor, files, linkOffers(files), key => rangeRemovalRefusal(files, key));
     if (shouldPublish) publish({ type: "view", view: authoringView, complete: completeAfterAnalysis });
     return authoringView;
   }
@@ -81,6 +87,11 @@ export function createAnalysisSession({
       worker = null;
     }
     publish({ type: "worker", active: false });
+    for (const [request, pending] of pendingMigrations) {
+      pendingMigrations.delete(request);
+      try { pending.resolve(migrateOnPage(pending.schemas)); }
+      catch (error) { pending.reject(error); }
+    }
     completeAfterAnalysis = true;
     applyAnalysis(analyzePackage(files, { folders: collectionDrawerFolders(folders()) }), ++analysisRevision);
     validateNow();
@@ -101,6 +112,14 @@ export function createAnalysisSession({
       });
       return;
     }
+    if (message.type === "migration") {
+      const pending = pendingMigrations.get(message.request);
+      if (!pending) return;
+      pendingMigrations.delete(message.request);
+      if (message.report) pending.resolve(message.report);
+      else pending.reject(new Error(message.message));
+      return;
+    }
     stopWorker();
   }
 
@@ -117,7 +136,8 @@ export function createAnalysisSession({
         urls: {
           analysis: import.meta.resolve("opengdd-analysis"),
           validation: import.meta.resolve("opengdd-validation"),
-          fileMapHost: import.meta.resolve("opengdd-file-map-host")
+          fileMapHost: import.meta.resolve("opengdd-file-map-host"),
+          migration: import.meta.resolve("opengdd-migrate")
         }
       });
     }
@@ -140,6 +160,37 @@ export function createAnalysisSession({
     return typeof schemas === "function" ? schemas() : schemas;
   }
 
+  function migrateOnPage(available) {
+    const host = withExplicitFolders(createFileMapHost(files, {
+      schemas: available,
+      bytes: true,
+      sha256: sha256Hex
+    }), folders());
+    return migratePackage(host, "/package", { dryRun: true, collectOutputs: true });
+  }
+
+  async function previewMigration() {
+    const available = await suppliedSchemas();
+    if (destroyed) throw new Error("The authoring session is closed.");
+    const missingSchemas = OPTIONAL_MIGRATION_SCHEMA_NAMES.filter(name => !(available instanceof Map ? available.get(name) : available?.[name]));
+    if (missingSchemas.length) return { unavailable: true, missingSchemas };
+    if (!worker) return migrateOnPage(available);
+    if (postedSchemas !== available && !postToWorker({ type: "schemas", schemas: available })) {
+      return migrateOnPage(available);
+    }
+    postedSchemas = available;
+    if (!sendPackageToWorker()) return migrateOnPage(available);
+    const request = ++migrationRequest;
+    return new Promise((resolve, reject) => {
+      pendingMigrations.set(request, { resolve, reject, schemas: available });
+      if (!postToWorker({ type: "migrate", request })) {
+        pendingMigrations.delete(request);
+        try { resolve(migrateOnPage(available)); }
+        catch (error) { reject(error); }
+      }
+    });
+  }
+
   async function validate(version) {
     let available;
     try {
@@ -156,7 +207,8 @@ export function createAnalysisSession({
       return;
     }
     try {
-      const host = withExplicitFolders(createFileMapHost(files, { schemas: available, bytes: false }), folders());
+      const sha256 = await createPackageSha256(files);
+      const host = withExplicitFolders(createFileMapHost(files, { schemas: available, bytes: false, sha256 }), folders());
       const run = validatePackage(host, "/package");
       if (version === validationRevision) publish({ type: "validation", validation: { status: "ready", run } });
     } catch (error) {
@@ -173,7 +225,7 @@ export function createAnalysisSession({
   }
 
   function fileChanged({ immediate = false, complete = true, publish: shouldPublish = true, supersede = true } = {}) {
-    if (immediate && !supersede) return buildAuthoringView(analyzePackage(files, { folders: collectionDrawerFolders(folders()) }), revisionFor, files.keys());
+    if (immediate && !supersede) return buildAuthoringView(analyzePackage(files, { folders: collectionDrawerFolders(folders()) }), revisionFor, files, linkOffers(files), key => rangeRemovalRefusal(files, key));
     if (!immediate || shouldPublish) completeAfterAnalysis = complete;
     const revision = ++analysisRevision;
     if (immediate) {
@@ -201,6 +253,8 @@ export function createAnalysisSession({
     validateSoon.cancel();
     analysisRevision += 1;
     validationRevision += 1;
+    for (const pending of pendingMigrations.values()) pending.reject(new Error("The authoring session is closed."));
+    pendingMigrations.clear();
     subscribers.clear();
   }
 
@@ -208,6 +262,7 @@ export function createAnalysisSession({
     openPackage,
     fileChanged,
     validateNow,
+    previewMigration,
     destroy,
     subscribe(subscriber) {
       subscribers.add(subscriber);

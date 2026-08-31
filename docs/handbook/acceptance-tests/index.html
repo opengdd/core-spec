@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Acceptance tests | OpenGDD handbook</title>
-<meta name="description" content="An acceptance test turns an important design promise into something a builder can demonstrate. You place each numbered test beside the build-plan phase it belongs to.">
+<meta name="description" content="An acceptance test turns an important design promise into something the builder, the person, team, studio, AI system, or combination that turns your package into a game, …">
 <link rel="canonical" href="https://opengdd.org/handbook/acceptance-tests/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Acceptance tests | OpenGDD handbook">
-<meta property="og:description" content="An acceptance test turns an important design promise into something a builder can demonstrate. You place each numbered test beside the build-plan phase it belongs to.">
+<meta property="og:description" content="An acceptance test turns an important design promise into something the builder, the person, team, studio, AI system, or combination that turns your package into a game, …">
 <meta property="og:url" content="https://opengdd.org/handbook/acceptance-tests/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Acceptance tests | OpenGDD handbook">
-<meta name="twitter:description" content="An acceptance test turns an important design promise into something a builder can demonstrate. You place each numbered test beside the build-plan phase it belongs to.">
+<meta name="twitter:description" content="An acceptance test turns an important design promise into something the builder, the person, team, studio, AI system, or combination that turns your package into a game, …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -28,7 +28,6 @@
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/" aria-current="page">Learn</a>
-      <a href="/contracts/">Contracts</a>
       <a href="/spec/">Spec</a>
       <a href="/standard/">Standard</a>
       <a href="/authoring-tool/">Authoring tool</a>
@@ -57,37 +56,42 @@
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Game systems and content</p>
+<p class="toc-group-title">Content, links, and time</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/collections/">Collections</a></li>
-<li class="toc-h2"><a href="/handbook/graphs/">Graphs</a></li>
-<li class="toc-h2"><a href="/handbook/runtime-state/">Runtime state</a></li>
+<li class="toc-h2"><a href="/handbook/links/">Links</a></li>
+<li class="toc-h2"><a href="/handbook/runtime-values/">Runtime values</a></li>
 <li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes &amp; clocks</a></li>
 <li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
-<li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
 </div>
 <div class="toc-group">
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-pinning/">Palette &amp; pinning</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette &amp; colour promises</a></li>
 <li class="toc-h2"><a href="/handbook/personalization/">Personalization</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Reusable mechanisms</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
 </div>
 <div class="toc-group">
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/promises-and-proof/">Promises and proof</a></li>
-<li class="toc-h2"><a href="/handbook/rulebook/">Preflight checklist</a></li>
+<li class="toc-h2"><a href="/handbook/preflight-checklist/">Preflight checklist</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
 <h1>Acceptance tests</h1>
 <p><em>Required: every spec has this.</em></p>
-<p>An acceptance test turns an important design promise into something a builder can demonstrate. You place each numbered test beside the build-plan phase it belongs to.</p>
-<p><em><code>05-build-plan.md</code>, under the heading <code>AT-4: Alarm on sight</code></em></p>
+<p>An acceptance test turns an important design promise into something the <strong>builder</strong>, the person, team, studio, AI system, or combination that turns your package into a game, can demonstrate. A test is a heading followed by one structured block. The block sits directly under the <code>AT-n</code> heading; put any context prose after it. Its fence carries the tag word <code>test</code>; that word tells tools this block is a test. Place it beside the build-plan stage it belongs to.</p>
+<p><em><code>05-build-plan.md</code>, under <code>AT-4: Alarm on sight</code>. <code>AT-4</code> is this test's permanent number.</em></p>
 <pre><code class="lang-test">{
   &quot;type&quot;: &quot;scenario&quot;,
   &quot;given&quot;: &quot;a guard on patrol with the player inside its view cone&quot;,
@@ -95,20 +99,21 @@
   &quot;then&quot;: [&quot;the guard raises the alarm&quot;, &quot;every other guard on the floor starts searching&quot;],
   &quot;diagnostics&quot;: [&quot;visibility-timeline&quot;, &quot;guard-state-after&quot;]
 }</code></pre>
-<p>In the Markdown file, open this block with three backticks followed by <code>test</code>. That label marks the block as a check. Restate the same check below it in plain language for readers who do not run tests.</p>
-<p>In plain language: if the player stays in one guard's view cone for the spotting time, that guard raises the alarm and every other guard on the floor starts searching.</p>
-<p>The fields describe the check:</p>
-<ul>
-<li><strong><code>type</code></strong> is <code>scenario</code> because this test describes one situation. The <a href="/spec/#acceptance-test-types">OpenGDD specification</a> defines broader test types for other kinds of proof.</li>
-<li><strong><code>given</code></strong>: the situation the check starts in.</li>
-<li><strong><code>when</code></strong>: what happens. One string, or a list when the check takes several steps.</li>
-<li><strong><code>then</code></strong>: the required results.</li>
-<li><strong><code>diagnostics</code></strong>: the information reported when the test fails.</li>
-</ul>
-<p>Most moment-to-moment behavior uses a scenario. Use a broader test type only when the rule itself is broader, such as requiring every generated level to remain winnable.</p>
-<p>The test states the required result, not the implementation. A person, an engine-specific testing tool, or an AI builder may run the check differently and still demonstrate the same result.</p>
+<p>This is a <strong>scenario</strong> because it describes one situation. <code>given</code> is the starting situation, <code>when</code> is what happens, and <code>then</code> lists the required results. Each may be one string or a list of strings. <code>diagnostics</code> names the evidence a <strong>runner</strong>, the tool or person that executes the tests, should produce.</p>
+<p>Use a scenario, unless the promise is about many cases.</p>
+<p>A <strong>general</strong> test states a promise across a scope. <code>scope</code> describes the cases in designer words, and <code>holds</code> says what must be true across them. <code>seeds</code> names repeatable random sequences that generate cases, so the builder can reproduce a failure.</p>
+<p><em><code>05-build-plan.md</code>, checking the generated floors of Emberdeep</em></p>
+<pre><code class="lang-test">{
+  &quot;type&quot;: &quot;general&quot;,
+  &quot;scope&quot;: &quot;first floors generated at default tuning&quot;,
+  &quot;holds&quot;: &quot;every floor satisfies every Fixed generation constraint in 02-mechanics.md&quot;,
+  &quot;seeds&quot;: [&quot;emberdeep-at-12&quot;],
+  &quot;diagnostics&quot;: [&quot;sample-seed&quot;, &quot;layout&quot;, &quot;failed-constraint&quot;]
+}</code></pre>
+<p>The runner's published description says how it samples or walks a general test's scope, for each seed when seeds are present. A <strong>build record</strong> is the builder's JSON report of what was built. It says which general tests were sampled instead of checked across their whole scope. A whole-scope result can prove an absence, a minimum, or a promise about every case; a sample cannot.</p>
+<p>Dotted names inside test sentences, such as <code>alarm.spot_seconds</code>, are instructions for the runner. The package validator does not resolve that prose as a citation. The test states the required result, not the implementation, so different runners may demonstrate the same result.</p>
 <p><em>Full rules: <a href="/spec/">OpenGDD specification</a>, §6.</em></p>
-<p class="note chapter-pager"><a href="/handbook/tuning/">← Tuning</a> · <a href="/handbook/">All chapters</a></p>
+<p class="note chapter-pager"><a href="/handbook/tuning/">← Tuning</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/collections/">Collections →</a></p>
 </article>
 </div>
 </main>

@@ -1,8 +1,11 @@
 import { resolveAnchor } from "opengdd-analysis";
+import { createFileMapHost } from "opengdd-file-map-host";
+import { validatePackage } from "opengdd-validation";
 import { createAnalysisSession } from "./analysis-session.mjs";
 import {
-  classifyCreation, collectionNameTaken, collectionRecordNameTaken,
-  collectionRecordText, kebabName, parseJsonScalar, rankCollectionCreationActions
+  chapterCreation, classifyCreation, collectionNameTaken, collectionRecordNameTaken,
+  collectionRecordText, kebabName, linkOffers, nextChapterNumber, parseJsonScalar,
+  rangeChange, rankCollectionCreationActions
 } from "./creation.mjs";
 import { createEditorSurface } from "./editor-surface.mjs";
 import { minimalTextChange } from "./edits.mjs";
@@ -10,13 +13,26 @@ import { clampedPositionToOffset, lineBounds, offsetToPosition } from "./text-co
 import { createScaffoldPackage, nextAvailablePackageId, packageIdFromTitle } from "./package.mjs";
 import { createPackageSession } from "./package-session.mjs";
 import { createPanelHost } from "./panel-host.mjs";
+import { createForms } from "./forms.mjs";
+import { createReferences } from "./references.mjs";
+import { openRenameDialog } from "./rename-dialog.mjs";
+import {
+  classifyContractText, collectContractSources, contractPackFilename,
+  findContractUpdateTargets, findPackageDefinition, prepareContractAddition, prepareContractUpdate
+} from "./contracts.mjs";
 import { createSelectionBus } from "./selection.mjs";
 import { AUTHORING_TOOL_VERSION } from "opengdd-authoring-version";
 import { CONFORMANCE_SCHEMA_NAMES } from "./loaders.mjs";
 import { CREATION_COPY } from "./copy/creation-copy.mjs";
+import { COLLECTION_COPY } from "./copy/collection-copy.mjs";
+import { CONTRACT_COPY } from "./copy/contract-copy.mjs";
+import { isContractDependentFinding } from "./contracts.mjs";
+import { RECORD_FORM_COPY } from "./copy/record-form-copy.mjs";
 import { WIDGET_COPY } from "./copy/widget-copy.mjs";
 import { WORKBENCH_COPY } from "./copy/workbench-copy.mjs";
-import { rollUpCollectionFindings } from "./outline.mjs";
+import { createOutlineRenderer } from "./outline-render.mjs";
+import { withExplicitFolders } from "./folder-aware-host.mjs";
+import { readZip } from "./zip.mjs";
 
 export { AUTHORING_TOOL_VERSION } from "opengdd-authoring-version";
 
@@ -28,10 +44,10 @@ const CAPABILITY_NAMES = Object.freeze([
 ]);
 const PROTECTED_PACKAGE_FILES = new Set([
   "manifest.json", "tuning.json", "01-overview.md", "02-mechanics.md",
-  "03-content.md", "04-presentation.md", "05-build-plan.md"
+  "03-content.md", "04-presentation.md", "05-build-plan.md",
+  "direction.json", "personalization.json", "clocks.json"
 ]);
-const OUTLINE_GROUPS = WIDGET_COPY.outlineGroups;
-const OUTLINE_CREATE_ITEMS = CREATION_COPY.outlineItems;
+const OPTIONAL_MECHANISM_FILES = new Set(Object.keys(WIDGET_COPY.protectedDeleteConfirm));
 
 const escapeHtml = (value = "") => String(value)
   .replaceAll("&", "&amp;")
@@ -39,6 +55,9 @@ const escapeHtml = (value = "") => String(value)
   .replaceAll(">", "&gt;")
   .replaceAll('"', "&quot;")
   .replaceAll("'", "&#039;");
+const inlineCodeHtml = (value = "") => String(value).split("`")
+  .map((part, index) => index % 2 ? `<code>${escapeHtml(part)}</code>` : escapeHtml(part))
+  .join("");
 
 const parentPath = path => path.includes("/") ? path.slice(0, path.lastIndexOf("/")) : "";
 const basename = path => path.slice(path.lastIndexOf("/") + 1);
@@ -50,20 +69,6 @@ function normalizePath(value) {
   return path;
 }
 
-function outlineIcon(group) {
-  const common = `class="opengdd-author-outline-icon" data-outline-icon="${group.id}" aria-hidden="true" focusable="false" viewBox="0 0 16 16"`;
-  if (group.id === "identifiers") return `<svg ${common}><text x="8" y="12" text-anchor="middle">@</text></svg>`;
-  if (group.id === "tuning-keys") return `<svg ${common}><path d="M2 4h5m3 0h4M2 8h1m3 0h8M2 12h7m3 0h2M7 2v4M3 6v4m6 0v4"/></svg>`;
-  if (group.id === "collections") return `<svg ${common}><path d="M2 3h12v10H2zM2 7h12M6 3v10m4-10v10"/></svg>`;
-  if (group.id === "descriptors") return `<svg ${common}><path d="M8 2l6 6-6 6-6-6z"/></svg>`;
-  if (group.id === "palettes") return `<svg ${common}><path d="M2 3h8v8H2zM6 7h8v6H6z"/></svg>`;
-  return "";
-}
-
-function severityIcon(label) {
-  return `<svg class="opengdd-author-outline-severity-icon" role="img" aria-label="${label}" viewBox="0 0 16 16"><path d="M8 2l6 12H2L8 2zm0 4v4m0 2v.5"/></svg>`;
-}
-
 export function mountAuthoringTool(rootElement, host = {}) {
   const document = rootElement?.ownerDocument;
   const view = document?.defaultView;
@@ -72,6 +77,10 @@ export function mountAuthoringTool(rootElement, host = {}) {
     ? host.headingLevel
     : 1;
   const headingTag = `h${headingLevel}`;
+  // No default URL: the public catalogue is withdrawn for the v0.7 lifetime,
+  // so the dialog shows a catalogue link only when the host supplies one.
+  const contractsCatalogueUrl = typeof host.contractsCatalogueUrl === "string" && host.contractsCatalogueUrl
+    ? host.contractsCatalogueUrl : "";
   const listeners = new view.AbortController();
   const on = (element, type, listener) => element.addEventListener(type, listener, { signal: listeners.signal });
   const decodeBinary = encoded => Uint8Array.from(view.atob(encoded), character => character.charCodeAt(0));
@@ -167,7 +176,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
         <div class="opengdd-author-tree-actions">
           <button type="button" data-action="new-file">${capabilities.workbenchLabels ? WORKBENCH_COPY.newFile : WIDGET_COPY.explorerActions.newFile}</button>
           <button type="button" data-action="new-folder">${capabilities.workbenchLabels ? WORKBENCH_COPY.newFolder : WIDGET_COPY.explorerActions.newFolder}</button>
-          <button type="button" data-action="rename" disabled>${WIDGET_COPY.explorerActions.rename}</button>
+          <button type="button" data-action="rename">${WIDGET_COPY.explorerActions.rename}</button>
         </div>
         <form class="opengdd-author-inline-form" data-role="tree-form" hidden>
           <label><span data-role="tree-prompt"></span><input data-role="tree-input" autocomplete="off"></label>
@@ -178,6 +187,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
       </aside>
       <section class="opengdd-author-editor-panel" aria-label="${WIDGET_COPY.fileEditor}">
         <header class="opengdd-author-file-heading"><span class="opengdd-author-file-path" data-role="path"></span><span class="opengdd-author-file-meta"><a data-role="reader" hidden>${WIDGET_COPY.openInReader}</a><span data-role="mode"></span></span></header>
+        <p class="opengdd-author-file-notice" data-role="file-notice" hidden></p>
         <div class="opengdd-author-editor" data-role="editor">
           <pre class="opengdd-author-highlight" data-role="highlight" aria-hidden="true"></pre>
           <textarea data-role="textarea" aria-label="${WIDGET_COPY.markdownSource}" wrap="soft" spellcheck="false"></textarea>
@@ -251,7 +261,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
     packageSelect: find("package"), packageDelete: find("package-delete"), packageConfirm: find("package-confirm"), notice: find("notice"),
     packageForm: find("package-form"), packageTitle: find("package-title"), packageId: find("package-id"),
     title: find("title"), tree: find("tree"), treeForm: find("tree-form"), treePrompt: find("tree-prompt"), treeParent: null,
-    treeInput: find("tree-input"), path: find("path"), reader: find("reader"), mode: find("mode"), editor: find("editor"),
+    treeInput: find("tree-input"), path: find("path"), reader: find("reader"), mode: find("mode"), fileNotice: find("file-notice"), editor: find("editor"),
     highlight: find("highlight"), textarea: find("textarea"), json: find("json"), empty: find("empty"),
     mirror: find("mirror"), completions: find("completions"), quickfix: find("quickfix"), panelInspector: find("panel-inspector"), status: find("status"), zip: find("zip"),
     diagnostics: find("diagnostics"), diagnosticSummary: find("diagnostic-summary"), collectionDialog: null,
@@ -293,7 +303,8 @@ export function mountAuthoringTool(rootElement, host = {}) {
     panelCreatorError: "",
     outlineSelection: "",
     outlineFallbackOpen: new Set(),
-    outlineCollectionCollapsed: new Set(host.outlineCollections?.collapsed?.() ?? [])
+    outlineCollectionCollapsed: new Set(host.outlineCollections?.collapsed?.() ?? []),
+    migration: { status: "idle", report: null, changes: [], hiddenNoOp: false, manualAfter: null, notice: null }
   };
   let editController;
   let editSaveAnnouncements = [];
@@ -303,13 +314,17 @@ export function mountAuthoringTool(rootElement, host = {}) {
   let proseCommitQueue = Promise.resolve();
   let historyQueue = Promise.resolve();
   let redoLabels = [];
-  let outlineFrame = 0;
-  let renderedOutlineModel = "";
+  let outlineView;
+  const renderOutline = () => outlineView?.render();
+  const scheduleOutlineRender = () => outlineView?.schedule();
   let collectionDialog = null;
   const selectionBus = createSelectionBus();
   const packageListeners = new Set();
   const validationListeners = new Set();
   const panelAdvice = new Map();
+  const pendingContractDuplicateChecks = new Set();
+  const pendingContractUpdateNotices = new Map();
+  let contractDuplicateWarnings = [];
   let validationRevision = 0;
   let panelPackageCancel = () => {};
   let panelHost;
@@ -384,6 +399,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
   }
 
   let packageConfirmReturnFocus = null;
+  let protectedDeletePath = "";
   const packageSession = createPackageSession({
     decodeBinary,
     listBuiltins: typeof host.listPackages === "function" ? () => host.listPackages() : undefined,
@@ -402,7 +418,8 @@ export function mountAuthoringTool(rootElement, host = {}) {
   const packageService = {};
   Object.defineProperties(packageService, {
     id: { enumerable: true, get: () => state.package.id },
-    title: { enumerable: true, get: () => state.package.title }
+    title: { enumerable: true, get: () => state.package.title },
+    packageRevision: { enumerable: true, get: () => `${state.revision}:${editController.revision()}` }
   });
   Object.assign(packageService, {
     list: () => [...state.package.folders, ...state.package.files.keys()],
@@ -467,12 +484,84 @@ export function mountAuthoringTool(rootElement, host = {}) {
       return transaction;
     }
   };
+  const formsService = createForms({
+    package: packageService,
+    edits: panelEdits,
+    validatePackage: validateStagedTransaction,
+    copy: RECORD_FORM_COPY
+  });
+  const referencesService = createReferences({
+    package: packageService,
+    analysis: {
+      current: () => state.authoringView,
+      refresh: () => analyzeNow()
+    },
+    edits: panelEdits,
+    validatePackage: validateStagedTransaction
+  });
+  const recordPanelInternal = Object.freeze({
+    validatePackage: validateStagedTransaction,
+    openCollectionRecord({ anchor, collection, prefill = "", sourceFile, undo, selectCreated = true } = {}) {
+      return openCollectionDialog(anchor, "record", collection, {
+        awaitResult: true, prefill, sourceFile, undo, selectCreated
+      });
+    }
+  });
+  // Collection paste creates several record files in one undo. That is a
+  // host-owned operation, so the internal panel gets the validated edit door
+  // without widening the public panel service's reserved-root boundary.
+  const collectionPanelInternal = Object.freeze({
+    validatePackage: validateStagedTransaction,
+    edits: Object.freeze({ begin: (...args) => panelEdits.begin(...args) }),
+    begin: (...args) => panelEdits.begin(...args),
+    openCollectionRecord({ anchor, collection, prefill = "", sourceFile, undo, selectCreated = true } = {}) {
+      return openCollectionDialog(anchor, "record", collection, {
+        awaitResult: true, prefill, sourceFile, undo, selectCreated
+      });
+    }
+  });
+  // The contract worksheet needs the validator's rendered-test field and the
+  // introduced-finding set. Both stay on its named host-private channel: the
+  // public validation and edit services keep their revision-1 shape.
+  const contractPanelInternal = Object.freeze({
+    begin: (...args) => panelEdits.begin(...args),
+    stage: transaction => stagedValidation(transaction),
+    run: () => state.validation.run,
+    view: () => state.authoringView,
+    subscribe: listener => validationService.subscribe(listener),
+    consumeDuplicateCheck(file) {
+      if (!pendingContractDuplicateChecks.has(file)) return false;
+      pendingContractDuplicateChecks.delete(file);
+      return true;
+    },
+    takeUpdateNotice(file) {
+      const notice = pendingContractUpdateNotices.get(file);
+      pendingContractUpdateNotices.delete(file);
+      return notice;
+    },
+    showTuningValue(key, contractFile) {
+      const selected = authoringEntries().find(entry => entry.kind === "value" && entry.name === key && entry.file === "tuning.json");
+      if (!selected || !openOutlineLocation(selected)) return false;
+      state.outlineSelection = selected.identity;
+      const adoption = /^contracts\/([^/]+)\.json$/u.exec(contractFile)?.[1];
+      selectionBus.select({ kind: "contract", name: `contracts.${adoption}`, file: contractFile }, { origin: { surface: "panel" } });
+      outlineView.invalidate();
+      renderOutline();
+      return true;
+    },
+    setDuplicateWarnings(warnings) {
+      contractDuplicateWarnings = Array.isArray(warnings) ? warnings.map(warning => ({ ...warning })) : [];
+      if (state.authoringView) state.authoringView.sameNumberWarnings = contractDuplicateWarnings.map(warning => ({ ...warning }));
+      outlineView?.invalidate();
+      scheduleOutlineRender();
+    }
+  });
   const panelServices = Object.freeze({
     selection: selectionBus,
     edits: panelEdits,
     validation: validationService,
-    references: undefined,
-    forms: undefined,
+    references: referencesService,
+    forms: formsService,
     grid: undefined,
     assets: undefined
   });
@@ -490,6 +579,16 @@ export function mountAuthoringTool(rootElement, host = {}) {
   function bindPanelPackageController() {
     panelPackageCancel();
     panelPackageCancel = editController.subscribe(event => {
+      // Collection identity includes its folder name, so rename and undo must
+      // carry the host-owned collapse preference across the recorded move.
+      for (const move of event.moves ?? []) {
+        const from = /^collections\/([^/]+)$/.exec(move.from)?.[1];
+        const to = /^collections\/([^/]+)$/.exec(move.to)?.[1];
+        if (!from || !to || !state.outlineCollectionCollapsed.has(from)) continue;
+        state.outlineCollectionCollapsed.delete(from);
+        state.outlineCollectionCollapsed.add(to);
+        host.outlineCollections?.setCollapsed?.([...state.outlineCollectionCollapsed]);
+      }
       for (const listener of [...packageListeners]) listener(event);
     });
   }
@@ -561,6 +660,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
       if (!result || controller !== editController) return;
       if (direction === "undo" && label) redoLabels.push(label);
       else if (direction === "redo") redoLabels.pop();
+      if (direction === "undo" && label === WIDGET_COPY.migrationUndo) state.migration.manualAfter = null;
       editorSurface.closeDialog(false);
       if (!state.package.files.has(state.openPath)) {
         const movedPath = result.moves.find(move => move.from === openPath)?.to;
@@ -593,18 +693,124 @@ export function mountAuthoringTool(rootElement, host = {}) {
   // Analysis and validation live behind one framework-free session. Its
   // deliveries contain only the promised authoring view or validation state.
   let workerActive = false;
+  async function suppliedSchemas() {
+    const schemas = await (typeof host.schemas === "function" ? host.schemas() : host.schemas);
+    const missing = SCHEMA_NAMES.filter(name => !(schemas instanceof Map ? schemas.get(name) : schemas?.[name]));
+    if (missing.length) throw new Error(`missing ${missing.join(", ")}`);
+    return schemas;
+  }
+
   const analysisSession = createAnalysisSession({
     Worker: view.Worker,
     revisionFor: path => editController.revision(path),
     folders: () => state.package?.folders ?? [],
     analysisDelay: () => ui.textarea.value.length > MAX_WRAPPED_TEXT_CHARS ? 300 : 150,
-    schemas: async () => {
-      const schemas = await (typeof host.schemas === "function" ? host.schemas() : host.schemas);
-      const missing = SCHEMA_NAMES.filter(name => !(schemas instanceof Map ? schemas.get(name) : schemas?.[name]));
-      if (missing.length) throw new Error(`missing ${missing.join(", ")}`);
-      return schemas;
-    }
+    schemas: suppliedSchemas
   });
+
+  const findingIdentity = finding => JSON.stringify([
+    finding.severity, finding.code, finding.file, finding.line, finding.message
+  ]);
+  async function stagedValidation(transaction) {
+    let schemas;
+    try { schemas = await suppliedSchemas(); }
+    catch { throw new Error(WIDGET_COPY.stagedWriteUnavailable); }
+    const run = packageValue => validatePackage(withExplicitFolders(
+      createFileMapHost(packageValue.files, { schemas, bytes: false }), packageValue.folders
+    ), "/package");
+    const beforeRun = run(state.package);
+    const staged = await transaction.preview();
+    const remaining = new Map();
+    for (const finding of beforeRun.findings.filter(candidate => candidate.severity === "error")) {
+      const identity = findingIdentity(finding);
+      remaining.set(identity, (remaining.get(identity) ?? 0) + 1);
+    }
+    const stagedRun = run(staged);
+    const introduced = stagedRun.findings.filter(finding => {
+      if (finding.severity !== "error") return false;
+      const identity = findingIdentity(finding);
+      const count = remaining.get(identity) ?? 0;
+      if (!count) return true;
+      remaining.set(identity, count - 1);
+      return false;
+    });
+    return { run: stagedRun, introduced, staged };
+  }
+
+  async function validateStagedTransaction(transaction) {
+    const staged = await stagedValidation(transaction);
+    if (staged.introduced[0]) throw new Error(staged.introduced[0].message);
+    return staged.run;
+  }
+
+  async function measureContractAddition(addition) {
+    const transaction = editController.begin(CONTRACT_COPY.undo.add);
+    transaction.file(addition.path).create(addition.adoptionText);
+    if (addition.pack?.create) transaction.file(addition.pack.path).create(addition.pack.value);
+    try {
+      const { introduced } = await stagedValidation(transaction);
+      const codes = introduced.map(finding => finding.code);
+      // The validator's marker is the same signal the outline folds under the badge.
+      const consequences = introduced.filter(isContractDependentFinding).length;
+      return { consequences, codes };
+    } finally {
+      transaction.abort();
+    }
+  }
+
+  function stageContractUpdate(transaction, update) {
+    const current = state.package.files.get(update.path);
+    transaction.text(update.path).replace({
+      start: { line: 0, character: 0 }, end: offsetToPosition(current, current.length),
+      revision: editController.revision(update.path)
+    }, update.text);
+    if (update.pack?.create) transaction.file(update.pack.path).create(update.pack.value);
+  }
+
+  async function measureContractUpdate(update) {
+    const transaction = editController.begin(CONTRACT_COPY.undo.update);
+    stageContractUpdate(transaction, update);
+    try {
+      const { introduced, staged } = await stagedValidation(transaction);
+      const accounted = new Set();
+      const forAdoption = finding => finding.file === update.path;
+      const answerFindings = introduced.filter(finding => forAdoption(finding)
+        && finding.code === "CONTRACT_ANSWER_MISSING");
+      const namesFinding = (finding, names) => names.some(name => finding.message?.includes(JSON.stringify(name)));
+      const freshFindings = answerFindings.filter(finding => namesFinding(finding, update.freshAnswers));
+      const addedFindings = answerFindings.filter(finding => namesFinding(finding, update.addedQuestions));
+      for (const finding of [...freshFindings, ...addedFindings]) accounted.add(finding);
+      const rangeFindings = introduced.filter(finding => forAdoption(finding) && finding.code === "CONTRACT_VALUE_RANGE");
+      for (const finding of rangeFindings) accounted.add(finding);
+      const inputFindings = introduced.filter(finding => forAdoption(finding) && finding.code === "CONTRACT_REFERENCE"
+        && /#\/verification\/[^ ]+ is missing required input /u.test(finding.message ?? ""));
+      for (const finding of inputFindings) accounted.add(finding);
+      const orphanFindings = introduced.filter(finding => finding.code === "CONTRACT_PACK_ORPHAN");
+      for (const finding of orphanFindings) accounted.add(finding);
+      const before = classifyContractText(state.package.files.get(update.path));
+      const after = classifyContractText(staged.files.get(update.path));
+      const beforePack = before.kind === "adoption"
+        ? staged.files.has(`contracts/${contractPackFilename(before.value)}`) : false;
+      const afterPack = after.kind === "adoption"
+        ? staged.files.has(`contracts/${contractPackFilename(after.value)}`) : false;
+      const promised = beforePack && !afterPack;
+      const otherFindings = introduced.filter(finding => !accounted.has(finding)).length;
+      const outOfRange = rangeFindings.length;
+      return {
+        outOfRange, addedToAnswer: addedFindings.length,
+        validatorFindings: introduced.length,
+        codes: introduced.map(finding => finding.code),
+        line: CONTRACT_COPY.updateLine(update.counts.kept, update.counts.dropped, addedFindings.length, outOfRange, {
+          droppedInputs: update.counts.droppedVerification,
+          testInputs: inputFindings.length,
+          orphanedPacks: orphanFindings.length,
+          promised,
+          otherFindings
+        }),
+        targetRevision: editController.revision(update.path)
+      };
+    } finally { transaction.abort(); }
+  }
   analysisSession.subscribe(delivery => {
     if (delivery.type === "worker") {
       workerActive = delivery.active;
@@ -617,6 +823,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
       if (!delivery.view) return;
       editorSurface.analysisChanged();
       scheduleOutlineRender();
+      renderDiagnostics();
       renderStatus();
       if (delivery.complete) editorSurface.offerCompletions();
       return;
@@ -640,6 +847,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
   // Structural changes need a view synchronously for the render that follows.
   function analyzeNow() {
     state.authoringView = analysisSession.fileChanged({ immediate: true, publish: false });
+    if (state.authoringView) state.authoringView.sameNumberWarnings = contractDuplicateWarnings.map(warning => ({ ...warning }));
     return state.authoringView;
   }
 
@@ -703,7 +911,9 @@ export function mountAuthoringTool(rootElement, host = {}) {
       if (typeof action.create === "string") {
         transaction.file(action.target).create(action.create);
       } else if (action.operations) {
-        const operationValue = action.needsValue ? parseJsonScalar(value) : undefined;
+        const operationValue = action.needsValue
+          ? (action.parseValue ? action.parseValue(value) : parseJsonScalar(value))
+          : undefined;
         for (const operation of action.operations(operationValue)) {
           if (operation.type !== "insert") throw new Error(CREATION_COPY.unsupportedOperation(operation.type));
           transaction.json(action.target).insert(operation.pointer, operation.keyOrIndex, operation.value, operation.options);
@@ -718,6 +928,19 @@ export function mountAuthoringTool(rootElement, host = {}) {
         }, next.slice(change.start, change.nextEnd));
       }
       await applyEdit(() => transaction.commit(), false);
+      if (action.selected) {
+        analyzeNow();
+        validationChanged();
+        renderAll();
+        const selected = authoringEntries().find(candidate => candidate.kind === action.selected.kind
+          && candidate.name === action.selected.name && candidate.file === action.selected.file);
+        if (selected) {
+          state.outlineSelection = selected.identity;
+          selectionBus.select({ kind: selected.kind, name: selected.name, file: selected.file, range: selected.range }, { origin: { surface: "prose" } });
+          outlineView.invalidate();
+          renderOutline();
+        }
+      }
       const next = state.package.files.get(action.target);
       return {
         changed: true,
@@ -747,7 +970,44 @@ export function mountAuthoringTool(rootElement, host = {}) {
     services: panelServices,
     packageService,
     hostInfo,
+    internal: {
+      "opengdd.contract": contractPanelInternal,
+      "opengdd.collection": collectionPanelInternal,
+      "opengdd.record-form": recordPanelInternal
+    },
     report
+  });
+
+  outlineView = createOutlineRenderer({
+    element: ui.outline,
+    document,
+    view,
+    state,
+    hidden: () => Boolean(widgetDrawer && widgetDrawer.outline.hidden),
+    panelHost,
+    entries: authoringEntries,
+    beforeOpen: async () => { await proseCommitQueue; analyzeNow(); },
+    openLocation: openOutlineLocation,
+    openFinding,
+    report,
+    select: selection => selectionBus.select(selection, { origin: { surface: "sidebar" } }),
+    syncCollectionCollapsed: () => host.outlineCollections?.setCollapsed?.([...state.outlineCollectionCollapsed]),
+    createFromOutline,
+    openCollectionDialog,
+    openContractRename: (anchor, artifact) => openRenameDialog({
+      document,
+      anchor,
+      references: referencesService,
+      name: artifact.name,
+      initial: artifact.display,
+      onApplied: next => {
+        if (state.openPath === artifact.file) state.openPath = `contracts/${next}.json`;
+        state.selected = { type: "file", path: `contracts/${next}.json` };
+        analyzeNow(); validationChanged(); renderAll();
+      }
+    }),
+    toggleRange,
+    acceptLinkOffer
   });
 
   // Package deliveries are synchronous: the session swaps controllers before
@@ -766,7 +1026,11 @@ export function mountAuthoringTool(rootElement, host = {}) {
     editorSurface.closeDialog(false);
     hideCollectionDialog(false);
     state.authoringView = null;
+    state.migration = { status: "idle", report: null, changes: [], hiddenNoOp: false, manualAfter: null, notice: null };
     panelAdvice.clear();
+    pendingContractDuplicateChecks.clear();
+    pendingContractUpdateNotices.clear();
+    contractDuplicateWarnings = [];
     redoLabels = [];
     editSaveAnnouncements = [];
     state.openPath = [...state.package.files.keys()].find(path => /\.md$/i.test(path)) ?? [...state.package.files.keys()][0] ?? "";
@@ -857,12 +1121,18 @@ export function mountAuthoringTool(rootElement, host = {}) {
   function renderTree() {
     ui.tree.innerHTML = renderTreeNode(treeData());
     const protectedFile = Boolean(capabilities.protectedFiles && state.selected?.type === "file" && PROTECTED_PACKAGE_FILES.has(state.selected.path));
+    const protectedDelete = protectedFile && !OPTIONAL_MECHANISM_FILES.has(state.selected.path);
     const renameReason = protectedFile ? WIDGET_COPY.protectedRename(state.selected.path) : "";
-    const deleteReason = protectedFile ? WIDGET_COPY.protectedDelete(state.selected.path) : "";
+    const deleteReason = protectedDelete ? WIDGET_COPY.protectedDelete(state.selected.path) : "";
     const setActionAvailability = (button, unavailable, reason) => {
       if (!button) return;
+      // The workbench keeps protected actions focusable so their explanation
+      // can be announced, but a shipped disabled attribute must never survive
+      // once an ordinary selection makes the action available.
+      // An unavailable action with a reason stays focusable so the reason can
+      // be announced; one with nothing to explain (no selection) is disabled.
+      button.disabled = unavailable && (!capabilities.protectedFiles || !reason);
       if (!capabilities.protectedFiles) {
-        button.disabled = unavailable;
         return;
       }
       button.setAttribute("aria-disabled", String(unavailable));
@@ -875,7 +1145,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
       }
     };
     setActionAvailability(ui.rename, !state.selected || protectedFile, renameReason);
-    setActionAvailability(ui.delete, !state.selected || protectedFile, deleteReason);
+    setActionAvailability(ui.delete, !state.selected || protectedDelete, deleteReason);
   }
 
   function openFile(path) {
@@ -958,6 +1228,11 @@ export function mountAuthoringTool(rootElement, host = {}) {
       : "";
     ui.reader.hidden = !readerUrl;
     if (readerUrl) ui.reader.href = readerUrl; else ui.reader.removeAttribute("href");
+    const contractNotice = /^contracts\/[^/]+\.json$/.test(path)
+      ? (path.endsWith(".pack.json") ? CONTRACT_COPY.packNotice : CONTRACT_COPY.adoptionNotice)
+      : "";
+    ui.fileNotice.hidden = !contractNotice;
+    ui.fileNotice.textContent = contractNotice;
     ui.textarea.hidden = true;
     ui.highlight.hidden = true;
     ui.json.hidden = true;
@@ -999,8 +1274,176 @@ export function mountAuthoringTool(rootElement, host = {}) {
     }
   }
 
+  const copyPackageFiles = files => new Map([...files].map(([path, value]) => [path, value instanceof Uint8Array ? value.slice() : value]));
+  const samePackageFiles = (left, right) => left.size === right.size && [...left].every(([path, value]) => {
+    const other = right.get(path);
+    if (typeof value === "string" || typeof other === "string") return value === other;
+    return value instanceof Uint8Array && other instanceof Uint8Array && value.length === other.length
+      && value.every((byte, index) => byte === other[index]);
+  });
+
+  async function currentMigrationReport() {
+    const controller = editController;
+    const before = copyPackageFiles(state.package.files);
+    const migration = await analysisSession.previewMigration();
+    if (controller !== editController || !samePackageFiles(before, state.package.files)) {
+      throw new Error(WIDGET_COPY.migrationChanged);
+    }
+    return { migration, before };
+  }
+
+  function migrationChanges(report, before) {
+    return [...new Map((report.outputs ?? []).map(output => [output.relative, {
+      relative: output.relative,
+      action: before.has(output.relative) ? WIDGET_COPY.migrationRewritten : WIDGET_COPY.migrationCreated
+    }])).values()];
+  }
+
+  function sameMigrationOutputs(left, right) {
+    if (!Array.isArray(left) || !Array.isArray(right) || left.length !== right.length) return false;
+    const fresh = new Map();
+    for (const output of right) {
+      if (fresh.has(output.relative)) return false;
+      fresh.set(output.relative, output.text);
+    }
+    if (fresh.size !== left.length) return false;
+    const previewed = new Set();
+    return left.every(output => {
+      if (previewed.has(output.relative)) return false;
+      previewed.add(output.relative);
+      return fresh.has(output.relative) && fresh.get(output.relative) === output.text;
+    });
+  }
+
+  function migrationPreviewState(migration, before, notice = null) {
+    if (migration.unavailable) {
+      return { ...state.migration, status: "unavailable", report: migration, changes: [], notice };
+    }
+    if (migration.noOp) {
+      return { ...state.migration, status: "no-op", report: migration, changes: [], hiddenNoOp: false, notice };
+    }
+    return { ...state.migration, status: "preview", report: migration, changes: migrationChanges(migration, before), notice };
+  }
+
+  async function previewMigration() {
+    if (state.migration.status === "pending") return;
+    const controller = editController;
+    state.migration = { ...state.migration, status: "pending", report: null, changes: [], notice: null };
+    renderDiagnostics();
+    try {
+      const { migration, before } = await currentMigrationReport();
+      if (controller !== editController) return;
+      state.migration = migrationPreviewState(migration, before);
+    } catch (error) {
+      if (controller !== editController) return;
+      state.migration = { ...state.migration, status: "error", report: null, changes: [], message: error.message, notice: null };
+    }
+    renderDiagnostics();
+  }
+
+  async function applyMigration() {
+    if (state.migration.status === "pending") return;
+    const requestedController = editController;
+    const previewedOutputs = state.migration.report?.outputs;
+    state.migration = { ...state.migration, status: "pending" };
+    renderDiagnostics();
+    try {
+      const controller = editController;
+      const { migration, before } = await currentMigrationReport();
+      if (requestedController !== editController) return;
+      if (migration.unavailable) {
+        state.migration = migrationPreviewState(migration, before);
+        renderDiagnostics();
+        return;
+      }
+      if (!sameMigrationOutputs(previewedOutputs, migration.outputs)) {
+        state.migration = migrationPreviewState(migration, before, WIDGET_COPY.migrationStale);
+        renderDiagnostics();
+        return;
+      }
+      if (migration.noOp || migration.refused) {
+        state.migration = migrationPreviewState(migration, before);
+        renderDiagnostics();
+        return;
+      }
+      const outputs = migration.outputs ?? [];
+      if (!outputs.length) throw new Error(WIDGET_COPY.migrationNoOutputs);
+      const seen = new Set();
+      const transaction = controller.begin(WIDGET_COPY.migrationUndo);
+      for (const output of outputs) {
+        const relative = normalizePath(output.relative);
+        if (relative !== output.relative || output.file !== `/package/${relative}` || typeof output.text !== "string" || seen.has(relative)) {
+          transaction.abort();
+          throw new Error(WIDGET_COPY.migrationUnsafeOutput);
+        }
+        seen.add(relative);
+        const current = state.package.files.get(relative);
+        if (current === undefined) transaction.file(relative).create(output.text);
+        else {
+          if (typeof current !== "string") {
+            transaction.abort();
+            throw new Error(WIDGET_COPY.migrationBinaryOutput(relative));
+          }
+          transaction.text(relative).replace({
+            start: { line: 0, character: 0 },
+            end: offsetToPosition(current, current.length),
+            revision: controller.revision(relative)
+          }, output.text);
+        }
+      }
+      await applyEdit(() => transaction.commit());
+      if (controller !== editController) return;
+      state.migration = {
+        status: "idle", report: null, changes: [], hiddenNoOp: false,
+        manualAfter: [...migration.manual], notice: null
+      };
+      analyzeNow();
+      renderAll();
+      validationChanged();
+    } catch (error) {
+      if (requestedController !== editController) return;
+      state.migration = { ...state.migration, status: "error", report: null, changes: [], message: error.message, notice: null };
+      renderDiagnostics();
+    }
+  }
+
+  function migrationMarkup() {
+    const migration = state.migration;
+    const manualAfter = migration.manualAfter?.length
+      ? `<section class="opengdd-author-migration opengdd-author-migration--after"><h3>${WIDGET_COPY.migrationAfter}</h3><ul>${migration.manualAfter.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul><button type="button" data-action="migration-dismiss-manual">${WIDGET_COPY.dismissMigrationManual}</button></section>`
+      : "";
+    const isV06 = state.authoringView?.manifest?.opengdd === "0.6";
+    if (migration.status === "no-op") {
+      const notice = migration.notice ? `<p>${migration.notice}</p>` : "";
+      return `<section class="opengdd-author-migration">${notice}<p>${WIDGET_COPY.migrationNoOp}</p><button type="button" data-action="migration-dismiss-no-op">${WIDGET_COPY.dismissMigrationNoOp}</button></section>${manualAfter}`;
+    }
+    if (!isV06 || migration.hiddenNoOp) return manualAfter;
+    const introduction = `<p>${WIDGET_COPY.migrationBanner}</p>`;
+    if (migration.status === "pending") {
+      return `<section class="opengdd-author-migration">${introduction}<p>${WIDGET_COPY.preparingMigration}</p></section>${manualAfter}`;
+    }
+    if (migration.status === "unavailable") {
+      return `<section class="opengdd-author-migration"><p>${WIDGET_COPY.migrationSchemaUnavailable}</p></section>${manualAfter}`;
+    }
+    if (migration.status === "error") {
+      return `<section class="opengdd-author-migration">${introduction}<p>${WIDGET_COPY.migrationPreviewFailed}</p><p class="opengdd-author-migration-detail"><small>${escapeHtml(migration.message || WIDGET_COPY.unknownError)}</small></p><button type="button" data-action="migration-preview">${WIDGET_COPY.previewMigration}</button></section>${manualAfter}`;
+    }
+    if (migration.status === "preview" && migration.report) {
+      const notice = migration.notice ? `<p>${migration.notice}</p>` : "";
+      const changes = migration.changes.length
+        ? `<h3>${WIDGET_COPY.migrationChanges}</h3><ul>${migration.changes.map(change => `<li data-migration-change><code>${escapeHtml(change.relative)}</code> — ${change.action}</li>`).join("")}</ul>`
+        : "";
+      const manual = `<h3>${WIDGET_COPY.migrationManual}</h3><ul>${migration.report.manual.map(item => `<li data-migration-manual>${escapeHtml(item)}</li>`).join("")}</ul>`;
+      const refusal = migration.report.refused ? `<p>${WIDGET_COPY.migrationRefused}</p>` : "";
+      const apply = migration.report.refused ? "" : `<button type="button" data-action="migration-apply">${WIDGET_COPY.applyMigration}</button>`;
+      return `<section class="opengdd-author-migration">${introduction}${notice}${changes}${manual}${refusal}<div class="opengdd-author-migration-actions">${apply}<button type="button" data-action="migration-not-now">${WIDGET_COPY.notNow}</button></div></section>${manualAfter}`;
+    }
+    return `<section class="opengdd-author-migration">${introduction}<button type="button" data-action="migration-preview">${WIDGET_COPY.previewMigration}</button></section>${manualAfter}`;
+  }
+
   function renderDiagnostics() {
     const { status, run, message } = state.validation;
+    const migration = migrationMarkup();
     const setDiagnosticSummary = text => {
       ui.diagnosticSummary.textContent = text;
       if (capabilities.workbenchLabels) ui.diagnosticSummary.parentElement.setAttribute("aria-label", WIDGET_COPY.validationAccessible(text));
@@ -1008,17 +1451,17 @@ export function mountAuthoringTool(rootElement, host = {}) {
     if (capabilities.workbenchLabels) ui.diagnosticSummary.classList.remove("opengdd-author-verdict--pass", "opengdd-author-verdict--warnings", "opengdd-author-verdict--fail");
     if (status === "pending") {
       setDiagnosticSummary(WIDGET_COPY.checkingEllipsis);
-      ui.diagnostics.innerHTML = `<p class="opengdd-author-muted">${WIDGET_COPY.checkingPackage}</p>`;
+      ui.diagnostics.innerHTML = `${migration}<p class="opengdd-author-muted">${WIDGET_COPY.checkingPackage}</p>`;
       return;
     }
     if (status === "unavailable") {
       setDiagnosticSummary(WIDGET_COPY.unavailable);
-      ui.diagnostics.innerHTML = `<p class="opengdd-author-validation-unavailable">${WIDGET_COPY.validationUnavailable}</p>`;
+      ui.diagnostics.innerHTML = `${migration}<p class="opengdd-author-validation-unavailable">${WIDGET_COPY.validationUnavailable}</p>`;
       return;
     }
     if (status === "crashed") {
       setDiagnosticSummary(WIDGET_COPY.crashed);
-      ui.diagnostics.innerHTML = `<p class="opengdd-author-validation-unavailable">${WIDGET_COPY.validationCrashed(escapeHtml(message || WIDGET_COPY.unknownError))}</p>`;
+      ui.diagnostics.innerHTML = `${migration}<p class="opengdd-author-validation-unavailable">${WIDGET_COPY.validationCrashed(escapeHtml(message || WIDGET_COPY.unknownError))}</p>`;
       return;
     }
 
@@ -1050,166 +1493,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
       ? `<p class="opengdd-author-validation-skipped">${WIDGET_COPY.skippedMediaChecks}</p>`
       : "";
     const verdictLine = capabilities.workbenchLabels ? "" : `<p class="opengdd-author-verdict opengdd-author-verdict--${verdictClass}">${WIDGET_COPY.validationSummaryFull(verdict, run.summary.errors, run.summary.warnings)}</p>`;
-    ui.diagnostics.innerHTML = `${verdictLine}${empty}${groups}${skipped}`;
-  }
-
-  function outlineModel() {
-    const viewGroups = state.authoringView?.groups ?? [];
-    const copyArtifact = (entry, parentIdentity = "") => ({
-      ...entry,
-      parentIdentity,
-      citations: entry.citations.map(citation => ({ ...citation })),
-      findings: [],
-      children: (entry.children ?? []).map(child => copyArtifact(child, entry.identity)),
-      expanded: entry.kind === "collection" ? !state.outlineCollectionCollapsed.has(entry.name) : undefined
-    });
-    const artifacts = viewGroups.flatMap(group => group.entries).map(entry => copyArtifact(entry));
-    const flatArtifacts = artifacts.flatMap(artifact => [artifact, ...(artifact.children ?? [])]);
-    const fallback = new Map(OUTLINE_GROUPS.map(group => [group.id, []]));
-    for (const [index, finding] of (state.validation.run?.findings ?? []).entries()) {
-      if (finding.code === "COLLECTION_UNCITED") {
-        const collection = flatArtifacts.find(artifact => artifact.kind === "collection" && artifact.location === finding.file);
-        if (collection) {
-          collection.findings.push(index);
-          continue;
-        }
-      }
-      const line = Number.isInteger(finding.line) ? finding.line - 1 : null;
-      const inRange = flatArtifacts.filter(artifact => artifact.kind !== "collection" && artifact.file === finding.file && line !== null
-        && line >= artifact.range.start.line && line <= artifact.range.end.line);
-      if (inRange.length) {
-        inRange.sort((left, right) => (left.range.end.line - left.range.start.line) - (right.range.end.line - right.range.start.line));
-        inRange[0].findings.push(index);
-        continue;
-      }
-      const fileArtifacts = flatArtifacts.filter(artifact => (artifact.kind !== "collection" && artifact.file === finding.file)
-        || artifact.citations.some(citation => citation.file === finding.file));
-      if (!fileArtifacts.length) continue;
-      const nearestLine = artifact => {
-        const locations = artifact.file === finding.file ? [artifact.range.start.line]
-          : artifact.citations.filter(citation => citation.file === finding.file).map(citation => citation.range.start.line);
-        return line === null ? 0 : Math.min(...locations.map(location => Math.abs(location - line)));
-      };
-      fileArtifacts.sort((left, right) => nearestLine(left) - nearestLine(right));
-      const group = OUTLINE_GROUPS.find(item => item.kinds.includes(fileArtifacts[0].kind));
-      if (group) fallback.get(group.id).push(index);
-    }
-    // A child problem also belongs to its collection for filtering and the
-    // parent badge, while the record keeps its own normal problem behavior.
-    rollUpCollectionFindings(flatArtifacts);
-    return {
-      problemsOnly: state.outlineProblemsOnly,
-      menuOpen: state.outlineMenuOpen,
-      selection: state.outlineSelection,
-      noProblems: state.outlineProblemsOnly && state.validation.status === "ready" && !(state.validation.run?.findings.length),
-      groups: OUTLINE_GROUPS.map(group => ({
-        ...group,
-        kinds: group.kinds,
-        artifacts: artifacts.filter(artifact => group.kinds.includes(artifact.kind)),
-        fallback: fallback.get(group.id),
-        fallbackOpen: state.outlineFallbackOpen.has(group.id)
-      }))
-    };
-  }
-
-  function findingBadge(findingIndexes, target = "") {
-    if (!findingIndexes.length) return "";
-    const uncited = findingIndexes.filter(index => state.validation.run.findings[index].code === "COLLECTION_UNCITED");
-    const ordinary = findingIndexes.filter(index => !uncited.includes(index));
-    const uncitedBadge = uncited.map(index => `<button type="button" class="opengdd-author-outline-badge opengdd-author-outline-badge--warning opengdd-author-outline-badge--sentence" data-outline-finding="${index}" aria-label="${escapeHtml(WIDGET_COPY.collectionUnmentioned)}">${severityIcon("warning")}<span>${escapeHtml(WIDGET_COPY.collectionUnmentioned)}</span></button>`).join("");
-    if (!ordinary.length) return uncitedBadge;
-    const findings = ordinary.map(index => state.validation.run.findings[index]);
-    const errors = findings.filter(finding => finding.severity === "error").length;
-    const warnings = findings.filter(finding => finding.severity === "warning").length;
-    const severity = errors ? "error" : "warning";
-    const label = WIDGET_COPY.problemCounts(ordinary.length, errors, warnings);
-    const attribute = target ? ` data-outline-finding="${ordinary[0]}"` : "";
-    const tag = target ? "button" : "span";
-    const type = target ? ' type="button"' : "";
-    return `${uncitedBadge}<${tag}${type} class="opengdd-author-outline-badge opengdd-author-outline-badge--${severity}"${attribute} aria-label="${label}">${severityIcon(severity)}<span>${ordinary.length}</span></${tag}>`;
-  }
-
-  const outlineData = value => encodeURIComponent(value);
-  const findingBadgeLabel = findingIndexes => {
-    const findings = findingIndexes.map(index => state.validation.run.findings[index]);
-    const errors = findings.filter(finding => finding.severity === "error").length;
-    const warnings = findings.filter(finding => finding.severity === "warning").length;
-    return WIDGET_COPY.problemCounts(findingIndexes.length, errors, warnings);
-  };
-
-  function renderOutline() {
-    if (!ui.outline || (widgetDrawer && widgetDrawer.outline.hidden)) return;
-    const model = outlineModel();
-    const serialized = JSON.stringify(model);
-    if (serialized === renderedOutlineModel) return;
-    renderedOutlineModel = serialized;
-    const active = ui.outline.contains(document.activeElement) ? document.activeElement.dataset.outlineFocus : "";
-    const groups = model.groups.map(group => {
-      const all = group.artifacts;
-      const shown = state.outlineProblemsOnly ? all.filter(artifact => artifact.findings.length).map(artifact => ({
-        ...artifact,
-        children: artifact.children.filter(child => child.findings.length)
-      })) : all;
-      const groupFallback = group.fallback;
-      if (state.outlineProblemsOnly && !shown.length && !groupFallback.length) return "";
-      const visibleTreeIdentities = group.id === "collections" ? shown.flatMap(artifact => [
-        artifact.identity,
-        ...(artifact.expanded ? artifact.children.map(child => child.identity) : [])
-      ]) : [];
-      const treeTabStop = visibleTreeIdentities.includes(state.outlineSelection)
-        ? state.outlineSelection
-        : visibleTreeIdentities[0];
-      const renderArtifact = (artifact, level = 1) => {
-        const kind = artifact.kind;
-        const entryKey = outlineData(artifact.identity);
-        const citations = artifact.citations.length ? `<details class="opengdd-author-outline-citations"><summary>${WIDGET_COPY.citations(artifact.citations.length)}</summary><ul role="list">${artifact.citations.map(citation => `<li><button type="button" data-outline-entry="${entryKey}" data-outline-citation="${outlineData(citation.identity)}" data-outline-focus="citation-${outlineData(citation.identity)}">${escapeHtml(citation.file)} · ${WIDGET_COPY.line(citation.range.start.line + 1)}</button></li>`).join("")}</ul></details>` : "";
-        const kindTagValue = artifact.kind === "collection" ? WIDGET_COPY.collectionKind : artifact.kindTag;
-        const kindTag = kindTagValue ? `<span class="opengdd-author-outline-kind-tag">${kindTagValue}</span>` : "";
-        const accessibleKind = kindTagValue ? `, ${kindTagValue}` : "";
-        if (kind === "collection") {
-          const count = artifact.count ? WIDGET_COPY.collectionCount(artifact.count) : WIDGET_COPY.collectionEmptyCount;
-          const location = WIDGET_COPY.collectionLocation(artifact.name);
-          const children = artifact.expanded && artifact.children.length
-            ? `<ul class="opengdd-author-outline-children" role="group">${artifact.children.map(child => renderArtifact(child, 2)).join("")}</ul>`
-            : "";
-          return `<li role="treeitem" aria-level="1" aria-expanded="${artifact.expanded}" tabindex="${treeTabStop === artifact.identity ? 0 : -1}" data-outline-treeitem="${entryKey}" data-outline-focus="entry-${entryKey}" class="opengdd-author-outline-entry opengdd-author-outline-entry--collection${state.outlineSelection === artifact.identity ? " opengdd-author-is-selected" : ""}"><div data-outline-entry="${entryKey}"><button type="button" class="opengdd-author-outline-toggle" data-outline-toggle="${entryKey}" data-outline-focus="toggle-${entryKey}" aria-label="${escapeHtml(artifact.expanded ? WIDGET_COPY.collapseCollection(artifact.name) : WIDGET_COPY.expandCollection(artifact.name))}" aria-expanded="${artifact.expanded}">${artifact.expanded ? "▾" : "▸"}</button><button type="button" tabindex="-1" class="opengdd-author-outline-jump opengdd-author-kind--collection" aria-label="${escapeHtml(`${artifact.name}${accessibleKind}, ${count}, ${location}`)}"><span class="opengdd-author-outline-name">${escapeHtml(artifact.name)}</span>${kindTag}<span class="opengdd-author-outline-count">${escapeHtml(count)}</span><span class="opengdd-author-outline-location">${escapeHtml(location)}</span></button>${findingBadge(artifact.findings, "finding")}<button type="button" class="opengdd-author-outline-add-record" data-outline-add-record="${escapeHtml(artifact.name)}" data-outline-focus="add-${entryKey}">${WIDGET_COPY.addRecord}</button></div>${citations}${children}</li>`;
-        }
-        if (level === 2) return `<li role="treeitem" aria-level="2" tabindex="${treeTabStop === artifact.identity ? 0 : -1}" data-outline-treeitem="${entryKey}" data-outline-parent="${outlineData(artifact.parentIdentity)}" data-outline-focus="entry-${entryKey}" class="opengdd-author-outline-entry opengdd-author-outline-entry--child${state.outlineSelection === artifact.identity ? " opengdd-author-is-selected" : ""}"><div data-outline-entry="${entryKey}"><button type="button" tabindex="-1" class="opengdd-author-outline-jump opengdd-author-kind--${kind}" aria-label="${escapeHtml(`${artifact.name}${accessibleKind}, ${artifact.file}, ${WIDGET_COPY.line(artifact.range.start.line + 1)}`)}"><span class="opengdd-author-outline-name">${escapeHtml(artifact.name)}</span>${kindTag}<span class="opengdd-author-outline-location">${escapeHtml(artifact.file)} · ${WIDGET_COPY.line(artifact.range.start.line + 1)}</span></button>${findingBadge(artifact.findings, "finding")}</div>${citations}</li>`;
-        return `<li class="opengdd-author-outline-entry${state.outlineSelection === artifact.identity ? " opengdd-author-is-selected" : ""}"><div><button type="button" class="opengdd-author-outline-jump opengdd-author-kind--${kind}" data-outline-entry="${entryKey}" data-outline-focus="entry-${entryKey}" aria-label="${escapeHtml(`${artifact.name}${accessibleKind}, ${artifact.file}, ${WIDGET_COPY.line(artifact.range.start.line + 1)}`)}"><span class="opengdd-author-outline-name">${escapeHtml(artifact.name)}</span>${kindTag}<span class="opengdd-author-outline-location">${escapeHtml(artifact.file)} · ${WIDGET_COPY.line(artifact.range.start.line + 1)}</span></button>${findingBadge(artifact.findings, "finding")}</div>${citations}</li>`;
-      };
-      const entries = shown.map(artifact => renderArtifact(artifact)).join("");
-      const empty = shown.length ? "" : state.outlineProblemsOnly ? "" : `<div class="opengdd-author-outline-empty"><p>${group.empty}</p><button type="button" data-outline-create="${group.create}" data-outline-focus="create-${outlineData(group.create)}">${group.action}</button></div>`;
-      const severity = groupFallback.some(index => state.validation.run.findings[index].severity === "error") ? "error" : "warning";
-      const fallbackId = `opengdd-outline-${group.id}-fallback`;
-      const disclosure = groupFallback.length ? `<button type="button" class="opengdd-author-outline-badge opengdd-author-outline-badge--${severity}" data-outline-disclosure="${group.id}" data-outline-focus="fallback-${group.id}" aria-expanded="${group.fallbackOpen}" aria-controls="${fallbackId}" aria-label="${findingBadgeLabel(groupFallback)}">${severityIcon(severity)}<span>${groupFallback.length}</span></button>` : "";
-      const fallbackList = group.fallbackOpen && groupFallback.length ? `<ul class="opengdd-author-outline-fallback" id="${fallbackId}" role="list">${groupFallback.map(index => {
-        const finding = state.validation.run.findings[index];
-        return `<li><button type="button" data-outline-finding="${index}" data-outline-focus="fallback-${group.id}-${index}"><span>${escapeHtml(finding.message)}</span><span>${escapeHtml(finding.file)}${finding.line ? ` · ${WIDGET_COPY.line(finding.line)}` : ""}</span></button></li>`;
-      }).join("")}</ul>` : "";
-      const headerCreate = group.id === "collections" ? `<button type="button" class="opengdd-author-outline-group-create" data-outline-create="Collection" data-outline-focus="group-create-collections">${group.action}</button>` : "";
-      const entryList = group.id === "collections" ? `<ul role="tree">${entries}</ul>` : `<ul role="list">${entries}</ul>`;
-      return `<section class="opengdd-author-outline-group opengdd-author-kind--${group.kinds[0] === "name" ? "name" : group.kinds[0]}" role="group" aria-labelledby="opengdd-outline-${group.id}"><h3 id="opengdd-outline-${group.id}">${outlineIcon(group)}<span>${group.label}</span>${headerCreate}${disclosure}</h3>${fallbackList}${entries ? entryList : empty}</section>`;
-    }).join("");
-    const artifacts = model.groups.flatMap(group => group.artifacts);
-    const nothing = artifacts.length || state.outlineProblemsOnly ? "" : `<p class="opengdd-author-outline-nothing"><strong>${WIDGET_COPY.outlineNothing}</strong><span>${WIDGET_COPY.outlineNothingAction}</span></p>`;
-    const noProblems = model.noProblems ? `<p class="opengdd-author-outline-nothing" role="status">${WIDGET_COPY.noValidationProblems}</p>` : "";
-    const selectedFile = state.selected?.type === "file" ? state.selected.path : "";
-    const panelCreators = panelHost?.creators({ file: selectedFile }, { menu: true }) ?? [];
-    const promptedCreator = panelCreators.find(creator => creator.id === state.panelCreatorPrompt);
-    const panelCreatorMarkup = panelCreators.map(creator => `<button type="button" role="menuitem" tabindex="-1" data-panel-creator="${escapeHtml(creator.id)}" data-outline-focus="panel-creator-${outlineData(creator.id)}">${escapeHtml(creator.label)}</button>`).join("");
-    const creatorError = state.panelCreatorError ? `<p class="opengdd-author-quickfix-error" aria-live="polite">${escapeHtml(state.panelCreatorError)}</p>` : "";
-    const promptMarkup = promptedCreator ? `<div class="opengdd-author-panel-creator-prompt"><strong>${escapeHtml(promptedCreator.label)}</strong><p>${escapeHtml(promptedCreator.help)}</p><input data-panel-creator-name autocomplete="off"><button type="button" data-panel-creator-confirm="${escapeHtml(promptedCreator.id)}">${WIDGET_COPY.create}</button>${creatorError}</div>` : creatorError;
-    ui.outline.innerHTML = `<div class="opengdd-author-outline-controls"><div class="opengdd-author-outline-create"><button type="button" data-action="outline-menu" data-outline-focus="menu" aria-label="${WIDGET_COPY.create}" aria-haspopup="menu" aria-expanded="${state.outlineMenuOpen}">+</button>${state.outlineMenuOpen ? `<div role="menu" aria-label="${WIDGET_COPY.create}"><span>${WIDGET_COPY.create}</span>${OUTLINE_CREATE_ITEMS.map((item, index) => `<button type="button" role="menuitem" tabindex="${index ? -1 : 0}" data-outline-create="${item}" data-outline-focus="menuitem-${outlineData(item)}">${item}</button>`).join("")}${panelCreatorMarkup}${promptMarkup}</div>` : ""}</div><label><input type="checkbox" data-outline-filter data-outline-focus="filter"${state.outlineProblemsOnly ? " checked" : ""}> ${WIDGET_COPY.problemsOnly}</label></div>${noProblems}${nothing}${groups}<div data-panel-sidebar></div>`;
-    panelHost?.refreshSidebar();
-    if (active) [...ui.outline.querySelectorAll("[data-outline-focus]")].find(element => element.dataset.outlineFocus === active)?.focus({ preventScroll: true });
-  }
-
-  function scheduleOutlineRender() {
-    if (!ui.outline || outlineFrame) return;
-    outlineFrame = view.requestAnimationFrame(() => {
-      outlineFrame = 0;
-      renderOutline();
-    });
+    ui.diagnostics.innerHTML = `${migration}${verdictLine}${empty}${groups}${skipped}`;
   }
 
   function openOutlineLocation(location) {
@@ -1249,8 +1533,10 @@ export function mountAuthoringTool(rootElement, host = {}) {
     for (let suffix = 2; ; suffix += 1) if (!Object.hasOwn(object, `${base}-${suffix}`)) return `${base}-${suffix}`;
   };
 
-  const authoringEntries = () => (state.authoringView?.groups ?? []).flatMap(group => group.entries)
-    .flatMap(entry => [entry, ...(entry.children ?? [])]);
+  function authoringEntries() {
+    return (state.authoringView?.groups ?? []).flatMap(group => group.entries)
+      .flatMap(entry => [entry, ...(entry.children ?? [])]);
+  }
 
   function positionCollectionDialog() {
     if (!collectionDialog || ui.collectionDialog.hidden) return;
@@ -1268,7 +1554,79 @@ export function mountAuthoringTool(rootElement, host = {}) {
 
   function updateCollectionDialog() {
     if (!collectionDialog) return;
+    if (collectionDialog.mode === "contract") {
+      const source = collectionDialog.contractSources[collectionDialog.contractIndex];
+      const name = kebabName(collectionDialog.contractName);
+      let prepared;
+      if (source && name) {
+        try {
+          prepared = prepareContractAddition({ files: state.package.files, definitionText: source.text, packText: source.pack, name });
+        } catch (error) {
+          prepared = { ok: false, reason: error.message };
+        }
+      }
+      const measureRevision = ++collectionDialog.contractMeasureRevision;
+      collectionDialog.prepared = prepared;
+      collectionDialog.contractUpdates = new Map();
+      const preview = ui.collectionDialog.querySelector("[data-contract-preview]");
+      const todo = ui.collectionDialog.querySelector("[data-contract-todo]");
+      const error = ui.collectionDialog.querySelector("[data-contract-error]");
+      const confirm = ui.collectionDialog.querySelector("[data-collection-confirm]");
+      if (preview) preview.innerHTML = name ? inlineCodeHtml(CONTRACT_COPY.namePreview(name)) : "";
+      if (todo) todo.textContent = "";
+      if (error) error.textContent = collectionDialog.sourceError || (prepared && !prepared.ok ? prepared.reason : "");
+      if (confirm) {
+        confirm.textContent = collectionDialog.contractUpdateFile ? CONTRACT_COPY.update : CONTRACT_COPY.add;
+        confirm.disabled = true;
+      }
+      if (source) for (const target of findContractUpdateTargets(state.package.files, source.text)) {
+        let update;
+        try {
+          update = prepareContractUpdate({ files: state.package.files, definitionText: source.text,
+            packText: source.pack, adoptionFile: target.file });
+        } catch (cause) { update = { ok: false, reason: cause.message }; }
+        collectionDialog.contractUpdates.set(target.file, update);
+        const input = [...ui.collectionDialog.querySelectorAll("[data-contract-update]")]
+          .find(candidate => candidate.dataset.contractUpdate === target.file);
+        const line = [...ui.collectionDialog.querySelectorAll("[data-contract-update-line]")]
+          .find(candidate => candidate.dataset.contractUpdateLine === target.file);
+        if (input) input.disabled = true;
+        if (line) line.textContent = update.ok ? "" : update.reason;
+        if (!update.ok) continue;
+        measureContractUpdate(update).then(measured => {
+          if (!collectionDialog || collectionDialog.contractMeasureRevision !== measureRevision) return;
+          const ready = Object.freeze({ ...update, ...measured });
+          collectionDialog.contractUpdates.set(target.file, ready);
+          if (line) line.textContent = measured.line;
+          if (input) input.disabled = false;
+          if (confirm && collectionDialog.contractUpdateFile === target.file) confirm.disabled = false;
+        }).catch(cause => {
+          if (!collectionDialog || collectionDialog.contractMeasureRevision !== measureRevision) return;
+          collectionDialog.contractUpdates.set(target.file, { ok: false, reason: cause.message });
+          if (line) line.textContent = cause.message;
+        });
+      }
+      if (prepared?.ok) measureContractAddition(prepared).then(measured => {
+        if (!collectionDialog || collectionDialog.contractMeasureRevision !== measureRevision) return;
+        collectionDialog.prepared = Object.freeze({ ...prepared, ...measured });
+        if (todo) todo.textContent = CONTRACT_COPY.todo(prepared.counts.questions, prepared.counts.values, measured.consequences);
+        if (confirm && !collectionDialog.contractUpdateFile) confirm.disabled = false;
+      }).catch(cause => {
+        if (!collectionDialog || collectionDialog.contractMeasureRevision !== measureRevision) return;
+        collectionDialog.prepared = { ok: false, reason: cause.message };
+        if (error) error.textContent = cause.message;
+      });
+      return;
+    }
     const copy = CREATION_COPY.collectionDialog;
+    if (collectionDialog.mode === "chapter") {
+      const stem = kebabName(collectionDialog.chapterValue);
+      const number = nextChapterNumber(state.package.files);
+      const preview = ui.collectionDialog.querySelector("[data-chapter-preview]");
+      if (preview) preview.innerHTML = stem ? inlineCodeHtml(CREATION_COPY.chapterDialog.preview(number, stem)) : "";
+      ui.collectionDialog.querySelector("[data-collection-confirm]").disabled = !stem;
+      return;
+    }
     const collectionName = collectionDialog.mode === "collection"
       ? kebabName(collectionDialog.collectionValue)
       : collectionDialog.collection;
@@ -1293,6 +1651,41 @@ export function mountAuthoringTool(rootElement, host = {}) {
   function renderCollectionDialog(focus = true) {
     if (!collectionDialog) return;
     const copy = CREATION_COPY.collectionDialog;
+    if (collectionDialog.mode === "contract") {
+      const source = collectionDialog.contractSources[collectionDialog.contractIndex];
+      let details = "";
+      if (source) {
+        const existing = findPackageDefinition(state.package.files, source.value.contract, source.value.version);
+        const definition = existing?.value ?? source.value;
+        const sequence = collectionDialog.contractSources.length > 1
+          ? `<p class="opengdd-author-create-sequence">${escapeHtml(CONTRACT_COPY.sequence(collectionDialog.contractIndex + 1, collectionDialog.contractSources.length, definition.summary))}</p>`
+          : `<p class="opengdd-author-create-sequence">${escapeHtml(definition.summary)}</p>`;
+        const reused = existing ? `<p>${escapeHtml(CONTRACT_COPY.sameDefinition)}</p>` : "";
+        const pack = source.pack ? `<p>${inlineCodeHtml(CONTRACT_COPY.packAlong(contractPackFilename(definition)))}</p>` : "";
+        const updateTargets = findContractUpdateTargets(state.package.files, source.text);
+        const updates = updateTargets.length ? `<fieldset class="opengdd-author-contract-updates"><legend>${CONTRACT_COPY.updateLegend}</legend>${updateTargets.map(target => `<label><input type="checkbox" data-contract-update="${escapeHtml(target.file)}"${collectionDialog.contractUpdateFile === target.file ? " checked" : ""}> <span>${inlineCodeHtml(CONTRACT_COPY.updateOffer(target.adoption, source.value.version))}</span></label><p data-contract-update-line="${escapeHtml(target.file)}"></p>`).join("")}</fieldset>` : "";
+        const skip = collectionDialog.contractSources.length > 1
+          ? `<button type="button" class="opengdd-author-create-skip" data-collection-skip>${CONTRACT_COPY.skip}</button>` : "";
+        details = `${sequence}${reused}${updates}<label for="opengdd-contract-name">${CONTRACT_COPY.nameQuestion}</label><p class="opengdd-author-create-help">${escapeHtml(CONTRACT_COPY.nameHelp)}</p><input id="opengdd-contract-name" data-contract-name autocomplete="off" value="${escapeHtml(collectionDialog.contractName)}"${collectionDialog.contractUpdateFile ? " disabled" : ""}><p class="opengdd-author-create-preview" data-contract-preview></p>${pack}<p data-contract-todo></p>${skip}`;
+      }
+      ui.collectionDialog.setAttribute("aria-labelledby", "opengdd-collection-dialog-title");
+      ui.collectionDialog.innerHTML = `<h3 id="opengdd-collection-dialog-title">${CONTRACT_COPY.title}</h3><label class="opengdd-author-contract-drop">${CONTRACT_COPY.drop}<input data-contract-file type="file" accept=".json,.zip,application/json,application/zip" multiple></label><textarea data-contract-paste aria-label="${CONTRACT_COPY.pastePlaceholder}" placeholder="${CONTRACT_COPY.pastePlaceholder}">${escapeHtml(collectionDialog.pasteValue)}</textarea>${contractsCatalogueUrl ? `<p>${escapeHtml(CONTRACT_COPY.catalogue)} <a href="${escapeHtml(contractsCatalogueUrl)}">${escapeHtml(contractsCatalogueUrl)}</a>.</p>` : ""}${details}<p class="opengdd-author-create-error" data-contract-error aria-live="polite"></p><div class="opengdd-author-create-actions"><button type="button" data-collection-confirm>${CONTRACT_COPY.add}</button><button type="button" data-collection-cancel>${CONTRACT_COPY.cancel}</button></div>`;
+      ui.collectionDialog.hidden = false;
+      updateCollectionDialog();
+      positionCollectionDialog();
+      if (focus) ui.collectionDialog.querySelector(source ? "[data-contract-name]" : "[data-contract-paste]")?.focus({ preventScroll: true });
+      return;
+    }
+    if (collectionDialog.mode === "chapter") {
+      const chapter = CREATION_COPY.chapterDialog;
+      ui.collectionDialog.setAttribute("aria-labelledby", "opengdd-collection-dialog-title");
+      ui.collectionDialog.innerHTML = `<h3 id="opengdd-collection-dialog-title">${chapter.title}</h3><label for="opengdd-chapter-name">${chapter.question}</label><p class="opengdd-author-create-help">${escapeHtml(chapter.help)}</p><input id="opengdd-chapter-name" data-chapter-name autocomplete="off" value="${escapeHtml(collectionDialog.chapterValue)}"><p class="opengdd-author-create-preview" data-chapter-preview></p><div class="opengdd-author-create-actions"><button type="button" data-collection-confirm>${chapter.create}</button><button type="button" data-collection-cancel>${chapter.cancel}</button></div>`;
+      ui.collectionDialog.hidden = false;
+      updateCollectionDialog();
+      positionCollectionDialog();
+      if (focus) ui.collectionDialog.querySelector("[data-chapter-name]")?.focus({ preventScroll: true });
+      return;
+    }
     const collectionQuestion = collectionDialog.mode === "collection" ? `<label for="opengdd-collection-name">${copy.collectionQuestion}</label><p class="opengdd-author-create-help">${escapeHtml(copy.collectionHelp)}</p><input id="opengdd-collection-name" data-collection-name autocomplete="off" value="${escapeHtml(collectionDialog.collectionValue)}"><p class="opengdd-author-create-preview" data-collection-preview></p><p class="opengdd-author-create-error" data-collection-error aria-live="polite"></p>` : "";
     const recordQuestion = collectionDialog.mode === "collection" ? copy.firstRecordQuestion : copy.recordQuestion;
     const skip = collectionDialog.mode === "collection" ? `<button type="button" class="opengdd-author-create-skip" data-collection-skip>${copy.skipFirstRecord}</button>` : "";
@@ -1301,7 +1694,58 @@ export function mountAuthoringTool(rootElement, host = {}) {
     ui.collectionDialog.hidden = false;
     updateCollectionDialog();
     positionCollectionDialog();
-    if (focus) ui.collectionDialog.querySelector(collectionDialog.mode === "collection" ? "[data-collection-name]" : "[data-record-name]")?.focus({ preventScroll: true });
+    if (focus) {
+      const input = ui.collectionDialog.querySelector(collectionDialog.mode === "collection" ? "[data-collection-name]" : "[data-record-name]");
+      input?.focus({ preventScroll: true });
+      if (collectionDialog.prefill && input?.select) input.select();
+    }
+  }
+
+  async function loadContractFiles(inputFiles) {
+    collectionDialog.contractUpdateFile = "";
+    const files = new Map();
+    let hadZip = false;
+    for (const file of inputFiles) {
+      if (/\.zip$/i.test(file.name)) {
+        hadZip = true;
+        const archive = await readZip(file, { preserveTextBytes: true });
+        for (const [path, value] of archive.files) files.set(`${file.name}/${path}`, value);
+      } else if (/\.json$/i.test(file.name)) {
+        // Keep the received bytes until classification has distinguished a
+        // definition from a pack; pack hashes and writes must use those bytes.
+        files.set(file.name, new Uint8Array(await file.arrayBuffer()));
+      }
+    }
+    const sources = collectContractSources(files);
+    if (!sources.length) throw new Error(hadZip ? CONTRACT_COPY.zipRefusal : CONTRACT_COPY.refusal);
+    collectionDialog.contractSources = sources;
+    collectionDialog.contractIndex = 0;
+    collectionDialog.contractName = "";
+    collectionDialog.pasteValue = "";
+    collectionDialog.sourceError = "";
+    renderCollectionDialog();
+  }
+
+  // A host may arrive with a contract already chosen (a catalogue deep link).
+  // The offer opens the ordinary Add-a-contract dialog with that source loaded,
+  // after the initial package is open so the dialog measures the right files.
+  async function offerInitialContract() {
+    if (typeof host.initialContract !== "function") return;
+    const revision = state.revision;
+    try {
+      const offer = await host.initialContract();
+      if (destroyed || revision !== state.revision || !offer) return;
+      const files = new Map([["offered.json", offer.definitionText]]);
+      if (offer.packText !== undefined && offer.packText !== null) files.set("offered.pack.json", offer.packText);
+      const sources = collectContractSources(files);
+      if (!sources.length) throw new Error(CONTRACT_COPY.refusal);
+      const anchor = ui.outline?.querySelector('[data-action="outline-menu"]') ?? ui.tree ?? rootElement;
+      openCollectionDialog(anchor, "contract");
+      collectionDialog.contractSources = sources;
+      renderCollectionDialog();
+    } catch (error) {
+      report(error.message, true);
+    }
   }
 
   function ensureCollectionDialog() {
@@ -1317,7 +1761,47 @@ export function mountAuthoringTool(rootElement, host = {}) {
       if (!collectionDialog) return;
       if (event.target.matches("[data-collection-name]")) collectionDialog.collectionValue = event.target.value;
       if (event.target.matches("[data-record-name]")) collectionDialog.recordValue = event.target.value;
+      if (event.target.matches("[data-chapter-name]")) collectionDialog.chapterValue = event.target.value;
+      if (event.target.matches("[data-contract-name]")) collectionDialog.contractName = event.target.value;
+      if (event.target.matches("[data-contract-paste]")) {
+        collectionDialog.contractUpdateFile = "";
+        collectionDialog.pasteValue = event.target.value;
+        const sources = collectContractSources(new Map([["pasted.json", event.target.value]]));
+        collectionDialog.contractSources = sources;
+        collectionDialog.contractIndex = 0;
+        collectionDialog.sourceError = sources.length ? "" : CONTRACT_COPY.refusal;
+        collectionDialog.contractName = "";
+        renderCollectionDialog(false);
+        return;
+      }
       updateCollectionDialog();
+    });
+    on(ui.collectionDialog, "change", event => {
+      if (event.target.matches("[data-contract-update]") && collectionDialog?.mode === "contract") {
+        const file = event.target.dataset.contractUpdate;
+        collectionDialog.contractUpdateFile = event.target.checked ? file : "";
+        for (const input of ui.collectionDialog.querySelectorAll("[data-contract-update]")) {
+          if (input !== event.target) input.checked = false;
+        }
+        renderCollectionDialog(false);
+        return;
+      }
+      if (!event.target.matches("[data-contract-file]") || !collectionDialog) return;
+      loadContractFiles([...event.target.files]).catch(error => {
+        collectionDialog.sourceError = error.message;
+        renderCollectionDialog(false);
+      });
+    });
+    on(ui.collectionDialog, "dragover", event => {
+      if (collectionDialog?.mode === "contract") event.preventDefault();
+    });
+    on(ui.collectionDialog, "drop", event => {
+      if (collectionDialog?.mode !== "contract") return;
+      event.preventDefault();
+      loadContractFiles([...(event.dataTransfer?.files ?? [])]).catch(error => {
+        collectionDialog.sourceError = error.message;
+        renderCollectionDialog(false);
+      });
     });
     on(ui.collectionDialog, "click", event => {
       event.stopPropagation();
@@ -1347,21 +1831,35 @@ export function mountAuthoringTool(rootElement, host = {}) {
     });
   }
 
-  function openCollectionDialog(anchor, mode = "collection", collection = "") {
+  function openCollectionDialog(anchor, mode = "collection", collection = "", options = {}) {
     ensureCollectionDialog();
+    let resolve;
+    const result = options.awaitResult ? new Promise(settle => { resolve = settle; }) : undefined;
     collectionDialog = {
       anchor,
       returnFocus: anchor,
       mode,
       collection,
+      prefill: options.prefill ?? "",
+      sourceFile: options.sourceFile,
+      undo: options.undo,
+      selectCreated: options.selectCreated !== false,
+      resolve,
+      settled: false,
       collectionValue: "",
-      recordValue: ""
+      recordValue: options.prefill ?? "",
+      chapterValue: "",
+      contractSources: [], contractIndex: 0, contractName: "", pasteValue: "", sourceError: "", prepared: null,
+      contractUpdateFile: "", contractUpdates: new Map(),
+      contractMeasureRevision: 0
     };
     renderCollectionDialog();
+    return result;
   }
 
   function hideCollectionDialog(restoreFocus = false) {
     const returnFocus = collectionDialog?.returnFocus;
+    if (collectionDialog?.resolve && !collectionDialog.settled) collectionDialog.resolve(null);
     collectionDialog = null;
     if (ui.collectionDialog) {
       ui.collectionDialog.hidden = true;
@@ -1380,6 +1878,96 @@ export function mountAuthoringTool(rootElement, host = {}) {
   async function commitCollectionDialog({ skip = false } = {}) {
     if (!collectionDialog) return;
     const pending = collectionDialog;
+    if (pending.mode === "contract") {
+      if (skip) {
+        pending.contractIndex += 1;
+        pending.contractName = "";
+        pending.contractUpdateFile = "";
+        if (pending.contractIndex >= pending.contractSources.length) { hideCollectionDialog(true); return; }
+        renderCollectionDialog();
+        return;
+      }
+      if (pending.contractUpdateFile) {
+        const update = pending.contractUpdates.get(pending.contractUpdateFile);
+        if (!update?.ok || !Number.isInteger(update.outOfRange) || !Number.isInteger(update.validatorFindings)) return;
+        if (editController.revision(update.path) !== update.targetRevision) {
+          renderCollectionDialog(false);
+          return;
+        }
+        const transaction = editController.begin(CONTRACT_COPY.undo.update);
+        stageContractUpdate(transaction, update);
+        await applyEdit(() => transaction.commit());
+        pendingContractDuplicateChecks.add(update.path);
+        pendingContractUpdateNotices.set(update.path, { changelog: update.changelog });
+        state.outlineMenuOpen = false;
+        const hasNext = pending.contractIndex + 1 < pending.contractSources.length;
+        if (hasNext) {
+          pending.contractIndex += 1;
+          pending.contractName = "";
+          pending.contractUpdateFile = "";
+          pending.sourceError = "";
+          analyzeNow(); validationChanged(); renderAll(); renderCollectionDialog();
+          return;
+        }
+        hideCollectionDialog(false);
+        analyzeNow(); validationChanged(); renderAll();
+        const selected = authoringEntries().find(entry => entry.kind === "contract" && entry.file === update.path);
+        if (selected) {
+          openOutlineLocation(selected);
+          state.outlineSelection = selected.identity;
+          selectionBus.select({ kind: selected.kind, name: selected.name, file: selected.file, range: selected.range }, { origin: { surface: "sidebar" } });
+          outlineView.invalidate(); renderOutline();
+        }
+        return;
+      }
+      const addition = pending.prepared;
+      if (!addition?.ok || !Number.isInteger(addition.consequences)) return;
+      const transaction = editController.begin(CONTRACT_COPY.undo.add);
+      transaction.file(addition.path).create(addition.adoptionText);
+      if (addition.pack?.create) transaction.file(addition.pack.path).create(addition.pack.value);
+      await applyEdit(() => transaction.commit());
+      pendingContractDuplicateChecks.add(addition.path);
+      state.outlineMenuOpen = false;
+      const hasNext = pending.contractIndex + 1 < pending.contractSources.length;
+      if (hasNext) {
+        pending.contractIndex += 1;
+        pending.contractName = "";
+        pending.contractUpdateFile = "";
+        pending.sourceError = "";
+        analyzeNow(); validationChanged(); renderAll(); renderCollectionDialog();
+        return;
+      }
+      hideCollectionDialog(false);
+      analyzeNow(); validationChanged(); renderAll();
+      const selected = authoringEntries().find(entry => entry.kind === "contract" && entry.file === addition.path);
+      if (selected) {
+        openOutlineLocation(selected);
+        state.outlineSelection = selected.identity;
+        selectionBus.select({ kind: selected.kind, name: selected.name, file: selected.file, range: selected.range }, { origin: { surface: "sidebar" } });
+        outlineView.invalidate(); renderOutline();
+      }
+      return;
+    }
+    if (pending.mode === "chapter") {
+      const chapter = chapterCreation(state.package.files, pending.chapterValue);
+      const transaction = editController.begin(CREATION_COPY.chapterDialog.createUndo);
+      transaction.file(chapter.path).create(chapter.text);
+      await applyEdit(() => transaction.commit());
+      state.outlineMenuOpen = false;
+      hideCollectionDialog(false);
+      analyzeNow();
+      validationChanged();
+      renderAll();
+      openFile(chapter.path);
+      const selected = authoringEntries().find(entry => entry.kind === "section" && entry.file === chapter.path);
+      if (selected) {
+        state.outlineSelection = selected.identity;
+        selectionBus.select({ kind: selected.kind, name: selected.name, file: selected.file, range: selected.range }, { origin: { surface: "sidebar" } });
+        outlineView.invalidate();
+        renderOutline();
+      }
+      return;
+    }
     const collection = pending.mode === "collection" ? kebabName(pending.collectionValue) : pending.collection;
     const record = kebabName(pending.recordValue);
     if (!collection || collectionNameTaken(state.package.files, state.package.folders, pending.mode === "collection" ? collection : "")) {
@@ -1390,20 +1978,29 @@ export function mountAuthoringTool(rootElement, host = {}) {
       updateCollectionDialog();
       return;
     }
-    const label = pending.mode === "collection"
+    const label = pending.undo ?? (pending.mode === "collection"
       ? CREATION_COPY.collectionDialog.createUndo
-      : CREATION_COPY.collectionDialog.addRecordUndo;
+      : CREATION_COPY.collectionDialog.addRecordUndo);
     const transaction = editController.begin(label);
     if (pending.mode === "collection") transaction.folder(`collections/${collection}`).create();
-    if (!skip) transaction.file(`collections/${collection}/${record}.json`).create(collectionRecordText(state.package.files, collection));
+    if (!skip) {
+      const source = pending.sourceFile ? state.package.files.get(pending.sourceFile) : undefined;
+      if (pending.sourceFile && source === undefined) throw new Error(`The source record ${pending.sourceFile} no longer exists.`);
+      transaction.file(`collections/${collection}/${record}.json`).create(source ?? collectionRecordText(state.package.files, collection));
+    }
     await applyEdit(() => transaction.commit());
     state.outlineCollectionCollapsed.delete(collection);
     host.outlineCollections?.setCollapsed?.([...state.outlineCollectionCollapsed]);
     state.outlineMenuOpen = false;
+    pending.settled = true;
     hideCollectionDialog(false);
+    pending.resolve?.(skip ? null : record);
     analyzeNow();
     validationChanged();
     renderAll();
+    // A form's create-and-fill door must keep its source form mounted until
+    // the returned id has been written; ordinary record creation still selects.
+    if (!pending.selectCreated) return;
     const selected = authoringEntries().find(entry => entry.kind === (skip ? "collection" : "collection-record")
       && entry.name === (skip ? collection : record)
       && (skip || entry.file === `collections/${collection}/${record}.json`));
@@ -1418,121 +2015,101 @@ export function mountAuthoringTool(rootElement, host = {}) {
       file: selected.kind === "collection" ? selected.location.replace(/\/$/, "") : selected.file,
       range: selected.range
     }, { origin: { surface: "sidebar" } });
-    renderedOutlineModel = "";
+    outlineView.invalidate();
     renderOutline();
   }
 
-  async function createFromOutline(item) {
+  async function createFromOutline(item, sourceElement) {
     state.outlineMenuOpen = false;
+    if (item === "Collection" || item === "Chapter" || item === "Contract") {
+      const focus = sourceElement?.dataset.outlineFocus;
+      renderOutline();
+      const anchor = [...ui.outline.querySelectorAll("[data-outline-focus]")]
+        .find(element => element.dataset.outlineFocus === focus)
+        ?? ui.outline.querySelector('[data-action="outline-menu"]');
+      openCollectionDialog(anchor, item === "Chapter" ? "chapter" : item === "Contract" ? "contract" : "collection");
+      return;
+    }
+    if (item === "Acceptance test") {
+      const plan = state.package.files.get("05-build-plan.md");
+      if (typeof plan !== "string") throw new Error(CREATION_COPY.cannotAddNoPlan("acceptance test"));
+      const numbers = [...plan.matchAll(/^#{1,6}\s+AT-(\d+)\b/gim)].map(match => Number(match[1]));
+      openFile("05-build-plan.md");
+      editorSurface.openCreation(`AT-${Math.max(0, ...numbers) + 1}`);
+      return;
+    }
+    if (item === "Rule") {
+      const tuning = parsedObject("tuning.json");
+      if (!tuning) throw new Error(CREATION_COPY.cannotAddNoTuning("rule"));
+      const key = availableKey(tuning.rules, "new-rule");
+      openFile("05-build-plan.md");
+      editorSurface.openCreation(`rules.${key}`);
+      return;
+    }
     const transaction = editController.begin(CREATION_COPY.createNamed(item));
     let selected;
     const insert = (path, pointer, key, value) => transaction.json(path).insert(pointer, key, value);
-    const replaceInTransaction = (path, next) => {
-      const previous = state.package.files.get(path);
-      const change = minimalTextChange(previous, next);
-      transaction.text(path).replace({
-        start: offsetToPosition(previous, change.start),
-        end: offsetToPosition(previous, change.previousEnd),
-        revision: editController.revision(path)
-      }, next.slice(change.start, change.nextEnd));
-    };
     const insertRoot = (path, key, value) => insert(path, "", key, value);
 
-    if (item === "Tuning key") {
+    if (item === "Value") {
       const tuning = parsedObject("tuning.json");
-      const key = availableKey(tuning?.tunables, "new.tuning_key");
-      if (!tuning) transaction.file("tuning.json").create(`${JSON.stringify({ tunables: { [key]: 0 } }, null, 2)}\n`);
-      else if (tuning.tunables && !Array.isArray(tuning.tunables) && typeof tuning.tunables === "object") insert("tuning.json", "/tunables", key, 0);
-      else if (tuning.tunables === undefined) insertRoot("tuning.json", "tunables", { [key]: 0 });
+      const key = availableKey(tuning?.values, "new.tuning_key");
+      if (!tuning) transaction.file("tuning.json").create(`${JSON.stringify({ values: { [key]: 0 } }, null, 2)}\n`);
+      else if (tuning.values && !Array.isArray(tuning.values) && typeof tuning.values === "object") insert("tuning.json", "/values", key, 0);
+      else if (tuning.values === undefined) insertRoot("tuning.json", "values", { [key]: 0 });
       else throw new Error(CREATION_COPY.outlineErrors.tuningObject);
-      selected = { kind: "tunable", name: key, file: "tuning.json" };
-    } else if (item === "Descriptor") {
-      const manifest = parsedObject("manifest.json");
-      if (!manifest) throw new Error(CREATION_COPY.outlineErrors.descriptorManifest);
-      const descriptors = manifest.descriptors;
-      const moods = Array.isArray(descriptors?.mood) ? descriptors.mood : [];
-      if (descriptors !== undefined && (!descriptors || Array.isArray(descriptors) || typeof descriptors !== "object")) throw new Error(CREATION_COPY.outlineErrors.descriptorsObject);
-      if (descriptors?.mood !== undefined && !Array.isArray(descriptors.mood)) throw new Error(CREATION_COPY.outlineErrors.descriptorMoodsArray);
-      const ids = Object.fromEntries(moods.map(entry => [entry?.id, true]));
-      const id = availableKey(ids, "new-mood");
-      const stub = { id, intent: "Describe the intended mood.", anti: [{ description: "Not yet specified." }] };
-      if (descriptors === undefined) insertRoot("manifest.json", "descriptors", { mood: [stub] });
-      else if (descriptors.mood === undefined) insert("manifest.json", "/descriptors", "mood", [stub]);
-      else insert("manifest.json", "/descriptors/mood", "-", stub);
-      selected = { kind: "descriptor", name: id, file: "manifest.json" };
-    } else if (item === "Palette") {
-      const manifest = parsedObject("manifest.json");
-      if (!manifest) throw new Error(CREATION_COPY.outlineErrors.paletteManifest);
-      if (manifest.palette !== undefined && (!manifest.palette || Array.isArray(manifest.palette) || typeof manifest.palette !== "object")) throw new Error(CREATION_COPY.outlineErrors.paletteObject);
-      const key = availableKey(manifest.palette, "new-palette");
-      const stub = [{ "new-color": "#000000" }];
-      if (manifest.palette === undefined) insertRoot("manifest.json", "palette", { [key]: stub });
-      else insert("manifest.json", "/palette", key, stub);
-      selected = { kind: "palette", name: `palette.${key}`, file: "manifest.json" };
-    } else if (item === "Identifier") {
-      const manifest = parsedObject("manifest.json");
-      if (!manifest) throw new Error(CREATION_COPY.outlineErrors.identifierManifest);
+      selected = { kind: "value", name: key, file: "tuning.json" };
+    } else if (item === "Clock") {
+      const clocks = parsedObject("clocks.json");
+      const key = availableKey(clocks, "new-clock");
+      const action = classifyCreation(`clocks.${key}`, {
+        files: state.package.files,
+        folders: state.package.folders,
+        manifest: state.authoringView?.manifest,
+        openPath: state.openPath
+      }).actions[0];
+      if (!action) throw new Error(CREATION_COPY.cannotCreateHere(`clocks.${key}`));
+      if (typeof action.create === "string") transaction.file(action.target).create(action.create);
+      else for (const operation of action.operations()) {
+        if (operation.type !== "insert") throw new Error(CREATION_COPY.unsupportedOperation(operation.type));
+        transaction.json(action.target).insert(operation.pointer, operation.keyOrIndex, operation.value, operation.options);
+      }
+      selected = action.selected;
+    } else if (item === "Mood") {
       const direction = parsedObject("direction.json");
-      const viewingStub = { speed_and_size: "Normal play view.", calibration: "Standard display.", hide_builder_name: true };
+      if (!direction && state.package.files.has("direction.json")) throw new Error(CREATION_COPY.outlineErrors.moodDirection);
+      if (direction?.mood !== undefined && (!direction.mood || Array.isArray(direction.mood) || typeof direction.mood !== "object")) throw new Error(CREATION_COPY.outlineErrors.moodsObject);
+      const id = availableKey(direction?.mood, "new-mood");
+      const stub = { intent: "Describe the intended mood.", anti: ["Not yet specified."] };
+      if (!direction) transaction.file("direction.json").create(`${JSON.stringify({ mood: { [id]: stub } }, null, 2)}\n`);
+      else if (direction.mood === undefined) insertRoot("direction.json", "mood", { [id]: stub });
+      else insert("direction.json", "/mood", id, stub);
+      selected = { kind: "mood", name: `mood.${id}`, file: "direction.json" };
+    } else if (item === "Palette") {
+      const direction = parsedObject("direction.json");
+      if (!direction && state.package.files.has("direction.json")) throw new Error(CREATION_COPY.outlineErrors.paletteDirection);
+      if (direction?.palette !== undefined && (!direction.palette || Array.isArray(direction.palette) || typeof direction.palette !== "object")) throw new Error(CREATION_COPY.outlineErrors.paletteObject);
+      const key = availableKey(direction?.palette, "new-palette");
+      const stub = [{ "new-color": "#000000" }];
+      if (!direction) transaction.file("direction.json").create(`${JSON.stringify({ palette: { [key]: stub } }, null, 2)}\n`);
+      else if (direction.palette === undefined) insertRoot("direction.json", "palette", { [key]: stub });
+      else insert("direction.json", "/palette", key, stub);
+      selected = { kind: "palette", name: `palette.${key}`, file: "direction.json" };
+    } else if (item === "Pillar") {
+      const direction = parsedObject("direction.json");
       let pillar;
-      let viewingName = "outline-view";
       if (!direction) {
         pillar = "new-pillar";
         transaction.file("direction.json").create(`${JSON.stringify({
-          pillars: {
-            [pillar]: { statement: "Describe this design pillar.", viewing: "outline-view" },
-            "supporting-pillar": { statement: "Describe the supporting design pillar.", viewing: "outline-view" }
-          },
-          viewing: { "outline-view": viewingStub }
+          pillars: { [pillar]: "Describe this design pillar." }
         }, null, 2)}\n`);
       } else {
-        if (direction.viewing !== undefined && (!direction.viewing || Array.isArray(direction.viewing) || typeof direction.viewing !== "object")) throw new Error(CREATION_COPY.outlineErrors.viewingObject);
-        const viewing = Object.keys(direction.viewing ?? {})[0] ?? "outline-view";
-        viewingName = viewing;
         if (direction.pillars !== undefined && (!direction.pillars || Array.isArray(direction.pillars) || typeof direction.pillars !== "object")) throw new Error(CREATION_COPY.outlineErrors.pillarsObject);
         pillar = availableKey(direction.pillars, "new-pillar");
-        const stub = { statement: "Describe this design pillar.", viewing };
-        const count = Object.keys(direction.pillars ?? {}).length;
-        if (direction.viewing === undefined || direction.pillars === undefined) {
-          const nextDirection = JSON.parse(JSON.stringify(direction));
-          nextDirection.viewing ??= { [viewing]: viewingStub };
-          nextDirection.pillars ??= {
-            [pillar]: stub,
-            "supporting-pillar": { statement: "Describe the supporting design pillar.", viewing }
-          };
-          if (direction.pillars !== undefined) {
-            nextDirection.pillars[pillar] = stub;
-            if (count === 0) nextDirection.pillars["supporting-pillar"] = { statement: "Describe the supporting design pillar.", viewing };
-          }
-          replaceInTransaction("direction.json", `${JSON.stringify(nextDirection, null, 2)}\n`);
-        } else {
-          insert("direction.json", "/pillars", pillar, stub);
-          if (count === 0) insert("direction.json", "/pillars", availableKey({ [pillar]: true }, "supporting-pillar"), { statement: "Describe the supporting design pillar.", viewing });
-        }
+        if (direction.pillars === undefined) insertRoot("direction.json", "pillars", { [pillar]: "Describe this design pillar." });
+        else insert("direction.json", "/pillars", pillar, "Describe this design pillar.");
       }
-      if (!manifest.build?.direction) insert("manifest.json", "/build", "direction", "direction.json");
-      const presentationPath = "04-presentation.md";
-      const presentation = state.package.files.get(presentationPath);
-      const directionFence = `\n\n\`\`\`direction\n> DELEGATED: presentation-direction\n\nPILLARS:\n- \`pillars.${pillar}\`\n  Describe this design pillar.\n${direction ? "" : "- `pillars.supporting-pillar`\n  Describe the supporting design pillar.\n"}\nVIEWING:\n- \`viewing.${viewingName}\`\n  Normal play view on a standard display.\n\`\`\`\n`;
-      if (typeof presentation !== "string") {
-        transaction.file(presentationPath).create(`# Presentation${directionFence}`);
-        if (!manifest.build?.chapters?.includes(presentationPath)) insert("manifest.json", "/build/chapters", "-", presentationPath);
-      } else if (!presentation.includes("```direction")) {
-        transaction.text(presentationPath).append(directionFence);
-      } else {
-        const fenceStart = presentation.indexOf("```direction");
-        const pillarsAt = presentation.indexOf("PILLARS:", fenceStart);
-        const nextSection = pillarsAt < 0 ? -1 : presentation.slice(pillarsAt + 8).search(/\n(?:[A-Z][A-Z-]*:|```)/);
-        if (pillarsAt < 0 || nextSection < 0) throw new Error(CREATION_COPY.outlineErrors.pillarsSection);
-        const at = pillarsAt + 8 + nextSection;
-        const block = `\n- \`pillars.${pillar}\`\n  Describe this design pillar.`;
-        transaction.text(presentationPath).replace({
-          start: offsetToPosition(presentation, at),
-          end: offsetToPosition(presentation, at),
-          revision: editController.revision(presentationPath)
-        }, block);
-      }
-      selected = { kind: "name", name: `pillars.${pillar}`, file: "direction.json" };
+      selected = { kind: "pillars", name: `pillars.${pillar}`, file: "direction.json" };
     } else return;
 
     await applyEdit(() => transaction.commit());
@@ -1546,8 +2123,59 @@ export function mountAuthoringTool(rootElement, host = {}) {
       return;
     }
     state.outlineSelection = entry.identity;
-    renderedOutlineModel = "";
+    outlineView.invalidate();
     renderOutline();
+  }
+
+  async function toggleRange(artifact) {
+    const change = rangeChange(state.package.files, artifact.name);
+    if (change.reason) {
+      report(change.reason, true);
+      return;
+    }
+    const label = change.remove ? WIDGET_COPY.removeRange : WIDGET_COPY.addRange;
+    const transaction = editController.begin(`${label}: ${artifact.name}`);
+    for (const operation of change.operations) {
+      if (operation.type === "insert") transaction.json("tuning.json").insert(operation.pointer, operation.keyOrIndex, operation.value, operation.options);
+      else if (operation.type === "remove") transaction.json("tuning.json").remove(operation.pointer);
+      else throw new Error(CREATION_COPY.unsupportedOperation(operation.type));
+    }
+    await applyEdit(() => transaction.commit());
+    analyzeNow();
+    validationChanged();
+    renderAll();
+    const selected = authoringEntries().find(entry => entry.kind === "value" && entry.name === artifact.name && entry.file === "tuning.json");
+    if (selected) {
+      state.outlineSelection = selected.identity;
+      selectionBus.select({ kind: selected.kind, name: selected.name, file: selected.file, range: selected.range }, { origin: { surface: "sidebar" } });
+      outlineView.invalidate();
+      renderOutline();
+    }
+  }
+
+  async function acceptLinkOffer(artifact, offered) {
+    const offer = linkOffers(state.package.files).find(candidate => candidate.drawer === offered.drawer && candidate.field === offered.field);
+    if (!offer || offer.refused) return;
+    const definition = offer.definition ?? { type: "link", to: offer.to, ...(offer.many ? { many: true } : {}) };
+    const transaction = editController.begin(WIDGET_COPY.describeLinkUndo(offer.field));
+    const label = parsedObject(offer.path);
+    if (!label) transaction.file(offer.path).create(`${JSON.stringify({ record: offer.record ?? { [offer.field]: definition } }, null, 2)}\n`);
+    else if (label.record === undefined) transaction.json(offer.path).insert("", "record", { [offer.field]: definition });
+    else if (label.record && !Array.isArray(label.record) && typeof label.record === "object") transaction.json(offer.path).insert("/record", offer.field, definition);
+    else throw new Error(WIDGET_COPY.jsonObjectRequired(offer.path));
+    try { await validateStagedTransaction(transaction); }
+    catch (error) { transaction.abort(); throw error; }
+    await applyEdit(() => transaction.commit());
+    analyzeNow();
+    validationChanged();
+    renderAll();
+    const selected = authoringEntries().find(entry => entry.kind === "collection" && entry.name === artifact.name);
+    if (selected) {
+      state.outlineSelection = selected.identity;
+      selectionBus.select({ kind: selected.kind, name: selected.name, file: selected.location.replace(/\/$/, ""), range: selected.range }, { origin: { surface: "sidebar" } });
+      outlineView.invalidate();
+      renderOutline();
+    }
   }
 
   function renderStatus() {
@@ -1653,14 +2281,162 @@ export function mountAuthoringTool(rootElement, host = {}) {
     return true;
   }
 
-  async function deleteTreeSelection() {
-    if (!state.selected) return false;
-    const { type, path } = state.selected;
-    if (capabilities.protectedFiles && type === "file" && PROTECTED_PACKAGE_FILES.has(path)) {
+  function confirmExplorerReferenceRename(plan) {
+    return new Promise(resolve => {
+      ui.treeForm.parentElement?.querySelector?.("[data-reference-rename-confirmation]")?.remove();
+      const box = document.createElement("section");
+      box.dataset.referenceRenameConfirmation = "";
+      box.className = "opengdd-author-confirmation";
+      box.setAttribute("role", "dialog");
+      const question = document.createElement("p");
+      // Backticked names render as code, as the outline's confirmation does.
+      String(plan.reason ?? "").split("`").forEach((part, index) => {
+        if (!part) return;
+        if (index % 2) { const code = document.createElement("code"); code.textContent = part; question.append(code); }
+        else question.append(part);
+      });
+      const rename = document.createElement("button");
+      rename.type = "button";
+      rename.textContent = plan.family === "contract" ? CONTRACT_COPY.renameButton : COLLECTION_COPY.rename;
+      const cancel = document.createElement("button");
+      cancel.type = "button";
+      cancel.textContent = COLLECTION_COPY.cancel;
+      const settle = value => { box.remove(); resolve(value); };
+      on(rename, "click", () => settle(true));
+      on(cancel, "click", () => settle(false));
+      box.append(question, rename, cancel);
+      ui.treeForm.after(box);
+      rename.focus();
+    });
+  }
+
+  async function renameCollectionReference(type, from, to) {
+    const record = type === "file" ? /^collections\/([^/]+)\/([a-z0-9]+(?:-[a-z0-9]+)*)\.json$/.exec(from) : undefined;
+    const collection = type === "folder" ? /^collections\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(from) : undefined;
+    if (!record && !collection) return false;
+    const recordTarget = record ? /^collections\/([^/]+)\/([a-z0-9]+(?:-[a-z0-9]+)*)\.json$/.exec(to) : undefined;
+    const collectionTarget = collection ? /^collections\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(to) : undefined;
+    // Only a record filename changing inside its current collection, or a
+    // collection name changing directly under collections/, is a reference
+    // rename. Every other explorer target keeps the ordinary move behavior.
+    if (record && (!recordTarget || recordTarget[1] !== record[1])) return false;
+    if (collection && !collectionTarget) return false;
+    const next = record ? recordTarget[2] : collectionTarget[1];
+    const name = record ? `collections.${record[1]}.${record[2]}` : `collections.${collection[1]}`;
+    const plan = referencesService.planRename(name, next ?? "");
+    if (plan.safety === "refused") { report(plan.reason, true); return true; }
+    if (!await confirmExplorerReferenceRename(plan)) {
+      ui.treeForm.hidden = true;
+      return true;
+    }
+    const result = await referencesService.applyRename(plan);
+    if (!result.applied) { report(result.reason, true); return true; }
+    if (type === "file" && state.openPath === from) state.openPath = to;
+    else if (type === "folder" && state.openPath.startsWith(`${from}/`)) state.openPath = `${to}${state.openPath.slice(from.length)}`;
+    state.selected = { type, path: to };
+    ui.treeForm.hidden = true;
+    analyzeNow();
+    renderAll();
+    validationChanged();
+    return true;
+  }
+
+  async function renameContractReference(type, from, to) {
+    if (type === "file" && /^contracts\/[^/]+\.pack\.json$/.test(from)) {
+      report(CONTRACT_COPY.packRenameRefused, true);
+      return true;
+    }
+    const adoption = type === "file" && /^contracts\/([a-z0-9]+(?:-[a-z0-9]+)*)\.json$/.exec(from);
+    if (!adoption || from.endsWith(".pack.json")) return false;
+    const target = /^contracts\/([a-z0-9]+(?:-[a-z0-9]+)*)\.json$/.exec(to);
+    if (!target) {
+      report(CONTRACT_COPY.moveRefused, true);
+      return true;
+    }
+    if (from === to) {
+      ui.treeForm.hidden = true;
+      return true;
+    }
+    const plan = referencesService.planRename(`contracts.${adoption[1]}`, target[1]);
+    if (plan.safety === "refused") { report(plan.reason, true); return true; }
+    if (!await confirmExplorerReferenceRename(plan)) {
+      ui.treeForm.hidden = true;
+      return true;
+    }
+    const result = await referencesService.applyRename(plan);
+    if (!result.applied) { report(result.reason, true); return true; }
+    if (state.openPath === from) state.openPath = to;
+    state.selected = { type, path: to };
+    ui.treeForm.hidden = true;
+    analyzeNow(); renderAll(); validationChanged();
+    return true;
+  }
+
+  async function dropCollectionReference(type, from, to) {
+    const record = type === "file" && /^collections\/([^/]+)\/([a-z0-9]+(?:-[a-z0-9]+)*)\.json$/.exec(from);
+    const collection = type === "folder" && /^collections\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(from);
+    if (!record && !collection) return false;
+    if (from === to) return true;
+    if (record) {
+      const target = /^collections\/([^/]+)\/([a-z0-9]+(?:-[a-z0-9]+)*)\.json$/.exec(to);
+      if (target?.[1] === record[1]) return renameCollectionReference(type, from, to);
+      report(COLLECTION_COPY.recordMoveRefused, true);
+      return true;
+    }
+    if (/^collections\/([a-z0-9]+(?:-[a-z0-9]+)*)$/.test(to)) return renameCollectionReference(type, from, to);
+    report(COLLECTION_COPY.collectionMoveRefused, true);
+    return true;
+  }
+
+  async function dropContractReference(type, from, to) {
+    if (!(type === "file" && /^contracts\/[^/]+\.json$/.test(from))) return false;
+    return renameContractReference(type, from, to);
+  }
+
+  async function deleteTreeSelection(confirmedPath = "") {
+    const selected = confirmedPath ? { type: "file", path: confirmedPath } : state.selected;
+    if (!selected) return false;
+    const { type, path } = selected;
+    if (confirmedPath && !state.package.files.has(path)) return false;
+    const contract = type === "file" && !path.endsWith(".pack.json")
+      ? /^contracts\/([a-z0-9]+(?:-[a-z0-9]+)*)\.json$/.exec(path) : null;
+    if (contract && capabilities.protectedFiles && confirmedPath !== path) {
+      const sites = referencesService.usages(`contracts.${contract[1]}`);
+      const prose = sites.filter(site => site.channel === "prose").length;
+      let adoption;
+      try { adoption = JSON.parse(state.package.files.get(path)); } catch {}
+      const pack = adoption && state.package.files.has(`contracts/${adoption.contract}-${adoption.version}.pack.json`)
+        && ![...state.package.files].some(([candidate, text]) => {
+          if (candidate === path || !/^contracts\/[^/]+\.json$/.test(candidate) || candidate.endsWith(".pack.json")) return false;
+          try {
+            const other = JSON.parse(text);
+            return other.contract === adoption.contract && other.version === adoption.version;
+          } catch { return false; }
+        }) ? `${adoption.contract}-${adoption.version}.pack.json` : "";
+      const question = CONTRACT_COPY.remove(contract[1], prose, pack);
+      protectedDeletePath = path;
+      packageConfirmReturnFocus = document.activeElement;
+      ui.packageConfirm.setAttribute("aria-label", question.replaceAll("`", ""));
+      ui.packageConfirm.hidden = false;
+      ui.packageConfirm.innerHTML = `<p>${inlineCodeHtml(question)}</p><div class="opengdd-author-draft-confirm-actions"><button type="button" data-action="protected-delete-confirm-yes">${WIDGET_COPY.yesDelete}</button><button type="button" data-action="protected-delete-confirm-no">${WIDGET_COPY.cancel}</button></div>`;
+      ui.packageConfirm.querySelector('[data-action="protected-delete-confirm-no"]').focus();
+      return false;
+    }
+    const protectedFile = capabilities.protectedFiles && type === "file" && PROTECTED_PACKAGE_FILES.has(path);
+    if (protectedFile && !OPTIONAL_MECHANISM_FILES.has(path)) {
       report(WIDGET_COPY.protectedDelete(path));
       return false;
     }
-    const transaction = editController.begin(WIDGET_COPY.deletePathAction(path));
+    if (protectedFile && confirmedPath !== path) {
+      protectedDeletePath = path;
+      packageConfirmReturnFocus = document.activeElement;
+      ui.packageConfirm.setAttribute("aria-label", WIDGET_COPY.deleteQuestion(path));
+      ui.packageConfirm.hidden = false;
+      ui.packageConfirm.innerHTML = `<p>${escapeHtml(WIDGET_COPY.protectedDeleteConfirm[path])}</p><div class="opengdd-author-draft-confirm-actions"><button type="button" data-action="protected-delete-confirm-yes">${WIDGET_COPY.yesDelete}</button><button type="button" data-action="protected-delete-confirm-no">${WIDGET_COPY.cancel}</button></div>`;
+      ui.packageConfirm.querySelector('[data-action="protected-delete-confirm-no"]').focus();
+      return false;
+    }
+    const transaction = editController.begin(contract ? CONTRACT_COPY.undo.remove : WIDGET_COPY.deletePathAction(path));
     if (type === "file") transaction.file(path).remove();
     else transaction.folder(path).remove();
     await applyEdit(() => transaction.commit());
@@ -1699,6 +2475,8 @@ export function mountAuthoringTool(rootElement, host = {}) {
       await applyEdit(() => transaction.commit());
       state.selected = { type: "folder", path };
     } else if (state.selected) {
+      if (await renameContractReference(state.selected.type, state.selected.path, path)) return;
+      if (await renameCollectionReference(state.selected.type, state.selected.path, path)) return;
       await movePath(state.selected.type, state.selected.path, path, WIDGET_COPY.renamePathAction(state.selected.path));
       ui.treeForm.hidden = true;
       return;
@@ -1710,13 +2488,14 @@ export function mountAuthoringTool(rootElement, host = {}) {
   }
 
   function hidePackageConfirmation(restoreFocus = false) {
-    // Confirmation key/click handlers update the session first; its synchronous
-    // cancellation delivery clears the pinned target before this DOM-only hide
-    // restores focus to the control that opened the dialog.
+    // Package confirmation handlers update the session first; its synchronous
+    // cancellation delivery clears that pinned target before this DOM-only hide
+    // restores focus to the control that opened either confirmation.
     ui.packageConfirm.hidden = true;
     ui.packageConfirm.replaceChildren();
     const returnFocus = packageConfirmReturnFocus;
     packageConfirmReturnFocus = null;
+    protectedDeletePath = "";
     if (restoreFocus && returnFocus?.isConnected && typeof returnFocus.focus === "function") returnFocus.focus();
   }
 
@@ -1762,119 +2541,15 @@ export function mountAuthoringTool(rootElement, host = {}) {
     // A detached target is a dialog control the surface re-rendered mid-click
     // (kind selection), never an outside click.
     if (editorSurface.dialogOpen() && event.target.isConnected && !editorSurface.dialogContains(event.target) && event.target !== ui.textarea) editorSurface.closeDialog(false);
+    // Only a click the outline owns may wait on it: awaiting for every click
+    // would land the explorer, export, and dialog handlers one microtask late.
+    if (outlineView.owns(event.target)) {
+      try { if (await outlineView.handleClick(event)) return; }
+      catch (error) { report(error.message, true); return; }
+    }
     const finding = event.target.closest("[data-finding]");
     if (finding) {
       safelyOpenFinding(Number(finding.dataset.finding));
-      return;
-    }
-    const outlineFinding = event.target.closest("[data-outline-finding]");
-    if (outlineFinding) {
-      openFinding(Number(outlineFinding.dataset.outlineFinding));
-      return;
-    }
-    const outlineToggle = event.target.closest("[data-outline-toggle]");
-    if (outlineToggle) {
-      const identity = decodeURIComponent(outlineToggle.dataset.outlineToggle);
-      const collection = authoringEntries().find(entry => entry.identity === identity && entry.kind === "collection");
-      if (!collection) return;
-      if (state.outlineCollectionCollapsed.has(collection.name)) state.outlineCollectionCollapsed.delete(collection.name);
-      else state.outlineCollectionCollapsed.add(collection.name);
-      host.outlineCollections?.setCollapsed?.([...state.outlineCollectionCollapsed]);
-      renderOutline();
-      return;
-    }
-    const addRecord = event.target.closest("[data-outline-add-record]");
-    if (addRecord) {
-      openCollectionDialog(addRecord, "record", addRecord.dataset.outlineAddRecord);
-      return;
-    }
-    const outlineEntry = event.target.closest("[data-outline-entry]");
-    if (outlineEntry) {
-      await proseCommitQueue;
-      analyzeNow();
-      const identity = decodeURIComponent(outlineEntry.dataset.outlineEntry);
-      const artifact = authoringEntries().find(entry => entry.identity === identity);
-      const citationIdentity = outlineEntry.dataset.outlineCitation === undefined ? "" : decodeURIComponent(outlineEntry.dataset.outlineCitation);
-      const location = citationIdentity ? artifact?.citations.find(citation => citation.identity === citationIdentity) : artifact;
-      if (!artifact || !location || !openOutlineLocation(location)) {
-        const name = artifact?.name ?? identity.split("\0")[1] ?? WIDGET_COPY.thisDeclaration;
-        report(WIDGET_COPY.declarationGone(name), true);
-        renderedOutlineModel = "";
-        renderOutline();
-        return;
-      }
-      state.outlineSelection = artifact.identity;
-      selectionBus.select({
-        kind: artifact.kind === "name" ? "identifier" : artifact.kind,
-        name: artifact.name,
-        file: artifact.kind === "collection" && !citationIdentity ? artifact.location.replace(/\/$/, "") : location.file,
-        range: location.range
-      }, { origin: { surface: "sidebar" } });
-      renderOutline();
-      return;
-    }
-    const outlineDisclosure = event.target.closest("[data-outline-disclosure]");
-    if (outlineDisclosure) {
-      const group = outlineDisclosure.dataset.outlineDisclosure;
-      if (state.outlineFallbackOpen.has(group)) state.outlineFallbackOpen.delete(group);
-      else state.outlineFallbackOpen.add(group);
-      renderOutline();
-      return;
-    }
-    const outlineCreate = event.target.closest("[data-outline-create]");
-    if (outlineCreate) {
-      if (outlineCreate.dataset.outlineCreate === "Collection") {
-        const focus = outlineCreate.dataset.outlineFocus;
-        state.outlineMenuOpen = false;
-        renderOutline();
-        const anchor = [...ui.outline.querySelectorAll("[data-outline-focus]")]
-          .find(element => element.dataset.outlineFocus === focus)
-          ?? ui.outline.querySelector('[data-action="outline-menu"]');
-        openCollectionDialog(anchor);
-        return;
-      }
-      await createFromOutline(outlineCreate.dataset.outlineCreate);
-      renderOutline();
-      return;
-    }
-    const panelCreator = event.target.closest("[data-panel-creator]");
-    if (panelCreator) {
-      const creator = panelHost.creators({ file: state.selected?.type === "file" ? state.selected.path : "" }, { menu: true })
-        .find(candidate => candidate.id === panelCreator.dataset.panelCreator);
-      if (!creator) return;
-      if (creator.requires.includes("name")) {
-        state.panelCreatorPrompt = creator.id;
-        state.panelCreatorError = "";
-        renderedOutlineModel = "";
-        renderOutline();
-        ui.outline.querySelector("[data-panel-creator-name]")?.focus();
-      } else {
-        try {
-          await panelHost.runCreator(creator.id, { file: state.selected?.type === "file" ? state.selected.path : undefined }, "sidebar");
-          state.outlineMenuOpen = false;
-          state.panelCreatorError = "";
-        } catch (error) { state.panelCreatorError = error.message; }
-        renderedOutlineModel = "";
-        renderOutline();
-        ui.outline.querySelector('[data-action="outline-menu"]')?.focus({ preventScroll: true });
-      }
-      return;
-    }
-    const panelCreatorConfirm = event.target.closest("[data-panel-creator-confirm]");
-    if (panelCreatorConfirm) {
-      const name = ui.outline.querySelector("[data-panel-creator-name]")?.value ?? "";
-      try {
-        await panelHost.runCreator(panelCreatorConfirm.dataset.panelCreatorConfirm, {
-          name,
-          file: state.selected?.type === "file" ? state.selected.path : undefined
-        }, "sidebar");
-        state.panelCreatorPrompt = "";
-        state.outlineMenuOpen = false;
-        state.panelCreatorError = "";
-      } catch (error) { state.panelCreatorError = error.message; }
-      renderedOutlineModel = "";
-      renderOutline();
-      (state.panelCreatorPrompt ? ui.outline.querySelector("[data-panel-creator-name]") : ui.outline.querySelector('[data-action="outline-menu"]'))?.focus({ preventScroll: true });
       return;
     }
     const treeItem = event.target.closest("[data-tree-type]");
@@ -1898,16 +2573,20 @@ export function mountAuthoringTool(rootElement, host = {}) {
       return;
     }
     try {
-      if (action === "outline-menu") {
-        state.outlineMenuOpen = !state.outlineMenuOpen;
-        if (!state.outlineMenuOpen) {
-          state.panelCreatorPrompt = "";
-          state.panelCreatorError = "";
-        }
-        renderOutline();
-        if (state.outlineMenuOpen) ui.outline.querySelector('[role="menu"] [role="menuitem"]')?.focus();
-      } else if (action === "widget-outline") openWidgetDrawer("outline");
+      if (action === "widget-outline") openWidgetDrawer("outline");
       else if (action === "widget-inspector") openWidgetDrawer("inspector");
+      else if (action === "migration-preview") await previewMigration();
+      else if (action === "migration-apply") await applyMigration();
+      else if (action === "migration-not-now") {
+        state.migration = { ...state.migration, status: "idle", report: null, changes: [], notice: null };
+        renderDiagnostics();
+      } else if (action === "migration-dismiss-no-op") {
+        state.migration = { ...state.migration, status: "idle", report: null, changes: [], hiddenNoOp: true, notice: null };
+        renderDiagnostics();
+      } else if (action === "migration-dismiss-manual") {
+        state.migration = { ...state.migration, manualAfter: null };
+        renderDiagnostics();
+      }
       else if (action === "new-package") beginPackage();
       else if (action === "export") downloadPackage();
       else if (action === "package-delete" && state.hasDraft) {
@@ -1928,6 +2607,12 @@ export function mountAuthoringTool(rootElement, host = {}) {
         ui.packageSelect.focus();
       } else if (action === "package-confirm-no") {
         await packageSession.deleteDraft({ cancel: true });
+        hidePackageConfirmation(true);
+      } else if (action === "protected-delete-confirm-yes" && protectedDeletePath) {
+        const path = protectedDeletePath;
+        hidePackageConfirmation();
+        await deleteTreeSelection(path);
+      } else if (action === "protected-delete-confirm-no") {
         hidePackageConfirmation(true);
       } else if (["new-file", "new-folder", "rename"].includes(action)) beginTreeAction(action);
       else if (action === "delete") await deleteTreeSelection();
@@ -1972,79 +2657,8 @@ export function mountAuthoringTool(rootElement, host = {}) {
     });
   }
   if (ui.outline) {
-    on(ui.outline, "change", event => {
-      if (!event.target.matches("[data-outline-filter]")) return;
-      state.outlineProblemsOnly = event.target.checked;
-      renderOutline();
-    });
-    on(ui.outline, "keydown", event => {
-      const menuItem = event.target.closest('[role="menuitem"]');
-      if (menuItem && ["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
-        event.preventDefault();
-        const items = [...ui.outline.querySelectorAll('[role="menuitem"]')];
-        const current = items.indexOf(menuItem);
-        const next = event.key === "Home" ? 0 : event.key === "End" ? items.length - 1
-          : (current + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
-        items.forEach((item, index) => { item.tabIndex = index === next ? 0 : -1; });
-        items[next].focus();
-        return;
-      }
-      if (event.key === "Escape" && state.outlineMenuOpen) {
-        event.preventDefault();
-        event.stopPropagation();
-        state.outlineMenuOpen = false;
-        renderOutline();
-        ui.outline.querySelector('[data-action="outline-menu"]')?.focus();
-        return;
-      }
-      const tree = event.target.closest('[role="tree"]');
-      const treeItem = event.target.closest("[data-outline-treeitem]");
-      if (!tree || !treeItem || !tree.contains(treeItem)) return;
-      const focusTreeItem = identity => {
-        const liveTree = ui.outline.querySelector('[role="tree"]');
-        const item = liveTree?.querySelector(`[data-outline-treeitem="${outlineData(identity)}"]`);
-        for (const candidate of liveTree?.querySelectorAll("[data-outline-treeitem]") ?? []) candidate.tabIndex = candidate === item ? 0 : -1;
-        item?.focus({ preventScroll: true });
-      };
-      if (["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) {
-        event.preventDefault();
-        const items = [...tree.querySelectorAll("[data-outline-treeitem]")];
-        const current = items.indexOf(treeItem);
-        const next = event.key === "Home" ? 0 : event.key === "End" ? items.length - 1
-          : Math.min(items.length - 1, Math.max(0, current + (event.key === "ArrowDown" ? 1 : -1)));
-        focusTreeItem(decodeURIComponent(items[next].dataset.outlineTreeitem));
-      } else if (event.key === "ArrowLeft") {
-        const identity = decodeURIComponent(treeItem.dataset.outlineTreeitem);
-        const collection = authoringEntries().find(entry => entry.identity === identity && entry.kind === "collection");
-        if (collection && !state.outlineCollectionCollapsed.has(collection.name)) {
-          event.preventDefault();
-          state.outlineCollectionCollapsed.add(collection.name);
-          host.outlineCollections?.setCollapsed?.([...state.outlineCollectionCollapsed]);
-          renderOutline();
-          focusTreeItem(identity);
-        } else if (treeItem.dataset.outlineParent) {
-          event.preventDefault();
-          focusTreeItem(decodeURIComponent(treeItem.dataset.outlineParent));
-        }
-      } else if (event.key === "ArrowRight") {
-        const identity = decodeURIComponent(treeItem.dataset.outlineTreeitem);
-        const collection = authoringEntries().find(entry => entry.identity === identity && entry.kind === "collection");
-        if (!collection) return;
-        if (state.outlineCollectionCollapsed.has(collection.name)) {
-          event.preventDefault();
-          state.outlineCollectionCollapsed.delete(collection.name);
-          host.outlineCollections?.setCollapsed?.([...state.outlineCollectionCollapsed]);
-          renderOutline();
-          focusTreeItem(identity);
-        } else {
-          const child = ui.outline.querySelector(`[data-outline-treeitem][data-outline-parent="${outlineData(identity)}"]`);
-          if (child) {
-            event.preventDefault();
-            focusTreeItem(decodeURIComponent(child.dataset.outlineTreeitem));
-          }
-        }
-      }
-    });
+    on(ui.outline, "change", event => outlineView.handleChange(event));
+    on(ui.outline, "keydown", event => outlineView.handleKeydown(event));
   }
 
   if (capabilities.hostUndo && workbenchScope) {
@@ -2058,9 +2672,9 @@ export function mountAuthoringTool(rootElement, host = {}) {
   }
 
   on(ui.packageConfirm, "keydown", event => {
-    if (event.key === "Escape" && state.pendingDelete) {
+    if (event.key === "Escape" && (state.pendingDelete || protectedDeletePath)) {
       event.preventDefault();
-      packageSession.deleteDraft({ cancel: true });
+      if (state.pendingDelete) packageSession.deleteDraft({ cancel: true });
       hidePackageConfirmation(true);
     }
   });
@@ -2180,7 +2794,12 @@ export function mountAuthoringTool(rootElement, host = {}) {
     if (!state.dragged) return;
     const folder = event.target.closest('[data-tree-type="folder"]')?.dataset.path ?? "";
     const destination = folder ? `${folder}/${basename(state.dragged.path)}` : basename(state.dragged.path);
-    try { await movePath(state.dragged.type, state.dragged.path, destination); }
+    try {
+      if (!await dropContractReference(state.dragged.type, state.dragged.path, destination)
+        && !await dropCollectionReference(state.dragged.type, state.dragged.path, destination)) {
+        await movePath(state.dragged.type, state.dragged.path, destination);
+      }
+    }
     catch (error) { report(error.message, true); }
     state.dragged = null;
   });
@@ -2204,7 +2823,8 @@ export function mountAuthoringTool(rootElement, host = {}) {
       }
       if (state.drafts.length) {
         try { await packageSession.open(state.drafts[0].id); }
-        catch (error) { report(WIDGET_COPY.selectedPackageOpenFailure(error.message), true); }
+        catch (error) { report(WIDGET_COPY.selectedPackageOpenFailure(error.message), true); return; }
+        await offerInitialContract();
         return;
       }
       packageSession.open({ id: "", title: WIDGET_COPY.noPackageSelected, files: [] });
@@ -2225,7 +2845,8 @@ export function mountAuthoringTool(rootElement, host = {}) {
     if (destroyed || revision !== state.revision) return;
     if (selected) {
       try { await packageSession.open(selected); }
-      catch (error) { report(WIDGET_COPY.selectedPackageOpenFailure(error.message), true); }
+      catch (error) { report(WIDGET_COPY.selectedPackageOpenFailure(error.message), true); return; }
+      await offerInitialContract();
     } else {
       packageSession.open({ id: "", title: WIDGET_COPY.noPackageSelected, files: [] });
       report(WIDGET_COPY.createOrImport);
@@ -2234,9 +2855,19 @@ export function mountAuthoringTool(rootElement, host = {}) {
 
   return {
     openPackage: packageSession.open,
+    references: referencesService,
+    selection: Object.freeze({
+      current: selectionBus.current,
+      subscribe: selectionBus.subscribe
+    }),
+    inspectorMatches(selection) {
+      return !destroyed && panelHost.inspectorMatches(selection);
+    },
     testHooks: Object.freeze({
       analysisView() { return state.authoringView; },
       editorRevision(path = state.openPath) { return editController.revision(path); },
+      packageFiles() { return copyPackageFiles(state.package.files); },
+      validationStatus() { return state.validation.status; },
       panelDescriptors() { return panelHost.descriptors(); },
       selection() { return selectionBus.current(); }
     }),
@@ -2288,7 +2919,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
       packageSession.close();
       analysisSession.destroy();
       editorSurface.destroy();
-      view.cancelAnimationFrame(outlineFrame);
+      outlineView.destroy();
       listeners.abort();
       for (const child of ownedChildren.get(rootElement) ?? []) {
         if (child.parentNode === rootElement) child.remove();

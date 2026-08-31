@@ -1,4 +1,4 @@
-import { isObject, markdownSlug, unfencedLines, directionFenceContinuationLines } from "../../../opengdd/conformance/package-syntax.mjs";
+import { isObject, markdownSlug, unfencedLines } from "../../../opengdd/conformance/package-syntax.mjs";
 
 const DOTTED_KEY = /^[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+$/;
 const FILE_ANCHOR = /^(?:[^`\s#]+\/)*[^`\s#]+\.(?:json|md|txt|csv|tsv|ya?ml)(?:#[A-Za-z0-9._-]+)?$/i;
@@ -47,63 +47,29 @@ function makeNameIndex() {
 
 function addJsonNames(index, relative, text, document, problems) {
   if (!isObject(document)) return;
-  for (const [role, kind] of [["tunables", "tunable"], ["constants", "constant"]]) {
-    const entries = document[role];
-    if (!isObject(entries)) continue;
-    let cursor = text.indexOf(JSON.stringify(role));
-    for (const [name, value] of Object.entries(entries)) {
+  if (isObject(document.values)) {
+    let cursor = text.indexOf('"values"');
+    for (const [name, value] of Object.entries(document.values)) {
       const range = jsonKeyRange(text, name, Math.max(cursor, 0));
       cursor = text.indexOf(JSON.stringify(name), Math.max(cursor, 0)) + 1;
-      index.add({ name, kind, value, file: relative, range, detail: `${role}.${name}` });
+      index.add({ name, kind: "value", value, file: relative, range, detail: `values.${name}` });
     }
   }
-  if (Array.isArray(document.invariants)) {
-    let cursor = text.indexOf('"invariants"');
-    for (const invariant of document.invariants) {
-      if (!isObject(invariant) || typeof invariant.id !== "string") continue;
-      const range = jsonKeyRange(text, invariant.id, Math.max(cursor, 0));
-      cursor = text.indexOf(JSON.stringify(invariant.id), Math.max(cursor, 0)) + 1;
-      index.add({ name: invariant.id, kind: "rule", value: invariant, file: relative, range, detail: "tuning invariant" });
+  if (isObject(document.rules)) {
+    let cursor = text.indexOf('"rules"');
+    for (const [name, value] of Object.entries(document.rules)) {
+      const range = jsonKeyRange(text, name, Math.max(cursor, 0));
+      cursor = text.indexOf(JSON.stringify(name), Math.max(cursor, 0)) + 1;
+      index.add({ name, kind: "rule", value, file: relative, range, detail: "tuning rule" });
     }
   }
-  if (problems && !isObject(document.tunables)) {
-    problems.push({ file: relative, message: "tuning.json has no tunables object", range: zeroRange() });
+  if (problems && !isObject(document.values)) {
+    problems.push({ file: relative, message: "tuning.json has no values object", range: zeroRange() });
   }
 }
 
-function addManifestNames(index, text, manifest) {
-  if (isObject(manifest?.ruleset_state) && Array.isArray(manifest.ruleset_state.rulesets)) {
-    let cursor = text.indexOf('"rulesets"');
-    for (const ruleset of manifest.ruleset_state.rulesets) {
-      if (!isObject(ruleset) || typeof ruleset.id !== "string") continue;
-      const range = jsonKeyRange(text, ruleset.id, Math.max(cursor, 0));
-      cursor = text.indexOf(JSON.stringify(ruleset.id), Math.max(cursor, 0)) + 1;
-      index.add({ name: ruleset.id, kind: "rule", value: ruleset, file: "manifest.json", range, detail: "manifest ruleset" });
-    }
-  }
-  if (!isObject(manifest?.descriptors)) return;
-  let cursor = text.indexOf('"descriptors"');
-  for (const [family, descriptors] of Object.entries(manifest.descriptors)) {
-    if (!Array.isArray(descriptors)) continue;
-    for (const descriptor of descriptors) {
-      if (!isObject(descriptor) || typeof descriptor.id !== "string") continue;
-      const range = jsonKeyRange(text, descriptor.id, Math.max(cursor, 0));
-      cursor = text.indexOf(JSON.stringify(descriptor.id), Math.max(cursor, 0)) + 1;
-      const definition = {
-        kind: "descriptor",
-        file: "manifest.json",
-        range,
-        detail: `${family} descriptor`
-      };
-      index.add({ ...definition, name: descriptor.id });
-      index.add({ ...definition, name: `descriptor:${family}:${descriptor.id}` });
-    }
-  }
-}
 
-// SPEC §3/§4 — the manifest's `palette` map. This is the format's first citable
-// family resolved from manifest.json rather than direction.json, so it is read
-// here beside the manifest's other names rather than in addDirectionNames.
+// SPEC §3/§4 — the `direction.json` palette map.
 //
 // The names added mirror conformance/validate-core.mjs's resolvePaletteReference
 // exactly: `palette.<key>` names a palette, `palette.<key>.<name>` names one
@@ -115,9 +81,9 @@ function addManifestNames(index, text, manifest) {
 // name is skipped when `<key>.<name>` is itself a declared key — the validator
 // forbids that collision at declare time, but the editor must not invent an
 // ambiguity where resolution has a fixed answer.
-function addPaletteNames(index, text, manifest) {
-  if (!isObject(manifest?.palette)) return;
-  const palettes = Object.entries(manifest.palette).filter(([, entries]) => Array.isArray(entries));
+function addPaletteNames(index, text, direction) {
+  if (!isObject(direction?.palette)) return;
+  const palettes = Object.entries(direction.palette).filter(([, entries]) => Array.isArray(entries));
   const declaredKeys = new Set(palettes.map(([key]) => key));
   let cursor = Math.max(text.indexOf('"palette"'), 0);
   for (const [key, entries] of palettes) {
@@ -127,9 +93,9 @@ function addPaletteNames(index, text, manifest) {
       name: `palette.${key}`,
       kind: "palette",
       value: entries,
-      file: "manifest.json",
+      file: "direction.json",
       range: keyRange,
-      detail: "manifest palette"
+      detail: "direction palette"
     });
     const named = new Set();
     for (const entry of entries) {
@@ -149,7 +115,7 @@ function addPaletteNames(index, text, manifest) {
         name: `palette.${key}.${name}`,
         kind: "color",
         value: entry[name],
-        file: "manifest.json",
+        file: "direction.json",
         range,
         detail: `palette.${key} color`
       });
@@ -167,18 +133,15 @@ function addDirectionNames(index, text, direction) {
       cursor = text.indexOf(JSON.stringify(key), Math.max(cursor, 0)) + 1;
       index.add({
         name: [...prefix, key].join("."),
-        kind: "name",
+        kind: prefix[0],
         file: "direction.json",
         range,
         detail: "direction claim"
       });
     }
   };
-  for (const section of ["pillars", "anti", "invariants", "motion", "mood", "viewing", "references"]) {
+  for (const section of ["pillars", "mood", "anti", "must_keep", "colors", "contrast", "timing"]) {
     addEntries([section], direction[section]);
-  }
-  if (isObject(direction.constraints)) {
-    for (const [group, entries] of Object.entries(direction.constraints)) addEntries(["constraints", group], entries);
   }
 }
 
@@ -187,7 +150,18 @@ function basename(relative) {
 }
 
 function addMarkdownNames(index, relative, text) {
+  const numberedChapter = !relative.includes("/") && /^\d\d-[^/]+\.md$/i.test(relative);
   for (const item of unfencedLines(text)) {
+    if (numberedChapter) {
+      for (const match of item.text.matchAll(/`(runtime\.[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?(?:\.[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?)*)`/g)) {
+        if (!index.byName.has(match[1])) index.add({ name: match[1], kind: "runtime", file: relative, range: zeroRange(item.line - 1, match.index + 1, match[1].length), detail: "runtime value declared by use" });
+      }
+      const ruleset = /^\s*>\s*RULESET:\s*([a-z0-9]+(?:-[a-z0-9]+)*)(?:\s+\(initial\))?\s*$/.exec(item.text);
+      if (ruleset && ruleset[1] !== "all") {
+        const start = item.text.indexOf(ruleset[1]);
+        if (!index.byName.has(ruleset[1])) index.add({ name: ruleset[1], kind: "ruleset", file: relative, range: zeroRange(item.line - 1, start, ruleset[1].length), detail: item.text.includes("(initial)") ? "initial ruleset" : "ruleset" });
+      }
+    }
     const heading = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(item.text);
     if (!heading) continue;
     const rawTitle = heading[2];
@@ -212,6 +186,24 @@ function addMarkdownNames(index, relative, text) {
     if (rule) {
       const ruleStart = item.text.indexOf(rule[1]);
       index.add({ name: rule[1], kind: "rule", value: title, file: relative, range: zeroRange(item.line - 1, ruleStart, rule[1].length), detail });
+    }
+  }
+}
+
+function addClockNames(index, text, clocks) {
+  if (!isObject(clocks)) return;
+  let cursor = 0;
+  for (const [name, clock] of Object.entries(clocks)) {
+    if (!isObject(clock)) continue;
+    const range = jsonKeyRange(text, name, cursor);
+    cursor = text.indexOf(JSON.stringify(name), cursor) + 1;
+    index.add({ name: `clocks.${name}`, kind: "clock", value: clock, file: "clocks.json", range, detail: "clock" });
+    let addressCursor = Math.max(cursor, 0);
+    for (const address of Array.isArray(clock.advances) ? clock.advances : []) {
+      if (typeof address !== "string" || index.byName.has(address)) continue;
+      const addressRange = jsonKeyRange(text, address, addressCursor);
+      addressCursor = text.indexOf(JSON.stringify(address), addressCursor) + 1;
+      index.add({ name: address, kind: "runtime", file: "clocks.json", range: addressRange, detail: `runtime value declared by clocks.${name}` });
     }
   }
 }
@@ -281,6 +273,42 @@ function addCollectionNames(index, documents, folders) {
   }
 }
 
+function firstSentence(value) {
+  if (typeof value !== "string") return "contract value";
+  const sentence = /^.*?(?:[.!?](?=\s|$)|$)/u.exec(value.trim())?.[0]?.trim();
+  return sentence || "contract value";
+}
+
+// SPEC §10.6: an adoption filename supplies the middle address segment. Packs
+// deliberately add no names; only filled forms can be cited by a package.
+export function addContractNames(index, documents) {
+  const adoptionPattern = /^contracts\/([a-z0-9]+(?:-[a-z0-9]+)*)\.json$/;
+  for (const relative of [...documents.keys()].sort()) {
+    const match = adoptionPattern.exec(relative);
+    if (!match || relative.endsWith(".pack.json")) continue;
+    const parsed = parsedDocument(documents, relative);
+    const adoption = parsed?.value;
+    if (!isObject(adoption) || typeof adoption.contract !== "string"
+      || !Number.isInteger(adoption.version) || !isObject(adoption.questions)) continue;
+    const name = `contracts.${match[1]}`;
+    index.add({ name, kind: "contract", file: relative, range: zeroRange(), detail: adoption.summary ?? "contract adoption" });
+    const values = adoption.declares?.values;
+    if (!isObject(values)) continue;
+    let cursor = Math.max(parsed.text.indexOf('"values"'), 0);
+    for (const [valueName, declaration] of Object.entries(values)) {
+      const range = jsonKeyRange(parsed.text, valueName, cursor);
+      cursor = parsed.text.indexOf(JSON.stringify(valueName), cursor) + 1;
+      index.add({
+        name: `${name}.${valueName}`,
+        kind: "contract-value",
+        file: relative,
+        range,
+        detail: firstSentence(declaration?.description)
+      });
+    }
+  }
+}
+
 function addPersonalizationNames(index, documents) {
   const parsed = parsedDocument(documents, "personalization.json");
   if (!parsed || !Array.isArray(parsed.value?.questions)) return;
@@ -304,10 +332,17 @@ export function resolveAnchor(definitionsByName, name) {
   // separate name kind. The stable address is the record, so longer
   // collection citations deliberately stop at their three-segment prefix.
   const segments = name.split(".");
-  const resolvedName = segments[0] === "collections" && segments.length >= 4
-    && definitionsByName.has(segments.slice(0, 3).join("."))
-    ? segments.slice(0, 3).join(".")
-    : name;
+  let resolvedName = name;
+  if (segments[0] === "collections" && segments.length >= 4
+    && definitionsByName.has(segments.slice(0, 3).join("."))) {
+    resolvedName = segments.slice(0, 3).join(".");
+  } else if (segments[0] === "contracts" && segments.length >= 4
+    && definitionsByName.has(segments.slice(0, 3).join("."))) {
+    // Contract addresses are closed at the declared value, but editor tokens
+    // may continue (for example punctuation-adjacent dotted prose). Resolve as
+    // far as the longest declared contract prefix, matching §10.6.
+    resolvedName = segments.slice(0, 3).join(".");
+  }
   const definitions = definitionsByName.get(resolvedName) ?? [];
   if (definitions.length === 0) return { classification: "unknown", name, definitions: [] };
   if (definitions.length === 1) {
@@ -330,7 +365,7 @@ function isAnchorCandidate(name, definitionsByName, namespaces) {
 
 function collectAnchors(relative, text, definitionsByName, namespaces) {
   const anchors = [];
-  const proseLines = [...unfencedLines(text), ...directionFenceContinuationLines(text)];
+  const proseLines = [...unfencedLines(text)];
   for (const item of proseLines) {
     for (const match of item.text.matchAll(/`([^`\r\n]+)`/g)) {
       const name = match[1];
@@ -366,18 +401,21 @@ export function analyzePackage(fileMap, { folders = [] } = {}) {
   if (tuningText !== undefined) addJsonNames(index, "tuning.json", tuningText, parseJson("tuning.json", tuningText, problems), problems);
   const manifestText = documents.get("manifest.json");
   const manifest = manifestText === undefined ? undefined : parseJson("manifest.json", manifestText, problems);
-  if (manifestText !== undefined) {
-    addManifestNames(index, manifestText, manifest);
-    addPaletteNames(index, manifestText, manifest);
-  }
+  const clocksText = documents.get("clocks.json");
+  if (clocksText !== undefined) addClockNames(index, clocksText, parseJson("clocks.json", clocksText, problems));
   const directionText = documents.get("direction.json");
-  if (directionText !== undefined) addDirectionNames(index, directionText, parseJson("direction.json", directionText, problems));
+  if (directionText !== undefined) {
+    const direction = parseJson("direction.json", directionText, problems);
+    addDirectionNames(index, directionText, direction);
+    addPaletteNames(index, directionText, direction);
+  }
   addCollectionNames(index, documents, folders);
+  addContractNames(index, documents);
   addPersonalizationNames(index, documents);
 
   const namespaces = new Set();
   for (const { name, definitions } of index.entries()) {
-    if (definitions.some(item => item.kind === "tunable" || item.kind === "constant")) namespaces.add(name.split(".", 1)[0]);
+    if (definitions.some(item => item.kind === "value")) namespaces.add(name.split(".", 1)[0]);
   }
   // `palette` is a reserved first segment format-wide (SPEC §4), not a namespace
   // a package opts into by declaring one. A `palette.*` citation is therefore
@@ -387,6 +425,9 @@ export function analyzePackage(fileMap, { folders = [] } = {}) {
   // Like palette, collections is reserved format-wide: a dangling prose
   // citation must be collected so the language tools can report it.
   namespaces.add("collections");
+  namespaces.add("contracts");
+  namespaces.add("runtime");
+  namespaces.add("clocks");
   const anchors = [];
   for (const [relative, text] of documents) {
     if (/\.md$/i.test(relative)) anchors.push(...collectAnchors(relative, text, index.byName, namespaces));

@@ -1,10 +1,4 @@
-const GROUPS = Object.freeze([
-  { id: "identifiers", kinds: ["name"] },
-  { id: "tuning-keys", kinds: ["tunable", "constant"] },
-  { id: "collections", kinds: ["collection", "collection-record"] },
-  { id: "descriptors", kinds: ["descriptor"] },
-  { id: "palettes", kinds: ["palette"] }
-]);
+import { OUTLINE_KIND_GROUPS, outlineGroupForDefinition } from "./kinds.mjs";
 
 const physicalIdentity = definition => `${definition.kind}\0${definition.file}\0${definition.range.start.line}\0${definition.range.start.character}`;
 const stableIdentity = (kind, name, file) => `${kind}\0${name}\0${file}`;
@@ -20,7 +14,20 @@ const wordCount = text => text.trim() ? text.trim().split(/\s+/u).length : 0;
 
 // No analysis-owned object, array, Map, range, or value is shared with the
 // returned structuredClone-able view; consumers may treat it as isolated data.
-export function buildAuthoringView(analysis, revisionFor = () => undefined, files = []) {
+export function buildAuthoringView(analysis, revisionFor = () => undefined, files, detectedLinkOffers = [], rangeRefusalFor = () => undefined) {
+  if (!(files instanceof Map)) throw new TypeError("buildAuthoringView requires the package files Map");
+  const fileEntries = [...files];
+  const fileList = fileEntries.map(([file]) => file);
+  const fileSet = new Set(fileList);
+  const fileText = new Map(fileEntries);
+  let tuningRanges = {};
+  let tuningRulesPresent = false;
+  try {
+    const tuning = JSON.parse(fileText.get("tuning.json"));
+    if (tuning?.ranges && !Array.isArray(tuning.ranges) && typeof tuning.ranges === "object") tuningRanges = tuning.ranges;
+    tuningRulesPresent = Boolean(tuning?.rules && !Array.isArray(tuning.rules)
+      && typeof tuning.rules === "object" && Object.keys(tuning.rules).length);
+  } catch {}
   const definitionsByName = new Map();
   const completionNames = [];
   for (const named of analysis?.nameIndex ?? []) {
@@ -32,15 +39,27 @@ export function buildAuthoringView(analysis, revisionFor = () => undefined, file
   const byPhysicalIdentity = new Map();
   for (const named of analysis?.nameIndex ?? []) {
     for (const definition of named.definitions ?? []) {
-      if (!GROUPS.some(group => group.kinds.includes(definition.kind))) continue;
+      const outlineGroup = outlineGroupForDefinition(definition);
+      if (!outlineGroup) continue;
+      const display = outlineGroup === "rules" && !named.name.startsWith("rules.")
+        ? `rules.${named.name}`
+        : named.name;
       const physical = physicalIdentity(definition);
       const current = byPhysicalIdentity.get(physical);
       if (!current || named.name.length < current.name.length) {
         byPhysicalIdentity.set(physical, {
           identity: stableIdentity(definition.kind, named.name, definition.kind === "collection" ? `collections/${named.name}/` : definition.file),
           kind: definition.kind,
-          kindTag: definition.kind === "tunable" || definition.kind === "constant" || definition.kind === "collection" ? definition.kind : "",
+          kindTag: ["collection", "contract"].includes(definition.kind) ? definition.kind : "",
+          rangeTag: definition.kind === "value" && Array.isArray(tuningRanges[named.name])
+            ? `[${tuningRanges[named.name].join(", ")}]`
+            : "",
+          rangeRefusal: definition.kind === "value" && Array.isArray(tuningRanges[named.name])
+            ? rangeRefusalFor(named.name)
+            : undefined,
+          outlineGroup,
           name: named.name,
+          display: definition.kind === "contract" ? named.name.slice("contracts.".length) : display,
           file: definition.file,
           range: copyRange(definition.range),
           revision: revisionFor(definition.file),
@@ -72,7 +91,19 @@ export function buildAuthoringView(analysis, revisionFor = () => undefined, file
     }
   }
 
-  const fileList = [...files];
+  const entriesFor = id => entries.filter(entry => entry.outlineGroup === id);
+  const hasKind = kind => entries.some(entry => entry.kind === kind);
+  const groupPresent = id => {
+    if (["sections", "values", "collections", "contracts", "acceptance-tests"].includes(id)) return true;
+    if (["pillars", "anti", "must_keep", "mood", "palette", "colors", "contrast", "timing"].includes(id)) {
+      return fileSet.has("direction.json");
+    }
+    if (id === "runtime" || id === "clocks") return fileSet.has("clocks.json") || hasKind("runtime");
+    if (id === "rulesets") return hasKind("ruleset");
+    if (id === "questions") return fileSet.has("personalization.json");
+    if (id === "rules") return tuningRulesPresent;
+    return entriesFor(id).length > 0;
+  };
   return {
     definitionsByName,
     anchors: (analysis?.anchors ?? []).map(copyValue),
@@ -84,15 +115,45 @@ export function buildAuthoringView(analysis, revisionFor = () => undefined, file
     completionNames,
     manifest: copyValue(analysis?.manifest ?? null),
     revisions: Object.fromEntries(fileList.map(file => [file, revisionFor(file)])),
-    groups: GROUPS.map(group => {
-      if (group.id !== "collections") return {
-        id: group.id,
-        entries: entries.filter(entry => group.kinds.includes(entry.kind)).map(copyValue)
-      };
+    groups: OUTLINE_KIND_GROUPS.filter(group => groupPresent(group.id)).map(group => {
+      if (group.id === "palette") {
+        const colors = entriesFor(group.id).filter(entry => entry.kind === "color");
+        return {
+          id: group.id,
+          entries: entriesFor(group.id).filter(entry => entry.kind === "palette").map(palette => ({
+            ...copyValue(palette),
+            children: colors.filter(color => color.name.startsWith(`${palette.name}.`)).map(copyValue)
+          }))
+        };
+      }
+      if (group.id === "contracts") {
+        const values = entriesFor(group.id).filter(entry => entry.kind === "contract-value");
+        return {
+          id: group.id,
+          entries: entriesFor(group.id).filter(entry => entry.kind === "contract")
+            .sort((left, right) => left.name.localeCompare(right.name))
+            .map(contract => {
+              let adoption;
+              try { adoption = JSON.parse(fileText.get(contract.file)); } catch {}
+              const packPath = /^sha256:[0-9a-f]{64}$/.test(adoption?.pack ?? "")
+                ? `contracts/${adoption.contract}-${adoption.version}.pack.json` : "";
+              const checked = Boolean(packPath && fileSet.has(packPath));
+              return {
+                ...copyValue(contract),
+                location: contract.file,
+                packPath,
+                mode: checked ? "checked" : "promised",
+                children: values.filter(value => value.file === contract.file)
+                  .sort((left, right) => left.range.start.line - right.range.start.line || left.name.localeCompare(right.name)).map(copyValue)
+              };
+            })
+        };
+      }
+      if (group.id !== "collections") return { id: group.id, entries: entriesFor(group.id).map(copyValue) };
       const records = entries.filter(entry => entry.kind === "collection-record");
       return {
         id: group.id,
-        entries: entries.filter(entry => entry.kind === "collection")
+        entries: entriesFor(group.id).filter(entry => entry.kind === "collection")
           .sort((left, right) => left.name.localeCompare(right.name))
           .map(collection => {
             const prefix = `collections/${collection.name}/`;
@@ -103,6 +164,7 @@ export function buildAuthoringView(analysis, revisionFor = () => undefined, file
               ...copyValue(collection),
               location: prefix,
               count: children.length,
+              linkOffers: detectedLinkOffers.filter(offer => offer.drawer === collection.name).map(copyValue),
               children
             };
           })
