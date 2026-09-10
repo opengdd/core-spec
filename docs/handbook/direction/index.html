@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Art direction | OpenGDD handbook</title>
-<meta name="description" content="Art direction says what the game should look and feel like in a way the builder can be held to, while leaving the craft of making it to them. The builder is the person, …">
+<meta name="description" content="Art direction says what the game must look and feel like, without saying how to make it. The builder keeps the craft, and you keep the intent. The builder is the person, …">
 <link rel="canonical" href="https://opengdd.org/handbook/direction/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Art direction | OpenGDD handbook">
-<meta property="og:description" content="Art direction says what the game should look and feel like in a way the builder can be held to, while leaving the craft of making it to them. The builder is the person, …">
+<meta property="og:description" content="Art direction says what the game must look and feel like, without saying how to make it. The builder keeps the craft, and you keep the intent. The builder is the person, …">
 <meta property="og:url" content="https://opengdd.org/handbook/direction/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Art direction | OpenGDD handbook">
-<meta name="twitter:description" content="Art direction says what the game should look and feel like in a way the builder can be held to, while leaving the craft of making it to them. The builder is the person, …">
+<meta name="twitter:description" content="Art direction says what the game must look and feel like, without saying how to make it. The builder keeps the craft, and you keep the intent. The builder is the person, …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -23,20 +23,21 @@
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/" aria-current="page">Learn</a>
-      <a href="/spec/">Spec</a>
-      <a href="/standard/">Standard</a>
+      <a href="/contracts/">Contracts</a>
+      <a href="/spec/">Specification</a>
       <a href="/authoring-tool/">Authoring tool</a>
       <a href="/about/">About</a>
       <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
     </nav>
   </div>
 </header>
-<main>
+<main id="main">
 <div class="doc-layout">
 <nav class="doc-toc" aria-label="Learn"><p class="toc-title">Learn</p>
 <ul class="learn-resources">
@@ -46,35 +47,35 @@
 <div class="toc-group">
 <p class="toc-group-title">Start and foundations</p>
 <ul>
-<li class="toc-h2"><a href="/handbook/an-afternoon-spec/">An afternoon spec</a></li>
-<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">The shape of a spec</a></li>
-<li class="toc-h2"><a href="/handbook/fantasy-block/">The fantasy block</a></li>
-<li class="toc-h2"><a href="/handbook/authority/">Authority</a></li>
-<li class="toc-h2"><a href="/handbook/identifiers/">Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
+<li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
+<li class="toc-h2"><a href="/handbook/player-fantasy/">The player fantasy</a></li>
+<li class="toc-h2"><a href="/handbook/who-decides/">Who decides</a></li>
+<li class="toc-h2"><a href="/handbook/naming-things/">Names and addresses</a></li>
 <li class="toc-h2"><a href="/handbook/tuning/">Tuning</a></li>
 <li class="toc-h2"><a href="/handbook/acceptance-tests/">Acceptance tests</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Content, links, and time</p>
+<p class="toc-group-title">Content, links and time</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/collections/">Collections</a></li>
 <li class="toc-h2"><a href="/handbook/links/">Links</a></li>
 <li class="toc-h2"><a href="/handbook/runtime-values/">Runtime values</a></li>
-<li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes &amp; clocks</a></li>
-<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes and clocks</a></li>
+<li class="toc-h2"><a href="/handbook/seeds/">Seeds and repeatable randomness</a></li>
 </ul>
 </div>
 <div class="toc-group">
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/" class="here" aria-current="page">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette &amp; colour promises</a></li>
-<li class="toc-h2"><a href="/handbook/personalization/">Personalization</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanisms</p>
+<p class="toc-group-title">Reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -82,16 +83,23 @@
 <div class="toc-group">
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
-<li class="toc-h2"><a href="/handbook/promises-and-proof/">Promises and proof</a></li>
-<li class="toc-h2"><a href="/handbook/preflight-checklist/">Preflight checklist</a></li>
+<li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
 <h1>Art direction</h1>
-<p><em>Opt-in: add this when your game needs it.</em></p>
-<p>Art direction says what the game should look and feel like in a way the builder can be held to, while leaving the craft of making it to them. The builder is the person, team, or system that turns your package into a game.</p>
-<p>Put one <code>direction.json</code> beside the chapters. The presentation chapter cites the direction entries it discusses.</p>
+<p class="chapter-scope"><span class="scope-badge">Optional</span></p>
+<p>Art direction says what the game must look and feel like, without saying how to make it. The builder keeps the craft, and you keep the intent. The builder is the person, team or AI that turns your package into a game.</p>
+<p>Structured art direction lives in one <code>direction.json</code> beside the chapters. Five kinds of entry in it are judged by people:</p>
+<ul>
+<li>A <strong>pillar</strong> is a visual priority. When two choices conflict, the pillar says which wins.</li>
+<li>A <strong>mood</strong> names a feeling: its intent, what it borrows from, and what it must not become.</li>
+<li>An <strong>anti-reference</strong> names a result you do not want, such as the genre's usual bright adventure-poster look.</li>
+<li>A <strong>must-keep</strong> is a visible quality every build has to preserve.</li>
+<li>The <strong>viewing</strong> entry says how someone should watch the game when judging it: how fast, how big, and on what kind of screen. A package has one.</li>
+</ul>
 <p><em><code>direction.json</code></em></p>
 <pre><code class="lang-json">{
   &quot;pillars&quot;: {
@@ -124,7 +132,8 @@
     &quot;calibration&quot;: &quot;an sRGB display at standard desktop brightness&quot;
   }
 }</code></pre>
-<p><code>&gt; DELEGATED:</code> is the authority tag that hands the decision to the builder; the <a href="/handbook/authority/">Authority</a> chapter explains the three tags. A citation is the entry's dotted name in backticks.</p>
+<p>Each mood has its own <code>anti</code> list for that mood. The top-level <code>anti</code> block is for the whole look, and those entries have names you can point at.</p>
+<p>The presentation chapter then points at these entries. A <strong>citation</strong> is an entry's dotted name in backticks, such as <code>pillars.weather-stays-readable</code>. The section is Delegated, because the builder decides how to achieve the intent. The <a href="/handbook/who-decides/">Who decides</a> chapter explains the tag.</p>
 <p><em><code>04-presentation.md</code></em></p>
 <blockquote>
 <p>DELEGATED: presentation-direction</p>
@@ -134,20 +143,16 @@
 <p>Keep the framing close to the climbers and refuse triumphant summit poses, following <code>anti.no-adventure-poster</code>.</p>
 <p>Keep the rope darker than the snow and clear across each climber's body, preserving <code>must_keep.rope-stays-legible</code>.</p>
 </blockquote>
-<p>A <strong>pillar</strong> is a visual priority the builder uses when choices pull in different directions. A <strong>mood</strong> names the intended feeling, what it borrows, and what it must not become. An <strong>anti-reference</strong> rules out an unwanted result by name, such as the genre's usual bright adventure-poster look. A mood's <code>anti</code> list rules out results for that feeling; the root <code>anti</code> map rules out results for the whole look and can be cited by name.</p>
-<p>A pillar guides the builder's choices; a must-keep is a visible quality every build has to preserve. The <strong>viewing conditions</strong> record the speed, size, and display conditions for review. The people who review the finished build look at it under these conditions. A package has one viewing entry.</p>
-<p>A pillar, mood, anti-reference, or must-keep entry that no chapter cites draws a warning.</p>
-<h2 id="what-is-checked">What is checked<a class="heading-anchor" href="#what-is-checked" aria-label="Link to this section">#</a></h2>
-<p>In an acceptance test, <code>direction_claims</code> is the list of measured promises this test covers. Every colour, contrast, and timing promise must appear in that list. The validator refuses a package when any of these measured promises has no covering test. The contrast floor is checked from the file before any build. Pillars, mood, anti-references, and must-keeps are read and judged by people, not by a machine.</p>
-<p>Most direction remains prose. Measurable colour and timing promises use the same <code>direction.json</code>; <a href="/handbook/palette-and-colour-promises/">Palette &amp; colour promises</a> teaches that path.</p>
-<p><em>Full rules: <a href="/spec/">OpenGDD specification</a>, §9.</em></p>
-<p class="note chapter-pager"><a href="/handbook/seeds-and-determinism/">← Seeds &amp; determinism</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/palette-and-colour-promises/">Palette &amp; colour promises →</a></p>
+<p>A pillar, mood, anti-reference or must-keep that no chapter cites draws a warning.</p>
+<p>Pillars, moods, anti-references and must-keeps are read and judged by people, not by a machine. Measurable promises about colour, contrast and timing use the same file and are checked by acceptance tests. The <a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a> chapter covers them.</p>
+<p><em>Full rules: <a href="/spec/#9-art-direction-direction-json">OpenGDD specification</a>, §9.</em></p>
+<p class="note chapter-pager"><a href="/handbook/seeds/">← Seeds and repeatable randomness</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/palette-and-colour-promises/">Palette and colour promises →</a></p>
 </article>
 </div>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
-    <span><a href="/about/">About the standard</a></span>
+    <span><a href="/about/">About OpenGDD</a></span>
     <span>Prose CC-BY 4.0 · code MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>

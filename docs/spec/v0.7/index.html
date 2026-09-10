@@ -1,0 +1,941 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The specification — OpenGDD</title>
+<meta name="description" content="The OpenGDD specification for game design documents: package layout, authority levels, structured data, acceptance tests, build evidence, and art direction.">
+<link rel="canonical" href="https://opengdd.org/spec/v0.7/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The specification — OpenGDD">
+<meta property="og:description" content="The OpenGDD specification for game design documents: package layout, authority levels, structured data, acceptance tests, build evidence, and art direction.">
+<meta property="og:url" content="https://opengdd.org/spec/v0.7/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="The specification — OpenGDD">
+<meta name="twitter:description" content="The OpenGDD specification for game design documents: package layout, authority levels, structured data, acceptance tests, build evidence, and art direction.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/spec/" aria-current="page">Spec</a>
+      <a href="/standard/">Standard</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main>
+<p class="note">This is the released v0.7 text. <a href="/spec/">Read the working draft</a>.</p>
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Specification</p><ul>
+<li class="toc-h2"><a href="#the-two-roles-non-normative">The two roles (non-normative)</a></li>
+<li class="toc-h2"><a href="#terms-for-designers-non-normative">Terms, for designers (non-normative)</a></li>
+<li class="toc-h3"><a href="#words-borrowed-from-standards-writing">Words borrowed from standards writing</a></li>
+<li class="toc-h3"><a href="#words-this-format-defines-for-itself">Words this format defines for itself</a></li>
+<li class="toc-h2"><a href="#1-package-layout"><span class="toc-num">1.</span>Package layout</a></li>
+<li class="toc-h3"><a href="#identifiers">Identifiers</a></li>
+<li class="toc-h2"><a href="#1a-the-fantasy-block-required"><span class="toc-num">1a.</span>The fantasy block (required)</a></li>
+<li class="toc-h2"><a href="#1b-structured-content-collections"><span class="toc-num">1b.</span>Structured content collections</a></li>
+<li class="toc-h3"><a href="#links-between-records">Links between records</a></li>
+<li class="toc-h2"><a href="#1c-retired"><span class="toc-num">1c.</span>Retired</a></li>
+<li class="toc-h2"><a href="#2-the-three-authority-levels"><span class="toc-num">2.</span>The three authority levels</a></li>
+<li class="toc-h2"><a href="#2a-the-responsibility-boundary"><span class="toc-num">2a.</span>The responsibility boundary</a></li>
+<li class="toc-h2"><a href="#2b-spec-lifecycle"><span class="toc-num">2b.</span>Spec lifecycle</a></li>
+<li class="toc-h2"><a href="#2c-rulesets"><span class="toc-num">2c.</span>Rulesets</a></li>
+<li class="toc-h2"><a href="#2d-conformance-layers-and-certification-status"><span class="toc-num">2d.</span>Conformance layers and certification status</a></li>
+<li class="toc-h2"><a href="#3-manifest-json"><span class="toc-num">3.</span>manifest.json</a></li>
+<li class="toc-h2"><a href="#3a-canonical-schema-urls"><span class="toc-num">3a.</span>Canonical schema URLs</a></li>
+<li class="toc-h2"><a href="#4-tuning-json"><span class="toc-num">4.</span>tuning.json</a></li>
+<li class="toc-h3"><a href="#values-values">Values (values)</a></li>
+<li class="toc-h3"><a href="#ranges-ranges">Ranges (ranges)</a></li>
+<li class="toc-h3"><a href="#rules-rules">Rules (rules)</a></li>
+<li class="toc-h3"><a href="#package-defaults">Package defaults</a></li>
+<li class="toc-h3"><a href="#reading-a-citation-in-prose-normative">Reading a citation in prose (normative)</a></li>
+<li class="toc-h2"><a href="#4a-retired"><span class="toc-num">4a.</span>Retired</a></li>
+<li class="toc-h2"><a href="#4b-runtime-values-time-modes-and-clocks"><span class="toc-num">4b.</span>Runtime values, time modes, and clocks</a></li>
+<li class="toc-h3"><a href="#4b-1-runtime-values">4b.1 Runtime values</a></li>
+<li class="toc-h3"><a href="#4b-2-time-modes-and-clocks">4b.2 Time modes and clocks</a></li>
+<li class="toc-h3"><a href="#4b-3-unchanged-during-a-mode">4b.3 Unchanged during a mode</a></li>
+<li class="toc-h3"><a href="#4b-4-what-the-runner-owns">4b.4 What the runner owns</a></li>
+<li class="toc-h2"><a href="#5-build-personalization-personalization-json"><span class="toc-num">5.</span>Build personalization (personalization.json)</a></li>
+<li class="toc-h3"><a href="#enumerated-answers">Enumerated answers</a></li>
+<li class="toc-h3"><a href="#numeric-answers">Numeric answers</a></li>
+<li class="toc-h3"><a href="#the-resolved-tuning-snapshot">The resolved tuning snapshot</a></li>
+<li class="toc-h3"><a href="#answers-outside-tuning">Answers outside tuning</a></li>
+<li class="toc-h2"><a href="#6-build-plan-and-acceptance-tests-05-build-plan-md"><span class="toc-num">6.</span>Build plan and acceptance tests (05-build-plan.md)</a></li>
+<li class="toc-h3"><a href="#acceptance-test-types">Acceptance-test types</a></li>
+<li class="toc-h3"><a href="#direction-claim-citations">Direction-claim citations</a></li>
+<li class="toc-h3"><a href="#checked-contract-tests">Checked contract tests</a></li>
+<li class="toc-h2"><a href="#7-build-records-opengdd-build-json"><span class="toc-num">7.</span>Build records (opengdd-build.json)</a></li>
+<li class="toc-h3"><a href="#core-fields">Core fields</a></li>
+<li class="toc-h3"><a href="#package-consistency-checks">Package-consistency checks</a></li>
+<li class="toc-h3"><a href="#audit-evidence-outside-the-build-record">Audit evidence outside the build record</a></li>
+<li class="toc-h2"><a href="#7a-authored-puzzles"><span class="toc-num">7a.</span>Authored puzzles</a></li>
+<li class="toc-h3"><a href="#grid-layout-encoding-family-parallel-string-layers-1-normative">Grid-layout encoding family: parallel-string-layers-1 (normative)</a></li>
+<li class="toc-h2"><a href="#8-retired"><span class="toc-num">8.</span>Retired</a></li>
+<li class="toc-h2"><a href="#9-art-direction-direction-json"><span class="toc-num">9.</span>Art direction (direction.json)</a></li>
+<li class="toc-h3"><a href="#9-1-palettes-palette"><span class="toc-num">9.1</span>Palettes (palette)</a></li>
+<li class="toc-h3"><a href="#9-2-pillars-pillars"><span class="toc-num">9.2</span>Pillars (pillars)</a></li>
+<li class="toc-h3"><a href="#9-3-mood-mood"><span class="toc-num">9.3</span>Mood (mood)</a></li>
+<li class="toc-h3"><a href="#9-4-anti-references-anti"><span class="toc-num">9.4</span>Anti-references (anti)</a></li>
+<li class="toc-h3"><a href="#9-5-what-must-stay-mustkeep"><span class="toc-num">9.5</span>What must stay (must_keep)</a></li>
+<li class="toc-h3"><a href="#9-6-measured-promises-colors-contrast-timing"><span class="toc-num">9.6</span>Measured promises (colors, contrast, timing)</a></li>
+<li class="toc-h3"><a href="#9-7-viewing-viewing"><span class="toc-num">9.7</span>Viewing (viewing)</a></li>
+<li class="toc-h3"><a href="#9-8-the-covering-rule"><span class="toc-num">9.8</span>The covering rule</a></li>
+<li class="toc-h3"><a href="#9-9-images"><span class="toc-num">9.9</span>Images</a></li>
+<li class="toc-h3"><a href="#9-10-what-the-audit-owns"><span class="toc-num">9.10</span>What the audit owns</a></li>
+<li class="toc-h3"><a href="#9-11-migration-from-v0-6"><span class="toc-num">9.11</span>Migration from v0.6</a></li>
+<li class="toc-h2"><a href="#10-contracts"><span class="toc-num">10.</span>Contracts</a></li>
+<li class="toc-h3"><a href="#10-1-what-a-contract-is"><span class="toc-num">10.1</span>What a contract is</a></li>
+<li class="toc-h3"><a href="#10-2-the-adoption-file"><span class="toc-num">10.2</span>The adoption file</a></li>
+<li class="toc-h3"><a href="#10-3-questions-and-answers"><span class="toc-num">10.3</span>Questions and answers</a></li>
+<li class="toc-h3"><a href="#10-4-values-rows-and-rules"><span class="toc-num">10.4</span>Values, rows, and rules</a></li>
+<li class="toc-h3"><a href="#10-5-promised-and-checked"><span class="toc-num">10.5</span>Promised and checked</a></li>
+<li class="toc-h3"><a href="#10-6-addresses"><span class="toc-num">10.6</span>Addresses</a></li>
+<li class="toc-h3"><a href="#10-7-citations-in-a-contract"><span class="toc-num">10.7</span>Citations in a contract</a></li>
+<li class="toc-h3"><a href="#10-8-the-pack"><span class="toc-num">10.8</span>The pack</a></li>
+<li class="toc-h3"><a href="#10-9-forking"><span class="toc-num">10.9</span>Forking</a></li>
+<li class="toc-h3"><a href="#10-10-what-this-layer-does-not-do"><span class="toc-num">10.10</span>What this layer does not do</a></li>
+<li class="toc-h2"><a href="#11-what-this-version-deliberately-excludes"><span class="toc-num">11.</span>What this version deliberately excludes</a></li>
+</ul></nav>
+<article class="doc-body">
+<h1>The specification</h1>
+<a class="card" href="/handbook/">
+  <h2>New to the format? Start with the handbook</h2>
+  <p>What each part is for and how the parts fit together, one short
+  chapter per mechanism. This page is the exact rules; the handbook is
+  the understanding.</p>
+</a>
+<p class="note">OpenGDD v0.7, a working draft. The format is versioned
+on a 0.x workbench: constructs earn their place against real games
+before anything is called 1.0.
+<a href="/spec/changelog/">What changed
+between versions</a> · <a href="/spec/limitations/">what the format
+knowingly does not cover yet</a>.</p>
+<p>OpenGDD is an open format for game design documents. Designers write the game in prose. Structured data makes selected claims checkable. Three authority levels state which decisions stay fixed, which belong to the builder, and which are resolved separately for each build.</p>
+<p>A builder turns the document into a running game. The builder may be a person, a studio, an AI agent, or a combination. The document can also carry optional attribution and commerce terms. The core format does not require a particular transaction model.</p>
+<p>Along the way this document names a handful of constructs — values (§4), the grid-layout encoding (§7a), identifiers (§1), art direction (§9), and contracts (§10). Each is defined in the section its pointer names; none needs to be understood before then.</p>
+<p>Throughout this document, the words MUST, MUST NOT, SHOULD, and MAY are used in their RFC 2119 sense.</p>
+<p>Status: v0.7 working draft — not a release. License: specification text CC-BY-4.0; schemas and validator code MIT.</p>
+<p>This document defines OpenGDD v0.7. Unless a passage explicitly describes a migration or historical artifact, every unnumbered current-version statement and every normative rule in this document applies to v0.7; no unstated rule is inherited from an earlier version.</p>
+<h2 id="the-two-roles-non-normative">The two roles (non-normative)<a class="heading-anchor" href="#the-two-roles-non-normative" aria-label="Link to this section">#</a></h2>
+<p><em>For everyone. Read this one first; it is one page and the rest assumes it.</em></p>
+<p>A spec connects the designer who authors the game with the builder who implements it.</p>
+<div class="table-scroll"><table>
+<thead><tr><th>The <strong>designer</strong></th><th>The <strong>builder</strong></th></tr></thead>
+<tbody>
+<tr><td>Writes the spec. Prose carries the design intent. Structured data makes selected claims checkable. The designer chooses an authority level for every design statement.</td><td>Turns the spec into a running game. A builder may be a person, a studio, an AI agent, or a combination.</td></tr>
+<tr><td>Owns every difference a player could notice that changes how the game plays (§2a).</td><td>Owns how the game is made: the code, the pipeline, everything two faithful builds may differ in without any player telling them apart — plus whatever visible area the spec expressly delegates (§2a).</td></tr>
+</tbody>
+</table></div>
+<p>One person can hold both roles, and often will. The roles stay distinct because a design can travel: if the designer wishes, the same spec can go to any number of builders, and every resulting build is judged against the same acceptance tests (§6, §7). When a design travels under terms, the manifest's optional commerce fields record them (§3).</p>
+<h2 id="terms-for-designers-non-normative">Terms, for designers (non-normative)<a class="heading-anchor" href="#terms-for-designers-non-normative" aria-label="Link to this section">#</a></h2>
+<p><em>For designers. Skip if you already know the format, and come back when a word looks odd.</em></p>
+<p>A reading aid for designers meeting the format for the first time. It is not part of the format and adds no rule; where a summary here and a numbered section disagree, the numbered section is right.</p>
+<h3 id="words-borrowed-from-standards-writing">Words borrowed from standards writing<a class="heading-anchor" href="#words-borrowed-from-standards-writing" aria-label="Link to this section">#</a></h3>
+<div class="table-scroll"><table>
+<thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>Normative</strong></td><td>A statement that decides whether something is correct: break one and the thing does not conform. <strong>Informative</strong> text explains, and decides nothing.</td></tr>
+<tr><td><strong>MUST, MUST NOT, SHOULD, MAY</strong></td><td>Set in capitals, these four words carry exact strengths: a requirement, a prohibition, a strong recommendation you may set aside with a reason, and a free choice. The convention is borrowed from RFC 2119 so nobody has to argue about what &quot;should&quot; means.</td></tr>
+<tr><td><strong>Schema</strong></td><td>A machine-readable description of what a data file is allowed to contain, so a program can tell whether the shape is right.</td></tr>
+<tr><td><strong>Validator</strong></td><td>A program that reads a package and reports what is wrong with it.</td></tr>
+<tr><td><strong>Conforming</strong></td><td>Meeting the format's rules. Different kinds of thing conform, each against the rules written for it.</td></tr>
+<tr><td><strong>Certified build</strong></td><td>Conforming is the standard a thing meets; certification would be an audited record that a particular build met it. That audit is still experimental (§2d).</td></tr>
+</tbody>
+</table></div>
+<h3 id="words-this-format-defines-for-itself">Words this format defines for itself<a class="heading-anchor" href="#words-this-format-defines-for-itself" aria-label="Link to this section">#</a></h3>
+<div class="table-scroll"><table>
+<thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>Spec, package</strong></td><td>A spec is one game's design, written in this format. <em>Package</em> is the same thing seen as files on disk (§1).</td></tr>
+<tr><td><strong>Manifest</strong></td><td>The file at the top of a package that identifies the spec and its target (§3).</td></tr>
+<tr><td><strong>Fantasy block</strong></td><td>Every game idea begins with a fantasy, meaning what the player gets to be and feel. A spec opens the same way (§1a).</td></tr>
+<tr><td><strong>Fixed, Delegated, Personalization</strong></td><td>Every design statement says who decides it. Fixed means the designer already did, Delegated leaves it to whoever builds the game, and Personalization leaves it to an answer given for one particular build (§2).</td></tr>
+<tr><td><strong>Identifier</strong></td><td>Any name the designer invents that the format then carries. Using one creates it; there is no separate step where you declare it (§1).</td></tr>
+<tr><td><strong>Value, range, rule</strong></td><td>A value is a number the design cites by name; a range says how far a value may move; a rule is a relation between values that must hold however they are tuned (§4).</td></tr>
+<tr><td><strong>Contract, definition, adoption, pack</strong></td><td>A contract is a ready-made questionnaire for a familiar mechanism. Its <strong>definition</strong> is the blank form; an <strong>adoption</strong> is one filled form copied into <code>contracts/</code>; an optional verification <strong>pack</strong> makes that adoption checked (§10).</td></tr>
+<tr><td><strong>Acceptance test</strong></td><td>A numbered check saying what a finished build has to prove. The heading names it and its test block states the check (§6).</td></tr>
+<tr><td><strong>Test block</strong></td><td>The machine-readable acceptance test, written as one fenced JSON block after its heading (§6).</td></tr>
+<tr><td><strong>Test type</strong></td><td>Which of the two test-block shapes applies: one specific scenario or a general claim across a scope (§6).</td></tr>
+<tr><td><strong>Replay</strong></td><td>Runner-owned data a test plays back as input. Any expected result is the test block's separate <code>target</code>; recorded footage is a <strong>capture</strong>, which is a different thing (§6).</td></tr>
+<tr><td><strong>Evidence</strong></td><td>The record of what actually happened when the tests were run (§7).</td></tr>
+<tr><td><strong>Harness</strong></td><td>The thing that runs the tests. Evidence is the record of what running them produced; the two words are not interchangeable (§6).</td></tr>
+<tr><td><strong>Runner profile</strong></td><td>The experimental document that gives one named, versioned runner's meaning to runtime test execution, measurements, and replay data (§§2d, 6).</td></tr>
+<tr><td><strong>Audit profile</strong></td><td>The experimental document that records the capture recipe an audit used and describes further evidence, runtime-value review, and judged direction review (§§2d, 7, 9.10).</td></tr>
+<tr><td><strong>Runtime value</strong></td><td>Something that changes during play and that the design names with a <code>runtime.</code> address (§4b).</td></tr>
+<tr><td><strong>Time mode</strong></td><td>A declared span of play with one pattern for how the game's clocks behave (§4b).</td></tr>
+<tr><td><strong>Clock</strong></td><td>A named source of advance, such as elapsed seconds or a turn count (§4b).</td></tr>
+<tr><td><strong>Ruleset</strong></td><td>One complete set of active rules, declared and scoped by a <code>&gt; RULESET:</code> tag (§2c).</td></tr>
+<tr><td><strong>Link</strong></td><td>A record field that holds another record's id (§1b).</td></tr>
+<tr><td><strong>Completeness</strong></td><td>The idea that a spec holds together: nothing points at something that is not there, and nothing declared is left out. Each mechanism says which side has to cover the other.</td></tr>
+<tr><td><strong>Direction</strong></td><td>One optional file for the game's colours, priorities, feeling, what it must never be, measurable promises, and viewing conditions (§9).</td></tr>
+<tr><td><strong>Palette</strong></td><td>A named set of colours in <code class="anchor">direction.json</code> (§9.1).</td></tr>
+<tr><td><strong>Mood</strong></td><td>A named feeling with what it borrows and what it must not be (§9.3).</td></tr>
+<tr><td><strong>Color promise</strong></td><td>A measured promise about one declared colour: what wears it, when it holds, and how close a build must stay to it (§9.6).</td></tr>
+<tr><td><strong>Closed</strong></td><td>Closed means no additions. A <strong>closed shape</strong> admits no field beyond the ones the format names; a <strong>closed value set</strong> accepts no value beyond the ones it lists.</td></tr>
+<tr><td><strong>Stable</strong></td><td>Said of a name that must not change between revisions, because other things point at it.</td></tr>
+<tr><td><strong>Error, warning</strong></td><td>The only two severities. An <strong>error</strong> is decisive: the thing does not conform. A <strong>warning</strong> advises and decides nothing (§2d).</td></tr>
+<tr><td><strong>Field, key</strong></td><td>A <strong>field</strong> is a named slot in a data object. A <strong>key</strong> is a lookup id in a map.</td></tr>
+</tbody>
+</table></div>
+<h2 id="1-package-layout">1. Package layout<a class="heading-anchor" href="#1-package-layout" aria-label="Link to this section">#</a></h2>
+<p><em>For everyone: designers read this as the shape of a spec on disk, tool authors as the file layout a parser walks.</em></p>
+<p>A spec is a directory. It travels as a zip file or a git repository.</p>
+<pre><code class="lang-text">my-game/
+  manifest.json          # identity + target — REQUIRED
+  tuning.json            # the numbers: values, ranges, rules — REQUIRED
+  clocks.json            # optional time modes and clocks (§4b)
+  direction.json         # optional art direction (§9)
+  personalization.json   # optional questions; in use when present (§5)
+  01-overview.md         # pitch, pillars, player experience — REQUIRED
+  02-mechanics.md        # complete rules — REQUIRED
+  03-content.md          # story, characters, dialogue, levels/generation — optional
+  04-presentation.md     # art direction, audio direction, UI, feel — optional
+  05-build-plan.md       # stages, checkpoints, acceptance tests — REQUIRED
+  assets/                # optional reference images, moodboards, sketches
+  contracts/             # optional adopted contracts (§10) — reserved name
+  collections/           # optional structured collections (§1b) — reserved name</code></pre>
+<p><code>contracts/</code> is reserved for the contracts layer (§10), and <code>collections/</code> for structured content (§1b); a package that keeps its own directory under either name renames it.</p>
+<h3 id="identifiers">Identifiers<a class="heading-anchor" href="#identifiers" aria-label="Link to this section">#</a></h3>
+<p>An identifier is a designer-defined name in a JSON file or declared namespace.</p>
+<p>Using an identifier creates it. There is no declaration step and no registry. A key such as <code class="anchor">infection.damage</code> or <code class="anchor">tick.day</code> becomes an identifier the moment it is used.</p>
+<p>Identity is scoped. The same spelling in two scopes may name two different identifiers. A field named once by a collection's record schema or prose is one identifier; the thousand records that fill it in carry one thousand values, not one thousand identifiers.</p>
+<p><strong>Chapters are declared by presence.</strong> A chapter is a Markdown file at the package root whose name has the form <code class="anchor">NN-name.md</code>, and tools read all such files in filename order. Numbers <code>01</code>–<code>05</code> keep the canonical names and roles shown in the tree. A numbered file in that range under any other name is a validation failure. <code class="anchor">03-content.md</code> and <code class="anchor">04-presentation.md</code> remain optional; <code class="anchor">01-overview.md</code>, <code class="anchor">02-mechanics.md</code>, and <code class="anchor">05-build-plan.md</code> are required.</p>
+<p>Number <code>00</code> is reserved and invalid. Numbers <code>06</code> and up belong to the designer's own chapters. An unnumbered Markdown file at the package root is not a chapter, and no tool reads it as a chapter, and nothing in it declares anything; the validator scans it only for the injection lint. This is where notes go, for example <code class="anchor">my-messy-prototyping-notes.md</code>. The canonical root files <code class="anchor">tuning.json</code>, <code class="anchor">clocks.json</code>, <code class="anchor">direction.json</code>, and <code class="anchor">personalization.json</code> are likewise read by presence where their sections make them legal. In particular, <code class="anchor">direction.json</code> and <code class="anchor">personalization.json</code> are in use when present; the manifest names neither one (§3).</p>
+<p><strong>The kernel promise.</strong> The five required files alone — three Markdown chapters written in ordinary prose, and two small JSON files — are a complete, conforming design document. Not a draft, and not a minimum awaiting the rest of this specification: every further mechanism in this document is opt-in, activated by declaring or using it, and a package that stops here is finished. This floor is deliberate. Widening it — making any further construct required of every package — is a format revision taken knowingly, never a side effect of another change.</p>
+<p>The Markdown chapters are written for the builder who will turn the spec into a game. Ordinary prose is welcome. Decide everything, and say it briefly. Every rule a player could observe has to be settled: either write it out, or hand it over on purpose using one of §2's authority levels. Say each rule once. Thoroughness is settling everything, not writing at length. A spec that settles everything in few words is easier to build from, easier to read, and cheaper. §2a's tie-break rule shows the kind of care this asks for.</p>
+<p>Numeric authority means which file owns which number. §4 assigns it. Three of its assignments are worth knowing here.</p>
+<ul>
+<li>A number the design cites lives under a key in <code class="anchor">tuning.json</code> <code>values</code>, such as <code class="anchor">hazard.interval_seconds</code>. A range beside it says how far it may move (§4).</li>
+<li>A fact about one piece of content lives in that content's own collection record. In a card game, the cost printed on a card is stored on that card (§1b), not in <code class="anchor">tuning.json</code> and not in a chapter's prose.</li>
+<li>If an acceptance test needs an input, the input lives with the test. A test that replays fixed random seeds carries its own list of seeds (§6).</li>
+</ul>
+<p>Normative prose MUST cite the tuning key rather than repeat the value it holds: write <code class="anchor">hazard.interval_seconds</code>, never the number stored under it. The citation is bare, and §4 gives the rule that tells a citation from the other dotted tokens prose carries.</p>
+<p>Every package-relative path MUST remain inside the package after normalization, so resolving its <code>..</code> segments must not lead out of the package directory. <code>assets/../../elsewhere.png</code> resolves outside, and is invalid.</p>
+<p>One convention for reading this document: a JSON example shows a fragment of the file it belongs to, not a complete document, unless the surrounding text says it is complete.</p>
+<h2 id="1a-the-fantasy-block-required">1a. The fantasy block (required)<a class="heading-anchor" href="#1a-the-fantasy-block-required" aria-label="Link to this section">#</a></h2>
+<p><em>For designers. Every spec needs one, so nobody skips this.</em></p>
+<p><code class="anchor">01-overview.md</code> MUST open with a fenced <code>fantasy</code> block. That filename is normative (§1): the block is read from <code class="anchor">01-overview.md</code> and nowhere else. The fence carries the tag <code>fantasy</code>, and the block MUST be the first substantive content in the file. One <code>#</code> title line may precede the fantasy block; HTML comments before the fantasy block are not content. Anything else before the block fails (<code>FANTASY_POSITION</code>). It holds three things:</p>
+<ul>
+<li><strong>The player fantasy, within 280 characters.</strong> The first line says what the player gets to be: &quot;You are the getaway driver, and the plan is already falling apart.&quot; Within the budget the shape is the writer's — one long sentence, three longer beats, six short ones. Further lines SHOULD each reach toward a different facet of the fantasy — what the player does, what the world looks and sounds like, what playing feels like — rather than elaborating a facet already stated.</li>
+<li><strong>Three to five feel adjectives.</strong> For example: fast, slick, breathless.</li>
+<li><strong>Anti-references</strong>: what this game is NOT. &quot;Not: grindy, tactical, punishing.&quot; Saying what the game is not constrains an AI builder better than positive description does. Without it, an AI builder tends toward the average of its genre.</li>
+</ul>
+<p><strong>Line grammar.</strong> The block is read line by line. Blank lines are ignored, as is leading and trailing whitespace on any line. Label matching ignores case.</p>
+<ul>
+<li>The <strong>feel adjectives</strong> sit on one line opening <code>Feel:</code>, separated by commas. There MUST be three to five of them, and an empty entry does not count toward that total.</li>
+<li>The <strong>anti-references</strong> sit on one line opening <code>NOT:</code> or <code>Anti-references:</code>. That line MUST NOT be empty after its label.</li>
+<li>Each label MUST NOT appear more than once in the block. A second <code>Feel:</code> line, or a second anti-reference line under either of its two spellings, is a hard failure. Two labelled lines would leave no rule for which one binds.</li>
+<li>The <strong>player fantasy</strong> is every line opening with neither label. There MUST be at least one such line. Consecutive unlabeled lines join into one fantasy statement, so a sentence may wrap across lines; each joined statement MUST end with a sentence-ending mark. The marks are <code>.</code>, <code>!</code>, and <code>?</code>.</li>
+<li>The fantasy lines' combined length MUST NOT exceed <strong>280 characters</strong>, counted after trimming each line's leading and trailing whitespace, newlines not counted. This is the block's one size limit, and it does the work a line count cannot: it permits six short beats or three long ones equally, while squeezing out the detail that belongs in the chapters.</li>
+<li>A fantasy line MUST NOT contain a typed-colon reference beginning <code>tuning:</code>, <code>state:</code>, <code>collections:</code>, <code>descriptor:</code>, or <code>palette:</code>; a <code>runtime.</code> address; a bare tuning citation; or a chapter anchor. A <strong>bare tuning citation</strong> is an inline-code token that §4's classification rule reads as a citation. A <strong>chapter anchor</strong> is a Markdown heading anchor reference, written <code>&lt;file&gt;.md#&lt;anchor&gt;</code> or as a bare <code>#&lt;anchor&gt;</code>. The bare form is read lexically: a <code>#</code> preceded by the start of the line or by whitespace and followed immediately by a kebab-case id. For this lexical form, a kebab-case id contains at least one letter. A <code>#</code> in any other position, or followed by digits alone, is ordinary text, so &quot;the #1 spot&quot; is not an anchor.</li>
+</ul>
+<p><strong>The anchor of a heading (normative).</strong> Wherever this document resolves a chapter anchor — a §10.7 contract-row citation — the anchor a heading answers to is derived from the heading's text by these steps, in order:</p>
+<ol>
+<li>lowercase it;</li>
+<li>remove every HTML tag, meaning every run from <code>&lt;</code> through the next <code>&gt;</code>;</li>
+<li>remove every backtick, asterisk, underscore, and tilde;</li>
+<li>remove every remaining character that is not a Unicode letter, a Unicode number, whitespace, or a hyphen;</li>
+<li>trim leading and trailing whitespace; and</li>
+<li>replace each run of whitespace with a single hyphen.</li>
+</ol>
+<p>The rule defines no disambiguating suffix, so two headings in one file whose text derives the same anchor leave a citation of it undecidable; a package SHOULD NOT carry a pair.</p>
+<p>The fantasy is read by every builder before any key exists to cite; a reference in it is mechanics leaking upward, and it fails validation.</p>
+<p>A sentence-ending mark closing the <code>Feel:</code> or anti-reference line is punctuation, and not part of the last entry on it.</p>
+<pre><code class="lang-fantasy">You are the getaway driver, and the plan is already falling apart.
+Neon rain on the windshield, a stolen V8 under your hands.
+Feel: fast, slick, breathless.
+NOT: grindy, tactical, punishing.</code></pre>
+<p>A single player-fantasy line is enough for that part of the block; a complete, valid block also carries the required <code>Feel:</code> line and anti-reference line. Extra fantasy facets earn their keep below: they tie-break delegations a role-only sentence never reaches.</p>
+<p>A spec deliberately leaves some decisions to the builder. Those are its Delegated sections, tagged <code>&gt; DELEGATED:</code> (§2), and they turn up in any chapter: a presentation chapter might delegate the menu typeface, or the paint on the getaway car.</p>
+<p><strong>Every Delegated section is implicitly constrained by the fantasy block.</strong> The block is the tie-breaker for every delegated decision in the spec, no matter which chapter makes it. When the block says &quot;NOT: punishing&quot; and a delegated choice is open between a harsh crash sound and a soft scrape, the soft scrape wins.</p>
+<h2 id="1b-structured-content-collections">1b. Structured content collections<a class="heading-anchor" href="#1b-structured-content-collections" aria-label="Link to this section">#</a></h2>
+<p><em>For designers. Skip unless your game keeps content in records: a deck, a bestiary, a level table, a dialogue tree, or anything like them.</em></p>
+<p>A collection is a folder with record files in it. Everything else is opt-in.</p>
+<pre><code class="lang-text">my-game/
+  collections/
+    enemies/
+      gloom-moth.json      one record; the filename is its id
+      cinder-wisp.json
+    levels/
+      _collection.json     the optional label: the record schema
+      first-slide.json</code></pre>
+<p><strong>Each immediate subdirectory of <code>collections/</code> is one collection</strong>, and the folder name is the collection's id, in lowercase kebab-case (the identifier grammar of §3). Presence is the whole declaration: there is nothing to register in the manifest, and nothing that can contradict what the folder holds. The directory holds drawers and nothing else, and a drawer holds its optional label and its records and nothing else: a loose file in either place is a hard failure, because a file the format cannot read as a record would otherwise sit silently beside the ones it can. Drawers are flat — subdirectories inside a drawer are not defined in this revision. Organization is expressed as sibling drawers with compound kebab names (<code>enemies-bosses</code>, <code>enemies-minions</code>), which is also what differently shaped records truthfully are: different collections.</p>
+<p><strong>One file per record, and the filename is the record's id and address.</strong> The name minus <code>.json</code> MUST be lowercase kebab-case, which also makes case-folding collisions unspellable, and the filesystem enforces id uniqueness by construction. The file holds one JSON object of the game's own fields, and a display name is ordinary record data: the address stays stable while the game calls the thing whatever it likes.</p>
+<p><strong><code class="anchor">_collection.json</code> is the drawer's optional label</strong>, validated by <code class="anchor">collection.schema.json</code> (§3a), and it appears only when it has something to say. Its one field is <strong><code>record</code></strong>: a record schema, written in the same closed field grammar a contract definition's row declarations use (§10.4). Each field names its <code>type</code>, one of <code>number</code>, <code>integer</code>, <code>string</code>, <code>grid</code>, <code>link</code>, or <code>list</code>, and may carry <code>required</code> or a row-domain <code>when</code>, <code>options</code>, <code>pattern</code>, <code>unique</code>, and a <code>description</code> saying how the field is read. <code>link</code> adds <code>to</code>, <code>many</code>, <code>loops</code>, and <code>mirrored_by</code>; <code>list</code> adds <code>of</code>, which contains the same field grammar recursively. With a schema present, every record in the drawer MUST satisfy it: an undeclared field, a missing required field, a wrong type, a value outside a closed option set, and a repeated unique value are hard failures. Without one, records are free-form designer data, and the format says so plainly rather than pretending otherwise. In a schema and in records alike, a key opening with <code>_</code> is an annotation — read by nothing, checked by nothing, and exempt from the undeclared-field rule — the same idiom §10.2 gives contract files.</p>
+<p>The grammar's §1b dialect adds <strong><code>grid</code></strong>, <strong><code>link</code></strong>, and <strong><code>list</code></strong>. <code>grid</code> is a non-empty array of strings, one per row. All grid fields of one record MUST agree in dimensions, measured in Unicode scalar values — the format fixes the unit — and §7a gives the congruence rules in full. The <code>citation</code> type is §10.7's dialect, and question-domain conditions are §10.4's: both read a contract adoption's context, and no such context exists here.</p>
+<p>Field-level meaning — what <code>speed</code> measures, what <code>#</code> marks — lives in the schema's <code>description</code>, exactly where contract definitions put it. Game rules — &quot;bosses spawn once per run&quot; — live in chapters, as every rule does. <strong>Drawers are Fixed spec data</strong>: statements of the package, like inline contract rows (§10.4), owned by the designer as every other statement is. A designer who hands some aspect of a collection's content to the builder says so in an ordinary <code>&gt; DELEGATED:</code> section, in words, checked as all delegation is (§2). No authority machinery attaches to a drawer, and no per-collection tag exists: the retired <code>&gt; COLLECTION:</code> claim of an earlier draft is reported as retired where it survives in a chapter.</p>
+<p><strong><code>collections</code> is a reserved prose first segment</strong> (v0.6, under §4's versioning clause). <code>`collections.&lt;drawer&gt;`</code> cites the drawer as a set, <code>`collections.&lt;drawer&gt;.&lt;record&gt;`</code> cites one record, and a longer token names a member of the record's own data and resolves as far as the record, as other record-backed paths do. A dangling citation is a hard failure. This closes the format's last silent-rename gap: with record links hard-checked, renaming a record makes every stale link a validator finding with a file and line — the failure that makes rename tooling trustworthy, exactly as §4 says of palettes.</p>
+<p>A drawer nothing reaches — no prose cites it and no record link points to it — is a <strong>warning</strong>: the spec never mentions it, which is a review lead, not an order.</p>
+<h3 id="links-between-records">Links between records<a class="heading-anchor" href="#links-between-records" aria-label="Link to this section">#</a></h3>
+<p>A field of type <code>link</code> holds the id of a record in the drawer named by <code>to</code>. <code>many: true</code> makes the field an array of ids; without it the field holds one id. The target drawer belongs to the same package and MAY be the drawer that declares the field. The field names below are the designer's; the format defines their shapes, not their names.</p>
+<pre><code class="lang-json">{
+  &quot;record&quot;: {
+    &quot;prerequisite_ids&quot;: {
+      &quot;type&quot;: &quot;link&quot;,
+      &quot;to&quot;: &quot;technologies&quot;,
+      &quot;many&quot;: true,
+      &quot;loops&quot;: false
+    },
+    &quot;unlock_recipe_ids&quot;: {
+      &quot;type&quot;: &quot;link&quot;,
+      &quot;to&quot;: &quot;recipes&quot;,
+      &quot;many&quot;: true,
+      &quot;mirrored_by&quot;: &quot;unlocked_by_tech_id&quot;
+    },
+    &quot;inputs&quot;: {
+      &quot;type&quot;: &quot;list&quot;,
+      &quot;of&quot;: {
+        &quot;item_id&quot;: { &quot;type&quot;: &quot;link&quot;, &quot;to&quot;: &quot;items&quot;, &quot;required&quot;: true },
+        &quot;qty&quot;: { &quot;type&quot;: &quot;integer&quot;, &quot;required&quot;: true }
+      }
+    }
+  }
+}</code></pre>
+<p>An absent link field, <code>null</code>, or an empty array contributes zero links. When <code>required: true</code> or a satisfied <code>when</code> condition makes the field required, it MUST instead hold at least one link. A present single link MUST be a string id; a present link with <code>many: true</code> MUST be an array of string ids. Repeating an id in one array produces the <code>COLLECTION_LINK_DUPLICATE</code> warning. A present value of the wrong type is <code>COLLECTION_LINK_TYPE</code>.</p>
+<p><strong>Existence is checked on every package validation.</strong> Each linked id MUST name a record in the <code>to</code> drawer. A missing drawer is <code>COLLECTION_LINK_TARGET</code>; a missing record is <code>COLLECTION_LINK_DANGLING</code>. Both diagnostics identify the declaring field, and the dangling-record diagnostic also identifies the source record and value. Nothing is registered in the manifest and no acceptance test turns this check on.</p>
+<p>Two further checks are opt-in on the field:</p>
+<ul>
+<li><strong><code>loops: false</code></strong>, on a link into the same drawer, says the links carried by that field MUST contain no cycle. A failure is <code>COLLECTION_LINK_LOOP</code> and reports one complete cycle as an ordered list of record ids. On a link to a different drawer, <code>loops</code> has no effect. Omitted or <code>true</code> permits cycles.</li>
+<li><strong><code>mirrored_by: &quot;&lt;field&gt;&quot;</code></strong> names a link field on the target drawer that points back to this drawer. Forward links and back-pointers MUST agree in both directions, link by link. A missing or incompatible mirror field is <code>COLLECTION_MIRROR_FIELD</code>; a link present in only one direction is <code>COLLECTION_MIRROR_ONE_WAY</code> and reports both record ids.</li>
+</ul>
+<p>A <code>list</code> field holds an array of objects. Its <code>of</code> object is a closed record schema for each line, so a recipe can keep an item link and its quantity together without a path grammar or wildcard.</p>
+<p>When a pointer's target depends on the record, use one link field per kind of target. For example, <code>requires_unit</code> points to units and <code>requires_improvement</code> points to improvements; the chapter says which one a rule reads. A later revision may let <code>loops</code> continue through a further field, allowing one claim to cross two fields.</p>
+<h2 id="1c-retired">1c. Retired<a class="heading-anchor" href="#1c-retired" aria-label="Link to this section">#</a></h2>
+<p><em>This section was retired in v0.7; links between records live on the field (§1b).</em></p>
+<h2 id="2-the-three-authority-levels">2. The three authority levels<a class="heading-anchor" href="#2-the-three-authority-levels" aria-label="Link to this section">#</a></h2>
+<p><em>For designers. This is the core mechanism of the format; nobody skips it.</em></p>
+<p>Every design statement in the spec carries one of three authority levels. Fixed is the default and needs no tag. Chapters mark non-default sections with a blockquote tag.</p>
+<div class="table-scroll"><table>
+<thead><tr><th>Level</th><th>Tag</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>Fixed</strong></td><td>(default, untagged)</td><td>Build exactly as written. A deviation is an audit finding under the experimental protocol and would block a future normative certification outcome (§2d).</td></tr>
+<tr><td><strong>Delegated</strong></td><td><code>&gt; DELEGATED:</code></td><td>The builder decides. The spec states intent and constraints; the implementation may vary.</td></tr>
+<tr><td><strong>Personalization</strong></td><td><code>&gt; PERSONALIZATION: &lt;id&gt;</code></td><td>Resolved by the answer to question <code>&lt;id&gt;</code> in <code class="anchor">personalization.json</code>.</td></tr>
+</tbody>
+</table></div>
+<p><strong>Scope.</strong> An authority tag has an exact syntactic scope. It starts at the tag and ends at the next authority tag in the same heading section, or at the end of that section, whichever comes first. The section ends at the next heading of the same or a higher level. A statement with no authority tag in scope is Fixed, which is why Fixed needs no tag of its own.</p>
+<p><strong>Token grammar.</strong> What follows <code>DELEGATED:</code> is an optional free-text label. It is descriptive only, and no rule reads it. What follows <code>PERSONALIZATION:</code> MUST be the id of a question declared in <code class="anchor">personalization.json</code> (§5). A tag naming no declared question is a hard failure, and it is a package-level one (§2d): the id and the question declaration are both package bytes.</p>
+<p>The three levels are the core mechanism of the format: they make every build unique while keeping the design intact.</p>
+<p><strong>What the format resolves by machine.</strong> All three levels are prose-level instructions to the builder, with one exception: this version defines machine semantics for Personalization only where an answer moves a number, and §5 owns that machinery. For a personalized prose section or collection record, the format defines no machine effect; §5's &quot;Answers outside tuning&quot; rules say how the builder resolves one.</p>
+<h2 id="2a-the-responsibility-boundary">2a. The responsibility boundary<a class="heading-anchor" href="#2a-the-responsibility-boundary" aria-label="Link to this section">#</a></h2>
+<p><em>For designers and builders. It settles who decides what, so read it before you argue about it.</em></p>
+<p>One test decides which statements must be Fixed and which may be Delegated: <strong>does the difference change play, in a way a player can observe?</strong></p>
+<p>Suppose two builds of one spec differ. If a player could notice the difference, and it changes how the game plays, that difference is design area. The spec must pin it, and give the design reason. If no player could ever tell, it is the builder's craft.</p>
+<p>That leaves a third case, and it is the common one in presentation: a difference a player plainly sees which does not change how the game plays. Two builds may light the same room differently, or animate the same win at different speeds. That area is Delegated. A designer who wants to constrain it without pinning it uses art direction (§9), which states targets and leaves the means open.</p>
+<p>The rendering technique is one such area. A spec's §3 <code>platform</code> names the state space the design is responsible for; how the builder draws it is the builder's choice. A <code>web-2d</code> world may use flat sprites or perspective 3D graphics without touching the design area, provided every Fixed and constrained claim still holds.</p>
+<p>Some decisions belong to neither party, but to <strong>the format itself</strong>. These are ecosystem properties, where builds agreeing with each other matters more than anyone's preference. The format fixes three of them.</p>
+<ul>
+<li><strong>PRNG algorithm.</strong> Seeds are strings. Hash an addressed seed's exact UTF-8 bytes with FNV-1a (32-bit), then drive Mulberry32. The same address then draws the same sequence in anyone's build, which is what makes a seeded acceptance test checkable.</li>
+<li><strong>PRNG address.</strong> A stream address has this canonical text grammar:</li>
+</ul>
+<p><code>text address = seed *( &quot;:&quot; unit &quot;:&quot; index ) [ &quot;:stream:&quot; stream ] unit    = lowercase-kebab-name index   = &quot;0&quot; | [ &quot;-&quot; ] nonzero-digit *digit stream  = lowercase-kebab-name</code></p>
+<p><code>+</code>, leading zeroes, and <code>-0</code> are forbidden.</p>
+<p>The spec MUST declare four things about its addresses.</p>
+<ol>
+<li>Every unit and named-stream template.</li>
+<li>Each index's meaning and origin.</li>
+<li>Whether a unit accepts signed coordinates or only non-negative ordinals.</li>
+<li>The order in which draws are consumed inside a sequential stream.</li>
+</ol>
+<p>These four MUSTs bind the package, and they are prose obligations under §2d. They are discharged in the spec's own chapters, since the format declares no machine site to hold them: no validator can decide whether a spec has named every unit or fixed every draw order. People reading the chapters decide it, and a builder who finds one missing files a §2b ambiguity report.</p>
+<p>An address may carry more than one <code>unit:index</code> component, as in <code>{seed}:chunk-x:-4:chunk-y:7:stream:terrain</code>. Ordinal units may nest, as in <code>{seed}:arena:2:wave:4:spawn:7:stream:choreography</code>. The floor form is <code>{seed}:floor:{n}</code> with non-negative <code>n</code>. A root stream is allowed only when declared. No free-form path segment is an address.</p>
+<p>Named streams isolate draw sequences from each other. The same address and Fixed consuming procedure MUST produce the same result in every build. A Delegated consuming procedure promises deterministic replay only within its own build and that build's Fixed rules. So a spec MUST NOT require an exact cross-build artifact hash while delegating the procedure that creates it.</p>
+<ul>
+<li><strong>Tie-break rule.</strong> Some rules force a choice: which target, which order, what happens when two conditions fire at once, which of two equal distances wins. Every such rule MUST state its tie-break. A validator should flag choice-shaped verbs such as &quot;nearest&quot;, &quot;first&quot;, and &quot;when both&quot; when no tie-break is present.</li>
+</ul>
+<h2 id="2b-spec-lifecycle">2b. Spec lifecycle<a class="heading-anchor" href="#2b-spec-lifecycle" aria-label="Link to this section">#</a></h2>
+<p><em>For designers. Skip if you are only building from someone else's spec.</em></p>
+<p>Three stages describe how far a spec has been proven. They are stated in terms of certified builds, so they take effect only as far as the experimental certification protocol does (§2d).</p>
+<ul>
+<li><strong>Draft.</strong> No build has ever been certified from it. It is buildable at your own risk, and ambiguity reports are expected and welcomed.</li>
+<li><strong>Proven.</strong> At least one certified build exists, normally the designer's own reference build. Producing that build is part of authoring, because it exposes the rules the spec left unstated.</li>
+<li><strong>Hardened.</strong> At least two independent builders have certified builds.</li>
+</ul>
+<p>A failed build checkpoint generates an <strong>ambiguity report</strong>, routed to the designer as a spec issue: what the builder found, what the spec left open, and which spec revision it was filed against. The format does not yet standardize the report's shape.</p>
+<p>Reviews attach to builds, and never to specs. A spec's quality signal would come instead from its certification rate, its independent-build count, and the ratings of its certified builds.</p>
+<h2 id="2c-rulesets">2c. Rulesets<a class="heading-anchor" href="#2c-rulesets" aria-label="Link to this section">#</a></h2>
+<p><em>For designers. Skip unless your game swaps one whole ruleset for another while play is in progress.</em></p>
+<p>Some games change which rules are active while play is in progress: a game might swap one complete ruleset for another between acts or scenes. A <code>&gt; RULESET: &lt;id&gt;</code> tag declares the ruleset id and scopes the prose that follows to it. Exactly one tag MUST add <code>(initial)</code> after the id:</p>
+<pre><code class="lang-markdown">&gt; RULESET: act-one (initial)</code></pre>
+<p>The id is kebab-case. The reserved id <code>all</code> is retired; an untagged statement already applies in every ruleset. Repeating a ruleset id in another tag continues the same ruleset; it does not declare a second one.</p>
+<p>A prose tag has an exact syntactic scope. It starts at the tag and ends at the next <code>&gt; RULESET:</code> tag in the same heading section, or at the end of that section, whichever comes first. The section ends at the next heading of the same or a higher level. An untagged statement is authoritative under every ruleset.</p>
+<p>Tooling parses the tags, identifies the one initial ruleset, and enumerates which statements are shared or belong to each ruleset.</p>
+<p>Tags cannot establish semantic claims about mutual exclusion or reachability, such as &quot;these two rulesets are never simultaneously active.&quot; Game-local §6 tests cover those claims.</p>
+<h2 id="2d-conformance-layers-and-certification-status">2d. Conformance layers and certification status<a class="heading-anchor" href="#2d-conformance-layers-and-certification-status" aria-label="Link to this section">#</a></h2>
+<p><em>For auditors and tool authors. Designers: read the two-severity rule and move on.</em></p>
+<p>The map of the three layers, before the rules:</p>
+<div class="table-scroll"><table>
+<thead><tr><th>Layer</th><th>Question it answers</th><th>Decided by</th><th>Decided from</th></tr></thead>
+<tbody>
+<tr><td>Package conformance (normative)</td><td>Is the design sound on paper?</td><td>Validation: machine checks, plus human reading for prose obligations</td><td>The package bytes alone</td></tr>
+<tr><td>Build-record conformance (normative)</td><td>Is the builder's completion claim coherent?</td><td>Validation: record shape, arithmetic, consistency with the source package</td><td>The record and package bytes alone</td></tr>
+<tr><td>Build certification (EXPERIMENTAL)</td><td>Is the claim true in reality?</td><td>The runner profile and audit profile in <a href="/conformance/certification/"><code>conformance/CERTIFICATION.md</code></a>: execution, evidence, judgment</td><td>Running the build and reviewing its evidence</td></tr>
+</tbody>
+</table></div>
+<p>This version defines two normative conformance subjects for a design — the package and the build record — and one experimental protocol. Every conformance or certification statement in this document reads against this section. Prose also says that a validator or a runtime outcome conforms; those uses read against the rules written for them and introduce no third conformance subject. There are two severities, and only two. An <strong>error</strong> is decisive: &quot;hard failure&quot;, &quot;validation failure&quot;, and &quot;validation error&quot; all mean the same thing — the package or build does not conform. A <strong>warning</strong> advises: it points at something worth looking at and decides nothing. §7's package-consistency check 6 shows the two severities keeping their subjects straight: a build whose <code class="anchor">acceptance.passed</code> falls short of <code class="anchor">acceptance.total</code> does not conform, and the shortfall is an error against build conformance rather than a complaint about the file — the record stays a well-formed, schema-valid record of an incomplete build.</p>
+<p><strong>Package conformance (normative).</strong> A package conforms when each machine file for which this document publishes a schema validates against its published v0.7 schema — <code class="anchor">manifest.json</code> against the manifest schema, <code class="anchor">tuning.json</code> against the tuning schema, and, when present, <code class="anchor">personalization.json</code> against the personalization schema, <code class="anchor">direction.json</code> against the direction schema, and <code class="anchor">clocks.json</code> against the clocks schema — and the package satisfies every package-level MUST in this document. A package-level MUST is one decidable from the package bytes alone — by machine or by a human reader, never requiring execution or external state. A MUST about build behavior, cross-build stability, or test execution reads against the build-record conformance layer or the experimental protocol instead. The published validator implements the machine-decidable subset of package conformance. A zero-error CLI result establishes only that the checks this implementation performs passed; it does not by itself establish full package conformance. The rules, not any one tool's current coverage, define that outcome. Package-level rules are of two kinds. Machine-decidable rules — schema validity, completeness, shape grammar, and cross-file consistency — are decided by validation, and a validator error is a conformance failure. Prose obligations, such as §2a's tie-break rule or the rule that normative prose cites a tuning key rather than repeating its value, bind the package with the same force, but deciding a violation can take human judgment. A validator may surface likely violations as warnings, but a warning does not by itself decide conformance, and the absence of a warning does not discharge the human review.</p>
+<p><strong>Build-record conformance (normative).</strong> A build conforms when it ships an <code class="anchor">opengdd-build.json</code> that validates against the build schema and passes every §7 validator-level package-consistency check. The record is the builder's completion claim: shipping it asserts that every acceptance test passed, and so that every colour promise with <code>within: 0</code> its tests cover matched (§9.6). This version machine-checks the record's internal validity and its consistency with the source package; it does not audit the assertion's truth. Auditing that truth is what certification would do. A build that still fails a test does not yet ship a conforming record; what it has are §2b ambiguity reports.</p>
+<p><strong>Build certification (EXPERIMENTAL).</strong> Certification would be the audited claim that one particular build faithfully implements its spec. The runner profile and audit profile are documents inside the conformance certification protocol published at <a href="/conformance/certification/"><code>conformance/CERTIFICATION.md</code></a>. The runner profile states how a named runner executes §6 tests and produces observations. The audit profile owns capture recipes, review of §7 evidence and runtime values, accounting for every Fixed statement, and judged direction claims (§9.10). Both profiles are experimental.</p>
+<p>This version does not define a normative certification outcome, an execution grammar for <code>test</code> blocks beyond §6's package-level field set, or a panel protocol for judged claims. Where this document describes certification, it describes the intended shape of that protocol. No statement grants or withholds a normative certification outcome. The draft protocol may record audit findings and experimental results, but those results are not core conformance outcomes.</p>
+<p>The experimental status changes no file's shape. <code class="anchor">opengdd-build.json</code> keeps its required fields, including <code>evidence</code>, and packages keep their §6 structural obligations. Record conformance checks the <code>evidence</code> field's shape and counts only: no record-conformance check executes tests or reproduces hashes. A contract's folder rules, filled-form shape, definition identity, pack pairing, and rendered-test shape are package-level rules of the first kind, all decidable from package bytes (§10); its definition digest is not a package rule, and recomputing one is audit work under the experimental protocol, exactly as with every other hash here (§10.9). Fixed statements bind at full force regardless: passing every acceptance test is necessary but never sufficient for the experimental certification protocol, because a Fixed statement binds whether or not a numbered test restates it (§2).</p>
+<h2 id="3-manifest-json">3. manifest.json<a class="heading-anchor" href="#3-manifest-json" aria-label="Link to this section">#</a></h2>
+<p><em>For designers. One short file per spec, and you write it once.</em></p>
+<p>The manifest carries the spec's identity and target. It is machine-validated against <a href="https://opengdd.org/schema/core/v0.7/manifest.schema.json">manifest.schema.json</a>. Here is a complete manifest for §1a's getaway driver, without optional commerce metadata:</p>
+<pre><code class="lang-json">{
+  &quot;opengdd&quot;: &quot;0.7&quot;,
+  &quot;id&quot;: &quot;getaway-driver&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;title&quot;: &quot;Getaway Driver&quot;,
+  &quot;designer&quot;: { &quot;name&quot;: &quot;OpenGDD Examples&quot; },
+  &quot;target&quot;: {
+    &quot;platform&quot;: &quot;web-2d&quot;,
+    &quot;genre&quot;: &quot;arcade driving&quot;,
+    &quot;session_minutes&quot;: 5,
+    &quot;audience&quot;: &quot;anyone; one hand on the keyboard&quot;
+  }
+}</code></pre>
+<p>Its required top-level fields are exactly:</p>
+<ul>
+<li><strong><code>opengdd</code></strong> is the format version. Its value is <code>&quot;0.7&quot;</code>.</li>
+<li><strong><code>id</code> and <code>version</code></strong> identify the spec. <code>version</code> is exactly three dot-separated non-negative decimal integers, <code class="anchor">MAJOR.MINOR.PATCH</code>. Each component is either <code>0</code> or begins with a non-zero digit; prerelease and build suffixes are not accepted. <code>id</code> is a kebab-case package id. Core conformance makes no global uniqueness claim; a catalogue or registry MAY impose uniqueness within its own declared domain.</li>
+<li><strong><code>title</code> and <code>designer</code></strong> name the game and its designer. The designer has a name and may also have a registry handle and contact details.</li>
+<li><strong><code>target</code></strong> requires the platform and genre family. It may also give the session length in <code>session_minutes</code> and the audience. <code>platform</code> names the delivery target and the <strong>state space</strong> the designer is responsible for — what the game must keep track of, not what it looks like. This version accepts <code>web-2d</code> and <code>web-3d</code>. A game whose world is a plane declares <code>web-2d</code> no matter how a build draws it; <code>web-3d</code> is for a game whose state itself needs three dimensions. Rendering technique is never a platform fact: it is the builder's craft on §2a's boundary, and a build records what it rendered with in <code class="anchor">opengdd-build.json</code> (§7).</li>
+</ul>
+<p>The manifest declares nothing beyond identity, target, and optional commerce metadata. Chapters and optional files are read by presence (§1); adopted contracts (§10.2) and collections (§1b) declare themselves through their directory contents; rulesets are declared by their prose tags (§2c).</p>
+<p>The optional <code>commerce</code> profile contains <code>license</code>, <code>split</code>, and an optional <code>derived_from</code> field:</p>
+<pre><code class="lang-json">{
+  &quot;commerce&quot;: {
+    &quot;license&quot;: &quot;opengdd-share-v0&quot;,
+    &quot;split&quot;: { &quot;designer&quot;: 50, &quot;builder&quot;: 50 },
+    &quot;derived_from&quot;: { &quot;id&quot;: &quot;parent-spec&quot;, &quot;version&quot;: &quot;1.0.0&quot; }
+  }
+}</code></pre>
+<p>The commerce profile is OPTIONAL core metadata. Whether the same package bytes are offered, listed, built by a third party, or kept internal does not change package conformance and never makes this field required. A publication or commerce profile MAY impose requirements within its own declared scope; those requirements are outside core conformance. Presence or absence here MUST NOT change gameplay expression or authority (a prose obligation, §2d). Under the experimental certification protocol, it does not change a build's standing.</p>
+<p><code>opengdd-share-v0</code> records proposed building and deployment terms under the declared split. The core format validates the metadata's shape, not whether it grants legal permission or whether a distribution satisfied its terms. The percentages in <code>split</code> MUST sum to 100.</p>
+<p><code>derived_from</code> is <strong>Reserved</strong> and inert in this version. It records lineage metadata only. Its <code>version</code> identifies a design spec and therefore uses the same numeric <code class="anchor">MAJOR.MINOR.PATCH</code> grammar as the manifest's own <code>version</code>. Fork licensing and royalties remain outside the core format. Modifications beyond the declared personalization bounds have no path through the experimental certification protocol. These rules belong to the commerce profile and do not change core artifact semantics.</p>
+<h2 id="3a-canonical-schema-urls">3a. Canonical schema URLs<a class="heading-anchor" href="#3a-canonical-schema-urls" aria-label="Link to this section">#</a></h2>
+<p><em>For tool authors. Designers: all you need is that <code>&quot;opengdd&quot;: &quot;0.7&quot;</code> picks your schemas.</em></p>
+<p>Every published schema is identified and served at a canonical URL:</p>
+<pre><code class="lang-text">https://opengdd.org/schema/&lt;layer&gt;/v&lt;minor&gt;/&lt;file&gt;.schema.json</code></pre>
+<p>For example:</p>
+<pre><code class="lang-text">https://opengdd.org/schema/core/v0.7/manifest.schema.json</code></pre>
+<p>The <code>core</code> layer publishes seven schemas: <code class="anchor">manifest.schema.json</code> (§3), <code class="anchor">tuning.schema.json</code> (§4), <code class="anchor">clocks.schema.json</code> (§4b), <code class="anchor">personalization.schema.json</code> (§5), <code class="anchor">collection.schema.json</code> (§1b, the drawer label), <code class="anchor">direction.schema.json</code> (§9), and <code class="anchor">opengdd-build.schema.json</code> (§7). The first six are the package's; the seventh is the build record's. A contract adoption file has no schema here by decision, not by omission: §10's filled form is format machinery while a definition's content is not (§10.10), so §10 states the shape normatively in prose and a validator implements it. A schema for that shape may ship with tooling later; it would add no rule.</p>
+<p>Four rules govern these URLs:</p>
+<ol>
+<li><strong>The schema layer comes before the version.</strong> Each schema layer versions independently. <code>core</code> is the only schema layer today. A future commerce profile could be another. The URL layout MUST NOT imply that different schema layers share one version (a rule for the schema publisher, outside package conformance).</li>
+<li><strong>The version segment uses the format version.</strong> It is <code>v</code> followed by the manifest's <code>opengdd</code> value. A schema under <code>/core/v0.7/</code> validates manifests that declare <code>&quot;opengdd&quot;: &quot;0.7&quot;</code>. Schema URLs use minor-version granularity. Patch-level corrections are published as errata at the same URL and MUST NOT silently change any validation outcome (a rule for the schema publisher, outside package conformance).</li>
+<li><strong>Published URLs are permanent.</strong> A schema MAY be superseded by a newer version at a new URL. Its existing URL MUST NOT be repurposed or removed (a rule for the schema publisher, outside package conformance). The content served there is frozen except for the errata allowed above.</li>
+<li><strong>There is no floating alias.</strong> Documents MUST reference an explicit version (a prose obligation, §2d). The format defines no <code>/latest/</code> URL.</li>
+</ol>
+<h2 id="4-tuning-json">4. tuning.json<a class="heading-anchor" href="#4-tuning-json" aria-label="Link to this section">#</a></h2>
+<p><em>For designers. This is where your numbers live, so read it.</em></p>
+<p><code class="anchor">tuning.json</code> keeps the numbers a build reads, the ranges within which some numbers may move, and readable rules that keep those numbers in step. It is machine-validated against <a href="https://opengdd.org/schema/core/v0.7/tuning.schema.json">tuning.schema.json</a>. The top level is a closed shape with exactly three possible tables: <code>values</code>, <code>ranges</code>, and <code>rules</code>.</p>
+<pre><code class="lang-json">{
+  &quot;values&quot;: {
+    &quot;dash.speed_tiles_per_second&quot;: 12,
+    &quot;dash.duration_seconds&quot;: 0.15,
+    &quot;dash.cooldown_seconds&quot;: 0.6,
+    &quot;tile.size_units&quot;: 16
+  },
+  &quot;ranges&quot;: {
+    &quot;dash.speed_tiles_per_second&quot;: [8, 20],
+    &quot;dash.duration_seconds&quot;: [0.1, 0.3],
+    &quot;dash.cooldown_seconds&quot;: [0.3, 1.5]
+  },
+  &quot;rules&quot;: {
+    &quot;no-dash-while-dashing&quot;: &quot;dash.cooldown_seconds &gt;= dash.duration_seconds&quot;,
+    &quot;dash-covers-a-tile&quot;: &quot;dash.speed_tiles_per_second * dash.duration_seconds &gt;= 1&quot;
+  }
+}</code></pre>
+<p><code class="anchor">clocks.json</code> declares the §4b block; it is not a fourth table here.</p>
+<h3 id="values-values">Values (<code>values</code>)<a class="heading-anchor" href="#values-values" aria-label="Link to this section">#</a></h3>
+<p><code>values</code> is required. It is one flat map from dotted keys to finite JSON numbers. A string, a Boolean, an object, an array, <code>null</code>, or a non-finite number under a key is a validation failure.</p>
+<p>Every key obeys three rules:</p>
+<ol>
+<li>It has two or more segments joined by <code>.</code>.</li>
+<li>Each segment contains only <code>a</code>–<code>z</code>, <code>A</code>–<code>Z</code>, <code>0</code>–<code>9</code>, <code>_</code>, and <code>-</code>, and a segment MUST NOT begin or end with <code>-</code>. <code class="anchor">hazard.interval_seconds</code> and <code class="anchor">lane.count</code> are keys; a single bare word is not.</li>
+<li>The key MUST NOT open with a segment reserved for prose citation, and no segment may be a reserved extension. Either would make the key unciteable in prose. Both lists appear under the citation rule below.</li>
+</ol>
+<p>Every number the design cites as shared gameplay data lives under one of these keys. A value declared by an adopted contract lives in that adoption instead and enters the same resolved snapshot under the reserved <code>contracts.</code> namespace (§§10.4, 10.6).</p>
+<h3 id="ranges-ranges">Ranges (<code>ranges</code>)<a class="heading-anchor" href="#ranges-ranges" aria-label="Link to this section">#</a></h3>
+<p><code>ranges</code> is optional. It maps a <code>values</code> key to an inclusive <code>[minimum, maximum]</code> pair. The minimum MUST NOT exceed the maximum; every range key MUST exist in <code>values</code>; and the declared value MUST sit inside its own range.</p>
+<p>A key with a range is what a rebalance or a personalization answer may move, within that range (§5). &quot;Tunable&quot; is a description of such a value, never a declaration or a category in this file. A key without a range is fixed as written.</p>
+<h3 id="rules-rules">Rules (<code>rules</code>)<a class="heading-anchor" href="#rules-rules" aria-label="Link to this section">#</a></h3>
+<p><code>rules</code> is optional. It maps each stable kebab-case rule name to one readable line. A rule reads keys from <code>values</code> only. <code class="anchor">rules.no-dash-while-dashing</code>, for example, is a mechanism path naming the first rule in the complete example above.</p>
+<p>A rule is one comparison between two sums: a left side, one of <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, or <code>&gt;=</code>, and a right side. Each side is arithmetic over numbers and <code>values</code> keys with <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, parentheses, and the three functions <code>min(a, b, …)</code>, <code>max(a, b, …)</code>, and <code>floor(x)</code>. <code>floor</code> rounds down and is useful when a division represents a whole-number count. Precedence is the usual arithmetic precedence: <code>*</code> and <code>/</code> before <code>+</code> and <code>-</code>; use parentheses for anything else.</p>
+<p>Every rule is evaluated over the authored <code>values</code>, over the package defaults, and over every resolved snapshot a build receives. The first two evaluations occur at package validation. A false package rule is a package validation failure; a false rule over a build snapshot is a build-record failure (§7). A failing rule produces a three-line message that names the rule, shows the line, and shows the numbers as they stand:</p>
+<pre><code class="lang-text">rule &quot;dash-covers-a-tile&quot; does not hold
+  dash.speed_tiles_per_second * dash.duration_seconds &gt;= 1
+  8 * 0.1 = 0.8, which is not &gt;= 1</code></pre>
+<p>Anything wrong with a rule line or its name is <code>TUNING_RULE_INVALID</code>; its message identifies the specific problem, such as an unreadable line, an unknown key or function, or division by zero. A false comparison is <code>TUNING_RULE_FAILED</code>.</p>
+<h3 id="package-defaults">Package defaults<a class="heading-anchor" href="#package-defaults" aria-label="Link to this section">#</a></h3>
+<p><strong>Package defaults</strong> are one flat <code>values</code> map. They are produced by applying every personalization question's <code>default</code> through §5's ordered answer pipeline to <code class="anchor">tuning.json</code> <code>values</code>. With no <code class="anchor">personalization.json</code>, they are <code class="anchor">tuning.json</code> <code>values</code> unchanged. These are the numbers over which package validation evaluates the rules above.</p>
+<p><em>Non-normative.</em> A balance-only revision moves values within their ranges; no conformance subject compares two revisions.</p>
+<p>Numbers that belong elsewhere stay elsewhere:</p>
+<ul>
+<li>A number that only says how many of something there are MAY stay in Fixed prose, as long as no program needs to read it. A mechanics chapter saying a run lasts three rounds is one such number.</li>
+<li>A per-content measurement or solver-derived fact lives on that content's own collection record.</li>
+<li>Test inputs and seeds live with the acceptance test. Sample counts belong to the runner profile. Schedules, expected observations, and tolerances live with the test or its replay. Where a contract pack declares the inputs a test needs, they are recorded in the adoption's <code>verification</code> map and land in the rendered test (§10.8).</li>
+<li>Examples and identifiers carry no numeric authority. A displayed numeric example in prose MUST be marked non-normative (a prose obligation, §2d). The <code>PROSE_TUNING_LITERAL</code> warning carries this numeric-example rule.</li>
+</ul>
+<h3 id="reading-a-citation-in-prose-normative">Reading a citation in prose (normative)<a class="heading-anchor" href="#reading-a-citation-in-prose-normative" aria-label="Link to this section">#</a></h3>
+<p>§1 requires normative prose to cite the tuning key rather than the value, and the citation is written bare: the key alone in inline code, with no prefix. Chapter prose carries other dotted tokens too, so one rule decides what a token is. A backticked dotted token in chapter prose is classified by the first of these that matches:</p>
+<ol>
+<li><strong>Its first segment is reserved</strong> → a mechanism path, resolved against the file that owns it. <code class="anchor">mood.rain-glass</code> resolves in <code class="anchor">direction.json</code> (§9), and <code class="anchor">rules.no-dash-while-dashing</code> in <code class="anchor">tuning.json</code>.</li>
+<li><strong>Every segment is all digits</strong> → not a citation. <code class="anchor">0.5.0</code> is a version string.</li>
+<li><strong>Any segment of it is a reserved extension</strong> — <code>json</code> or <code>md</code> → a file or file-member mention, such as <code class="anchor">tuning.json</code>, <code class="anchor">02-mechanics.md</code>, or <code class="anchor">tuning.json.rules</code>. The extension need not be the last segment, which is why a tuning key MUST NOT carry one in any position.</li>
+<li><strong>Otherwise</strong> → a tuning citation. It MUST resolve to a key declared in <code class="anchor">tuning.json</code>. A token that resolves to nothing is a dangling citation, and a validation failure.</li>
+</ol>
+<p>The reserved first segments are <code>pillars</code>, <code>mood</code>, <code>anti</code>, <code>must_keep</code>, <code>colors</code>, <code>contrast</code>, <code>timing</code>, <code>values</code>, <code>ranges</code>, <code>rules</code>, <code>runtime</code>, <code>clocks</code>, <code>manifest</code>, <code>build</code>, <code>contracts</code>, <code>palette</code>, and <code>collections</code>. <code>manifest</code> and <code>build</code> are reserved against future use; a prose token opening with one is classified as a mechanism path and resolves against nothing in this version, so it is neither checked nor a citation. <code>runtime</code> is reserved because §4b owns it. An inline-code token equal to <code>runtime</code> or opening with <code>runtime.</code> MUST have §4b's runtime-address shape; otherwise validation reports <code>PROSE_CITATION_DANGLING</code>. <code>content</code> is deliberately not among them: it is a natural key namespace for a designer. The list is versioned: a later revision of this format MAY extend it as new mechanisms claim a segment, and a validator that rejects a key on a newly reserved segment names the revision that reserved it and suggests a legal key beginning with <code>feel.</code>. <code>palette</code> and <code>collections</code> are reserved as of v0.6. A tuning key opening with either that was legal before is rejected with a diagnostic naming that revision. <code>references.*</code> and <code>viewing.*</code> are legal tuning keys again in v0.7.</p>
+<p><code>values</code>, <code>ranges</code>, <code>rules</code>, <code>runtime</code>, <code>colors</code>, <code>contrast</code>, and <code>timing</code> are reserved as of v0.7. A tuning key opening with any of those segments is rejected with a diagnostic naming v0.7 as the revision that reserved it. A <code>values.&lt;key&gt;</code>, <code>ranges.&lt;key&gt;</code>, or <code>rules.&lt;name&gt;</code> token in prose is a mechanism path and MUST resolve against the corresponding <code class="anchor">tuning.json</code> table.</p>
+<p>The seven citable direction kinds are <code>pillars</code>, <code>mood</code>, <code>anti</code>, <code>must_keep</code>, <code>colors</code>, <code>contrast</code>, and <code>timing</code>. Each citation has exactly two segments: the kind and the entry key. <code>viewing</code> is not a citation target.</p>
+<p><code>contracts</code> earns its place on that list by rule 1: a backticked <code class="anchor">contracts.stamina.max</code> in prose is a mechanism path, resolved against the adoption file that owns it (§10). That is how chapter prose cites a contract value, and §1's rule that prose cites the key rather than the number holds over it unchanged. The same dotted address is used in JSON (§10.6).</p>
+<p><code>palette.&lt;key&gt;</code> and <code>palette.&lt;key&gt;.&lt;color&gt;</code> are mechanism paths resolved against <code class="anchor">direction.json</code> under §9.1's whole-key-first order.</p>
+<p><strong>Every reference form, in one place.</strong> This table gathers the format's reference spellings; each row's cited section states the governing rules, and the classification order above decides what a prose token is.</p>
+<div class="table-scroll"><table>
+<thead><tr><th>Form</th><th>Legal where</th><th>Resolves against</th><th>Failure behavior</th></tr></thead>
+<tbody>
+<tr><td>Bare dotted token, first segment unreserved — <code>`hazard.interval_seconds`</code></td><td>Chapter prose, inline code</td><td>A declared <code class="anchor">tuning.json</code> key</td><td>Dangling citation is a hard failure (§4)</td></tr>
+<tr><td>Dotted token, reserved first segment — <code>`mood.rain-glass`</code>, <code>`colors.mark-ink`</code>, <code>`palette.enemies.fire.flame`</code></td><td>Chapter prose, inline code; JSON fields that cite the same address</td><td>The owning file or directory, including <code class="anchor">direction.json</code> (§9), the <code class="anchor">tuning.json</code> tables (§4), <code class="anchor">clocks.json</code> (§4b), contract adoptions (§10), and <code>collections/</code> (§1b)</td><td>Dangling is a hard failure; a palette token resolves whole-key first (§9.1)</td></tr>
+<tr><td><code>runtime.&lt;dotted-name&gt;</code></td><td>Chapter prose; a clock's <code>advances</code>; a test's <code class="anchor">unchanged.values</code></td><td>Chapter prose and a clock's <code>advances</code> declare the runtime value (§4b)</td><td>A well-formed prose use is the declaration and cannot dangle; a prose token equal to <code>runtime</code> or opening with <code>runtime.</code> but not shaped as a runtime address is <code>PROSE_CITATION_DANGLING</code>. <code>RUNTIME_UNDECLARED</code> applies when a test's <code class="anchor">unchanged.values</code> names a value declared by neither chapter prose nor a clock's <code>advances</code> (§4b)</td></tr>
+<tr><td>Chapter anchor — <code>&lt;file&gt;.md#&lt;anchor&gt;</code></td><td>§10.7 contract row citations</td><td>Heading anchors under §1a's derivation</td><td>Unresolvable where the position requires one; banned in fantasy lines (§1a)</td></tr>
+<tr><td><code>&gt; RULESET: &lt;id&gt;</code> tag</td><td>Prose section tags</td><td>The ruleset ids the tags declare (§2c)</td><td>Exactly one tag carries <code>(initial)</code> (§2c)</td></tr>
+<tr><td><code>[MODE]</code> heading tag</td><td>End of a chapter heading</td><td>The time modes named by <code class="anchor">clocks.json</code> (§4b)</td><td>An unknown mode is <code>MODE_TAG_DANGLING</code> (§4b)</td></tr>
+</tbody>
+</table></div>
+<p>Not references, by the same rules: a token whose segments are all digits (a version string), a token carrying a <code>json</code> or <code>md</code> segment (a file mention), a colon-bearing token read as prose (not a dotted citation), and a <code>#</code> that is not preceded by line start or whitespace, or not followed by a kebab-case id with at least one letter (&quot;the #1 spot&quot;).</p>
+<h2 id="4a-retired">4a. Retired<a class="heading-anchor" href="#4a-retired" aria-label="Link to this section">#</a></h2>
+<p><em>This section was retired in v0.7; runtime values moved to §4b.</em></p>
+<h2 id="4b-runtime-values-time-modes-and-clocks">4b. Runtime values, time modes, and clocks<a class="heading-anchor" href="#4b-runtime-values-time-modes-and-clocks" aria-label="Link to this section">#</a></h2>
+<p><em>For designers. Skip unless a test must name a changing value, or the game mixes real time with turns or a pause.</em></p>
+<h3 id="4b-1-runtime-values">4b.1 Runtime values<a class="heading-anchor" href="#4b-1-runtime-values" aria-label="Link to this section">#</a></h3>
+<p>A <strong>runtime value</strong> is something that changes during play and that the design names so prose, tests, and clocks can point at it. Its address is <code>runtime.&lt;dotted-name&gt;</code>, such as <code class="anchor">runtime.oxygen_seconds</code> or <code class="anchor">runtime.case_facts.gallery_argument</code>. The address is untyped: the surrounding chapter sentence says what the value is and when it is read, and the builder chooses its implementation.</p>
+<p>Using a runtime address in a package-root chapter declares it. Naming it in a clock's <code>advances</code> array also declares it. Any other use without either declaration is <code>RUNTIME_UNDECLARED</code>.</p>
+<h3 id="4b-2-time-modes-and-clocks">4b.2 Time modes and clocks<a class="heading-anchor" href="#4b-2-time-modes-and-clocks" aria-label="Link to this section">#</a></h3>
+<p>A <strong>time mode</strong> is a span of play with one pattern for how time passes. A <strong>clock</strong> is a named source of advance, such as elapsed seconds or a turn count. A package opts in by adding <code class="anchor">clocks.json</code> at its root. The file is a non-empty map with one entry per clock and is machine-validated against <a href="https://opengdd.org/schema/core/v0.7/clocks.schema.json">clocks.schema.json</a>:</p>
+<pre><code class="lang-json">{
+  &quot;world_clock&quot;: {
+    &quot;unit&quot;: &quot;seconds&quot;,
+    &quot;advances&quot;: [&quot;runtime.scan_progress&quot;, &quot;runtime.research_remaining&quot;],
+    &quot;modes&quot;: {
+      &quot;playing&quot;: &quot;running&quot;,
+      &quot;paused&quot;: &quot;paused&quot;,
+      &quot;in-mission&quot;: &quot;paused&quot;
+    }
+  },
+  &quot;mission_turn&quot;: {
+    &quot;unit&quot;: &quot;turns&quot;,
+    &quot;advances&quot;: [&quot;runtime.faction_turn&quot;],
+    &quot;modes&quot;: {
+      &quot;playing&quot;: &quot;none&quot;,
+      &quot;paused&quot;: &quot;none&quot;,
+      &quot;in-mission&quot;: &quot;steps&quot;
+    }
+  }
+}</code></pre>
+<p>Every clock MUST declare a non-empty string <code>unit</code> and a non-empty <code>modes</code> map. <code>advances</code>, when present, is an array of runtime addresses carried forward by that clock. The <code>advances</code> arrays of different clocks MUST be disjoint; a value named by more than one is <code>CLOCKS_ADVANCES_DISJOINT</code>. Clock names use the tuning-key segment grammar: a letter, number, or underscore at each end, with letters, numbers, underscores, or hyphens between them.</p>
+<p>The time modes are the union of the keys in every clock's <code>modes</code> map. Every clock MUST name every mode; an omitted cell is <code>CLOCKS_MODE_MISSING</code>. Mode ids are kebab-case. Each cell uses exactly one of four words:</p>
+<ul>
+<li><code>running</code>: the clock moves continuously in that mode;</li>
+<li><code>paused</code>: the clock keeps its value and does not move in that mode;</li>
+<li><code>steps</code>: the clock moves only when a turn or other discrete step is taken;</li>
+<li><code>none</code>: the clock has no value in that mode.</li>
+</ul>
+<p>Any other cell word is <code>CLOCKS_MODE_WORD</code>. The object shape makes two words for one clock in one mode unrepresentable.</p>
+<p>A mode tag such as <code>[IN-MISSION]</code> is written at the end of a chapter heading and scopes that heading's section to one time mode, the way <code>&gt; RULESET:</code> scopes its section. Tags are uppercase by convention and compare case-insensitively with the lowercase kebab-case ids declared by <code class="anchor">clocks.json</code>; the folded tag MUST name one of those ids. A bracketed word in a paragraph is ordinary text. The reserved <code>all</code> tag is retired; leave a statement untagged when it applies in every mode. A later revision may add a tag that names a subset of modes.</p>
+<p>Clocks are not contracts. The clock map declares this game's facts; unusual behavior, such as a clock that runs only while the player moves, is a rule in prose. A later pause contract may ask the closed semantic questions that games answer differently, such as whether an expiry during a pause fires on resume, while still citing the game's clock rather than replacing it.</p>
+<h3 id="4b-3-unchanged-during-a-mode">4b.3 Unchanged during a mode<a class="heading-anchor" href="#4b-3-unchanged-during-a-mode" aria-label="Link to this section">#</a></h3>
+<p>A <code>scenario</code> or <code>general</code> test MAY carry <code>unchanged</code>:</p>
+<pre><code class="lang-json">{
+  &quot;unchanged&quot;: {
+    &quot;modes&quot;: [&quot;paused&quot;, &quot;in-mission&quot;],
+    &quot;values&quot;: [&quot;runtime.scan_progress&quot;]
+  }
+}</code></pre>
+<p>Both arrays MUST be non-empty. Every mode MUST be declared in <code class="anchor">clocks.json</code>, and every value MUST be a declared runtime address. During any one unbroken stretch in a named mode, each named value MUST read the same at every runner observation; a later stretch may read differently.</p>
+<p>Naming a value advanced by a clock that is <code>running</code> or <code>steps</code> in a named mode is the <code>UNCHANGED_ADVANCES</code> warning. Naming a value whose clock is <code>none</code> there is the <code>UNCHANGED_UNDEFINED</code> error. A package without <code class="anchor">clocks.json</code> cannot make this claim (<code>UNCHANGED_NO_CLOCKS</code>). A malformed <code>unchanged</code> object, or a value or mode of the wrong type, is <code>UNCHANGED_SHAPE</code>; an unknown mode is <code>UNCHANGED_MODE</code>.</p>
+<h3 id="4b-4-what-the-runner-owns">4b.4 What the runner owns<a class="heading-anchor" href="#4b-4-what-the-runner-owns" aria-label="Link to this section">#</a></h3>
+<p>Replay schedules and replay actions are runner data, not package vocabulary. At package conformance, <code>replay</code> is an opaque object: the core checks its shape as an object and assigns no meaning to its contents. The runner profile belonging to the experimental protocol defines the schedule and action vocabulary it accepts; that vocabulary is not yet standardized. See <a href="/conformance/certification/">the certification protocol</a>.</p>
+<h2 id="5-build-personalization-personalization-json">5. Build personalization (<code class="anchor">personalization.json</code>)<a class="heading-anchor" href="#5-build-personalization-personalization-json" aria-label="Link to this section">#</a></h2>
+<p><em>For designers. Skip if every build of your spec should come out the same.</em></p>
+<p><strong>Two lanes, one file.</strong> A question can set numbers mechanically or give the builder creative instruction. A <code>choice</code> option sets numbers when it carries <code>sets</code>; a <code>number</code> question sets its one named key to the numeric answer when the question carries <code>sets</code>. Text answers and answers with no <code>sets</code> are recorded for the builder to interpret. The same numeric answers always produce the same resolved snapshot; creative answers may lead two faithful builders to different implementations (§2a).</p>
+<p><code class="anchor">personalization.json</code> carries the questions asked before or while building. Its top level is a closed object whose one required field is <code>questions</code>:</p>
+<pre><code class="lang-json">{ &quot;questions&quot;: [] }</code></pre>
+<p><code>questions</code> is an ordered array of question objects, and answers are applied in that order. The file is machine-validated against <a href="https://opengdd.org/schema/core/v0.7/personalization.schema.json">personalization.schema.json</a>. One entry of that array:</p>
+<pre><code class="lang-json">{
+  &quot;id&quot;: &quot;hazard_interval&quot;,
+  &quot;prompt&quot;: &quot;How quickly should hazards arrive?&quot;,
+  &quot;type&quot;: &quot;choice&quot;,
+  &quot;options&quot;: [
+    {
+      &quot;id&quot;: &quot;steady&quot;,
+      &quot;label&quot;: &quot;Steady&quot;,
+      &quot;sets&quot;: { &quot;hazard.interval_seconds&quot;: 1.2 }
+    }
+  ],
+  &quot;default&quot;: &quot;steady&quot;
+}</code></pre>
+<p>A question object carries these fields, and the set is closed: adding one takes a format revision.</p>
+<ul>
+<li><strong><code>id</code></strong> is required: a string, unique within the file. It is the id a <code>&gt; PERSONALIZATION: &lt;id&gt;</code> prose tag (§2) names.</li>
+<li><strong><code>prompt</code></strong> is required: a non-empty string stating the question as the builder is asked it.</li>
+<li><strong><code>type</code></strong> is required, and is exactly one of <code>choice</code>, <code>text</code>, or <code>number</code>.</li>
+<li><strong><code>options</code></strong> is required for a <code>choice</code> question and legal only there. It is a non-empty array of objects, each carrying a required string <code>id</code> unique within the question, a required string <code>label</code>, an optional <code>notes</code> string, and the optional <code>sets</code> object below.</li>
+<li><strong><code>default</code></strong> is required for every question. Its type follows the question's <code>type</code>: the <code>id</code> of one declared option for <code>choice</code>, a string for <code>text</code>, a JSON number for <code>number</code>.</li>
+<li><strong><code>sets</code></strong> is optional on a <code>number</code> question and legal at question level only there. It is one tuning-key string: the key that receives the answer.</li>
+<li><strong><code>notes</code></strong> is optional: a string, under the same rule as an option's <code>notes</code>.</li>
+</ul>
+<p><code>default</code> is required because a skipped question with no default has no defined outcome: nothing would say what the build resolved, and the resolved snapshot could not be computed. Questions are optional for each build; when one is skipped, its <code>default</code> applies, so every question has an answer either way.</p>
+<p>For a <code>choice</code> question, the declared <code>default</code> and every recorded answer MUST name the <code>id</code> of one of its declared <code>options</code>: the answer pipeline below is defined only for declared option ids, and an undeclared id is a validation failure.</p>
+<p>For creative variants, designers SHOULD write <code>notes</code> a builder can act on directly: concrete instructions. Notes MUST NOT be the only authority for a numeric change (a prose obligation, §2d).</p>
+<h3 id="enumerated-answers">Enumerated answers<a class="heading-anchor" href="#enumerated-answers" aria-label="Link to this section">#</a></h3>
+<p>A choice option MAY declare exact tuning-key assignments through <code>sets</code>. When present, this object contains at least one entry:</p>
+<pre><code class="lang-json">{
+  &quot;id&quot;: &quot;rush-hour&quot;,
+  &quot;label&quot;: &quot;Rush hour&quot;,
+  &quot;sets&quot;: { &quot;hazard.interval_seconds&quot;: 0.9 }
+}</code></pre>
+<p>Each key in <code>sets</code> MUST name a key in <code>values</code> that has a range (§4); a key without a range cannot be set.</p>
+<p>Each value MUST lie within its key's declared range. A value outside that range is a package validation failure. A choice option without <code>sets</code> gives the builder creative instruction only.</p>
+<h3 id="numeric-answers">Numeric answers<a class="heading-anchor" href="#numeric-answers" aria-label="Link to this section">#</a></h3>
+<p>A numeric question MAY name one ranged key with <code>sets</code>:</p>
+<pre><code class="lang-json">{
+  &quot;id&quot;: &quot;hazard_pace&quot;,
+  &quot;prompt&quot;: &quot;How many seconds should separate hazards?&quot;,
+  &quot;type&quot;: &quot;number&quot;,
+  &quot;default&quot;: 1.2,
+  &quot;sets&quot;: &quot;hazard.interval_seconds&quot;
+}</code></pre>
+<p>The answer is the value assigned to that key. The <code>sets</code> key MUST exist in <code>values</code> and have a range (§4). The default MUST sit within that inclusive range. A supplied answer outside it is refused, never clamped, and the build record fails §7's check 4. A number question without <code>sets</code> records creative instruction and changes no number by machine.</p>
+<p><strong>Contract values are not targets.</strong> A <code>sets</code> key MUST NOT name <code>contracts.&lt;adoption&gt;.&lt;value&gt;</code>. A contract's values are fixed in the adoption; they cannot be set per build. A violation is <code>PERSONALIZATION_SETS_TARGET</code> (§10.4).</p>
+<h3 id="the-resolved-tuning-snapshot">The resolved tuning snapshot<a class="heading-anchor" href="#the-resolved-tuning-snapshot" aria-label="Link to this section">#</a></h3>
+<p>The <strong>resolved tuning snapshot</strong> is one object with exactly one flat map member, <code>values</code>. Starting from <code class="anchor">tuning.json</code> <code>values</code>, apply each supplied answer, or its question's default when no answer was supplied, in question order. A choice answer applies its selected option's <code>sets</code> map. A number answer assigns itself to the question's one <code>sets</code> key when present. After that pipeline, every adopted contract value joins the map unchanged under <code>contracts.&lt;adoption&gt;.&lt;value&gt;</code> (§§10.4, 10.6). The audit protocol compares runtime consumption with the resolved snapshot for the keys it chooses to check (§2d). <code class="anchor">opengdd-build.json</code> MUST record the answers and the full resolved snapshot.</p>
+<h3 id="answers-outside-tuning">Answers outside tuning<a class="heading-anchor" href="#answers-outside-tuning" aria-label="Link to this section">#</a></h3>
+<p>Numbers are the whole of what this version resolves by machine. A question may also reach prose, through a <code>&gt; PERSONALIZATION: &lt;id&gt;</code> section tag (§2). For prose the format defines no machine effect: there is no include, exclude, or replace semantics, and no selector saying which answer produces which section. Collection records are Fixed spec data (§1b) and are not a personalization channel in this version.</p>
+<p>A personalized prose section is interpreted by the builder from the recorded answer, under §2a's boundary and the §1a fantasy block's tie-break. The recorded answer in <code class="anchor">opengdd-build.json</code> is the only machine-checked trace: a validator confirms the answer names a declared question and, for a choice, a declared option (§7), and nothing more. A designer who needs a personalized decision checked by machine gives it a ranged number and uses <code>sets</code>.</p>
+<p>Choices made at runtime, such as boons, difficulty modifiers, crafting choices, and laws, are gameplay state. They are not build personalization.</p>
+<h2 id="6-build-plan-and-acceptance-tests-05-build-plan-md">6. Build plan and acceptance tests (<code class="anchor">05-build-plan.md</code>)<a class="heading-anchor" href="#6-build-plan-and-acceptance-tests-05-build-plan-md" aria-label="Link to this section">#</a></h2>
+<p><em>For designers and builders. Required reading: this chapter is what a build is judged against.</em></p>
+<p>Under the experimental certification protocol (§2d), a certification harness would execute this chapter, and its acceptance tests are what a build would be certified against. The chapter's structure below is a normative package obligation, and so is the closed test-block field set stated with the test types. The executing runner is not defined by the core format and belongs to the experimental protocol. The chapter MUST contain ordered build stages. The conventional order is <code>core-loop</code> → <code>content</code> → <code>tuning</code> → <code>presentation</code> → <code>polish</code>. Each stage lists its scope, chapter references, and machine-verifiable checkpoints. Build-stage structure is a prose obligation (§2d): the format defines no machine grammar for it, and validators do not decide it.</p>
+<h3 id="acceptance-test-types">Acceptance-test types<a class="heading-anchor" href="#acceptance-test-types" aria-label="Link to this section">#</a></h3>
+<p>Acceptance tests are numbered <code>AT-1 … AT-n</code>. Their machine-checked shape grammar: an acceptance test is a Markdown heading, at any heading level, whose text begins <code>AT-&lt;n&gt;</code>. One file is scanned for those headings — the canonical root build plan <code class="anchor">05-build-plan.md</code> (§1) — and it MUST carry at least one. Numbers MUST be unique and ascending in document order. Gaps are permitted: a deleted test's number is retired and never reused, so <code>AT-4</code> names the same check in every revision that still has one. This numbering scopes to the tests the package writes itself: a generated test is named rather than numbered, its heading begins <code>AT</code> with no hyphen, and the scan above never sees one (below). Every <code>AT-n</code> heading MUST be immediately followed by one fenced JSON block whose fence carries the tag word <code>test</code>. That block is the acceptance test; no prose restatement is required.</p>
+<p>Every test block declares one of two <strong>test types</strong>:</p>
+<ul>
+<li><strong><code>scenario</code></strong> describes one specific situation with <code>given</code>, <code>when</code>, and <code>then</code>.</li>
+<li><strong><code>general</code></strong> states <code>scope</code>, the cases the claim is about in words, and <code>holds</code>, the claim across those cases. Optional <code>seeds</code> name repeatable random sequences used to generate cases so a failure can be reproduced.</li>
+</ul>
+<p>The choosing rule is: <strong>a scenario, unless the promise is about many cases.</strong></p>
+<h4 id="the-package-level-test-block-shape-normative">The package-level test-block shape (normative)<a class="heading-anchor" href="#the-package-level-test-block-shape-normative" aria-label="Link to this section">#</a></h4>
+<p>The format defines exactly these test-block field names, and the set is closed: adding one takes a format revision. A package validator reads these names, decides their shapes, and reports a violation as a package conformance error (§2d):</p>
+<ul>
+<li><code>type</code>, in every block: a string, one of the two test types above.</li>
+<li><code>scenario</code>: <code>given</code>, <code>when</code>, and <code>then</code>. Each is a string or an array of strings, and each MUST be non-empty. The example below writes <code>given</code> as one string and <code>when</code> and <code>then</code> as arrays.</li>
+<li><code>general</code>: <code>scope</code>, a non-empty string describing the cases in words; <code>holds</code>, a non-empty string stating the claim; and optional <code>seeds</code>, a non-empty array of non-empty strings.</li>
+<li>Beyond each type's required fields, the optional grants are exactly these. Both types MAY carry <code>diagnostics</code>, a non-empty array of strings; <code>direction_claims</code>, a non-empty array of dotted-path strings (below); <code>unchanged</code>, an object (§4b); <code>replay</code>, an opaque object; and the expected-observation pair <code>target</code>, which takes the observation's own JSON type, with <code>tolerance</code>, a finite JSON number.</li>
+<li><code>extensions</code>, optional in every block: an object whose keys are package-local kebab-case extension ids and whose values are JSON objects. Each key names one package or harness extension and is the namespace for everything inside its value. The core format validates the container, key grammar, and object-valued entries, but treats each value as opaque and assigns no meaning to its nested fields.</li>
+</ul>
+<p>Which of these a block MUST carry is stated with the type that carries it; this list settles the names, not the obligations. A package validator decides these shapes as far as they are decided at all: where a field takes one type, it decides that type, and where a field is prose-shaped it decides presence and non-emptiness, with the string form and the array form equally legal.</p>
+<p>A block MUST NOT carry any other top-level field. Package- or harness-owned data, such as a fixture id or capture handle, is legal only inside <code>extensions</code>; placing it directly beside standard fields is a package conformance error. The extension ids remain designer-coined identifiers under §1, but the one-container rule prevents them from colliding with present or future standard fields.</p>
+<p>The list is package-level and closed at the top-level field-name layer. Test execution semantics are not in it: how a runner reads a <code>given</code>, a <code>when</code>, or a <code>then</code>, how it plays a <code>replay</code> back, and what an observation is worth remain the experimental certification protocol's (§2d). A package validator decides which fields are present and whether their shapes are well-formed; it never runs the check.</p>
+<p>A general test whose scope was sampled establishes what its <code>holds</code> sentence bounds; one whose whole scope was checked can establish absence, a minimum, or a universal. The build record's <code class="anchor">acceptance.sampled</code> list states which game-local general tests were sampled (§7).</p>
+<p>The retired test types <code>property</code>, <code>exhaustive-search</code>, and <code>document-check</code>, and their retired fields <code>domain</code>, <code>applies_to</code>, <code>predicate</code>, <code>initial_states</code>, <code>transitions</code>, <code>finite_state</code>, <code>complete</code>, <code>bound</code>, <code>rule_set</code>, and <code>artifacts</code>, receive focused errors that name <code>opengdd migrate</code>. A package-file check belongs in the data rules or in ordinary prose.</p>
+<p>Every test feature has exactly one owner (§2d's layers):</p>
+<div class="table-scroll"><table>
+<thead><tr><th>Test feature</th><th>Owner</th></tr></thead>
+<tbody>
+<tr><td>Block shape, the closed field set, per-type shapes, <code>direction_claims</code> lookup and coverage</td><td>PACKAGE — the validator decides from bytes</td></tr>
+<tr><td>Reading <code>given</code>/<code>when</code>/<code>then</code>, sampling or walking a general test's <code>scope</code>, playing back <code>replay</code>, <code>target</code> and observation semantics, schedule execution</td><td>Runner profile — experimental protocol document (<a href="/conformance/certification/"><code>conformance/CERTIFICATION.md</code></a>)</td></tr>
+<tr><td>&quot;The tests passed&quot;</td><td>RECORD — the build record's claim, checked for shape and counts (§7)</td></tr>
+<tr><td>Whether they truly passed, and whether uncited Fixed prose held</td><td>AUDIT — the experimental certification audit (§2d, §9.10)</td></tr>
+</tbody>
+</table></div>
+<h3 id="direction-claim-citations">Direction-claim citations<a class="heading-anchor" href="#direction-claim-citations" aria-label="Link to this section">#</a></h3>
+<p>A <code>scenario</code> or <code>general</code> test block that covers a measured §9 direction promise carries <code>direction_claims</code>, a non-empty array of exact dotted paths. Each path MUST resolve to a <code>colors.&lt;key&gt;</code>, <code>contrast.&lt;key&gt;</code>, or <code>timing.&lt;key&gt;</code> entry. A path of another kind or a dangling path is <code>DIRECTION_CLAIMS_DANGLING</code>; an empty or malformed array is <code>DIRECTION_CLAIMS_SHAPE</code>. Illegal test types use <code>VERIFICATION_CLASS</code>, or <code>VERIFICATION_TYPE_RETIRED</code> for a retired type.</p>
+<p>Every declared <code>colors</code>, <code>contrast</code>, and <code>timing</code> entry MUST be cited by at least one game-local acceptance test. An entry no test cites is <code>DIRECTION_CLAIM_UNCOVERED</code>. Palettes, pillars, moods, anti-references, what must stay, and viewing conditions are not <code>direction_claims</code> targets.</p>
+<p>The test points at the promise; it does not copy it. A test carrying <code>direction_claims</code> MUST NOT restate the cited promise's value, metric, location, or conditions (a prose obligation, §2d). Its procedure states how the runner observes the declared promise, including how it reaches any conditions named by <code>while</code>. The validator decides the citation and coverage from package bytes. Execution and the truth of the result belong to the runner and experimental audit under §2d.</p>
+<p>Example scenario, the commonest type, from the getaway driver's build plan:</p>
+<pre><code class="lang-test">{
+  &quot;type&quot;: &quot;scenario&quot;,
+  &quot;given&quot;: &quot;a chase running at the resolved hazard.interval_seconds&quot;,
+  &quot;when&quot;: [&quot;the road runs for sixty seconds and the player never crashes&quot;],
+  &quot;then&quot;: [&quot;no two hazards arrive closer together than that interval&quot;],
+  &quot;diagnostics&quot;: [&quot;hazard-spawn-log&quot;]
+}</code></pre>
+<p>At package conformance, <code>replay</code>, when present, is an opaque object. A <code>tolerance</code> without an expected <code>target</code> is invalid.</p>
+<p>The remainder is an <strong>experimental certification obligation</strong>, not a package conformance check. Because this version deliberately leaves other replay entries runner-defined, the certification audit confirms that every path the runner treats as replay input is package-relative, that replay input carried as structured content is declared through §1b, and that every <code>target</code> is grounded in an input or schedule the runner actually supplies. A package validator does not perform those checks; question 8 in <a href="/conformance/certification/"><code>conformance/CERTIFICATION.md</code></a> owns them.</p>
+<h3 id="checked-contract-tests">Checked contract tests<a class="heading-anchor" href="#checked-contract-tests" aria-label="Link to this section">#</a></h3>
+<p>A checked contract adoption (§10.5) contributes acceptance tests from its verification pack. They are rendered for reading with <code>--render-contract-tests</code>; they are never committed to this chapter. Each is named <code>AT &lt;adoption&gt;/&lt;template-id&gt;</code>, or <code>AT &lt;adoption&gt;/&lt;template-id&gt;/&lt;row-id&gt;</code> for a per-row expansion, so changing one adoption or row does not renumber another test.</p>
+<p>Rendered contract tests use the same two test types, closed field sets, runner, evidence duties, and §7 acceptance counts as game-local tests. They do not satisfy this chapter's requirement for at least one numbered <code>AT-&lt;n&gt;</code>. Because a pack cannot own the adopting package's art-direction coverage, a rendered contract test MUST NOT carry <code>direction_claims</code>; §9.8 remains the package's own work.</p>
+<p>The tests are the executable part of the spec; they are not all of it. Every Fixed statement binds even when no test restates it (§2). So passing every acceptance test is necessary but never sufficient for the experimental certification protocol. Build-record conformance is defined by §2d and §7.</p>
+<h2 id="7-build-records-opengdd-build-json">7. Build records (<code class="anchor">opengdd-build.json</code>)<a class="heading-anchor" href="#7-build-records-opengdd-build-json" aria-label="Link to this section">#</a></h2>
+<p><em>For builders and auditors. Designers: skip, you never write this file.</em></p>
+<p>A conforming build ships <code class="anchor">opengdd-build.json</code> (build-record conformance, §2d). Where this chapter uses certification vocabulary — &quot;certified&quot;, &quot;certifying spec&quot;, &quot;certifying profile&quot; — it uses it in §2d's intended-shape sense: the record is the artifact the experimental protocol would audit, and the core format defines no normative certification outcome for it. The file is machine-validated against <a href="https://opengdd.org/schema/core/v0.7/opengdd-build.schema.json">opengdd-build.schema.json</a>.</p>
+<h3 id="core-fields">Core fields<a class="heading-anchor" href="#core-fields" aria-label="Link to this section">#</a></h3>
+<p>The required top-level fields are exactly:</p>
+<ul>
+<li><strong><code>opengdd</code></strong>: the format version the build was tested against.</li>
+<li><strong><code>spec</code></strong>: the <code>id</code> and <code>version</code> of the built spec.</li>
+<li><strong><code>designer</code></strong> and <strong><code>builder</code></strong>: each carries a name, with optional <code>handle</code>, <code>contact</code>, and <code>role</code>.</li>
+<li><strong><code>personalization</code></strong>: an <code>answers</code> object that maps question ids to the answers used. It is an empty object when there are no answers.</li>
+<li><strong><code>resolved_tuning</code></strong>: the §5 resolved snapshot. It contains one complete, flat <code>values</code> map after the ordered answers are applied, including every adopted contract value as <code>contracts.&lt;adoption&gt;.&lt;value&gt;</code>, copied unchanged from its adoption (§10.6).</li>
+<li><strong><code>evidence</code></strong>: the test-run record. Its required fields are:<ul>
+<li><code>result_hash</code>, written as 64 characters of bare lowercase hexadecimal.</li>
+<li><code>payload</code>, with <code>covers</code> and <code>file</code>. <code>covers</code> states in plain words which artifacts the hash covers. <code>file</code> is a package-relative path to the canonical payload bytes covered by the hash.</li>
+<li><code>acceptance</code>, with <code>passed</code> and <code>total</code> counts. It MAY carry <code>sampled</code>, a unique list of game-local <code>AT-n</code> ids for general tests whose scopes were sampled rather than checked whole. Absent or empty means every general test's whole scope was checked.</li>
+</ul></li>
+</ul>
+<p>When the source package has checked contract adoptions, <code>evidence</code> also carries <code>contracts</code>: one closed <code>{ &quot;adoption&quot;: &quot;&lt;id&gt;&quot;, &quot;pack&quot;: &quot;sha256:&lt;digest&gt;&quot; }</code> entry per checked adoption. It is absent when every adoption is promised (§10.5). This records the pack bytes the build was verified against, the way <code>resolved_tuning</code> records the numbers it used; a later pack replacement does not change what this record says was checked.</p>
+<p>One further field is conditionally required when the source package is available:</p>
+<ul>
+<li><code>runner</code>, a closed object with non-empty <code>id</code> and <code>version</code> strings. It names the runner profile relative to which the result is true. It is required when any source acceptance test is <code>scenario</code> or <code>general</code>, or when a block carries <code>replay</code>, <code>target</code>, or <code>direction_claims</code>.</li>
+</ul>
+<p>Canonicalization follows the conformance certification protocol published at <a href="/conformance/certification/"><code>conformance/CERTIFICATION.md</code></a> in the OpenGDD conformance suite (§2d). The standalone record check validates the evidence shapes it can see. Source-backed record validation additionally decides the conditional runner and test-count rules below. <code class="anchor">payload.file</code> is checked as a package-relative path shape, not for existence. Reproducing <code>result_hash</code> and auditing the payload belong to the experimental protocol, under which a digest without a reconstructible payload is unauditable and fails the audit. <code>evidence</code> may also contain build-local checkpoint records, captures, and transcripts. The core format does not define that additional detail.</p>
+<h3 id="package-consistency-checks">Package-consistency checks<a class="heading-anchor" href="#package-consistency-checks" aria-label="Link to this section">#</a></h3>
+<p>The schema cannot perform every check because some rules depend on the source package. A conforming validator MUST also verify all of the following:</p>
+<ol>
+<li><code class="anchor">spec.id</code> and <code class="anchor">spec.version</code> match the source manifest.</li>
+<li>The build <code>designer</code> matches the source manifest on their common identity fields: <code>name</code>, plus <code>handle</code> and <code>contact</code> when each is present in both. <code>role</code> is build-local and is excluded from matching.</li>
+<li>Every recorded answer names a declared question and type-checks against that question's type; a <code>choice</code> answer MUST additionally name a declared option id (§5). Defaulted questions are recorded too.</li>
+<li>The <code class="anchor">resolved_tuning.values</code> keys exactly equal the source <code>values</code> key set unioned with the contract keys the package declares — <code>contracts.&lt;adoption&gt;.&lt;value&gt;</code> for every value of every adoption (§10.6). The validator MUST compute the complete expected snapshot from the source package and the recorded personalization answers, then append the adoption values unchanged and require every recorded value to equal its expected value. Every tuning key with a range remains inside that range. A recorded number answer outside its <code>sets</code> target's range is refused, never adjusted to an endpoint, and the record does not conform (<code>BUILD_ANSWER_REJECTED</code>). The refused answer is still visible when the validator computes the expected snapshot, so the invalid record may also receive <code>BUILD_TUNING_VALUE</code>; no boundary value is substituted (§5).</li>
+<li><code class="anchor">acceptance.total</code> equals the package's enumerated AT count: its game-local acceptance tests plus the tests rendered from checked packs after template liveness and per-row expansion (§§6, 10.8). Every id in <code class="anchor">acceptance.sampled</code> names a game-local general test; an unknown id is <code>BUILD_SAMPLED_UNKNOWN</code> and another test type is <code>BUILD_SAMPLED_TYPE</code>.</li>
+<li>A conforming build has <code>acceptance.passed == acceptance.total</code>.</li>
+<li>When the source test set contains any runtime test named above, <code class="anchor">evidence.runner</code> is present. Its identity makes results attributable; the core does not interpret the named profile or claim that two profiles are equivalent.</li>
+<li><code class="anchor">evidence.contracts</code> is present exactly when the source package has checked adoptions and matches their adoption ids and pack hashes exactly (§10.5).</li>
+</ol>
+<p>Every <code>rules</code> entry of the certifying package MUST hold over <code class="anchor">resolved_tuning.values</code>. A false rule is a build-record failure (§4).</p>
+<p>Checks 1–8 are the core set, not the whole set. Every relation declared by a contract definition is re-evaluated over the adoption's values in the resolved snapshot (§10.4). Validators report divergence in checks 1–8 as errors. A check-6 shortfall is an error against build conformance rather than a complaint about the file (§2d); it does not conflict with honest reporting, because the shipped record is a completion claim, and a build still failing tests reports through §2b ambiguity reports rather than a build record.</p>
+<p><code class="anchor">opengdd-build.json</code> MAY copy the source manifest's <code>commerce</code> profile. When it does, the source manifest MUST carry that profile and the copy MUST be verbatim, including <code>derived_from</code> when present. Omitting the optional copy has no conformance consequence, and nothing in the experimental certification protocol depends on commerce metadata.</p>
+<h3 id="audit-evidence-outside-the-build-record">Audit evidence outside the build record<a class="heading-anchor" href="#audit-evidence-outside-the-build-record" aria-label="Link to this section">#</a></h3>
+<p>The audit profile in <a href="/conformance/certification/#audit-profile"><code>conformance/CERTIFICATION.md#audit-profile</code></a> records the capture recipe it used by id in the audit's own record, not in <code class="anchor">opengdd-build.json</code>. An audit may ask the builder to attach any further evidence it needs; the format gives that evidence no field or fixed shape. A v0.7 build record carrying the historical <code>renderer</code>, <code>resources</code>, <code>capture_profile</code>, <code>direction_result</code>, <code class="anchor">evidence.direction_observations</code>, or <code class="anchor">evidence.algorithm</code> fields receives a focused <code>BUILD_SCHEMA</code> error and can be rewritten with <code>opengdd migrate --build</code>. The certification protocol fixes SHA-256 for the result hash. <code class="anchor">evidence.runner</code> remains the runner identity defined above.</p>
+<h2 id="7a-authored-puzzles">7a. Authored puzzles<a class="heading-anchor" href="#7a-authored-puzzles" aria-label="Link to this section">#</a></h2>
+<p><em>For designers with hand-authored puzzles. The grid encoding applies only to grid games.</em></p>
+<p>Specs with authored logical puzzles MAY declare them as a §1b structured collection. These are puzzles authored as content rather than systemic or generated play. Two tiers are supported:</p>
+<ul>
+<li><strong>Tier 1 — literal layouts.</strong> Each puzzle is data: a layout, entity placements, and a win condition, referenced from the content chapters. The puzzle is fully Fixed, and an acceptance test can check it. For example: &quot;puzzle 7 requires at least 12 moves.&quot;</li>
+<li><strong>Tier 2 — solution-annotated layouts.</strong> Each puzzle also carries designer metadata: intended insight, red herrings, difficulty-curve position, and machine-checkable properties. Those properties may include minimum solution length, required mechanics, and forbidden shortcuts. Checking them needs a solver, and the format standardizes no solver adapter, so the citing package supplies one (below). The insight is Fixed. Its decoration is Delegated.</li>
+</ul>
+<h3 id="grid-layout-encoding-family-parallel-string-layers-1-normative">Grid-layout encoding family: <code>parallel-string-layers-1</code> (normative)<a class="heading-anchor" href="#grid-layout-encoding-family-parallel-string-layers-1-normative" aria-label="Link to this section">#</a></h3>
+<p>This version defines one named, buildable member of the still-open grid-encoding family: the flat, single-cell <code>parallel-string-layers-1</code> encoding. Two independent grid-puzzle instances converged on this layout shape. They did not converge on a solver-adapter interface or predicate vocabulary, so those parts remain open below.</p>
+<p>A §1b drawer declares this encoding through its record schema (decision 33): a field of type <code>grid</code> is one layer, and the schema's grid fields are the layer set. A single-layer grid — one field holding the whole board — is the commonest case and declares one grid field. A validator reads exactly the grid-typed fields; no other field is a layer, whatever its shape, and generic tools discover layers from the schema, not from game prose:</p>
+<pre><code class="lang-json">{
+  &quot;record&quot;: {
+    &quot;terrain&quot;: { &quot;type&quot;: &quot;grid&quot;, &quot;required&quot;: true,
+      &quot;description&quot;: &quot;walls and floor: `#` is wall, `.` is floor&quot; },
+    &quot;entities&quot;: { &quot;type&quot;: &quot;grid&quot;, &quot;required&quot;: true,
+      &quot;description&quot;: &quot;what stands where: `-` is empty, `o` is a stone&quot; }
+  }
+}</code></pre>
+<p>The cell unit is fixed by the format: a row's column count is its length in Unicode scalar values, or code points. UTF-16 code units and grapheme clusters are not the measurement. A surrogate-pair emoji is one cell. A combining-mark sequence occupies as many cells as it contains scalar values. (An earlier draft carried this as a mandatory <code>cell_unit</code> field with exactly one legal value; a field that can only say one thing is the format's to say.)</p>
+<p>A grid field's presence and string-array shape are the record schema's rules (§1b). The grids a record does carry MUST be non-empty and congruent with one another:</p>
+<ul>
+<li>Row count, the array length, MUST be at least 1.</li>
+<li>Every row's column count, measured in scalar values, MUST be at least 1.</li>
+<li>Row count and every row's column count MUST be identical within each grid field and across all grid fields of the record.</li>
+</ul>
+<p>These rules establish one shared, zero-based <code>(x, y)</code> grid per collection record. The grid is at least 1×1, with no partial or zero-width rows.</p>
+<p>A collection record with empty or incongruent layers is a hard failure. A row-count disagreement, including zero rows, is diagnosed as <code>layer-row-mismatch</code>. A column-count disagreement at a named row, including zero columns, is diagnosed as <code>layer-column-mismatch</code>. The report codes are <code>CONTENT_LAYER_ROW_MISMATCH</code> and <code>CONTENT_LAYER_COLUMN_MISMATCH</code>; the lowercase diagnostic name travels in the finding's <code>data</code>. Both are existence-level package checks under §1b's unconditional record checks. No acceptance test is needed to catch them.</p>
+<p><strong>Single-cell rule (core-fixed).</strong> Each <code>(x, y)</code> coordinate holds exactly one cell value per declared layer: one Unicode scalar value read from that layer's row at that column. The encoding cannot represent one value spanning several cells in a layer. Multi-cell entities are outside <code>parallel-string-layers-1</code>, even if a game's own rules express one entity identity across several single-cell footprints.</p>
+<p>The grid field's schema <code>description</code> owns the per-cell glyph vocabulary — what <code>#</code> marks is how the field is read, and field-level reading lives in the schema (§1b), written once. The game's own chapters keep the rest in the game's own words:</p>
+<ul>
+<li>overlap rules;</li>
+<li>entity footprints;</li>
+<li>terrain semantics; and</li>
+<li>the win predicate.</li>
+</ul>
+<p>The core encoding fixes the grid shape and layer set; the schema description names the glyphs; the game's prose gives the rules their meaning. This encoding declares no solver adapter or replay grammar. Until those are standardized, a citing collection defines its own command alphabet and predicates under §§6 and 7a.</p>
+<p><strong>The encoding family remains open.</strong> One documented case this encoding cannot express needs integer per-column heights, region terrain with tile overrides, graph edges between cells, and persistent multi-cell rigid bodies. It still requires a game-local extension.</p>
+<p>The family widens when an encoding or encoding-family member can express that shape without a game-local extension and is validated against a third grid-puzzle package that needs it.</p>
+<h2 id="8-retired">8. Retired<a class="heading-anchor" href="#8-retired" aria-label="Link to this section">#</a></h2>
+<p><em>This section was retired in v0.7; identifiers moved to §1.</em></p>
+<h2 id="9-art-direction-direction-json">9. Art direction (<code class="anchor">direction.json</code>)<a class="heading-anchor" href="#9-art-direction-direction-json" aria-label="Link to this section">#</a></h2>
+<p>Art direction is optional. When it is used, one file named <code class="anchor">direction.json</code> MUST sit at the package root. The file is in use when it exists and is self-contained: it carries the colours, priorities, feeling, what the result must never be, measurable promises, and viewing conditions.</p>
+<p>The presentation chapter says what it wants in ordinary prose under a <code>&gt; DELEGATED:</code> section and cites direction entries by their dotted addresses. A <code>pillars</code>, <code>mood</code>, <code>anti</code>, or <code>must_keep</code> entry that no chapter cites is legal but produces <code>DIRECTION_UNMENTIONED</code>. Direction uses Delegated authority under §2; it creates no additional authority level.</p>
+<p>This is a complete <code class="anchor">direction.json</code>:</p>
+<pre><code class="lang-json">{
+  &quot;palette&quot;: {
+    &quot;board&quot;: [{ &quot;mark-ink&quot;: &quot;#2B2A26&quot; }, { &quot;paper&quot;: &quot;#F7F4EC&quot; }]
+  },
+  &quot;pillars&quot;: {
+    &quot;shape-not-color&quot;: &quot;The two players are told apart by mark shape alone; color never carries identity.&quot;
+  },
+  &quot;mood&quot;: {
+    &quot;paper-quiet&quot;: {
+      &quot;intent&quot;: &quot;The quiet of a game drawn on scrap paper between two people who happen to be nearby.&quot;,
+      &quot;borrows&quot;: [{ &quot;from&quot;: &quot;a pencil game on the back of an envelope&quot;, &quot;what&quot;: [&quot;paper texture&quot;, &quot;hand-drawn line weight&quot;], &quot;image&quot;: &quot;assets/mood/envelope.jpg&quot;, &quot;license&quot;: &quot;CC-BY-4.0&quot; }],
+      &quot;anti&quot;: [
+        &quot;not an arena: no announcers, no glow, no dramatic stings, no victory fanfare&quot;,
+        &quot;not a casino: no chance imagery, no jackpot celebration&quot;
+      ],
+      &quot;palette&quot;: &quot;palette.board&quot;
+    }
+  },
+  &quot;anti&quot;: {
+    &quot;no-mascots&quot;: &quot;no wobbling mascots or candy gloss; the game is casual, not infantile&quot;
+  },
+  &quot;must_keep&quot;: {
+    &quot;shape-carries-identity&quot;: &quot;cross and ring are distinguishable by shape alone in every state&quot;
+  },
+  &quot;colors&quot;: {
+    &quot;mark-ink&quot;: { &quot;is&quot;: &quot;palette.board.mark-ink&quot;, &quot;within&quot;: 12, &quot;where&quot;: &quot;every placed mark and every grid line&quot;, &quot;while&quot;: [&quot;in-game&quot;] }
+  },
+  &quot;contrast&quot;: {
+    &quot;mark-vs-paper&quot;: { &quot;colors&quot;: [&quot;palette.board.mark-ink&quot;], &quot;against&quot;: &quot;palette.board.paper&quot;, &quot;at_least&quot;: 4.5, &quot;where&quot;: &quot;marks on the board&quot; }
+  },
+  &quot;timing&quot;: {
+    &quot;mark-placement&quot;: { &quot;key&quot;: &quot;feel.placement_seconds&quot;, &quot;where&quot;: &quot;the mark appearing after a legal tap&quot; }
+  },
+  &quot;viewing&quot;: {
+    &quot;speed_and_size&quot;: &quot;the whole board on screen at once, at real play speed&quot;,
+    &quot;calibration&quot;: &quot;sRGB display at standard desktop viewing distance&quot;
+  }
+}</code></pre>
+<p><code class="anchor">direction.json</code> is a closed, non-empty object. Its only root fields are the ones defined below. Schema-shape failures, including unknown fields and empty maps, are reported as <code>DIRECTION_SCHEMA</code>.</p>
+<h3 id="9-1-palettes-palette">9.1 Palettes (<code>palette</code>)<a class="heading-anchor" href="#9-1-palettes-palette" aria-label="Link to this section">#</a></h3>
+<p>A palette keeps a named set of colours in one place so every other direction entry can point at it.</p>
+<p><code>palette</code> is an optional non-empty map. Each key names one palette and holds a non-empty array. A palette key is one or more dot-separated segments. Each segment MUST match <code>^[a-z0-9]+(-[a-z0-9]+)*$</code>, MUST contain at least one letter, and MUST NOT be <code>json</code> or <code>md</code>. The dots are part of the flat key; they do not create nested objects.</p>
+<p>Each array entry is either a <code>#RRGGBB</code> sRGB colour string or a one-key object whose key names that colour and whose value is a <code>#RRGGBB</code> string. A colour name follows the same dot-free kebab-case rule, contains at least one letter, MUST NOT be <code>json</code> or <code>md</code>, and is unique within its palette. A bare colour has no address. A colour is named only when something needs to cite it. Array order carries no meaning, and array positions are not citation targets. Two entries MAY carry the same hex value. Tools MUST preserve the authored spelling; this binds tools, not packages.</p>
+<p>A palette carries no scope, tolerance, or per-colour promise. Those belong to the measured entry that cites a named colour. <code>PALETTE_SHAPE</code> reports an empty or non-array palette, <code>PALETTE_ENTRY_FORM</code> an illegal entry, and <code>PALETTE_COLOR_DUPLICATE</code> a repeated colour name.</p>
+<p>Palette addresses resolve in one fixed order. Remove the leading <code>palette.</code> and first try the entire remainder as a palette key. If no such palette exists, split off the final segment, try the preceding text as the palette key, and try the final segment as a named colour in it. Otherwise the address is dangling. Therefore <code class="anchor">palette.enemies.fire</code> names a palette when <code class="anchor">enemies.fire</code> is a key, while <code class="anchor">palette.enemies.fire.flame</code> names its colour <code>flame</code>. The whole-key/colour distinction is decided only when the address has two or more segments after <code>palette.</code>. A <code>palette.&lt;key&gt;</code> address in a colour position is a malformed colour address, reported as <code>DIRECTION_COLOR_REFERENCE</code>. For a longer address, a whole-key result that names a palette where the position requires a colour is <code>DIRECTION_COLOR_DANGLING</code>, not an ambiguity.</p>
+<p>A palette key MUST NOT equal another palette key plus one of that other palette's colour names. For example, a palette <code class="anchor">enemies.fire</code> with a colour <code>flame</code> cannot coexist with a palette keyed <code class="anchor">enemies.fire.flame</code>. <code>PALETTE_KEY_COLLISION</code> reports this declaration-time collision. Invalid colour-address spelling is <code>DIRECTION_COLOR_REFERENCE</code>; a well-spelled address that resolves to neither a palette nor a named colour is <code>DIRECTION_COLOR_DANGLING</code>.</p>
+<p>A palette is reached when a mood's <code>palette</code> field names it, a <code>colors</code> or <code>contrast</code> entry names a colour in it, or chapter prose cites the palette or one of its colours. A palette nothing reaches is legal and produces the <code>PALETTE_UNREACHED</code> warning. Reachability is per palette; unused colours inside a reached palette produce no warning.</p>
+<h3 id="9-2-pillars-pillars">9.2 Pillars (<code>pillars</code>)<a class="heading-anchor" href="#9-2-pillars-pillars" aria-label="Link to this section">#</a></h3>
+<p>Pillars state the visual priorities a builder uses when direction goals pull against each other.</p>
+<p><code>pillars</code> is an optional non-empty map from a kebab-case name to a non-empty sentence. Its closed entry shape is the sentence itself. Priority is the order written. Invalid shape is <code>DIRECTION_SCHEMA</code>; a pillar no chapter cites produces <code>DIRECTION_UNMENTIONED</code>.</p>
+<h3 id="9-3-mood-mood">9.3 Mood (<code>mood</code>)<a class="heading-anchor" href="#9-3-mood-mood" aria-label="Link to this section">#</a></h3>
+<p>A mood names the intended feeling, what it borrows, and the negative space that keeps the result from drifting into a nearby but wrong feeling.</p>
+<p><code>mood</code> is an optional non-empty map from a kebab-case name to a closed object. Every mood requires a non-empty <code>intent</code> string and <code>anti</code>, a non-empty array with at least one entry. An <code>anti</code> entry is either a non-empty sentence or the image-bearing object defined in §9.4. <code>borrows</code> is optional and non-empty when present. Each borrow is a closed object with required non-empty <code>from</code> and a required non-empty <code>what</code> array of non-empty strings. It MAY carry <code>image</code> and its required <code>license</code> under §9.9.</p>
+<p>The optional <code>palette</code> field holds a palette address such as <code class="anchor">palette.board</code>, not a bare key and not a colour address. A missing palette or an address that names a colour produces <code>DIRECTION_MOOD_PALETTE_DANGLING</code>. Other shape failures are <code>DIRECTION_SCHEMA</code>. A mood no chapter cites produces <code>DIRECTION_UNMENTIONED</code>.</p>
+<h3 id="9-4-anti-references-anti">9.4 Anti-references (<code>anti</code>)<a class="heading-anchor" href="#9-4-anti-references-anti" aria-label="Link to this section">#</a></h3>
+<p>An anti-reference names a result the builder must avoid.</p>
+<p><code>anti</code> is an optional non-empty map from a kebab-case name to either a non-empty sentence or a closed object. The object requires a non-empty <code>not</code> sentence and MAY carry <code>image</code> and <code>license</code>; an image requires its licence under §9.9. Invalid shape is <code>DIRECTION_SCHEMA</code>. An anti-reference no chapter cites produces <code>DIRECTION_UNMENTIONED</code>.</p>
+<h3 id="9-5-what-must-stay-mustkeep">9.5 What must stay (<code>must_keep</code>)<a class="heading-anchor" href="#9-5-what-must-stay-mustkeep" aria-label="Link to this section">#</a></h3>
+<p>What must stay names visible qualities that every faithful build preserves.</p>
+<p><code>must_keep</code> is an optional non-empty map from a kebab-case name to a non-empty sentence. Its closed entry shape is the sentence itself; a later revision MAY allow a sentence to become an object if another field is needed. Invalid shape is <code>DIRECTION_SCHEMA</code>; an entry no chapter cites produces <code>DIRECTION_UNMENTIONED</code>.</p>
+<h3 id="9-6-measured-promises-colors-contrast-timing">9.6 Measured promises (<code>colors</code>, <code>contrast</code>, <code>timing</code>)<a class="heading-anchor" href="#9-6-measured-promises-colors-contrast-timing" aria-label="Link to this section">#</a></h3>
+<p>Measured promises put a number or a tuning value behind the parts of art direction that a covering acceptance test can observe.</p>
+<p>Each of <code>colors</code>, <code>contrast</code>, and <code>timing</code> is an optional non-empty map from a kebab-case name to the closed entry shape below. Unknown or missing fields, empty strings, empty arrays, and invalid numeric bounds are <code>DIRECTION_SCHEMA</code>.</p>
+<p><strong>Colours (<code>colors</code>).</strong> A colour entry requires exactly <code>is</code>, <code>within</code>, and <code>where</code>, with optional <code>while</code>. <code>is</code> is a named palette-colour address. <code>within</code> is a non-negative CIEDE2000 distance in CIELAB D65, computed after decoding the declared sRGB values; <code>within: 0</code> requires the exact declared colour. <code>where</code> says which visible things the promise covers. <code>while</code>, when present, is a non-empty array of non-empty state descriptions saying when it holds. A malformed address is <code>DIRECTION_COLOR_REFERENCE</code>; one whose remaining segments resolve to a palette rather than to a named colour of one, or to nothing, is <code>DIRECTION_COLOR_DANGLING</code>.</p>
+<p><strong>Contrast (<code>contrast</code>).</strong> A contrast entry requires exactly <code>colors</code>, <code>against</code>, <code>at_least</code>, and <code>where</code>, with optional <code>while</code>. <code>colors</code> is a non-empty array of named palette-colour addresses. <code>against</code> is one such address. <code>at_least</code> is a positive WCAG 2.1 contrast ratio. <code>where</code> and <code>while</code> have the meanings above. The validator decides from the declared colour bytes whether every <code>colors</code> operand meets the floor against <code>against</code>; a pair below it is <code>DIRECTION_CONTRAST_FAILED</code>. Address failures use <code>DIRECTION_COLOR_REFERENCE</code> and <code>DIRECTION_COLOR_DANGLING</code>.</p>
+<p><strong>Timing (<code>timing</code>).</strong> A timing entry requires exactly <code>key</code> and <code>where</code>, with optional <code>while</code>. <code>key</code> is the dotted address of a declared <code class="anchor">tuning.json</code> value. <code>where</code> names the rendered event whose duration the build matches to that tuning value, and <code>while</code> states when the promise holds. The covering test's procedure says how the runner observes the event; the format defines no universal timing window. A key that names no declared value is <code>DIRECTION_TIMING_KEY</code>.</p>
+<p>The metric for each measured kind is fixed here. There is no per-entry field that chooses or redescribes it.</p>
+<h3 id="9-7-viewing-viewing">9.7 Viewing (<code>viewing</code>)<a class="heading-anchor" href="#9-7-viewing-viewing" aria-label="Link to this section">#</a></h3>
+<p>Viewing records the conditions under which the finished result is considered.</p>
+<p><code>viewing</code> is one optional closed object, not a map of contexts. It requires <code>speed_and_size</code>, which says the playback speed and the size or framing at which the game is seen, and <code>calibration</code>, which says the relevant display or output calibration. Optional <code>sequence</code> says what span or order of play must be included. Each value is a non-empty string. Invalid shape is <code>DIRECTION_SCHEMA</code>. The experimental audit judges direction under this object; <code>viewing</code> itself is not a citation target.</p>
+<h3 id="9-8-the-covering-rule">9.8 The covering rule<a class="heading-anchor" href="#9-8-the-covering-rule" aria-label="Link to this section">#</a></h3>
+<p>Every <code>colors</code>, <code>contrast</code>, and <code>timing</code> entry MUST be cited by at least one game-local acceptance test's <code>direction_claims</code> field. §6 owns that field and its lookup rules. An uncovered measured promise is <code>DIRECTION_CLAIM_UNCOVERED</code>.</p>
+<p>The acceptance test points to the promise and its procedure says how to test it. It MUST NOT restate the promise's value, metric, location, or conditions (a prose obligation, §2d); there is no mirror between the two files.</p>
+<h3 id="9-9-images">9.9 Images<a class="heading-anchor" href="#9-9-images" aria-label="Link to this section">#</a></h3>
+<p>An <code>image</code> on a mood borrow or anti-reference is a package-relative path that MUST remain inside the package and name an existing file. It carries a non-empty <code>license</code>. A missing file is <code>MEDIA_PATH_MISSING</code>; missing or malformed fields are <code>DIRECTION_SCHEMA</code>. The core checks nothing else about the image or licence.</p>
+<h3 id="9-10-what-the-audit-owns">9.10 What the audit owns<a class="heading-anchor" href="#9-10-what-the-audit-owns" aria-label="Link to this section">#</a></h3>
+<p>Judging pillars, mood, anti-references, and what must stay under the package's viewing conditions, blind to the builder's name, is the experimental audit protocol's concern. Where a borrow reaches a real place, people, culture, or living tradition, that protocol uses qualified judges. It records per-claim observations and reports two axes, adherence apart from coverage. None of those are fields in <code class="anchor">direction.json</code>; <a href="/conformance/certification/"><code>conformance/CERTIFICATION.md</code></a> owns the experimental protocol.</p>
+<p>Retired from the package format are audit classes; the precision ladder; <code>hide_builder_name</code>; <code>judge_qualifications</code>; <code>observable</code>; <code>may_vary</code>; <code>behaviors</code>; media hash and format; <code>tie_break_order</code>; the references pool; the fence and its grammar; the mood wrapper and <code>descriptor:</code> token; <code>semantics</code>; <code>constraints</code>; and <code>scope</code>.</p>
+<h3 id="9-11-migration-from-v0-6">9.11 Migration from v0.6<a class="heading-anchor" href="#9-11-migration-from-v0-6" aria-label="Link to this section">#</a></h3>
+<p><code>opengdd migrate</code> rewrites a v0.6 direction, including the manifest palette and descriptors, the direction fence, and measured constraints, into this shape; a surviving fence is <code>DIRECTION_FENCE_RETIRED</code>.</p>
+<h2 id="10-contracts">10. Contracts<a class="heading-anchor" href="#10-contracts" aria-label="Link to this section">#</a></h2>
+<p>A contract is a declared mechanism. This chapter defines its package and build-record checks; the experimental audit owns judged claims (§2d).</p>
+<p><em>For designers, §§10.1–10.6 state what the form promises. Pack authors and tool builders need §§10.7–10.8 as well.</em></p>
+<h3 id="10-1-what-a-contract-is">10.1 What a contract is<a class="heading-anchor" href="#10-1-what-a-contract-is" aria-label="Link to this section">#</a></h3>
+<p>Games often answer the same mechanical question in inconsistent ways: whether a health value clamps, whether a failed craft consumes its inputs, or which event wins when two effects happen together. A <strong>contract</strong> writes one such mechanism down once as questions with closed answer options. The questions record the decisions a faithful build would otherwise have to guess.</p>
+<p>A catalogue publishes a <strong>definition</strong>, the blank form. A package adopts it by copying the definition into one JSON file and filling in that game's answers, values, rows, and any verification inputs. The result is an <strong>adoption</strong>. The copy travels with the package and requires no registry or network access.</p>
+<p>The contract's <code>mechanism</code> text is the builder's exact obligation. An option's required <code>meaning</code> binds the designer; when optional <code>semantics</code> is present, its precise wording is what holds the builder and the tests. Validation checks the form and its declared relations. It does not decide whether a definition is useful or whether its prose is good (§10.10).</p>
+<h3 id="10-2-the-adoption-file">10.2 The adoption file<a class="heading-anchor" href="#10-2-the-adoption-file" aria-label="Link to this section">#</a></h3>
+<p>A package MAY carry a reserved package-root <code>contracts/</code> directory. Presence declares adoption: every non-dot entry is either one adoption file or one pack file, and there is no manifest registration. The directory name is exact lowercase. Dotfiles are ignored. A subdirectory, a non-JSON entry, or another file shape is a validation failure. A package that already used <code>contracts/</code> for unrelated files renames that directory.</p>
+<p>One filled form lives at <code>contracts/&lt;adoption&gt;.json</code>. <code>&lt;adoption&gt;</code> is a dot-free kebab-case name and the filename is its id and address; there is no duplicate id field inside the JSON. A package without this directory is unaffected by this chapter.</p>
+<p>The top level is closed. Its <strong>definition part</strong> has these fields:</p>
+<ul>
+<li><code>contract</code> (required): the definition's kebab-case id.</li>
+<li><code>version</code> (required): an integer. <code>&lt;contract&gt;-&lt;version&gt;</code> is the definition identity.</li>
+<li><code>origin</code> (optional, recommended): a string naming where the blank form came from.</li>
+<li><code>summary</code> (required): a string.</li>
+<li><code>mechanism</code> (required): an array of strings stating what the builder implements.</li>
+<li><code>questions</code> (required): the question map (§10.3).</li>
+<li><code>declares</code> (required): optional <code>values</code> and <code>rows</code> maps inside one object (§10.4). The object may be empty.</li>
+<li><code>rules</code> (optional): the rule map (§10.4).</li>
+<li><code>pack</code> (optional): a <code>sha256:</code> digest naming the verification pack (§10.5).</li>
+</ul>
+<p>Its <strong>designer part</strong> has <code>answers</code> and <code>values</code>, both required maps, plus optional <code>rows</code> and <code>verification</code>, in that order. An optional map with nothing in it is better omitted. The definition part comes first in the field order listed above. Definition annotations precede <code>answers</code>; designer annotations follow it. Every object is closed except that a key beginning with <code>_</code> is an annotation: checks do not read it and unknown-field checks ignore it.</p>
+<p>Two adoptions of the same <code>contract</code> and <code>version</code> are two filled forms with independent designer parts. For comparison, <code>answers</code>, <code>values</code>, <code>rows</code>, <code>verification</code>, and annotations are stripped; the remaining definition fields are emitted in the order listed above and serialized as two-space JSON. Member order inside those fields is part of the identity. Divergence is <code>CONTRACT_DEFINITION_DIVERGENT</code>.</p>
+<h3 id="10-3-questions-and-answers">10.3 Questions and answers<a class="heading-anchor" href="#10-3-questions-and-answers" aria-label="Link to this section">#</a></h3>
+<p><code>questions</code> maps each kebab-case question id to an object with <code>asks</code> and a non-empty <code>options</code> map. It may also carry <code>rationale</code>, <code>guidance</code>, and <code>when</code>. Each option id is kebab-case. An option requires a <code>meaning</code> string and may carry <code>semantics</code> and <code>rationale</code>. When <code>semantics</code> is present, it MUST NOT contradict <code>meaning</code>; that fidelity is a review obligation, and <code>semantics</code> holds the builder to its more precise wording.</p>
+<p>A question with no <code>when</code> is <strong>asked</strong>. A question with <code class="anchor">when.flag</code> is asked only when every named question is asked and its recorded answer is one of the listed option ids. Otherwise it is <strong>not asked</strong>. Dependencies MUST be acyclic; a dependency on a not-asked question makes the dependent question not asked.</p>
+<p><code>answers</code> maps question ids to option ids. Every asked question MUST have exactly one declared answer (<code>CONTRACT_ANSWER_MISSING</code> or <code>CONTRACT_ANSWER_UNKNOWN</code>). An answer to a not-asked question is permitted but warned as <code>CONTRACT_ANSWER_NOT_ASKED</code>, because removing it makes the filled form state only decisions that apply.</p>
+<h3 id="10-4-values-rows-and-rules">10.4 Values, rows, and rules<a class="heading-anchor" href="#10-4-values-rows-and-rules" aria-label="Link to this section">#</a></h3>
+<p>A definition declares numbers under <code class="anchor">declares.values</code>. Each kebab-case value name maps to a closed object with a required <code>description</code> and an optional inclusive <code>range</code> written as <code>[minimum, maximum]</code>. Both bounds are finite and the minimum is not above the maximum. The adoption's <code>values</code> map supplies one finite plain JSON number for every declaration, no more and no fewer, and each number MUST be inside its declared range. Contract values are Fixed: §5 cannot change them per build. A value name MUST NOT be <code>and</code>, <code>or</code>, or <code>not</code>, which the rule grammar reserves, and MUST NOT duplicate a question name.</p>
+<p>A definition declares row sets under <code class="anchor">declares.rows</code>. Each entry has an optional <code>description</code> and a required <code>record</code> schema in the §1b record grammar's contract dialect: <code>number</code>, <code>integer</code>, <code>string</code>, and <code>citation</code> fields; <code>required</code>, or a <code>when</code> condition over recorded answers (§10.3), row fields, or both; <code>options</code>; <code>pattern</code>; <code>within</code>; <code>unique</code>; and <code>description</code>. The adoption's <code>rows</code> map supplies one inline array for every declared row set, including <code>[]</code> when empty. Drawer bindings are not legal. Rows are Fixed package data and are validated whether or not a pack test uses them.</p>
+<p>The row object is closed. <code>required</code> and <code>when</code> are mutually exclusive; <code>pattern</code> accepts only <code>kebab-case</code> and, like <code>options</code>, is legal only on a <code>string</code> field. A closed option is kebab-case and at most 64 characters. A <code>within</code> pair is legal only on a <code>number</code> or <code>integer</code> field and gives its inclusive lower and upper bounds, in that order; each bound is either a bare name from <code class="anchor">declares.values</code> or a finite JSON number. A present row value MUST lie inside the pair when both named bounds have been supplied by the adoption. A conditioned field is required exactly when its condition holds and forbidden otherwise. Violations use <code>CONTRACT_ROW_FIELD_SHAPE</code>, <code>CONTRACT_ROW_FIELD</code>, <code>CONTRACT_ROW_CHOICE</code>, <code>CONTRACT_ROW_RANGE</code>, or — for a <code>within</code> bound naming no declared value — <code>CONTRACT_REFERENCE</code>.</p>
+<p><code>rules</code> maps a kebab-case name to one comparison over the definition's bare value names. It uses exactly §4's one-comparison grammar, operators, and three functions. It is evaluated at package validation over the adoption's <code>values</code> and again at build-record validation over those same values at <code>contracts.&lt;adoption&gt;.&lt;value&gt;</code> in the resolved snapshot. Anything wrong with the line or its name is <code>CONTRACT_RULE_INVALID</code>; a false comparison is <code>CONTRACT_RULE_FAILED</code>. A false comparison in the build record is <code>BUILD_CONTRACT_RULE</code>.</p>
+<h3 id="10-5-promised-and-checked">10.5 Promised and checked<a class="heading-anchor" href="#10-5-promised-and-checked" aria-label="Link to this section">#</a></h3>
+<p>Mode is declared by the pack's presence. An adoption with no matching pack file is <strong>promised</strong> even when its definition names a pack hash. It binds as a conviction: its promise binds the builder as Fixed prose does, and the experimental audit judges whether the build kept it.</p>
+<p>A matching file at <code>contracts/&lt;contract&gt;-&lt;version&gt;.pack.json</code> makes every adoption of that definition <strong>checked</strong>. Its exact bytes MUST hash to the definition's <code>pack</code> value. A missing or mismatched digest is <code>CONTRACT_PACK_HASH</code>; a pack whose <code>contract</code> and <code>version</code> match no adoption is <code>CONTRACT_PACK_ORPHAN</code>. A present same-identity pack makes the adoption checked even when another pack finding is reported; a malformed pack does not silently weaken the promise.</p>
+<p>Checked acceptance tests are rendered from the pack with:</p>
+<pre><code class="lang-text">node conformance/validate.mjs --render-contract-tests &lt;package-dir&gt;</code></pre>
+<p>Rendering is a read-only view. Tests are never pasted into <code class="anchor">05-build-plan.md</code>; a retired marker block there is <code>CONTRACT_BLOCK_RETIRED</code>. Rendered tests use the §6 acceptance-test shapes, run under the same runner and audit duties as game-local tests, and count in the build record's acceptance total.</p>
+<p>Each checked answer becomes one or more named acceptance tests that the build MUST pass. A build that behaves differently fails the corresponding test by its rendered name; §7 check 6 refuses a record whose passed count falls short.</p>
+<p>A source-backed build record carries <code class="anchor">evidence.contracts</code> exactly when the package has checked adoptions. It lists one <code>{ &quot;adoption&quot;: &quot;&lt;id&gt;&quot;, &quot;pack&quot;: &quot;sha256:&lt;digest&gt;&quot; }</code> entry per checked adoption and no promised adoption. The entries MUST match the source pack hashes (<code>BUILD_CONTRACTS_MISSING</code>, <code>BUILD_CONTRACTS_UNEXPECTED</code>, and <code>BUILD_CONTRACT_PACK</code>).</p>
+<h3 id="10-6-addresses">10.6 Addresses<a class="heading-anchor" href="#10-6-addresses" aria-label="Link to this section">#</a></h3>
+<p>An adoption's address is <code>contracts.&lt;adoption&gt;</code>. One of its values is <code>contracts.&lt;adoption&gt;.&lt;value&gt;</code>. Both forms are written exactly that way in prose and JSON, resolve against the adoption file, and use <code>contracts</code> as a reserved first segment under §4. A dangling adoption or value address is a validation failure.</p>
+<p>Inside a pack, <code>{{value-cite:&lt;value&gt;}}</code> renders the literal <code>contracts.&lt;adoption&gt;.&lt;value&gt;</code> address, never the number. Contract values join <code class="anchor">resolved_tuning.values</code> under those addresses and are copied unchanged from the adoption.</p>
+<h3 id="10-7-citations-in-a-contract">10.7 Citations in a contract<a class="heading-anchor" href="#10-7-citations-in-a-contract" aria-label="Link to this section">#</a></h3>
+<p>A pack template cites one of the adoption's values with <code>{{value-cite:&lt;value&gt;}}</code>; rendering produces the dotted address described in §10.6. A <code>citation</code> row field accepts either a dotted tuning or contract address, or one chapter anchor written <code>&lt;file&gt;.md#&lt;anchor&gt;</code>. Every citation MUST resolve. A chapter target MUST be Fixed: no <code>&gt; DELEGATED:</code> or <code>&gt; PERSONALIZATION:</code> authority tag may reach or occur inside the cited section, because a contract test cannot depend on prose the builder may vary.</p>
+<p>An invalid form is <code>CONTRACT_CITATION_GRAMMAR</code>, an unresolved target is <code>CONTRACT_CITATION_DANGLING</code>, and a non-Fixed chapter target is <code>CONTRACT_CITATION_AUTHORITY</code>.</p>
+<h3 id="10-8-the-pack">10.8 The pack<a class="heading-anchor" href="#10-8-the-pack" aria-label="Link to this section">#</a></h3>
+<p>A verification pack is immutable under the SHA-256 of its exact file bytes. Its filename and top-level <code>contract</code> and <code>version</code> agree, and its only other required field is <code>templates</code>, an array. Each template requires <code>id</code>, <code>title</code>, <code>type</code>, <code>expand</code>, <code>test</code>, and <code>text</code>; it may carry <code>when</code>, <code>bindings</code>, <code>collection</code>, and <code>inputs</code>. <code>type</code> is <code>scenario</code> or <code>general</code> and matches <code class="anchor">test.type</code>. <code>expand</code> is <code>once</code> or <code>per-row</code>; only <code>per-row</code> names a declared row set in <code>collection</code>. <code>inputs</code> may declare <code>scope</code> and <code>seeds</code>, each with an optional <code>default</code>. The adoption supplies each declared input under <code>verification.&lt;template-id&gt;.scope</code> and <code>.seeds</code>. A live template whose input has no <code>default</code> MUST be filled there.</p>
+<p><strong>Template liveness.</strong> A <code>once</code> template is live when its <code class="anchor">when.flag</code> condition is satisfied and every question read by a binding is asked. A <code>per-row</code> template additionally needs at least one row that satisfies its <code class="anchor">when.row</code> condition and carries every field the template reads. A template that is not live renders no test and accepts no <code>verification</code> entry.</p>
+<p><strong>Per-row expansion.</strong> A live <code>once</code> template renders one test named <code>&lt;adoption&gt;/&lt;template&gt;</code>. A live <code>per-row</code> template renders one test per matching row, in authored row order, named <code>&lt;adoption&gt;/&lt;template&gt;/&lt;row-id&gt;</code>. Its row declaration therefore has a required, unique kebab-case string <code>id</code>. Template order is the pack's authored order.</p>
+<p>Placeholders are <code>{{instance}}</code> for the adoption id, <code>{{value-cite:&lt;value&gt;}}</code> for a value address, <code>{{inputs:scope}}</code> and <code>{{inputs:seeds}}</code> for verification inputs, <code>{{bind:&lt;id&gt;}}</code> for a phrase selected by an answer or row field, and <code>{{row.&lt;field&gt;}}</code> during per-row expansion. A placeholder that occupies a whole JSON value substitutes its raw JSON value; one inside a string substitutes text. Expansion is one pass over pack-authored <code>title</code>, <code>test</code>, <code>text</code>, and binding phrases. Values supplied by an adoption or row are never scanned again.</p>
+<p>That last boundary is enforced as an injection ban. Every supplied string, including strings nested in an array or object, MUST contain neither <code>{{</code>, <code>}}</code>, nor a three-backtick code-fence delimiter. An unknown, unreachable, or unresolved placeholder is a validation failure. <code>_</code>-prefixed annotations are stripped from a rendered test.</p>
+<h3 id="10-9-forking">10.9 Forking<a class="heading-anchor" href="#10-9-forking" aria-label="Link to this section">#</a></h3>
+<p>A catalogue definition is immutable under its published identity. Editing its definition part creates a fork: the catalogue's identity and pack no longer apply, the adoption drops to promised, and the audit records a finding naming the divergence. To check the fork, publish it under a new <code>contract</code> or <code>version</code>, give it its own origin and pack, and update the pack hash.</p>
+<p>The package validator does not contact a catalogue and cannot discover that two unrelated definitions claim the same id and version. Catalogue identity rules therefore apply only to unforked copies. The audit records the digest of the definition part it actually judged (§2d), so the bytes covered by its finding or verdict remain explicit.</p>
+<h3 id="10-10-what-this-layer-does-not-do">10.10 What this layer does not do<a class="heading-anchor" href="#10-10-what-this-layer-does-not-do" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>No registry or online lookup.</strong> Definitions and packs travel by copy and remain readable offline. The catalogue publishes them but does not make their ids globally unique.</li>
+<li><strong>No dependencies between contracts.</strong> A definition is readable and removable on its own. Interactions between two adopted mechanisms belong in package prose and game-local acceptance tests.</li>
+<li><strong>No composition algebra.</strong> The package authors the seam between mechanisms.</li>
+<li><strong>No implementation code.</strong> A contract specifies behavior. A library may claim it implements that behavior only through evidence outside the format.</li>
+<li><strong>No semantic review by validation.</strong> Mechanical validity proves the file shape, references, ranges, rules, pack pairing, and rendered test shape. It does not prove that the mechanism or its answer options are well designed.</li>
+</ul>
+<h2 id="11-what-this-version-deliberately-excludes">11. What this version deliberately excludes<a class="heading-anchor" href="#11-what-this-version-deliberately-excludes" aria-label="Link to this section">#</a></h2>
+<p><em>For everyone. One page, and it may save you designing something the format cannot carry yet.</em></p>
+<p>This version deliberately excludes:</p>
+<ul>
+<li>multiplayer and networking;</li>
+<li>rendered-capture certification for 3D graphics. A <code>web-3d</code> package validates, and a build of one can assemble a full record under the experimental protocol (§2d) when its complete acceptance suite needs only logic and state observations. The audit profile defines one browser capture recipe, but no standardized recipe for 3D rendered captures (<a href="/conformance/certification/#audit-profile"><code>conformance/CERTIFICATION.md#audit-profile</code></a>);</li>
+<li>binary asset pipelines;</li>
+<li>audio direction — a professional-vocabulary survey exists, but its transmission experiment has not run, so this version makes no audio-direction claims;</li>
+<li>localization structure;</li>
+<li>monetization design beyond the optional commerce split, including IAP design;</li>
+<li>any registry API; and</li>
+<li>target families beyond web delivery (<code>web-2d</code>, <code>web-3d</code>), until the format has held up across ten real specs.</li>
+</ul>
+<hr>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About the standard</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

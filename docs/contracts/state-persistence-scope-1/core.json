@@ -1,0 +1,510 @@
+{
+  "contract": "state-persistence-scope",
+  "version": 1,
+  "summary": "Covers what survives the end of a run or session, a quit, a crash, death, deleting saved data, and moving to another device. It also covers local saves, manual slots, cloud copies, server profiles, backups, conflicts, and version changes. Closed-game time, replay guarantees, file formats, and the shape of saved numbers stay elsewhere.",
+  "questions": {
+    "unreadable-copy-default": {
+      "asks": "What normally happens when saved state cannot be read?",
+      "rationale": "Lost progress is the most visible failure a save system has. Choose the result players should expect first.",
+      "when": {
+        "row-count": {
+          "copy-kinds": "non-empty"
+        }
+      },
+      "otherwise": "No saved copy can be opened later, so unreadable saved state never reaches a load attempt.",
+      "options": {
+        "refuse-load": {
+          "meaning": "The unreadable copy stays closed. A city slot remains listed, but none of its progress becomes active.",
+          "semantics": "Loading stops before any state from that copy becomes active. The copy is neither replaced nor repaired by this response."
+        },
+        "start-fresh": {
+          "meaning": "Play starts from normal fresh state. A damaged puzzle slot opens with its first board instead of the old board.",
+          "semantics": "Fresh state becomes active instead of state from the unreadable copy. The response does not by itself delete or overwrite that copy."
+        },
+        "restore-earlier-copy": {
+          "meaning": "An earlier copy can replace it through the supported route, including a manual file restore. A factory returns after choosing the backup before its damaged autosave.",
+          "semantics": "A declared manual, in-game, or automatic recovery route can activate an earlier copy. The newest usable earlier copy under the matching backup rule becomes active."
+        },
+        "repair-readable-state": {
+          "meaning": "Readable progress returns and damaged parts reset. A dungeon keeps cleared floors but rebuilds one broken room record.",
+          "semantics": "Readable state becomes active as one repaired result. Every unreadable part takes the fresh value named by the cited repair rule."
+        },
+        "warn-and-try": {
+          "meaning": "The player can cancel or try the unreadable copy. A colony save opens only after its damage warning is accepted.",
+          "semantics": "No state from the copy becomes active before the explicit choice. Accepting the warning permits an attempt but does not promise success."
+        }
+      }
+    },
+    "older-build-default": {
+      "asks": "What normally happens when an older game build wrote the copy?",
+      "rationale": "Updates can strand a player's progress or change it permanently. Choose how the current build protects that progress.",
+      "when": {
+        "row-count": {
+          "copy-kinds": "non-empty"
+        }
+      },
+      "otherwise": "No loadable copy exists, so an older build has no saved state to open.",
+      "options": {
+        "refuse-load": {
+          "meaning": "The older copy stays closed. A world from last year's rules cannot open in the current build.",
+          "semantics": "Loading stops before state written by the older build becomes active."
+        },
+        "convert-and-load": {
+          "meaning": "The game updates the old state and opens it. A factory save gains the current recipe records before play resumes.",
+          "semantics": "A declared conversion produces current-build state before activation."
+        },
+        "warn-and-load": {
+          "meaning": "The old copy is tried only after a warning. A racing career from an earlier patch opens after the player accepts the risk.",
+          "semantics": "The player accepts a compatibility warning before old-build state becomes active. Acceptance permits an attempt but does not promise success."
+        }
+      }
+    },
+    "newer-build-default": {
+      "asks": "What normally happens when a newer game build wrote the copy?",
+      "rationale": "Going back to an older build can erase newer content. Choose whether the player may take that risk.",
+      "when": {
+        "row-count": {
+          "copy-kinds": "non-empty"
+        }
+      },
+      "otherwise": "No loadable copy exists, so a newer build has no saved state to open.",
+      "options": {
+        "refuse-load": {
+          "meaning": "The newer copy stays closed. A world from a later patch remains unavailable in this build.",
+          "semantics": "Loading stops before state written by the newer build becomes active."
+        },
+        "warn-and-load": {
+          "meaning": "The newer copy is tried only after a warning. A sandbox world opens after the player accepts that newer content may be lost.",
+          "semantics": "The player accepts a compatibility warning before newer-build state becomes active. Acceptance permits an attempt but does not promise success."
+        }
+      }
+    }
+  },
+  "declares": {
+    "values": {},
+    "rows": {
+      "state-families": {
+        "description": "List each family of state that can change later play and give its observed persistence boundaries.",
+        "when-empty": "No changing game state is covered, so this adoption makes no persistence promise.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name the state family in game words, such as campaign-progress, run-inventory, unlocks, or settings."
+          },
+          "state-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The fixed game prose naming every field in this family and the points where it can affect later play. For a family that does not return after a quit, a crash, or on another device, it also names the value the family starts from."
+          },
+          "lifetime": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "run",
+              "session",
+              "slot",
+              "profile",
+              "device",
+              "account",
+              "until-event",
+              "not-kept"
+            ],
+            "description": "Run: the state belongs to one attempt; a roguelike's carried items go when that attempt ends. Session: the state belongs to one continuous visit; a co-op lobby choice goes when the party leaves that lobby. Slot: the state belongs to one player-selected save; campaign progress goes when that slot is deleted. Profile: the state belongs to one local player profile; unlocks go when that profile is deleted. Device: the state belongs to one installation; local settings go when that device data is erased. Account: the state belongs to one account; online settings go when that account is deleted or reset. Until event: the state lasts to one named game event; dropped currency goes at the next death. Not kept: the state does not cross its first named interruption; an enemy's alert meter does not return after quitting."
+          },
+          "scope-starts-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "lifetime": [
+                  "run",
+                  "session"
+                ]
+              }
+            },
+            "description": "The player-observable start of this attempt or continuous visit. A run may start when the character enters the dungeon; a session may start when the party joins a lobby."
+          },
+          "scope-ends-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "lifetime": [
+                  "run",
+                  "session",
+                  "slot",
+                  "profile",
+                  "device",
+                  "account",
+                  "not-kept"
+                ]
+              }
+            },
+            "description": "The player-observable ending of this lifetime. It may be an attempt result, leaving a lobby, deleting a player-selected slot, deleting a local profile, erasing device data, deleting an account, or the first interruption that discards the value."
+          },
+          "lifetime-event-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "lifetime": [
+                  "until-event"
+                ]
+              }
+            },
+            "description": "The named game event that destroys the earlier value. A recovery point may last until the next death after it appears."
+          },
+          "saved-in": {
+            "type": "string",
+            "pattern": "kebab-case",
+            "description": "The save kind that restores this family. Absence means no copy restores it."
+          },
+          "after-normal-quit": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "returns-last-commit",
+              "does-not-return"
+            ],
+            "description": "Whether the last saved point returns after an ordinary quit. A campaign returns its last checkpoint; an unsaved match score does not."
+          },
+          "after-crash": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "returns-last-commit",
+              "does-not-return"
+            ],
+            "description": "Whether the last saved point returns after a crash. A timer-written world may lose changes since its last write while still returning that write."
+          },
+          "after-death": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "keeps-value",
+              "clears-value"
+            ],
+            "description": "Whether death keeps this value. Roguelike unlocks may remain while the dead run's inventory clears."
+          },
+          "after-slot-delete": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "keeps-value",
+              "clears-value",
+              "no-slot"
+            ],
+            "description": "Whether deleting the related player-selected save keeps this value. That slot is named by the storage rule for several player-selected saves; a save presented as one current copy answers that no related slot exists."
+          },
+          "after-local-profile-delete": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "keeps-value",
+              "clears-value",
+              "no-profile"
+            ],
+            "description": "Whether deleting the related local player profile keeps this value. That profile is named by the restoring copy's storage rule; a family with no such profile answers that no related profile exists."
+          },
+          "on-another-device": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "returns",
+              "does-not-return"
+            ],
+            "description": "Whether the value returns when the same eligible player continues on another device. A server profile may return; local settings may not."
+          }
+        }
+      },
+      "copy-kinds": {
+        "description": "List each independently written and loaded save kind, such as campaign slots, profile data, cloud settings, or a server profile.",
+        "when-empty": "No saved copy can be opened later. Loading cannot restore state, compare builds, recover damage, or resolve a conflict.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this save kind in game words, such as campaign-slots, unlock-profile, or account-settings."
+          },
+          "contains-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The fixed list of state-family ids written and restored together by this save kind."
+          },
+          "write-trigger": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "player-save",
+              "checkpoint",
+              "continuous",
+              "timer",
+              "service-owned"
+            ],
+            "description": "What starts a save: a save action, a named checkpoint, each accepted change, a timer, or the service's own rule."
+          },
+          "write-rule-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule naming exactly when a save begins, what makes it successful, and which later changes a quit or crash can lose."
+          },
+          "residence": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "local-device",
+              "cloud-synced",
+              "server-authoritative"
+            ],
+            "description": "Where the copy that can restore play is authoritative: this device, synced device copies, or a game service. Copies shared through sync can conflict; a profile controlled by the service reads its accepted state."
+          },
+          "layout": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "one-current",
+              "manual-slots"
+            ],
+            "description": "How the save is presented: one current copy or several player-selected slots. A slot is one named load choice in the storage rule; retained earlier copies belong in the backup list."
+          },
+          "storage-rule-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule naming copy residence, sync or service authority, and the player-visible selection route. For several player-selected saves it also names each stable slot identity; one current copy names no player-selected slot."
+          },
+          "unreadable-copy": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "use-game-default",
+              "refuse-load",
+              "start-fresh",
+              "restore-earlier-copy",
+              "repair-readable-state",
+              "warn-and-try"
+            ],
+            "description": "Use the game's ordinary answer for a save that cannot be read, or choose a different result for this save kind."
+          },
+          "older-build-copy": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "use-game-default",
+              "refuse-load",
+              "convert-and-load",
+              "warn-and-load"
+            ],
+            "description": "Use the game's ordinary answer for a save written by an older build, or choose a different result for this save kind."
+          },
+          "newer-build-copy": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "use-game-default",
+              "refuse-load",
+              "warn-and-load"
+            ],
+            "description": "Use the game's ordinary answer for a save written by a newer build, or choose a different result for this save kind."
+          },
+          "mode-gated": {
+            "type": "string",
+            "options": [
+              "only-in-named-modes"
+            ],
+            "description": "This save kind exists only in named player modes. A restore point may exist in a practice mode and a standard mode but not in a challenge mode."
+          },
+          "mode-rule-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "mode-gated": [
+                  "only-in-named-modes"
+                ]
+              }
+            },
+            "description": "The rule naming every player mode where this save kind exists and confirming that it is absent elsewhere."
+          },
+          "removed-at": {
+            "type": "string",
+            "options": [
+              "normal-quit",
+              "crash",
+              "death",
+              "slot-delete",
+              "local-profile-delete",
+              "device-data-delete",
+              "account-delete"
+            ],
+            "description": "The event that removes this copy from later load choices. A permadeath save may vanish when the character dies. For several player-selected saves this names removal of the deleted slot's copy, not of the whole save kind."
+          },
+          "removal-rule-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "removed-at": [
+                  "normal-quit",
+                  "crash",
+                  "death",
+                  "slot-delete",
+                  "local-profile-delete",
+                  "device-data-delete",
+                  "account-delete"
+                ]
+              }
+            },
+            "description": "The rule naming the exact event that removes the copy and what the player sees afterward."
+          }
+        }
+      },
+      "backup-copies": {
+        "description": "List save kinds that retain an earlier copy for supported recovery.",
+        "when-empty": "No save kind promises an earlier usable copy, so damage cannot be answered by restoring one.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name the earlier-copy family, such as previous-campaign-checkpoint."
+          },
+          "copy-kind": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The save kind protected by this earlier copy."
+          },
+          "backup-rule-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule naming when an earlier copy is retained, how many remain, and what later progress recovery loses."
+          },
+          "restore-rule-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The supported route for opening an earlier copy. It names whether recovery is automatic, in the game, or an external file step."
+          }
+        }
+      },
+      "copy-conflicts": {
+        "description": "List shared save kinds that can present two complete but disagreeing copies. One adoption has at most one row per conflict scope: one for each named save kind and one for all synced kinds.",
+        "when-empty": "No shared save kind can present competing copies, so no conflict response runs.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name the conflict in game words, such as campaign-slot-sync."
+          },
+          "scope": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "this-copy-kind",
+              "all-synced-kinds"
+            ],
+            "description": "Whether the response settles one save kind or every synced save kind together. One cloud dialog may settle campaign slots and quicksaves as a set."
+          },
+          "copy-kind": {
+            "type": "string",
+            "when": {
+              "row": {
+                "scope": [
+                  "this-copy-kind"
+                ]
+              }
+            },
+            "pattern": "kebab-case",
+            "description": "The one cloud-synced or service save kind whose copies can disagree."
+          },
+          "response": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "select-by-rule",
+              "player-chooses-copy",
+              "refuse-until-resolved"
+            ],
+            "description": "What happens before any disagreeing state becomes active. A fixed rule may always prefer the copy the game service holds; the player may choose between dated copies; or neither copy may open until sync is repaired."
+          },
+          "resolution-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule detecting disagreement, comparing copy identity, selecting or preserving copies, and naming the event that clears the conflict."
+          }
+        }
+      },
+      "earlier-point-returns": {
+        "description": "List save kinds that can return to an earlier point of the same continuous play, whether or not the game names a run. One adoption has at most one row per save kind.",
+        "when-empty": "No save kind can return to an earlier point of the same continuous play, so reload-to-retry is unavailable.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name the earlier return point in game words, such as dungeon-retry or quicksave."
+          },
+          "copy-kind": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The save kind that can return play to the earlier point."
+          },
+          "after-load": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "resume-stays",
+              "resume-is-used-once",
+              "player-mode-decides"
+            ],
+            "description": "Whether the same earlier point remains available after a successful load. A practice mode may keep a boss checkpoint while an iron mode allows one return."
+          },
+          "return-rule-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule naming the earlier point, successful activation, and whether another load remains possible."
+          },
+          "mode-gated": {
+            "type": "string",
+            "options": [
+              "only-in-named-modes"
+            ],
+            "description": "This earlier return point exists only in named player modes. A quicksave may be available in a practice mode but absent in a challenge mode."
+          },
+          "mode-rule-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "mode-gated": [
+                  "only-in-named-modes"
+                ]
+              }
+            },
+            "description": "The rule naming every player mode where this earlier return point exists and confirming that it is absent elsewhere."
+          }
+        }
+      }
+    }
+  },
+  "rules": {},
+  "origin": "https://opengdd.org/contracts/state-persistence-scope-1",
+  "mechanism": [
+    "This is the one normative settlement authority for state-family identity, scope starts and endings, commits, loads, damage, build mismatch, copy conflicts, deletion, and device change. Questions and rows supply defaults, overrides, and cited game rules; they do not define another sequence.",
+    "A **run** begins at the player-observable attempt start named by `scope-starts-in` and ends at the result or exit named by `scope-ends-in`. Victory, death, and abandonment are common endings, but only the cited game rules decide. A save or load does not start or end a run. A **session** begins when play enters the world, match, lobby, or profile context named by `scope-starts-in` and ends at the exit, switch, or reset named by `scope-ends-in`. It survives a pause, background interval, closure, or relaunch that returns to that same context; a missing commit may still prevent its earlier value from returning.",
+    "A **commit** is one coherent accepted write of a copy kind. A **copy** is a load candidate with its save-kind id, copy identity, any slot identity, build identity, commit identity, and complete state-family set. A **conflict** exists when the cited rule finds two accepted shared copies in one declared conflict scope that disagree and neither has already replaced the other. An **earlier copy** is a retained older commit named by a backup row.",
+    "### Change and commit",
+    "1. When state changes, keep each `state-families` row as one family under its cited game rule. The row's lifetime is the maximum scope of that earlier value. An `until-event` value ends at its cited game event; a shorter boundary result may clear any value sooner only when the row says so. 2. Evaluate run and session starts and endings from their separate cited player-observable events. A save action, automatic write, timer tick, process launch, process close, or load does not create a new run or session by itself. 3. Start a copy-kind commit only at its selected write trigger. A player save follows the cited save action. A checkpoint follows its named game event. Continuous writing follows each accepted change named by its rule. A timer follows the cited interval. A service-owned copy follows its authority's cited acceptance event. 4. A commit becomes loadable only when `write-rule-declared-in` reports success for the complete `contains-declared-in` set. A failed or partial write never replaces the last successful commit. Earlier copies are retained and ordered only by their backup and storage rules.",
+    "### Quit, crash, and return",
+    "5. On an ordinary quit, perform a final commit only when the copy kind's cited write rule calls for one. For each state row, `returns-last-commit` restores its latest successful commit on return; `does-not-return` starts from the cited post-quit value. Uncommitted changes do not return. A copy removed at normal quit is no longer a later load choice. 6. On a crash, no unfinished commit succeeds. For each state row, `returns-last-commit` restores the last commit that succeeded before the crash; `does-not-return` starts from the cited post-crash value. A timer or checkpoint therefore has an explicit possible loss window. A copy removed at crash is no longer a later load choice. 7. Select the requested slot or profile before activating state. A `one-current` kind selects its current copy. `manual-slots` selects the player's named slot. A retained earlier copy is not another layout; the damage response and matching backup rule may select it later, and a backup row's cited restore route is also available to the player directly, independent of any damage response. 8. A local-device copy is available only on that device unless another cited transfer exists outside this adoption. A cloud-synced kind obtains every accepted device and cloud candidate before conflict handling. A server-authoritative kind obtains the service's accepted copy and does not treat an unaccepted local cache as equal authority. Read each candidate's save-kind, slot, build, and commit identity now. A candidate whose identity cannot be read is not a conflict candidate. If no candidate survives, run the requested kind's damage response immediately, without conflict or build comparison. A readable header with an unreadable gameplay body remains a candidate for steps 9 and 10, then reaches the damage response in step 11.",
+    "### Conflict, compatibility, and damage",
+    "9. If readable shared candidates conflict, apply the matching row's response before reading their gameplay state. A one-kind row settles only that save kind; a whole-set row settles every synced kind together. `select-by-rule` chooses one complete copy. `player-chooses-copy` waits for one complete-copy choice. `refuse-until-resolved` activates neither. No response merges fields. 10. Compare the selected copy's writing build with the running build. Apply the copy-kind override when present; otherwise apply the matching older or newer default. Refusal activates no state. Conversion produces one current-build copy before activation. A warning precedes the attempt and does not promise that it succeeds. If conversion fails, refuse the load and leave the source copy unchanged unless its cited rule says otherwise. 11. Read the selected copy as one coherent unit. If it is unreadable, apply the copy-kind override or `unreadable-copy-default`. Refusal activates nothing. Fresh start activates the cited fresh state without silently deleting the unreadable copy. Earlier-copy recovery follows the matching backup row, selects the newest usable earlier copy, and reports the lost interval. Repair activates one coherent repaired result and resets every unreadable part under the cited rule; failure to produce a coherent result refuses the load. Warning waits for the player's choice before any attempted activation. 12. Activate all state families in the accepted copy together. State families saved in another copy kind keep the already active value from that kind; a state family without `saved-in` is never restored by this load. 13. If the accepted copy has a `earlier-point-returns` row, return continuous play to its cited earlier point. If that point is inside a run, continue the same run identity. Apply `after-load` only after successful activation: keeping the resume leaves it available, using it once makes it unavailable, and a player-mode answer follows the mode fixed before the load.",
+    "### Death, deletion, and another device",
+    "14. On death, apply every state's `after-death` result. `clears-value` removes the earlier value before later play. `keeps-value` retains it. If death is also the cited run end, every run-lifetime value clears even if no save action occurs. If it is the cited event for an `until-event` value, that value clears as well. Longer-lived unlocks, settings, and profile state follow their own rows. A copy with `removed-at: death` disappears from the load choices after these state results are settled. 15. On slot deletion, clear each `clears-value` row tied to that slot and keep each `keeps-value` row. `no-slot` records that the state has no related player-selected slot. Deleting a local profile applies `after-local-profile-delete` the same way and includes any slots whose cited rule makes them children of that profile. Device-data deletion ends device-lifetime state under its cited rule. Account deletion or reset ends account-lifetime state through `scope-ends-in`. At each event, remove every copy whose `removed-at` value names it. 16. On another eligible device, `returns` obtains the family from its cloud-synced or server-authoritative copy before activation and still runs conflict handling. `does-not-return` starts from the cited new-device value. A device change does not by itself delete the source device's copy. 17. After every event, no earlier value affects later play once its lifetime has ended or its selected boundary result cleared it. A later game rule may derive a new value, but that is new state rather than restoration of the cleared value. A mode-gated copy or earlier return point exists only while the cited player mode permits it.",
+    "Every settlement report identifies the state-family id, copy-kind id or its absence, event, scope before and after, last successful commit when read, selected copy and build when loaded, override or default used, state result, and any lost interval. Conflict reports also identify both candidate commits and the selected response. Damage reports identify refusal, fresh state, earlier-copy recovery, repaired parts, or warning choice without claiming an unattempted load succeeded."
+  ],
+  "pack": "sha256:86060e861a3d6b10e0019612467e03749328dba98ab1a148bbc54c09e2492cf7"
+}

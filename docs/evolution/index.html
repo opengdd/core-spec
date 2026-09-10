@@ -23,106 +23,127 @@
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/">Learn</a>
-      <a href="/spec/">Spec</a>
-      <a href="/standard/" aria-current="page">Standard</a>
+      <a href="/contracts/">Contracts</a>
+      <a href="/spec/">Specification</a>
       <a href="/authoring-tool/">Authoring tool</a>
-      <a href="/about/">About</a>
+      <a href="/about/" aria-current="page">About</a>
       <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
     </nav>
   </div>
 </header>
-<main>
-<div class="wrap">
+<main id="main">
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="About OpenGDD">
+<p class="toc-title">About OpenGDD</p>
+<ul><li><a href="/about/">Overview</a></li>
+<li><a href="/schema/">Schemas</a></li>
+<li><a href="/conformance/">Validator</a><ul><li class="toc-h3"><a href="/conformance/certification/">Experimental certification protocol</a></li></ul></li>
+<li><a href="/evolution/" aria-current="page">Evolution</a></li></ul>
+</nav>
+<div class="doc-body">
 <h1>How the format evolves</h1>
 
-<p>OpenGDD is on a 0.x workbench. Minor versions may reshape
-constructs while the format earns its stability against real games.
-Every construct in the current draft is there because two different
-games needed it. The <a href="/spec/changelog/">changelog</a> records
-each version's migration path. Schema URLs are versioned and never
-repurposed, so a package that validated under its own version will
-always validate under it.</p>
+<p>OpenGDD is a working draft. Trials with game designs, tools and builds
+help identify missing rules and unclear instructions. A package may need
+edits to move to a newer version.</p>
+
+<p>The <a href="/spec/changelog/">changelog</a> describes changes between
+versions. Older <a href="/schema/">schema files</a>, which define data-file
+structure, remain available at their versioned addresses.</p>
+
+<h2>Move a package to the released version</h2>
+
+<p><code>opengdd migrate</code> rewrites a v0.6 or v0.7 package or build
+record into the v0.8 form. Use <code>--dry-run</code> to see the changes without writing
+them, or <code>--json</code> for a machine-readable report.</p>
+
+<pre><code>npx opengdd migrate &lt;package-dir&gt; [--dry-run] [--json]
+npx opengdd migrate --build &lt;opengdd-build.json&gt; [--dry-run] [--json]</code></pre>
+
+<p>Exit code <code>0</code> means the migration is complete with no manual
+items. Exit code <code>1</code> means manual items remain. Exit code
+<code>2</code> means invalid arguments, unreadable input, or another migration
+error.</p>
 
 <h2>The 1.0 promise</h2>
 
-<p>Version 1.0 is a set of criteria. There is no target date. When all
-five hold, 1.0 is declared:</p>
+<p>Version 1.0 has no target date. It depends on five criteria:</p>
 
 <ol>
-<li><strong>Stability.</strong> Once a package is valid, it stays
-valid. Later 1.x releases will not break it. Breaking changes wait for
-version 2.0, and they are announced well before they arrive.</li>
-<li><strong>Testable conformance.</strong> A suite of checks decides
-whether a package conforms. Anyone who runs it gets the same
-answer.</li>
+<li><strong>Stability.</strong> A package that meets version 1.0's requirements
+will keep meeting them in later 1.x releases. Breaking changes wait for
+version 2.0.</li>
+<li><strong>Clear checking requirements.</strong> Automated checks give
+repeatable results. Requirements that need human review are listed
+separately. A reader can then tell a tool check apart from a full review. The
+reference validator is tested against repository fixtures; version 1.0 also
+requires a published suite that independent validators can run.</li>
 <li><strong>An independent implementation.</strong> Someone outside the
-project has built a working tool from the written specification alone.
-That is the proof the specification is complete.</li>
+project has built a working tool from the written specification alone.</li>
 <li><strong>Public review.</strong> A public review round has run, and
 every finding is resolved.</li>
-<li><strong>The battery.</strong> The format is tested against real
-games, and it must express them at the predicted level. The
-<a href="/spec/limitations/">known limitations</a> page must be
-current.</li>
+<li><strong>Real games.</strong> The format is tested on real games and
+can describe their designs accurately. The
+<a href="/spec/limitations/">known limitations</a> page must be current.</li>
 </ol>
 
-<p>Until then the version stays at 0.x: the format still changes as
-real games teach it.</p>
+<p>Until these criteria are met, OpenGDD remains a 0.x working draft.</p>
 
 <h2>How proposals happen</h2>
 
-<p>Evidence first. A construct enters the specification when real
-games need it, not when an argument sounds right. The strongest
-proposal names a game, shows what the current format forces it to do
-awkwardly or dishonestly, and sketches the smallest construct that
-fixes it. Two independent instances of a need move a proposal from
-"interesting" to "ready to draft."</p>
+<p>The steward decides what enters the
+specification. Proposals and questions go through
+<a href="https://github.com/opengdd/core-spec/discussions">GitHub
+Discussions</a>. Accepted changes appear in the
+<a href="/spec/changelog/">changelog</a> with the version they land in.</p>
+
+<p>A useful proposal shows a real design problem. It explains how the current
+format handles it. It suggests a small change. Examples from unrelated games
+show whether the change would help many designers. Ideas can be tried in
+prototypes first. Evidence from those trials decides which changes enter the
+specification.</p>
 
 <p>Proposals go to
 <a href="https://github.com/opengdd/core-spec/discussions">GitHub
-Discussions on the specification repository</a>: new constructs in
-Proposals, questions in Q&amp;A, and things you built in Show and
-tell. Security reports go to
+Discussions on the specification repository</a>. Include a small example
+that other people can examine or reproduce. Security reports go to
 <a href="mailto:security@opengdd.org">security@opengdd.org</a>,
 never to public threads.</p>
 
-<h2>Open questions, right now</h2>
+<h2>Areas for further work</h2>
 
-<p>Questions the current draft has open, where opinions and evidence
-are wanted:</p>
+<p>Examples and feedback are welcome in these areas:</p>
 
 <ul>
-<li><strong>A designer shorthand for acceptance tests.</strong>
-Writing formal <code>test</code> blocks is the steepest part of
-authoring a package. Should there be a shorthand tier that a tool
-can expand into the formal test block?</li>
-<li><strong>Prose sub-files for large specs.</strong> Chapters grow.
-Should a chapter be able to split into paired record-and-prose
-sub-files without inventing a second structure?</li>
-<li><strong>The level-encoding family.</strong> The current grid
-encoding handles parallel string layers. Single-grid pictures and
-overlapping glyphs recur in real games. What does the family
-need?</li>
-<li><strong>The solver interface.</strong> Authored puzzles can
-declare solvability, but the adapter and predicate vocabulary an independent
-solver would implement are still open. The evidence so far says the drafted
-shape must widen before it locks.</li>
-<li><strong>The 3D capture recipe.</strong> A <code>web-3d</code>
-package can validate, and its build can carry a conforming record when its
-acceptance tests need only logic and state observations. A rendered-capture profile needs a
-renderer-neutral way to classify what sits under a sampled pixel;
-the recipe is unwritten.</li>
+<li><strong>A designer shorthand for acceptance tests.</strong> A simpler
+writing form could let designers describe a check that a tool turns into the
+required test data.</li>
+<li><strong>Long design chapters.</strong> Authors need a way to split a
+large chapter into smaller files and keep its writing and data connected.</li>
+<li><strong>Maps and levels.</strong> The format can describe grids as
+layers of text. Overlapping terrain, objects and other features need more
+than that.</li>
+<li><strong>Puzzle-solving tools.</strong> A package can describe a puzzle
+and the requirement that it has a solution. Independent tools still need
+shared rules for receiving the puzzle and reporting a solution.</li>
+<li><strong>Checking 3D images.</strong> Game logic can be checked today.
+Rendered 3D images cannot. A shared method that works across different
+rendering systems is still missing.</li>
 </ul>
+<p>The <a href="/spec/limitations/">known limitations</a> describe current
+boundaries. The <a href="/spec/">OpenGDD specification</a> gives the exact rules.</p>
+</div>
 </div>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
-    <span><a href="/about/">About the standard</a></span>
+    <span><a href="/about/">About OpenGDD</a></span>
     <span>Prose CC-BY 4.0 · code MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>

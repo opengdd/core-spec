@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Modes &amp; clocks | OpenGDD handbook</title>
-<meta name="description" content="When real time meets a pause or a turn structure, time modes and clocks say which clocks run in each situation. A time mode is one timing situation, such as diving or …">
+<title>Modes and clocks | OpenGDD handbook</title>
+<meta name="description" content="When real time meets a pause or a turn structure, clocks.json says which clocks run in which situation. A time mode is one situation, such as diving or reading the map. …">
 <link rel="canonical" href="https://opengdd.org/handbook/modes-and-clocks/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Modes &amp; clocks | OpenGDD handbook">
-<meta property="og:description" content="When real time meets a pause or a turn structure, time modes and clocks say which clocks run in each situation. A time mode is one timing situation, such as diving or …">
+<meta property="og:title" content="Modes and clocks | OpenGDD handbook">
+<meta property="og:description" content="When real time meets a pause or a turn structure, clocks.json says which clocks run in which situation. A time mode is one situation, such as diving or reading the map. …">
 <meta property="og:url" content="https://opengdd.org/handbook/modes-and-clocks/">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Modes &amp; clocks | OpenGDD handbook">
-<meta name="twitter:description" content="When real time meets a pause or a turn structure, time modes and clocks say which clocks run in each situation. A time mode is one timing situation, such as diving or …">
+<meta name="twitter:title" content="Modes and clocks | OpenGDD handbook">
+<meta name="twitter:description" content="When real time meets a pause or a turn structure, clocks.json says which clocks run in which situation. A time mode is one situation, such as diving or reading the map. …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -23,20 +23,21 @@
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/" aria-current="page">Learn</a>
-      <a href="/spec/">Spec</a>
-      <a href="/standard/">Standard</a>
+      <a href="/contracts/">Contracts</a>
+      <a href="/spec/">Specification</a>
       <a href="/authoring-tool/">Authoring tool</a>
       <a href="/about/">About</a>
       <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
     </nav>
   </div>
 </header>
-<main>
+<main id="main">
 <div class="doc-layout">
 <nav class="doc-toc" aria-label="Learn"><p class="toc-title">Learn</p>
 <ul class="learn-resources">
@@ -46,35 +47,35 @@
 <div class="toc-group">
 <p class="toc-group-title">Start and foundations</p>
 <ul>
-<li class="toc-h2"><a href="/handbook/an-afternoon-spec/">An afternoon spec</a></li>
-<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">The shape of a spec</a></li>
-<li class="toc-h2"><a href="/handbook/fantasy-block/">The fantasy block</a></li>
-<li class="toc-h2"><a href="/handbook/authority/">Authority</a></li>
-<li class="toc-h2"><a href="/handbook/identifiers/">Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
+<li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
+<li class="toc-h2"><a href="/handbook/player-fantasy/">The player fantasy</a></li>
+<li class="toc-h2"><a href="/handbook/who-decides/">Who decides</a></li>
+<li class="toc-h2"><a href="/handbook/naming-things/">Names and addresses</a></li>
 <li class="toc-h2"><a href="/handbook/tuning/">Tuning</a></li>
 <li class="toc-h2"><a href="/handbook/acceptance-tests/">Acceptance tests</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Content, links, and time</p>
+<p class="toc-group-title">Content, links and time</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/collections/">Collections</a></li>
 <li class="toc-h2"><a href="/handbook/links/">Links</a></li>
 <li class="toc-h2"><a href="/handbook/runtime-values/">Runtime values</a></li>
-<li class="toc-h2"><a href="/handbook/modes-and-clocks/" class="here" aria-current="page">Modes &amp; clocks</a></li>
-<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-clocks/" class="here" aria-current="page">Modes and clocks</a></li>
+<li class="toc-h2"><a href="/handbook/seeds/">Seeds and repeatable randomness</a></li>
 </ul>
 </div>
 <div class="toc-group">
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette &amp; colour promises</a></li>
-<li class="toc-h2"><a href="/handbook/personalization/">Personalization</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanisms</p>
+<p class="toc-group-title">Reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -82,23 +83,23 @@
 <div class="toc-group">
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
-<li class="toc-h2"><a href="/handbook/promises-and-proof/">Promises and proof</a></li>
-<li class="toc-h2"><a href="/handbook/preflight-checklist/">Preflight checklist</a></li>
+<li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
-<h1>Modes &amp; clocks</h1>
-<p><em>Opt-in: add this when your game needs it.</em></p>
-<p>When real time meets a pause or a turn structure, <strong>time modes and clocks</strong> say which clocks run in each situation. A <strong>time mode</strong> is one timing situation, such as diving or plotting a course on the chart. A <strong>clock</strong> is one source of advance, such as elapsed dive time. Writing them down keeps timing promises clear for the builder (the person, team, or system that turns your package into a game) and for acceptance tests.</p>
-<p><em><code>clocks.json</code>, two clocks during a dive and chart plotting</em></p>
+<h1>Modes and clocks</h1>
+<p class="chapter-scope"><span class="scope-badge">Optional</span></p>
+<p>When real time meets a pause or a turn structure, <code>clocks.json</code> says which clocks run in which situation. A <strong>time mode</strong> is one situation, such as diving or reading the map. A <strong>clock</strong> is one source of passing time, such as elapsed dive time. Writing this down keeps timing promises clear for the builder and for acceptance tests. The example is the same diving game as the <a href="/handbook/runtime-values/">Runtime values</a> chapter.</p>
+<p><em><code>clocks.json</code>, two clocks: diving, and reading the map</em></p>
 <pre><code class="lang-json">{
   &quot;dive_clock&quot;: {
     &quot;unit&quot;: &quot;seconds&quot;,
     &quot;advances&quot;: [&quot;runtime.dive_seconds&quot;],
     &quot;modes&quot;: {
       &quot;dive&quot;: &quot;running&quot;,
-      &quot;plotting&quot;: &quot;paused&quot;
+      &quot;map&quot;: &quot;paused&quot;
     }
   },
   &quot;oxygen_clock&quot;: {
@@ -106,44 +107,53 @@
     &quot;advances&quot;: [&quot;runtime.oxygen_seconds&quot;],
     &quot;modes&quot;: {
       &quot;dive&quot;: &quot;running&quot;,
-      &quot;plotting&quot;: &quot;paused&quot;
+      &quot;map&quot;: &quot;paused&quot;
     }
   }
 }</code></pre>
-<p>Here the modes are <code>dive</code> and <code>plotting</code>, and <code>dive_clock</code> and <code>oxygen_clock</code> are the two clocks. You choose each clock's <code>unit</code>, such as <code>seconds</code>, <code>turns</code>, or <code>beats</code>; the format fixes no list.</p>
-<p>Clock names use the spelling of one dotted-key segment, so underscores and hyphens are legal. Mode ids use lowercase kebab-case. Two clocks never advance the same runtime value.</p>
-<p>The set of time modes is every mode any clock names. If one clock names a mode and another leaves it out, validation reports the clock and the missing mode.</p>
-<p><em><code>clocks.json</code>, one clock missing <code>plotting</code></em></p>
-<pre><code class="lang-json">{ &quot;dive_clock&quot;: { &quot;unit&quot;: &quot;seconds&quot;, &quot;modes&quot;: { &quot;dive&quot;: &quot;running&quot;, &quot;plotting&quot;: &quot;paused&quot; } },
+<p>Here the modes are <code>dive</code> and <code>map</code>, and the clocks are <code>dive_clock</code> and <code>oxygen_clock</code>. While the player reads the map, both clocks pause. You choose each clock's <code>unit</code>, such as <code>seconds</code>, <code>turns</code> or <code>beats</code>. The format has no fixed list.</p>
+<p>A clock name uses letters, digits, <code>_</code> and <code>-</code>, and does not start or end with a hyphen. A mode id is lowercase words joined by hyphens. Two clocks never advance the same runtime value.</p>
+<h2 id="every-clock-covers-every-mode">Every clock covers every mode<a class="heading-anchor" href="#every-clock-covers-every-mode" aria-label="Link to this section">#</a></h2>
+<p>The set of time modes is every mode that any clock names. If one clock names a mode and another leaves it out, validation reports the clock and the missing mode. In this excerpt, <code>…</code> marks fields left out.</p>
+<p><em><code>clocks.json</code>, one clock missing <code>map</code></em></p>
+<pre><code class="lang-json">{ &quot;dive_clock&quot;: { &quot;unit&quot;: &quot;seconds&quot;, &quot;modes&quot;: { &quot;dive&quot;: &quot;running&quot;, &quot;map&quot;: &quot;paused&quot; } },
   &quot;oxygen_clock&quot;: { &quot;unit&quot;: &quot;seconds&quot;, &quot;modes&quot;: { &quot;dive&quot;: &quot;running&quot; } },
   … }</code></pre>
-<p>The validator reports:</p>
-<pre><code class="lang-text">ERROR [CLOCKS_MODE_MISSING] clocks.json — clock &quot;oxygen_clock&quot; is missing mode &quot;plotting&quot; (SPEC §4b)</code></pre>
-<p>The name in brackets is the diagnostic code for this exact rule. Use it when searching the OpenGDD specification or asking for help; the filename, message, and section show where to make the correction.</p>
-<p>Each mode uses one of four words. <code>running</code> means the clock moves continuously. <code>paused</code> means it keeps its value without moving. <code>steps</code> means it moves only when a turn or another discrete step is taken. <code>none</code> means the clock has no value at all in that mode, for example a turn counter outside a mission.</p>
-<p><code>advances</code> names the runtime values carried forward by the clock. The <a href="/handbook/runtime-values/">Runtime values</a> chapter explains that <code>runtime.oxygen_seconds</code> is a changing value named by the design.</p>
-<p>A mode tag at the end of a heading limits that heading's section to one mode. Tags are uppercase by convention and match the lowercase mode id without regard to case. A bracketed word in a paragraph is ordinary text.</p>
-<p><em><code>02-mechanics.md</code>, a section that applies only during plotting</em></p>
-<pre><code class="lang-markdown">## Reading the dive chart [PLOTTING]</code></pre>
+<p>The validator (the checking tool) reports:</p>
+<pre><code class="lang-text">ERROR [CLOCKS_MODE_MISSING] clocks.json — clock &quot;oxygen_clock&quot; is missing mode &quot;map&quot; (SPEC §4b)</code></pre>
+<p>The name in brackets is the code for this exact rule. Quote it when asking for help. The filename, message and section say where to fix it.</p>
+<p>Each mode uses one of four words:</p>
+<ul>
+<li><code>running</code>: the clock moves continuously.</li>
+<li><code>paused</code>: it keeps its value without moving.</li>
+<li><code>steps</code>: it moves only when a turn or another discrete step is taken.</li>
+<li><code>none</code>: the clock has no value at all in that mode, such as a turn counter outside a mission.</li>
+</ul>
+<p><code>advances</code> lists the runtime values this clock moves forward. The <a href="/handbook/runtime-values/">Runtime values</a> chapter explains that <code>runtime.oxygen_seconds</code> is a changing value named by the design.</p>
+<h2 id="rules-that-apply-in-one-mode">Rules that apply in one mode<a class="heading-anchor" href="#rules-that-apply-in-one-mode" aria-label="Link to this section">#</a></h2>
+<p>A mode tag at the end of a heading limits that section to one mode. Capitals are the custom, but case does not matter. The tag must name a mode your <code>clocks.json</code> declares. Square brackets only mean something at the end of a heading. In a paragraph they are just text.</p>
+<p><em><code>02-mechanics.md</code>, a section that applies only while the map is open</em></p>
+<pre><code class="lang-markdown">## Reading the map [MAP]</code></pre>
 <p>Leave a heading untagged when its section applies in every mode.</p>
-<p>A <code>scenario</code> or <code>general</code> test can say that values stay unchanged during a mode:</p>
-<p><em><code>05-build-plan.md</code>, inside a <code>scenario</code> test block</em></p>
+<h2 id="tests-about-a-mode">Tests about a mode<a class="heading-anchor" href="#tests-about-a-mode" aria-label="Link to this section">#</a></h2>
+<p>A test can say that some values stay unchanged during a mode:</p>
+<p><em><code>05-build-plan.md</code>, inside a test block</em></p>
 <pre><code class="lang-json">{
   …
   &quot;unchanged&quot;: {
-    &quot;modes&quot;: [&quot;plotting&quot;], &quot;values&quot;: [&quot;runtime.oxygen_seconds&quot;]
+    &quot;modes&quot;: [&quot;map&quot;], &quot;values&quot;: [&quot;runtime.oxygen_seconds&quot;]
   }
 }</code></pre>
-<p>Every value it names must be declared in a chapter or in a clock's <code>advances</code>; an unknown value is reported.</p>
-<p>Clocks do not program the game. A clock that behaves unusually, such as running only while the player moves, is written as a rule in prose; <code>clocks.json</code> says only which clocks run, pause, step, or do not exist in each mode.</p>
-<p><em>Full rules: <a href="/spec/">OpenGDD specification</a>, §4b, Runtime values, time modes, and clocks.</em></p>
-<p class="note chapter-pager"><a href="/handbook/runtime-values/">← Runtime values</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism →</a></p>
+<p>Every value it names must be declared in a chapter or in a clock's <code>advances</code>. An unknown value is reported.</p>
+<p>Clocks do not program the game. A clock with unusual behaviour, such as one that runs only while the player moves, is written as a rule in prose. <code>clocks.json</code> says only which clocks run, pause, step or do not exist in each mode.</p>
+<p><em>Full rules: <a href="/spec/#4b-2-time-modes-and-clocks">OpenGDD specification</a>, §4b.</em></p>
+<p class="note chapter-pager"><a href="/handbook/runtime-values/">← Runtime values</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/seeds/">Seeds and repeatable randomness →</a></p>
 </article>
 </div>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
-    <span><a href="/about/">About the standard</a></span>
+    <span><a href="/about/">About OpenGDD</a></span>
     <span>Prose CC-BY 4.0 · code MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>

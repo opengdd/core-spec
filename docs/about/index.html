@@ -23,71 +23,114 @@
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/">Learn</a>
-      <a href="/spec/">Spec</a>
-      <a href="/standard/">Standard</a>
+      <a href="/contracts/">Contracts</a>
+      <a href="/spec/">Specification</a>
       <a href="/authoring-tool/">Authoring tool</a>
       <a href="/about/" aria-current="page">About</a>
       <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
     </nav>
   </div>
 </header>
-<main>
-<div class="wrap">
+<main id="main">
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="About OpenGDD">
+<p class="toc-title">About OpenGDD</p>
+<ul><li><a href="/about/" aria-current="page">Overview</a></li>
+<li><a href="/schema/">Schemas</a></li>
+<li><a href="/conformance/">Validator</a><ul><li class="toc-h3"><a href="/conformance/certification/">Experimental certification protocol</a></li></ul></li>
+<li><a href="/evolution/">Evolution</a></li></ul>
+</nav>
+<div class="doc-body about-page">
 <h1>About</h1>
 
-<p>OpenGDD is an open format for game design documents. Prose carries
-the designer's creative intent. Structured data supports validation.
-Authority levels state which decisions stay fixed, which belong to the
-builder, and which are resolved separately for each build. The specification
-prose is licensed
+<p>OpenGDD is an open format for game design documents. It helps a designer
+describe a game and guide the people building it. The project maintains the
+specification, an <a href="/authoring-tool/">authoring tool</a>, the
+validator, and documentation.</p>
+
+<p>OpenGDD is a working draft. Its source is available in the
+<a href="https://github.com/opengdd/core-spec">public specification repository</a>.
+The <a href="/evolution/">evolution page</a> explains how changes are proposed
+and reviewed.</p>
+
+<h2 id="resources">Understanding the standard</h2>
+
+<p>These pages explain the file definitions, the checks, and how the
+standard develops.</p>
+
+<div class="card-grid about-resources">
+  <a class="card" href="/schema/">
+    <h3>Schemas</h3>
+    <p>Data-file definitions for people building or configuring tools.</p>
+  </a>
+  <a class="card" href="/conformance/">
+    <h3>Validator</h3>
+    <p>How OpenGDD checks design files and how a finished game can be reviewed.</p>
+  </a>
+  <a class="card" href="/evolution/">
+    <h3>Evolution</h3>
+    <p>How the format changes, how to contribute, and the criteria for version 1.0.</p>
+  </a>
+</div>
+
+<p class="note">Read <a href="/spec/changelog/">changes between versions</a>
+or the <a href="/spec/limitations/">current limitations</a>.</p>
+
+<h2>Licences</h2>
+
+<p>© 2026 Starphase Lab. The specification text and documentation are licensed
 <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a>.
-The validator, the authoring tool, and this site are licensed
+The schemas, validator code, and authoring tool source are licensed
 <a href="https://opensource.org/license/mit">MIT</a>.</p>
 
-<h2>Stewardship</h2>
+<h2>Intellectual property</h2>
 
-<p>The OpenGDD project maintains the format, the conformance suite, and this site through its public stewardship process.</p>
-
-<p>OpenGDD is published at
-<a href="https://opengdd.org/">opengdd.org</a>. The source repository
-for the core specification is
-<a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a>.</p>
+<p>Contributions are accepted under the same licences above. You may say that
+a tool reads or writes OpenGDD packages, or that a package conforms to a stated
+version. Do not use the OpenGDD name to imply that a tool, package, or
+organization is certified or endorsed; no certification program exists.</p>
 
 <h2>Privacy</h2>
 
-<p>This site counts visits with
-<a href="https://www.goatcounter.com/">GoatCounter</a>. It sets no
-cookies. A visit records the page, referrer, browser, operating system,
-screen width, language, and country. IP addresses are never stored.
-Repeat visits are grouped with a random identifier held only in memory
-for at most eight hours. See GoatCounter's
-<a href="https://www.goatcounter.com/help/privacy">privacy policy</a>.</p>
+<p>This site uses <a href="https://www.goatcounter.com/">GoatCounter</a>
+to count visits without setting analytics cookies. It collects page and
+referrer information, browser and operating-system details, screen width,
+language and country.</p>
 
-<p>GoatCounter is the only outside service this site contacts.
-Everything else, including the fonts, is served from opengdd.org. Theme
-preferences and drafts in the <a href="/authoring-tool/">authoring
-tool</a> stay in your browser and are never sent anywhere.</p>
+<p>GoatCounter recognizes repeated visits with a temporary value in memory.
+That value comes from the site, the IP address and browser information. It
+lasts up to 8 hours. IP addresses are not saved in its analytics database.
+Its <a href="https://www.goatcounter.com/help/privacy">privacy policy</a>
+explains how it stores counts and optional pageview records.</p>
+
+<p>Fonts are served from opengdd.org. Your theme choice and your work in the
+<a href="/authoring-tool/">authoring tool</a> stay in this browser. The tool
+uploads nothing.</p>
 
 <h2>Contact</h2>
 
 <ul>
-<li>General: <a href="mailto:steward@opengdd.org">steward@opengdd.org</a></li>
-<li>Security: <a href="mailto:security@opengdd.org">security@opengdd.org</a>
-— for vulnerability reports in the validator, schemas, or site;
-please use this address rather than public threads
-(<a href="/.well-known/security.txt">security.txt</a>).</li>
-<li>Everything else: <a href="https://github.com/opengdd/core-spec/discussions">GitHub Discussions</a>.</li>
+<li>Questions, proposals and examples:
+<a href="https://github.com/opengdd/core-spec/discussions">GitHub Discussions</a>.</li>
+<li>Project enquiries by email:
+<a href="mailto:steward@opengdd.org">steward@opengdd.org</a>.</li>
+<li>Security vulnerabilities:
+<a href="mailto:security@opengdd.org">security@opengdd.org</a>.
+Report these privately rather than in public discussions.
+Contact details are also available in <a href="/.well-known/security.txt">security.txt</a>.</li>
 </ul>
+</div>
 </div>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
-    <span><a href="/about/">About the standard</a></span>
+    <span><a href="/about/">About OpenGDD</a></span>
     <span>Prose CC-BY 4.0 · code MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>

@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Conformance — OpenGDD</title>
+<title>The validator, and what a pass means — OpenGDD</title>
 <meta name="description" content="How OpenGDD validates packages and build records, and how the experimental audit protocol treats their evidence.">
 <link rel="canonical" href="https://opengdd.org/conformance/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Conformance — OpenGDD">
+<meta property="og:title" content="The validator, and what a pass means — OpenGDD">
 <meta property="og:description" content="How OpenGDD validates packages and build records, and how the experimental audit protocol treats their evidence.">
 <meta property="og:url" content="https://opengdd.org/conformance/">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Conformance — OpenGDD">
+<meta name="twitter:title" content="The validator, and what a pass means — OpenGDD">
 <meta name="twitter:description" content="How OpenGDD validates packages and build records, and how the experimental audit protocol treats their evidence.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
@@ -23,129 +23,198 @@
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/">Learn</a>
-      <a href="/spec/">Spec</a>
-      <a href="/standard/" aria-current="page">Standard</a>
+      <a href="/contracts/">Contracts</a>
+      <a href="/spec/">Specification</a>
       <a href="/authoring-tool/">Authoring tool</a>
-      <a href="/about/">About</a>
+      <a href="/about/" aria-current="page">About</a>
       <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
     </nav>
   </div>
 </header>
-<main>
-<div class="wrap">
-<h1>Conformance</h1>
+<main id="main">
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="About OpenGDD">
+<p class="toc-title">About OpenGDD</p>
+<ul><li><a href="/about/">Overview</a></li>
+<li><a href="/schema/">Schemas</a></li>
+<li><a href="/conformance/" aria-current="page">Validator</a><ul><li class="toc-h3"><a href="/conformance/certification/">Experimental certification protocol</a></li></ul></li>
+<li><a href="/evolution/">Evolution</a></li></ul>
+</nav>
+<div class="doc-body">
+<h1>The validator, and what a pass means</h1>
 
-<p>Conformance is what makes "this is an OpenGDD package" a claim
-anyone can test. Today, the <a href="/authoring-tool/">authoring tool</a>
-checks a package continuously in the browser. The standalone
-<code>opengdd</code> command ships with each published version on npm
-(<code>opengdd@0.6.0</code> today; <code>0.7.0</code> at publication).</p>
+<p><strong>Conformance</strong> means meeting the OpenGDD specification's
+requirements. OpenGDD's <strong>validator</strong> checks the requirements a
+program can decide from the design files. A person reviews the written
+design.</p>
 
-<p>The validation engine also lives in the specification repository and
-runs on plain Node with no dependencies. It reads the package, never
-runs a game, and reports findings with stable codes, each pointing at
-the specification section it enforces.</p>
+<h2>Run the checks</h2>
 
-<h2>What validation checks</h2>
+<p>The validator runs inside OpenGDD's <a href="/authoring-tool/">authoring
+tool</a> as you write. Nothing to install.</p>
 
-<p>Errors are limited to mechanically testable MUST requirements of
-the specification:</p>
+<details><summary>Run the validator from the command line</summary>
+<p>With Node.js installed, replace <code>&lt;package-dir&gt;</code> with
+the path to the folder containing the game's design:</p>
 
+<pre><code>npx opengdd validate &lt;package-dir&gt;</code></pre>
+<p>To check a build record, name the record and, if you have it, the package
+it was built from. <code>--render-contract-tests</code> prints the tests that
+the package's checked contract adoptions imply, as Markdown, without
+changing any file.</p>
+<pre><code>npx opengdd validate --build &lt;opengdd-build.json&gt; [&lt;package-dir&gt;]
+npx opengdd validate --render-contract-tests &lt;package-dir&gt;</code></pre>
+
+<h3>Exit codes</h3>
 <ul>
-<li>the package envelope: required files present, every declared path
-inside the package, the manifest valid against its schema;</li>
-<li>the fantasy block: at least one player-fantasy line, sentence-ending
-punctuation on each joined run, no more than 280 characters across those
-lines, three to five feel adjectives, and non-empty anti-references;</li>
+<li><code>0</code>: the report has no errors. Warnings never fail a run.</li>
+<li><code>1</code>: the report has one or more conformance errors.</li>
+<li><code>2</code>: the command has a usage error, such as an unknown option
+or a missing argument.</li>
+</ul>
+
+<h3>JSON report</h3>
+<p><code>validate --json</code> writes one JSON object to standard output for
+both passing and failing validation runs. It has these fields:</p>
+<ul>
+<li><code>validator</code> names the validation kind;
+<code>format</code> is the OpenGDD version checked, currently
+<code>"0.8"</code>; and <code>validator_version</code> is the npm package
+version that produced the report.</li>
+<li><code>package</code>, or <code>build</code> in build-record mode, contains
+<code>id</code> and <code>path</code>. A package id is <code>null</code> when
+the package directory could not be read.</li>
+<li><code>valid</code> is a Boolean, or <code>null</code> when a build record
+was checked without its package. <code>verdict</code> is <code>PASS</code>,
+<code>PASS WITH WARNINGS</code>, <code>FAIL</code>, or
+<code>NOT CHECKED</code>.</li>
+<li><code>summary</code> contains the numeric counts <code>errors</code>,
+<code>dependent</code>, <code>warnings</code>, and <code>findings</code>.</li>
+<li><code>findings</code> is an array. Every finding has <code>code</code>,
+<code>severity</code>, <code>spec_section</code>, <code>file</code>, and
+<code>message</code>. <code>line</code> and check-specific <code>data</code>
+appear when known. <code>dependent: true</code> appears on an error that is
+waiting for required designer input.</li>
+</ul>
+
+<p>The same checks live in the specification repository. They run on plain Node with no dependencies. Every finding has a stable code, such
+as <code>PROSE_CITATION_DANGLING</code>. It names the rule and the
+specification section behind it.</p>
+</details>
+
+<h2>What the validator checks</h2>
+
+<p>A <strong>package</strong> is one folder containing a game's design.
+The validator checks its files and the connections between them:</p>
+<ul>
+<li>Required files and fields are present.</li>
+<li>References in the writing point to defined names.</li>
+<li>Numbers fall within their declared limits and satisfy the written
+calculation rules.</li>
+<li>Data files follow their required structure.</li>
+<li>Acceptance tests, the checks a finished game must pass, contain the
+required information.</li>
+</ul>
+
+<details><summary>More detail by part of the package</summary>
+<ul>
+<li>the package: required files present, every declared path inside the
+package, the manifest valid against its schema;</li>
+<li>the fantasy block: at least one fantasy line, sentence-ending
+punctuation, no more than 280 characters across the lines, three to five
+feel adjectives, and a non-empty <code>NOT:</code> line;</li>
 <li>values: finite shared numbers under declared keys;</li>
 <li>ranges: inclusive limits that contain their current values;</li>
-<li>rules: one comparison between two arithmetic sides, with resolvable keys
+<li>rules: one comparison between two calculations, with resolvable keys
 and finite results;</li>
 <li>personalization: question and answer shapes, with every <code>sets</code>
-assignment aimed at a ranged number and kept inside that range;</li>
-<li>collections: well-formed drawer and record ids, with every record held to
-the drawer's record schema where one is declared, and no dangling drawer or
-record citation;</li>
+entry aimed at a ranged number and kept inside that range;</li>
+<li>collections: well-formed collection and record ids, every record held
+to its schema where one is declared, and no dangling collection or record
+citation;</li>
 <li>links: linked records exist, forbidden loops are absent, and declared
 back-pointers agree in both directions;</li>
-<li>runtime values: every use has a declaration in a chapter or clock;</li>
-<li>clocks: every clock covers every time mode, uses one of the four behavior
-words, and supports any test claim that named runtime values stay unchanged;</li>
-<li>acceptance tests: ordered headings, one structured <code>test</code> block
-per heading, and the scenario or general fields that block requires;</li>
-<li>art direction: palette and direction shape, dotted references,
-measured-promise coverage, and declared WCAG 2.1 contrast floors.</li>
+<li>runtime values: every use has a declaration in a chapter or a clock;</li>
+<li>clocks: every clock covers every time mode with one of the four
+behaviour words, and supports any test claim that named runtime values
+stay unchanged;</li>
+<li>acceptance tests: ordered headings, one structured <code>test</code>
+block per heading, and the fields that block requires;</li>
+<li>art direction: palette and direction shape, dotted references, coverage
+of every measured promise, and declared WCAG 2.1 contrast floors;</li>
+<li>contracts: each adoption's answers, numbers, rows and rules against its
+contract, and that the acceptance tests beside it match the contract they
+belong to.</li>
 </ul>
+</details>
 
-<p>Warnings flag what deserves a look without breaking validity.
-A package with zero errors is <strong>valid</strong>; that word claims
-a well-formed, internally consistent, honestly declared specification,
-and nothing more. Validation never judges whether the game is good,
-and it never runs a build.</p>
+<p>Zero errors means the package passed the validator's checks. Warnings ask
+for another look, but do not fail validation. A person still reviews the
+written design. Passing validation does not prove that the design is good, or
+that a finished game follows it.</p>
 
-<h2>Build records and the experimental audit</h2>
+<h2>Build records</h2>
 
-<p><code>opengdd-build.json</code> has its own conformance layer. With the
-source package available, the validator cross-checks identity,
-personalization answers, the complete resolved values produced in question
-order, acceptance counts, and runner identity. It refuses an out-of-range
-number answer instead of substituting a boundary value. It does not run the
-build or acceptance tests, and it does not verify that recorded assertions
-are true.</p>
+<p>The <strong>builder</strong> is the person, team or AI that turns the
+package into a game. A <strong>build record</strong> is the builder's report
+of that game, stored in <code>opengdd-build.json</code>. It identifies the
+package, the choices made for that build, the final numbers and the test
+results.</p>
 
-<p>The <a href="/conformance/certification/">draft certification
-protocol</a> describes a longer audit that would:</p>
+<p>If you also have the package, the validator checks that the record agrees
+with it. For example, the final numbers must follow from the recorded
+answers, and the test totals must add up. These checks read the report. They
+do not run the game or prove that the report is true.</p>
+
+<h2>Auditing a build</h2>
+
+<p>An <strong>audit</strong> examines a finished game and its evidence to
+check whether it follows the package. OpenGDD's
+<a href="/conformance/certification/">experimental audit protocol</a>
+describes the process:</p>
 
 <ol>
-<li><strong>Validate the package</strong> with zero errors.</li>
-<li><strong>Build it.</strong> Fixed statements bind
-exactly; Delegated ones are the builder's craft.</li>
-<li><strong>Run the acceptance suite.</strong> Every acceptance test
-in the build plan produces its recorded result.</li>
-<li><strong>Audit the evidence.</strong> Check that the tests
-measure the right thing, that tuned values flow by reference instead
-of being re-hardcoded, that Fixed rules survive in the implementation
-itself, and that the builder's disclosed interpretations are
-honest.</li>
-<li><strong>Inspect the build record</strong>
-(<code>opengdd-build.json</code>): builder, resolved tuning snapshot,
-acceptance outcomes, and a SHA-256 result hash over a canonical
-payload. The build record names what that payload covers, so an auditor can
-recompute the digest over the same bytes.</li>
+<li><strong>Check the package.</strong> Run the validator and have a person
+review the applicable requirements in the writing.</li>
+<li><strong>Build and test the game.</strong> The builder follows the design,
+runs every required acceptance test and records the results.</li>
+<li><strong>Review the game and evidence.</strong> A separate auditor checks
+whether the tests measure the intended behavior. They also check that the
+game uses the declared numbers and follows the design.</li>
+<li><strong>Verify the report.</strong> The auditor checks identities,
+choices, test results and file hashes. A hash identifies the exact evidence
+file. The audit records its findings and the limits of the checks made.</li>
 </ol>
 
-<p>Certification remains experimental. The current draft defines no
-normative certification verdict, and no construct grants or withholds one.
-A conforming build record is evidence-shaped data, not proof that its claims
-are true and not a certification outcome.</p>
+<p>The protocol defines experimental verdicts: certify, certify with notes,
+or do not certify. These are research outcomes. There is no official
+OpenGDD certification program. These verdicts grant no certification mark.</p>
 
-<h2>What is never judged</h2>
-
-<p>Honesty about the edges is part of the format:</p>
+<h2>Limits of the checks</h2>
 
 <ul>
-<li><strong>Taste.</strong> The experimental audit concerns fidelity to the
-spec, never quality of craft. Two faithful builds of one spec may look and
-feel different wherever the spec delegates.</li>
-<li><strong>Audio.</strong> A package may describe audio direction in prose,
-but the working draft makes no audio-direction claim and defines no audio
-judgment protocol.</li>
-<li><strong>What a player feels or knows.</strong> Claims about
-experience, belief, or discovery are not state predicates. The format
-can test observable facts, never the feeling itself; the
-<a href="/spec/limitations/">known limitations</a> page draws this
-boundary precisely.</li>
+<li><strong>Taste.</strong> An audit asks whether a build is faithful to
+its package. It does not decide whether the game is enjoyable. Builds may
+differ where the designer leaves choices open.</li>
+<li><strong>Audio.</strong> A package may describe audio in prose, but the
+current standard has no portable checking rules for audio direction.</li>
+<li><strong>What a player feels or knows.</strong> The format can test what
+is on screen and in the game's state. Those observations do not prove a
+player's feelings or understanding. The
+<a href="/spec/limitations/">known limitations</a> page draws that line.</li>
 </ul>
+</div>
 </div>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
-    <span><a href="/about/">About the standard</a></span>
+    <span><a href="/about/">About OpenGDD</a></span>
     <span>Prose CC-BY 4.0 · code MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>

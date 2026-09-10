@@ -1,0 +1,1945 @@
+{
+  "contract": "pointer-command",
+  "version": 1,
+  "templates": [
+    {
+      "id": "pointer-command-vocabulary",
+      "title": "pointer command uses actions, phases, snapshots, and states",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and its cited pointer, action, selection, and command rules",
+        "when": [
+          "the contract's state and records are identified before a pointer phase is resolved"
+        ],
+        "then": [
+          "a game-facing pointer action is received after physical input mapping and a pointer phase is its press, release, completed drag, or cancelled drag",
+          "a pointer snapshot is the world point and classified object under the pointer at that phase",
+          "a cited non-pointer action that supplies a verb, confirmation, or cancellation has one completion phase, recorded as press unless its cited rule names release",
+          "a selection drag begins when its cited gesture rule crosses the drag threshold and ends when that action completes or cancels",
+          "a targeting state holds one chosen verb or one target-first snapshot waiting for the verb",
+          "device identity, several simultaneous pointers, and camera view or follow behavior are outside this contract and assert nothing here"
+        ],
+        "diagnostics": [
+          "{{instance}}-pointer-result",
+          "{{instance}}-snapshot-log",
+          "{{instance}}-targeting-state"
+        ]
+      },
+      "text": "A game-facing pointer action arrives after physical input mapping. Its pointer phase is a press, release, completed drag, or cancelled drag, and its pointer snapshot is the world point and classified object at that phase. A cited non-pointer action has one completion phase. A selection drag and a targeting state begin and end only as the contract states. Device identity, several simultaneous pointers, and camera view or follow behavior assert nothing here."
+    },
+    {
+      "id": "selection-proposal-and-plan-vocabulary",
+      "title": "selection, proposals, and waiting plans keep distinct meanings",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption with distinguishable selection, proposal, and waiting-plan records",
+        "when": [
+          "a selection change and a pointer command are each followed through their declared route"
+        ],
+        "then": [
+          "the current selection is one set of world objects and begins empty unless a cited load or scene-entry rule supplies it",
+          "the selection persists until a cited pointer, control-group recall, death, roster, scene-entry, or load rule changes it",
+          "one command proposal contains one command, its receiver shape, its exact world target, and its queue placement",
+          "one waiting plan contains pointer commands accepted for later execution for the plan owner named by the cited command rule"
+        ],
+        "diagnostics": [
+          "{{instance}}-selection-state",
+          "{{instance}}-proposal-log",
+          "{{instance}}-plan-state"
+        ]
+      },
+      "text": "The current selection is one set and starts empty unless a cited load or scene-entry rule supplies it. It persists until a cited rule changes it. A command proposal contains one command, receiver shape, exact world target, and queue placement. A waiting plan contains pointer commands accepted for later execution for its cited plan owner."
+    },
+    {
+      "id": "selection-gesture-resolves-at-declared-phase",
+      "title": "selection gesture {{row.id}} resolves at its declared phase",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "selection-gestures",
+      "bindings": {
+        "phase": {
+          "row_field": "resolves-on",
+          "map": {
+            "press": "resolves immediately from the press snapshot; a later drag or release is not inferred from that press",
+            "release": "resolves from the final snapshot at release",
+            "drag-complete": "resolves once when the recognized drag completes; an aborted drag creates one drag-cancel phase belonging to {{row.gesture}} and no completed result"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "selection row {{row.id}} and the gesture rule at {{row.gesture-declared-in}}",
+        "when": [
+          "game-facing pointer action {{row.gesture}} is performed through its declared press, movement, and release"
+        ],
+        "then": [
+          "{{row.id}} {{bind:phase}}",
+          "the row matches only its declared game-facing pointer action and resolving phase",
+          "the test leaves recognition, thresholds, and geometry to {{row.gesture-declared-in}} and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-pointer-result",
+          "{{instance}}-snapshot-log"
+        ]
+      },
+      "text": "Selection row {{row.id}} matches action {{row.gesture}} and {{bind:phase}} under {{row.gesture-declared-in}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "context-gesture-resolves-at-declared-phase",
+      "title": "context command {{row.id}} resolves at its declared phase",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "context-commands",
+      "bindings": {
+        "phase": {
+          "row_field": "resolves-on",
+          "map": {
+            "press": "resolves immediately from the press snapshot; a later drag or release is not inferred from that press",
+            "release": "resolves from the final snapshot at release",
+            "drag-complete": "resolves once when the recognized drag completes; an aborted drag creates one drag-cancel phase belonging to {{row.gesture}} and no proposal"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "context row {{row.id}} and the gesture rule at {{row.gesture-declared-in}}",
+        "when": [
+          "game-facing pointer action {{row.gesture}} is performed through its declared press, movement, and release"
+        ],
+        "then": [
+          "{{row.id}} {{bind:phase}}",
+          "the row matches only its declared game-facing pointer action and resolving phase",
+          "where {{row.gesture-declared-in}} emits repeated completed phases while held, each emitted phase produces exactly one {{row.command}} proposal; where it emits none, this clause asserts nothing",
+          "the test leaves recognition, thresholds, and geometry to {{row.gesture-declared-in}} and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-pointer-result",
+          "{{instance}}-snapshot-log",
+          "{{instance}}-proposal-log"
+        ]
+      },
+      "text": "Context row {{row.id}} matches action {{row.gesture}} and {{bind:phase}} under {{row.gesture-declared-in}}. Where that cited rule emits repeated completed phases while held, each emitted phase produces exactly one {{row.command}} proposal; where it emits none, this clause asserts nothing. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "targeted-verb-resolves-at-declared-phase",
+      "title": "targeted verb {{row.id}} resolves at its declared phase",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "targeted-verbs",
+      "bindings": {
+        "phase": {
+          "row_field": "resolves-on",
+          "map": {
+            "press": "uses the pointer snapshot at its declared press completion",
+            "release": "uses the final pointer snapshot at its declared release completion",
+            "drag-complete": "uses one completed dragged region; an aborted drag creates one drag-cancel phase for its own action and no proposal"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "targeted-verb row {{row.id}} in its declared targeting route",
+        "when": [
+          "its capture or confirmation reaches {{row.resolves-on}}"
+        ],
+        "then": [
+          "{{row.id}} {{bind:phase}}",
+          "one completed phase is recorded before validity is tested",
+          "an incomplete phase creates no command proposal"
+        ],
+        "diagnostics": [
+          "{{instance}}-pointer-result",
+          "{{instance}}-snapshot-log",
+          "{{instance}}-proposal-log"
+        ]
+      },
+      "text": "Targeted verb {{row.id}} {{bind:phase}}. One completed phase is recorded before validity is tested, and an incomplete phase creates no command proposal."
+    },
+    {
+      "id": "gesture-rule-alone-classifies-motion",
+      "title": "the cited gesture rule alone classifies motion",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each pointer action the {{instance}} adoption can perform, including positions on either side of every cited gesture boundary",
+        "when": [
+          "the action moves and ends"
+        ],
+        "then": [
+          "the cited gesture rule alone decides point, drag, or cancel",
+          "the result follows the cited distance, duration, geometry, coordinate space, and boundary rule",
+          "the adoption contributes no gesture quantity of its own"
+        ],
+        "diagnostics": [
+          "{{instance}}-pointer-result",
+          "{{instance}}-snapshot-log"
+        ]
+      },
+      "text": "The cited gesture rule alone decides whether movement stays a point gesture, becomes a drag, or cancels. Its distance, duration, geometry, coordinate space, and boundary rule are read directly; this adoption contributes no number."
+    },
+    {
+      "id": "one-physical-sequence-one-result",
+      "title": "one physical sequence produces one pointer result",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each physical pointer sequence the {{instance}} adoption can recognize",
+        "when": [
+          "the sequence passes through press, movement, and release"
+        ],
+        "then": [
+          "the sequence produces a point result or a drag result, never both",
+          "where the cited gesture rule creates two distinct game-facing pointer actions, each action has its own result; otherwise that exception asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-pointer-result"
+        ]
+      },
+      "text": "One physical sequence produces a point result or a drag result, never both. If the cited rule creates two distinct game-facing pointer actions, each has its own result; otherwise that exception asserts nothing."
+    },
+    {
+      "id": "repeated-completed-phases-stay-distinct",
+      "title": "each repeated completed command phase produces one proposal",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a held control whose cited gesture rule emits repeated completed command phases, where the adoption has one",
+        "when": [
+          "the control remains held through two cited completed phases"
+        ],
+        "then": [
+          "each emitted completed phase has its own pointer result",
+          "each completed command phase produces exactly one command proposal",
+          "a held interval that emits no repeated completed phase produces no extra proposal",
+          "where no cited rule emits repeated completed phases, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-pointer-result",
+          "{{instance}}-proposal-log"
+        ]
+      },
+      "text": "Where a cited gesture rule emits repeated completed command phases while held, each phase has its own result and produces exactly one proposal. A held interval with no repeated phase produces no extra proposal. Where no rule emits repeated phases, this test asserts nothing."
+    },
+    {
+      "id": "cancellation-applies-before-other-rows",
+      "title": "cancellation {{row.id}} applies before any other row",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cancellations",
+      "bindings": {
+        "phase": {
+          "row_field": "resolves-on",
+          "map": {
+            "press": "press",
+            "release": "release",
+            "drag-cancel": "drag-cancel"
+          }
+        },
+        "state": {
+          "row_field": "active-state",
+          "map": {
+            "targeting": "a targeting state is active",
+            "selection-drag": "a selection drag is active",
+            "queued-commands": "a waiting plan has queued pointer commands",
+            "selection": "the current selection is non-empty"
+          }
+        },
+        "result": {
+          "row_field": "result",
+          "map": {
+            "ends-targeting": "ends the targeting state",
+            "ends-drag": "ends the selection drag",
+            "empties-queue": "empties the waiting pointer commands in the plan named at {{row.state-declared-in}}",
+            "empties-selection": "empties the current selection"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "cancellation row {{row.id}}, action {{row.action}}, and the cited state at {{row.state-declared-in}}",
+        "when": [
+          "{{bind:state}} and {{row.action}} reaches {{bind:phase}}",
+          "the nearest action, phase, or holding-state mismatch is also checked"
+        ],
+        "then": [
+          "the complete match is checked before selection, context-command, or targeting rows and {{bind:result}}",
+          "the matched phase proposes no command, changes no selection beyond empties-selection, and ends immediately",
+          "where more than one cancellation row could match, the holding state is checked in the order targeting, selection-drag, queued-commands, selection",
+          "the mismatch does not apply {{row.id}} and asserts nothing about another matching cancellation row",
+          "an area cancellation, if the game has one, asserts nothing here because this row has no dragged cancellation region"
+        ],
+        "diagnostics": [
+          "{{instance}}-cancellation-log",
+          "{{instance}}-targeting-state",
+          "{{instance}}-selection-state",
+          "{{instance}}-plan-state",
+          "{{instance}}-proposal-log"
+        ]
+      },
+      "text": "Cancellation {{row.id}} matches action {{row.action}}, its {{bind:phase}} phase, and the holding state in {{row.state-declared-in}} before any other row. It {{bind:result}}, proposes no command, changes no selection beyond empties-selection, and ends the phase. Where more than one cancellation row could match, the contract checks the holding state in the order targeting, selection-drag, queued-commands, selection. A mismatch does not apply this row and asserts nothing about another cancellation. Area cancellation asserts nothing here."
+    },
+    {
+      "id": "verb-first-begins-targeting",
+      "title": "verb-first row {{row.id}} begins from its cited action",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "targeted-verbs",
+      "when": {
+        "row": {
+          "order": [
+            "verb-first"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "targeted-verb row {{row.id}} with no active targeting state and the start rule at {{row.starts-when-declared-in}}",
+        "when": [
+          "the cited game action supplies verb {{row.verb}}",
+          "the same entry is attempted while a targeting state is already active"
+        ],
+        "then": [
+          "the first action begins a targeting entry holding {{row.verb}}",
+          "the second entry does not replace the active state unless {{row.starts-when-declared-in}} explicitly replaces it",
+          "the test leaves the start action and any explicit replacement to {{row.starts-when-declared-in}} and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-targeting-state",
+          "{{instance}}-snapshot-log"
+        ]
+      },
+      "text": "For verb-first row {{row.id}}, the action at {{row.starts-when-declared-in}} supplies {{row.verb}} and begins targeting. A second entry does not replace an active state unless that cited rule explicitly does so. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "target-first-captures-before-verb",
+      "title": "target-first row {{row.id}} captures its target before the verb",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "targeted-verbs",
+      "when": {
+        "row": {
+          "order": [
+            "target-first"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "targeted-verb row {{row.id}}, capture action {{row.target-gesture}}, and the rules at {{row.target-gesture-declared-in}} and {{row.starts-when-declared-in}}",
+        "when": [
+          "{{row.target-gesture}} reaches {{row.resolves-on}} on a classified snapshot with no active targeting state",
+          "the cited game action then supplies verb {{row.verb}}",
+          "another entry is attempted while the state is active"
+        ],
+        "then": [
+          "the capture stores that exact world target in a target-first state before the verb arrives",
+          "the cited start action supplies {{row.verb}} to the stored target",
+          "the later entry does not replace the active state unless {{row.starts-when-declared-in}} explicitly replaces it",
+          "the test leaves recognition and the start action to the two cited rules and restates nothing from them"
+        ],
+        "diagnostics": [
+          "{{instance}}-targeting-state",
+          "{{instance}}-snapshot-log"
+        ]
+      },
+      "text": "Target-first row {{row.id}} captures the classified target through {{row.target-gesture}} at {{row.target-gesture-declared-in}}, then {{row.starts-when-declared-in}} supplies {{row.verb}}. A later entry does not replace an active state unless the start rule explicitly does so. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "separate-confirmation-reads-completion-snapshot",
+      "title": "{{row.id}} reads the target when confirmation completes",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "targeted-verbs",
+      "when": {
+        "row": {
+          "confirm-style": [
+            "separate-gesture"
+          ]
+        }
+      },
+      "bindings": {
+        "snapshot": {
+          "row_field": "resolves-on",
+          "map": {
+            "press": "the pointer snapshot at confirmation completion",
+            "release": "the pointer snapshot at confirmation completion",
+            "drag-complete": "the completed dragged region supplied by its cited region rule, on which validity is tested"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "active targeting for {{row.id}} and confirmation action {{row.confirm-gesture}} recognized at {{row.confirm-gesture-declared-in}}",
+        "when": [
+          "the confirmation completes at {{row.resolves-on}} after the pointer has moved from the entry position"
+        ],
+        "then": [
+          "confirmation reads {{bind:snapshot}}",
+          "for a non-pointer confirmation that reads a pointer snapshot, the snapshot uses the pointer position at that action's completion; where this row reads a dragged region, this clause asserts nothing",
+          "the test leaves recognition and completion to {{row.confirm-gesture-declared-in}} and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-snapshot-log",
+          "{{instance}}-targeting-state",
+          "{{instance}}-pointer-result"
+        ]
+      },
+      "text": "For {{row.id}}, separate confirmation {{row.confirm-gesture}} reads {{bind:snapshot}}. A non-pointer confirmation that reads a pointer snapshot uses the pointer position at that action's completion; where this row reads a dragged region, that clause asserts nothing. Recognition comes from {{row.confirm-gesture-declared-in}}; the test names the address and restates nothing from it."
+    },
+    {
+      "id": "entry-position-confirmation-keeps-entry-snapshot",
+      "title": "{{row.id}} confirms from its entry snapshot",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "targeted-verbs",
+      "when": {
+        "row": {
+          "confirm-style": [
+            "at-entry-position"
+          ]
+        }
+      },
+      "bindings": {
+        "source": {
+          "row_field": "order",
+          "map": {
+            "verb-first": "the pointer position captured when the verb-first entry begins",
+            "target-first": "the world target already captured before the verb arrives"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "targeted-verb row {{row.id}} with distinguishable entry and later pointer snapshots",
+        "when": [
+          "the row captures its declared entry-time snapshot and the pointer later occupies another position"
+        ],
+        "then": [
+          "confirmation reads {{bind:source}}",
+          "the later pointer position does not replace that snapshot"
+        ],
+        "diagnostics": [
+          "{{instance}}-snapshot-log",
+          "{{instance}}-targeting-state"
+        ]
+      },
+      "text": "At-entry-position row {{row.id}} confirms from {{bind:source}}. A later pointer position does not replace that snapshot."
+    },
+    {
+      "id": "targeted-drag-uses-cited-region",
+      "title": "dragged verb {{row.id}} uses its cited region",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "targeted-verbs",
+      "when": {
+        "row": {
+          "resolves-on": [
+            "drag-complete"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "targeted-verb row {{row.id}} and a completed dragged region governed at {{row.area-declared-in}}",
+        "when": [
+          "the row reaches drag-complete"
+        ],
+        "then": [
+          "the complete region from {{row.area-declared-in}} becomes the verb target",
+          "the test contributes no endpoint, geometry, coordinate-space, or boundary rule",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-snapshot-log",
+          "{{instance}}-pointer-result"
+        ]
+      },
+      "text": "When {{row.id}} reaches drag-complete, the complete region at {{row.area-declared-in}} becomes its target. The adoption contributes no endpoint, geometry, coordinate-space, or boundary rule. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "targeted-verb-tests-candidate-and-validity",
+      "title": "{{row.id}} resolves a candidate and tests validity",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "targeted-verbs",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "targeted-verb row {{row.id}} with one cited valid target and one cited invalid target under {{row.targets-declared-in}}",
+        "when": [
+          "each target reaches the row's confirmation route"
+        ],
+        "then": [
+          "candidate lookup applies the adoption's near-miss-resolution answer through {{row.targets-declared-in}}",
+          "the cited validity test records valid for the valid target and invalid for the invalid target",
+          "the test leaves target kinds, reach, tie-break, and validity content to {{row.targets-declared-in}} and restates nothing from it",
+          "a verb needing several separately confirmed points asserts nothing here"
+        ],
+        "diagnostics": [
+          "{{instance}}-snapshot-log",
+          "{{instance}}-pointer-result",
+          "{{instance}}-targeting-state"
+        ]
+      },
+      "text": "Targeted verb {{row.id}} applies near-miss resolution and validity through {{row.targets-declared-in}}. The result record distinguishes a valid target from an invalid one. The test names the address and restates nothing from it. Verbs needing several separately confirmed points assert nothing here."
+    },
+    {
+      "id": "invalid-target-keeps-targeting",
+      "title": "an invalid target keeps targeting",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "invalid-target": [
+            "keep-targeting"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each targeted verb in {{instance}} with an invalid target under its cited target rule",
+        "when": [
+          "the verb reaches confirmation and the target fails validity"
+        ],
+        "then": [
+          "no command proposal is created",
+          "the same chosen verb remains active for another target",
+          "no context-command row runs from the same phase",
+          "the pointer result records invalid target rather than a rejected proposal"
+        ],
+        "diagnostics": [
+          "{{instance}}-pointer-result",
+          "{{instance}}-targeting-state",
+          "{{instance}}-proposal-log"
+        ]
+      },
+      "text": "An invalid target creates no command proposal, keeps the same chosen verb active, and never falls through to a context command from the same phase. The result records invalid target rather than a rejected proposal."
+    },
+    {
+      "id": "invalid-target-leaves-targeting",
+      "title": "an invalid target leaves targeting",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "invalid-target": [
+            "leave-targeting"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each targeted verb in {{instance}} with an invalid target under its cited target rule",
+        "when": [
+          "the verb reaches confirmation and the target fails validity"
+        ],
+        "then": [
+          "no command proposal is created",
+          "the chosen verb is cleared",
+          "no context-command row runs from the same phase",
+          "the pointer result records invalid target rather than a rejected proposal"
+        ],
+        "diagnostics": [
+          "{{instance}}-pointer-result",
+          "{{instance}}-targeting-state",
+          "{{instance}}-proposal-log"
+        ]
+      },
+      "text": "An invalid target creates no command proposal, clears the chosen verb, and never falls through to a context command from the same phase. The result records invalid target rather than a rejected proposal."
+    },
+    {
+      "id": "valid-target-creates-one-proposal",
+      "title": "a valid target creates one {{row.id}} proposal",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "targeted-verbs",
+      "bindings": {
+        "after": {
+          "row_field": "after-dispatch",
+          "map": {
+            "leave-targeting": "ends targeting after the proposal is dispatched, placed, or rejected",
+            "keep-targeting": "keeps the same chosen verb after the proposal is dispatched, placed, or rejected"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "targeted-verb row {{row.id}} with a valid resolved target under {{row.targets-declared-in}}",
+        "when": [
+          "the row completes confirmation and its proposal reaches placement"
+        ],
+        "then": [
+          "one command proposal is created with the command from {{row.command-declared-in}}, the receiver selected by the command-receiver answer, the validated exact target, and a placement outcome",
+          "the proposal preserves the row result that {{bind:after}}",
+          "rejection remains a dispatched proposal and does not restore the earlier targeting instance",
+          "the test leaves permission, cost, range, path, unreachable result, effect, and rejection to {{row.command-declared-in}} and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-targeting-state",
+          "{{instance}}-pointer-result",
+          "{{instance}}-plan-state"
+        ]
+      },
+      "text": "A valid target for {{row.id}} creates one proposal carrying the exact target, the command from {{row.command-declared-in}}, and the receiver selected by the command-receiver answer. It {{bind:after}}. Rejection remains a dispatched proposal and does not restore the earlier targeting instance. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "targeting-suppresses-selection-and-context",
+      "title": "{{row.id}} targeting suppresses ordinary selection and context rows",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "targeted-verbs",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "targeted-verb row {{row.id}}'s active targeting state and a game-facing pointer action that would match a selection or context row with no targeting state",
+        "when": [
+          "the action completes while targeting is active, first without and then with a matching cancellation row where one exists"
+        ],
+        "then": [
+          "without a matching cancellation row, the action changes no selection and creates no context-command proposal",
+          "with a matching cancellation row, only that cancellation result applies and the phase ends",
+          "where either branch cannot be constructed, that branch asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-targeting-state",
+          "{{instance}}-selection-state",
+          "{{instance}}-proposal-log",
+          "{{instance}}-cancellation-log"
+        ]
+      },
+      "text": "While the targeting state for {{row.id}} is active, an ordinary selection or context gesture has no meaning. If the same action and phase matches a cancellation row in the holding state, only the cancellation applies. A branch the adoption cannot construct asserts nothing."
+    },
+    {
+      "id": "selection-or-context-row-match",
+      "title": "one selection or context row matches without targeting",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "no active targeting state and each classified pointer snapshot the {{instance}} adoption can produce, including an unmatched classification where one can be constructed",
+        "when": [
+          "the game-facing pointer action reaches a completed phase"
+        ],
+        "then": [
+          "where a row matches, exactly one selection or context row proceeds from its action, phase, and classification",
+          "a target-first capture gesture is resolved at targeting entry and is neither a selection or context row match nor an unmatched classification",
+          "where no row matches, no world-command state changes and the result records the unmatched classification",
+          "where every constructible classification matches, the unmatched branch asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-pointer-result",
+          "{{instance}}-selection-state",
+          "{{instance}}-proposal-log"
+        ]
+      },
+      "text": "With no active targeting state, if a selection or context row matches action, phase, and classification, exactly one proceeds. A target-first capture gesture is resolved at targeting entry and is neither a selection or context row match nor an unmatched classification. If no row matches, no world-command state changes and the unmatched classification is recorded. Where no unmatched classification can be constructed, that branch asserts nothing."
+    },
+    {
+      "id": "receiver-conditioned-context-match",
+      "title": "{{row.id}} also matches its cited receiver class",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "context-commands",
+      "bindings": {
+        "condition": {
+          "row_field": "resolves-on",
+          "map": {
+            "press": "{{row.receiver-condition}}",
+            "release": "{{row.receiver-condition}}",
+            "drag-complete": "{{row.receiver-condition}}"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "context row {{row.id}}, the receiver classes distinguished at {{bind:condition}}, and otherwise identical action, phase, and target classifications",
+        "when": [
+          "the context action completes once with a matching receiver class and once with a non-matching class"
+        ],
+        "then": [
+          "{{row.id}} matches only the receiver class named at {{bind:condition}}",
+          "where another row cites a different receiver class for the same action, phase, and target kind, the selection holds one class at a time under that citation",
+          "the non-matching class matches no row here, changes no world-command state, and is recorded as an unmatched classification",
+          "per-member dispatch asserts nothing here",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-pointer-result",
+          "{{instance}}-selection-state",
+          "{{instance}}-proposal-log"
+        ]
+      },
+      "text": "Context row {{row.id}} also matches the receiver class at {{bind:condition}}. Where another row cites a different receiver class for the same action, phase, and target kind, the selection holds one class at a time under that citation. The non-matching class matches no row here, changes no world-command state, and is recorded as an unmatched classification. Per-member dispatch for a mixed selection asserts nothing here. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "selection-row-uses-complete-candidate-set",
+      "title": "selection row {{row.id}} commits its complete candidate set once",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "selection-gestures",
+      "bindings": {
+        "shape": {
+          "row_field": "shape",
+          "map": {
+            "point": "the complete candidate set at the pointer point",
+            "area": "the complete candidate set inside the cited dragged area"
+          }
+        },
+        "change": {
+          "row_field": "change",
+          "map": {
+            "replace": "replaces the current selection with the complete non-empty set; for an empty set it follows the adoption's empty-selection answer; a non-empty result, or an empty replace result that changes the selection, is committed once; an unchanged empty result records no selection change",
+            "add": "adds the complete non-empty set; an empty set keeps the current selection; a non-empty result is committed once and an unchanged empty result records no selection change",
+            "remove": "removes the complete non-empty set; an empty set keeps the current selection; a non-empty result is committed once and an unchanged empty result records no selection change",
+            "toggle": "toggles every member of the complete non-empty set; an empty set keeps the current selection; a non-empty result is committed once and an unchanged empty result records no selection change"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "selection row {{row.id}} with a non-empty and an empty result from {{row.candidates-declared-in}}",
+        "when": [
+          "{{row.gesture}} completes at {{row.resolves-on}} for each result"
+        ],
+        "then": [
+          "candidate lookup returns {{bind:shape}} through {{row.candidates-declared-in}}",
+          "the row {{bind:change}}",
+          "the pointer phase ends without a command proposal",
+          "the test leaves candidate kinds, inclusion, reach, and tie-break to {{row.candidates-declared-in}} and restates nothing from it",
+          "selection layers assert nothing here because the result is one set"
+        ],
+        "diagnostics": [
+          "{{instance}}-selection-state",
+          "{{instance}}-pointer-result",
+          "{{instance}}-proposal-log"
+        ]
+      },
+      "text": "Selection row {{row.id}} reads {{bind:shape}} from {{row.candidates-declared-in}} and {{bind:change}}. The phase ends without a proposal. Selection layers assert nothing here. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "empty-replace-clears-selection",
+      "title": "an empty replacement clears the selection",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "empty-selection": [
+            "clear-selection"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each replace selection row in {{instance}}, a non-empty current selection, and an empty complete candidate set",
+        "when": [
+          "the selection gesture completes"
+        ],
+        "then": [
+          "the current selection is cleared and committed once",
+          "the result record distinguishes clearing a non-empty selection from leaving an already empty selection unchanged",
+          "where the adoption declares no replace selection row, this answer is inert and this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-selection-state",
+          "{{instance}}-pointer-result"
+        ]
+      },
+      "text": "When a replace selection row returns an empty complete candidate set, the current selection is cleared and committed once. The result distinguishes that change from an already empty selection left unchanged. The contract says the answer binds only through replace rows; where the adoption declares none, this answer is inert and this test asserts nothing."
+    },
+    {
+      "id": "empty-replace-keeps-selection",
+      "title": "an empty replacement keeps the selection",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "empty-selection": [
+            "keep-selection"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each replace selection row in {{instance}}, a distinguishable current selection, and an empty complete candidate set",
+        "when": [
+          "the selection gesture completes"
+        ],
+        "then": [
+          "the earlier current selection remains unchanged",
+          "the result record distinguishes the empty candidate set from a non-empty set that happens to reproduce the same selection",
+          "where the adoption declares no replace selection row, this answer is inert and this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-selection-state",
+          "{{instance}}-pointer-result"
+        ]
+      },
+      "text": "When a replace selection row returns an empty complete candidate set, the earlier current selection remains unchanged. The result distinguishes the empty candidate set from a non-empty set with the same final members. The contract says the answer binds only through replace rows; where the adoption declares none, this answer is inert and this test asserts nothing."
+    },
+    {
+      "id": "context-row-copies-target-and-creates-proposal",
+      "title": "context row {{row.id}} copies its target into one proposal",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "context-commands",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "context row {{row.id}} and a classified {{row.target-kind}} snapshot under {{row.target-declared-in}}",
+        "when": [
+          "{{row.gesture}} completes at {{row.resolves-on}} with no active targeting state"
+        ],
+        "then": [
+          "the row copies the classified point or object as the exact target",
+          "one proposal is created with command {{row.command}} and the receiver shape selected by the command-receiver answer",
+          "the proposal proceeds to queue placement without changing the copied target or receiver",
+          "the test leaves classification, reach, and tie-break to {{row.target-declared-in}} and command content to {{row.command-declared-in}} and restates nothing from them"
+        ],
+        "diagnostics": [
+          "{{instance}}-snapshot-log",
+          "{{instance}}-proposal-log",
+          "{{instance}}-pointer-result"
+        ]
+      },
+      "text": "Context row {{row.id}} copies the classified {{row.target-kind}} point or object from {{row.target-declared-in}} as its exact target. One proposal is created with command {{row.command}} and the receiver shape selected by the command-receiver answer; its Fixed command rule is at {{row.command-declared-in}}. The copied target and receiver do not change before placement. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "context-drag-uses-cited-region",
+      "title": "dragged context row {{row.id}} uses its cited region",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "context-commands",
+      "when": {
+        "row": {
+          "resolves-on": [
+            "drag-complete"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "context row {{row.id}} and the completed dragged region at {{row.area-declared-in}}",
+        "when": [
+          "{{row.gesture}} reaches drag-complete"
+        ],
+        "then": [
+          "the complete region from {{row.area-declared-in}} becomes the command target",
+          "the test contributes no geometry, coordinate-space, or boundary rule",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-snapshot-log",
+          "{{instance}}-pointer-result",
+          "{{instance}}-proposal-log"
+        ]
+      },
+      "text": "When context row {{row.id}} reaches drag-complete, the complete region at {{row.area-declared-in}} becomes its target. The adoption contributes no geometry, coordinate-space, or boundary rule. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "fixed-actor-receives-command",
+      "title": "the cited fixed actor receives each command",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "command-receiver": [
+            "fixed-actor"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each matching context command and valid targeted verb in {{instance}}",
+        "when": [
+          "the command proposal is created"
+        ],
+        "then": [
+          "the proposal copies the fixed actor or party from its cited command rule",
+          "no current selection is required to supply the receiver",
+          "the proposal proceeds through placement with that receiver unchanged"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-selection-state",
+          "{{instance}}-plan-state"
+        ]
+      },
+      "text": "Every command proposal copies the fixed actor or party from its cited command rule. No current selection supplies the receiver, and placement does not change it."
+    },
+    {
+      "id": "current-selection-receives-command",
+      "title": "the complete current selection receives each command",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "command-receiver": [
+            "current-selection"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each matching context command and valid targeted verb in {{instance}}, first with a non-empty current selection and then with an empty one",
+        "when": [
+          "the command proposal reaches receiver resolution"
+        ],
+        "then": [
+          "the non-empty case copies the complete current selection and creates one proposal that proceeds to placement",
+          "the empty case creates one rejected proposal with no world effect and ends before queue placement or command dispatch",
+          "for a valid targeted verb, the contract says an empty current selection makes one rejected proposal on the same terms",
+          "the result record distinguishes the rejected proposal from no proposal",
+          "later selection changes do not change the copied receiver"
+        ],
+        "diagnostics": [
+          "{{instance}}-selection-state",
+          "{{instance}}-proposal-log",
+          "{{instance}}-pointer-result",
+          "{{instance}}-plan-state"
+        ]
+      },
+      "text": "A non-empty complete current selection is copied as the receiver and its proposal proceeds to placement. An empty copy creates one rejected proposal with no world effect and ends before placement or dispatch. For a valid targeted verb, the contract says an empty current selection makes the same one rejected proposal. The result distinguishes that from no proposal. Later selection changes do not alter the copy."
+    },
+    {
+      "id": "world-target-owns-command",
+      "title": "the exact world target owns each command",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "command-receiver": [
+            "world-target"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each matching context command and valid targeted verb in {{instance}}",
+        "when": [
+          "the command proposal is created"
+        ],
+        "then": [
+          "the proposal attaches no selected receiver",
+          "the cited command rule supplies the exact target's plan owner",
+          "later actor or worker allocation is not performed by this contract and asserts nothing here"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-selection-state",
+          "{{instance}}-plan-state"
+        ]
+      },
+      "text": "Each proposal attaches no selected receiver and reads the exact world target's plan owner from its cited command rule. Later actor or worker allocation asserts nothing here."
+    },
+    {
+      "id": "exact-point-only-resolves-candidates",
+      "title": "candidate lookup uses the exact pointer point",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "near-miss-resolution": [
+            "exact-point-only"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each candidate lookup in {{instance}}, with one point on a cited target and one point just outside it",
+        "when": [
+          "the pointer snapshot is classified through the row's candidate or target rule"
+        ],
+        "then": [
+          "only the exact pointer point is used",
+          "no near-miss reach adds a candidate",
+          "the cited rule still owns target kinds, point inclusion, and validity"
+        ],
+        "diagnostics": [
+          "{{instance}}-snapshot-log",
+          "{{instance}}-pointer-result"
+        ]
+      },
+      "text": "Every candidate lookup uses only the exact pointer point. No near-miss reach adds a candidate; the cited row rule still owns target kinds, point inclusion, and validity."
+    },
+    {
+      "id": "nearest-within-reach-resolves-candidates",
+      "title": "candidate lookup chooses the cited nearest candidate",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "near-miss-resolution": [
+            "nearest-within-reach"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each candidate lookup in {{instance}}, with candidates inside and outside the reach and a cited tie where one can be constructed",
+        "when": [
+          "the pointer snapshot is classified through the row's candidate or target rule"
+        ],
+        "then": [
+          "the nearest selectable candidate inside the cited reach is chosen",
+          "a candidate outside the cited reach is not chosen",
+          "a tie follows the complete tie-break in the cited row rule; where no tie can be constructed, that comparison asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-snapshot-log",
+          "{{instance}}-pointer-result"
+        ]
+      },
+      "text": "Every candidate lookup chooses the nearest selectable candidate inside the reach cited by its row rule; a candidate outside that reach is not chosen. A tie follows the cited complete tie-break, and where no tie can be constructed that comparison asserts nothing."
+    },
+    {
+      "id": "queue-modifier-appends-at-end",
+      "title": "queue modifier {{row.id}} appends a matching proposal",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "queue-modifiers",
+      "when": {
+        "flag": {
+          "queued-command-placement": [
+            "append-at-end"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "queue modifier {{row.id}}, a matching command named through {{row.applies-to-declared-in}}, and distinguishable current and waiting commands for one plan owner",
+        "when": [
+          "{{row.modifier-action}} is active under {{row.modifier-declared-in}} when the proposal completes"
+        ],
+        "then": [
+          "the proposal keeps its command, receiver, and target and is placed after every waiting pointer command for the same owner",
+          "the cited modifier rule decides activity, capacity, and the complete no-place result, and no command is dropped implicitly",
+          "the applicability rule decides which declared commands this modifier reaches",
+          "a command that {{row.applies-to-declared-in}} does not name takes the unmodified-command path even while {{row.modifier-action}} is active",
+          "per-row placement differences assert nothing here because the answer is adoption-wide",
+          "the test names both addresses and restates nothing from them"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-plan-state",
+          "{{instance}}-pointer-result"
+        ]
+      },
+      "text": "When {{row.modifier-action}} is active under {{row.modifier-declared-in}}, modifier {{row.id}} places a matching proposal after every waiting pointer command for the same plan owner without changing its meaning. Capacity and the no-place result stay in that citation, nothing is dropped implicitly, and {{row.applies-to-declared-in}} decides applicability. A command that the applicability rule does not name takes the unmodified-command path even while the modifier action is active. Per-row placement differences assert nothing here. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "queue-modifier-inserts-next",
+      "title": "queue modifier {{row.id}} inserts a matching proposal next",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "queue-modifiers",
+      "when": {
+        "flag": {
+          "queued-command-placement": [
+            "insert-next"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "queue modifier {{row.id}}, a matching command named through {{row.applies-to-declared-in}}, and distinguishable current and waiting commands for one plan owner",
+        "when": [
+          "{{row.modifier-action}} is active under {{row.modifier-declared-in}} when the proposal completes"
+        ],
+        "then": [
+          "the proposal keeps its command, receiver, and target and is placed before every waiting pointer command and after the command already being carried out",
+          "the cited modifier rule decides activity, capacity, and the complete no-place result, and no command is dropped implicitly",
+          "the applicability rule decides which declared commands this modifier reaches",
+          "a command that {{row.applies-to-declared-in}} does not name takes the unmodified-command path even while {{row.modifier-action}} is active",
+          "per-row placement differences assert nothing here because the answer is adoption-wide",
+          "the test names both addresses and restates nothing from them"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-plan-state",
+          "{{instance}}-pointer-result"
+        ]
+      },
+      "text": "When {{row.modifier-action}} is active under {{row.modifier-declared-in}}, modifier {{row.id}} places a matching proposal before every waiting pointer command and after the command already being carried out, without changing its meaning. Capacity and the no-place result stay in that citation, nothing is dropped implicitly, and {{row.applies-to-declared-in}} decides applicability. A command that the applicability rule does not name takes the unmodified-command path even while the modifier action is active. Per-row placement differences assert nothing here. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "unmodified-command-replaces-waiting",
+      "title": "an unmodified command replaces waiting pointer commands",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "unmodified-command": [
+            "replaces-waiting"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an unmodified proposal in {{instance}} for a plan owner with distinguishable waiting pointer commands",
+        "when": [
+          "the proposal reaches placement with no matching queue modifier"
+        ],
+        "then": [
+          "every waiting pointer command for the same owner is cleared",
+          "the new proposal is placed once and proceeds to its cited command rule",
+          "the command already being carried out stops only if the cited command rule says so",
+          "the plan record distinguishes replacement from an append that leaves one visible entry",
+          "per-row placement differences assert nothing because the answer is adoption-wide"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-plan-state",
+          "{{instance}}-pointer-result"
+        ]
+      },
+      "text": "With no matching queue modifier, the proposal clears every waiting pointer command for the same owner and is placed once. Whether a command already being carried out stops belongs to the cited command rule. The plan record distinguishes replacement from an append with the same visible count. Per-row placement differences assert nothing because the answer is adoption-wide."
+    },
+    {
+      "id": "unmodified-command-always-appends",
+      "title": "an unmodified command appends after waiting commands",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "unmodified-command": [
+            "always-appends"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an unmodified proposal in {{instance}} for a plan owner with distinguishable waiting pointer commands",
+        "when": [
+          "the proposal reaches placement with no matching queue modifier"
+        ],
+        "then": [
+          "the proposal is placed after every waiting pointer command for the same owner",
+          "every earlier waiting command remains in the same order",
+          "the new proposal proceeds to its cited command rule when it reaches that place",
+          "per-row placement differences assert nothing because the answer is adoption-wide"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-plan-state",
+          "{{instance}}-pointer-result"
+        ]
+      },
+      "text": "With no matching queue modifier, the proposal is placed after every waiting pointer command for the same owner. Earlier waiting commands keep their order, and the proposal reaches its cited command rule at that place. Per-row placement differences assert nothing because the answer is adoption-wide."
+    },
+    {
+      "id": "unmodified-command-rejects-while-busy",
+      "title": "an unmodified command is accepted only when its plan is not busy",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "unmodified-command": [
+            "rejected-while-busy"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the same unmodified proposal in {{instance}}, first for a plan owner with one waiting pointer command and then for that owner with none",
+        "when": [
+          "the proposal reaches placement with no matching queue modifier in each state"
+        ],
+        "then": [
+          "the busy case records one rejected proposal, leaves the waiting plan unchanged, and stops before command-rule submission",
+          "the not-busy case places the proposal once and submits it to its cited command rule",
+          "the proposal log distinguishes rejection from no proposal",
+          "per-row placement differences assert nothing because the answer is adoption-wide"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-plan-state",
+          "{{instance}}-pointer-result"
+        ]
+      },
+      "text": "With no matching queue modifier, a busy plan owner records one rejected proposal and keeps the waiting plan unchanged. The same proposal for an owner with no waiting pointer command is placed once and submitted. The log distinguishes rejection from no proposal. Per-row placement differences assert nothing because the answer is adoption-wide."
+    },
+    {
+      "id": "proposal-count-and-targeting-result",
+      "title": "one completed phase creates no duplicate proposal",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each completed pointer phase in {{instance}} that creates a proposal, including one with a held queue modifier where available",
+        "when": [
+          "the proposal is created, placed or rejected, and any targeted-verb result is applied"
+        ],
+        "then": [
+          "the completed phase creates exactly one proposal",
+          "a held modifier or update creates no second copy within that phase",
+          "for a targeted verb, its after-dispatch result applies after placement or rejection; for a context command, that clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-pointer-result",
+          "{{instance}}-targeting-state",
+          "{{instance}}-plan-state"
+        ]
+      },
+      "text": "Each completed phase that creates a proposal creates exactly one. A held modifier or update adds no copy. For a targeted verb, the row's after-dispatch result applies after placement or rejection; for a context command, that clause asserts nothing."
+    },
+    {
+      "id": "proposal-submission-stops-at-command-rule",
+      "title": "dispatch stops at the cited command rule",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each placed proposal in {{instance}}, including one queued proposal when the adoption can create one",
+        "when": [
+          "the proposal reaches its declared place and is submitted"
+        ],
+        "then": [
+          "the proposal is submitted once to its cited Fixed command rule at its declared place",
+          "the pointer contract makes no claim about permission, cost, range, path, the unreachable case, effect, rejection, or whether a current command stops after submission",
+          "when several proposals share one instant, their order is left to Event resolution",
+          "a paired Action legibility adoption asserts nothing here"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-plan-state",
+          "{{instance}}-pointer-result"
+        ]
+      },
+      "text": "Each placed proposal is submitted once to its cited Fixed command rule at its declared place. Permission, cost, range, path, the unreachable case, effect, rejection, and whether a current command stops belong to that rule. Event resolution owns same-instant order. A paired Action legibility adoption asserts nothing here."
+    },
+    {
+      "id": "pointer-result-record-is-complete",
+      "title": "the pointer result records the completed phase",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each completed pointer phase in {{instance}}, including every optional circumstance the adoption can construct",
+        "when": [
+          "the pointer result is read after resolution"
+        ],
+        "then": [
+          "the result records gesture id, resolving phase, pointer snapshot, prior and final targeting state, and prior and final selection when changed",
+          "it records command and receiver when proposed, target, queue modifier or unmodified placement outcome, cancellation when used, and target validity for every targeted verb that reached validity",
+          "it records no-matching-row when applicable and the cited game-rule result when available",
+          "an optional circumstance the adoption cannot construct asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-pointer-result"
+        ]
+      },
+      "text": "Every pointer result records its gesture, phase, snapshot, targeting states, changed selection, proposed command and receiver, target, placement outcome, cancellation, tested target validity, unmatched classification, and available cited game-rule result. An optional circumstance the adoption cannot construct asserts nothing."
+    },
+    {
+      "id": "authority-order-preserves-copies",
+      "title": "later stages preserve the earlier snapshot and receiver",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each completed pointer phase in {{instance}} with distinguishable snapshot, receiver, placement, and game-rule data",
+        "when": [
+          "the phase proceeds through every stage it reaches"
+        ],
+        "then": [
+          "physical mapping precedes gesture recognition, cancellation, targeting entry, target confirmation, selection or context classification, receiver snapshot, queue placement, command dispatch, game rule, and same-instant event order",
+          "a later stage never changes the pointer snapshot or receiver copied earlier",
+          "classification can read receiver class without copying the receiver set",
+          "questions and rows describe choices and citations but define no second sequence"
+        ],
+        "diagnostics": [
+          "{{instance}}-pointer-result",
+          "{{instance}}-snapshot-log",
+          "{{instance}}-proposal-log",
+          "{{instance}}-plan-state"
+        ]
+      },
+      "text": "The contract's authority order is physical mapping, gesture recognition, cancellation, targeting entry, confirmation, selection or context classification, receiver snapshot, placement, dispatch, game rule, and same-instant event order. Later stages never change an earlier snapshot or receiver; classification can read receiver class without copying the set. Questions and rows describe choices and citations, not another sequence."
+    },
+    {
+      "id": "empty-collections-and-unasked-questions",
+      "title": "absent rows and unasked questions keep their declared meaning",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, including each empty and non-empty row set and each gated question it does or does not answer",
+        "when": [
+          "a reviewer compares the adoption shape with every row-set when-empty sentence and every gated-question otherwise sentence"
+        ],
+        "then": [
+          "an empty selection-gestures set means no pointer gesture changes the current selection; when non-empty, this clause asserts nothing",
+          "an empty context-commands set means no pointer gesture chooses a command directly from its world target; when non-empty, this clause asserts nothing",
+          "an empty targeted-verbs set means no chosen verb waits for a pointer target; when non-empty, this clause asserts nothing",
+          "an empty queue-modifiers set means no pointer modifier adds a command to a waiting plan; when non-empty, this clause asserts nothing",
+          "an empty cancellations set means no action has a separate cancellation meaning in this adoption; when non-empty, this clause asserts nothing",
+          "when the adoption does not answer empty-selection, no pointer gesture changes the current world selection; when it answers, this clause asserts nothing",
+          "when the adoption does not answer invalid-target, no chosen ability or verb waits for a world target from the pointer; when it answers, this clause asserts nothing",
+          "when the adoption does not answer queued-command-placement, no pointer modifier adds a command to a waiting plan; when it answers, this clause asserts nothing",
+          "when the adoption does not answer unmodified-command, no pointer command can enter a waiting plan; when it answers, this clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This check reads the adoption shape. Each empty row set has exactly its when-empty meaning. Each gated question the adoption does not answer has exactly its otherwise meaning: without empty-selection, no pointer gesture changes the current world selection; without invalid-target, no chosen ability or verb waits for a world target from the pointer; without queued-command-placement, no pointer modifier adds a command to a waiting plan; without unmodified-command, no pointer command can enter a waiting plan. When the adoption answers a question or fills a row set, that clause asserts nothing."
+    },
+    {
+      "id": "selection-and-context-rows-are-disjoint",
+      "title": "declaration check: selection and context rows are disjoint",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption, not the running game",
+        "when": [
+          "a reviewer compares every selection row, context row, target-first capture gesture, and cancellation row by its contract matching terms"
+        ],
+        "then": [
+          "no selection row and context row match the same game-facing action, phase, and classification",
+          "no two selection rows match the same game-facing action, phase, and classification",
+          "no target-first capture gesture matches the same game-facing action, phase, and classification as a selection or context row",
+          "no two cancellation rows match the same game-facing action and phase in one holding state",
+          "for one context action and phase, target-kind values together with any cited receiver class are mutually exclusive",
+          "one completed phase therefore selects or commands, never both",
+          "any other shape is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. Under the contract's mutually exclusive classifications, no selection and context row, two selection rows, or target-first capture and selection or context row can match the same game-facing action, phase, and classification. No two cancellation rows match the same game-facing action and phase in one holding state under the contract's targeting, selection-drag, queued-commands, selection order. Context target kinds for one action and phase, together with any cited receiver class, must be mutually exclusive. One completed phase selects or commands, never both. Any other shape is a defect this test fails by construction."
+    },
+    {
+      "id": "queue-modifier-targets-declared-rows",
+      "title": "declaration check: modifier {{row.id}} names declared commands and is not inert",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "queue-modifiers",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.applies-to-declared-in}}, not the running game",
+        "when": [
+          "a reviewer compares every command named by the applicability rule with context-command and targeted-verb row ids"
+        ],
+        "then": [
+          "the rule names only declared context-command and targeted-verb rows",
+          "the contract requires the rule to name at least one declared row",
+          "any undeclared target or empty applicability set is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.applies-to-declared-in}}, not the running game. The rule must name only declared context-command and targeted-verb rows, and the contract requires it to name at least one declared row. An undeclared target or empty applicability set is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "cancellation-state-can-exist",
+      "title": "declaration check: cancellation {{row.id}} names a state this adoption can hold",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cancellations",
+      "bindings": {
+        "duty": {
+          "row_field": "active-state",
+          "map": {
+            "targeting": "the adoption has a targeted-verb row",
+            "selection-drag": "the adoption has a selection gesture that resolves on drag-complete",
+            "queued-commands": "the adoption declares a route by which a pointer command can be waiting: a queue modifier, or an unmodified-command answer that leaves one placed",
+            "selection": "the adoption has a selection gesture"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and cancellation row {{row.id}}, not the running game",
+        "when": [
+          "a reviewer compares its active state with the adoption's rows and answers"
+        ],
+        "then": [
+          "for active state {{row.active-state}}, {{bind:duty}}",
+          "the result matches that state: targeting with ends-targeting, selection-drag with ends-drag, queued-commands with empties-queue, or selection with empties-selection",
+          "any other shape is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. For cancellation {{row.id}} in {{row.active-state}}, {{bind:duty}}, and its result must match that state. Any other shape is a defect this test fails by construction."
+    },
+    {
+      "id": "current-selection-has-a-source",
+      "title": "declaration check: current selection has a declared source",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "command-receiver": [
+            "current-selection"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and its selection, load, and scene-entry declarations, not the running game",
+        "when": [
+          "a reviewer checks how a non-empty current selection can first exist"
+        ],
+        "then": [
+          "at least one selection gesture or a cited load or scene-entry rule supplies the selection",
+          "any other shape is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. Under current-selection, at least one selection gesture or a cited load or scene-entry rule must supply the selection. Any other shape is a defect this test fails by construction."
+    },
+    {
+      "id": "targeted-verb-has-exit",
+      "title": "declaration check: targeted verb {{row.id}} has a way to leave targeting",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "targeted-verbs",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption, the contract's targeted-verbs description, targeted-verb row {{row.id}}, its start rule, and its cancellation rows, not the running game",
+        "when": [
+          "a reviewer checks every route by which this targeting state can end"
+        ],
+        "then": [
+          "the targeted-verbs description requires every targeting state to be left through leave-targeting, a targeting cancellation row, or the cited start rule",
+          "for {{row.id}}, the applicable invalid-target answer or after-dispatch value is leave-targeting, or the adoption has a targeting cancellation row, or {{row.starts-when-declared-in}} states an exit",
+          "any other shape is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, the contract's targeted-verbs description, and {{row.starts-when-declared-in}}, not the running game. The description requires every targeting state to be left through leave-targeting, a targeting cancellation row, or the cited start rule. Targeted verb {{row.id}} must therefore have leave-targeting as its applicable invalid-target answer or after-dispatch value, a targeting cancellation row, or an exit in that cited start rule. Any other shape is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "selection-gesture-citation-duty",
+      "title": "declaration check: {{row.id}} gesture citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "selection-gestures",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.gesture-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.gesture-declared-in}} recognizes the game-facing pointer action and its completion phase, including drag threshold and area geometry where used",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.gesture-declared-in}}, not the running game. The citation must satisfy this duty: it recognizes the game-facing pointer action and its completion phase, including drag threshold and area geometry where used. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "selection-candidates-citation-duty",
+      "title": "declaration check: {{row.id}} candidate citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "selection-gestures",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.candidates-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.candidates-declared-in}} names selectable target kinds, point or area inclusion, near-miss reach when used, and a complete tie-break",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.candidates-declared-in}}, not the running game. The citation must satisfy this duty: it names selectable target kinds, point or area inclusion, near-miss reach when used, and a complete tie-break. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "context-gesture-citation-duty",
+      "title": "declaration check: {{row.id}} gesture citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "context-commands",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.gesture-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.gesture-declared-in}} recognizes the game-facing pointer action and its completion phase",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.gesture-declared-in}}, not the running game. The citation must satisfy this duty: it recognizes the game-facing pointer action and its completion phase. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "context-target-citation-duty",
+      "title": "declaration check: {{row.id}} target citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "context-commands",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.target-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.target-declared-in}} classifies the pointer snapshot, names the exact target, and states reach and a complete tie-break for nearest-within-reach",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.target-declared-in}}, not the running game. The citation must satisfy this duty: it classifies the pointer snapshot, names the exact target, and states reach and a complete tie-break for nearest-within-reach. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "context-area-citation-duty",
+      "title": "declaration check: {{row.id}} area citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "context-commands",
+      "when": {
+        "row": {
+          "resolves-on": [
+            "drag-complete"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.area-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.area-declared-in}} names the dragged region, boundary inclusion, and how that region becomes the command target",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.area-declared-in}}, not the running game. The citation must satisfy this duty: it names the dragged region, boundary inclusion, and how that region becomes the command target. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "context-receiver-condition-citation-duty",
+      "title": "declaration check: {{row.id}} receiver-condition citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "context-commands",
+      "bindings": {
+        "address": {
+          "row_field": "resolves-on",
+          "map": {
+            "press": "{{row.receiver-condition}}",
+            "release": "{{row.receiver-condition}}",
+            "drag-complete": "{{row.receiver-condition}}"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{bind:address}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{bind:address}} names the receiver class that limits this row",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{bind:address}}, not the running game. The citation must satisfy this duty: it names the receiver class that limits this row. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "context-command-citation-duty",
+      "title": "declaration check: {{row.id}} command citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "context-commands",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.command-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.command-declared-in}} names the command, receiver, target, per-target plan owner, permission, unreachable-target result, and complete accepted or rejected effect",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.command-declared-in}}, not the running game. The citation must satisfy this duty: it names the command, receiver, target, per-target plan owner, permission, unreachable-target result, and complete accepted or rejected effect. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "targeted-start-citation-duty",
+      "title": "declaration check: {{row.id}} start citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "targeted-verbs",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.starts-when-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.starts-when-declared-in}} names the game action that supplies the verb and any targeting-state replacement or exit it owns",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.starts-when-declared-in}}, not the running game. The citation must satisfy this duty: it names the game action that supplies the verb and any targeting-state replacement or exit it owns. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "targeted-target-gesture-citation-duty",
+      "title": "declaration check: {{row.id}} target-gesture citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "targeted-verbs",
+      "when": {
+        "row": {
+          "order": [
+            "target-first"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.target-gesture-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.target-gesture-declared-in}} recognizes the target-first pointer action and its capture phase",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.target-gesture-declared-in}}, not the running game. The citation must satisfy this duty: it recognizes the target-first pointer action and its capture phase. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "targeted-confirm-gesture-citation-duty",
+      "title": "declaration check: {{row.id}} confirmation citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "targeted-verbs",
+      "when": {
+        "row": {
+          "confirm-style": [
+            "separate-gesture"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.confirm-gesture-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.confirm-gesture-declared-in}} recognizes the confirmation action and its completion phase",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.confirm-gesture-declared-in}}, not the running game. The citation must satisfy this duty: it recognizes the confirmation action and its completion phase. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "targeted-targets-citation-duty",
+      "title": "declaration check: {{row.id}} targets citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "targeted-verbs",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.targets-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.targets-declared-in}} names target capture, every valid target, near-miss reach and tie-break when used, and the complete invalid-target test",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.targets-declared-in}}, not the running game. The citation must satisfy this duty: it names target capture, every valid target, near-miss reach and tie-break when used, and the complete invalid-target test. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "targeted-area-citation-duty",
+      "title": "declaration check: {{row.id}} area citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "targeted-verbs",
+      "when": {
+        "row": {
+          "resolves-on": [
+            "drag-complete"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.area-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.area-declared-in}} names the dragged region, boundary inclusion, and how that region becomes the verb target",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.area-declared-in}}, not the running game. The citation must satisfy this duty: it names the dragged region, boundary inclusion, and how that region becomes the verb target. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "targeted-command-citation-duty",
+      "title": "declaration check: {{row.id}} command citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "targeted-verbs",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.command-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.command-declared-in}} names the command, receiver, per-target plan owner, permission, cost, unreachable-target result, and complete effect or rejection",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.command-declared-in}}, not the running game. The citation must satisfy this duty: it names the command, receiver, per-target plan owner, permission, cost, unreachable-target result, and complete effect or rejection. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "queue-modifier-citation-duty",
+      "title": "declaration check: {{row.id}} modifier citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "queue-modifiers",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.modifier-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.modifier-declared-in}} names when the mapped modifier is active, any waiting-plan capacity, and the complete result when no place is available",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.modifier-declared-in}}, not the running game. The citation must satisfy this duty: it names when the mapped modifier is active, any waiting-plan capacity, and the complete result when no place is available. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "queue-applicability-citation-duty",
+      "title": "declaration check: {{row.id}} applicability citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "queue-modifiers",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.applies-to-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.applies-to-declared-in}} names every declared context command and targeted verb to which this modifier applies",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.applies-to-declared-in}}, not the running game. The citation must satisfy this duty: it names every declared context command and targeted verb to which this modifier applies. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "cancellation-action-citation-duty",
+      "title": "declaration check: {{row.id}} action citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cancellations",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.action-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.action-declared-in}} recognizes the cancellation action and its completion phase",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.action-declared-in}}, not the running game. The citation must satisfy this duty: it recognizes the cancellation action and its completion phase. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "cancellation-state-citation-duty",
+      "title": "declaration check: {{row.id}} state citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cancellations",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.state-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.state-declared-in}} names when the affected targeting, selection-drag, waiting-plan, or selection state exists",
+          "a missing duty is a defect this test fails by construction",
+          "the test names the address and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.state-declared-in}}, not the running game. The citation must satisfy this duty: it names when the affected targeting, selection-drag, waiting-plan, or selection state exists. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "pointer-command-holds",
+      "title": "pointer command holds for the whole run",
+      "type": "general",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "every completed pointer phase matched at most one row in the precedence the contract fixes; every selection change committed once from the complete candidate set; every command proposal carried its copied snapshot and receiver unchanged to its declared place; every cancellation cleared only its declared state; every targeting state ended only as declared; no phase produced two proposals",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-pointer-result",
+          "{{instance}}-snapshot-log",
+          "{{instance}}-selection-state",
+          "{{instance}}-targeting-state",
+          "{{instance}}-proposal-log",
+          "{{instance}}-plan-state",
+          "{{instance}}-cancellation-log"
+        ]
+      },
+      "text": "Across {{inputs:scope}}, every completed phase matches at most one row in the contract's precedence; every selection change commits once from the complete candidate set; every proposal keeps its copied snapshot and receiver to its declared place; every cancellation clears only its declared state; every targeting state ends only as declared; and no phase produces two proposals.",
+      "inputs": {
+        "scope": {
+          "default": "every completed pointer phase of the audited run in every state the adoption can be in"
+        },
+        "seeds": {
+          "default": [
+            "audit-a",
+            "audit-b"
+          ]
+        }
+      }
+    }
+  ]
+}

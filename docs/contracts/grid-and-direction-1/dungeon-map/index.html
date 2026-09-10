@@ -1,0 +1,1195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dungeon map — Grid and direction adoption — OpenGDD</title>
+<meta name="description" content="Dungeon map is a Grid and direction adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="canonical" href="https://opengdd.org/contracts/grid-and-direction-1/dungeon-map/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dungeon map — Grid and direction adoption — OpenGDD">
+<meta property="og:description" content="Dungeon map is a Grid and direction adoption with supplied answers, settings and matching acceptance tests.">
+<meta property="og:url" content="https://opengdd.org/contracts/grid-and-direction-1/dungeon-map/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Dungeon map — Grid and direction adoption — OpenGDD">
+<meta name="twitter:description" content="Dungeon map is a Grid and direction adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=ff285f28dd16">
+<script type="module" src="/assets/contracts.mjs?v=ff285f28dd16"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout contract-catalogue contract-entry-page contract-instance-page" data-contract-root data-core-id="grid-and-direction" data-contract-preset="{&quot;origin-and-axes&quot;:&quot;top-left&quot;,&quot;coordinate-order&quot;:&quot;not-applicable&quot;,&quot;counting-starts-at&quot;:&quot;zero&quot;,&quot;cell-ownership&quot;:&quot;not-applicable&quot;,&quot;distance-metric&quot;:&quot;diagonals-count-the-same&quot;,&quot;adjacency-for-movement&quot;:&quot;eight-neighbours&quot;,&quot;adjacency-for-effects&quot;:&quot;eight-neighbours&quot;,&quot;enumeration-order&quot;:&quot;rows-then-columns&quot;,&quot;tie-break-between-cells&quot;:&quot;lower-row-wins&quot;,&quot;turn-direction&quot;:&quot;not-applicable&quot;}" data-contract-facts="{&quot;rowCounts&quot;:{&quot;directions&quot;:8},&quot;valueForms&quot;:{&quot;cell-size&quot;:&quot;number&quot;},&quot;rows&quot;:{&quot;directions&quot;:[{&quot;id&quot;:&quot;north&quot;,&quot;frame&quot;:&quot;grid&quot;,&quot;points&quot;:&quot;up&quot;},{&quot;id&quot;:&quot;north-east&quot;,&quot;frame&quot;:&quot;grid&quot;,&quot;points&quot;:&quot;up-right&quot;},{&quot;id&quot;:&quot;east&quot;,&quot;frame&quot;:&quot;grid&quot;,&quot;points&quot;:&quot;right&quot;},{&quot;id&quot;:&quot;south-east&quot;,&quot;frame&quot;:&quot;grid&quot;,&quot;points&quot;:&quot;down-right&quot;},{&quot;id&quot;:&quot;south&quot;,&quot;frame&quot;:&quot;grid&quot;,&quot;points&quot;:&quot;down&quot;},{&quot;id&quot;:&quot;south-west&quot;,&quot;frame&quot;:&quot;grid&quot;,&quot;points&quot;:&quot;down-left&quot;},{&quot;id&quot;:&quot;west&quot;,&quot;frame&quot;:&quot;grid&quot;,&quot;points&quot;:&quot;left&quot;},{&quot;id&quot;:&quot;north-west&quot;,&quot;frame&quot;:&quot;grid&quot;,&quot;points&quot;:&quot;up-left&quot;}]}}">
+<nav class="doc-toc contract-nav" aria-label="Contracts">
+<details class="contract-nav-disclosure">
+  <summary>Contracts</summary>
+  <div class="contract-nav-content">
+    <p class="toc-title">Contracts</p>
+    <ul class="contract-nav-home"><li><a href="/contracts/">Overview</a></li><li><a href="/contracts/catalogue/">Contract catalogue</a></li></ul>
+<div class="toc-group contract-page-nav">
+  <p class="toc-group-title">On this page</p>
+  <ul><li><a href="#use-this">Use in your game</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#values">Numbers</a></li>
+<li><a href="#lists">Lists</a></li>
+<li><a href="#tests">Acceptance tests</a></li>
+<li><a href="#adoption-json">JSON</a></li></ul>
+</div>
+  </div>
+</details>
+</nav>
+<article class="doc-body contract-entry-body">
+<p class="label"><a href="/contracts/catalogue/#world-space-grids">World space &amp; grids</a></p>
+<div class="contract-entry-title-row">
+  <div><h1>Dungeon map</h1><p class="contract-core-name"><code>dungeon-map</code> · an adoption of <a href="/contracts/grid-and-direction-1/">Grid and direction</a>, version 1</p></div>
+  <div><span class="contract-badge ">Tests included</span></div>
+</div>
+
+<section class="contract-handoff" aria-labelledby="use-this">
+  <h2 id="use-this">Use in your game</h2>
+  <p>Opens the authoring tool with these answers and settings already filled in. You still add your game's own rules and tuning.</p>
+  <div class="contract-actions">
+    <a class="cta" href="/authoring-tool/?contract=grid-and-direction-1&amp;adoption=dungeon-map">Open in the authoring tool</a>
+    <a class="cta-quiet" href="/contracts/grid-and-direction-1/dungeon-map.zip" download="dungeon-map.zip">Download ZIP</a>
+  </div>
+  <details><summary>What is in the ZIP</summary><p>The ZIP holds the adoption and its acceptance tests. In the authoring tool, choose <strong>Add contract</strong> and pick this ZIP. If you keep your design as files, put them in <code>contracts/</code>.</p><div class="contract-actions"><a href="/contracts/grid-and-direction-1/dungeon-map.json" download="dungeon-map.json">Download adoption JSON</a> · <a href="/contracts/grid-and-direction-1/grid-and-direction-1.pack.json" download="grid-and-direction-1.pack.json">Download tests</a><button type="button" class="cta-quiet" data-copy-core data-core-url="/contracts/grid-and-direction-1/dungeon-map.json" data-copy-kind="adoption">Copy adoption</button><span role="status" aria-live="polite" data-copy-status></span></div></details>
+</section>
+<section class="contract-overview">
+  <h2>The contract behind it</h2>
+  <p>Covers square grids and the direction words your game uses. It says where numbering starts, which cells touch, and how a position belongs to a cell. It says how rules measure distance, choose between equal cells, list cells in order, and turn. Grid edges, pathfinding, non-square cells, and a third axis stay with your game.</p>
+  <p><a href="/contracts/grid-and-direction-1/">Read the full Grid and direction contract →</a></p>
+</section>
+<section class="contract-form-section" id="questions">
+  <h2>Questions</h2>
+  <p>The supplied answer is marked on each question. Pick other answers to see what changes. Nothing is saved here: the ZIP and the authoring tool use the supplied answers.</p>
+  <div class="contract-actions contract-question-tools">
+    <button type="button" class="cta-quiet contract-reset" data-reset-choices>Restore supplied answers</button>
+    <label class="contract-switch"><input type="checkbox" data-builder-wording> Show exact wording for builders</label>
+  </div>
+  <div class="contract-question-list">
+  <article class="contract-question" id="question-origin-and-axes" data-contract-question data-flag="origin-and-axes" data-when="null">
+  <h3>Where is this grid&#39;s first cell, and which way do its row and column numbers grow?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Where is this grid&#39;s first cell, and which way do its row and column numbers grow?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-origin-and-axes" value="top-left" data-contract-choice><span class="contract-option-label">Top left</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The first cell is the top-left corner. Column numbers grow right, and row numbers grow down.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-origin-and-axes" value="bottom-left" data-contract-choice><span class="contract-option-label">Bottom left</span></label></th>
+  <td><span class="contract-option-meaning">The first cell is the bottom-left corner. Column numbers grow right, and row numbers grow up.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-origin-and-axes" value="unbounded-right-and-down" data-contract-choice><span class="contract-option-label">Unbounded right and down</span></label></th>
+  <td><span class="contract-option-meaning">There is no first cell or corner. The grid continues through negative and positive numbers. Columns grow right, and rows grow down from the cell your game calls zero.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-origin-and-axes" value="unbounded-right-and-up" data-contract-choice><span class="contract-option-label">Unbounded right and up</span></label></th>
+  <td><span class="contract-option-meaning">There is no first cell or corner. The grid continues through negative and positive numbers. Columns grow right, and rows grow up from the cell your game calls zero.</span></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Every later rule needs one shared reading of row and column numbers. This contract only carries columns that grow right; state a left-growing grid in your own prose.</p></details>
+</article>
+<article class="contract-question" id="question-coordinate-order" data-contract-question data-flag="coordinate-order" data-when="null">
+  <h3>When you write a cell with two numbers, does the row or column come first?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for When you write a cell with two numbers, does the row or column come first?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-coordinate-order" value="column-first" data-contract-choice><span class="contract-option-label">Column first</span></label></th>
+  <td><span class="contract-option-meaning">The column comes first. The pair (3, 5) means column 3, row 5.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-coordinate-order" value="row-first" data-contract-choice><span class="contract-option-label">Row first</span></label></th>
+  <td><span class="contract-option-meaning">The row comes first. The pair (3, 5) means row 3, column 5.</span></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-coordinate-order" value="not-applicable" data-contract-choice><span class="contract-option-label">Not applicable</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The game never names a cell with a pair of numbers. It uses a layout, cell contents, or another name instead.</span></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Swapping the two numbers turns rows into columns. A square grid can hide that mistake, so the order must be clear.</p></details>
+</article>
+<article class="contract-question" id="question-counting-starts-at" data-contract-question data-flag="counting-starts-at" data-when="{&quot;flag&quot;:{&quot;origin-and-axes&quot;:[&quot;top-left&quot;,&quot;bottom-left&quot;]}}">
+  <h3>Do the first row and column use zero or one?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>Origin and axes is Top left or Bottom left.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Do the first row and column use zero or one?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-counting-starts-at" value="zero" data-contract-choice><span class="contract-option-label">Zero</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The first row and column are numbered zero. A ten-cell row runs from zero through nine.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-counting-starts-at" value="one" data-contract-choice><span class="contract-option-label">One</span></label></th>
+  <td><span class="contract-option-meaning">The first row and column are numbered one. A ten-cell row runs from one through ten.</span></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Starting at zero or one changes every written cell address. Naming it prevents an off-by-one shift between the design and the build.</p></details>
+</article>
+<article class="contract-question" id="question-cell-ownership" data-contract-question data-flag="cell-ownership" data-when="null">
+  <h3>A point lies exactly on the line between two cells. Which cell owns it?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for A point lies exactly on the line between two cells. Which cell owns it?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-cell-ownership" value="next-cell-along" data-contract-choice><span class="contract-option-label">Next cell along</span></label></th>
+  <td><span class="contract-option-meaning">The cell with the larger number owns the line. The line where cell five ends and cell six begins belongs to cell six, on either side of zero.</span><p class="contract-option-semantics">Divide the position by cell-size and round down, then add one when counting-starts-at is one. A boundary position belongs to the cell with the larger coordinate.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-cell-ownership" value="truncate-toward-zero" data-contract-choice><span class="contract-option-label">Truncate toward zero</span></label></th>
+  <td><span class="contract-option-meaning">The cell farther from zero owns the line. The zero cell reaches one cell-size to each side, so it is twice as wide as the others.</span><p class="contract-option-semantics">Divide the position by cell-size and truncate toward zero, then add one when counting-starts-at is one. Coordinate zero spans one cell-size on each side.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-cell-ownership" value="cell-centres-are-whole-numbers" data-contract-choice><span class="contract-option-label">Cell centres are whole numbers</span></label></th>
+  <td><span class="contract-option-meaning">Whole numbers mark cell centres. A point halfway between two centres belongs to the cell with the larger number.</span><p class="contract-option-semantics">Cell coordinates name centres. Divide the position by cell-size and round to the nearest whole coordinate, taking an exact half toward the larger coordinate, then add one when counting-starts-at is one.</p></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-cell-ownership" value="not-applicable" data-contract-choice><span class="contract-option-label">Not applicable</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">Your rules only use whole cells, never positions between them. No boundary choice is needed.</span></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>A boundary point needs one owner. Different rounding rules can place the same point in different cells, especially beside zero.</p></details>
+</article>
+<article class="contract-question" id="question-distance-metric" data-contract-question data-flag="distance-metric" data-when="null">
+  <h3>When your rules say nearest or within some distance, how do they measure between cells?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for When your rules say nearest or within some distance, how do they measure between cells?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-distance-metric" value="no-diagonals" data-contract-choice><span class="contract-option-label">No diagonals</span></label></th>
+  <td><span class="contract-option-meaning">Add the steps across and down the grid (Manhattan). A cell two across and one up is three steps away.</span></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-distance-metric" value="diagonals-count-the-same" data-contract-choice><span class="contract-option-label">Diagonals count the same</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">Count the larger of the across and down steps (Chebyshev). A cell two across and one up is two steps away.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-distance-metric" value="octile" data-contract-choice><span class="contract-option-label">Octile</span></label></th>
+  <td><span class="contract-option-meaning">Straight steps cost one, and diagonal steps cost the square root of two (octile). The distance is the cheapest mix of those steps. Your game&#39;s comparison rule decides when two distances count as equal.</span><p class="contract-option-semantics">For absolute coordinate differences dx and dy, multiply the smaller difference by the square root of two minus one (about 0.414), then add the result to the larger difference. Equal means equal at whatever precision this game compares its distances with. For straight-line and octile distance, the adoption must state that comparison rule in the distance test&#39;s verification scope.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-distance-metric" value="straight-line" data-contract-choice><span class="contract-option-label">Straight line</span></label></th>
+  <td><span class="contract-option-meaning">Measure a straight line between the cell centres (Euclidean). Use position units when positions exist; otherwise use cells. Your game&#39;s comparison rule decides when two distances count as equal.</span><p class="contract-option-semantics">Equal means equal at whatever precision this game compares its distances with. For straight-line and octile distance, the adoption must state that comparison rule in the distance test&#39;s verification scope.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-distance-metric" value="not-applicable" data-contract-choice><span class="contract-option-label">Not applicable</span></label></th>
+  <td><span class="contract-option-meaning">No rule measures distance between cells. Rules may still use neighbours, named shapes, or links.</span></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Games often use several distance rules. This answer only controls what your written rules mean by nearest or within a distance.</p></details>
+</article>
+<article class="contract-question" id="question-adjacency-for-movement" data-contract-question data-flag="adjacency-for-movement" data-when="null">
+  <h3>From one cell, which other cells can a thing reach in one step?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for From one cell, which other cells can a thing reach in one step?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-adjacency-for-movement" value="four-neighbours" data-contract-choice><span class="contract-option-label">Four neighbours</span></label></th>
+  <td><span class="contract-option-meaning">Only the four cells sharing an edge are one step away. A diagonal cell cannot be reached in one step.</span></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-adjacency-for-movement" value="eight-neighbours" data-contract-choice><span class="contract-option-label">Eight neighbours</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">All eight surrounding cells are one step away. A thing may move across an edge or diagonally across a corner.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-adjacency-for-movement" value="not-applicable" data-contract-choice><span class="contract-option-label">Not applicable</span></label></th>
+  <td><span class="contract-option-meaning">Nothing moves one cell at a time. Things are placed directly or move freely while the grid only reads their final cell.</span></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Movement neighbours do not follow automatically from distance or effect range. A game can use different cells for each.</p></details>
+</article>
+<article class="contract-question" id="question-adjacency-for-effects" data-contract-question data-flag="adjacency-for-effects" data-when="null">
+  <h3>When a rule says two cells are next to each other, do corners count?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for When a rule says two cells are next to each other, do corners count?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-adjacency-for-effects" value="four-neighbours" data-contract-choice><span class="contract-option-label">Four neighbours</span></label></th>
+  <td><span class="contract-option-meaning">Only cells sharing an edge count as neighbours. Two cells touching only at a corner are not next to each other.</span></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-adjacency-for-effects" value="eight-neighbours" data-contract-choice><span class="contract-option-label">Eight neighbours</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">All eight surrounding cells count as neighbours. Cells touching only at a corner are still next to each other.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-adjacency-for-effects" value="not-applicable" data-contract-choice><span class="contract-option-label">Not applicable</span></label></th>
+  <td><span class="contract-option-meaning">No rule uses next to by itself. Each rule names the cells it means, or no rule asks whether cells are neighbours.</span></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Movement and effects can count neighbours differently. This answer keeps words such as next to from changing meaning between rules.</p></details>
+</article>
+<article class="contract-question" id="question-enumeration-order" data-contract-question data-flag="enumeration-order" data-when="null">
+  <h3>In what order does an authored layout list its cells?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for In what order does an authored layout list its cells?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-enumeration-order" value="rows-then-columns" data-contract-choice><span class="contract-option-label">Rows then columns</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">List every cell in one row before starting the next row. Start with the smallest row and column numbers. A text map with one line per row already uses this order.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-enumeration-order" value="columns-then-rows" data-contract-choice><span class="contract-option-label">Columns then rows</span></label></th>
+  <td><span class="contract-option-meaning">List every cell in one column before starting the next column. Start with the smallest row and column numbers.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-enumeration-order" value="block-tiled" data-contract-choice><span class="contract-option-label">Block tiled</span></label></th>
+  <td><span class="contract-option-meaning">List cells inside blocks such as chunks, regions, or screens. Your game&#39;s prose states block size, block order, and the order inside each block.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-enumeration-order" value="not-applicable" data-contract-choice><span class="contract-option-label">Not applicable</span></label></th>
+  <td><span class="contract-option-meaning">No authored layout lists the grid&#39;s cells. No order is needed for the material designers write and read.</span></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Drawing, updates, and save files may use different orders. This answer covers only layouts designers write and read.</p></details>
+</article>
+<article class="contract-question" id="question-tie-break-between-cells" data-contract-question data-flag="tie-break-between-cells" data-when="null">
+  <h3>A rule rates two cells equally and must pick one. How does it decide?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for A rule rates two cells equally and must pick one. How does it decide?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-tie-break-between-cells" value="lower-column-wins" data-contract-choice><span class="contract-option-label">Lower column wins</span></label></th>
+  <td><span class="contract-option-meaning">The cell with the smaller column number wins. Between a cell in column 2 and a cell in column 4, the column-2 cell wins and the column-4 cell loses. If columns match, the smaller row number wins.</span></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-tie-break-between-cells" value="lower-row-wins" data-contract-choice><span class="contract-option-label">Lower row wins</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The cell with the smaller row number wins. Between a cell in row 2 and a cell in row 4, the row-2 cell wins and the row-4 cell loses. If rows match, the smaller column number wins.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-tie-break-between-cells" value="direction-order" data-contract-choice><span class="contract-option-label">Direction order</span></label></th>
+  <td><span class="contract-option-meaning">Walk the grid-fixed direction words in their chosen order. The first direction that points to a tied neighbour wins. Use another answer when tied cells are not neighbours.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-tie-break-between-cells" value="arrival-order" data-contract-choice><span class="contract-option-label">Arrival order</span></label></th>
+  <td><span class="contract-option-meaning">The candidate that arrived first wins. Your game names whether arrival means creation, placement, storage, or entering play. The same run repeats the choice, but save and reload follow your persistence rules. The validator (the checking tool) cannot check this; a reviewer does.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-tie-break-between-cells" value="named-priority-list" data-contract-choice><span class="contract-option-label">Named priority list</span></label></th>
+  <td><span class="contract-option-meaning">The candidate kind listed first in your game&#39;s priority order wins. Cell position never decides.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-tie-break-between-cells" value="deliberately-arbitrary" data-contract-choice><span class="contract-option-label">Deliberately arbitrary</span></label></th>
+  <td><span class="contract-option-meaning">Either candidate may win, and players must not depend on which one. Replaying the same run repeats the choice, but loading a save may not.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-tie-break-between-cells" value="random-from-a-declared-seed" data-contract-choice><span class="contract-option-label">Random from a declared seed</span></label></th>
+  <td><span class="contract-option-meaning">Draw one candidate from a random stream declared by your game. The same run and replay draw the same candidate. The validator cannot check this; a reviewer does.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-tie-break-between-cells" value="player-chooses" data-contract-choice><span class="contract-option-label">Player chooses</span></label></th>
+  <td><span class="contract-option-meaning">The player chooses the candidate. If the game cannot ask, the rule does nothing instead of guessing. The validator cannot check this; a reviewer does.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-tie-break-between-cells" value="not-applicable" data-contract-choice><span class="contract-option-label">Not applicable</span></label></th>
+  <td><span class="contract-option-meaning">No rule ever chooses one of two equal candidates. The situation cannot happen, or the rule affects every tied candidate.</span></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Equal choices are common and rarely written down. A fixed answer stops two builds from choosing different cells.</p></details>
+</article>
+<article class="contract-question" id="question-turn-direction" data-contract-question data-flag="turn-direction" data-when="null">
+  <h3>When your rules turn a facing by an amount, which way does the amount go on the grid?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for When your rules turn a facing by an amount, which way does the amount go on the grid?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-turn-direction" value="clockwise" data-contract-choice><span class="contract-option-label">Clockwise</span></label></th>
+  <td><span class="contract-option-meaning">A positive turn goes clockwise on the grid. A rotated view may show it differently, but the grid rule stays the same.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-turn-direction" value="counter-clockwise" data-contract-choice><span class="contract-option-label">Counter clockwise</span></label></th>
+  <td><span class="contract-option-meaning">A positive turn goes counter-clockwise on the grid. A rotated view may show it differently, but the grid rule stays the same.</span></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="grid-and-direction-turn-direction" value="not-applicable" data-contract-choice><span class="contract-option-label">Not applicable</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">No rule turns a facing by an amount. A piece may still snap directly toward movement or a target.</span></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Axis direction does not decide turn direction. Naming clockwise or counter-clockwise prevents equivalent formulas from reading as opposite rules.</p></details>
+</article>
+  </div>
+</section>
+<aside class="contract-relief" aria-labelledby="relief-title">
+  <p class="contract-relief-title" id="relief-title">That was the hard part.</p>
+  <p>The questions are the decisions. Everything below follows from them: the numbers, lists and test inputs this adoption supplies, and the tests that come with it. The authoring tool edits all of it in place. Read on only if you want to check.</p>
+</aside>
+<details class="contract-form-section contract-fold" id="values">
+  <summary><span class="contract-fold-title">Numbers</span><span class="contract-fold-note">1 number</span></summary>
+  <p>Each value is either a number set here or a reference to one of your tuning keys.</p>
+<div class="contract-detail-grid"><article class="contract-detail-card">
+  <div class="contract-detail-heading"><h3>Cell size = 0</h3><span class="contract-badge ">fixed as written</span></div>
+  <p class="contract-exact-name"><code>cell-size</code></p>
+  <p>The length of one cell in your position units. For centre-based cells, measure from one centre to the next. Use a positive size when rules read positions. Use zero when they only read whole cells. Changing this number changes which cell holds a position.</p>
+</article></div>
+</details>
+<details class="contract-form-section contract-fold" id="rules">
+  <summary><span class="contract-fold-title">Rules</span><span class="contract-fold-note">1 rule</span></summary>
+  <p>A rule is a check between the numbers. Validation reports a rule that fails.</p>
+  <ul class="contract-rule-list"><li id="rule-cell-size-not-negative"><code>cell-size &gt;= 0</code></li></ul>
+</details>
+<details class="contract-form-section contract-fold" id="lists">
+  <summary><span class="contract-fold-title">Lists</span><span class="contract-fold-note">1 list</span></summary>
+  <p>Each list holds the rows this adoption supplies. A list can be empty.</p>
+  <article class="contract-collection">
+<h3>Directions</h3>
+<p class="contract-exact-name"><code>directions</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Frame</th><th>Points</th><th>Order</th></tr></thead>
+<tbody>
+<tr><td><code>north</code></td><td><code>grid</code></td><td><code>up</code></td><td>—</td></tr>
+<tr><td><code>north-east</code></td><td><code>grid</code></td><td><code>up-right</code></td><td>—</td></tr>
+<tr><td><code>east</code></td><td><code>grid</code></td><td><code>right</code></td><td>—</td></tr>
+<tr><td><code>south-east</code></td><td><code>grid</code></td><td><code>down-right</code></td><td>—</td></tr>
+<tr><td><code>south</code></td><td><code>grid</code></td><td><code>down</code></td><td>—</td></tr>
+<tr><td><code>south-west</code></td><td><code>grid</code></td><td><code>down-left</code></td><td>—</td></tr>
+<tr><td><code>west</code></td><td><code>grid</code></td><td><code>left</code></td><td>—</td></tr>
+<tr><td><code>north-west</code></td><td><code>grid</code></td><td><code>up-left</code></td><td>—</td></tr>
+</tbody></table></div>
+</article>
+</details>
+<details class="contract-form-section contract-fold" id="verification">
+  <summary><span class="contract-fold-title">Test inputs</span><span class="contract-fold-note">scope and seeds</span></summary>
+  <p>Some tests need a scope or seeds from the adoption before they can run.</p>
+  <div class="contract-detail-grid"><article class="contract-detail-card">
+  <p class="contract-exact-name"><code>distance-is-measured</code></p>
+  <h3>Distance is measured</h3>
+  <dl class="contract-inline-facts"><div><dt>Scope</dt><dd>every movement, monster-sense, spell, and area-effect rule that says nearest, in range, or within on the dungeon map</dd></div><div><dt>Seeds</dt><dd><code>[&quot;dungeon-distance-room&quot;,&quot;dungeon-distance-corridor&quot;]</code></dd></div></dl>
+</article>
+<article class="contract-detail-card">
+  <p class="contract-exact-name"><code>one-step-moves</code></p>
+  <h3>One step moves</h3>
+  <dl class="contract-inline-facts"><div><dt>Scope</dt><dd>player and monster one-cell moves from every floor cell in the authored rooms and corridors, including diagonal moves beside walls and doors; whether a diagonal may pass between blocked straight neighbours is stated in the game&#39;s own movement prose</dd></div><div><dt>Seeds</dt><dd><code>[&quot;dungeon-move-room&quot;,&quot;dungeon-move-corner&quot;]</code></dd></div></dl>
+</article>
+<article class="contract-detail-card">
+  <p class="contract-exact-name"><code>next-to-means</code></p>
+  <h3>Next to means</h3>
+  <dl class="contract-inline-facts"><div><dt>Scope</dt><dd>every melee, trap, aura, and area-effect rule that uses next to on the dungeon map, including cells touching only at a corner</dd></div><div><dt>Seeds</dt><dd><code>[&quot;dungeon-effect-room&quot;,&quot;dungeon-effect-corner&quot;]</code></dd></div></dl>
+</article>
+<article class="contract-detail-card">
+  <p class="contract-exact-name"><code>tie-break-settles</code></p>
+  <h3>Tie break settles</h3>
+  <dl class="contract-inline-facts"><div><dt>Scope</dt><dd>the north-east and south-west neighbours of a floor cell are both distance one from that cell; the north-east cell wins because its row number is smaller, even though the south-west cell has the smaller column number</dd></div></dl>
+</article></div>
+</details>
+<details class="contract-form-section contract-fold" id="tests">
+  <summary><span class="contract-fold-title">Acceptance tests</span><span class="contract-fold-note">15 tests apply</span></summary>
+  <p>The contract comes with 22 tests. A test that runs once per row is counted once for each row. Tests that do not apply to these answers are still listed, with the reason.</p>
+  <div class="contract-test-list"><article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>axes-grow</code></p>
+      <h3>the numbers grow one way</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to dungeon-map.</p>
+  <p class="contract-test-text">In <code class="contract-placeholder">dungeon-map</code> the two numbers grow right across rows and down columns, one per cell. The layout this is read against is the one this package declares, not the finished picture: a build may draw the grid any way its presentation chapter allows and still has to number it this way.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p><code class="contract-placeholder">dungeon-map</code> as this package lays it out, with at least two rows and at least two columns</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a cell is located in the layout</li><li>the cells one step from it across and down are located</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the numbers grow right across rows and down columns</li><li>moving one cell that way raises exactly one of the two numbers by one and lowers neither</li><li>moving one cell the opposite way lowers exactly one of them by one</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">dungeon-map</code>-cell-addresses</li><li><code class="contract-placeholder">dungeon-map</code>-declared-layout</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>the-first-cell-is-in-one-corner</code></p>
+      <h3>the grid has a first cell, in one named corner</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to dungeon-map.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">dungeon-map</code> is a bounded rectangle whose first cell — the one whose two numbers are both smallest — is the top-left corner of the grid as this package lays it out. A build that numbers from the opposite corner fails this test even when every layout still loads.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p><code class="contract-placeholder">dungeon-map</code> as this package lays it out</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the cell whose two numbers are both the smallest on the grid is located in the layout</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>that cell is the top-left corner of the grid as this package lays it out</li><li>no other corner of <code class="contract-placeholder">dungeon-map</code> holds a smaller pair of numbers</li><li>the grid is bounded: every cell of it lies inside the declared number of rows and columns</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">dungeon-map</code>-cell-addresses</li><li><code class="contract-placeholder">dungeon-map</code>-declared-layout</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>the-grid-has-no-first-cell</code></p>
+      <h3>the grid runs on in every direction</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to dungeon-map: origin and axes is top left, not unbounded right and down or unbounded right and up.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>coordinate-reading</code></p>
+      <h3>a written pair names the cell this package means</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to dungeon-map: coordinate order is not applicable, not column first or row first.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>every-position-has-one-cell</code></p>
+      <h3>every position belongs to exactly one cell</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to dungeon-map: cell ownership is not applicable, not next cell along or truncate toward zero or cell centres are whole numbers.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>boundary-belongs-to-one-cell</code></p>
+      <h3>a position on a shared line belongs to one cell</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to dungeon-map: cell ownership is not applicable, not next cell along or truncate toward zero or cell centres are whole numbers.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>distance-is-measured</code></p>
+      <h3>distance between two cells is measured one way</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to dungeon-map.</p>
+  <p class="contract-test-text">Where a rule of <code class="contract-placeholder">dungeon-map</code> says nearest, in range, or within, the distance it means is the larger of the steps across and the steps down, as a whole number of cells. It is zero from a cell to itself, it does not depend on which cell is asked about first, and — the clause that matters most — every such rule returns the same number for the same pair. One worked case pins the arithmetic where a near-enough value would pass unnoticed: measured from one cell, a cell 10 across is at 10, and a cell 8 across and 5 down is at 8.
+
+Seven of nine externally surveyed games measure distance more than one way, and one carries five measures at once. This test does not forbid that: a route planner&#39;s own estimate is craft and is outside <code class="contract-placeholder">every movement, monster-sense, spell, and area-effect rule that says nearest, in range, or within on the dungeon map</code>. What it forbids is two rules telling a player two different things about the same two cells.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">dungeon-map</code>-distance-trace</li><li>first-disagreeing-rule</li></ul></dd></div>
+<div><dt>Holds</dt><dd><p>the distance the rule uses between the two cells is the larger of the steps across and the steps down, as a whole number of cells; the distance from a cell to itself is zero; it is the same whichever cell is asked about first; every rule in <code class="contract-placeholder">every movement, monster-sense, spell, and area-effect rule that says nearest, in range, or within on the dungeon map</code> returns the same number for the same pair; and the worked case holds — measured from one cell, a cell 10 across is at 10, and a cell 8 across and 5 down is at 8</p></dd></div>
+<div><dt>Seeds</dt><dd><p><code class="contract-placeholder">[&quot;dungeon-distance-room&quot;,&quot;dungeon-distance-corridor&quot;]</code></p></dd></div>
+<div><dt>Scope</dt><dd><p><code class="contract-placeholder">every movement, monster-sense, spell, and area-effect rule that says nearest, in range, or within on the dungeon map</code></p></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>equal-distance-is-decided</code></p>
+      <h3>two distances count as equal by a declared rule</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to dungeon-map: distance metric is diagonals count the same, not straight line or octile.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>one-step-moves</code></p>
+      <h3>one step reaches exactly the neighbouring cells</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to dungeon-map.</p>
+  <p class="contract-test-text">From any cell of <code class="contract-placeholder">dungeon-map</code>, one step reaches exactly the eight cells sharing an edge or a corner with it, with nothing standing in the way. What happens when a step would leave the grid, and whether something in the way blocks it, are settled elsewhere in this package; this test fixes only which cells a step can reach at all.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">dungeon-map</code>-reachable-in-one-step</li><li>first-unexpected-destination</li></ul></dd></div>
+<div><dt>Holds</dt><dd><p>of the cells on the grid, the ones a thing can move to from this cell in one step, with nothing standing in the way, are exactly the eight cells sharing an edge or a corner with it — no more and no fewer</p></dd></div>
+<div><dt>Seeds</dt><dd><p><code class="contract-placeholder">[&quot;dungeon-move-room&quot;,&quot;dungeon-move-corner&quot;]</code></p></dd></div>
+<div><dt>Scope</dt><dd><p><code class="contract-placeholder">player and monster one-cell moves from every floor cell in the authored rooms and corridors, including diagonal moves beside walls and doors; whether a diagonal may pass between blocked straight neighbours is stated in the game&#39;s own movement prose</code></p></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>next-to-means</code></p>
+      <h3>next to means the same cells in every rule</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to dungeon-map.</p>
+  <p class="contract-test-text">Wherever a rule of <code class="contract-placeholder">dungeon-map</code> says one cell is next to another, it means the eight cells sharing an edge or a corner with it — and it means the same thing in every rule that says it. This is asked apart from movement because games answer the two differently, sometimes without noticing: one surveyed game plans routes over four neighbours while targeting by straight line, and one engine hands back four surrounding cells while its own direction list carries sixteen.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">dungeon-map</code>-neighbour-set-per-rule</li><li>first-disagreeing-rule</li></ul></dd></div>
+<div><dt>Holds</dt><dd><p>wherever a rule of this game treats one cell as next to another, the cells it means are exactly the eight cells sharing an edge or a corner with it, and the answer is the same in every such rule</p></dd></div>
+<div><dt>Seeds</dt><dd><p><code class="contract-placeholder">[&quot;dungeon-effect-room&quot;,&quot;dungeon-effect-corner&quot;]</code></p></dd></div>
+<div><dt>Scope</dt><dd><p><code class="contract-placeholder">every melee, trap, aura, and area-effect rule that uses next to on the dungeon map, including cells touching only at a corner</code></p></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>authored-order-lists-every-cell</code></p>
+      <h3>this package&#39;s own material lists every cell once</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to dungeon-map.</p>
+  <p class="contract-test-text">An authored layout of <code class="contract-placeholder">dungeon-map</code> lists every cell exactly once, one whole row at a time, counting from the smallest numbers upward, and reading that layout back gives the same cells in the same places.
+
+This does not set save-file order, drawing order, update order, or the order in which rules visit cells. Naming the authored order stops a rule from quietly depending on one of those other orders.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Scope</dt><dd><p>an authored layout of <code class="contract-placeholder">dungeon-map</code>, with every cell distinguishable from every other, read from the first cell to the last as designers write it</p></dd></div>
+<div><dt>Holds</dt><dd><p>the material lists every cell of <code class="contract-placeholder">dungeon-map</code> exactly once, one whole row at a time, counting from the smallest numbers upward, and a board written out and read back arrives cell for cell the same</p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">dungeon-map</code>-authored-order-sequence</li><li>first-cell-out-of-order</li><li>cells-listed-twice-or-never</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>block-layout-is-declared</code></p>
+      <h3>the blocks this material is written in are declared</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to dungeon-map: enumeration order is rows then columns, not block tiled.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>tie-break-settles</code></p>
+      <h3>a tie between two cells settles the same way every time</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to dungeon-map.</p>
+  <p class="contract-test-text">When a rule of <code class="contract-placeholder">dungeon-map</code> must pick between two candidates it ranks equally, it picks the candidate with the smaller row number, and if those are equal the one with the smaller column number. The adoption demonstrates that answer with this worked case: <code class="contract-placeholder">the north-east and south-west neighbours of a floor cell are both distance one from that cell; the north-east cell wins because its row number is smaller, even though the south-west cell has the smaller column number</code>. The test repeats the case after reversing creation and drawing order. A choice that changed would be a different answer to this question.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a rule of this game that must pick one cell, and the worked pair of equally ranked candidates described here: <code class="contract-placeholder">the north-east and south-west neighbours of a floor cell are both distance one from that cell; the north-east cell wins because its row number is smaller, even though the south-west cell has the smaller column number</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the rule runs</li><li>the same situation is set up again, with the two candidates created in the opposite order and drawn in the opposite order</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the rule picks the candidate with the smaller row number, and if those are equal the one with the smaller column number</li><li>it picks the same candidate both times</li><li>the order the candidates were created in, the order they are drawn in, where the pointer is, and how the animation runs change nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">dungeon-map</code>-tie-break-report</li><li><code class="contract-placeholder">dungeon-map</code>-candidate-set</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>tie-break-follows-arrival</code></p>
+      <h3>a tie between two cells goes to whichever came first</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to dungeon-map: tie break between cells is lower row wins, not arrival order.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>tie-break-is-arbitrary</code></p>
+      <h3>a tie between two cells comes out the same way in a replay</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to dungeon-map: tie break between cells is lower row wins, not deliberately arbitrary.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>tie-break-is-drawn</code></p>
+      <h3>a tie between two cells is drawn from a declared stream</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to dungeon-map: tie break between cells is lower row wins, not random from a declared seed.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>tie-break-asks-the-player</code></p>
+      <h3>a tie between two cells is put to the player</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to dungeon-map: tie break between cells is lower row wins, not player chooses.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>no-tie-ever-arises</code></p>
+      <h3>no rule ever faces a tie between two cells</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to dungeon-map: tie break between cells is lower row wins, not not applicable.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>a-positive-turn-goes</code></p>
+      <h3>a positive turn goes one way</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to dungeon-map: turn direction is not applicable, not clockwise or counter clockwise.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>grid-direction-points · north</code></p>
+      <h3><code class="contract-placeholder">north</code> points toward the top of the declared grid</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per directions row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the north row.</p>
+  <p class="contract-test-text">In <code class="contract-placeholder">dungeon-map</code>, the word <code class="contract-placeholder">north</code> means the direction toward the top of the declared grid. It is fixed to the grid: it points the same way whoever uses it, and it never follows anything&#39;s facing. Naming it says nothing about whether anything may move that way — the movement question decides that, and a game whose pieces move to four neighbours may still name a diagonal for an effect or a line of sight.
+
+Writing the word down here is what stops a second document in this package using it for a different direction. One surveyed format ships eight named compass directions and never says where any of them points.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a cell of <code class="contract-placeholder">dungeon-map</code> with a cell on every side of it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a rule of this game moves something, points something, or reads a cell <code class="contract-placeholder">north</code> of that cell</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the cell it uses is the one toward the top of the declared grid</li><li>the word <code class="contract-placeholder">north</code> means that same direction in every rule of this package and never another</li><li>the direction does not change with whatever is using it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">dungeon-map</code>-direction-resolution</li><li><code class="contract-placeholder">dungeon-map</code>-cell-addresses</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>grid-direction-points · north-east</code></p>
+      <h3><code class="contract-placeholder">north-east</code> points diagonally toward the top-right of the declared grid</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per directions row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the north-east row.</p>
+  <p class="contract-test-text">In <code class="contract-placeholder">dungeon-map</code>, the word <code class="contract-placeholder">north-east</code> means the direction diagonally toward the top-right of the declared grid. It is fixed to the grid: it points the same way whoever uses it, and it never follows anything&#39;s facing. Naming it says nothing about whether anything may move that way — the movement question decides that, and a game whose pieces move to four neighbours may still name a diagonal for an effect or a line of sight.
+
+Writing the word down here is what stops a second document in this package using it for a different direction. One surveyed format ships eight named compass directions and never says where any of them points.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a cell of <code class="contract-placeholder">dungeon-map</code> with a cell on every side of it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a rule of this game moves something, points something, or reads a cell <code class="contract-placeholder">north-east</code> of that cell</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the cell it uses is the one diagonally toward the top-right of the declared grid</li><li>the word <code class="contract-placeholder">north-east</code> means that same direction in every rule of this package and never another</li><li>the direction does not change with whatever is using it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">dungeon-map</code>-direction-resolution</li><li><code class="contract-placeholder">dungeon-map</code>-cell-addresses</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>grid-direction-points · east</code></p>
+      <h3><code class="contract-placeholder">east</code> points toward the right of the declared grid</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per directions row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the east row.</p>
+  <p class="contract-test-text">In <code class="contract-placeholder">dungeon-map</code>, the word <code class="contract-placeholder">east</code> means the direction toward the right of the declared grid. It is fixed to the grid: it points the same way whoever uses it, and it never follows anything&#39;s facing. Naming it says nothing about whether anything may move that way — the movement question decides that, and a game whose pieces move to four neighbours may still name a diagonal for an effect or a line of sight.
+
+Writing the word down here is what stops a second document in this package using it for a different direction. One surveyed format ships eight named compass directions and never says where any of them points.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a cell of <code class="contract-placeholder">dungeon-map</code> with a cell on every side of it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a rule of this game moves something, points something, or reads a cell <code class="contract-placeholder">east</code> of that cell</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the cell it uses is the one toward the right of the declared grid</li><li>the word <code class="contract-placeholder">east</code> means that same direction in every rule of this package and never another</li><li>the direction does not change with whatever is using it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">dungeon-map</code>-direction-resolution</li><li><code class="contract-placeholder">dungeon-map</code>-cell-addresses</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>grid-direction-points · south-east</code></p>
+      <h3><code class="contract-placeholder">south-east</code> points diagonally toward the bottom-right of the declared grid</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per directions row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the south-east row.</p>
+  <p class="contract-test-text">In <code class="contract-placeholder">dungeon-map</code>, the word <code class="contract-placeholder">south-east</code> means the direction diagonally toward the bottom-right of the declared grid. It is fixed to the grid: it points the same way whoever uses it, and it never follows anything&#39;s facing. Naming it says nothing about whether anything may move that way — the movement question decides that, and a game whose pieces move to four neighbours may still name a diagonal for an effect or a line of sight.
+
+Writing the word down here is what stops a second document in this package using it for a different direction. One surveyed format ships eight named compass directions and never says where any of them points.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a cell of <code class="contract-placeholder">dungeon-map</code> with a cell on every side of it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a rule of this game moves something, points something, or reads a cell <code class="contract-placeholder">south-east</code> of that cell</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the cell it uses is the one diagonally toward the bottom-right of the declared grid</li><li>the word <code class="contract-placeholder">south-east</code> means that same direction in every rule of this package and never another</li><li>the direction does not change with whatever is using it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">dungeon-map</code>-direction-resolution</li><li><code class="contract-placeholder">dungeon-map</code>-cell-addresses</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>grid-direction-points · south</code></p>
+      <h3><code class="contract-placeholder">south</code> points toward the bottom of the declared grid</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per directions row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the south row.</p>
+  <p class="contract-test-text">In <code class="contract-placeholder">dungeon-map</code>, the word <code class="contract-placeholder">south</code> means the direction toward the bottom of the declared grid. It is fixed to the grid: it points the same way whoever uses it, and it never follows anything&#39;s facing. Naming it says nothing about whether anything may move that way — the movement question decides that, and a game whose pieces move to four neighbours may still name a diagonal for an effect or a line of sight.
+
+Writing the word down here is what stops a second document in this package using it for a different direction. One surveyed format ships eight named compass directions and never says where any of them points.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a cell of <code class="contract-placeholder">dungeon-map</code> with a cell on every side of it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a rule of this game moves something, points something, or reads a cell <code class="contract-placeholder">south</code> of that cell</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the cell it uses is the one toward the bottom of the declared grid</li><li>the word <code class="contract-placeholder">south</code> means that same direction in every rule of this package and never another</li><li>the direction does not change with whatever is using it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">dungeon-map</code>-direction-resolution</li><li><code class="contract-placeholder">dungeon-map</code>-cell-addresses</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>grid-direction-points · south-west</code></p>
+      <h3><code class="contract-placeholder">south-west</code> points diagonally toward the bottom-left of the declared grid</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per directions row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the south-west row.</p>
+  <p class="contract-test-text">In <code class="contract-placeholder">dungeon-map</code>, the word <code class="contract-placeholder">south-west</code> means the direction diagonally toward the bottom-left of the declared grid. It is fixed to the grid: it points the same way whoever uses it, and it never follows anything&#39;s facing. Naming it says nothing about whether anything may move that way — the movement question decides that, and a game whose pieces move to four neighbours may still name a diagonal for an effect or a line of sight.
+
+Writing the word down here is what stops a second document in this package using it for a different direction. One surveyed format ships eight named compass directions and never says where any of them points.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a cell of <code class="contract-placeholder">dungeon-map</code> with a cell on every side of it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a rule of this game moves something, points something, or reads a cell <code class="contract-placeholder">south-west</code> of that cell</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the cell it uses is the one diagonally toward the bottom-left of the declared grid</li><li>the word <code class="contract-placeholder">south-west</code> means that same direction in every rule of this package and never another</li><li>the direction does not change with whatever is using it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">dungeon-map</code>-direction-resolution</li><li><code class="contract-placeholder">dungeon-map</code>-cell-addresses</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>grid-direction-points · west</code></p>
+      <h3><code class="contract-placeholder">west</code> points toward the left of the declared grid</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per directions row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the west row.</p>
+  <p class="contract-test-text">In <code class="contract-placeholder">dungeon-map</code>, the word <code class="contract-placeholder">west</code> means the direction toward the left of the declared grid. It is fixed to the grid: it points the same way whoever uses it, and it never follows anything&#39;s facing. Naming it says nothing about whether anything may move that way — the movement question decides that, and a game whose pieces move to four neighbours may still name a diagonal for an effect or a line of sight.
+
+Writing the word down here is what stops a second document in this package using it for a different direction. One surveyed format ships eight named compass directions and never says where any of them points.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a cell of <code class="contract-placeholder">dungeon-map</code> with a cell on every side of it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a rule of this game moves something, points something, or reads a cell <code class="contract-placeholder">west</code> of that cell</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the cell it uses is the one toward the left of the declared grid</li><li>the word <code class="contract-placeholder">west</code> means that same direction in every rule of this package and never another</li><li>the direction does not change with whatever is using it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">dungeon-map</code>-direction-resolution</li><li><code class="contract-placeholder">dungeon-map</code>-cell-addresses</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>grid-direction-points · north-west</code></p>
+      <h3><code class="contract-placeholder">north-west</code> points diagonally toward the top-left of the declared grid</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per directions row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the north-west row.</p>
+  <p class="contract-test-text">In <code class="contract-placeholder">dungeon-map</code>, the word <code class="contract-placeholder">north-west</code> means the direction diagonally toward the top-left of the declared grid. It is fixed to the grid: it points the same way whoever uses it, and it never follows anything&#39;s facing. Naming it says nothing about whether anything may move that way — the movement question decides that, and a game whose pieces move to four neighbours may still name a diagonal for an effect or a line of sight.
+
+Writing the word down here is what stops a second document in this package using it for a different direction. One surveyed format ships eight named compass directions and never says where any of them points.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a cell of <code class="contract-placeholder">dungeon-map</code> with a cell on every side of it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a rule of this game moves something, points something, or reads a cell <code class="contract-placeholder">north-west</code> of that cell</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the cell it uses is the one diagonally toward the top-left of the declared grid</li><li>the word <code class="contract-placeholder">north-west</code> means that same direction in every rule of this package and never another</li><li>the direction does not change with whatever is using it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">dungeon-map</code>-direction-resolution</li><li><code class="contract-placeholder">dungeon-map</code>-cell-addresses</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>direction-walk-order</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> takes place <code class="contract-placeholder">Row.order</code> in the direction walk</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per directions row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to dungeon-map: tie break between cells is lower row wins, not direction order.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>piece-direction-follows-facing</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> is read from the facing of whatever uses it</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per directions row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to dungeon-map: no row in directions matches frame piece.</p>
+  
+</article></div>
+</details>
+<details class="contract-form-section contract-fold" id="adoption-json">
+  <summary><span class="contract-fold-title">JSON</span><span class="contract-fold-note">the adoption as one file</span></summary>
+  <p>The adoption file as supplied. Answers you try on this page are not written into it; to change an adoption, open it in the authoring tool.</p>
+
+  <pre class="contract-json"><code>{
+  &quot;contract&quot;: &quot;grid-and-direction&quot;,
+  &quot;version&quot;: 1,
+  &quot;origin&quot;: &quot;https://opengdd.org/contracts/grid-and-direction-1&quot;,
+  &quot;summary&quot;: &quot;Covers square grids and the direction words your game uses. It says where numbering starts, which cells touch, and how a position belongs to a cell. It says how rules measure distance, choose between equal cells, list cells in order, and turn. Grid edges, pathfinding, non-square cells, and a third axis stay with your game.&quot;,
+  &quot;mechanism&quot;: [
+    &quot;The mechanism is one grid of equal square cells. A row runs across it, and a column runs down it. When a game names a cell with two whole numbers, coordinate-order says which one comes first; a layout may name cells by their contents instead. The grid may be a bounded rectangle with a first cell in one corner, or run on in every direction with signed numbers and no first cell; the first question says which.&quot;,
+    &quot;The grid&#39;s own frame. Every answer below is read against the grid as this package declares it: the layout your content writes out, or your own chapter&#39;s sentence about which way the numbers grow. Up, down, left and right mean those directions on the declared grid. On a bounded grid where content writes the grid out row by row, the first written row is nearest the declared origin corner: the top row for top-left, and the bottom row for bottom-left. These directions never follow the finished picture, which a build may draw any way its presentation chapter allows. A Delegated view can never change a Fixed answer.&quot;,
+    &quot;Where a game also has positions — things resting between cells rather than on them — zero is the same place for cells and for positions, and where a cell-ownership option makes the cell at zero a different width, that option says so. Two neighbouring cells share a line, and cell-ownership says which cell the line belongs to. Every conversion below divides by the cell size and, where the grid counts from 1, adds 1. Each cell-ownership option that uses positions states how position zero and shared lines are treated.&quot;,
+    &quot;Several nearby decisions are deliberately not here — the grid&#39;s edge, sharing a cell, corner-cutting, pathfinding, a third axis, cells that are not squares, whether a sweep sees its own changes. The note at the end says where each lives.&quot;
+  ],
+  &quot;questions&quot;: {
+    &quot;origin-and-axes&quot;: {
+      &quot;asks&quot;: &quot;Where is this grid&#39;s first cell, and which way do its row and column numbers grow?&quot;,
+      &quot;rationale&quot;: &quot;Every later rule needs one shared reading of row and column numbers. This contract only carries columns that grow right; state a left-growing grid in your own prose.&quot;,
+      &quot;options&quot;: {
+        &quot;top-left&quot;: {
+          &quot;meaning&quot;: &quot;The first cell is the top-left corner. Column numbers grow right, and row numbers grow down.&quot;
+        },
+        &quot;bottom-left&quot;: {
+          &quot;meaning&quot;: &quot;The first cell is the bottom-left corner. Column numbers grow right, and row numbers grow up.&quot;
+        },
+        &quot;unbounded-right-and-down&quot;: {
+          &quot;meaning&quot;: &quot;There is no first cell or corner. The grid continues through negative and positive numbers. Columns grow right, and rows grow down from the cell your game calls zero.&quot;
+        },
+        &quot;unbounded-right-and-up&quot;: {
+          &quot;meaning&quot;: &quot;There is no first cell or corner. The grid continues through negative and positive numbers. Columns grow right, and rows grow up from the cell your game calls zero.&quot;
+        }
+      }
+    },
+    &quot;coordinate-order&quot;: {
+      &quot;asks&quot;: &quot;When you write a cell with two numbers, does the row or column come first?&quot;,
+      &quot;rationale&quot;: &quot;Swapping the two numbers turns rows into columns. A square grid can hide that mistake, so the order must be clear.&quot;,
+      &quot;options&quot;: {
+        &quot;column-first&quot;: {
+          &quot;meaning&quot;: &quot;The column comes first. The pair (3, 5) means column 3, row 5.&quot;
+        },
+        &quot;row-first&quot;: {
+          &quot;meaning&quot;: &quot;The row comes first. The pair (3, 5) means row 3, column 5.&quot;
+        },
+        &quot;not-applicable&quot;: {
+          &quot;meaning&quot;: &quot;The game never names a cell with a pair of numbers. It uses a layout, cell contents, or another name instead.&quot;
+        }
+      }
+    },
+    &quot;counting-starts-at&quot;: {
+      &quot;asks&quot;: &quot;Do the first row and column use zero or one?&quot;,
+      &quot;rationale&quot;: &quot;Starting at zero or one changes every written cell address. Naming it prevents an off-by-one shift between the design and the build.&quot;,
+      &quot;when&quot;: {
+        &quot;flag&quot;: {
+          &quot;origin-and-axes&quot;: [
+            &quot;top-left&quot;,
+            &quot;bottom-left&quot;
+          ]
+        }
+      },
+      &quot;options&quot;: {
+        &quot;zero&quot;: {
+          &quot;meaning&quot;: &quot;The first row and column are numbered zero. A ten-cell row runs from zero through nine.&quot;
+        },
+        &quot;one&quot;: {
+          &quot;meaning&quot;: &quot;The first row and column are numbered one. A ten-cell row runs from one through ten.&quot;
+        }
+      }
+    },
+    &quot;cell-ownership&quot;: {
+      &quot;asks&quot;: &quot;A point lies exactly on the line between two cells. Which cell owns it?&quot;,
+      &quot;rationale&quot;: &quot;A boundary point needs one owner. Different rounding rules can place the same point in different cells, especially beside zero.&quot;,
+      &quot;options&quot;: {
+        &quot;next-cell-along&quot;: {
+          &quot;meaning&quot;: &quot;The cell with the larger number owns the line. The line where cell five ends and cell six begins belongs to cell six, on either side of zero.&quot;,
+          &quot;semantics&quot;: &quot;Divide the position by cell-size and round down, then add one when counting-starts-at is one. A boundary position belongs to the cell with the larger coordinate.&quot;
+        },
+        &quot;truncate-toward-zero&quot;: {
+          &quot;meaning&quot;: &quot;The cell farther from zero owns the line. The zero cell reaches one cell-size to each side, so it is twice as wide as the others.&quot;,
+          &quot;semantics&quot;: &quot;Divide the position by cell-size and truncate toward zero, then add one when counting-starts-at is one. Coordinate zero spans one cell-size on each side.&quot;
+        },
+        &quot;cell-centres-are-whole-numbers&quot;: {
+          &quot;meaning&quot;: &quot;Whole numbers mark cell centres. A point halfway between two centres belongs to the cell with the larger number.&quot;,
+          &quot;semantics&quot;: &quot;Cell coordinates name centres. Divide the position by cell-size and round to the nearest whole coordinate, taking an exact half toward the larger coordinate, then add one when counting-starts-at is one.&quot;
+        },
+        &quot;not-applicable&quot;: {
+          &quot;meaning&quot;: &quot;Your rules only use whole cells, never positions between them. No boundary choice is needed.&quot;
+        }
+      }
+    },
+    &quot;distance-metric&quot;: {
+      &quot;asks&quot;: &quot;When your rules say nearest or within some distance, how do they measure between cells?&quot;,
+      &quot;rationale&quot;: &quot;Games often use several distance rules. This answer only controls what your written rules mean by nearest or within a distance.&quot;,
+      &quot;options&quot;: {
+        &quot;no-diagonals&quot;: {
+          &quot;meaning&quot;: &quot;Add the steps across and down the grid (Manhattan). A cell two across and one up is three steps away.&quot;
+        },
+        &quot;diagonals-count-the-same&quot;: {
+          &quot;meaning&quot;: &quot;Count the larger of the across and down steps (Chebyshev). A cell two across and one up is two steps away.&quot;
+        },
+        &quot;octile&quot;: {
+          &quot;meaning&quot;: &quot;Straight steps cost one, and diagonal steps cost the square root of two (octile). The distance is the cheapest mix of those steps. Your game&#39;s comparison rule decides when two distances count as equal.&quot;,
+          &quot;semantics&quot;: &quot;For absolute coordinate differences dx and dy, multiply the smaller difference by the square root of two minus one (about 0.414), then add the result to the larger difference. Equal means equal at whatever precision this game compares its distances with. For straight-line and octile distance, the adoption must state that comparison rule in the distance test&#39;s verification scope.&quot;
+        },
+        &quot;straight-line&quot;: {
+          &quot;meaning&quot;: &quot;Measure a straight line between the cell centres (Euclidean). Use position units when positions exist; otherwise use cells. Your game&#39;s comparison rule decides when two distances count as equal.&quot;,
+          &quot;semantics&quot;: &quot;Equal means equal at whatever precision this game compares its distances with. For straight-line and octile distance, the adoption must state that comparison rule in the distance test&#39;s verification scope.&quot;
+        },
+        &quot;not-applicable&quot;: {
+          &quot;meaning&quot;: &quot;No rule measures distance between cells. Rules may still use neighbours, named shapes, or links.&quot;
+        }
+      }
+    },
+    &quot;adjacency-for-movement&quot;: {
+      &quot;asks&quot;: &quot;From one cell, which other cells can a thing reach in one step?&quot;,
+      &quot;rationale&quot;: &quot;Movement neighbours do not follow automatically from distance or effect range. A game can use different cells for each.&quot;,
+      &quot;options&quot;: {
+        &quot;four-neighbours&quot;: {
+          &quot;meaning&quot;: &quot;Only the four cells sharing an edge are one step away. A diagonal cell cannot be reached in one step.&quot;
+        },
+        &quot;eight-neighbours&quot;: {
+          &quot;meaning&quot;: &quot;All eight surrounding cells are one step away. A thing may move across an edge or diagonally across a corner.&quot;
+        },
+        &quot;not-applicable&quot;: {
+          &quot;meaning&quot;: &quot;Nothing moves one cell at a time. Things are placed directly or move freely while the grid only reads their final cell.&quot;
+        }
+      }
+    },
+    &quot;adjacency-for-effects&quot;: {
+      &quot;asks&quot;: &quot;When a rule says two cells are next to each other, do corners count?&quot;,
+      &quot;rationale&quot;: &quot;Movement and effects can count neighbours differently. This answer keeps words such as next to from changing meaning between rules.&quot;,
+      &quot;options&quot;: {
+        &quot;four-neighbours&quot;: {
+          &quot;meaning&quot;: &quot;Only cells sharing an edge count as neighbours. Two cells touching only at a corner are not next to each other.&quot;
+        },
+        &quot;eight-neighbours&quot;: {
+          &quot;meaning&quot;: &quot;All eight surrounding cells count as neighbours. Cells touching only at a corner are still next to each other.&quot;
+        },
+        &quot;not-applicable&quot;: {
+          &quot;meaning&quot;: &quot;No rule uses next to by itself. Each rule names the cells it means, or no rule asks whether cells are neighbours.&quot;
+        }
+      }
+    },
+    &quot;enumeration-order&quot;: {
+      &quot;asks&quot;: &quot;In what order does an authored layout list its cells?&quot;,
+      &quot;rationale&quot;: &quot;Drawing, updates, and save files may use different orders. This answer covers only layouts designers write and read.&quot;,
+      &quot;options&quot;: {
+        &quot;rows-then-columns&quot;: {
+          &quot;meaning&quot;: &quot;List every cell in one row before starting the next row. Start with the smallest row and column numbers. A text map with one line per row already uses this order.&quot;
+        },
+        &quot;columns-then-rows&quot;: {
+          &quot;meaning&quot;: &quot;List every cell in one column before starting the next column. Start with the smallest row and column numbers.&quot;
+        },
+        &quot;block-tiled&quot;: {
+          &quot;meaning&quot;: &quot;List cells inside blocks such as chunks, regions, or screens. Your game&#39;s prose states block size, block order, and the order inside each block.&quot;
+        },
+        &quot;not-applicable&quot;: {
+          &quot;meaning&quot;: &quot;No authored layout lists the grid&#39;s cells. No order is needed for the material designers write and read.&quot;
+        }
+      }
+    },
+    &quot;tie-break-between-cells&quot;: {
+      &quot;asks&quot;: &quot;A rule rates two cells equally and must pick one. How does it decide?&quot;,
+      &quot;rationale&quot;: &quot;Equal choices are common and rarely written down. A fixed answer stops two builds from choosing different cells.&quot;,
+      &quot;options&quot;: {
+        &quot;lower-column-wins&quot;: {
+          &quot;meaning&quot;: &quot;The cell with the smaller column number wins. Between a cell in column 2 and a cell in column 4, the column-2 cell wins and the column-4 cell loses. If columns match, the smaller row number wins.&quot;
+        },
+        &quot;lower-row-wins&quot;: {
+          &quot;meaning&quot;: &quot;The cell with the smaller row number wins. Between a cell in row 2 and a cell in row 4, the row-2 cell wins and the row-4 cell loses. If rows match, the smaller column number wins.&quot;
+        },
+        &quot;direction-order&quot;: {
+          &quot;meaning&quot;: &quot;Walk the grid-fixed direction words in their chosen order. The first direction that points to a tied neighbour wins. Use another answer when tied cells are not neighbours.&quot;
+        },
+        &quot;arrival-order&quot;: {
+          &quot;meaning&quot;: &quot;The candidate that arrived first wins. Your game names whether arrival means creation, placement, storage, or entering play. The same run repeats the choice, but save and reload follow your persistence rules. The validator cannot check this; a reviewer does.&quot;
+        },
+        &quot;named-priority-list&quot;: {
+          &quot;meaning&quot;: &quot;The candidate kind listed first in your game&#39;s priority order wins. Cell position never decides.&quot;
+        },
+        &quot;deliberately-arbitrary&quot;: {
+          &quot;meaning&quot;: &quot;Either candidate may win, and players must not depend on which one. Replaying the same run repeats the choice, but loading a save may not.&quot;
+        },
+        &quot;random-from-a-declared-seed&quot;: {
+          &quot;meaning&quot;: &quot;Draw one candidate from a random stream declared by your game. The same run and replay draw the same candidate. The validator cannot check this; a reviewer does.&quot;
+        },
+        &quot;player-chooses&quot;: {
+          &quot;meaning&quot;: &quot;The player chooses the candidate. If the game cannot ask, the rule does nothing instead of guessing. The validator cannot check this; a reviewer does.&quot;
+        },
+        &quot;not-applicable&quot;: {
+          &quot;meaning&quot;: &quot;No rule ever chooses one of two equal candidates. The situation cannot happen, or the rule affects every tied candidate.&quot;
+        }
+      }
+    },
+    &quot;turn-direction&quot;: {
+      &quot;asks&quot;: &quot;When your rules turn a facing by an amount, which way does the amount go on the grid?&quot;,
+      &quot;rationale&quot;: &quot;Axis direction does not decide turn direction. Naming clockwise or counter-clockwise prevents equivalent formulas from reading as opposite rules.&quot;,
+      &quot;options&quot;: {
+        &quot;clockwise&quot;: {
+          &quot;meaning&quot;: &quot;A positive turn goes clockwise on the grid. A rotated view may show it differently, but the grid rule stays the same.&quot;
+        },
+        &quot;counter-clockwise&quot;: {
+          &quot;meaning&quot;: &quot;A positive turn goes counter-clockwise on the grid. A rotated view may show it differently, but the grid rule stays the same.&quot;
+        },
+        &quot;not-applicable&quot;: {
+          &quot;meaning&quot;: &quot;No rule turns a facing by an amount. A piece may still snap directly toward movement or a target.&quot;
+        }
+      }
+    }
+  },
+  &quot;declares&quot;: {
+    &quot;values&quot;: {
+      &quot;cell-size&quot;: {
+        &quot;description&quot;: &quot;The length of one cell in your position units. For centre-based cells, measure from one centre to the next. Use a positive size when rules read positions. Use zero when they only read whole cells. Changing this number changes which cell holds a position.&quot;
+      }
+    },
+    &quot;rows&quot;: {
+      &quot;directions&quot;: {
+        &quot;description&quot;: &quot;List every direction word your game uses. Each row says whether it follows the grid or a piece. A grid direction also says where it points. An empty list means the game names no directions. If ties use this order, list every grid-fixed neighbour that can tie. The validator cannot check this; a reviewer does.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;The direction word your game uses, such as north, forward, or starboard. Write it in lowercase with hyphens between words.&quot;
+          },
+          &quot;frame&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;grid&quot;,
+              &quot;piece&quot;
+            ],
+            &quot;description&quot;: &quot;Whether the direction follows the grid or a piece. A grid direction always points the same way: north stays north. A piece direction changes when that piece turns: forward, left, and behind turn with it.&quot;
+          },
+          &quot;points&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;frame&quot;: [
+                  &quot;grid&quot;
+                ]
+              }
+            },
+            &quot;options&quot;: [
+              &quot;up&quot;,
+              &quot;down&quot;,
+              &quot;left&quot;,
+              &quot;right&quot;,
+              &quot;up-left&quot;,
+              &quot;up-right&quot;,
+              &quot;down-left&quot;,
+              &quot;down-right&quot;
+            ],
+            &quot;description&quot;: &quot;Where this grid-fixed direction points on the grid. Omit it for a direction that follows a piece. This does not decide whether movement is allowed that way.&quot;
+          },
+          &quot;order&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;when&quot;: {
+              &quot;flag&quot;: {
+                &quot;tie-break-between-cells&quot;: [
+                  &quot;direction-order&quot;
+                ]
+              },
+              &quot;row&quot;: {
+                &quot;frame&quot;: [
+                  &quot;grid&quot;
+                ]
+              }
+            },
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;This direction&#39;s place in the tie-breaking walk. One is tried first. Give each grid-fixed direction a different number. Use it only when ties follow direction order.&quot;
+          }
+        }
+      }
+    }
+  },
+  &quot;rules&quot;: {
+    &quot;cell-size-not-negative&quot;: &quot;cell-size &gt;= 0&quot;
+  },
+  &quot;pack&quot;: &quot;sha256:b17529b6bce460ee83f7c460f2e73c39d5c32051637613867e42ef85b6e0996a&quot;,
+  &quot;answers&quot;: {
+    &quot;origin-and-axes&quot;: &quot;top-left&quot;,
+    &quot;coordinate-order&quot;: &quot;not-applicable&quot;,
+    &quot;counting-starts-at&quot;: &quot;zero&quot;,
+    &quot;cell-ownership&quot;: &quot;not-applicable&quot;,
+    &quot;distance-metric&quot;: &quot;diagonals-count-the-same&quot;,
+    &quot;adjacency-for-movement&quot;: &quot;eight-neighbours&quot;,
+    &quot;adjacency-for-effects&quot;: &quot;eight-neighbours&quot;,
+    &quot;enumeration-order&quot;: &quot;rows-then-columns&quot;,
+    &quot;tie-break-between-cells&quot;: &quot;lower-row-wins&quot;,
+    &quot;turn-direction&quot;: &quot;not-applicable&quot;
+  },
+  &quot;values&quot;: {
+    &quot;cell-size&quot;: 0
+  },
+  &quot;rows&quot;: {
+    &quot;directions&quot;: [
+      {
+        &quot;id&quot;: &quot;north&quot;,
+        &quot;frame&quot;: &quot;grid&quot;,
+        &quot;points&quot;: &quot;up&quot;
+      },
+      {
+        &quot;id&quot;: &quot;north-east&quot;,
+        &quot;frame&quot;: &quot;grid&quot;,
+        &quot;points&quot;: &quot;up-right&quot;
+      },
+      {
+        &quot;id&quot;: &quot;east&quot;,
+        &quot;frame&quot;: &quot;grid&quot;,
+        &quot;points&quot;: &quot;right&quot;
+      },
+      {
+        &quot;id&quot;: &quot;south-east&quot;,
+        &quot;frame&quot;: &quot;grid&quot;,
+        &quot;points&quot;: &quot;down-right&quot;
+      },
+      {
+        &quot;id&quot;: &quot;south&quot;,
+        &quot;frame&quot;: &quot;grid&quot;,
+        &quot;points&quot;: &quot;down&quot;
+      },
+      {
+        &quot;id&quot;: &quot;south-west&quot;,
+        &quot;frame&quot;: &quot;grid&quot;,
+        &quot;points&quot;: &quot;down-left&quot;
+      },
+      {
+        &quot;id&quot;: &quot;west&quot;,
+        &quot;frame&quot;: &quot;grid&quot;,
+        &quot;points&quot;: &quot;left&quot;
+      },
+      {
+        &quot;id&quot;: &quot;north-west&quot;,
+        &quot;frame&quot;: &quot;grid&quot;,
+        &quot;points&quot;: &quot;up-left&quot;
+      }
+    ]
+  },
+  &quot;verification&quot;: {
+    &quot;distance-is-measured&quot;: {
+      &quot;seeds&quot;: [
+        &quot;dungeon-distance-room&quot;,
+        &quot;dungeon-distance-corridor&quot;
+      ],
+      &quot;scope&quot;: &quot;every movement, monster-sense, spell, and area-effect rule that says nearest, in range, or within on the dungeon map&quot;
+    },
+    &quot;one-step-moves&quot;: {
+      &quot;seeds&quot;: [
+        &quot;dungeon-move-room&quot;,
+        &quot;dungeon-move-corner&quot;
+      ],
+      &quot;scope&quot;: &quot;player and monster one-cell moves from every floor cell in the authored rooms and corridors, including diagonal moves beside walls and doors; whether a diagonal may pass between blocked straight neighbours is stated in the game&#39;s own movement prose&quot;
+    },
+    &quot;next-to-means&quot;: {
+      &quot;seeds&quot;: [
+        &quot;dungeon-effect-room&quot;,
+        &quot;dungeon-effect-corner&quot;
+      ],
+      &quot;scope&quot;: &quot;every melee, trap, aura, and area-effect rule that uses next to on the dungeon map, including cells touching only at a corner&quot;
+    },
+    &quot;tie-break-settles&quot;: {
+      &quot;scope&quot;: &quot;the north-east and south-west neighbours of a floor cell are both distance one from that cell; the north-east cell wins because its row number is smaller, even though the south-west cell has the smaller column number&quot;
+    }
+  }
+}
+</code></pre>
+</details>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

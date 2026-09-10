@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en" class="opengdd-authoring">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="description" content="Full-window OpenGDD package authoring workbench.">
+    <title>OpenGDD workbench</title>
+    <link rel="stylesheet" href="/author/authoring.css">
+    <link rel="stylesheet" href="/author/src/workbench/workbench.css">
+    <script type="importmap" nonce="%CSP_NONCE%">
+      { "imports": {
+        "opengdd-analysis": "/file/lang-tools/src/analysis.mjs",
+        "opengdd-syntax": "/file/conformance/package-syntax.mjs",
+        "opengdd-file-map-host": "/file/conformance/file-map-host.mjs",
+        "opengdd-migrate": "/file/conformance/migrate.mjs",
+        "opengdd-validation": "/file/conformance/validate-core.mjs",
+        "opengdd-authoring-version": "/author/src/version.mjs"
+      } }
+    </script>
+    <script nonce="%CSP_NONCE%">
+      (() => {
+        const root = document.documentElement;
+        let theme = "System";
+        try { theme = localStorage.getItem("opengdd-workbench-theme") || theme; } catch {}
+        if (!["Light", "Dark", "System"].includes(theme)) theme = "System";
+        root.dataset.workbenchTheme = theme.toLowerCase();
+        root.style.colorScheme = theme === "System" ? "light dark" : theme.toLowerCase();
+        root.classList.remove("opengdd-author-theme--light", "opengdd-author-theme--dark");
+        if (theme !== "System") root.classList.add(`opengdd-author-theme--${theme.toLowerCase()}`);
+      })();
+    </script>
+  </head>
+  <body class="opengdd-workbench">
+    <a class="opengdd-workbench-skip" href="#workbench-prose">Skip to Prose editor</a>
+    <main id="workbench">
+      <p class="opengdd-workbench-loading">The workbench requires a browser with JavaScript modules and import-map support.</p>
+    </main>
+    <script type="module" nonce="%CSP_NONCE%">
+      import { mountWorkbenchShell } from "/author/src/workbench/shell.mjs";
+      import panels from "/author/panels/index.mjs";
+
+      mountWorkbenchShell(document.querySelector("#workbench"), {
+        panels, preparedConventionsUrl: document.documentElement.dataset.preparedConventions
+      });
+    </script>
+  </body>
+</html>

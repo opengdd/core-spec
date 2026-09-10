@@ -29,7 +29,7 @@ const PRECEDENCE = new Map([["or", 1], ["and", 2], ["not", 3], ["compare", 4], [
 
 function treeReference(node) {
   if (!isObject(node) || typeof node.ref !== "string") return undefined;
-  if (!node.ref.startsWith("tuning:")) throw unsupported(`reference ${JSON.stringify(node.ref)} has no v0.7 number-rule form`);
+  if (!node.ref.startsWith("tuning:")) throw unsupported(`reference ${JSON.stringify(node.ref)} has no v0.8 number-rule form`);
   return node.ref.slice("tuning:".length);
 }
 
@@ -39,7 +39,7 @@ function printTree(node, parent = 0) {
   if (reference !== undefined) return { text: reference, precedence: PRECEDENCE.get("primary") };
   if (!isObject(node) || typeof node.op !== "string" || !Array.isArray(node.args)) throw unsupported(`expression node ${JSON.stringify(node)} cannot be printed`);
   const { op, args } = node;
-  if (op === "pow") throw unsupported("operator `pow` has no v0.7 number-rule form");
+  if (op === "pow") throw unsupported("operator `pow` has no v0.8 number-rule form");
 
   let text;
   let precedence;
@@ -62,7 +62,7 @@ function printTree(node, parent = 0) {
     operator = "and";
   } else {
     const normalized = op === "all" ? "and" : op === "any" ? "or" : op === "sum" ? "+" : OPERATOR.get(op);
-    if (!normalized) throw unsupported(`operator ${JSON.stringify(op)} has no v0.7 number-rule form`);
+    if (!normalized) throw unsupported(`operator ${JSON.stringify(op)} has no v0.8 number-rule form`);
     precedence = ["==", "!=", "<", "<=", ">", ">="].includes(normalized) ? PRECEDENCE.get("compare") : PRECEDENCE.get(normalized);
     operator = normalized;
     text = args.map((arg, index) => {
@@ -466,7 +466,7 @@ const RUNTIME_REWRITES = [
 
 function rewriteRuntimeChunk(text, report, file) {
   for (const match of text.matchAll(/state:member:ruleset:([A-Za-z0-9_.-]+)/g)) {
-    report.manual.push(`${file}: ${JSON.stringify(match[0])} has no v0.7 form; write the condition as a sentence`);
+    report.manual.push(`${file}: ${JSON.stringify(match[0])} has no v0.8 form; write the condition as a sentence`);
   }
   for (const match of text.matchAll(/collections:[A-Za-z0-9_-]+:count/g)) report.manual.push(`${file}: ${JSON.stringify(match[0])} is retired; rewrite the count as ordinary prose`);
   let result = text;
@@ -531,7 +531,7 @@ function migrateClocks(document, report) {
     for (const [mode, word] of Object.entries(oldModes)) if (!own(migrated.modes, mode)) migrated.modes[mode] = words.get(word) ?? word;
     result[name] = migrated;
   }
-  report.changes.push({ file: "clocks.json", message: "reshaped root modes/clocks into the v0.7 clock map" });
+  report.changes.push({ file: "clocks.json", message: "reshaped root modes/clocks into the v0.8 clock map" });
   return result;
 }
 
@@ -691,7 +691,7 @@ function migrateGraphs(host, packageRoot, manifest, planText, report, outputs) {
         const definition = site.nestedField ? site.from.schema[site.rootField].of[site.nestedField] : site.from.schema[site.rootField];
         definition.loops = false;
       } else if (rule?.predicate === "acyclic" && siteList.length !== 1) {
-        report.manual.push(`05-build-plan.md: acyclic graph rule ${JSON.stringify(rule)} ${siteList.length ? "crosses several reference fields" : "has no migrated reference field"} and has no v0.7 field-local form; write the condition as a sentence`);
+        report.manual.push(`05-build-plan.md: acyclic graph rule ${JSON.stringify(rule)} ${siteList.length ? "crosses several reference fields" : "has no migrated reference field"} and has no v0.8 field-local form; write the condition as a sentence`);
       } else if (rule?.predicate === "monotone-attribute-along-path") report.manual.push(`05-build-plan.md: retired graph rule requires a sentence: ${JSON.stringify(rule)}`);
     }
     report.changes.push({ file: "05-build-plan.md", message: `removed ${headings[index][0]} using opengdd-graph-1` });
@@ -1386,7 +1386,7 @@ export function migrateLegacyContract(document, report = { changes: [], manual: 
   for (const [name, meta] of Object.entries(isObject(core.knobs) ? core.knobs : {})) if (!own(adoption.values, name)) {
     const provisional = typeof meta?.default_guidance === "number" && Number.isFinite(meta.default_guidance) ? meta.default_guidance : 0;
     adoption.values[name] = provisional;
-    report.manual.push(`${site}: old liveness pruned value ${JSON.stringify(name)}; inserted provisional ${provisional} because v0.7 values are always declared and filled — review this number`);
+    report.manual.push(`${site}: old liveness pruned value ${JSON.stringify(name)}; inserted provisional ${provisional} because v0.8 values are always declared and filled — review this number`);
   }
   const verification = {};
   copyContractAnnotations(oldVerification, verification);
@@ -1472,7 +1472,7 @@ export function migratePackage(host, root, options = {}) {
   const manifestInput = readJsonForMigration(host, manifestFile, "manifest.json", report);
   if (manifestInput.failed) return refuse(report, options.collectOutputs);
   const manifest = manifestInput.document;
-  if (manifest.opengdd !== "0.6" && manifest.opengdd !== "0.7") throw new Error(`manifest.json opengdd must be "0.6" or "0.7", got ${JSON.stringify(manifest.opengdd)}`);
+  if (!["0.6", "0.7", "0.8"].includes(manifest.opengdd)) throw new Error(`manifest.json opengdd must be "0.6", "0.7" or "0.8", got ${JSON.stringify(manifest.opengdd)}`);
   if (!host.exists(tuningFile) || !host.isFile(tuningFile)) throw new Error(`tuning.json not found in ${packageRoot}`);
   const tuningInput = readJsonForMigration(host, tuningFile, "tuning.json", report);
   const clocksInput = host.exists(clocksFile) && host.isFile(clocksFile)
@@ -1498,7 +1498,9 @@ export function migratePackage(host, root, options = {}) {
   const phase5Legacy = phase5LegacyNeeded(host, packageRoot, chapters);
   const phase5 = phase5Legacy || phase5Needed(host, packageRoot, chapters);
   const phase6 = phase6PackageNeeded(host, packageRoot, tuning, chapters);
-  if (!phase1 && !phase2 && !phase3 && !phase4 && !phase5 && !phase6) {
+  // v0.7 to v0.8 changes no file shape; only the manifest's version moves.
+  const phase0 = manifest.opengdd !== "0.8";
+  if (!phase0 && !phase1 && !phase2 && !phase3 && !phase4 && !phase5 && !phase6) {
     report.noOp = true;
     if (options.collectOutputs) report.outputs = [];
     return report;
@@ -1679,7 +1681,7 @@ export function migratePackage(host, root, options = {}) {
         }
         return refuse(report, options.collectOutputs);
       }
-      throw new Error(`migrated direction.json does not satisfy the v0.7 schema: ${directionSchemaProblems.map(problem => `${problem.path} ${problem.message}`).join("; ")}`);
+      throw new Error(`migrated direction.json does not satisfy the v0.8 schema: ${directionSchemaProblems.map(problem => `${problem.path} ${problem.message}`).join("; ")}`);
     }
     stageIfChanged(host, directionFile, JSON_TEXT(migratedDirection.result), "direction.json", report, outputs);
     if (own(manifest, "palette")) report.changes.push({ file: "manifest.json", message: "moved palette to direction.json" });
@@ -1695,7 +1697,7 @@ export function migratePackage(host, root, options = {}) {
       const migratedClocks = migrateClocks(clocksForPhase3, report);
       const clockSchema = host.loadSchema("clocks.schema.json");
       const clockProblems = validateSchemaDocument(migratedClocks, clockSchema);
-      if (clockProblems.length) throw new Error(`migrated clocks.json does not satisfy the v0.7 schema: ${clockProblems.map(problem => `${problem.path} ${problem.message}`).join("; ")}`);
+      if (clockProblems.length) throw new Error(`migrated clocks.json does not satisfy the v0.8 schema: ${clockProblems.map(problem => `${problem.path} ${problem.message}`).join("; ")}`);
       stageIfChanged(host, clocksFile, JSON_TEXT(migratedClocks), "clocks.json", report, outputs);
     }
     const planEntry = chapters.find(([name]) => name === "05-build-plan.md");
@@ -1740,7 +1742,7 @@ export function migratePackage(host, root, options = {}) {
     }
   }
 
-  manifest.opengdd = "0.7";
+  manifest.opengdd = "0.8";
   delete manifest.build;
   stageIfChanged(host, manifestFile, JSON_TEXT(manifest), "manifest.json", report, outputs);
 
@@ -1756,12 +1758,12 @@ export function migratePackage(host, root, options = {}) {
     let after = before;
     if (phase1) {
       after = after.replace(/`invariants\.([A-Za-z0-9_-]+)`/g, "`rules.$1`");
-      for (const match of after.matchAll(/`meta\.([A-Za-z0-9_.-]+)`/g)) report.manual.push(`${name}: citation ${match[0]} has no automatic v0.7 form; cite the value key directly, or cite \`ranges.<key>\``);
+      for (const match of after.matchAll(/`meta\.([A-Za-z0-9_.-]+)`/g)) report.manual.push(`${name}: citation ${match[0]} has no automatic v0.8 form; cite the value key directly, or cite \`ranges.<key>\``);
     }
     if (phase2) {
       after = rewriteDirectionText(after, moodNames, report, name);
       if (/```direction/i.test(after)) after = migrateFence(after, new Map(), report, name);
-      for (const match of after.matchAll(/`viewing\.([A-Za-z0-9_.-]+)`/g)) report.manual.push(`${name}: citation ${match[0]} has no v0.7 direction target; move its meaning into prose`);
+      for (const match of after.matchAll(/`viewing\.([A-Za-z0-9_.-]+)`/g)) report.manual.push(`${name}: citation ${match[0]} has no v0.8 direction target; move its meaning into prose`);
     }
     if (phase3) {
       after = rewriteRuntimeText(after, report, name);
@@ -1808,9 +1810,9 @@ export function migrateBuildRecord(json) {
   const changes = [];
   const manual = [];
   const beganLegacy = document.opengdd === "0.6" || !isObject(document.resolved_tuning?.values);
-  if (document.opengdd !== "0.6" && document.opengdd !== "0.7") throw new Error(`opengdd-build.json opengdd must be "0.6" or "0.7", got ${JSON.stringify(document.opengdd)}`);
+  if (!["0.6", "0.7", "0.8"].includes(document.opengdd)) throw new Error(`opengdd-build.json opengdd must be "0.6", "0.7" or "0.8", got ${JSON.stringify(document.opengdd)}`);
   if (document.opengdd === "0.6" || !isObject(document.resolved_tuning?.values)) {
-    document.opengdd = "0.7";
+    document.opengdd = "0.8";
     const resolved = isObject(document.resolved_tuning) ? document.resolved_tuning : {};
     const values = { ...(isObject(resolved.tunables) ? resolved.tunables : {}) };
     for (const [key, value] of Object.entries(isObject(resolved.constants) ? resolved.constants : {})) {
@@ -1818,7 +1820,10 @@ export function migrateBuildRecord(json) {
       else values[key] = value;
     }
     document.resolved_tuning = { values };
-    changes.push({ file: "opengdd-build.json", message: "set opengdd to 0.7 and merged resolved_tuning into values" });
+    changes.push({ file: "opengdd-build.json", message: "set opengdd to 0.8 and merged resolved_tuning into values" });
+  } else if (document.opengdd === "0.7") {
+    document.opengdd = "0.8";
+    changes.push({ file: "opengdd-build.json", message: "set opengdd to 0.8" });
   }
   if (own(document, "direction_result")) {
     delete document.direction_result;
@@ -1871,7 +1876,7 @@ function createNodeHost({ fs, path, crypto, fileURLToPath }) {
 
 function printReport(report, jsonMode) {
   if (jsonMode) return `${JSON.stringify(report, null, 2)}\n`;
-  if (report.noOp) return "package already uses OpenGDD v0.7; no changes needed\n";
+  if (report.noOp) return "package already uses OpenGDD v0.8; no changes needed\n";
   const lines = [];
   for (const change of report.changes) lines.push(`CHANGE ${change.file}: ${change.message}`);
   for (const item of report.manual) lines.push(`MANUAL ${item}`);

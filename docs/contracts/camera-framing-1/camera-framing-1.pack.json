@@ -1,0 +1,1646 @@
+{
+  "contract": "camera-framing",
+  "version": 1,
+  "templates": [
+    {
+      "id": "framing-vocabulary-is-observable",
+      "title": "the framing vocabulary is observed at the displayed result",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a trace of camera settlement and displayed output for {{instance}}",
+        "when": [
+          "displayed play moments and play regions are classified"
+        ],
+        "then": [
+          "each displayed play moment is the final play image after follow motion, manual pan, aim or peek offset, player-held zoom, shake, temporary zoom, scripted movement, viewport scaling, and HUD composition",
+          "two play regions are treated as one region whenever their screen areas overlap at all"
+        ],
+        "diagnostics": [
+          "{{instance}}-displayed-frame-log",
+          "{{instance}}-active-camera-trace",
+          "{{instance}}-candidate-trace"
+        ]
+      },
+      "text": "This test fixes two observable meanings. A displayed play moment is the final play image after every listed camera change, scaling, and HUD composition. Any overlap makes two screen areas one play region."
+    },
+    {
+      "id": "declared-content-framing-outcomes-are-observable",
+      "title": "valid frames and framing failures are observable",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "content-visibility": [
+            "declared-content"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a trace of composed views and failure settlement for {{instance}}",
+        "when": [
+          "valid frames and framing failures are classified"
+        ],
+        "then": [
+          "a frame is valid exactly when every applicable unsuspended coverage row fits at its settled margin",
+          "a framing failure is recorded only when no position and view size allowed by the camera can produce a valid frame"
+        ],
+        "diagnostics": [
+          "{{instance}}-failure-record"
+        ]
+      },
+      "text": "For declared content, a valid frame satisfies every applicable unsuspended coverage row at its settled margin. A framing failure exists only after every allowed position and size has failed."
+    },
+    {
+      "id": "camera-supplies-region-while-active",
+      "title": "{{row.id}} supplies its region exactly while active",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "camera row {{row.id}} and the rules cited at {{row.active-when}} and {{row.view-declared-in}}",
+        "when": [
+          "the active-camera trace crosses both edges of the rule cited at {{row.active-when}}"
+        ],
+        "then": [
+          "{{row.id}} supplies exactly the play region cited at {{row.view-declared-in}} while {{row.active-when}} holds",
+          "{{row.id}} supplies no play region while {{row.active-when}} does not hold"
+        ],
+        "diagnostics": [
+          "{{instance}}-active-camera-trace",
+          "{{instance}}-displayed-frame-log"
+        ]
+      },
+      "text": "Camera {{row.id}} supplies exactly the play region cited at {{row.view-declared-in}}, and only while the rule cited at {{row.active-when}} holds. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "active-regions-are-exclusive",
+      "title": "active cameras occupy exclusive play regions",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "every pair of cameras that {{instance}} can activate at the same displayed play moment; an adoption with no such pair asserts only the no-pair result",
+        "when": [
+          "their play regions are compared after display scaling"
+        ],
+        "then": [
+          "no pair is active where the two screen areas overlap at all; a violating pair is a defect this test fails by construction",
+          "no pair settles independently unless its play regions are distinct; where they are distinct, each camera's base position, settled view size, suspensions, and promise results are recorded per camera and no value of one is a function of the other's",
+          "an adoption that can activate no pair has no simultaneous-region settlement to assert"
+        ],
+        "diagnostics": [
+          "{{instance}}-active-camera-trace",
+          "{{instance}}-play-region-map",
+          "{{instance}}-candidate-trace",
+          "{{instance}}-settled-margin-record",
+          "{{instance}}-suspension-log"
+        ]
+      },
+      "text": "At most one camera is active in one play region. Overlap is the whole test; how two areas are composited is outside this contract. No pair settles independently unless its play regions are distinct, and each distinct camera's settlement and promise results remain independent. Where the adoption can activate no pair, there is no pair behavior to assert."
+    },
+    {
+      "id": "promise-applies-exactly-when-cited",
+      "title": "{{row.id}} applies exactly when its cited rule holds",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "coverage-promises",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "coverage-promises row {{row.id}} for {{row.camera-id}}",
+        "when": [
+          "the trace crosses both edges of the rule cited at {{row.applies-when}}"
+        ],
+        "then": [
+          "{{row.id}} enters the applicable promise set exactly while {{row.applies-when}} holds",
+          "outside that interval {{row.id}} is not tested and cannot create a framing failure"
+        ],
+        "diagnostics": [
+          "{{instance}}-visibility-area-trace",
+          "{{instance}}-failure-record"
+        ]
+      },
+      "text": "Promise {{row.id}} on {{row.camera-id}} applies exactly while the rule cited at {{row.applies-when}} holds. Outside that interval it is not tested and cannot create a framing failure. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "whole-extent-stays-visible",
+      "title": "the whole extent of {{row.id}} remains inside its visibility area",
+      "type": "general",
+      "expand": "per-row",
+      "collection": "coverage-promises",
+      "when": {
+        "row": {
+          "coverage": [
+            "whole-extent"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "on every displayed play moment when {{row.id}} is applicable and unsuspended, the complete displayed extent of the subject named at {{row.subject}} remains inside this row's visibility area at its settled margin, except on a displayed play moment that has entered failure settlement, where this row is recorded as failed rather than kept; when the subject is set-valued, that complete extent is the union of its members' displayed extents; the suspension log shows whether each moment tested this row or left it untested",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-displayed-frame-log",
+          "{{instance}}-visibility-area-trace",
+          "{{instance}}-suspension-log",
+          "{{row.id}}-displayed-extent"
+        ]
+      },
+      "text": "The whole extent of {{row.id}}, the subject named at {{row.subject}}, remains inside this row's own visibility area at its settled margin on every displayed play moment where the promise is applicable and unsuspended, except on a displayed play moment that has entered failure settlement, where this row is recorded as failed rather than kept. For a set-valued subject, the whole extent is the union of its members' displayed extents. The suspension log shows whether each moment tested this row or left it untested.",
+      "inputs": {
+        "scope": {
+          "default": "all supported play routes and camera transitions covered by the row's cited conditions"
+        },
+        "seeds": {
+          "default": [
+            "camera-route-a",
+            "camera-route-b"
+          ]
+        }
+      }
+    },
+    {
+      "id": "reference-point-stays-visible",
+      "title": "the declared point for {{row.id}} remains inside its visibility area",
+      "type": "general",
+      "expand": "per-row",
+      "collection": "coverage-promises",
+      "when": {
+        "row": {
+          "coverage": [
+            "reference-point"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "on every displayed play moment when {{row.id}} is applicable and unsuspended, the point named at {{row.reference-point}} for the subject named at {{row.subject}} remains inside this row's visibility area at its settled margin, except on a displayed play moment that has entered failure settlement, where this row is recorded as failed rather than kept; no other part of the subject is required to fit by this row; the suspension log shows whether each moment tested this row or left it untested",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-displayed-frame-log",
+          "{{instance}}-visibility-area-trace",
+          "{{instance}}-suspension-log",
+          "{{row.id}}-reference-point"
+        ]
+      },
+      "text": "The reference point named at {{row.reference-point}} for {{row.id}}, the subject named at {{row.subject}}, remains inside this row's own visibility area at its settled margin on every displayed play moment where the promise is applicable and unsuspended, except on a displayed play moment that has entered failure settlement, where this row is recorded as failed rather than kept. This row promises nothing about the rest of the subject. The suspension log shows whether each moment tested this row or left it untested. The test names the addresses and restates nothing from them.",
+      "inputs": {
+        "scope": {
+          "default": "all supported play routes and camera transitions covered by the row's cited conditions"
+        },
+        "seeds": {
+          "default": [
+            "camera-route-a",
+            "camera-route-b"
+          ]
+        }
+      }
+    },
+    {
+      "id": "rendered-view-defines-visibility-area",
+      "title": "{{row.id}} uses the rendered play region",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "coverage-promises",
+      "when": {
+        "row": {
+          "visibility-area": [
+            "rendered-view"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "applicable unsuspended promise {{row.id}} after display scaling and HUD composition",
+        "when": [
+          "its visibility area is constructed"
+        ],
+        "then": [
+          "the visibility area is the final rendered play region supplied by {{row.camera-id}}",
+          "HUD overlap alone removes no space from this visibility area"
+        ],
+        "diagnostics": [
+          "{{instance}}-visibility-area-trace",
+          "{{instance}}-hud-composition-log"
+        ]
+      },
+      "text": "Promise {{row.id}} uses the final rendered play region supplied by {{row.camera-id}} as its visibility area. HUD overlap alone is ignored for this row."
+    },
+    {
+      "id": "hud-safe-area-defines-visibility-area",
+      "title": "{{row.id}} uses its cited HUD-safe area",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "coverage-promises",
+      "when": {
+        "row": {
+          "visibility-area": [
+            "hud-safe-area"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "applicable unsuspended promise {{row.id}} after display scaling and the HUD placement named by its conditions",
+        "when": [
+          "its visibility area is constructed"
+        ],
+        "then": [
+          "the visibility area is the final unobscured shape cited at {{row.safe-area-declared-in}}",
+          "HUD-covered space is outside that visibility area"
+        ],
+        "diagnostics": [
+          "{{instance}}-visibility-area-trace",
+          "{{instance}}-hud-composition-log"
+        ]
+      },
+      "text": "Promise {{row.id}} uses the final unobscured shape cited at {{row.safe-area-declared-in}} after scaling and the HUD placement named by its conditions. HUD-covered space is outside it. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "margin-insets-the-visibility-area",
+      "title": "{{row.id}} insets its visibility area by four margins",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "coverage-promises",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "promise {{row.id}}, its visibility area, and the four clearances with units cited at {{row.margin-declared-in}}",
+        "when": [
+          "the margin is inset"
+        ],
+        "then": [
+          "the top, right, bottom, and left clearances from {{row.margin-declared-in}} inset the visibility area",
+          "a subject or reference point exactly on the boundary of the inset area fits"
+        ],
+        "diagnostics": [
+          "{{instance}}-visibility-area-trace",
+          "{{instance}}-settled-margin-record"
+        ]
+      },
+      "text": "The four clearances with units cited at {{row.margin-declared-in}} inset {{row.id}}'s visibility area. A subject or reference point exactly on the inset boundary fits. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "activity-selects-affected-promises",
+      "title": "{{row.id}} affects exactly its selected promises",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "camera-activities",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "active activity row {{row.id}} on {{row.camera-id}}, the fixed promise list this row cites in its promises field, when it has one, and every applicable promise on that camera",
+        "when": [
+          "the activity's affected set is built"
+        ],
+        "then": [
+          "where this row cites a promises list, the affected promises are exactly the ones it names",
+          "where it cites no promises list, the affected set is every applicable promise on {{row.camera-id}}",
+          "the affected-promise-set record names each promise the citation lists, or every applicable promise on {{row.camera-id}} when the row cites none",
+          "the selection record distinguishes an unaffected promise from an affected promise that happened not to change"
+        ],
+        "diagnostics": [
+          "{{instance}}-activity-log",
+          "{{instance}}-affected-promise-set"
+        ]
+      },
+      "text": "Activity {{row.id}} affects exactly the applicable promises selected for {{row.camera-id}}. Where this row cites a promises list, that fixed list is exact; where it cites none, every applicable promise on {{row.camera-id}} is affected. The test names no list contents and restates nothing from the citation."
+    },
+    {
+      "id": "may-suspend-releases-and-restores-promises",
+      "title": "{{row.id}} suspends only its affected promises",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "camera-activities",
+      "when": {
+        "row": {
+          "promise-effect": [
+            "may-suspend"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "activity {{row.id}} and its affected applicable promises",
+        "when": [
+          "the interval cited at {{row.applies-when}} begins and then the last suspending activity affecting each promise ends"
+        ],
+        "then": [
+          "only the affected set is suspended during {{row.id}}'s active interval",
+          "each suspended promise is not tested and cannot create a framing failure during that interval",
+          "each promise is required again on the first displayed play moment after its last affecting suspension ends",
+          "the suspension log distinguishes a promise that was not tested from one that happened to fit"
+        ],
+        "diagnostics": [
+          "{{instance}}-suspension-log",
+          "{{instance}}-displayed-frame-log",
+          "{{instance}}-failure-record"
+        ]
+      },
+      "text": "Activity {{row.id}} releases only its affected promises, and only during the interval cited at {{row.applies-when}}. A suspended promise is not tested and cannot create a framing failure. It holds again on the first displayed play moment after its last affecting suspension ends. The log distinguishes an untested promise from one that happened to fit. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "keeps-promise-preserves-other-suspensions",
+      "title": "{{row.id}} keeps its promise without cancelling another suspension",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "camera-activities",
+      "when": {
+        "row": {
+          "promise-effect": [
+            "keeps-promise"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "active keeps-promise activity {{row.id}} and each overlap with another active suspending activity on the same promise that {{instance}} can construct; where no overlap can be constructed, the overlap clause asserts nothing",
+        "when": [
+          "the final promise set is tested during {{row.id}}'s interval cited at {{row.applies-when}}"
+        ],
+        "then": [
+          "{{row.id}} supplies no suspension of its own",
+          "a different active suspension affecting the same promise remains active until its own interval ends"
+        ],
+        "diagnostics": [
+          "{{instance}}-suspension-log",
+          "{{instance}}-activity-log"
+        ]
+      },
+      "text": "Activity {{row.id}} supplies no suspension of its own. If another active activity suspends the same promise, {{row.id}} does not cancel it; where this adoption cannot construct that overlap, the overlap clause asserts nothing. The interval comes from {{row.applies-when}}, whose content this test does not restate."
+    },
+    {
+      "id": "recenter-manual-pan-defines-suspension-interval",
+      "title": "suspending manual pan uses the recentered interval",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "camera-activities",
+      "when": {
+        "row": {
+          "promise-effect": [
+            "may-suspend"
+          ],
+          "activity-kind": [
+            "manual-pan"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each case this adoption can construct where {{row.camera-id}} is free-with-recenter; an activity row cannot read its camera's follow mode, so a non-recentering camera asserts nothing",
+        "when": [
+          "the player moves the view away from the recentered state and later recenters or deactivates the camera"
+        ],
+        "then": [
+          "the suspending interval begins when the view leaves the recentered state",
+          "the interval ends on recenter or camera deactivation"
+        ],
+        "diagnostics": [
+          "{{instance}}-suspension-log",
+          "{{instance}}-candidate-trace",
+          "{{instance}}-active-camera-trace"
+        ]
+      },
+      "text": "Where may-suspend manual-pan activity {{row.id}} is on a free-with-recenter camera, its suspension begins when the view leaves the recentered state and ends on recenter or camera deactivation; an activity row cannot read its camera's follow mode, so a non-recentering camera asserts nothing."
+    },
+    {
+      "id": "controller-disposes-of-kept-player-proposals",
+      "title": "the controller disposes of kept player proposals",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "camera-activities",
+      "when": {
+        "row": {
+          "promise-effect": [
+            "keeps-promise"
+          ],
+          "activity-kind": [
+            "manual-pan",
+            "aim-or-peek-offset"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each proposal this adoption can construct for {{row.id}}",
+        "when": [
+          "the proposal would make an affected promise fail"
+        ],
+        "then": [
+          "the controller stops, redirects, or resizes the proposed view before the affected promise fails",
+          "the player proposes and the controller disposes; the player's proposal never owns the displayed result"
+        ],
+        "diagnostics": [
+          "{{instance}}-player-proposal-log",
+          "{{instance}}-controller-disposal-log",
+          "{{instance}}-displayed-frame-log"
+        ]
+      },
+      "text": "For keeps-promise activity {{row.id}}, the controller stops, redirects, or resizes a player proposal before an affected promise fails. The player proposes and the controller disposes; the proposal never owns the displayed result."
+    },
+    {
+      "id": "camera-without-activity-uses-base-alone",
+      "title": "a camera without an activity builds from its base alone",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each active camera and displayed play moment for which {{instance}} has no active camera-activities row; if every active camera has an activity, this test asserts nothing",
+        "when": [
+          "the candidate position is built"
+        ],
+        "then": [
+          "the candidate has the settled base position and no activity offset"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-trace",
+          "{{instance}}-activity-log"
+        ]
+      },
+      "text": "For each active camera and moment with no active camera-activities row, the candidate is built from the settled base position alone and has no activity offset. If this adoption has no such moment, the test asserts nothing."
+    },
+    {
+      "id": "fixed-view-uses-authored-base",
+      "title": "{{row.id}} uses only its authored base position",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "row": {
+          "follow-mode": [
+            "fixed-view"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "active fixed-view camera {{row.id}}",
+        "when": [
+          "its base position is selected and player inputs are offered"
+        ],
+        "then": [
+          "the set this follow mode supplies contains only the base position named at {{row.view-declared-in}}",
+          "no player input moves that base position; only a declared activity can add an offset"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-trace",
+          "{{instance}}-player-proposal-log"
+        ]
+      },
+      "text": "Fixed-view camera {{row.id}} has one base position, named at {{row.view-declared-in}}. No player input moves it; only a declared activity can add an offset. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "locked-follow-uses-target-point",
+      "title": "{{row.id}} follows only its cited target point",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "row": {
+          "follow-mode": [
+            "locked-follow"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "active locked-follow camera {{row.id}} and the target point cited at {{row.follow-target-declared-in}}",
+        "when": [
+          "the base position is selected"
+        ],
+        "then": [
+          "the set this follow mode supplies contains only that cited target point",
+          "the selected base position is that point before the travel limit is applied"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-trace",
+          "{{instance}}-follow-target-trace"
+        ]
+      },
+      "text": "Locked-follow camera {{row.id}} has only the target point cited at {{row.follow-target-declared-in}} in the set this follow mode supplies. That point becomes the base before the travel limit is applied. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "slack-follow-stays-in-allowed-set",
+      "title": "{{row.id}} stays in its cited slack set",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "row": {
+          "follow-mode": [
+            "slack-follow"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "active slack-follow camera {{row.id}} and the target and allowed positions cited at {{row.follow-target-declared-in}}",
+        "when": [
+          "the controller selects a base position across target motion and direction changes"
+        ],
+        "then": [
+          "every selected base position lies inside the cited allowed set around the target before the travel limit is applied",
+          "the controller searches no position outside that set"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-trace",
+          "{{instance}}-follow-target-trace"
+        ]
+      },
+      "text": "Slack-follow camera {{row.id}} selects only positions inside the allowed set around its target cited at {{row.follow-target-declared-in}}. It never searches outside that set. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "free-camera-starts-from-player-pan",
+      "title": "{{row.id}} starts from its player pan proposal",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "row": {
+          "follow-mode": [
+            "free-view",
+            "free-with-recenter"
+          ]
+        }
+      },
+      "bindings": {
+        "pan-method": {
+          "row_field": "manual-pan",
+          "map": {
+            "edge-scroll": "an edge-scroll proposal",
+            "drag-view": "a drag-view proposal",
+            "move-view-actions": "a move-view-actions proposal",
+            "several-methods": "a proposal by any of the several cited methods"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "active free camera {{row.id}} receiving {{bind:pan-method}} through the actions cited at {{row.pan-actions-declared-in}}",
+        "when": [
+          "the mode selects its base proposal"
+        ],
+        "then": [
+          "the mode begins from the player's proposed position",
+          "the controller searches only positions supplied by this free-camera mode and still disposes of the displayed result",
+          "only the game actions cited at {{row.pan-actions-declared-in}} produce this camera's pan proposal"
+        ],
+        "diagnostics": [
+          "{{instance}}-player-proposal-log",
+          "{{instance}}-controller-disposal-log",
+          "{{instance}}-candidate-trace"
+        ]
+      },
+      "text": "Camera {{row.id}} begins from {{bind:pan-method}} through the actions cited at {{row.pan-actions-declared-in}}. Only those cited actions produce this camera's pan proposal. This says who initiates movement, not who owns the result: the controller still disposes of the displayed frame. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "free-with-recenter-selects-target",
+      "title": "{{row.id}} returns to its cited target on recenter",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "row": {
+          "follow-mode": [
+            "free-with-recenter"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "active free-with-recenter camera {{row.id}}, target rule {{row.follow-target-declared-in}}, and recenter action {{row.recenter-action-declared-in}}",
+        "when": [
+          "the player pans and then invokes the cited recenter action"
+        ],
+        "then": [
+          "the mode starts from player proposals until recenter",
+          "recenter selects the target point cited at {{row.follow-target-declared-in}} as the new base proposal"
+        ],
+        "diagnostics": [
+          "{{instance}}-player-proposal-log",
+          "{{instance}}-candidate-trace",
+          "{{instance}}-follow-target-trace"
+        ]
+      },
+      "text": "Free-with-recenter camera {{row.id}} starts from player proposals until the action cited at {{row.recenter-action-declared-in}} selects the target cited at {{row.follow-target-declared-in}}. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "no-travel-limit-does-not-clamp",
+      "title": "{{row.id}} applies no camera travel clamp",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "row": {
+          "travel-limit": [
+            "no-camera-travel-limit"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "camera {{row.id}} with base proposals across the set this follow mode supplies",
+        "when": [
+          "the travel-limit stage settles the base position"
+        ],
+        "then": [
+          "no camera travel clamp changes the base position"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-trace"
+        ]
+      },
+      "text": "Camera {{row.id}} has no camera travel clamp. Its base position passes this stage unchanged."
+    },
+    {
+      "id": "travel-limit-clamps-base-position",
+      "title": "{{row.id}} clamps its base position to the cited region",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "row": {
+          "travel-limit": [
+            "one-world-region",
+            "changes-by-situation"
+          ]
+        }
+      },
+      "bindings": {
+        "region-selection": {
+          "row_field": "travel-limit",
+          "map": {
+            "one-world-region": "the one camera-position region",
+            "changes-by-situation": "the camera-position region currently selected by the rule"
+          }
+        },
+        "region-change": {
+          "row_field": "travel-limit",
+          "map": {
+            "one-world-region": "",
+            "changes-by-situation": "; the situation changes so that the rule cited at {{row.travel-limit-declared-in}} selects a different region, and the base is clamped to the new region from that moment"
+          }
+        },
+        "region-change-text": {
+          "row_field": "travel-limit",
+          "map": {
+            "one-world-region": "",
+            "changes-by-situation": " When the cited rule selects a different region, the base is clamped to the new region from that moment."
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "camera {{row.id}}, base proposals inside and outside {{bind:region-selection}} cited at {{row.travel-limit-declared-in}}, and a subject near each region edge",
+        "when": [
+          "the travel limit is applied before activity offsets{{bind:region-change}}"
+        ],
+        "then": [
+          "the base position is clamped to {{bind:region-selection}}",
+          "the clamp constrains camera position, not the visible region",
+          "a promise not tested by the final composed-view test is not recorded as kept",
+          "where the clamp alone prevents the subject from meeting a margin, the clamped-side margin is reduced by the exact shortfall and no lower than zero, while the subject remains inside the underlying uninset visibility area",
+          "the margin-settlement record distinguishes a thinned margin from a subject that merely fit inside the original inset"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-trace",
+          "{{instance}}-settled-margin-record",
+          "{{instance}}-visibility-area-trace"
+        ]
+      },
+      "text": "Camera {{row.id}} clamps its base position to {{bind:region-selection}} cited at {{row.travel-limit-declared-in}}. The limit constrains camera position, not the visible region.{{bind:region-change-text}} A promise not tested by the final composed-view test is not recorded as kept. Its edge condition reduces only the clamped-side margin by the exact shortfall, never below zero, while the subject still stays inside the underlying area; the margin record distinguishes that thinning from an ordinary fit. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "activity-offset-follows-settled-base",
+      "title": "{{row.id}} applies its bounded change after the base settles",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "camera-activities",
+      "when": {
+        "row": {
+          "activity-kind": [
+            "look-ahead",
+            "aim-or-peek-offset",
+            "shake",
+            "scripted-move"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "active activity {{row.id}} at its strongest displacement cited at {{row.extent-declared-in}}",
+        "when": [
+          "the candidate is built after the base position and travel clamp settle"
+        ],
+        "then": [
+          "the activity change is bounded by {{row.extent-declared-in}} and is applied after the base settles",
+          "a position-changing activity is an activity offset outside the set this follow mode supplies and can carry the candidate past any travel limit the camera declares",
+          "the offset never substitutes for the final composed-view test"
+        ],
+        "diagnostics": [
+          "{{instance}}-activity-log",
+          "{{instance}}-candidate-trace",
+          "{{instance}}-displayed-frame-log"
+        ]
+      },
+      "text": "Activity {{row.id}} applies after the base settles and is bounded by the strongest change cited at {{row.extent-declared-in}}. A position-changing activity is an offset outside the set this follow mode supplies and can pass any travel limit the camera declares; the final test still decides every promise. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "temporary-zoom-settles-one-proposed-size",
+      "title": "{{row.id}} proposes and settles one temporary view size",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "camera-activities",
+      "when": {
+        "row": {
+          "activity-kind": [
+            "temporary-zoom"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "active temporary-zoom activity {{row.id}} on {{row.camera-id}} during the interval cited at {{row.applies-when}}",
+        "when": [
+          "the activity proposes the size cited at {{row.extent-declared-in}} as a temporary view size"
+        ],
+        "then": [
+          "the controller disposes of the proposal under this row's promise effect and every unsuspended promise together",
+          "exactly one view size settles per displayed moment",
+          "while the proposal is accepted, the temporary size replaces the size this camera's view-size answer would otherwise settle: the authored size, the held level, or the fit result",
+          "on the first displayed moment after the activity ends, the authored size, held level, or fit result settles again"
+        ],
+        "diagnostics": [
+          "{{instance}}-activity-log",
+          "{{instance}}-view-size-trace",
+          "{{instance}}-controller-disposal-log"
+        ]
+      },
+      "text": "During the interval cited at {{row.applies-when}}, temporary-zoom activity {{row.id}} proposes the size cited at {{row.extent-declared-in}}. The controller disposes of it with the row's promise effect and every unsuspended promise, and exactly one view size settles per displayed moment. While the proposal is accepted, the temporary size replaces whatever this camera's view-size answer would otherwise settle: the authored size, the held level, or the fit result. When the activity ends, that size returns on the next displayed moment."
+    },
+    {
+      "id": "aim-offset-uses-cited-actions",
+      "title": "{{row.id}} receives proposals through its cited aim actions",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "camera-activities",
+      "when": {
+        "row": {
+          "activity-kind": [
+            "aim-or-peek-offset"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "activity {{row.id}} and supported and unsupported game actions",
+        "when": [
+          "aim or peek proposals are collected"
+        ],
+        "then": [
+          "only the game actions cited at {{row.actions-declared-in}} produce this activity's proposal",
+          "the controller still disposes of the displayed result"
+        ],
+        "diagnostics": [
+          "{{instance}}-player-proposal-log",
+          "{{instance}}-controller-disposal-log"
+        ]
+      },
+      "text": "Aim-or-peek activity {{row.id}} receives proposals only through the game actions cited at {{row.actions-declared-in}}. The controller still disposes of the displayed result. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "fixed-size-uses-authored-size",
+      "title": "{{row.id}} uses its authored view size",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "row": {
+          "view-size": [
+            "fixed-size"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "active fixed-size camera {{row.id}} across ordinary activity and, where this adoption has such an activity, every active temporary-zoom activity it can construct",
+        "when": [
+          "view size settles"
+        ],
+        "then": [
+          "without an active temporary-zoom activity the size is exactly the authored size named at {{row.view-declared-in}}",
+          "only an active temporary-zoom activity can propose a different temporary size"
+        ],
+        "diagnostics": [
+          "{{instance}}-view-size-trace",
+          "{{instance}}-activity-log"
+        ]
+      },
+      "text": "Fixed-size camera {{row.id}} uses the authored size named at {{row.view-declared-in}}. Only an active temporary-zoom activity can propose another temporary size. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "player-held-zoom-starts-in-cited-range",
+      "title": "{{row.id}} starts from held zoom inside its cited range",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "row": {
+          "view-size": [
+            "player-held-zoom"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "active player-held-zoom camera {{row.id}}, held levels at the ends and interior of the range cited at {{row.view-size-rule-declared-in}}, and each player-zoom activity row this camera declares, or the no-row default where it declares none",
+        "when": [
+          "view size settles with each applicable player-zoom activity row"
+        ],
+        "then": [
+          "the proposal starts from the player's held level inside the cited range",
+          "where this camera declares a player-zoom activity row, that row's promise effect decides keep or suspend; where it declares none, the controller must keep every applicable promise at every held level",
+          "only the game actions cited at {{row.view-size-rule-declared-in}} change the held level",
+          "the controller disposes of the final size together with every unsuspended promise"
+        ],
+        "diagnostics": [
+          "{{instance}}-view-size-trace",
+          "{{instance}}-suspension-log",
+          "{{instance}}-controller-disposal-log"
+        ]
+      },
+      "text": "Player-held-zoom camera {{row.id}} starts from the held level inside the range cited at {{row.view-size-rule-declared-in}}. Where this camera declares a player-zoom activity row, that row's promise effect decides keep or suspend; where it declares none, the controller must keep every applicable promise at every held level. Only the game actions cited at the same address change the held level. The controller disposes of the final size with all unsuspended promises. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "automatic-fit-chooses-largest-valid-size",
+      "title": "{{row.id}} chooses the largest allowed fitting size",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "row": {
+          "view-size": [
+            "automatic-fit"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "active automatic-fit camera {{row.id}}, its applicable extents and margins, and every keeps-promise activity row whose camera-id names this camera",
+        "when": [
+          "the fit rule cited at {{row.view-size-rule-declared-in}} settles view size"
+        ],
+        "then": [
+          "the controller chooses the largest allowed size where the subject extent, margins, the strongest cited displacement of every position-changing keeps-promise activity on this camera, and the largest cited size of every size-changing one fit together",
+          "if no allowed size and position fits, failure settlement begins"
+        ],
+        "diagnostics": [
+          "{{instance}}-view-size-trace",
+          "{{instance}}-candidate-trace",
+          "{{instance}}-failure-record"
+        ]
+      },
+      "text": "Automatic-fit camera {{row.id}} follows {{row.view-size-rule-declared-in}} and chooses the largest allowed size where the subject extent, margins, the strongest cited displacement of every position-changing keeps-promise activity on this camera, and the largest cited size of every size-changing one fit together. If nothing fits, failure settlement begins. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "automatic-fit-respects-travel-region",
+      "title": "{{row.id}} continues automatic fitting after its centre is clamped",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "row": {
+          "view-size": [
+            "automatic-fit"
+          ],
+          "travel-limit": [
+            "one-world-region",
+            "changes-by-situation"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "active automatic-fit camera {{row.id}} at positions where fitting would need a centre outside the region cited at {{row.travel-limit-declared-in}}",
+        "when": [
+          "the fit rule cited at {{row.view-size-rule-declared-in}} and the travel limit settle together"
+        ],
+        "then": [
+          "the controller clamps the centre to the travel region and continues fitting inside the cited size range even when the visible region extends beyond the travel region",
+          "if no allowed size and clamped position fits, failure settlement begins"
+        ],
+        "diagnostics": [
+          "{{instance}}-view-size-trace",
+          "{{instance}}-candidate-trace",
+          "{{instance}}-failure-record"
+        ]
+      },
+      "text": "When automatic fitting would need a centre outside the travel region cited at {{row.travel-limit-declared-in}}, camera {{row.id}} clamps the centre and continues fitting inside the range cited at {{row.view-size-rule-declared-in}}, even when the visible region extends beyond the travel region. If no allowed size and clamped position fits, failure settlement begins. The test names the addresses and restates nothing from them."
+    },
+    {
+      "id": "final-composed-test-decides-frame",
+      "title": "the final composed-view test decides every promise",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "content-visibility": [
+            "declared-content"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each candidate {{instance}} can construct, including candidates that pass an earlier follow, recenter, travel, or position check",
+        "when": [
+          "the final view and HUD are composed"
+        ],
+        "then": [
+          "every applicable unsuspended promise is tested against its inset visibility area",
+          "only this final test decides whether the frame is valid",
+          "no follow trigger, recenter action, travel limit, or earlier candidate substitutes for the final test",
+          "when every applicable unsuspended promise passes, that composed view is the displayed play moment",
+          "exactly one view size settles for each displayed play moment on each active camera",
+          "the controller disposes of every size and position proposal under the activity permission and all unsuspended promises together"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-trace",
+          "{{instance}}-visibility-area-trace",
+          "{{instance}}-displayed-frame-log"
+        ]
+      },
+      "text": "After the final view and HUD are composed, every applicable unsuspended promise is tested against its inset visibility area. That result alone decides validity; no follow trigger, recenter action, travel limit, or earlier candidate substitutes for it. When every applicable unsuspended promise passes, that composed view is the displayed play moment. Exactly one view size settles per displayed play moment on each active camera, and the controller disposes of every size and position proposal under the activity permission and all unsuspended promises together."
+    },
+    {
+      "id": "keeps-promise-holds-through-full-interval",
+      "title": "{{row.id}} keeps every affected promise for its full interval",
+      "type": "general",
+      "expand": "per-row",
+      "collection": "camera-activities",
+      "when": {
+        "row": {
+          "promise-effect": [
+            "keeps-promise"
+          ],
+          "activity-kind": [
+            "look-ahead",
+            "aim-or-peek-offset",
+            "shake",
+            "temporary-zoom",
+            "scripted-move"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "the final composed-view test passes for every affected unsuspended promise on every displayed play moment in the interval cited at {{row.applies-when}}, including the strongest displacement or size change cited at {{row.extent-declared-in}}",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-activity-log",
+          "{{instance}}-displayed-frame-log",
+          "{{instance}}-visibility-area-trace"
+        ]
+      },
+      "text": "Activity {{row.id}} is demonstrated as keeps-promise only when the final test passes for every affected unsuspended promise on every displayed play moment in its interval at {{row.applies-when}}, including the strongest displacement or size change cited at {{row.extent-declared-in}}. The test names the addresses and restates nothing from them.",
+      "inputs": {
+        "scope": {
+          "default": "the full cited activity interval, including boundary moments and strongest legal proposals"
+        },
+        "seeds": {
+          "default": [
+            "activity-route-a",
+            "activity-route-b"
+          ]
+        }
+      }
+    },
+    {
+      "id": "keeps-promise-holds-for-pan-and-zoom",
+      "title": "{{row.id}} keeps every affected promise across its proposals",
+      "type": "general",
+      "expand": "per-row",
+      "collection": "camera-activities",
+      "when": {
+        "row": {
+          "promise-effect": [
+            "keeps-promise"
+          ],
+          "activity-kind": [
+            "manual-pan",
+            "player-zoom"
+          ]
+        }
+      },
+      "bindings": {
+        "activity-bound": {
+          "row_field": "activity-kind",
+          "map": {
+            "manual-pan": "every pan proposal bounded by the camera's travel limit and controller disposal",
+            "player-zoom": "every held level inside the range its camera's view-size answer supplies"
+          }
+        }
+      },
+      "test": {
+        "type": "general",
+        "holds": "the final composed-view test passes for every affected unsuspended promise on every displayed play moment in the interval cited at {{row.applies-when}}, including {{bind:activity-bound}}",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-activity-log",
+          "{{instance}}-displayed-frame-log",
+          "{{instance}}-visibility-area-trace"
+        ]
+      },
+      "text": "Activity {{row.id}} is demonstrated as keeps-promise only when the final test passes for every affected unsuspended promise on every displayed play moment in its interval at {{row.applies-when}}, including {{bind:activity-bound}}. The test names the address and restates nothing from it.",
+      "inputs": {
+        "scope": {
+          "default": "the full cited activity interval, including boundary moments and strongest legal proposals"
+        },
+        "seeds": {
+          "default": [
+            "activity-route-a",
+            "activity-route-b"
+          ]
+        }
+      }
+    },
+    {
+      "id": "failure-record-follows-exhausted-search",
+      "title": "{{row.id}} creates one complete failure record after search",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "flag": {
+          "content-visibility": [
+            "declared-content"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "active camera {{row.id}} and each situation the adoption can construct where every allowed candidate fails; where no such situation is reachable, the failure branch asserts nothing",
+        "when": [
+          "the allowed position and view-size search is exhausted"
+        ],
+        "then": [
+          "exactly one framing failure is created only after no allowed candidate passes",
+          "the record contains the camera id, failed promise ids, display size, visibility areas, settled margins, attempted position and view size, travel limit, active activities, and selected failure response",
+          "before this step, the failure response weakens no coverage row"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-trace",
+          "{{instance}}-failure-record",
+          "{{instance}}-visibility-area-trace"
+        ]
+      },
+      "text": "For camera {{row.id}}, one complete framing failure is created only after no allowed candidate passes. It records the camera, failed promises, display size, visibility areas, settled margins, attempted position and size, travel limit, active activities, and selected response. Before that point, the response weakens no coverage row. If this adoption can construct no exhausted search, the failure branch asserts nothing."
+    },
+    {
+      "id": "hold-valid-frame-keeps-invalid-candidate-offscreen",
+      "title": "{{row.id}} holds a valid frame on failure",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "flag": {
+          "content-visibility": [
+            "declared-content"
+          ]
+        },
+        "row": {
+          "failure-response": [
+            "hold-valid-frame"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each reached framing failure for {{row.id}}, both where a valid frame has already been displayed and where none has yet been displayed",
+        "when": [
+          "the hold-valid-frame response cited at {{row.failure-handling-declared-in}} settles"
+        ],
+        "then": [
+          "the invalid candidate is never displayed",
+          "after a prior valid frame, that last valid frame remains displayed; before one exists, the cited non-play transition surface is displayed",
+          "the rule at {{row.failure-handling-declared-in}} decides whether play or a transition advances"
+        ],
+        "diagnostics": [
+          "{{instance}}-failure-record",
+          "{{instance}}-displayed-frame-log",
+          "{{instance}}-transition-log"
+        ]
+      },
+      "text": "On a reached failure, {{row.id}} never displays the invalid candidate. It keeps the last valid frame or, before one exists, the non-play transition surface cited at {{row.failure-handling-declared-in}}. That cited rule decides whether play or a transition advances. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "keep-priority-content-displays-best-allowed-frame",
+      "title": "{{row.id}} applies its total priority on failure",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "flag": {
+          "content-visibility": [
+            "declared-content"
+          ]
+        },
+        "row": {
+          "failure-response": [
+            "keep-priority-content"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a reached framing failure for {{row.id}} with candidate frames that preserve different promise subsets",
+        "when": [
+          "the response applies the total priority cited at {{row.failure-handling-declared-in}}"
+        ],
+        "then": [
+          "the best allowed frame under that cited total priority is displayed",
+          "every promise that does not fit in that displayed frame is recorded as failed"
+        ],
+        "diagnostics": [
+          "{{instance}}-failure-record",
+          "{{instance}}-candidate-trace",
+          "{{instance}}-displayed-frame-log"
+        ]
+      },
+      "text": "On a reached failure, {{row.id}} applies the total priority cited at {{row.failure-handling-declared-in}}, displays the best allowed frame, and records every promise that did not fit. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "show-framing-failure-adds-cited-state",
+      "title": "{{row.id}} shows its cited framing-failure state",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "flag": {
+          "content-visibility": [
+            "declared-content"
+          ]
+        },
+        "row": {
+          "failure-response": [
+            "show-framing-failure"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a reached framing failure for {{row.id}}",
+        "when": [
+          "the response at {{row.failure-handling-declared-in}} settles"
+        ],
+        "then": [
+          "the best allowed frame is displayed",
+          "the player-facing failure state cited at {{row.failure-handling-declared-in}} is present on that displayed result"
+        ],
+        "diagnostics": [
+          "{{instance}}-failure-record",
+          "{{instance}}-displayed-frame-log",
+          "{{instance}}-player-facing-state-log"
+        ]
+      },
+      "text": "On a reached failure, {{row.id}} displays the best allowed frame with the player-facing state cited at {{row.failure-handling-declared-in}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "change-world-reruns-framing-before-display",
+      "title": "{{row.id}} changes the world and reruns framing",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "flag": {
+          "content-visibility": [
+            "declared-content"
+          ]
+        },
+        "row": {
+          "failure-response": [
+            "change-world-to-restore-frame"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a reached framing failure for {{row.id}}",
+        "when": [
+          "the game rule cited at {{row.failure-handling-declared-in}} applies its tether, defeat, or move"
+        ],
+        "then": [
+          "steps 2 through 10 rerun before another displayed play moment",
+          "the active camera set is unchanged and no play region is created",
+          "only the rerun result can produce a valid frame or another framing failure"
+        ],
+        "diagnostics": [
+          "{{instance}}-failure-record",
+          "{{instance}}-active-camera-trace",
+          "{{instance}}-displayed-frame-log"
+        ]
+      },
+      "text": "On a reached failure, {{row.id}} applies the tether, defeat, or move rule cited at {{row.failure-handling-declared-in}}, then reruns promise selection through the final composed-view test before another displayed play moment. The rule changes neither the active camera set nor the play-region set. The test fixes those consequences and restates nothing from the cited rule."
+    },
+    {
+      "id": "failure-unreachable-invalidates-reached-claim",
+      "title": "{{row.id}} treats a reached failure as an invalid claim",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "flag": {
+          "content-visibility": [
+            "declared-content"
+          ]
+        },
+        "row": {
+          "failure-response": [
+            "failure-unreachable"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "camera {{row.id}} and the complete unreachability argument cited at {{row.failure-handling-declared-in}}",
+        "when": [
+          "the run exercises every supported display size and route named by the cited argument"
+        ],
+        "then": [
+          "no failure handling beyond the failure record itself is declared",
+          "a failure record for this camera contradicts the argument cited at {{row.failure-handling-declared-in}} and the design claim fails"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-trace",
+          "{{instance}}-failure-record",
+          "{{instance}}-first-unreachable-counterexample"
+        ]
+      },
+      "text": "Camera {{row.id}} declares no failure handling beyond the failure record itself. A failure record for this camera contradicts the complete unreachability argument cited at {{row.failure-handling-declared-in}}, and the design claim fails. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "failure-persists-until-valid-or-inactive",
+      "title": "a framing failure persists until settlement or deactivation",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "content-visibility": [
+            "declared-content"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each framing failure {{instance}} can reach; if none is reachable, this test asserts nothing",
+        "when": [
+          "priority is applied, a notice is shown, a world change starts, and later settlement or deactivation occurs as available"
+        ],
+        "then": [
+          "the failure remains a failure until a later settlement produces a valid frame or the camera deactivates",
+          "priority, a visible notice, or a started world change does not by itself turn an invalid frame into a kept promise"
+        ],
+        "diagnostics": [
+          "{{instance}}-failure-record",
+          "{{instance}}-displayed-frame-log",
+          "{{instance}}-active-camera-trace"
+        ]
+      },
+      "text": "Every reached framing failure persists until a later valid settlement or camera deactivation. Priority, a notice, or a started world change does not itself make an invalid frame satisfy a promise. If this adoption cannot reach failure, the template asserts nothing."
+    },
+    {
+      "id": "recovery-and-handover-insert-no-unchecked-frame",
+      "title": "recovery and handover insert no unchecked frame",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each suspension end and camera handover {{instance}} can construct; an adoption in which no camera activation follows a deactivation has no handover case to construct",
+        "when": [
+          "the next displayed play moment is prepared"
+        ],
+        "then": [
+          "neither recovery nor switching inserts an unchecked frame or leaves two cameras active in one play region"
+        ],
+        "diagnostics": [
+          "{{instance}}-active-camera-trace",
+          "{{instance}}-displayed-frame-log"
+        ]
+      },
+      "text": "Neither the end of a suspension nor a camera switch inserts an unchecked frame, and neither leaves two cameras active in one play region. An adoption in which no camera activation follows a deactivation has no handover case to construct."
+    },
+    {
+      "id": "recovery-and-handover-first-frame-is-settled",
+      "title": "recovery and handover settle a checked first frame",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each suspension end and camera handover {{instance}} can construct; an adoption in which no camera activation follows a deactivation has no handover case to construct",
+        "when": [
+          "the next displayed play moment is prepared"
+        ],
+        "then": [
+          "after a suspension ends, steps 2 through 10 run and the first unsuspended moment is valid or enters steps 11 through 13",
+          "at handover, steps 1 through 10 run with the incoming camera's own promise set and visibility areas"
+        ],
+        "diagnostics": [
+          "{{instance}}-suspension-log",
+          "{{instance}}-active-camera-trace",
+          "{{instance}}-displayed-frame-log",
+          "{{instance}}-failure-record"
+        ]
+      },
+      "text": "After a suspension ends, the mechanism reruns promise selection through the final composed-view test before the next displayed play moment; that moment is valid or enters failure settlement. A handover runs active-region selection through the final composed-view test with the incoming camera's own promises and visibility areas. An adoption in which no camera activation follows a deactivation has no handover case to construct.",
+      "when": {
+        "flag": {
+          "content-visibility": [
+            "declared-content"
+          ]
+        }
+      }
+    },
+    {
+      "id": "camera-first-frame-is-checked",
+      "title": "{{row.id}} checks its first frame after every activation",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "flag": {
+          "content-visibility": [
+            "declared-content"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each activation of camera {{row.id}}, whether at a handover or a reactivation",
+        "when": [
+          "its first displayed play moment is prepared in the region cited at {{row.view-declared-in}}"
+        ],
+        "then": [
+          "the first displayed play moment is tested against this camera's own applicable promises and visibility areas",
+          "that moment is valid or enters failure settlement under this camera's own {{row.failure-response}} answer"
+        ],
+        "diagnostics": [
+          "{{instance}}-active-camera-trace",
+          "{{instance}}-visibility-area-trace",
+          "{{instance}}-displayed-frame-log",
+          "{{instance}}-failure-record"
+        ]
+      },
+      "text": "Whenever camera {{row.id}} becomes active, whether at a handover or a reactivation, its first displayed play moment in the region cited at {{row.view-declared-in}} is tested against this camera's own applicable promises and visibility areas. It is valid or enters failure settlement under the failure response this camera declares."
+    },
+    {
+      "id": "promise-camera-id-joins-one-camera",
+      "title": "declaration check: {{row.id}} names exactly one camera in this adoption",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "coverage-promises",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "coverage-promises row {{row.id}} with camera-id {{row.camera-id}}",
+        "when": [
+          "the cameras rows are inspected"
+        ],
+        "then": [
+          "{{row.camera-id}} names exactly one cameras row in this adoption; a missing or ambiguous join is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "Declaration check: coverage promise {{row.id}} is legal only when {{row.camera-id}} names exactly one cameras row in this adoption. A missing or ambiguous name is a defect this test fails by construction. This check reads the adoption, not the running game; the validator cannot check this join, so the reviewer does."
+    },
+    {
+      "id": "activity-camera-id-joins-one-camera",
+      "title": "declaration check: {{row.id}} names exactly one camera in this adoption",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "camera-activities",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "camera-activities row {{row.id}} with camera-id {{row.camera-id}}",
+        "when": [
+          "the cameras rows are inspected"
+        ],
+        "then": [
+          "{{row.camera-id}} names exactly one cameras row in this adoption; a missing or ambiguous join is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "Declaration check: camera activity {{row.id}} is legal only when {{row.camera-id}} names exactly one cameras row in this adoption. A missing or ambiguous name is a defect this test fails by construction. This check reads the adoption, not the running game; the validator cannot check this join, so the reviewer does."
+    },
+    {
+      "id": "activity-promise-list-stays-on-camera",
+      "title": "declaration check: {{row.id}} cites promises only from its own camera",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "camera-activities",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "camera-activities row {{row.id}} and the fixed promise list this row cites in its promises field, when it has one; where it cites none, the list clause asserts nothing",
+        "when": [
+          "the named coverage-promises rows and their camera-id fields are inspected"
+        ],
+        "then": [
+          "every named promise exists and has camera-id {{row.camera-id}}; a missing promise or a promise on another camera is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "Declaration check: where activity {{row.id}} cites a promises list, every named promise must exist and belong to {{row.camera-id}}. A stale, missing, or foreign-camera name is a defect this test fails by construction. Where the row cites no list, this join test asserts nothing. This check reads the adoption, not the running game. The test names no list contents and restates nothing from its citation."
+    },
+    {
+      "id": "adoption-declares-a-camera",
+      "title": "declaration check: the adoption declares at least one camera",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the cameras row set for {{instance}}",
+        "when": [
+          "the adoption is reviewed as a camera-framing adoption"
+        ],
+        "then": [
+          "at least one cameras row exists; an adoption with none describes no play view and is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "Declaration check: a camera-framing adoption declares at least one cameras row. An adoption with none describes no play view and is a defect this test fails by construction. This check reads the adoption, not the running game."
+    },
+    {
+      "id": "declared-content-has-a-promise",
+      "title": "declaration check: declared content includes at least one coverage promise",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "content-visibility": [
+            "declared-content"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} answering declared-content",
+        "when": [
+          "its coverage-promises rows are inspected"
+        ],
+        "then": [
+          "at least one coverage-promises row exists; an adoption that answers declared-content and declares none has no promise to test and is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "Declaration check: an adoption answering declared-content declares at least one coverage-promises row. If it declares none, it has no visibility promise to test and fails this test by construction. This check reads the adoption, not the running game."
+    },
+    {
+      "id": "free-promise-camera-has-manual-pan-activity",
+      "title": "declaration check: a free promise-bearing camera declares manual-pan activity",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cameras",
+      "when": {
+        "row": {
+          "follow-mode": [
+            "free-view",
+            "free-with-recenter"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "camera {{row.id}} where at least one coverage promise names it; where no promise names it, this test asserts nothing",
+        "when": [
+          "the camera-activities rows are inspected"
+        ],
+        "then": [
+          "the promise-bearing free camera has at least one manual-pan activity row whose camera-id names {{row.id}}; a missing row is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "Declaration check: where free camera {{row.id}} carries a coverage promise, it declares at least one manual-pan activity row naming this camera. A missing row is a defect this test fails by construction. A free camera with no promise asserts nothing here. This check reads the adoption, not the running game."
+    },
+    {
+      "id": "no-content-guarantee-keeps-promise-shape-empty",
+      "title": "declaration check: no-content-guarantee declares no promise machinery",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "content-visibility": [
+            "no-content-guarantee"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} answering no-content-guarantee",
+        "when": [
+          "its promise and activity declarations are inspected"
+        ],
+        "then": [
+          "the coverage-promises and camera-activities row sets are both empty; a non-empty set is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "Declaration check: an adoption answering no-content-guarantee declares both coverage-promises and camera-activities empty. A non-empty row set is a defect this test fails by construction. This check reads the adoption, not the running game."
+    },
+    {
+      "id": "framing-holds",
+      "title": "the framing authority order holds for the whole run",
+      "type": "general",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "every displayed play moment passes in order through active play region, applicable promise, each coverage row's visibility area and margin, activity suspension, player proposal and controller disposal, camera-position travel limit, allowed position and view-size settlement, final composed-view test, and failure response; later stages never rewrite an earlier declaration; no question answer or row field changes the order in which these stages settle; no displayed play moment is both invalid and outside steps 11 through 13; an adoption answering no-content-guarantee audits only the active-region and displayed-moment stages",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-displayed-frame-log",
+          "{{instance}}-active-camera-trace",
+          "{{instance}}-candidate-trace",
+          "{{instance}}-suspension-log",
+          "{{instance}}-failure-record",
+          "{{instance}}-first-authority-order-violation"
+        ]
+      },
+      "text": "Across {{inputs:scope}}, every displayed play moment follows the mechanism's authority order. Later stages never rewrite an earlier declaration, no question answer or row field changes the settlement order, and no displayed moment is both invalid and outside failure settlement. An adoption answering no-content-guarantee audits only the active-region and displayed-moment stages. The adoption supplies the audit seeds through verification inputs.",
+      "inputs": {
+        "scope": {
+          "default": "sequences of displayed play moments across activations, activities, suspensions, handovers, and failures"
+        },
+        "seeds": {
+          "default": [
+            "framing-audit-a",
+            "framing-audit-b"
+          ]
+        }
+      }
+    }
+  ]
+}

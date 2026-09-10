@@ -1,13 +1,15 @@
 // Pure validation engine. All environment access is supplied by the host.
 import { isObject, markdownSlug, own, slash, unfencedLines } from "./package-syntax.mjs";
 
-const SPEC_VERSION = "0.7";
+export const FORMAT_VERSION = "0.8";
+export const VALIDATOR_VERSION = "0.8.0";
+const SPEC_VERSION = FORMAT_VERSION;
 // The revision that reserved the `palette` first segment. §4's versioning clause requires the
 // diagnostics on a newly reserved segment to name their revision, so this is
 // carried separately from SPEC_VERSION rather than folded into it.
 const PALETTE_REVISION = "0.6";
 // The revision that reserved the `collections` first segment for the
-// collections/ drawers (decision 32). The reservation is what closes the
+// collections/ drawers. The reservation is what closes the
 // format's last silent-rename gap: a prose citation of a drawer or record is
 // classified as a mechanism path and a dangling one is a hard failure.
 const COLLECTIONS_REVISION = "0.6";
@@ -24,8 +26,8 @@ const TUNING_KEY_PREFIX = /^[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?(?:\.[A-Z
 // §4's versioning clause: a validator that rejects a key on a newly reserved
 // segment names the revision that reserved it. The revision each segment
 // was reserved in is `RESERVED_SINCE` in the validator below: v0.6 took
-// `palette` and `collections` (decision 32), v0.7 took the seven number
-// and direction words (decisions 36 and 39); everything else dates from
+// `palette` and `collections`, v0.7 took the seven number and direction
+// words; everything else dates from
 // v0.5 — so a key legal under an older draft learns what changed under it.
 export const RESERVED_FIRST_SEGMENTS = Object.freeze([
   "pillars", "mood", "anti", "must_keep", "colors", "contrast", "timing",
@@ -392,11 +394,63 @@ function createValidator(host) {
     return String(token).replaceAll("~", "~0").replaceAll("/", "~1");
   }
 
+  function lineAtOffset(text, offset) {
+    let line = 1;
+    for (let index = 0; index < Math.min(Math.max(offset, 0), text.length); index += 1) {
+      if (text[index] === "\n") line += 1;
+    }
+    return line;
+  }
+
+  function jsonSyntaxProblem(text, cause) {
+    let stringStart = -1;
+    let escaped = false;
+    for (let index = 0; index < text.length; index += 1) {
+      const character = text[index];
+      if (stringStart < 0) {
+        if (character === '"') stringStart = index;
+        continue;
+      }
+      if (character === "\r" || character === "\n") {
+        return {
+          line: lineAtOffset(text, stringStart),
+          message: "has mismatched quotation marks near this line: JSON crossed a line break while reading quoted text; check this line and the one before it for a missing opening or closing quote"
+        };
+      }
+      if (escaped) {
+        escaped = false;
+      } else if (character === "\\") {
+        escaped = true;
+      } else if (character === '"') {
+        stringStart = -1;
+      }
+    }
+    if (stringStart >= 0) {
+      return {
+        line: lineAtOffset(text, stringStart),
+        message: "has mismatched quotation marks near this line: JSON reached the end of the file while reading quoted text; check nearby for a missing opening or closing quote"
+      };
+    }
+    const detail = cause?.message ?? String(cause);
+    const statedLine = /\bline\s+(\d+)\b/i.exec(detail);
+    if (statedLine) return { line: Number(statedLine[1]), message: `is not valid JSON: ${detail}` };
+    const position = /\bposition\s+(\d+)\b/i.exec(detail);
+    return {
+      line: position ? lineAtOffset(text, Number(position[1])) : undefined,
+      message: `is not valid JSON: ${detail}`
+    };
+  }
+
   function parseJsonFile(file, display, section, code) {
+    let text;
     try {
-      return JSON.parse(host.readText(file));
+      text = host.readText(file);
+      return JSON.parse(text);
     } catch (cause) {
-      error(code, section, display, `is not valid JSON: ${cause.message}`);
+      const problem = typeof text === "string"
+        ? jsonSyntaxProblem(text, cause)
+        : { message: `could not be read as JSON: ${cause?.message ?? String(cause)}`, line: undefined };
+      error(code, section, display, problem.message, problem.line);
       return undefined;
     }
   }
@@ -680,6 +734,24 @@ function createValidator(host) {
     return undefined;
   }
 
+  function authorityTagScopes(lines) {
+    const headings = markdownHeadings(lines);
+    const sectionEnd = heading => headings.find(item => item.index > heading.index && item.level <= heading.level)?.index ?? lines.length;
+    const tags = [];
+    let fenced = false;
+    lines.forEach((line, index) => {
+      if (/^\s*```/.test(line)) { fenced = !fenced; return; }
+      if (fenced || !/^\s*>\s*(?:DELEGATED|PERSONALIZATION):/.test(line)) return;
+      const owner = [...headings].reverse().find(item => item.index < index);
+      if (owner) tags.push({ index, owner });
+    });
+    return tags.map((tag, tagIndex) => {
+      const end = sectionEnd(tag.owner);
+      const next = tags.slice(tagIndex + 1).find(item => item.owner === tag.owner && item.index < end);
+      return { start: tag.index, end: next?.index ?? end };
+    });
+  }
+
   function loadPersonalization(packageRoot, manifest, resolvePath) {
     const empty = { questions: new Map(), doc: undefined, display: undefined, declared: false, readable: false };
     const display = "personalization.json";
@@ -817,7 +889,7 @@ function createValidator(host) {
   }
 
   // SPEC §7a — grid congruence. A drawer's record schema marks fields with
-  // type "grid" (decision 33 — the label's separate layout block and its
+  // type "grid" (the label's separate layout block and its
   // one-value cell_unit field are retired; the format fixes the unit at
   // Unicode scalar values). These are existence-level package checks over
   // EVERY record of a drawer whose schema declares at least one grid field.
@@ -862,7 +934,7 @@ function createValidator(host) {
   }
 
   // ---------------------------------------------------------------------------
-  // SPEC §1b (decision 33) — a collection is a folder with record files in
+  // SPEC §1b — a collection is a folder with record files in
   // it, and everything else is opt-in.
   //
   // `collections/` is a reserved package-root directory. Each immediate
@@ -899,7 +971,7 @@ function createValidator(host) {
     for (const [field, shape] of Object.entries(record)) {
       if (field.startsWith("_")) continue;
       const at = `${root}/${field}`;
-      // Decision 41's adopted field examples use designer-owned snake_case;
+      // Field examples use designer-owned snake_case;
       // collection fields therefore use the tuning-segment character set,
       // independently of the narrower contract-row grammar.
       if (!COLLECTION_FIELD_ID.test(field)) {
@@ -1168,7 +1240,7 @@ function createValidator(host) {
           }
           if (member.name === "_collection.json") {
             // The label is optional and appears only when it has something
-            // to say; `record` is its one field (decision 33).
+            // to say; `record` is its one field.
             const data = parseJsonFile(path.join(drawerDir, member.name), display, "§1b", "COLLECTION_LABEL_JSON");
             if (data === undefined) continue;
             const labelSchema = loadSchema("collection.schema.json", "§1b");
@@ -1212,13 +1284,13 @@ function createValidator(host) {
       }
     }
 
-    // The `> COLLECTION:` tag is retired (decision 33): presence declares the
+    // The `> COLLECTION:` tag is retired: presence declares the
     // drawer, prose cites it, and the label's record schema owns the shape. A
     // surviving tag is old machinery that would otherwise sit silently.
     for (const { chapter, text } of chapterTexts(packageRoot)) {
       for (const item of unfencedLines(text)) {
         if (/^\s*>\s*COLLECTION:/.test(item.text)) {
-          error("COLLECTION_TAG_RETIRED", "§1b", slash(chapter), "`> COLLECTION:` is retired (decision 33); presence declares the drawer, prose cites it, and the label's `record` schema owns the shape", item.line);
+          error("COLLECTION_TAG_RETIRED", "§1b", slash(chapter), "`> COLLECTION:` is retired; presence declares the drawer, prose cites it, and the label's `record` schema owns the shape", item.line);
         }
       }
     }
@@ -1820,12 +1892,15 @@ function createValidator(host) {
     const file = path.join(packageRoot, "02-mechanics.md");
     if (!host.exists(file)) return;
     const text = host.readText(file);
+    const authorityScopes = authorityTagScopes(text.split(/\r?\n/));
     const choice = /\b(?:nearest|closest|first|last|when both|both conditions|simultaneous(?:ly)?|equal distance|equidistant|ties?|targets?|selects?|chooses?|choice|ordering)\b/i;
     const sharedCeiling = /(?:\b(?:total|combined|shared|all)\b.{0,180}\b(?:cap(?:ped)?|ceiling|limit(?:ed)?|maximum|max)\b|\b(?:cap(?:ped)?|ceiling)\b.{0,180}\b(?:allocation|composition|formula|total|combined|shared|reduce|remaining|regardless)\b)/i;
-    const resolution = /\b(?:tie[- ]?break|lowest|highest|ascending|descending|clockwise|counterclockwise|lexicograph|priority|prioritize|prefer|wins|random|prng|listed order|declared order|fixed order|by id|before|after|then)\b/i;
+    const resolution = /\b(?:tie[- ]?break|lowest|highest|ascending|descending|clockwise|counterclockwise|lexicograph|priority|prioritize|prefer|wins|random|prng|listed order|declared order|fixed order|by id)\b/i;
     const allocationResolution = /\b(?:priority|prioritize|preserve|clamp\s+(?:the\s+)?(?:first|second|[a-z-]+)|remove\s+(?:the\s+)?(?:first|second|[a-z-]+)|reduce\s+(?:the\s+)?(?:first|second|[a-z-]+)|remaining capacity|allocated first|allocated last|wins)\b/i;
     for (const paragraph of proseParagraphs(text)) {
-      // A backticked token is a citation, not English: under decision 32 a
+      const paragraphIndex = paragraph.line - 1;
+      if (authorityScopes.some(scope => paragraphIndex >= scope.start && paragraphIndex < scope.end)) continue;
+      // A backticked token is a citation, not English; a
       // record id like `first-note` is cited constantly, and reading it as
       // the word "first" makes every such paragraph choice-shaped. The
       // resolution scan keeps the full text — a resolution stated anywhere
@@ -1850,6 +1925,11 @@ function createValidator(host) {
         }
       }
     }
+    const displayKeys = keys => {
+      const shown = keys.slice(0, 5);
+      const names = shown.length === 1 ? shown[0] : `${shown.slice(0, -1).join(", ")} and ${shown.at(-1)}`;
+      return `${names}${keys.length > 5 ? ` and ${keys.length - 5} more` : ""}`;
+    };
     const numberPattern = /(?<![A-Za-z0-9_.-])-?(?:\d+\.\d+|\d+)(?![A-Za-z0-9_.-])/g;
     for (const { chapter, text } of chapterTexts(packageRoot)) {
       for (const item of unfencedLines(text)) {
@@ -1861,7 +1941,7 @@ function createValidator(host) {
           const numeric = Number(raw);
           const keys = numericValues.get(numeric);
           if (!keys) continue;
-          warning("PROSE_TUNING_LITERAL", "§4", slash(chapter), `numeric literal ${raw} duplicates tuning ${keys.slice(0, 5).join(", ")}${keys.length > 5 ? ` (+${keys.length - 5} more)` : ""}; normative prose should refer to a key`, item.line, { value: numeric, tuning_keys: keys });
+          warning("PROSE_TUNING_LITERAL", "§4", slash(chapter), `numbers belong in tuning.json, not in prose: replace ${raw} with a citation of the key it means (${displayKeys(keys)} ${keys.length === 1 ? "has" : "have"} this value), or mark the line non-normative`, item.line, { value: numeric, tuning_keys: keys });
         }
       }
     }
@@ -2188,6 +2268,10 @@ function createValidator(host) {
     const tuningReadable = isObject(tuningDoc) && isObject(tuningDoc.values);
     const keys = new Set(tuningReadable ? Object.keys(tuningDoc.values) : []);
     const directionDoc = directionCtx?.directionDoc;
+    // The same gate skips the direction mentions below, so the unmentioned
+    // check cannot run either: it would report every judged entry as
+    // unmentioned because of a tuning.json that already reported itself.
+    directionCtx.mentionsUnknown = !tuningReadable;
     for (const { chapter, text } of chapterTexts(packageRoot)) {
       for (const { token, line } of inlineCodeTokens(text)) {
         // §4: "a token carrying a colon is not one" of the dotted tokens the
@@ -2237,7 +2321,7 @@ function createValidator(host) {
             continue;
           }
           if (first === "runtime") continue;
-          // Decision 40's single address is `clocks.<name>`. Modes are tag
+          // A clock's single address is `clocks.<name>`. Modes are tag
           // vocabulary, not separately citable objects, and the retired
           // root wrappers do not survive as prose paths.
           if (first === "clocks") {
@@ -2249,7 +2333,7 @@ function createValidator(host) {
             }
             continue;
           }
-          // §1b (decision 32): `collections.<drawer>` cites the drawer as a
+          // §1b: `collections.<drawer>` cites the drawer as a
           // set and `collections.<drawer>.<record>` cites one record; a longer
           // token names a member of the record's own data and resolves as far
           // as the record, the rule descriptors and invariants use. A dangling
@@ -2283,6 +2367,10 @@ function createValidator(host) {
           // Palette citations use their own variable-length resolver before
           // the exact two-segment direction-family gate below.
           if (first === "palette") {
+            // An unreadable direction file has already produced the actionable
+            // syntax finding. Treating it as an absent palette would create a
+            // cascade of false dangling references while the designer types.
+            if (directionCtx?.declared && !directionCtx.readable) continue;
             const text = classified.segments.slice(1).join(".");
             const resolved = resolvePaletteReference(paletteCtx, text);
             if (resolved.kind === "dangling") {
@@ -2356,7 +2444,7 @@ function createValidator(host) {
         error("DIRECTION_FENCE_RETIRED", "§9", slash(chapter), "the ```direction fence is retired; run `opengdd migrate` to turn its citations and rationale into ordinary presentation prose");
       }
     }
-    if (!declared) return { directionDoc: undefined, declaredPath, requiredCoverage: new Set(), coveredByAT: new Set(), mentioned: new Set(), paletteCtx: validatePalettes(undefined) };
+    if (!declared) return { declared, readable: false, directionDoc: undefined, declaredPath, requiredCoverage: new Set(), coveredByAT: new Set(), mentioned: new Set(), paletteCtx: validatePalettes(undefined) };
 
     const directionDoc = parseJsonFile(directionFile, declaredPath, "§9", "DIRECTION_JSON");
 
@@ -2408,17 +2496,19 @@ function createValidator(host) {
         }
       }
       for (const [key, entry] of Object.entries(directionDoc.timing ?? {})) {
+        // A malformed entry is the schema's finding; it owes no covering test.
+        if (!isObject(entry)) continue;
         requiredCoverage.add(`timing.${key}`);
-        if (isObject(entry) && typeof entry.key === "string" && !exprContext?.tuning?.has(entry.key)) {
+        if (typeof entry.key === "string" && !exprContext?.tuning?.has(entry.key)) {
           error("DIRECTION_TIMING_KEY", "§9", declaredPath, `timing.${key}.key ${JSON.stringify(entry.key)} does not resolve to a declared values key`);
         }
       }
     }
-    return { directionDoc, declaredPath, requiredCoverage, coveredByAT: new Set(), mentioned: new Set(), paletteCtx };
+    return { declared, readable: directionDoc !== undefined, directionDoc, declaredPath, requiredCoverage, coveredByAT: new Set(), mentioned: new Set(), paletteCtx };
   }
 
   function reportUnmentionedDirection(directionCtx) {
-    if (!isObject(directionCtx?.directionDoc)) return;
+    if (!isObject(directionCtx?.directionDoc) || directionCtx.mentionsUnknown) return;
     for (const kind of DIRECTION_JUDGED_KINDS) {
       for (const key of Object.keys(directionCtx.directionDoc[kind] ?? {})) {
         const citation = `${kind}.${key}`;
@@ -2512,6 +2602,10 @@ function createValidator(host) {
       } else {
         for (const claim of claims) {
           if (typeof claim !== "string") { error("DIRECTION_CLAIMS_SHAPE", "§6", file, `${id} direction_claims entries must be strings`, line); continue; }
+          // The direction syntax finding is the root cause. Resolution cannot
+          // be measured until that file parses, so do not misreport every
+          // otherwise-valid claim as dangling in the meantime.
+          if (directionCtx?.declared && !directionCtx.readable) continue;
           const resolved = directionCtx?.directionDoc ? resolveDirectionPath(directionCtx.directionDoc, claim) : undefined;
           if (!resolved || !["colors", "contrast", "timing"].includes(resolved.kind)) {
             const hint = typeof claim === "string" && claim.startsWith("constraints.") ? "; constraints.colors.x is now colors.x, constraints.thresholds.x is now contrast.x, and constraints.timing.x is now timing.x" : "";
@@ -2721,6 +2815,220 @@ function createValidator(host) {
     return true;
   }
 
+  // §10.3 (v0.8): a question condition carries exactly one of five forms; a
+  // value-declaration condition adds standalone `row-has`. Shape only —
+  // references are checked with the definition, truth per adoption.
+  const CONTRACT_CONDITION_FORMS = ["flag", "value-form", "row-count", "any", "all", "row-has"];
+  const CONTRACT_VALUE_FORM_NAMES = new Set(["number", "citation"]);
+  const CONTRACT_ROW_COUNT_CARDINALITIES = new Set(["empty", "non-empty", "at-least-two"]);
+
+  function contractConditionShape(when, display, pointer, code, rowHasLegal, nested = false) {
+    const report = message => error(code, CONTRACT_SECTION, display, message);
+    if (!isObject(when)) {
+      report(`${pointer} must be a condition object carrying exactly one of flag, value-form, row-count, any, or all${rowHasLegal ? ", or row-has" : ""}`);
+      return;
+    }
+    const keys = Object.keys(when).filter(key => !key.startsWith("_"));
+    for (const key of keys) if (!CONTRACT_CONDITION_FORMS.includes(key)) report(`${pointer} carries unknown condition form ${JSON.stringify(key)}`);
+    const forms = keys.filter(key => CONTRACT_CONDITION_FORMS.includes(key));
+    if (forms.length !== 1) {
+      report(`${pointer} must carry exactly one condition form, got ${forms.length ? forms.map(key => JSON.stringify(key)).join(", ") : "none"}`);
+      return;
+    }
+    const form = forms[0];
+    if (form === "row-has" && (!rowHasLegal || nested)) {
+      report(`${pointer}/row-has is legal only as a standalone value-declaration condition`);
+      return;
+    }
+    if ((form === "any" || form === "all") && nested) {
+      report(`${pointer}/${form} may not nest inside another combinator`);
+      return;
+    }
+    if (form === "flag") {
+      if (!isObject(when.flag) || Object.keys(when.flag).length === 0) return report(`${pointer}/flag must map at least one question id to a non-empty array of option ids`);
+      for (const [name, allowed] of Object.entries(when.flag)) {
+        if (!Array.isArray(allowed) || allowed.length === 0) report(`${pointer}/flag/${pointerEscape(name)} must be a non-empty array of option ids`);
+      }
+    } else if (form === "value-form") {
+      if (!isObject(when["value-form"]) || Object.keys(when["value-form"]).length === 0) return report(`${pointer}/value-form must map at least one value name to a non-empty array of forms`);
+      for (const [name, listed] of Object.entries(when["value-form"])) {
+        if (!Array.isArray(listed) || listed.length === 0 || !listed.every(item => CONTRACT_VALUE_FORM_NAMES.has(item))) {
+          report(`${pointer}/value-form/${pointerEscape(name)} must be a non-empty array containing "number", "citation", or both`);
+        }
+      }
+    } else if (form === "row-count") {
+      if (!isObject(when["row-count"]) || Object.keys(when["row-count"]).length === 0) return report(`${pointer}/row-count must map at least one row-set name to a cardinality`);
+      for (const [name, cardinality] of Object.entries(when["row-count"])) {
+        if (!CONTRACT_ROW_COUNT_CARDINALITIES.has(cardinality)) report(`${pointer}/row-count/${pointerEscape(name)} must be exactly one of "empty", "non-empty", or "at-least-two"`);
+      }
+    } else if (form === "any" || form === "all") {
+      if (!Array.isArray(when[form]) || when[form].length === 0) return report(`${pointer}/${form} must be a non-empty array of conditions`);
+      when[form].forEach((member, index) => contractConditionShape(member, display, `${pointer}/${form}/${index}`, code, false, true));
+    } else if (form === "row-has") {
+      if (!isObject(when["row-has"]) || Object.keys(when["row-has"]).length !== 1) return report(`${pointer}/row-has must map exactly one row-set name to a row field condition`);
+      const [rowCondition] = Object.values(when["row-has"]);
+      if (!isObject(rowCondition) || Object.keys(rowCondition).length === 0) return report(`${pointer}/row-has must give the row-set name a map of row fields to non-empty value arrays`);
+      for (const [field, values] of Object.entries(rowCondition)) {
+        if (!Array.isArray(values) || values.length === 0) report(`${pointer}/row-has row field ${JSON.stringify(field)} must map to a non-empty array of values`);
+      }
+    }
+  }
+
+  // Reference checks for the widened condition forms. A question's top-level
+  // v0.7 `flag` references keep CONTRACT_REFERENCE via checkWhen, so questions
+  // pass checkFlag=false; value declarations have no other flag checker and
+  // pass true. Every widened form uses the caller's condition code, per the
+  // §10.4 validator obligations. Recursion stops one combinator deep: the
+  // shape checker already rejects nesting, so deeper members are not walked.
+  function contractConditionRefs(when, display, pointer, code, model, checkFlag = false, nested = false) {
+    if (!isObject(when)) return;
+    const report = message => error(code, CONTRACT_SECTION, display, message);
+    if (isObject(when.flag) && checkFlag) for (const [name, allowed] of Object.entries(when.flag)) {
+      const question = model.questions.get(name);
+      if (!question) report(`${pointer}/flag names undeclared question ${JSON.stringify(name)}`);
+      else if (Array.isArray(allowed)) for (const option of allowed) if (!question.options.has(option)) report(`${pointer}/flag/${pointerEscape(name)} names undeclared option ${JSON.stringify(option)}`);
+    }
+    if (isObject(when["value-form"])) for (const name of Object.keys(when["value-form"])) {
+      const declaration = model.values.get(name);
+      if (!declaration) report(`${pointer}/value-form names undeclared value ${JSON.stringify(name)}`);
+      else if (own(declaration, "when")) report(`${pointer}/value-form names conditional declaration ${JSON.stringify(name)}; a condition may read unconditional declarations only`);
+    }
+    if (isObject(when["row-count"])) for (const name of Object.keys(when["row-count"])) {
+      if (!model.rows.has(name)) report(`${pointer}/row-count names undeclared row set ${JSON.stringify(name)}`);
+    }
+    if (isObject(when["row-has"])) for (const [name, rowCondition] of Object.entries(when["row-has"])) {
+      const info = model.rows.get(name);
+      if (!info) { report(`${pointer}/row-has names undeclared row set ${JSON.stringify(name)}`); continue; }
+      if (isObject(rowCondition)) for (const field of Object.keys(rowCondition)) {
+        const shape = info.fields.get(field);
+        if (!shape) report(`${pointer}/row-has names undeclared row field ${JSON.stringify(field)} in ${JSON.stringify(name)}`);
+        else if (shape.required !== true) report(`${pointer}/row-has reads row field ${JSON.stringify(field)}, which must be unconditional and required in ${JSON.stringify(name)}`);
+      }
+    }
+    if (!nested) for (const combinator of ["any", "all"]) {
+      if (Array.isArray(when[combinator])) when[combinator].forEach((member, index) => contractConditionRefs(member, display, `${pointer}/${combinator}/${index}`, code, model, true, true));
+    }
+  }
+
+  // Truth of a widened condition per adoption. `env` carries the stratified
+  // reads: unconditional value forms and row-array facts first, question
+  // liveness and answers second (§10.3). A condition whose named operand is
+  // absent or malformed is false; the absence has its own diagnostic.
+  function contractConditionHolds(when, env, nested = false) {
+    if (!isObject(when)) return true;
+    if (isObject(when.flag)) {
+      for (const [name, allowed] of Object.entries(when.flag)) {
+        if (!env.flagHolds(name, allowed)) return false;
+      }
+      return true;
+    }
+    if (isObject(when["value-form"])) {
+      for (const [name, listed] of Object.entries(when["value-form"])) {
+        const form = env.valueForms.get(name);
+        if (!form || !Array.isArray(listed) || !listed.includes(form)) return false;
+      }
+      return true;
+    }
+    if (isObject(when["row-count"])) {
+      for (const [name, cardinality] of Object.entries(when["row-count"])) {
+        const count = env.rowCounts.get(name);
+        if (typeof count !== "number") return false;
+        if (cardinality === "empty" && count !== 0) return false;
+        if (cardinality === "non-empty" && count < 1) return false;
+        if (cardinality === "at-least-two" && count < 2) return false;
+      }
+      return true;
+    }
+    if (Array.isArray(when.any)) return !nested && when.any.some(member => contractConditionHolds(member, env, true));
+    if (Array.isArray(when.all)) return !nested && when.all.every(member => contractConditionHolds(member, env, true));
+    if (isObject(when["row-has"])) {
+      if (nested) return false;
+      for (const [name, rowCondition] of Object.entries(when["row-has"])) {
+        const rows = env.rowArrays.get(name);
+        if (!Array.isArray(rows)) return false;
+        if (!rows.some(row => isObject(row) && isObject(rowCondition) && Object.entries(rowCondition).every(([field, values]) => own(row, field) && Array.isArray(values) && values.includes(row[field])))) return false;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  // Every question id a condition's flag members read, including inside
+  // `any`/`all`, for the acyclicity walk.
+  function contractConditionFlagDeps(when, found = [], nested = false) {
+    if (!isObject(when)) return found;
+    if (isObject(when.flag)) found.push(...Object.keys(when.flag));
+    if (!nested) for (const combinator of ["any", "all"]) {
+      if (Array.isArray(when[combinator])) for (const member of when[combinator]) contractConditionFlagDeps(member, found, true);
+    }
+    return found;
+  }
+
+  // §10.4: the value-citation grammar — a dotted address with no space, hash,
+  // colon, or brace, and no empty segment. A string outside this grammar has
+  // no form, so a value-form condition reading it is false (§10.3); the
+  // grammar violation is reported where the value is validated.
+  function contractValueCitationForm(value) {
+    return typeof value === "string" && value.trim() !== "" && !/[\s#:{}]/.test(value) && value.includes(".") && !value.split(".").some(segment => !segment);
+  }
+
+  // Shared derivation of the §10.3 strata and the §10.4 active declaration
+  // set. Findings-free: contractValidateAdoption reports around it, and the
+  // package-level pre-pass only needs the active addresses.
+  function contractAdoptionActivation(document, model) {
+    const answers = isObject(document.answers) ? document.answers : {};
+    const sourceValues = isObject(document.values) ? document.values : {};
+    const sourceRows = isObject(document.rows) ? document.rows : {};
+    const valueForms = new Map();
+    for (const [name, declaration] of model.values) {
+      if (own(declaration, "when") || !own(sourceValues, name)) continue;
+      const value = sourceValues[name];
+      if (typeof value === "number" && Number.isFinite(value)) valueForms.set(name, "number");
+      else if (contractValueCitationForm(value)) valueForms.set(name, "citation");
+    }
+    const rowCounts = new Map();
+    const rowArrays = new Map();
+    for (const name of model.rows.keys()) {
+      if (Array.isArray(sourceRows[name])) {
+        rowCounts.set(name, sourceRows[name].length);
+        rowArrays.set(name, sourceRows[name]);
+      }
+    }
+    const { asked, cycle } = contractQuestionLiveness(model, answers, { valueForms, rowCounts, rowArrays });
+    const declEnv = {
+      valueForms, rowCounts, rowArrays,
+      flagHolds: (name, allowed) => asked.has(name) && own(answers, name) && Array.isArray(allowed) && allowed.includes(answers[name])
+    };
+    const activeValues = new Set();
+    for (const [name, declaration] of model.values) {
+      if (!own(declaration, "when") || contractConditionHolds(declaration.when, declEnv)) activeValues.add(name);
+    }
+    return { answers, sourceValues, sourceRows, asked, cycle, activeValues };
+  }
+
+  // §10.3: a definition is widened when it uses any v0.8 form. Widening is a
+  // whole-definition step: it requires `otherwise` on every gated question and
+  // `when-empty` on every row set.
+  function contractDefinitionWidened(document) {
+    for (const [name, question] of Object.entries(isObject(document?.questions) ? document.questions : {})) {
+      if (name.startsWith("_") || !isObject(question)) continue;
+      if (own(question, "otherwise")) return true;
+      if (isObject(question.when) && ["value-form", "row-count", "any", "all", "row-has"].some(key => own(question.when, key))) return true;
+    }
+    for (const [name, declaration] of Object.entries(isObject(document?.declares?.values) ? document.declares.values : {})) {
+      if (name.startsWith("_") || !isObject(declaration)) continue;
+      if (own(declaration, "forms") || own(declaration, "when")) return true;
+    }
+    for (const [name, declaration] of Object.entries(isObject(document?.declares?.rows) ? document.declares.rows : {})) {
+      if (name.startsWith("_") || !isObject(declaration)) continue;
+      if (own(declaration, "when-empty")) return true;
+    }
+    for (const [name, rule] of Object.entries(isObject(document?.rules) ? document.rules : {})) {
+      if (!name.startsWith("_") && isObject(rule)) return true;
+    }
+    return false;
+  }
+
   // Every placeholder occurrence in core-authored text, with the string it sits
   // in, so the caller can tell whole-value position from in-string position.
   function contractScanPlaceholders(value, pointer, found = []) {
@@ -2838,7 +3146,24 @@ function createValidator(host) {
       error("CONTRACT_CITATION_GRAMMAR", CONTRACT_SECTION, display, `${at} citation ${JSON.stringify(value)} uses a retired colon form; use the thing's dotted address`);
       return;
     }
-    if (ctx.tuningKeys.has(value) || ctx.contractKeys.has(value) || (value.startsWith("contracts.") && value.split(".").length === 2 && ctx.instanceIds?.has(value.split(".")[1]))) {
+    if (ctx.tuningKeys.has(value) || (value.startsWith("contracts.") && value.split(".").length === 2 && ctx.instanceIds?.has(value.split(".")[1]))) {
+      return;
+    }
+    if (ctx.contractKeys.has(value)) {
+      // §10.6: the declaration exists, but when its condition does not hold
+      // the address is absent, and a citation that reads it fails.
+      if (ctx.activeContractKeys && !ctx.activeContractKeys.has(value)) {
+        error("CONTRACT_CITATION_DANGLING", CONTRACT_SECTION, display, `${at} cites ${JSON.stringify(value)}, which names an inactive declaration; the address is absent`);
+      }
+      return;
+    }
+    // A well-formed address can be absent from the receiving package.
+    // Diagnose that missing target separately from a malformed address.
+    const dottedAddress = value.startsWith("contracts.")
+      ? /^contracts\.[a-z0-9]+(?:-[a-z0-9]+)*(?:\.[a-z0-9]+(?:-[a-z0-9]+)*)?$/.test(value)
+      : TUNING_KEY_PATTERN.test(value);
+    if (dottedAddress) {
+      error("CONTRACT_CITATION_DANGLING", CONTRACT_SECTION, display, `${at} cites ${JSON.stringify(value)}, which resolves to no tuning value, adoption or contract value in this design`);
       return;
     }
     const hash = value.indexOf("#");
@@ -2959,7 +3284,7 @@ function createValidator(host) {
   }
 
   // -------------------------------------------------------------------------
-  // OpenGDD v0.7 contracts (decision 35, with decisions 34/36/40).
+  // OpenGDD v0.7 contracts.
   //
   // Package validation enters here: one filled form per adoption, with
   // verification machinery in an optional content-addressed pack.
@@ -2996,7 +3321,7 @@ function createValidator(host) {
     return { questions, values, rows };
   }
 
-  function contractQuestionLiveness(model, answers) {
+  function contractQuestionLiveness(model, answers, facts = { valueForms: new Map(), rowCounts: new Map(), rowArrays: new Map() }) {
     const state = new Map();
     let cycle;
     const visit = (name, stack) => {
@@ -3008,25 +3333,23 @@ function createValidator(host) {
       state.set(name, "open");
       stack.push(name);
       const when = model.questions.get(name)?.entry?.when;
-      if (isObject(when?.flag)) for (const dependency of Object.keys(when.flag)) if (model.questions.has(dependency)) visit(dependency, stack);
+      for (const dependency of contractConditionFlagDeps(when)) if (model.questions.has(dependency)) visit(dependency, stack);
       stack.pop();
       state.set(name, "done");
     };
     for (const name of model.questions.keys()) visit(name, []);
     if (cycle) return { asked: new Set(model.questions.keys()), cycle };
     const memo = new Map();
+    const env = {
+      valueForms: facts.valueForms,
+      rowCounts: facts.rowCounts,
+      rowArrays: facts.rowArrays,
+      flagHolds: (dependency, allowed) => model.questions.has(dependency) && resolve(dependency) && own(answers, dependency) && Array.isArray(allowed) && allowed.includes(answers[dependency])
+    };
     const resolve = name => {
       if (memo.has(name)) return memo.get(name);
       const when = model.questions.get(name)?.entry?.when;
-      let asked = true;
-      if (isObject(when?.flag)) {
-        for (const [dependency, allowed] of Object.entries(when.flag)) {
-          if (!model.questions.has(dependency) || !resolve(dependency) || !own(answers, dependency) || !Array.isArray(allowed) || !allowed.includes(answers[dependency])) {
-            asked = false;
-            break;
-          }
-        }
-      }
+      const asked = !isObject(when) || contractConditionHolds(when, env);
       memo.set(name, asked);
       return asked;
     };
@@ -3084,6 +3407,7 @@ function createValidator(host) {
   }
 
   function contractValidateDefinition(document, display, model) {
+    const widened = contractDefinitionWidened(document);
     contractClosed(document, [...CONTRACT_DEFINITION_FIELDS, ...CONTRACT_DESIGNER_FIELDS], ["contract", "version", "summary", "mechanism", "questions", "declares", "answers", "values"], display, "#");
     if (own(document, "contract")) contractKebab(document.contract, display, "#", "contract id");
     if (own(document, "version") && !Number.isInteger(document.version)) error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, `#/version must be an integer, got ${JSON.stringify(document.version)}`);
@@ -3103,9 +3427,15 @@ function createValidator(host) {
         error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, `${at} must be a question object`);
         continue;
       }
-      contractClosed(question, ["asks", "rationale", "guidance", "when", "options"], ["asks", "options"], display, at);
+      contractClosed(question, ["asks", "rationale", "guidance", "when", "otherwise", "options"], ["asks", "options"], display, at);
       for (const key of ["asks", "rationale", "guidance"]) if (own(question, key)) contractType(question[key], "string", display, at, key);
-      contractWhenShape(question.when, display, at, false);
+      if (own(question, "when")) contractConditionShape(question.when, display, `${at}/when`, "CONTRACT_QUESTION_CONDITION", false);
+      if (own(question, "otherwise") && !(typeof question.otherwise === "string" && question.otherwise.trim())) {
+        error("CONTRACT_QUESTION_OTHERWISE", CONTRACT_SECTION, display, `${at}/otherwise must be one non-empty string of binding mechanism prose`);
+      }
+      if (widened && own(question, "when") && !own(question, "otherwise")) {
+        error("CONTRACT_QUESTION_OTHERWISE", CONTRACT_SECTION, display, `${at} is gated in a widened definition and must carry \`otherwise\` — the binding prose that holds while the question is not asked`);
+      }
       if (!isObject(question.options) || Object.keys(question.options).filter(key => !key.startsWith("_")).length === 0) {
         error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, `${at}/options must be a non-empty map`);
       } else for (const [optionId, option] of Object.entries(question.options)) {
@@ -3136,10 +3466,17 @@ function createValidator(host) {
           error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, `${at} must be a value declaration`);
           continue;
         }
-        contractClosed(declaration, ["description", "range"], ["description"], display, at);
+        contractClosed(declaration, ["description", "range", "forms", "when"], ["description"], display, at);
         if (own(declaration, "description")) contractType(declaration.description, "string", display, at, "description");
         if (own(declaration, "range") && (!Array.isArray(declaration.range) || declaration.range.length !== 2 || !declaration.range.every(value => typeof value === "number" && Number.isFinite(value)) || declaration.range[0] > declaration.range[1])) {
           error("CONTRACT_VALUE_RANGE", CONTRACT_SECTION, display, `${at}/range must be an inclusive [min, max] pair of finite numbers with min <= max`);
+        }
+        if (own(declaration, "forms") && (!Array.isArray(declaration.forms) || declaration.forms.length === 0 || !declaration.forms.every(form => CONTRACT_VALUE_FORM_NAMES.has(form)))) {
+          error("CONTRACT_VALUE_FORM", CONTRACT_SECTION, display, `${at}/forms must be a non-empty array containing "number", "citation", or both`);
+        }
+        if (own(declaration, "when")) {
+          contractConditionShape(declaration.when, display, `${at}/when`, "CONTRACT_VALUE_CONDITION", true);
+          contractConditionRefs(declaration.when, display, `${at}/when`, "CONTRACT_VALUE_CONDITION", model, true);
         }
       }
       if (own(document.declares, "rows") && !isObject(document.declares.rows)) error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, "#/declares/rows must be a map");
@@ -3151,14 +3488,20 @@ function createValidator(host) {
           error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, `${at} must be a row declaration`);
           continue;
         }
-        contractClosed(declaration, ["description", "record"], ["record"], display, at);
+        contractClosed(declaration, ["description", "record", "when-empty"], ["record"], display, at);
         if (own(declaration, "description")) contractType(declaration.description, "string", display, at, "description");
+        if (own(declaration, "when-empty") && !(typeof declaration["when-empty"] === "string" && declaration["when-empty"].trim())) {
+          error("CONTRACT_ROW_WHEN_EMPTY", CONTRACT_SECTION, display, `${at}/when-empty must be one non-empty string of binding mechanism prose`);
+        }
+        if (widened && !own(declaration, "when-empty")) {
+          error("CONTRACT_ROW_WHEN_EMPTY", CONTRACT_SECTION, display, `${at} sits in a widened definition and must carry \`when-empty\` — the binding prose that holds while its array is empty`);
+        }
         if (!isObject(declaration.record)) error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, `${at}/record must be an object`);
         else contractValidateFieldDeclarations(declaration.record, display, `${at}/record`, model.values);
       }
     }
     if (!isObject(document.rules)) {
-      if (own(document, "rules")) error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, "#/rules must map rule ids to one-line strings");
+      if (own(document, "rules")) error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, "#/rules must map rule ids to one-line strings or answer-aware rule objects");
     }
 
     const checkWhen = (when, at, rowInfo) => {
@@ -3170,7 +3513,10 @@ function createValidator(host) {
       }
       if (isObject(when.row) && rowInfo) for (const field of Object.keys(when.row)) if (!rowInfo.fields.has(field)) error("CONTRACT_REFERENCE", CONTRACT_SECTION, display, `${at}/when/row names undeclared row field ${JSON.stringify(field)}`);
     };
-    for (const [name, question] of model.questions) checkWhen(question.entry.when, `#/questions/${pointerEscape(name)}`, undefined);
+    for (const [name, question] of model.questions) {
+      checkWhen(question.entry.when, `#/questions/${pointerEscape(name)}`, undefined);
+      contractConditionRefs(question.entry.when, display, `#/questions/${pointerEscape(name)}/when`, "CONTRACT_QUESTION_CONDITION", model);
+    }
     for (const [name, rowInfo] of model.rows) for (const [field, shape] of rowInfo.fields) checkWhen(shape.when, `#/declares/rows/${pointerEscape(name)}/record/${pointerEscape(field)}`, rowInfo);
   }
 
@@ -3180,7 +3526,11 @@ function createValidator(host) {
     const id = entry.fileId;
     const answers = isObject(document.answers) ? document.answers : {};
     if (own(document, "answers") && !isObject(document.answers)) error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, "#/answers must map question ids to option ids");
-    const { asked, cycle } = contractQuestionLiveness(model, answers);
+
+    // §10.3 strata and the §10.4 active set, via the shared derivation. A
+    // malformed operand simply yields no fact; the condition reading it is
+    // false and the malformation has its own code.
+    const { sourceValues, sourceRows, asked, cycle, activeValues } = contractAdoptionActivation(document, model);
     if (cycle) error("CONTRACT_QUESTION_CYCLE", CONTRACT_SECTION, display, `the question dependency graph carries a cycle (${cycle.join(" → ")}); asked questions must resolve in one pass`);
     for (const [name, question] of model.questions) {
       if (asked.has(name)) {
@@ -3190,26 +3540,99 @@ function createValidator(host) {
     }
     for (const name of Object.keys(answers)) if (!name.startsWith("_") && !model.questions.has(name)) error("CONTRACT_ANSWER_UNKNOWN", CONTRACT_SECTION, display, `#/answers/${pointerEscape(name)} names no declared question`);
 
-    const sourceValues = isObject(document.values) ? document.values : {};
-    if (own(document, "values") && !isObject(document.values)) error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, "#/values must map declared names to finite numbers");
+    if (own(document, "values") && !isObject(document.values)) error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, "#/values must map declared names to finite numbers or value citations");
+
     const valueValues = new Map();
+    const citationSources = new Map();
+    const rangeCheck = (name, declaration, value, at) => {
+      if (Array.isArray(declaration.range) && declaration.range.length === 2 && declaration.range.every(Number.isFinite) && (value < declaration.range[0] || value > declaration.range[1])) error("CONTRACT_VALUE_RANGE", CONTRACT_SECTION, display, `${at} value ${value} is outside the declared inclusive range [${declaration.range[0]}, ${declaration.range[1]}]`);
+    };
     for (const [name, declaration] of model.values) {
       const at = `#/values/${pointerEscape(name)}`;
+      const active = activeValues.has(name);
       if (!own(sourceValues, name)) {
-        error("CONTRACT_VALUE_MISSING", CONTRACT_SECTION, display, `${at} is missing; every declared value needs one number`);
+        if (active) error("CONTRACT_VALUE_MISSING", CONTRACT_SECTION, display, `${at} is missing; every active declared value needs one supplied value`);
         continue;
       }
+      if (!active) {
+        error("CONTRACT_VALUE_INACTIVE", CONTRACT_SECTION, display, `${at} supplies a value whose declaration condition does not hold; an inactive declaration must be absent`);
+        continue;
+      }
+      const forms = Array.isArray(declaration.forms) && declaration.forms.length && declaration.forms.every(form => CONTRACT_VALUE_FORM_NAMES.has(form)) ? declaration.forms : ["number"];
       const value = sourceValues[name];
-      if (typeof value !== "number" || !Number.isFinite(value)) {
-        error("CONTRACT_VALUE_TYPE", CONTRACT_SECTION, display, `${at} must be a finite number, got ${JSON.stringify(value)}`);
-        continue;
+      if (typeof value === "number" && Number.isFinite(value)) {
+        if (!forms.includes("number")) {
+          error("CONTRACT_VALUE_TYPE", CONTRACT_SECTION, display, `${at} supplies a number, but the declaration accepts only a citation`);
+          continue;
+        }
+        valueValues.set(name, value);
+        rangeCheck(name, declaration, value, at);
+      } else if (typeof value === "string" && forms.includes("citation")) {
+        citationSources.set(name, value);
+      } else {
+        const wants = forms.includes("citation") ? (forms.includes("number") ? "a finite number or a value citation" : "a value citation") : "a finite number";
+        error("CONTRACT_VALUE_TYPE", CONTRACT_SECTION, display, `${at} must be ${wants}, got ${JSON.stringify(value)}`);
       }
-      valueValues.set(name, value);
-      if (Array.isArray(declaration.range) && declaration.range.length === 2 && declaration.range.every(Number.isFinite) && (value < declaration.range[0] || value > declaration.range[1])) error("CONTRACT_VALUE_RANGE", CONTRACT_SECTION, display, `${at} value ${value} is outside the declared inclusive range [${declaration.range[0]}, ${declaration.range[1]}]`);
+    }
+
+    // §10.7 value citations: a dotted tuning address or a numeric value
+    // address in this adoption, resolved acyclically to a number.
+    const resolving = new Set();
+    const resolveValueCitation = name => {
+      if (valueValues.has(name)) return valueValues.get(name);
+      if (!citationSources.has(name)) return undefined;
+      const at = `#/values/${pointerEscape(name)}`;
+      if (resolving.has(name)) {
+        error("CONTRACT_CITATION_CYCLE", CONTRACT_SECTION, display, `${at} citation chain returns to ${JSON.stringify(name)}; value citations must be acyclic`);
+        return undefined;
+      }
+      resolving.add(name);
+      try {
+        const cite = citationSources.get(name);
+        if (!contractValueCitationForm(cite)) {
+          error("CONTRACT_CITATION_GRAMMAR", CONTRACT_SECTION, display, `${at} value citation ${JSON.stringify(cite)} is outside the grammar: a dotted tuning address or a numeric value address in this adoption`);
+          return undefined;
+        }
+        if (cite.startsWith("contracts.")) {
+          const segments = cite.split(".");
+          if (segments.length !== 3) {
+            error("CONTRACT_CITATION_GRAMMAR", CONTRACT_SECTION, display, `${at} value citation ${JSON.stringify(cite)} must be \`contracts.<adoption>.<value>\``);
+            return undefined;
+          }
+          if (segments[1] !== id) {
+            error("CONTRACT_CITATION_CROSS_ADOPTION", CONTRACT_SECTION, display, `${at} cites ${JSON.stringify(cite)}, which targets another adoption; a value citation stays inside its own adoption`);
+            return undefined;
+          }
+          const target = segments[2];
+          if (!model.values.has(target) || !activeValues.has(target) || (!valueValues.has(target) && !citationSources.has(target))) {
+            error("CONTRACT_CITATION_DANGLING", CONTRACT_SECTION, display, `${at} cites ${JSON.stringify(cite)}, which does not resolve: the address names ${model.values.has(target) ? (activeValues.has(target) ? "a value that was not supplied" : "an inactive declaration, whose address is absent") : "no declared value"}`);
+            return undefined;
+          }
+          return resolveValueCitation(target);
+        }
+        if (!ctx.tuningKeys.has(cite)) {
+          error("CONTRACT_CITATION_DANGLING", CONTRACT_SECTION, display, `${at} cites ${JSON.stringify(cite)}, which resolves to no tuning value`);
+          return undefined;
+        }
+        const resolved = ctx.tuningValues?.get(cite);
+        if (typeof resolved !== "number" || !Number.isFinite(resolved)) {
+          error("CONTRACT_CITATION_NON_NUMERIC", CONTRACT_SECTION, display, `${at} cites ${JSON.stringify(cite)}, which does not resolve to a number`);
+          return undefined;
+        }
+        return resolved;
+      } finally {
+        resolving.delete(name);
+      }
+    };
+    for (const name of citationSources.keys()) {
+      const resolved = resolveValueCitation(name);
+      if (resolved !== undefined && !valueValues.has(name)) {
+        valueValues.set(name, resolved);
+        rangeCheck(name, model.values.get(name), resolved, `#/values/${pointerEscape(name)}`);
+      }
     }
     for (const name of Object.keys(sourceValues)) if (!name.startsWith("_") && !model.values.has(name)) error("CONTRACT_VALUE_UNKNOWN", CONTRACT_SECTION, display, `#/values/${pointerEscape(name)} names no declared value`);
 
-    const sourceRows = isObject(document.rows) ? document.rows : {};
     if (own(document, "rows") && !isObject(document.rows)) error("CONTRACT_ROWS_SHAPE", CONTRACT_SECTION, display, "#/rows must map each declared row set to an inline array");
     for (const name of Object.keys(sourceRows)) if (!name.startsWith("_") && !model.rows.has(name)) error("CONTRACT_ROWS_BINDING", CONTRACT_SECTION, display, `#/rows/${pointerEscape(name)} names no declared row set`);
     const boundRows = new Map();
@@ -3228,33 +3651,82 @@ function createValidator(host) {
     if (isObject(document.rules)) for (const [name, source] of Object.entries(document.rules)) {
       if (name.startsWith("_")) continue;
       if (!CONTRACT_KEBAB.test(name)) error("CONTRACT_RULE_INVALID", CONTRACT_SECTION, display, `rule name ${JSON.stringify(name)} must be kebab-case`);
-      if (typeof source !== "string") {
-        error("CONTRACT_RULE_INVALID", CONTRACT_SECTION, display, `rule ${JSON.stringify(name)} must be a string`);
-        continue;
-      }
-      try {
-        const ast = parseRule(source, { bareKeys: new Set(model.values.keys()) });
-        parsedRules.push({ name, source, ast });
-        const referenced = new Set();
-        const pending = [ast];
-        while (pending.length) {
-          const node = pending.pop();
-          if (node.type === "key") referenced.add(node.name);
-          else if (node.type === "group") pending.push(node.expression);
-          else if (node.type === "unary") pending.push(node.argument);
-          else if (node.type === "binary") pending.push(node.left, node.right);
-          else if (node.type === "call") pending.push(...node.args);
+      if (typeof source === "string") {
+        try {
+          const ast = parseRule(source, { bareKeys: new Set(model.values.keys()) });
+          parsedRules.push({ name, source, ast });
+          const referenced = new Set();
+          const pending = [ast];
+          while (pending.length) {
+            const node = pending.pop();
+            if (node.type === "key") referenced.add(node.name);
+            else if (node.type === "group") pending.push(node.expression);
+            else if (node.type === "unary") pending.push(node.argument);
+            else if (node.type === "binary") pending.push(node.left, node.right);
+            else if (node.type === "call") pending.push(...node.args);
+          }
+          // §10.4: a comparison naming a conditional declaration is evaluated
+          // only while every declaration it names is active; an unresolved
+          // citation already carries its own diagnostic.
+          const missing = [...model.values.keys()].filter(key => activeValues.has(key) && referenced.has(key) && !own(sourceValues, key));
+          const inactiveOrUnresolved = [...referenced].some(key => model.values.has(key) && (!activeValues.has(key) || !valueValues.has(key)));
+          if (missing.length) {
+            const waits = missing.length === 1
+              ? `value ${JSON.stringify(missing[0])}`
+              : `values ${missing.map(key => JSON.stringify(key)).join(", ")}`;
+            error("CONTRACT_RULE_INVALID", CONTRACT_SECTION, display,
+              `rule ${JSON.stringify(name)} waits on ${waits}`, undefined, { rule: name, waits_on: missing }, true);
+          } else if (!inactiveOrUnresolved && !evaluateRule(ast, valueValues)) error("CONTRACT_RULE_FAILED", CONTRACT_SECTION, display, formatRuleFailure(name, source, ast, valueValues, `adoption ${JSON.stringify(id)}`));
+        } catch (cause) {
+          error("CONTRACT_RULE_INVALID", CONTRACT_SECTION, display, `rule ${JSON.stringify(name)}: ${cause.message} at position ${cause.position ?? 0}`);
         }
-        const missing = [...model.values.keys()].filter(key => referenced.has(key) && !own(sourceValues, key));
-        if (missing.length) {
-          const waits = missing.length === 1
-            ? `value ${JSON.stringify(missing[0])}`
-            : `values ${missing.map(key => JSON.stringify(key)).join(", ")}`;
-          error("CONTRACT_RULE_INVALID", CONTRACT_SECTION, display,
-            `rule ${JSON.stringify(name)} waits on ${waits}`, undefined, { rule: name, waits_on: missing }, true);
-        } else if (!evaluateRule(ast, valueValues)) error("CONTRACT_RULE_FAILED", CONTRACT_SECTION, display, formatRuleFailure(name, source, ast, valueValues, `adoption ${JSON.stringify(id)}`));
-      } catch (cause) {
-        error("CONTRACT_RULE_INVALID", CONTRACT_SECTION, display, `rule ${JSON.stringify(name)}: ${cause.message} at position ${cause.position ?? 0}`);
+      } else if (isObject(source)) {
+        // §10.4 answer-aware rule: forbid + message, optional severity.
+        const bad = message => error("CONTRACT_RULE_INVALID", CONTRACT_SECTION, display, `rule ${JSON.stringify(name)}: ${message}`);
+        let shapeOk = true;
+        for (const key of Object.keys(source)) if (!key.startsWith("_") && !["forbid", "message", "severity"].includes(key)) { bad(`answer-aware rule carries unknown field ${JSON.stringify(key)}`); shapeOk = false; }
+        if (!(typeof source.message === "string" && source.message.trim())) { bad("message must be one non-empty definition-authored, designer-facing sentence"); shapeOk = false; }
+        if (own(source, "severity") && source.severity !== "error" && source.severity !== "warning") { bad('severity must be "error" or "warning"'); shapeOk = false; }
+        const checkFlagCondition = (condition, pointer) => {
+          if (!isObject(condition) || !isObject(condition.flag) || Object.keys(condition).filter(key => !key.startsWith("_")).length !== 1 || Object.keys(condition.flag).length === 0) {
+            bad(`${pointer} must be a flag condition mapping question ids to non-empty option arrays`);
+            return false;
+          }
+          let ok = true;
+          for (const [questionId, allowed] of Object.entries(condition.flag)) {
+            const question = model.questions.get(questionId);
+            if (!question) { bad(`${pointer}/flag names undeclared question ${JSON.stringify(questionId)}`); ok = false; continue; }
+            if (!Array.isArray(allowed) || allowed.length === 0) { bad(`${pointer}/flag/${pointerEscape(questionId)} must be a non-empty array of option ids`); ok = false; continue; }
+            for (const option of allowed) if (!question.options.has(option)) { bad(`${pointer}/flag/${pointerEscape(questionId)} names undeclared option ${JSON.stringify(option)}`); ok = false; }
+          }
+          return ok;
+        };
+        const forbid = source.forbid;
+        let members;
+        let combinator;
+        if (isObject(forbid) && (Array.isArray(forbid.any) || Array.isArray(forbid.all)) && Object.keys(forbid).filter(key => !key.startsWith("_")).length === 1) {
+          combinator = Array.isArray(forbid.any) ? "any" : "all";
+          members = forbid[combinator];
+          if (members.length === 0) { bad(`forbid/${combinator} must be a non-empty array of flag conditions`); shapeOk = false; }
+          else members.forEach((member, index) => { if (!checkFlagCondition(member, `forbid/${combinator}/${index}`)) shapeOk = false; });
+        } else if (isObject(forbid) && isObject(forbid.flag)) {
+          if (!checkFlagCondition(forbid, "forbid")) shapeOk = false;
+          members = [forbid];
+          combinator = "all";
+        } else {
+          bad("forbid must be a flag condition, or a non-nested any/all of flag conditions");
+          shapeOk = false;
+        }
+        if (shapeOk) {
+          const flagConditionHolds = condition => Object.entries(condition.flag).every(([questionId, allowed]) => asked.has(questionId) && own(answers, questionId) && allowed.includes(answers[questionId]));
+          const holds = combinator === "any" ? members.some(flagConditionHolds) : members.every(flagConditionHolds);
+          if (holds) {
+            const report = source.severity === "warning" ? warning : error;
+            report("CONTRACT_RULE_FORBIDDEN", CONTRACT_SECTION, display, `${source.message.trim()} (rule ${JSON.stringify(name)})`);
+          }
+        }
+      } else {
+        error("CONTRACT_RULE_INVALID", CONTRACT_SECTION, display, `rule ${JSON.stringify(name)} must be a one-line string or an answer-aware rule object`);
       }
     }
 
@@ -3270,7 +3742,7 @@ function createValidator(host) {
         contractInjectionBan(override, display, at, "verification input");
       }
     }
-    return { id, display, document, model, answers, asked, valueValues, boundRows, parsedRules, ctx, checked: false, pack: undefined, liveTemplates: new Set(), expandedRows: new Map() };
+    return { id, display, document, model, answers, asked, valueValues, activeValues, boundRows, parsedRules, ctx, checked: false, pack: undefined, liveTemplates: new Set(), expandedRows: new Map() };
   }
 
   function contractPackError(display, message) {
@@ -3436,6 +3908,16 @@ function createValidator(host) {
       }
       if (isObject(template.bindings)) for (const binding of Object.values(template.bindings)) {
         if (isObject(binding) && typeof binding.flag === "string" && !adoption.asked.has(binding.flag)) genuineBlock = true;
+      }
+      // §10.8: a template whose {{value-cite:}} names an inactive declaration
+      // is not live; no live template reads an inactive declaration.
+      if (adoption.activeValues) {
+        const citeSources = [template.title, template.text, template.test];
+        if (isObject(template.bindings)) for (const binding of Object.values(template.bindings)) if (isObject(binding?.map)) citeSources.push(...Object.values(binding.map));
+        for (const found of contractScanPlaceholders(citeSources, "")) {
+          const cited = /^value-cite:(.+)$/.exec(found.body);
+          if (cited && adoption.model.values.has(cited[1]) && !adoption.activeValues.has(cited[1])) genuineBlock = true;
+        }
       }
       let live = !genuineBlock && missingAnswers.length === 0;
       if (!genuineBlock && missingAnswers.length) waitReason = { kind: "answer", name: missingAnswers[0] };
@@ -3607,10 +4089,17 @@ function createValidator(host) {
     packEntries.sort((a, b) => a.display.localeCompare(b.display));
 
     const tuningKeys = new Set(Object.keys(isObject(tuningDoc?.values) ? tuningDoc.values : {}));
+    const tuningValues = new Map(Object.entries(isObject(tuningDoc?.values) ? tuningDoc.values : {}).filter(([, value]) => typeof value === "number" && Number.isFinite(value)));
     const contractKeys = new Set();
     for (const entry of adoptionEntries) for (const name of entry.model.values.keys()) contractKeys.add(`contracts.${entry.fileId}.${name}`);
+    // §10.6: an address naming an inactive declaration is absent rather than
+    // dangling in itself, but a citation that reads it fails. The pre-pass
+    // recomputes each adoption's active set findings-free so row citation
+    // fields agree with the §10.4 value-citation path about the same address.
+    const activeContractKeys = new Set();
+    for (const entry of adoptionEntries) for (const name of contractAdoptionActivation(entry.document, entry.model).activeValues) activeContractKeys.add(`contracts.${entry.fileId}.${name}`);
     const instanceIds = new Set(adoptionEntries.map(entry => entry.fileId));
-    const ctx = { resolvePath, contentContext, tuningKeys, contractKeys, instanceIds, manifest, exprContext, directionCtx };
+    const ctx = { resolvePath, contentContext, tuningKeys, tuningValues, contractKeys, activeContractKeys, instanceIds, manifest, exprContext, directionCtx };
     const instances = adoptionEntries.map(entry => contractValidateAdoption(entry, ctx));
 
     const byDefinition = new Map();
@@ -3678,7 +4167,7 @@ function createValidator(host) {
     const packageRoot = path.resolve(packageArgument);
     if (!host.exists(packageRoot) || !host.isDirectory(packageRoot)) {
       error("PACKAGE_DIRECTORY", "§1", ".", `package directory does not exist or is not a directory: ${packageRoot}`);
-      return { packageRoot, packageName: path.basename(packageRoot), manifest: undefined };
+      return { packageRoot, packageName: null, manifest: undefined };
     }
     const resolvePath = makePathResolver(packageRoot);
     const required = ["manifest.json", "tuning.json", "01-overview.md", "02-mechanics.md", "05-build-plan.md"];
@@ -3688,14 +4177,19 @@ function createValidator(host) {
     }
 
     const manifestFile = path.join(packageRoot, "manifest.json");
-    const manifest = host.exists(manifestFile) ? parseJsonFile(manifestFile, "manifest.json", "§3", "MANIFEST_JSON") : undefined;
-    if (manifest !== undefined) {
+    const parsedManifest = host.exists(manifestFile) ? parseJsonFile(manifestFile, "manifest.json", "§3", "MANIFEST_JSON") : undefined;
+    if (parsedManifest !== undefined) {
       const schema = loadSchema("manifest.schema.json", "§3");
       if (schema) {
-        for (const problem of schemaProblems(manifest, schema, schema)) {
+        for (const problem of schemaProblems(parsedManifest, schema, schema)) {
           error("MANIFEST_SCHEMA", "§3", "manifest.json", `${problem.path} ${problem.message}`);
         }
       }
+    }
+    // A parsed non-object (JSON null, array, string) is schema-reported above;
+    // every later pass reads manifest fields, so it continues as absent.
+    const manifest = isObject(parsedManifest) ? parsedManifest : undefined;
+    if (manifest !== undefined) {
       if (isObject(manifest.commerce) && isObject(manifest.commerce.split)) {
         const designer = manifest.commerce.split.designer;
         const builder = manifest.commerce.split.builder;
@@ -3813,7 +4307,7 @@ function createValidator(host) {
         "BUILD_SPEC_CROSS_CHECKS_SKIPPED",
         "§7",
         "opengdd-build.json",
-        "certifying spec directory was not supplied; skipped source-dependent SPEC §7 package-consistency checks (spec id/version, designer, personalization answers, resolved_tuning values, acceptance-test total, completion, and runtime runner identity) plus optional commerce equality. Supply the optional <spec-dir> argument to enable them; until then this run reports NOT CHECKED rather than any passing verdict, because most of the record's subject was never decided"
+        "certifying package directory was not supplied; skipped source-dependent SPEC §7 package-consistency checks (spec id/version, designer, personalization answers, resolved_tuning values, acceptance-test total, completion, and runtime runner identity) plus optional commerce equality. Supply the optional <package-dir> argument to enable them; until then this run reports NOT CHECKED rather than any passing verdict, because most of the record's subject was never decided"
       );
     }
 
@@ -3916,6 +4410,19 @@ function createValidator(host) {
           for (const entry of contractFacts?.rules ?? []) {
             const prefix = `contracts.${entry.adoption}.`;
             const local = new Map([...snapshot].filter(([key]) => key.startsWith(prefix)).map(([key, value]) => [key.slice(prefix.length), value]));
+            // §10.4: an absent address marks an inactive declaration; a
+            // comparison naming one is skipped, not failed.
+            const referenced = [];
+            const pending = [entry.ast];
+            while (pending.length) {
+              const node = pending.pop();
+              if (node.type === "key") referenced.push(node.name);
+              else if (node.type === "group") pending.push(node.expression);
+              else if (node.type === "unary") pending.push(node.argument);
+              else if (node.type === "binary") pending.push(node.left, node.right);
+              else if (node.type === "call") pending.push(...node.args);
+            }
+            if (referenced.some(key => !local.has(key))) continue;
             try {
               if (!evaluateRule(entry.ast, local)) error("BUILD_CONTRACT_RULE", "§7", "opengdd-build.json", formatRuleFailure(entry.name, entry.source, entry.ast, local, `adoption ${JSON.stringify(entry.adoption)}`));
             } catch (cause) {
@@ -4076,6 +4583,8 @@ export function formatReport(run, jsonMode) {
   const subject = { id: run.packageName, path: run.packageRoot };
   const output = {
     validator: `OpenGDD v${SPEC_VERSION} ${isBuild ? "build" : "package"} conformance`,
+    format: FORMAT_VERSION,
+    validator_version: VALIDATOR_VERSION,
     [isBuild ? "build" : "package"]: subject,
     valid: run.valid,
     verdict: run.verdict,
@@ -4087,7 +4596,7 @@ export function formatReport(run, jsonMode) {
   const status = run.verdict;
   const lines = [
     `OpenGDD v${SPEC_VERSION} ${isBuild ? "build" : "package"} validation`,
-    `${isBuild ? "Build" : "Package"}: ${run.packageName} (${run.packageRoot})`,
+    `${isBuild ? "Build" : "Package"}: ${run.packageName ?? "(unread)"} (${run.packageRoot})`,
     `Result: ${status} — ${run.summary.errors} error(s)${run.summary.dependent ? ` (${run.summary.dependent} waiting on designer input)` : ""}, ${run.summary.warnings} warning(s)`
   ];
   if (run.findings.length) lines.push("");

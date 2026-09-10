@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timed window contract — OpenGDD</title>
+<meta name="description" content="Decides how i-frames, cooldowns, and status effects repeat, keep or lose time while play is suspended, end early, or expire.">
+<link rel="canonical" href="https://opengdd.org/contracts/timed-window-1/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Timed window contract — OpenGDD">
+<meta property="og:description" content="Decides how i-frames, cooldowns, and status effects repeat, keep or lose time while play is suspended, end early, or expire.">
+<meta property="og:url" content="https://opengdd.org/contracts/timed-window-1/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Timed window contract — OpenGDD">
+<meta name="twitter:description" content="Decides how i-frames, cooldowns, and status effects repeat, keep or lose time while play is suspended, end early, or expire.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=ff285f28dd16">
+<script type="module" src="/assets/contracts.mjs?v=ff285f28dd16"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout contract-catalogue contract-entry-page" data-contract-root data-core-id="timed-window">
+<nav class="doc-toc contract-nav" aria-label="Contracts">
+<details class="contract-nav-disclosure">
+  <summary>Contracts</summary>
+  <div class="contract-nav-content">
+    <p class="toc-title">Contracts</p>
+    <ul class="contract-nav-home"><li><a href="/contracts/">Overview</a></li><li><a href="/contracts/catalogue/">Contract catalogue</a></li></ul>
+<div class="toc-group contract-page-nav">
+  <p class="toc-group-title">On this page</p>
+  <ul><li><a href="#use-this">Use in your game</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#rows">Lists</a></li>
+<li><a href="#for-builders">For builders</a></li></ul>
+</div>
+  </div>
+</details>
+</nav>
+<article class="doc-body contract-entry-body">
+<p class="label"><a href="/contracts/catalogue/#ordering-resolution">Ordering &amp; resolution</a></p>
+<div class="contract-entry-title-row">
+  <div><h1>Timed window</h1><p class="contract-core-name"><code>timed-window-1</code></p></div>
+  <div><span class="contract-badge ">Tests included</span></div>
+</div>
+<p class="contract-entry-hook">This contract defines the behaviour of timed windows: i-frames, a cooldown, or a status effect.</p>
+<p class="contract-entry-summary">It decides how i-frames, cooldowns, and status effects repeat, keep or lose time while play is suspended, end early, or expire.</p>
+<ul class="contract-facts">
+  <li><a href="#questions">4 questions</a></li>
+  <li>no numbers</li>
+  <li><a href="#rows">1 list</a></li>
+  <li><a href="#for-builders">7 tests</a></li>
+</ul>
+<aside class="contract-relief contract-adoption-start" id="adoptions" aria-labelledby="adoptions-title">
+  <p class="contract-relief-title" id="adoptions-title">Start from an adoption</p>
+  <p>An adoption is this contract with the answers already filled in for one kind of game. Open the one closest to yours, change what does not fit, and skip the questions below.</p>
+  <p class="contract-adoption-links"><a class="contract-adoption-chip" href="/contracts/timed-window-1/dodge-roll-invulnerability/">Dodge roll invulnerability</a><a class="contract-adoption-chip" href="/contracts/timed-window-1/poison-window/">Poison window</a></p>
+</aside>
+<section class="contract-handoff" aria-labelledby="use-this">
+  <h2 id="use-this">Use in your game</h2>
+  <p>Opens the authoring tool with this contract added and its questions unanswered. Or download the ZIP and add it later.</p>
+  <div class="contract-actions">
+    <a class="cta" href="/authoring-tool/?contract=timed-window-1">Open in the authoring tool</a>
+    <a class="cta-quiet" href="/contracts/timed-window-1/timed-window-1.zip" download="timed-window-1.zip">Download ZIP</a>
+  </div>
+  <details><summary>What is in the ZIP</summary><p>The ZIP holds the contract and its acceptance tests. In the authoring tool, choose <strong>Add contract</strong> and pick this ZIP. If you keep your design as files, put them in <code>contracts/</code> and fill in the answers there.</p><div class="contract-actions"><a href="/contracts/timed-window-1/core.json" download="timed-window-1.core.json">Download contract JSON</a> · <a href="/contracts/timed-window-1/timed-window-1.pack.json" download="timed-window-1.pack.json">Download tests</a><button type="button" class="cta-quiet" data-copy-core data-core-url="/contracts/timed-window-1/core.json" data-copy-kind="contract">Copy contract</button><span role="status" aria-live="polite" data-copy-status></span></div></details>
+</section>
+<section class="contract-decision-overview">
+  <h2 id="questions">4 questions per window</h2>
+<p>You answer these once for each window.</p>
+<ol class="contract-decision-list"><li>The unit used by the duration and its clock.</li>
+<li>For a window whose clock runs with play — seconds, frames, or ticks — whether that clock pauses with ordinary play.</li>
+<li>What a new opening does while this window is already open.</li>
+<li>Whether the window can close before its duration ends.</li></ol>
+</section>
+
+<aside class="contract-relief" aria-labelledby="relief-title">
+  <p class="contract-relief-title" id="relief-title">That was the hard part.</p>
+  <p>The questions are the decisions. Everything below follows from them: the numbers and lists an adoption fills in, and the exact wording and tests for builders. The authoring tool handles the filling in. Read on only if you want to check.</p>
+</aside>
+
+<details class="contract-form-section contract-fold" id="rows">
+  <summary><span class="contract-fold-title">Lists</span><span class="contract-fold-note">1 list</span></summary>
+  <p>Some settings are lists of rows.</p><p class="contract-citation-help">A reference points to a number or a rule in your design. For a number, use its address in your tuning. For a rule, use its file and heading, such as <code>02-mechanics.md#recovery</code>. Each field's description says what it needs.</p><article class="contract-collection">
+<h3>Windows</h3>
+<p class="contract-exact-name"><code>windows</code></p>
+<p>List every named window. An empty list is a claim its author must defend. A cap uses the window&#39;s unit and cannot be shorter than its normal duration. The duration unit must match the clock. A real-time window cannot use turns to avoid the suspension choice. The validator (the checking tool) cannot check this; a reviewer does.</p>
+<p class="contract-row-shape">Each row is: <code>id</code>, <code>opens-at</code>, <code>duration</code>, <code>duration-unit</code>, <code>clock</code>, <code>while-suspended</code>, <code>on-retrigger</code>, <code>retrigger-cap</code>, <code>ends-early</code>, <code>early-end</code>.</p>
+<details class="contract-fields-detail"><summary>Every field</summary>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Field</th><th>Kind</th><th>When it appears</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr data-contract-dependent data-when="null">
+  <td><code>id</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>The window&#39;s stable name as your game writes it. A poison effect might be named poison.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>opens-at</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>Where your fixed game prose says what opens the window. A poison window might open when a poisoned attack lands.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>duration</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>Where your game states how long the window lasts. Cite a number for a fixed duration, or fixed prose for a duration calculated from game state. The value is read when the window opens. For example, poison may read its turn count when the hit lands.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>duration-unit</code></td>
+  <td>choice: seconds, frames, ticks, turns</td>
+  <td>Required</td>
+  <td>The unit used by the duration and its clock. Seconds measure real time. Frames count updates. Ticks count clock steps. Turns count game turns. A poison effect might use turns.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>clock</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>Where your fixed game prose names the clock that closes this window. A poison effect may use the turn clock.</td>
+</tr>
+<tr data-contract-dependent data-when="{&quot;row&quot;:{&quot;duration-unit&quot;:[&quot;seconds&quot;,&quot;frames&quot;,&quot;ticks&quot;]}}">
+  <td><code>while-suspended</code></td>
+  <td>choice: stops, keeps-running</td>
+  <td>Present when row duration unit is Seconds or Frames or Ticks.</td>
+  <td>For a window whose clock runs with play — seconds, frames, or ticks — whether that clock pauses with ordinary play. If it stops, an invulnerability window keeps all its remaining time during a pause. If it keeps running, the window can expire before play resumes.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>on-retrigger</code></td>
+  <td>choice: ignore, new-duration, keep-longer, extend-to-cap, stack</td>
+  <td>Required</td>
+  <td>What a new opening does while this window is already open. Ignore leaves the poison window unchanged. New duration replaces its remaining time with the duration from the new poison hit. Keep longer uses whichever time is longer. Extend to cap adds time without passing its cap. Stack opens another independent poison copy. Only stacking creates a new copy. Every other choice continues the current copy and keeps one opening in its history.</td>
+</tr>
+<tr data-contract-dependent data-when="{&quot;row&quot;:{&quot;on-retrigger&quot;:[&quot;extend-to-cap&quot;]}}">
+  <td><code>retrigger-cap</code></td>
+  <td>reference</td>
+  <td>Present when row on retrigger is Extend to cap.</td>
+  <td>Where your game states the largest amount of time that can remain after an extension. A poison effect may cap all extensions at its maximum duration. Add this only when repeat openings extend up to a cap. Use the same unit as the duration.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>ends-early</code></td>
+  <td>choice: expiry-only, declared-ending</td>
+  <td>Required</td>
+  <td>Whether the window can close before its duration ends. Expiry only keeps a poison effect open until time runs out. A declared ending lets a cure close every open poison copy on the entity it cures, unless the cited prose names more.</td>
+</tr>
+<tr data-contract-dependent data-when="{&quot;row&quot;:{&quot;ends-early&quot;:[&quot;declared-ending&quot;]}}">
+  <td><code>early-end</code></td>
+  <td>reference</td>
+  <td>Present when row ends early is Declared ending.</td>
+  <td>Where your fixed game prose names every event or condition that ends this window early. This includes using or cancelling it. For poison, this may be an antidote or cleansing the target. Add this only when the window can end early.</td>
+</tr>
+</tbody></table></div>
+</details>
+</article>
+</details>
+<section class="contract-form-section" id="for-builders">
+  <h2>For builders</h2>
+  <details class="contract-builder-details">
+    <summary>Exact mechanism wording and 7 pack tests</summary>
+    <div class="contract-builder-block">
+      <h3>Exact mechanism wording</h3>
+      <div class="contract-mechanism"><p>Each row declares one timed window. The row cites the game&#39;s own Fixed material for what opens it, its duration, and the clock that advances it; the contract owns none of those game-specific rules or numbers. An opening is an event of the entity the window is given to. Each entity that the game&#39;s rules give the window gets its own instance, opened, advanced, and closed by that entity&#39;s own events, unless the adoption&#39;s Fixed prose explicitly names the window as shared. This per-entity reading is binding for every sentence and generated check that speaks of open copies. The validator cannot check this; a reviewer does.</p>
+<p>When the cited opening occurs, the duration is read once and the window opens for that duration; later changes to the cited number or calculation do not move an open copy&#39;s endpoint. A fixed duration cites its tuning number; a duration computed from game state cites the Fixed prose that defines the calculation. A window includes its named last moment: it is still open exactly when the cited clock has advanced by that duration, and closed at any point after that, unless its row says it can end early.</p>
+<p>A row&#39;s on-retrigger answer applies when its opening occurs again while that window is open. ignore leaves the open copy unchanged. new-duration replaces its remaining time with the newly granted duration. keep-longer keeps whichever is longer: the remaining time or the newly granted duration. extend-to-cap adds the newly granted duration to the time remaining, but never leaves more than the row&#39;s cited cap. The same open copy continues under ignore, new-duration, keep-longer, and extend-to-cap, and its history shows one opening; only stack creates a new copy. stack opens another independent copy and leaves every open copy unchanged. A game whose extension has a largest permitted duration names that duration as its cap; a game that permits no largest duration states the exception in its own prose and adopts this contract as promised rather than checked. A game whose stacking has a largest number of open copies states that limit in its own prose and adopts this row as promised rather than checked; this contract does not count copies.</p>
+<p>Under expiry-only, nothing closes any open copy before its duration ends; a retrigger&#39;s own rewrite of an open copy&#39;s remaining time is not an early closure. Under declared-ending, the event or condition cited by the row closes every open copy on the entity the ending happens to, unless the cited prose names more; this covers copies being used, cancelled, dispelled, or otherwise ended by the game.</p>
+<p>stops means the row&#39;s clock does not advance while ordinary play is suspended. keeps-running means it does. The cited clock definition decides what ordinary play being suspended means; this contract does not define pause or catch-up behavior.</p>
+<p>The answers belong to each window row, not to the game as a whole. If one apparent window follows different repeat-trigger rules for different opening causes, this version does not model those causes separately; the game must name them as separate windows or state the exception in its own prose.</p></div>
+    </div>
+    <section class="contract-builder-block">
+  <h3>Verification pack</h3>
+  <p><code>sha256:0b00f8a7b2f1f165dbffc65ea394d7fad1cb9fdf6dc123b74bf78c675ad138ed</code></p>
+
+  <p>The format calls an adoption with its matching pack <strong>Checked</strong>: the tests travel with it, but a game has not necessarily passed them. Without the pack the adoption is <strong>Promised</strong>: the builder still owes the chosen behavior.</p>
+  <h3>7 pack tests</h3>
+  <p>Placeholders are filled from the adoption's answers, values, rows, and verification inputs.</p>
+<div class="contract-test-list"><details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>the declared window list matches the game</summary>
+  <p class="contract-exact-name"><code>declared-window-set</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">The window list in <code class="contract-placeholder">Instance</code> is complete for <code class="contract-placeholder">Inputs scope</code>: every window in scope has one row, no window has two rows, and no row names something outside the scope.</p>
+  <dl class="contract-test-steps"><div><dt>Scope</dt><dd><p><code class="contract-placeholder">Inputs scope</code></p></dd></div>
+<div><dt>Holds</dt><dd><p>every timed window in scope has exactly one row in <code class="contract-placeholder">Instance</code>, and every row in <code class="contract-placeholder">Instance</code> names a timed window in scope</p></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> opens and expires on its declared clock</summary>
+  <p class="contract-exact-name"><code>opens-and-expires</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per windows row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> opens on the occurrence defined at <code class="contract-placeholder">Row.opens at</code>, reads its <code class="contract-placeholder">Row.duration unit</code> duration from <code class="contract-placeholder">Row.duration</code>, and closes after that much progress on the clock defined at <code class="contract-placeholder">Row.clock</code>.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Row.id</code> window closed, with its opening defined at <code class="contract-placeholder">Row.opens at</code>, its duration at <code class="contract-placeholder">Row.duration</code> in <code class="contract-placeholder">Row.duration unit</code>, and its clock at <code class="contract-placeholder">Row.clock</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the opening defined at <code class="contract-placeholder">Row.opens at</code> occurs once, with no repeat trigger and no declared early ending</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.id</code> becomes open when that occurrence happens</li><li>a change to the value or calculation at <code class="contract-placeholder">Row.duration</code> after that moment does not move this copy&#39;s endpoint; the copy still closes after the duration read at opening</li><li>it is still open when the clock at <code class="contract-placeholder">Row.clock</code> has advanced by exactly that duration</li><li>it is closed at the first observable step after the clock has advanced beyond that duration</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-open-close-trace</li><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-clock-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;on-retrigger&quot;:[&quot;ignore&quot;,&quot;new-duration&quot;,&quot;keep-longer&quot;,&quot;stack&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> handles a repeat trigger in the declared way</summary>
+  <p class="contract-exact-name"><code>retrigger-behavior</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">per windows row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row on retrigger is Ignore or New duration or Keep longer or Stack.</p>
+  <p class="contract-test-text">Repeat triggers of <code class="contract-placeholder">Row.id</code> follow one rule: <code class="contract-placeholder">Bind retrigger claim</code>. The worked arithmetic fixes the meaning even when the game&#39;s own duration uses another number or unit.</p>
+  <dl class="contract-test-steps"><div><dt>Scope</dt><dd><p>repeat triggers of <code class="contract-placeholder">Row.id</code> while at least one copy is open</p></dd></div>
+<div><dt>Holds</dt><dd><p><code class="contract-placeholder">Bind retrigger claim</code></p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-trigger-trace</li><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-remaining-time-trace</li><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-open-copy-count</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;on-retrigger&quot;:[&quot;extend-to-cap&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> extends on a repeat trigger without passing its cap</summary>
+  <p class="contract-exact-name"><code>retrigger-extends-to-cap</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">per windows row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row on retrigger is Extend to cap.</p>
+  <p class="contract-test-text">Repeat triggers extend <code class="contract-placeholder">Row.id</code> without passing the cap at <code class="contract-placeholder">Row.retrigger cap</code>. The worked cases leave twelve units when four remain and ten are added under a cap of twelve, and nine when four remain and five are added, fixing both the addition and the cap.</p>
+  <dl class="contract-test-steps"><div><dt>Scope</dt><dd><p>repeat triggers of <code class="contract-placeholder">Row.id</code> while one copy is open</p></dd></div>
+<div><dt>Holds</dt><dd><p>a repeat trigger adds the newly granted duration to the remaining time without passing the cap at <code class="contract-placeholder">Row.retrigger cap</code>; the arithmetic gives twelve units when four remain, ten are added, and the cap is twelve, and gives nine units when four remain, five are added, and the cap is twelve</p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-trigger-trace</li><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-remaining-time-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;ends-early&quot;:[&quot;expiry-only&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> cannot end early</summary>
+  <p class="contract-exact-name"><code>expiry-is-the-only-ending</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">per windows row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row ends early is Expiry only.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> has no early ending: using it, removing related state, or changing the world does not close it. A retrigger&#39;s own rewrite of remaining time is not an early closure. Only its duration ending closes the copy.</p>
+  <dl class="contract-test-steps"><div><dt>Scope</dt><dd><p>the finite list of events and world changes that the game&#39;s Fixed prose associates with <code class="contract-placeholder">Row.id</code>, plus its game-local acceptance-test sample of ordinary play while a copy is open with time remaining</p></dd></div>
+<div><dt>Holds</dt><dd><p>no event or world change in scope closes any open <code class="contract-placeholder">Row.id</code> copy before its duration ends; a copy&#39;s remaining time changes only through ordinary progress on the clock at <code class="contract-placeholder">Row.clock</code> or through this row&#39;s declared repeat-trigger behavior; a retrigger&#39;s own rewrite of remaining time is not an early closure</p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-open-close-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;ends-early&quot;:[&quot;declared-ending&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> closes at its declared early ending</summary>
+  <p class="contract-exact-name"><code>declared-ending-closes</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per windows row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row ends early is Declared ending.</p>
+  <p class="contract-test-text">Every open <code class="contract-placeholder">Row.id</code> copy on the entity the ending happens to closes when the event or condition defined at <code class="contract-placeholder">Row.early end</code> occurs, unless the cited prose names more. Remaining duration does not delay an affected copy&#39;s ending.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>one or more <code class="contract-placeholder">Row.id</code> copies open with time remaining, with their early ending defined at <code class="contract-placeholder">Row.early end</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>one early-ending event or condition defined at <code class="contract-placeholder">Row.early end</code> occurs</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>every open <code class="contract-placeholder">Row.id</code> copy on the entity the ending happens to closes at that occurrence, unless the prose at <code class="contract-placeholder">Row.early end</code> names more</li><li>no remaining duration keeps any affected copy open</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-early-ending-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;duration-unit&quot;:[&quot;seconds&quot;,&quot;frames&quot;,&quot;ticks&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> treats suspended play in the declared way</summary>
+  <p class="contract-exact-name"><code>suspension-behavior</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per windows row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row duration unit is Seconds or Frames or Ticks.</p>
+  <p class="contract-test-text">Suspended play leaves an observable answer for every <code class="contract-placeholder">Row.id</code> copy: <code class="contract-placeholder">Bind suspension result</code>. Each remaining-time trace is read during the suspension so the two answers cannot pass on the same later state.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>one or more <code class="contract-placeholder">Row.id</code> copies open, with an observed copy having four <code class="contract-placeholder">Row.duration unit</code> left and a remaining-time trace for every copy</p></dd></div>
+<div><dt>When</dt><dd><ul><li>ordinary play is suspended for an interval that would advance the clock at <code class="contract-placeholder">Row.clock</code> by six <code class="contract-placeholder">Row.duration unit</code> during ordinary play, while that clock and every open copy are observed</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Bind suspension result</code></li><li>the remaining-time trace shows whether time advanced during the suspension, even if the stored open state after play resumes could look the same</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-remaining-time-trace</li><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-suspension-trace</li></ul></dd></div></dl>
+</details></div>
+</section>
+  </details>
+</section>
+<p class="contract-related"><strong>Related groups:</strong> <a href="/contracts/catalogue/#determinism-replay">Determinism &amp; replay</a>, <a href="/contracts/catalogue/#pools-meters">Pools &amp; meters</a></p>
+<p><a href="#use-this">Use this contract in your game ↑</a></p>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

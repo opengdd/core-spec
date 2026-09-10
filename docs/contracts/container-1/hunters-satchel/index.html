@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hunters satchel — Container adoption — OpenGDD</title>
+<meta name="description" content="Hunters satchel is a Container adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="canonical" href="https://opengdd.org/contracts/container-1/hunters-satchel/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hunters satchel — Container adoption — OpenGDD">
+<meta property="og:description" content="Hunters satchel is a Container adoption with supplied answers, settings and matching acceptance tests.">
+<meta property="og:url" content="https://opengdd.org/contracts/container-1/hunters-satchel/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hunters satchel — Container adoption — OpenGDD">
+<meta name="twitter:description" content="Hunters satchel is a Container adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=ff285f28dd16">
+<script type="module" src="/assets/contracts.mjs?v=ff285f28dd16"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout contract-catalogue contract-entry-page contract-instance-page" data-contract-root data-core-id="container" data-contract-preset="{&quot;capacity-limit&quot;:&quot;size-budget&quot;,&quot;partial-acceptance&quot;:&quot;fill-what-fits&quot;,&quot;leftover-destination&quot;:&quot;left-where-it-is&quot;,&quot;draw-order&quot;:&quot;not-applicable&quot;,&quot;type-restriction&quot;:&quot;any-item&quot;}" data-contract-facts="{&quot;rowCounts&quot;:{&quot;items&quot;:4},&quot;valueForms&quot;:{&quot;slot-count&quot;:&quot;number&quot;,&quot;size-budget&quot;:&quot;number&quot;},&quot;rows&quot;:{&quot;items&quot;:[{&quot;id&quot;:&quot;venison-cut&quot;,&quot;size&quot;:1.5,&quot;when-forced-out&quot;:&quot;dropped-nearby&quot;,&quot;forced-out-order&quot;:1},{&quot;id&quot;:&quot;deer-pelt&quot;,&quot;size&quot;:3.5,&quot;when-forced-out&quot;:&quot;dropped-nearby&quot;,&quot;forced-out-order&quot;:2},{&quot;id&quot;:&quot;iron-jaw-trap&quot;,&quot;size&quot;:6,&quot;when-forced-out&quot;:&quot;dropped-nearby&quot;,&quot;forced-out-order&quot;:3},{&quot;id&quot;:&quot;hunting-bow&quot;,&quot;size&quot;:1.5,&quot;when-forced-out&quot;:&quot;dropped-nearby&quot;,&quot;forced-out-order&quot;:4}]}}">
+<nav class="doc-toc contract-nav" aria-label="Contracts">
+<details class="contract-nav-disclosure">
+  <summary>Contracts</summary>
+  <div class="contract-nav-content">
+    <p class="toc-title">Contracts</p>
+    <ul class="contract-nav-home"><li><a href="/contracts/">Overview</a></li><li><a href="/contracts/catalogue/">Contract catalogue</a></li></ul>
+<div class="toc-group contract-page-nav">
+  <p class="toc-group-title">On this page</p>
+  <ul><li><a href="#use-this">Use in your game</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#values">Numbers</a></li>
+<li><a href="#lists">Lists</a></li>
+<li><a href="#tests">Acceptance tests</a></li>
+<li><a href="#adoption-json">JSON</a></li></ul>
+</div>
+  </div>
+</details>
+</nav>
+<article class="doc-body contract-entry-body">
+<p class="label"><a href="/contracts/catalogue/#inventories-holdings">Inventories &amp; holdings</a></p>
+<div class="contract-entry-title-row">
+  <div><h1>Hunters satchel</h1><p class="contract-core-name"><code>hunters-satchel</code> · an adoption of <a href="/contracts/container-1/">Container</a>, version 1</p></div>
+  <div><span class="contract-badge ">Tests included</span></div>
+</div>
+
+<section class="contract-handoff" aria-labelledby="use-this">
+  <h2 id="use-this">Use in your game</h2>
+  <p>Opens the authoring tool with these answers and settings already filled in. You still add your game's own rules and tuning.</p>
+  <div class="contract-actions">
+    <a class="cta" href="/authoring-tool/?contract=container-1&amp;adoption=hunters-satchel">Open in the authoring tool</a>
+    <a class="cta-quiet" href="/contracts/container-1/hunters-satchel.zip" download="hunters-satchel.zip">Download ZIP</a>
+  </div>
+  <details><summary>What is in the ZIP</summary><p>The ZIP holds the adoption and its acceptance tests. In the authoring tool, choose <strong>Add contract</strong> and pick this ZIP. If you keep your design as files, put them in <code>contracts/</code>.</p><div class="contract-actions"><a href="/contracts/container-1/hunters-satchel.json" download="hunters-satchel.json">Download adoption JSON</a> · <a href="/contracts/container-1/container-1.pack.json" download="container-1.pack.json">Download tests</a><button type="button" class="cta-quiet" data-copy-core data-core-url="/contracts/container-1/hunters-satchel.json" data-copy-kind="adoption">Copy adoption</button><span role="status" aria-live="polite" data-copy-status></span></div></details>
+</section>
+<section class="contract-overview">
+  <h2>The contract behind it</h2>
+  <p>A delivery is items arriving at a container, such as a bag or chest, that holds distinct items. This contract says when it is full and what happens when some items do not fit. It also says which items it accepts and which slot fills or empties first. It covers slots and size budgets. Version 1 excludes item footprints; counted amounts such as gold use the Ranged value contract.</p>
+  <p><a href="/contracts/container-1/">Read the full Container contract →</a></p>
+</section>
+<section class="contract-form-section" id="questions">
+  <h2>Questions</h2>
+  <p>The supplied answer is marked on each question. Pick other answers to see what changes. Nothing is saved here: the ZIP and the authoring tool use the supplied answers.</p>
+  <div class="contract-actions contract-question-tools">
+    <button type="button" class="cta-quiet contract-reset" data-reset-choices>Restore supplied answers</button>
+    <label class="contract-switch"><input type="checkbox" data-builder-wording> Show exact wording for builders</label>
+  </div>
+  <div class="contract-question-list">
+  <article class="contract-question" id="question-capacity-limit" data-contract-question data-flag="capacity-limit" data-when="null">
+  <h3>What makes this container full?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for What makes this container full?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-capacity-limit" value="slot-count" data-contract-choice><span class="contract-option-label">Slot count</span></label></th>
+  <td><span class="contract-option-meaning">A fixed number of slots makes it full. A shop&#39;s twenty stock slots refuse a new kind of item when all twenty hold stacks. A matching stack with room can still accept it.</span></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-capacity-limit" value="size-budget" data-contract-choice><span class="contract-option-label">Size budget</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">A size-budget container has no slots. A card deck with a thirty-point build budget may spend those points across cards of different costs.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-capacity-limit" value="slots-and-size" data-contract-choice><span class="contract-option-label">Slots and size</span></label></th>
+  <td><span class="contract-option-meaning">A slot limit and a size budget both apply. A bag with three free slots can still refuse an anvil when its weight budget is full.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-capacity-limit" value="no-limit" data-contract-choice><span class="contract-option-label">No limit</span></label></th>
+  <td><span class="contract-option-meaning">It never fills. A new item always has room, so nothing is refused because the container ran out of space.</span></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Capacity changes what the container can hold and how it fills. This contract supports one size measure. Containers where items occupy a width-and-height footprint are outside version 1.</p></details>
+</article>
+<article class="contract-question" id="question-partial-acceptance" data-contract-question data-flag="partial-acceptance" data-when="{&quot;flag&quot;:{&quot;capacity-limit&quot;:[&quot;slot-count&quot;,&quot;size-budget&quot;,&quot;slots-and-size&quot;]}}">
+  <h3>A delivery reaches the container, but not all the items fit. What goes in?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>Capacity limit is Slot count or Size budget or Slots and size.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for A delivery reaches the container, but not all the items fit. What goes in?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-partial-acceptance" value="all-or-nothing" data-contract-choice><span class="contract-option-label">All or nothing</span></label></th>
+  <td><span class="contract-option-meaning">The whole delivery is refused. A ten-arrow pickup adds no arrows when the container has room for only five. Each offered type and amount is one delivery. A craft with several outputs makes several deliveries, so some outputs may enter before another is refused. The refused items stay with whatever offered them, and what that action does next is the game&#39;s own rule.</span></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-partial-acceptance" value="fill-what-fits" data-contract-choice><span class="contract-option-label">Fill what fits</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">Everything that fits goes in. A ten-arrow pickup adds five when only five fit; the other five remain outside.</span></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Two containers with the same free space can act differently. One accepts what fits; the other refuses the whole delivery.</p></details>
+</article>
+<article class="contract-question" id="question-leftover-destination" data-contract-question data-flag="leftover-destination" data-when="{&quot;flag&quot;:{&quot;partial-acceptance&quot;:[&quot;fill-what-fits&quot;]}}">
+  <h3>What happens to the items that do not fit?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>Partial acceptance is Fill what fits.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for What happens to the items that do not fit?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-leftover-destination" value="back-to-the-sender" data-contract-choice><span class="contract-option-label">Back to the sender</span></label></th>
+  <td><span class="contract-option-meaning">The leftover goes back to its source. Arrows that do not fit return to the chest or pickup that offered them.</span></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-leftover-destination" value="left-where-it-is" data-contract-choice><span class="contract-option-label">Left where it is</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The leftover stays where the delivery arrived. Arrows that do not fit become a loose pickup beside the bag.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-leftover-destination" value="another-store" data-contract-choice><span class="contract-option-label">Another store</span></label></th>
+  <td><span class="contract-option-meaning">The leftover moves to another store named by your game. Arrows that do not fit may go to a stash.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-leftover-destination" value="destroyed" data-contract-choice><span class="contract-option-label">Destroyed</span></label></th>
+  <td><span class="contract-option-meaning">The leftover is destroyed. Arrows that do not fit disappear instead of returning, dropping, or moving elsewhere.</span></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Items that stay outside still need a clear home. Otherwise one build may return them while another drops or destroys them.</p></details>
+</article>
+<article class="contract-question" id="question-fill-order" data-contract-question data-flag="fill-order" data-when="{&quot;flag&quot;:{&quot;capacity-limit&quot;:[&quot;slot-count&quot;,&quot;slots-and-size&quot;,&quot;no-limit&quot;]}}">
+  <h3>Several slots could hold a new item. Which slot gets it?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>Capacity limit is Slot count or Slots and size or No limit.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Several slots could hold a new item. Which slot gets it?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-fill-order" value="top-up-then-first-empty" data-contract-choice><span class="contract-option-label">Top up then first empty</span></label></th>
+  <td><span class="contract-option-meaning">Matching stacks fill before empty slots open. A potion tops up the first potion stack with room, then uses the first empty slot.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-fill-order" value="first-slot-that-fits" data-contract-choice><span class="contract-option-label">First slot that fits</span></label></th>
+  <td><span class="contract-option-meaning">The first slot that can hold the item gets it. An empty first hotbar slot wins over a later matching stack with room.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-fill-order" value="append" data-contract-choice><span class="contract-option-label">Append</span></label></th>
+  <td><span class="contract-option-meaning">New items go after everything already held. An empty slot in the middle stays unused until the items after it are gone. A bag with a slot limit can count as full while that gap remains.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-fill-order" value="not-applicable" data-contract-choice><span class="contract-option-label">Not applicable</span></label></th>
+  <td><span class="contract-option-meaning">Choose this only when each item has one reserved slot. If slots are unlimited, choose Append instead.</span></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Two teams building the same spec can fill the same container differently. That changes what players see and what the game removes later. Rules that score slots, rotate between containers, or use a custom sequence stay in your game&#39;s prose.</p></details>
+</article>
+<article class="contract-question" id="question-draw-order" data-contract-question data-flag="draw-order" data-when="null">
+  <h3>The game needs an item for one of its own rules. Which matching slot does it take from?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for The game needs an item for one of its own rules. Which matching slot does it take from?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-draw-order" value="first-in-order" data-contract-choice><span class="contract-option-label">First in order</span></label></th>
+  <td><span class="contract-option-meaning">The first matching slot supplies the item. Crafting uses the earliest stack in the bag before later stacks.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-draw-order" value="last-in-order" data-contract-choice><span class="contract-option-label">Last in order</span></label></th>
+  <td><span class="contract-option-meaning">The last matching slot supplies the item. Crafting empties the last matching stack before earlier stacks.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-draw-order" value="newest-first" data-contract-choice><span class="contract-option-label">Newest first</span></label></th>
+  <td><span class="contract-option-meaning">The stack that received items most recently supplies them first. Topping up an older potion stack makes it the newest again.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-draw-order" value="oldest-first" data-contract-choice><span class="contract-option-label">Oldest first</span></label></th>
+  <td><span class="contract-option-meaning">The stack that began first supplies items first. Topping up an old potion stack does not make it newer.</span></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-draw-order" value="not-applicable" data-contract-choice><span class="contract-option-label">Not applicable</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The game never has to choose between matching slots. The player chooses a slot, only one can match, or the container has no slots.</span></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Automatic use needs a stable choice because it can change which stack remains for the player. A rotating choice over counted amounts belongs in the Ranged value contract.</p></details>
+</article>
+<article class="contract-question" id="question-type-restriction" data-contract-question data-flag="type-restriction" data-when="null">
+  <h3>Which kinds of item can this container hold?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Which kinds of item can this container hold?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-type-restriction" value="only-these" data-contract-choice><span class="contract-option-label">Only these</span></label></th>
+  <td><span class="contract-option-meaning">Only listed item types can enter. A potion bag says no to a sword. The sword stays where it was; nothing is destroyed. An empty list means the container accepts nothing.</span></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-type-restriction" value="any-item" data-contract-choice><span class="contract-option-label">Any item</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">Every item type may enter once the contract knows how much room it needs. Where slots alone set the limit, an unlisted type — a quest letter no row names — uses one slot per item and cannot be forced out. Under a size budget, it is refused intact until a row names its size.</span></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="container-type-restriction" value="by-slot" data-contract-choice><span class="contract-option-label">By slot</span></label></th>
+  <td><span class="contract-option-meaning">Each slot has its own item rule. An armour slot accepts a helmet but refuses a potion without destroying it. List every kind that needs a stacking or forced-out rule.</span><p class="contract-option-semantics">Each item row&#39;s slot-rules-declared-in citation is binding. It points to prose that lists every slot and every item kind that slot accepts; an item not accepted there is refused intact.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>A clear item rule prevents silent differences between what the game accepts and what the designer intended. Rules built from another list or a code callback stay in your game&#39;s prose.</p></details>
+</article>
+  </div>
+</section>
+<aside class="contract-relief" aria-labelledby="relief-title">
+  <p class="contract-relief-title" id="relief-title">That was the hard part.</p>
+  <p>The questions are the decisions. Everything below follows from them: the numbers, lists and test inputs this adoption supplies, and the tests that come with it. The authoring tool edits all of it in place. Read on only if you want to check.</p>
+</aside>
+<details class="contract-form-section contract-fold" id="values">
+  <summary><span class="contract-fold-title">Numbers</span><span class="contract-fold-note">2 numbers</span></summary>
+  <p>Each value is either a number set here or a reference to one of your tuning keys.</p>
+<div class="contract-detail-grid"><article class="contract-detail-card">
+  <div class="contract-detail-heading"><h3>Slot count = 0</h3><span class="contract-badge ">fixed as written</span></div>
+  <p class="contract-exact-name"><code>slot-count</code></p>
+  <p>How many slots the container has. Use at least one when slots set capacity. Use zero when this container has no slot limit. If your game stores this number elsewhere, move it here so two copies cannot disagree.</p>
+</article>
+<article class="contract-detail-card">
+  <div class="contract-detail-heading"><h3>Size budget = 35</h3><span class="contract-badge ">fixed as written</span></div>
+  <p class="contract-exact-name"><code>size-budget</code></p>
+  <p>The largest total size the container holds. Your game chooses the unit, such as kilograms or bulk. Every item uses the same unit. Use zero when size does not limit the container.</p>
+</article></div>
+</details>
+<details class="contract-form-section contract-fold" id="rules">
+  <summary><span class="contract-fold-title">Rules</span><span class="contract-fold-note">2 rules</span></summary>
+  <p>A rule is a check between the numbers. Validation reports a rule that fails.</p>
+  <ul class="contract-rule-list"><li id="rule-slot-count-not-negative"><code>slot-count &gt;= 0</code></li>
+<li id="rule-size-budget-not-negative"><code>size-budget &gt;= 0</code></li></ul>
+</details>
+<details class="contract-form-section contract-fold" id="lists">
+  <summary><span class="contract-fold-title">Lists</span><span class="contract-fold-note">1 list</span></summary>
+  <p>Each list holds the rows this adoption supplies. A list can be empty.</p>
+  <article class="contract-collection">
+<h3>Items</h3>
+<p class="contract-exact-name"><code>items</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Slot rules declared in</th><th>Stack limit</th><th>Size</th><th>When forced out</th><th>Forced out order</th></tr></thead>
+<tbody>
+<tr><td><code>venison-cut</code></td><td>—</td><td>—</td><td><code>1.5</code></td><td><code>dropped-nearby</code></td><td><code>1</code></td></tr>
+<tr><td><code>deer-pelt</code></td><td>—</td><td>—</td><td><code>3.5</code></td><td><code>dropped-nearby</code></td><td><code>2</code></td></tr>
+<tr><td><code>iron-jaw-trap</code></td><td>—</td><td>—</td><td><code>6</code></td><td><code>dropped-nearby</code></td><td><code>3</code></td></tr>
+<tr><td><code>hunting-bow</code></td><td>—</td><td>—</td><td><code>1.5</code></td><td><code>dropped-nearby</code></td><td><code>4</code></td></tr>
+</tbody></table></div>
+</article>
+</details>
+<details class="contract-form-section contract-fold" id="verification">
+  <summary><span class="contract-fold-title">Test inputs</span><span class="contract-fold-note">scope and seeds</span></summary>
+  <p>Some tests need a scope or seeds from the adoption before they can run.</p>
+  <div class="contract-detail-grid"><article class="contract-detail-card">
+  <p class="contract-exact-name"><code>capacity-holds</code></p>
+  <h3>Capacity holds</h3>
+  <dl class="contract-inline-facts"><div><dt>Scope</dt><dd>sequences of packing, eating, dropping, and collecting venison cuts, pelts, traps, and the bow over a three-day hunt, including an exact-budget delivery, a partly fitting delivery, and an unlisted lantern refused intact, all measured in kilograms</dd></div><div><dt>Seeds</dt><dd><code>[&quot;hunters-satchel-weight-a&quot;,&quot;hunters-satchel-weight-b&quot;]</code></dd></div></dl>
+</article></div>
+</details>
+<details class="contract-form-section contract-fold" id="tests">
+  <summary><span class="contract-fold-title">Acceptance tests</span><span class="contract-fold-note">8 tests apply</span></summary>
+  <p>The contract comes with 14 tests. A test that runs once per row is counted once for each row. Tests that do not apply to these answers are still listed, with the reason.</p>
+  <div class="contract-test-list"><article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>delivery-that-fits</code></p>
+      <h3>a delivery that fits is accepted whole</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to hunters-satchel.</p>
+  <p class="contract-test-text">A delivery <code class="contract-placeholder">hunters-satchel</code> has room for is accepted whole: the container gains exactly what was offered, keeps everything it already held, and nothing is left over to account for. This is the ordinary case, written down so that every other test below reads as a departure from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">hunters-satchel</code> container with room for the whole of the delivery below</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a delivery offers n items of a type <code class="contract-placeholder">hunters-satchel</code> accepts</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">hunters-satchel</code> holds exactly n more items of that type than it did</li><li>nothing already in <code class="contract-placeholder">hunters-satchel</code> is removed, destroyed, or changed into another type</li><li>nothing is handed back, dropped, or destroyed</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">hunters-satchel</code>-contents-before-after</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>refuses-whole</code></p>
+      <h3>a delivery that does not fit is refused whole</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to hunters-satchel: partial acceptance is fill what fits, not all or nothing.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>takes-what-fits</code></p>
+      <h3>a delivery that does not fit is split</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to hunters-satchel.</p>
+  <p class="contract-test-text">A delivery larger than the room available fills <code class="contract-placeholder">hunters-satchel</code> as far as it goes and reports what it could not take. The part that did not fit is left outside <code class="contract-placeholder">hunters-satchel</code> as a loose item where the delivery happened. Where that part ends up next, and who is responsible for it after that, is decided in this game&#39;s own prose.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">hunters-satchel</code> container with room for m items of a type it accepts, where m is more than zero and less than n</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a delivery offers n items of that type</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">hunters-satchel</code> holds exactly m more items of that type</li><li>the remaining n minus m items are left outside <code class="contract-placeholder">hunters-satchel</code> as a loose item where the delivery happened</li><li>the delivery reports n minus m as the number it could not take</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">hunters-satchel</code>-contents-before-after</li><li><code class="contract-placeholder">hunters-satchel</code>-delivery-report</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>slots-are-the-limit</code></p>
+      <h3>the container is full when its slots are full</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to hunters-satchel: capacity limit is size budget, not slot count or slots and size.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>size-is-the-limit</code></p>
+      <h3>the container is full when its size budget is spent</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to hunters-satchel.</p>
+  <p class="contract-test-text">This container is full when the next item&#39;s size would take the total past the value at <code class="contract-placeholder">size-budget = 35</code>. Sizes come from the item rows and the budget from that value; this test restates neither number.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">hunters-satchel</code> container holding items whose sizes add up to less than <code class="contract-placeholder">size-budget = 35</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>a delivery offers items whose sizes would take the total past <code class="contract-placeholder">size-budget = 35</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the sizes of the items <code class="contract-placeholder">hunters-satchel</code> holds never add up to more than <code class="contract-placeholder">size-budget = 35</code></li><li>each item&#39;s size is the size written on its own type&#39;s row, in the unit this game&#39;s prose names for the budget</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">hunters-satchel</code>-size-total</li><li><code class="contract-placeholder">hunters-satchel</code>-delivery-report</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>never-refuses</code></p>
+      <h3>nothing is ever refused for want of room</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to hunters-satchel: capacity limit is size budget, not no limit.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fill-order-holds</code></p>
+      <h3>an accepted item lands in the declared slot</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to hunters-satchel: fill order is not asked for hunters-satchel.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>draw-order-by-position</code></p>
+      <h3>the game takes from the declared slot</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to hunters-satchel: draw order is not applicable, not first in order or last in order.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>draw-order-by-arrival</code></p>
+      <h3>the game takes by when the stack arrived</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to hunters-satchel: draw order is not applicable, not newest first or oldest first.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>stack-limit-holds</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> stacks no higher than its limit</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to hunters-satchel: capacity limit is size budget, not slot count or slots and size or no limit.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unlisted-type-refused</code></p>
+      <h3>a type the list does not name is refused</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to hunters-satchel: type restriction is any item, not only these.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>forced-out-holds · venison-cut</code></p>
+      <h3><code class="contract-placeholder">venison-cut</code> leaves <code class="contract-placeholder">hunters-satchel</code> in the declared way</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per items row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the venison-cut row.</p>
+  <p class="contract-test-text">When <code class="contract-placeholder">hunters-satchel</code> is made to give items up, <code class="contract-placeholder">venison-cut</code> is left as a loose item where <code class="contract-placeholder">hunters-satchel</code> is, for anyone to pick up, and it goes at position <code class="contract-placeholder">1</code> in the declared order. When the container has slots and <code class="contract-placeholder">venison-cut</code> sits in more than one slot, the last of those slots empties first — the row number orders the types, and that rule orders the slots inside one type. Of the five surveyed games that can force items out, three declare the switch that turns it on and none declares which item goes or where it lands — that gap is what this row closes.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">hunters-satchel</code> container holding more than one <code class="contract-placeholder">venison-cut</code> and, when it has slots and more than one slot is needed for that many, holding that type in more than one slot, together with any types carrying lower or higher forced-out order numbers</p></dd></div>
+<div><dt>When</dt><dd><ul><li><code class="contract-placeholder">hunters-satchel</code> is made to give items up without a take</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">venison-cut</code> is left as a loose item where <code class="contract-placeholder">hunters-satchel</code> is, for anyone to pick up</li><li><code class="contract-placeholder">venison-cut</code> goes at position <code class="contract-placeholder">1</code> in the order: any type present with a lower number has gone before it, and any type present with a higher number goes after it</li><li>when the container has slots and <code class="contract-placeholder">venison-cut</code> sits in more than one slot, the last occupied slot of that type goes first and the container works back through its own order</li><li>no type that did not have to leave leaves</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">hunters-satchel</code>-forced-removal-log</li><li><code class="contract-placeholder">hunters-satchel</code>-contents-before-after</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>forced-out-holds · deer-pelt</code></p>
+      <h3><code class="contract-placeholder">deer-pelt</code> leaves <code class="contract-placeholder">hunters-satchel</code> in the declared way</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per items row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the deer-pelt row.</p>
+  <p class="contract-test-text">When <code class="contract-placeholder">hunters-satchel</code> is made to give items up, <code class="contract-placeholder">deer-pelt</code> is left as a loose item where <code class="contract-placeholder">hunters-satchel</code> is, for anyone to pick up, and it goes at position <code class="contract-placeholder">2</code> in the declared order. When the container has slots and <code class="contract-placeholder">deer-pelt</code> sits in more than one slot, the last of those slots empties first — the row number orders the types, and that rule orders the slots inside one type. Of the five surveyed games that can force items out, three declare the switch that turns it on and none declares which item goes or where it lands — that gap is what this row closes.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">hunters-satchel</code> container holding more than one <code class="contract-placeholder">deer-pelt</code> and, when it has slots and more than one slot is needed for that many, holding that type in more than one slot, together with any types carrying lower or higher forced-out order numbers</p></dd></div>
+<div><dt>When</dt><dd><ul><li><code class="contract-placeholder">hunters-satchel</code> is made to give items up without a take</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">deer-pelt</code> is left as a loose item where <code class="contract-placeholder">hunters-satchel</code> is, for anyone to pick up</li><li><code class="contract-placeholder">deer-pelt</code> goes at position <code class="contract-placeholder">2</code> in the order: any type present with a lower number has gone before it, and any type present with a higher number goes after it</li><li>when the container has slots and <code class="contract-placeholder">deer-pelt</code> sits in more than one slot, the last occupied slot of that type goes first and the container works back through its own order</li><li>no type that did not have to leave leaves</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">hunters-satchel</code>-forced-removal-log</li><li><code class="contract-placeholder">hunters-satchel</code>-contents-before-after</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>forced-out-holds · iron-jaw-trap</code></p>
+      <h3><code class="contract-placeholder">iron-jaw-trap</code> leaves <code class="contract-placeholder">hunters-satchel</code> in the declared way</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per items row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the iron-jaw-trap row.</p>
+  <p class="contract-test-text">When <code class="contract-placeholder">hunters-satchel</code> is made to give items up, <code class="contract-placeholder">iron-jaw-trap</code> is left as a loose item where <code class="contract-placeholder">hunters-satchel</code> is, for anyone to pick up, and it goes at position <code class="contract-placeholder">3</code> in the declared order. When the container has slots and <code class="contract-placeholder">iron-jaw-trap</code> sits in more than one slot, the last of those slots empties first — the row number orders the types, and that rule orders the slots inside one type. Of the five surveyed games that can force items out, three declare the switch that turns it on and none declares which item goes or where it lands — that gap is what this row closes.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">hunters-satchel</code> container holding more than one <code class="contract-placeholder">iron-jaw-trap</code> and, when it has slots and more than one slot is needed for that many, holding that type in more than one slot, together with any types carrying lower or higher forced-out order numbers</p></dd></div>
+<div><dt>When</dt><dd><ul><li><code class="contract-placeholder">hunters-satchel</code> is made to give items up without a take</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">iron-jaw-trap</code> is left as a loose item where <code class="contract-placeholder">hunters-satchel</code> is, for anyone to pick up</li><li><code class="contract-placeholder">iron-jaw-trap</code> goes at position <code class="contract-placeholder">3</code> in the order: any type present with a lower number has gone before it, and any type present with a higher number goes after it</li><li>when the container has slots and <code class="contract-placeholder">iron-jaw-trap</code> sits in more than one slot, the last occupied slot of that type goes first and the container works back through its own order</li><li>no type that did not have to leave leaves</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">hunters-satchel</code>-forced-removal-log</li><li><code class="contract-placeholder">hunters-satchel</code>-contents-before-after</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>forced-out-holds · hunting-bow</code></p>
+      <h3><code class="contract-placeholder">hunting-bow</code> leaves <code class="contract-placeholder">hunters-satchel</code> in the declared way</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per items row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the hunting-bow row.</p>
+  <p class="contract-test-text">When <code class="contract-placeholder">hunters-satchel</code> is made to give items up, <code class="contract-placeholder">hunting-bow</code> is left as a loose item where <code class="contract-placeholder">hunters-satchel</code> is, for anyone to pick up, and it goes at position <code class="contract-placeholder">4</code> in the declared order. When the container has slots and <code class="contract-placeholder">hunting-bow</code> sits in more than one slot, the last of those slots empties first — the row number orders the types, and that rule orders the slots inside one type. Of the five surveyed games that can force items out, three declare the switch that turns it on and none declares which item goes or where it lands — that gap is what this row closes.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">hunters-satchel</code> container holding more than one <code class="contract-placeholder">hunting-bow</code> and, when it has slots and more than one slot is needed for that many, holding that type in more than one slot, together with any types carrying lower or higher forced-out order numbers</p></dd></div>
+<div><dt>When</dt><dd><ul><li><code class="contract-placeholder">hunters-satchel</code> is made to give items up without a take</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">hunting-bow</code> is left as a loose item where <code class="contract-placeholder">hunters-satchel</code> is, for anyone to pick up</li><li><code class="contract-placeholder">hunting-bow</code> goes at position <code class="contract-placeholder">4</code> in the order: any type present with a lower number has gone before it, and any type present with a higher number goes after it</li><li>when the container has slots and <code class="contract-placeholder">hunting-bow</code> sits in more than one slot, the last occupied slot of that type goes first and the container works back through its own order</li><li>no type that did not have to leave leaves</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">hunters-satchel</code>-forced-removal-log</li><li><code class="contract-placeholder">hunters-satchel</code>-contents-before-after</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>never-forced-out</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> is never given up by <code class="contract-placeholder">hunters-satchel</code> itself</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to hunters-satchel: no row in items matches when-forced-out never.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>capacity-holds</code></p>
+      <h3>the limit holds after every delivery and take</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to hunters-satchel.</p>
+  <p class="contract-test-text">For every delivery and take in this adoption&#39;s verification scope — <code class="contract-placeholder">sequences of packing, eating, dropping, and collecting venison cuts, pelts, traps, and the bow over a three-day hunt, including an exact-budget delivery, a partly fitting delivery, and an unlisted lantern refused intact, all measured in kilograms</code> — the sizes of the items held never add up to more than the container&#39;s declared size budget. The scope and seeds are supplied by this adoption through its verification inputs; the rule being checked is the one this container&#39;s own capacity answer entitles it to assert.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">hunters-satchel</code>-contents-trace</li><li>first-violating-delivery-or-take</li></ul></dd></div>
+<div><dt>Holds</dt><dd><p>after every delivery and every take, the sizes of the items held never add up to more than the container&#39;s declared size budget</p></dd></div>
+<div><dt>Seeds</dt><dd><p><code class="contract-placeholder">[&quot;hunters-satchel-weight-a&quot;,&quot;hunters-satchel-weight-b&quot;]</code></p></dd></div>
+<div><dt>Scope</dt><dd><p><code class="contract-placeholder">sequences of packing, eating, dropping, and collecting venison cuts, pelts, traps, and the bow over a three-day hunt, including an exact-budget delivery, a partly fitting delivery, and an unlisted lantern refused intact, all measured in kilograms</code></p></dd></div></dl></details>
+</article></div>
+</details>
+<details class="contract-form-section contract-fold" id="adoption-json">
+  <summary><span class="contract-fold-title">JSON</span><span class="contract-fold-note">the adoption as one file</span></summary>
+  <p>The adoption file as supplied. Answers you try on this page are not written into it; to change an adoption, open it in the authoring tool.</p>
+
+  <pre class="contract-json"><code>{
+  &quot;contract&quot;: &quot;container&quot;,
+  &quot;version&quot;: 1,
+  &quot;origin&quot;: &quot;https://opengdd.org/contracts/container-1&quot;,
+  &quot;summary&quot;: &quot;A delivery is items arriving at a container, such as a bag or chest, that holds distinct items. This contract says when it is full and what happens when some items do not fit. It also says which items it accepts and which slot fills or empties first. It covers slots and size budgets. Version 1 excludes item footprints; counted amounts such as gold use the Ranged value contract.&quot;,
+  &quot;mechanism&quot;: [
+    &quot;One container holds items. Two items of one type are interchangeable; items differing within a type — wear, charges — are separate types here, or this game&#39;s prose. A slot holds one stack: items of one type together.&quot;,
+    &quot;The container&#39;s own order is the order the game&#39;s material numbers or lists its slots; first and last below mean first and last in it. A container with no slots has none. Containers where an item occupies a width-and-height footprint, including attaché cases and grid inventories, are outside version 1.&quot;,
+    &quot;A put offers a type and an amount — a delivery. A take asks for a type and an amount; one larger than the holdings yields what is held and reports the shortfall.&quot;,
+    &quot;A delivery that fits is accepted whole; one that does not is settled by partial-acceptance, and anything left over by leftover-destination.&quot;,
+    &quot;A stack never holds more than the stack limit on its type&#39;s row. Past it, an amount starts a new stack in a free slot, or counts as not fitting if there is none. Under type-restriction any-item, where slots alone set the limit, a type with no row stacks one item per slot and is unmovable in a forced removal, as though when-forced-out were never; under a size budget an unlisted type has no size, so it is refused intact until a row names its size.&quot;,
+    &quot;A forced removal is an item leaving without a take: the container shrank, its rules changed, or its owner is gone. Each item row says what becomes of its type and when its turn comes. In a container with slots, the last occupied slot within one type goes first.&quot;,
+    &quot;One adoption file describes one container; two are two files with their own rows. Moving an item between them is a take then a delivery, and nothing binds them. Rearranging by hand is input. In a container with slots, a sort re-delivers the contents in the order the sort names; each delivery then lands by the fill-order answer. A slotless container&#39;s sort changes nothing observable.&quot;,
+    &quot;The same delivery from the same contents lands the same way; the same take comes from the same slot.&quot;
+  ],
+  &quot;questions&quot;: {
+    &quot;capacity-limit&quot;: {
+      &quot;asks&quot;: &quot;What makes this container full?&quot;,
+      &quot;rationale&quot;: &quot;Capacity changes what the container can hold and how it fills. This contract supports one size measure. Containers where items occupy a width-and-height footprint are outside version 1.&quot;,
+      &quot;options&quot;: {
+        &quot;slot-count&quot;: {
+          &quot;meaning&quot;: &quot;A fixed number of slots makes it full. A shop&#39;s twenty stock slots refuse a new kind of item when all twenty hold stacks. A matching stack with room can still accept it.&quot;
+        },
+        &quot;size-budget&quot;: {
+          &quot;meaning&quot;: &quot;A size-budget container has no slots. A card deck with a thirty-point build budget may spend those points across cards of different costs.&quot;
+        },
+        &quot;slots-and-size&quot;: {
+          &quot;meaning&quot;: &quot;A slot limit and a size budget both apply. A bag with three free slots can still refuse an anvil when its weight budget is full.&quot;
+        },
+        &quot;no-limit&quot;: {
+          &quot;meaning&quot;: &quot;It never fills. A new item always has room, so nothing is refused because the container ran out of space.&quot;,
+          &quot;rationale&quot;: &quot;Use this when room can never run out. It avoids a fake large limit that readers may mistake for a real cap.&quot;
+        }
+      }
+    },
+    &quot;partial-acceptance&quot;: {
+      &quot;asks&quot;: &quot;A delivery reaches the container, but not all the items fit. What goes in?&quot;,
+      &quot;rationale&quot;: &quot;Two containers with the same free space can act differently. One accepts what fits; the other refuses the whole delivery.&quot;,
+      &quot;when&quot;: {
+        &quot;flag&quot;: {
+          &quot;capacity-limit&quot;: [
+            &quot;slot-count&quot;,
+            &quot;size-budget&quot;,
+            &quot;slots-and-size&quot;
+          ]
+        }
+      },
+      &quot;options&quot;: {
+        &quot;all-or-nothing&quot;: {
+          &quot;meaning&quot;: &quot;The whole delivery is refused. A ten-arrow pickup adds no arrows when the container has room for only five. Each offered type and amount is one delivery. A craft with several outputs makes several deliveries, so some outputs may enter before another is refused. The refused items stay with whatever offered them, and what that action does next is the game&#39;s own rule.&quot;
+        },
+        &quot;fill-what-fits&quot;: {
+          &quot;meaning&quot;: &quot;Everything that fits goes in. A ten-arrow pickup adds five when only five fit; the other five remain outside.&quot;
+        }
+      }
+    },
+    &quot;leftover-destination&quot;: {
+      &quot;asks&quot;: &quot;What happens to the items that do not fit?&quot;,
+      &quot;rationale&quot;: &quot;Items that stay outside still need a clear home. Otherwise one build may return them while another drops or destroys them.&quot;,
+      &quot;when&quot;: {
+        &quot;flag&quot;: {
+          &quot;partial-acceptance&quot;: [
+            &quot;fill-what-fits&quot;
+          ]
+        }
+      },
+      &quot;options&quot;: {
+        &quot;back-to-the-sender&quot;: {
+          &quot;meaning&quot;: &quot;The leftover goes back to its source. Arrows that do not fit return to the chest or pickup that offered them.&quot;
+        },
+        &quot;left-where-it-is&quot;: {
+          &quot;meaning&quot;: &quot;The leftover stays where the delivery arrived. Arrows that do not fit become a loose pickup beside the bag.&quot;
+        },
+        &quot;another-store&quot;: {
+          &quot;meaning&quot;: &quot;The leftover moves to another store named by your game. Arrows that do not fit may go to a stash.&quot;
+        },
+        &quot;destroyed&quot;: {
+          &quot;meaning&quot;: &quot;The leftover is destroyed. Arrows that do not fit disappear instead of returning, dropping, or moving elsewhere.&quot;
+        }
+      }
+    },
+    &quot;fill-order&quot;: {
+      &quot;asks&quot;: &quot;Several slots could hold a new item. Which slot gets it?&quot;,
+      &quot;rationale&quot;: &quot;Two teams building the same spec can fill the same container differently. That changes what players see and what the game removes later. Rules that score slots, rotate between containers, or use a custom sequence stay in your game&#39;s prose.&quot;,
+      &quot;when&quot;: {
+        &quot;flag&quot;: {
+          &quot;capacity-limit&quot;: [
+            &quot;slot-count&quot;,
+            &quot;slots-and-size&quot;,
+            &quot;no-limit&quot;
+          ]
+        }
+      },
+      &quot;options&quot;: {
+        &quot;top-up-then-first-empty&quot;: {
+          &quot;meaning&quot;: &quot;Matching stacks fill before empty slots open. A potion tops up the first potion stack with room, then uses the first empty slot.&quot;
+        },
+        &quot;first-slot-that-fits&quot;: {
+          &quot;meaning&quot;: &quot;The first slot that can hold the item gets it. An empty first hotbar slot wins over a later matching stack with room.&quot;
+        },
+        &quot;append&quot;: {
+          &quot;meaning&quot;: &quot;New items go after everything already held. An empty slot in the middle stays unused until the items after it are gone. A bag with a slot limit can count as full while that gap remains.&quot;
+        },
+        &quot;not-applicable&quot;: {
+          &quot;meaning&quot;: &quot;Choose this only when each item has one reserved slot. If slots are unlimited, choose Append instead.&quot;
+        }
+      }
+    },
+    &quot;draw-order&quot;: {
+      &quot;asks&quot;: &quot;The game needs an item for one of its own rules. Which matching slot does it take from?&quot;,
+      &quot;rationale&quot;: &quot;Automatic use needs a stable choice because it can change which stack remains for the player. A rotating choice over counted amounts belongs in the Ranged value contract.&quot;,
+      &quot;options&quot;: {
+        &quot;first-in-order&quot;: {
+          &quot;meaning&quot;: &quot;The first matching slot supplies the item. Crafting uses the earliest stack in the bag before later stacks.&quot;
+        },
+        &quot;last-in-order&quot;: {
+          &quot;meaning&quot;: &quot;The last matching slot supplies the item. Crafting empties the last matching stack before earlier stacks.&quot;
+        },
+        &quot;newest-first&quot;: {
+          &quot;meaning&quot;: &quot;The stack that received items most recently supplies them first. Topping up an older potion stack makes it the newest again.&quot;
+        },
+        &quot;oldest-first&quot;: {
+          &quot;meaning&quot;: &quot;The stack that began first supplies items first. Topping up an old potion stack does not make it newer.&quot;,
+          &quot;rationale&quot;: &quot;Use this when the longest-held stack must leave first, such as a magazine or queue.&quot;
+        },
+        &quot;not-applicable&quot;: {
+          &quot;meaning&quot;: &quot;The game never has to choose between matching slots. The player chooses a slot, only one can match, or the container has no slots.&quot;
+        }
+      }
+    },
+    &quot;type-restriction&quot;: {
+      &quot;asks&quot;: &quot;Which kinds of item can this container hold?&quot;,
+      &quot;rationale&quot;: &quot;A clear item rule prevents silent differences between what the game accepts and what the designer intended. Rules built from another list or a code callback stay in your game&#39;s prose.&quot;,
+      &quot;options&quot;: {
+        &quot;only-these&quot;: {
+          &quot;meaning&quot;: &quot;Only listed item types can enter. A potion bag says no to a sword. The sword stays where it was; nothing is destroyed. An empty list means the container accepts nothing.&quot;
+        },
+        &quot;any-item&quot;: {
+          &quot;meaning&quot;: &quot;Every item type may enter once the contract knows how much room it needs. Where slots alone set the limit, an unlisted type — a quest letter no row names — uses one slot per item and cannot be forced out. Under a size budget, it is refused intact until a row names its size.&quot;
+        },
+        &quot;by-slot&quot;: {
+          &quot;meaning&quot;: &quot;Each slot has its own item rule. An armour slot accepts a helmet but refuses a potion without destroying it. List every kind that needs a stacking or forced-out rule.&quot;,
+          &quot;semantics&quot;: &quot;Each item row&#39;s slot-rules-declared-in citation is binding. It points to prose that lists every slot and every item kind that slot accepts; an item not accepted there is refused intact.&quot;
+        }
+      }
+    }
+  },
+  &quot;declares&quot;: {
+    &quot;values&quot;: {
+      &quot;slot-count&quot;: {
+        &quot;description&quot;: &quot;How many slots the container has. Use at least one when slots set capacity. Use zero when this container has no slot limit. If your game stores this number elsewhere, move it here so two copies cannot disagree.&quot;
+      },
+      &quot;size-budget&quot;: {
+        &quot;description&quot;: &quot;The largest total size the container holds. Your game chooses the unit, such as kilograms or bulk. Every item uses the same unit. Use zero when size does not limit the container.&quot;
+      }
+    },
+    &quot;rows&quot;: {
+      &quot;items&quot;: {
+        &quot;description&quot;: &quot;The item types whose rules this contract records. Use one row for each type. For a restricted container, the rows are also the allowed list. An empty list means no listed types. For any-item, the rows plus the unlisted-type defaults fully decide entry, stacking, and forced removal for every type. The validator checks each row&#39;s fields; a reviewer checks that the game&#39;s own prose does not give unlisted types a rule different from the defaults.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;The item type&#39;s name, written as your game names it.&quot;
+          },
+          &quot;slot-rules-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;flag&quot;: {
+                &quot;type-restriction&quot;: [
+                  &quot;by-slot&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The place in this game&#39;s prose that lists every slot and every item kind it accepts. This citation is the binding rule for the slots. Use the same citation on every row when one section holds the whole list.&quot;
+          },
+          &quot;stack-limit&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;when&quot;: {
+              &quot;flag&quot;: {
+                &quot;capacity-limit&quot;: [
+                  &quot;slot-count&quot;,
+                  &quot;slots-and-size&quot;,
+                  &quot;no-limit&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;How many items of this type fit in one slot. It is required whenever the container has slots, including when it never fills. Use one for an item that does not stack, or another positive whole number.&quot;
+          },
+          &quot;size&quot;: {
+            &quot;type&quot;: &quot;number&quot;,
+            &quot;when&quot;: {
+              &quot;flag&quot;: {
+                &quot;capacity-limit&quot;: [
+                  &quot;size-budget&quot;,
+                  &quot;slots-and-size&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;How much of the size budget one item uses. Use the same unit as the container&#39;s budget. Use zero or more.&quot;
+          },
+          &quot;when-forced-out&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;never&quot;,
+              &quot;dropped-nearby&quot;,
+              &quot;moved-to-another-store&quot;,
+              &quot;destroyed&quot;
+            ],
+            &quot;description&quot;: &quot;What happens to this item when the container must give items up. It may stay, drop nearby, move to another store, or be destroyed. An item marked to stay is skipped. The container tries other types in their chosen order. It refuses the forced removal if too few items can leave. If destroying an item could make the game impossible to finish, say so and test it in your own rules.&quot;
+          },
+          &quot;forced-out-order&quot;: {
+            &quot;type&quot;: &quot;integer&quot;,
+            &quot;unique&quot;: true,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;when-forced-out&quot;: [
+                  &quot;dropped-nearby&quot;,
+                  &quot;moved-to-another-store&quot;,
+                  &quot;destroyed&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The order in which item types leave, lowest number first. Give each movable type a different number. Items of one type leave from its last occupied slot first. The size of the gaps between numbers does not matter.&quot;
+          }
+        }
+      }
+    }
+  },
+  &quot;pack&quot;: &quot;sha256:8f40a54e650b683136852e7a5b47976ebe709f810057f847424d6d8ab3b41b20&quot;,
+  &quot;rules&quot;: {
+    &quot;slot-count-not-negative&quot;: &quot;slot-count &gt;= 0&quot;,
+    &quot;size-budget-not-negative&quot;: &quot;size-budget &gt;= 0&quot;
+  },
+  &quot;answers&quot;: {
+    &quot;capacity-limit&quot;: &quot;size-budget&quot;,
+    &quot;partial-acceptance&quot;: &quot;fill-what-fits&quot;,
+    &quot;leftover-destination&quot;: &quot;left-where-it-is&quot;,
+    &quot;draw-order&quot;: &quot;not-applicable&quot;,
+    &quot;type-restriction&quot;: &quot;any-item&quot;
+  },
+  &quot;values&quot;: {
+    &quot;slot-count&quot;: 0,
+    &quot;size-budget&quot;: 35
+  },
+  &quot;rows&quot;: {
+    &quot;items&quot;: [
+      {
+        &quot;id&quot;: &quot;venison-cut&quot;,
+        &quot;size&quot;: 1.5,
+        &quot;when-forced-out&quot;: &quot;dropped-nearby&quot;,
+        &quot;forced-out-order&quot;: 1
+      },
+      {
+        &quot;id&quot;: &quot;deer-pelt&quot;,
+        &quot;size&quot;: 3.5,
+        &quot;when-forced-out&quot;: &quot;dropped-nearby&quot;,
+        &quot;forced-out-order&quot;: 2
+      },
+      {
+        &quot;id&quot;: &quot;iron-jaw-trap&quot;,
+        &quot;size&quot;: 6,
+        &quot;when-forced-out&quot;: &quot;dropped-nearby&quot;,
+        &quot;forced-out-order&quot;: 3
+      },
+      {
+        &quot;id&quot;: &quot;hunting-bow&quot;,
+        &quot;size&quot;: 1.5,
+        &quot;when-forced-out&quot;: &quot;dropped-nearby&quot;,
+        &quot;forced-out-order&quot;: 4
+      }
+    ]
+  },
+  &quot;verification&quot;: {
+    &quot;capacity-holds&quot;: {
+      &quot;scope&quot;: &quot;sequences of packing, eating, dropping, and collecting venison cuts, pelts, traps, and the bow over a three-day hunt, including an exact-budget delivery, a partly fitting delivery, and an unlisted lantern refused intact, all measured in kilograms&quot;,
+      &quot;seeds&quot;: [
+        &quot;hunters-satchel-weight-a&quot;,
+        &quot;hunters-satchel-weight-b&quot;
+      ]
+    }
+  }
+}
+</code></pre>
+</details>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

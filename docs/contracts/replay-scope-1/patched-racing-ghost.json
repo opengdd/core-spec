@@ -1,0 +1,301 @@
+{
+  "contract": "replay-scope",
+  "version": 1,
+  "summary": "Covers racing ghosts, daily seeds, observer replays, solution shares, and other recorded reruns. It decides what the record contains, whether an update can still play it, what must match, and what happens at the first difference. Input encoding, random-number methods, storage, cameras, and networking stay in the game's own rules.",
+  "questions": {
+    "replay-record": {
+      "asks": "What does this replay need to run again?",
+      "rationale": "A daily seed recreates a challenge. A racing ghost also needs the driver's recorded inputs.",
+      "options": {
+        "seed-only": {
+          "meaning": "The replay needs only the seed. A roguelike daily run rebuilds the day's dungeon before new play begins.",
+          "semantics": "The record carries the seed but no input log; each claim's comparison reference is carried or recomputed from the record. Playback consumes the seed, accepts live inputs, and applies each claim's live-input answer."
+        },
+        "seed-and-input-log": {
+          "meaning": "The replay needs the seed and the recorded inputs. A racing ghost follows the recorded steering on the same generated track.",
+          "semantics": "The record carries the seed and one ordered input log; each claim's comparison reference is carried or recomputed from the record. Playback consumes the seed and log from the declared starting point; changing either creates a different record instance."
+        },
+        "input-log-from-fixed-start": {
+          "meaning": "The replay needs recorded inputs and one fixed start. A puzzle solution begins from the shared board and repeats the saved moves.",
+          "semantics": "The record carries one fixed-start identity and one ordered input log; each claim's comparison reference is carried or recomputed from the record. Seed identity is not a separate requirement."
+        }
+      }
+    },
+    "after-an-update": {
+      "asks": "What happens to a recorded replay after the game updates?",
+      "rationale": "A patch can change rules, content, or timing. The replay needs a clear version promise before playback starts.",
+      "options": {
+        "same-version-only": {
+          "meaning": "The replay works only in the version that recorded it. A patched racing game labels an older ghost as incompatible.",
+          "semantics": "When the recorded and running version ids differ, reject the replay before consuming its seed, start, or inputs. Equal version ids do not override failed content, mod, or settings checks."
+        },
+        "migrate-then-replay": {
+          "meaning": "The game converts the replay before playing it. A puzzle update maps an old move list onto the revised board rules.",
+          "semantics": "When the version ids differ, a cited migration rule derives a new record for the running version while preserving the source record. Playback consumes only a successful migrated record and identifies both versions and the migration used."
+        },
+        "best-effort-with-declared-divergence": {
+          "meaning": "The game tries the old replay and states what may differ. An RTS update names changed unit balance before the observer replay starts.",
+          "semantics": "When the version ids differ, the running version consumes the original record after presenting the cited known cross-version differences. Actual mismatches still follow the divergence-response answer."
+        }
+      }
+    },
+    "divergence-response": {
+      "asks": "What happens at the first result that does not match?",
+      "rationale": "A replay can stop, continue with a warning, or continue without showing the difference.",
+      "options": {
+        "stop-and-report": {
+          "meaning": "Stop the replay and report the first difference. A puzzle solution stops on the first move that produces the wrong board.",
+          "semantics": "Do not consume the next recorded input. Report the failed claim, comparison point, expected result, observed result, versions, and platforms, then end playback as diverged."
+        },
+        "continue-and-flag": {
+          "meaning": "Keep playing and mark the replay as diverged. An RTS observer can watch the rest after a unit first appears in the wrong place.",
+          "semantics": "Report the first difference, mark playback as diverged, and continue from playback's own state. Later comparisons are informational; they do not replace the first report or resynchronise playback to the reference."
+        },
+        "continue-silently": {
+          "meaning": "Keep playing without showing the difference. A racing ghost can finish the lap after it drifts past the allowed gap.",
+          "semantics": "Mark the mismatch inside the replay controller, emit no player-facing, ordinary-log, or telemetry report, and continue from playback's own state. Later comparisons are informational and playback remains diverged."
+        }
+      }
+    }
+  },
+  "declares": {
+    "values": {
+      "allowed-position-gap": {
+        "description": "The greatest allowed distance between recorded and replayed positions, in the position unit named by every position claim in this adoption.",
+        "range": [
+          0,
+          1000000
+        ],
+        "forms": [
+          "number",
+          "citation"
+        ],
+        "when": {
+          "row-has": {
+            "reproduction-claims": {
+              "matching-standard": [
+                "allowed-position-gap"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "rows": {
+      "replay-record": {
+        "description": "Give the rules that capture and read this replay family. One adoption has exactly one row.",
+        "when-empty": "An empty replay-record list is never a behavior choice: this adoption requires exactly one row, and a reviewer rejects a file without it.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this replay family in the game's words, such as ghost-lap or observer-match. Each sealed record created from the family carries its own cited instance identity."
+          },
+          "recording-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule naming the start and end of recording. It fixes the recording version, platform, content-set identity, settings, mod identity, and the record's own instance identity. It names the seed or fixed start and the input log when used, and says whether each claim's comparison reference is captured at recording or recomputed from the record at playback."
+          },
+          "input-clock-declared-in": {
+            "type": "citation",
+            "when": {
+              "flag": {
+                "replay-record": [
+                  "seed-and-input-log",
+                  "input-log-from-fixed-start"
+                ]
+              }
+            },
+            "description": "The rule that orders recorded inputs and states the clock, step, or turn used to play them back."
+          },
+          "fixed-start-declared-in": {
+            "type": "citation",
+            "when": {
+              "flag": {
+                "replay-record": [
+                  "input-log-from-fixed-start"
+                ]
+              }
+            },
+            "description": "The rule that identifies and verifies the fixed starting state before the first input."
+          },
+          "migration-declared-in": {
+            "type": "citation",
+            "when": {
+              "flag": {
+                "after-an-update": [
+                  "migrate-then-replay"
+                ]
+              }
+            },
+            "description": "The deterministic rule that derives the running-version record while preserving the source record."
+          },
+          "cross-version-divergence-declared-in": {
+            "type": "citation",
+            "when": {
+              "flag": {
+                "after-an-update": [
+                  "best-effort-with-declared-divergence"
+                ]
+              }
+            },
+            "description": "The player-facing statement of known changes that may alter this replay in the running version."
+          },
+          "difference-report-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The incompatibility or difference report. It presents version, content, mod, settings, start, or migration rejection before playback and presents the first failed claim and comparison details when the selected response is visible."
+          }
+        }
+      },
+      "reproduction-claims": {
+        "description": "List one row for each result this replay promises to compare. Rows may share one conditions section when the same conditions apply. Shared test material must cover every row that cites it.",
+        "when-empty": "This adoption makes no replay promise without at least one result to compare, and a reviewer rejects the empty list.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this comparison claim in the game's words, such as car-path or match-state."
+          },
+          "artifact": {
+            "type": "string",
+            "required": true,
+            "description": "The game's plain name for the result that playback compares."
+          },
+          "platform-reach": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "recorded-platform-only",
+              "every-supported-platform"
+            ],
+            "description": "Whether this claim is compared only on the recording platform or on every supported platform."
+          },
+          "shifts-with-live-input": {
+            "type": "string",
+            "when": {
+              "flag": {
+                "replay-record": [
+                  "seed-only"
+                ]
+              }
+            },
+            "options": [
+              "seed-fixes-this-claim",
+              "live-input-may-shift-this-claim"
+            ],
+            "description": "Can what the player does change a result this replay promises? Say whether the seed fixes this claim or whether live input may shift it."
+          },
+          "live-input-dependence-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "shifts-with-live-input": [
+                  "live-input-may-shift-this-claim"
+                ]
+              }
+            },
+            "description": "The fixed rule naming every live-input history fact allowed to change this claimed result. Unlisted live input does not change it."
+          },
+          "matching-standard": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "bit-exact-state",
+              "outcome-equivalent",
+              "allowed-position-gap"
+            ],
+            "description": "What this claim compares: every named state byte, every named outcome field, or position in the cited space using the adoption's allowed gap."
+          },
+          "reproduces": {
+            "type": "citation",
+            "required": true,
+            "description": "The fixed game prose naming every state byte, outcome field, or position that must match."
+          },
+          "excludes": {
+            "type": "citation",
+            "required": true,
+            "description": "A separate fixed section naming what this claim subtracts from what it promises to match, including an explicit statement when nothing is excluded."
+          },
+          "conditions": {
+            "type": "citation",
+            "required": true,
+            "description": "The fixed game prose naming when the promise holds, including content-set identity, settings, mods, and any other compatibility or comparison conditions. Content identity is a condition, not a version."
+          },
+          "comparison-points": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule naming when a reference is captured or recomputed and when playback compares it, such as every simulation checkpoint, the finish line, or the solved board."
+          }
+        }
+      }
+    }
+  },
+  "rules": {
+    "best-effort-must-be-visible": {
+      "forbid": {
+        "flag": {
+          "after-an-update": [
+            "best-effort-with-declared-divergence"
+          ],
+          "divergence-response": [
+            "continue-silently"
+          ]
+        }
+      },
+      "message": "Best-effort replay after an update needs a visible difference notice; show and flag differences, or keep the replay on its recorded version."
+    }
+  },
+  "origin": "https://opengdd.org/contracts/replay-scope-1",
+  "mechanism": [
+    "This is the single normative authority for what is recorded, when capture or recomputation happens, what playback consumes, and how differences are detected and handled. Questions and rows supply choices and references; they do not redefine this order.",
+    "A `replay-record` row names a replay family. Each immutable replay record made from that family carries its own stable instance identity under `recording-declared-in`. It also carries the recording version, platform, content-set identity, settings and mod identity; the chosen seed or fixed start; the ordered input log when selected; and every claim's comparison reference. A reference is either captured at recording or deterministically recomputed from the sealed record at lifecycle step 11. A migrated record is a derived record with its own identity and a link to the unchanged source.",
+    "A **comparison point** is a cited checkpoint at which playback reads a result and obtains the corresponding captured or recomputed reference. A **difference** is the first eligible comparison that fails that claim's matching standard. The terminal playback result is `diverged`, `rejected`, or `complete`; before a terminal result, playback is in progress.",
+    "### Record",
+    "1. Read the one replay-family row and every reproduction claim. From `recording-declared-in`, fix the recording version, platform, content-set identity, settings, and mod identity before the record begins. 2. Establish the start. A seed-only or seed-and-input record captures the seed before any claimed seeded result is generated. A fixed-start record captures an identity that the cited state rule can verify before playback. 3. Begin input capture at the cited start. A seed-only record captures no inputs. Either input-log record captures each mapped game action with its complete order and cited clock, step, or turn. 4. At every claim's comparison point, either capture the reference required by that claim's matching standard or capture all sealed source data that the cited rule requires to recompute the reference at step 11. 5. End capture at the cited boundary. Seal the record's own instance identity and contents. A later edit creates a different record instance in the same replay family.",
+    "### Select a playable version and claims",
+    "6. Before consuming the seed, start, or inputs, read the version, platform, content-set identity, settings, and mod identity carried under `recording-declared-in`, then read every cited compatibility condition. If a record-wide identity — content, settings, mods, or the fixed start — no longer holds, reject the record and use the incompatibility report. A failed condition cited by one claim alone exempts only that claim, per steps 7 and 12. Content identity is a condition, not a version; a level-content patch can therefore invalidate a record even when the version id is unchanged. 7. Determine platform reach claim by claim. A claim limited to the recording platform is not compared on another running platform. A claim covering every supported platform is not compared on an unsupported running platform. Either excluded claim does not diverge; other claims continue. 8. Only when the recorded version differs from the running version, apply the selected update policy. `same-version-only` rejects with the incompatibility report. `migrate-then-replay` runs the cited migration once; success creates a derived record naming source version, target version, and migration rule, while failure rejects. `best-effort-with-declared-divergence` presents the cited known differences and keeps the source record unchanged. Migration must map the recorded input clock to an existing running-version clock; best-effort playback rejects if the cited clock no longer exists.",
+    "### Replay and compare",
+    "9. Recreate the start. Supply the recorded seed when present. Verify or restore the fixed starting state when present. Reject the replay if either required item cannot be established. 10. For an input-log record, consume inputs in their recorded order at their cited clock, step, or turn. For a seed-only record, accept live inputs. A `seed-fixes-this-claim` result cannot change when those inputs vary. A `live-input-may-shift-this-claim` result may read only the live-input facts named by its gated citation. 11. Obtain each claim's comparison reference. Read a reference captured in the record, or deterministically recompute it from the sealed record using the method cited by `recording-declared-in` and that claim's `comparison-points`. This is the recomputation step used by a puzzle share whose solved-board reference is derived from its fixed board and move log. 12. At each comparison point, first read the claim's cited conditions. If they are not met, do not compare that claim and do not mark a divergence. A `live-input-may-shift-this-claim` result's gated citation works the same way: a result that differs only as that citation permits is not compared against the recorded reference and does not diverge; where the citation's method recomputes a reference for the actual inputs, step 11's recomputation applies. Otherwise compare with the reference using the row's matching standard. Bit-exact state compares every declared byte. Outcome matching compares every declared outcome field. Position matching measures distance in the cited space and passes when it is no greater than `allowed-position-gap`. `excludes` subtracts from `reproduces`; excluded state is never compared.",
+    "Changes outside the cited conditions make no promise and do not fail this contract.",
+    "### Handle the first difference",
+    "13. On the first failed eligible comparison, set the playback result to `diverged` and retain the claim id, comparison point, expected result, observed result, versions, platforms, and last consumed input when present. 14. Under `stop-and-report`, present the difference, consume no later input, and end playback. Under `continue-and-flag`, present the difference, keep a visible diverged mark, and continue. Under `continue-silently`, emit no outward report and continue. Either continuing route advances from playback's own state. Later comparisons are informational and never resynchronise playback to the recorded reference. 15. If no eligible comparison fails and the record reaches its cited end, set the result to `complete`. Completion means every comparison actually made matched. It makes no promise about excluded claims, unmet conditions, or excluded state.",
+    "Every event offered at the same replay moment enters this lifecycle in the total order supplied by **Event resolution**. This contract preserves that order but does not choose it."
+  ],
+  "answers": {
+    "replay-record": "seed-and-input-log",
+    "after-an-update": "best-effort-with-declared-divergence",
+    "divergence-response": "continue-and-flag"
+  },
+  "values": {
+    "allowed-position-gap": "tuning.social-ghost-gap"
+  },
+  "rows": {
+    "replay-record": [
+      {
+        "id": "social-ghost",
+        "recording-declared-in": "racing.social-ghost-recording",
+        "input-clock-declared-in": "racing.physics-steps",
+        "cross-version-divergence-declared-in": "racing.patch-ghost-notice",
+        "difference-report-declared-in": "racing.social-ghost-status"
+      }
+    ],
+    "reproduction-claims": [
+      {
+        "id": "patched-car-path",
+        "artifact": "social ghost car path",
+        "platform-reach": "recorded-platform-only",
+        "matching-standard": "allowed-position-gap",
+        "reproduces": "racing.social-ghost-position",
+        "excludes": "racing.social-ghost-exclusions",
+        "conditions": "racing.social-ghost-conditions",
+        "comparison-points": "racing.social-ghost-samples"
+      }
+    ]
+  },
+  "pack": "sha256:dc3ee9f2383b70086aa53fad03e41f878befddd8b12eca9147598b6ea59505bc"
+}

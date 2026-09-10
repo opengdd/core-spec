@@ -23,20 +23,21 @@
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/">Learn</a>
-      <a href="/spec/" aria-current="page">Spec</a>
-      <a href="/standard/">Standard</a>
+      <a href="/contracts/">Contracts</a>
+      <a href="/spec/" aria-current="page">Specification</a>
       <a href="/authoring-tool/">Authoring tool</a>
       <a href="/about/">About</a>
       <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
     </nav>
   </div>
 </header>
-<main>
+<main id="main">
 <div class="doc-layout">
 <nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Limitations</p><ul>
 <li class="toc-h2"><a href="#deliberately-out-of-scope">Deliberately out of scope</a></li>
@@ -54,57 +55,57 @@
 </ul></nav>
 <article class="doc-body">
 <h1>Known limitations</h1>
-<p>This document describes the OpenGDD v0.7 working draft. An honest format states what it cannot yet do. &quot;Expressible&quot; never means &quot;uniformly machine-discoverable or portably machine-verifiable,&quot; and this page keeps those ideas apart. Certification is experimental in v0.7: nothing below grants or withholds a certification outcome.</p>
+<p>This page describes the OpenGDD v0.8 working draft. A package can express things that a tool cannot always find or check. Certification is experimental in v0.8, and nothing below grants or withholds a certification outcome.</p>
 <h2 id="deliberately-out-of-scope">Deliberately out of scope<a class="heading-anchor" href="#deliberately-out-of-scope" aria-label="Link to this section">#</a></h2>
 <p>The current OpenGDD core does not define:</p>
 <ul>
 <li>multiplayer session, delivery, networking, or private-view behavior;</li>
-<li>rendered-capture checks for 3D renderers — a <code>web-3d</code> package validates, but no 3D capture profile defines how to sample rendered output;</li>
+<li>rendered-capture checks for 3D renderers. A <code>web-3d</code> package validates, but no 3D capture profile says how to sample rendered output;</li>
 <li>binary asset pipelines;</li>
-<li>audio direction — the transmission experiment has not run, so this version makes no audio-direction claims;</li>
+<li>audio direction. The transmission experiment has not run, so this version makes no audio-direction claims;</li>
 <li>localization structure;</li>
 <li>monetization design beyond the optional commerce split, including IAP design;</li>
 <li>a registry API; or</li>
 <li>target families beyond web delivery (<code>web-2d</code> and <code>web-3d</code>).</li>
 </ul>
-<p><code>platform</code> names the delivery target and the state space the designer is responsible for, not the rendering technique. A planar game is <code>web-2d</code> even when a builder draws it with a perspective 3D renderer; <code>web-3d</code> is for game state that itself needs three dimensions. The renderer is the builder's fact and belongs in the build record.</p>
-<p>Authentic host-filesystem, save-byte, achievement, and recording integration is also not standardized for the current web targets. Simulated versions inside the game's fiction remain ordinary game state.</p>
+<p><code>platform</code> names the delivery target and the state space the designer is responsible for. It does not name the rendering technique. A planar game is <code>web-2d</code> even when a builder draws it with a perspective 3D renderer. <code>web-3d</code> is for game state that needs three dimensions. The renderer is the builder's fact and belongs in the build record.</p>
+<p>Real host-filesystem, save-byte, achievement, and recording integration is also not standardized for the current web targets. Simulated versions inside the game's fiction are ordinary game state.</p>
 <h2 id="in-scope-boundaries-that-remain-open">In-scope boundaries that remain open<a class="heading-anchor" href="#in-scope-boundaries-that-remain-open" aria-label="Link to this section">#</a></h2>
-<p>These are not claims that a game is unbuildable. They are places where a package still needs game-specific prose or tests that independent tools cannot infer from OpenGDD alone.</p>
+<p>A limit here does not mean a game is unbuildable. It means the package still needs its own prose or tests that independent tools cannot infer from OpenGDD alone.</p>
 <h3 id="multiplayer-authority-and-hidden-information">Multiplayer authority and hidden information<a class="heading-anchor" href="#multiplayer-authority-and-hidden-information" aria-label="Link to this section">#</a></h3>
-<p>Many rules express as deterministic state transitions, but the current core has no shared model for session membership, network authority, delivery, reconciliation, or private-view non-leakage. Those facilities need a future profile.</p>
+<p>Many rules can be written as deterministic state transitions. The current core has no shared model for session membership, network authority, delivery, reconciliation, or private-view non-leakage. Those facilities need a future profile.</p>
 <h3 id="authored-puzzle-solver-interfaces">Authored-puzzle solver interfaces<a class="heading-anchor" href="#authored-puzzle-solver-interfaces" aria-label="Link to this section">#</a></h3>
-<p>The working draft defines the <code>parallel-string-layers-1</code> grid layout and can carry finite domains, replays, and general tests. It does not define a shared solver adapter or predicate vocabulary. Until one exists, the package defines its own command alphabet and predicates.</p>
+<p>The working draft defines the <code>parallel-string-layers-1</code> grid layout. It can carry finite domains, replays, and general tests. It does not define a shared solver adapter or predicate vocabulary. Until one exists, the package defines its own command alphabet and predicates.</p>
 <h3 id="open-ended-rule-mutation">Open-ended rule mutation<a class="heading-anchor" href="#open-ended-rule-mutation" aria-label="Link to this section">#</a></h3>
 <p>Finite, author-declared rules can be activated or replaced through Fixed prose, declared ruleset state, and tests. Runtime creation of vocabulary or behavior outside an author-declared finite set is not standardized.</p>
 <h3 id="what-a-player-knows-or-feels">What a player knows or feels<a class="heading-anchor" href="#what-a-player-knows-or-feels" aria-label="Link to this section">#</a></h3>
 <p>Claims about knowledge, perception, belief, discovery, taste, or narrative quality are not state predicates. A package can test operational facts such as reachability, causal history, elimination necessity, or batch-validation behavior. It cannot turn those facts into proof of a player's interpretation.</p>
 <h3 id="simulation-below-an-observable-envelope">Simulation below an observable envelope<a class="heading-anchor" href="#simulation-below-an-observable-envelope" aria-label="Link to this section">#</a></h3>
-<p>Macroscopic outcomes can be specified without fixing implementation grain. Below a declared feature width, or between declared observation times, visible outcomes may depend on cell size, neighborhood, update order, or another architectural choice. OpenGDD can state a bounded observable requirement and the test that checks it, but v0.7 defines no general material-simulation profile and does not standardize every grain or intermediate state.</p>
+<p>You can specify large-scale outcomes without fixing implementation grain. Below a declared feature width, or between declared observation times, visible outcomes may depend on cell size, neighborhood, update order, or another architectural choice. OpenGDD can state a bounded observable requirement and the test that checks it. v0.8 defines no general material-simulation profile, and does not standardize every grain or intermediate state.</p>
 <h3 id="personalized-presentation">Personalized presentation<a class="heading-anchor" href="#personalized-presentation" aria-label="Link to this section">#</a></h3>
-<p>The direction file does not define how player-selected presentation, such as a player's own colour choices, composes with the package's palette and colour promises. Exact visual properties have an audit path only where a test and machine-checkable evidence expose the result; prose direction remains interpretive.</p>
+<p>A player may choose part of the presentation, such as colours. The direction file does not define how those choices combine with the package's palette and colour promises. Exact visual properties have an audit path only where a test and machine-checkable evidence show the result. Prose direction remains open to interpretation.</p>
 <h3 id="material-feel-and-motion">Material feel and motion<a class="heading-anchor" href="#material-feel-and-motion" aria-label="Link to this section">#</a></h3>
-<p>Text, named palettes, and annotated reference imagery can communicate decomposable features such as shape, stitches, edge treatments, and shadows. Continuous qualities such as fiber, translucency, sheen, glisten, drip, ooze, and deformation remain harder to transmit consistently. The direction format has claims, annotated references, colour and timing promises, and an experimental judged-evidence shape, but no general material-rendering solution.</p>
+<p>Text, named palettes, and annotated reference imagery can communicate separate features such as shape, stitches, edge treatments, and shadows. Continuous qualities such as fiber, sheen, and deformation remain harder to transmit consistently. The direction format has claims, annotated references, colour and timing promises, and an experimental judged-evidence shape. It has no general material-rendering solution.</p>
 <h2 id="authoring-lessons-the-format-cannot-absorb">Authoring lessons the format cannot absorb<a class="heading-anchor" href="#authoring-lessons-the-format-cannot-absorb" aria-label="Link to this section">#</a></h2>
 <p>OpenGDD cannot compensate for a package that leaves its own rules contradictory or its evidence incomplete:</p>
 <ol>
-<li><strong>Specify outcomes, not architecture.</strong> Require the observable result and its evidence. Leave renderer structure and equivalent implementation techniques to the builder unless they are themselves part of the design.</li>
-<li><strong>Give every test an input and a target.</strong> A useful test identifies its setup, action or schedule, expected observations, tolerances, and diagnostics.</li>
+<li><strong>Specify outcomes, not architecture.</strong> Require the observable result and its evidence. Leave renderer structure and equivalent implementation techniques to the builder, unless they are themselves part of the design.</li>
+<li><strong>Give every test an input and a target.</strong> A useful test names its setup, action or schedule, expected observations, tolerances, and diagnostics.</li>
 <li><strong>Do not create a second authority channel.</strong> Local fields must not silently redefine Fixed, Delegated, or Personalization authority.</li>
-<li><strong>Do not restate tuning values in normative prose.</strong> Prose binds to symbolic keys and formulas; literal examples are non-normative or generated from authoritative data.</li>
+<li><strong>Do not restate tuning values in normative prose.</strong> Prose binds to keys and formulas. Literal examples are non-normative or generated from authoritative data.</li>
 </ol>
 <p>Schema validity is only the first gate. Publication still requires semantic review, reachable test setups, reference closure, successful replay, and honest disclosure of claims the available evidence cannot support.</p>
 <h2 id="art-direction">Art direction<a class="heading-anchor" href="#art-direction" aria-label="Link to this section">#</a></h2>
-<p>Art direction is optional in the v0.7 working draft. When it is used, one <code class="anchor">direction.json</code> file at the package root carries palettes, pillars, mood, anti-references, <code>must_keep</code> requirements, measured <code>colors</code>, <code>contrast</code>, and <code>timing</code> promises, and the package's <code>viewing</code> conditions. Colour promises use CIEDE2000 distance, contrast promises use the WCAG 2.1 contrast ratio, and timing promises cite a value in <code class="anchor">tuning.json</code>. Those metrics are fixed by the format rather than chosen per entry. Every <code>colors</code>, <code>contrast</code>, and <code>timing</code> entry must be covered by at least one acceptance test through its <code>direction_claims</code> field.</p>
-<p>Palette and shape language transmit more exactly than continuous material feel. Not every exact visual surface has a machine-checkable evidence path; an exact texture with no applicable test, for example, remains a prose requirement whose truth package validation cannot decide.</p>
+<p>Art direction is optional in the v0.8 working draft. When it is used, one <code class="anchor">direction.json</code> file at the package root carries palettes, pillars, mood, anti-references, and <code>must_keep</code> requirements. It also carries measured <code>colors</code>, <code>contrast</code>, and <code>timing</code> promises, and the package's <code>viewing</code> conditions. Colour promises use CIEDE2000 distance, contrast promises use the WCAG 2.1 contrast ratio, and timing promises cite a value in <code class="anchor">tuning.json</code>. The format fixes those metrics. An entry cannot choose its own. Every <code>colors</code>, <code>contrast</code>, and <code>timing</code> entry must be covered by at least one acceptance test through its <code>direction_claims</code> field.</p>
+<p>Palette and shape language transmit more exactly than continuous material feel. Not every exact visual surface has a machine-checkable evidence path. An exact texture with no applicable test stays a prose requirement, and package validation cannot decide whether it is met.</p>
 <h2 id="audio">Audio<a class="heading-anchor" href="#audio" aria-label="Link to this section">#</a></h2>
-<p>Audio direction remains draft material in v0.7. It can be described in prose, but this version makes no audio-direction claims and defines no audio judgment protocol.</p>
+<p>Audio direction remains draft material in v0.8. It can be described in prose, but this version makes no audio-direction claims and defines no audio judgment protocol.</p>
 </article>
 </div>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
-    <span><a href="/about/">About the standard</a></span>
+    <span><a href="/about/">About OpenGDD</a></span>
     <span>Prose CC-BY 4.0 · code MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>

@@ -1,0 +1,434 @@
+{
+  "contract": "suspension-and-catch-up",
+  "version": 1,
+  "summary": "Covers state that pauses, catches up, or continues while a game is closed or in the background. It also covers return rewards, calendar crossings, clock changes, and what appears before play resumes. Normal rates, timer rules, inventory capacity, save lifetime, and replay guarantees stay elsewhere.",
+  "questions": {
+    "while-in-the-background": {
+      "asks": "What happens while the game stays open in the background?",
+      "rationale": "An open game may use away handling, keep playing, or stay still until it closes. The same time must never count twice.",
+      "options": {
+        "counts-as-away": {
+          "meaning": "Background time uses the same suspension rules as closed time. Ten minutes in another tab refills energy like ten minutes with the game closed.",
+          "semantics": "The lifecycle treats the background interval as a suspension interval. Ordinary updates do not also apply that interval."
+        },
+        "keeps-playing": {
+          "meaning": "Ordinary play continues in the background. A browser farm keeps growing crops while the player uses another tab.",
+          "semantics": "The ordinary update path continues, including platform throttling. Foregrounding adds no catch-up for the same interval."
+        },
+        "waits-until-closed": {
+          "meaning": "The open game stays still, and away progress starts only after closing. A crop timer pauses in the app switcher but advances after the app closes.",
+          "semantics": "The open-background interval receives neither ordinary updates nor catch-up."
+        }
+      }
+    },
+    "return-display": {
+      "asks": "What appears before ordinary play resumes?",
+      "rationale": "Changed state may speak for itself, animate before play, or appear in a return summary.",
+      "options": {
+        "state-only": {
+          "meaning": "No separate return surface appears. A match-3 game simply shows that three lives are ready.",
+          "semantics": "The lifecycle adds no player-facing return surface. Existing game displays may show the settled state after ordinary play resumes. Developer or diagnostic instrumentation that is not player-facing is out of scope."
+        },
+        "visible-before-resume": {
+          "meaning": "Existing displays show the change before play resumes. A life counter ticks from two lives to five on the map screen.",
+          "semantics": "At least one existing player-facing display presents the affected state during return settlement."
+        },
+        "return-summary": {
+          "meaning": "A return surface names each result. An idle game shows energy gained and coins waiting for collection.",
+          "semantics": "A player-facing return surface identifies each affected row and its settled result."
+        },
+        "detailed-return-summary": {
+          "meaning": "A return surface also explains the calculation. A factory screen shows six hours away, its energy ceiling, and the final gain.",
+          "semantics": "The return surface reports elapsed time, applicable limits, amount rules, fidelity, and settled results."
+        }
+      }
+    },
+    "clock-source": {
+      "asks": "Can the player change the clock that measures time away?",
+      "rationale": "The player can move a device clock through settings. A protected clock stays outside those settings, though the service behind it can correct it.",
+      "when": {
+        "row-count": {
+          "clock": "non-empty"
+        }
+      },
+      "otherwise": "No clock row exists, so this adoption measures no elapsed suspension time.",
+      "options": {
+        "device-clock": {
+          "meaning": "The game reads a clock from the device. Moving a phone clock forward by two hours gives an idle mine two more measured hours.",
+          "semantics": "The elapsed interval comes from a clock the player can change through device settings. Both backward-clock questions are asked."
+        },
+        "protected-clock": {
+          "meaning": "The game reads a clock outside device settings. Changing a phone clock does not refill a match-3 life sooner.",
+          "semantics": "The elapsed interval comes from a clock the player cannot change through device settings. The backward-clock questions are not asked."
+        }
+      }
+    },
+    "backward-clock-anchor": {
+      "asks": "If the player moves the device clock backward, which state does the game keep?",
+      "rationale": "Zero elapsed time does not say which saved state survives a backward clock. The anchor prevents duplicate or reversed gains.",
+      "when": {
+        "flag": {
+          "clock-source": [
+            "device-clock"
+          ]
+        }
+      },
+      "otherwise": "No device clock is read, either because no clock row exists or because the clock is protected, so no rollback anchor is selected. A protected-clock resync may still move its reading backward; the lifecycle then keeps the loaded state.",
+      "options": {
+        "suspension-snapshot": {
+          "meaning": "The game returns to the state captured when suspension began. An idle mine returns to the ore count recorded when the app closed.",
+          "semantics": "Every in-scope local item is restored from the suspension snapshot. Elapsed time for this interval is zero."
+        },
+        "last-trusted-checkpoint": {
+          "meaning": "The game returns to the latest state accepted by a trusted rule. An online workshop returns to its last server-confirmed stock count.",
+          "semantics": "The one rollback rule supplies a trusted state and matching clock reading. The current suspension interval contributes zero elapsed time."
+        },
+        "keep-return-state": {
+          "meaning": "The game keeps the state loaded at return but adds no away change. A newer cloud save from another device keeps its crops.",
+          "semantics": "No state is restored by this contract. The loaded return state remains, and elapsed time for this interval is zero. That state may be newer than the suspension snapshot because of a cloud save, a second device, or a mid-session autosave."
+        }
+      }
+    },
+    "backward-clock-notice": {
+      "asks": "Does the game explain the backward clock result?",
+      "rationale": "The same backward-clock outcome can be silent or visible to the player.",
+      "when": {
+        "flag": {
+          "clock-source": [
+            "device-clock"
+          ]
+        }
+      },
+      "otherwise": "No device clock is read, either because no clock row exists or because the clock is protected, so no player-caused clock-change notice is selected. A protected-clock resync may still produce zero elapsed time.",
+      "options": {
+        "silent": {
+          "meaning": "The game adds no clock-change notice. A life refill stays unchanged without a pop-up.",
+          "semantics": "The lifecycle adds no player-facing explanation for the backward-clock branch."
+        },
+        "explain": {
+          "meaning": "The game explains that the clock change blocked away time. An idle game shows a short clock-change message beside unchanged energy.",
+          "semantics": "The lifecycle presents a player-facing clock-change explanation after the anchor is applied and before ordinary play resumes."
+        }
+      }
+    },
+    "crossed-calendar-boundaries": {
+      "asks": "Several calendar boundaries passed while the game was away. Which ones count on return?",
+      "rationale": "A daily or weekly rule may run for every crossing, only the latest one, or one combined return event.",
+      "when": {
+        "row-count": {
+          "calendar-boundaries": "non-empty"
+        }
+      },
+      "otherwise": "No calendar boundary is tracked, so return settlement creates no calendar crossing.",
+      "options": {
+        "every-crossing-in-order": {
+          "meaning": "Every crossed boundary settles in time order. A farm processes Friday, Saturday, and Sunday crop resets separately.",
+          "semantics": "The lifecycle inserts every crossed boundary into the return timeline in ascending time order."
+        },
+        "latest-crossing-only": {
+          "meaning": "Only the latest crossed boundary settles. A daily reward calendar opens on today's entry without granting missed days.",
+          "semantics": "The lifecycle inserts only the latest crossed boundary for each calendar row and omits earlier crossings."
+        },
+        "one-combined-crossing": {
+          "meaning": "All crossings become one return event. A weekly shop refreshes once and receives the number of missed weeks.",
+          "semantics": "The lifecycle inserts one return-time event per calendar row, carrying that row's number and span of crossed boundaries."
+        }
+      }
+    }
+  },
+  "declares": {
+    "values": {},
+    "rows": {
+      "clock": {
+        "description": "The elapsed-time rule for this behaviour family. At most one row is valid.",
+        "when-empty": "No elapsed suspension time is measured by this adoption.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable name for the elapsed clock, such as away-clock."
+          },
+          "clock-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The game rule naming the reading, its unit, and when it is sampled."
+          }
+        }
+      },
+      "fixed-items": {
+        "description": "State that remains at its suspension anchor until ordinary play resumes.",
+        "when-empty": "No covered state is fixed by suspension.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "The state item in game language, such as round-score or player-position."
+          },
+          "state-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The game rule that identifies the complete state held fixed."
+          }
+        }
+      },
+      "catch-up-items": {
+        "description": "State calculated from elapsed time when the suspension interval returns.",
+        "when-empty": "No covered state is calculated from missed time on return.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "The state item in game language, such as energy, crops, or lives."
+          },
+          "state-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The game rule identifying the state, its ordinary changes, and its unit."
+          },
+          "away-amount": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "same-as-playing",
+              "reduced",
+              "away-rule"
+            ],
+            "description": "The amount earned from equal elapsed time: the ordinary amount, a lower amount, or an amount from a separate away rule. An energy refill may keep its normal one point per minute."
+          },
+          "amount-rule-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "away-amount": [
+                  "reduced",
+                  "away-rule"
+                ]
+              }
+            },
+            "description": "The rule for the lower or separate away amount. It states the complete amount calculation and its unit. Only the cited rule binds this row; uncited game prose does not."
+          },
+          "catch-up-fidelity": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "every-missed-update",
+              "larger-steps",
+              "one-derived-change"
+            ],
+            "description": "How missed play changes this state between calendar events: every missed update, larger catch-up steps, or one derived change. A crop may replay every growth tick while a life refill may derive one total."
+          },
+          "fidelity-rule-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "catch-up-fidelity": [
+                  "larger-steps",
+                  "one-derived-change"
+                ]
+              }
+            },
+            "description": "The rule naming step size and order, or the rule deriving the single return change. It distributes the promised amount and does not change it. Only the cited rule binds this row; uncited game prose does not."
+          },
+          "away-limit": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "whole-interval",
+              "time-limit",
+              "less-after-a-point",
+              "state-ceiling"
+            ],
+            "description": "How much time or gain is allowed away: all time, a hard time stop, a lower amount past a point, or a state ceiling. A normal full-energy maximum is a valid state ceiling. A maximum that limits away gain is declared here as a state ceiling, not left under whole-interval."
+          },
+          "limit-rule-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "away-limit": [
+                  "time-limit",
+                  "less-after-a-point",
+                  "state-ceiling"
+                ]
+              }
+            },
+            "description": "The time point, later amount rule, or state ceiling. A state ceiling may be the same maximum that applies during ordinary play. Only the cited rule binds this row; uncited game prose does not."
+          }
+        }
+      },
+      "continuous-items": {
+        "description": "State that continued under another authority while the local game was suspended.",
+        "when-empty": "No covered state continued elsewhere during suspension.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "The state item in game language, such as skill-training or life-service."
+          },
+          "state-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The external or protected rule that continued the state and supplies its return reading."
+          }
+        }
+      },
+      "choice-items": {
+        "description": "State whose away behaviour is selected by a setting, platform, unlock, or other game rule.",
+        "when-empty": "No covered state selects between away behaviours at runtime.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "The state item in game language, such as harvest-mode."
+          },
+          "choice-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The game rule naming both possible behaviours, their complete data, the condition selecting one, and the time at which the selection is made."
+          }
+        }
+      },
+      "return-rewards": {
+        "description": "Rewards created by catch-up or a crossed calendar boundary, then delivered or left for the player to claim.",
+        "when-empty": "Return settlement creates no separately delivered reward.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "The reward in game language, such as offline-coins or daily-gift."
+          },
+          "reward-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The game rule deriving the reward and identifying its source settlement."
+          },
+          "destination-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The destination rule that accepts the complete reward or leaves it pending."
+          },
+          "delivery": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "automatic",
+              "player-claims"
+            ],
+            "description": "Whether this reward enters its destination automatically or waits on a return surface for the player to claim it. A player-claims reward requires a return-display answer that supplies a return surface: return-summary or detailed-return-summary."
+          },
+          "claim-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "delivery": [
+                  "player-claims"
+                ]
+              }
+            },
+            "description": "The player event that claims this pending reward from the return surface."
+          },
+          "expires-declared-in": {
+            "type": "citation",
+            "required": false,
+            "description": "The optional rule naming when an unclaimed reward expires and is removed. Omission means an unclaimed reward never expires."
+          }
+        }
+      },
+      "calendar-boundaries": {
+        "description": "Daily, weekly, seasonal, or other calendar boundaries that may pass during suspension.",
+        "when-empty": "Return settlement creates no calendar crossing.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "The boundary in game language, such as daily-reset or new-week."
+          },
+          "boundary-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule naming the calendar, time zone, boundary test, exact crossing time, and what happens when local civil time skips or repeats a boundary."
+          },
+          "settlement-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The game rule that receives each selected crossing and states its immediate effects."
+          }
+        }
+      },
+      "rollback-rules": {
+        "description": "The trusted checkpoint rule used by the backward-clock checkpoint answer. Exactly one row under last-trusted-checkpoint; no row under any other anchor, a protected clock, or no clock.",
+        "when-empty": "No trusted checkpoint is used as a backward-clock anchor.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable name for the trusted checkpoint rule."
+          },
+          "trusted-state-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule that supplies one coherent state snapshot and its matching trusted clock reading."
+          }
+        }
+      }
+    }
+  },
+  "origin": "https://opengdd.org/contracts/suspension-and-catch-up-1",
+  "mechanism": [
+    "This is the one normative authority for suspension state, elapsed time, catch-up, calendar crossings, return rewards, and report order. Questions and rows supply choices and game rules to this lifecycle; they do not define a second sequence.",
+    "A **suspension interval** begins at game closure, or at the earlier open-background transition selected by `counts-as-away`, and ends at return processing, at the return clock reading when a clock row exists. A **suspension snapshot** contains every in-scope local item and the starting clock reading. A **return timeline** is the ordered elapsed span, split at the calendar crossings selected by the calendar answer. A **pending reward** has been created but not accepted by its destination.",
+    "An unclaimed reward with an expiry rule is removed at its cited deadline. The lifecycle checks that deadline at return and immediately before a claim.",
+    "### Suspend",
+    "1. **Closing the game always begins a suspension interval.** Route an earlier open-background transition through `while-in-the-background`. `counts-as-away` begins the interval at that transition. `keeps-playing` continues ordinary play and creates no return catch-up for background time. `waits-until-closed` holds state unchanged until closure begins the interval. 2. When an interval begins, capture one coherent suspension snapshot before any covered state can change. If a clock row exists, read its starting value in the same batch; the interval's starting value is the higher of that reading and the committed anchor from the previous return, so time below the anchor is never replayed. A protected authority may keep changing a `continuous-items` row after the snapshot. 3. Hold every fixed and catch-up item at its snapshot state. A choice row resolves its cited selection at the time named by that rule. A selected continuous branch stays under its cited authority; other selected branches follow their matching lifecycle paths.",
+    "### While away",
+    "4. Local catch-up items do not advance visibly while ordinary updates are stopped. The interval records clock reach only; settlement waits for return. 5. Continuous items keep changing under their cited authority. This lifecycle neither predicts those changes nor duplicates them locally. 6. Calendar crossings are discovered from the cited calendar and clock. They are not settled yet. Return processing selects and orders them.",
+    "### Return",
+    "7. If a clock row exists, read the return clock once. A non-negative interval uses the suspension snapshot and the elapsed difference. Any negative protected-clock interval counts as zero elapsed with the loaded state retained, because a service resync can move even a protected clock back; skip steps 9–11 and continue at step 12. That skipped interval creates no return reward. Without a clock row, local catch-up and calendar crossings are absent; continue with the unchanged fixed state at step 12. 8. If a device clock reads earlier, apply `backward-clock-anchor` before any catch-up. Restore the suspension snapshot, restore the cited trusted checkpoint, or keep the loaded return state. The current interval then has zero elapsed time. A skipped interval creates no return reward. Apply the selected clock notice, skip steps 9–11, and continue at step 12. 9. Build one calendar return timeline and one pass timeline for each catch-up row. A calendar row admits the full non-negative measured interval because it declares no away limit. For a catch-up row, this lifecycle derives the admitted span from the row's declared limit for crossing selection only; that derivation is not the limit application step 10 assigns, and a state-dependent ceiling discovers its endpoint during the chronological pass. Crossings inside that admitted span settle against the row, and crossings beyond it do not. A state-dependent ceiling discovers its endpoint during the chronological pass, so no later crossing enters that row's pass. A catch-up row's limit does not cancel an independent calendar event: the row shape declares no such link, and the event settles once on the calendar timeline. `every-crossing-in-order` keeps all remaining crossings in ascending time order. `latest-crossing-only` keeps the last remaining crossing for each calendar row. `one-combined-crossing` creates one return-time event per calendar row with its count and span. Row order breaks a tie between equal timestamps before **Event resolution** receives them. 10. Compute each catch-up row's segments as step 11 hands them over, keeping amount separate from fidelity; step 11 owns the ordering. `same-as-playing` defines the ordinary amount for equal elapsed time; `reduced` and `away-rule` use only their cited amount rule. Under `every-missed-update`, this lifecycle applies the away limit as a per-segment clip and then feeds only the remaining missed updates to the game rules. Under `larger-steps`, the cited fidelity rule receives the amount and limit, owns both the larger-step distribution and the limit, and returns the ordered changes. Under `one-derived-change`, the cited fidelity rule receives the amount and limit, owns the limit, and returns one change. The lifecycle does not re-apply a limit owned by a cited fidelity rule. When `away-rule` and `one-derived-change` compose, the amount rule defines the total and the fidelity rule distributes it. 11. Settle each selected calendar event once through `settlement-declared-in`. For every catch-up row containing that crossing, settle the preceding segment first, then the event's immediate effect, then the following segment. The row's clip already excluded later crossings, so this order cannot re-admit time or events beyond its limit. Reports keep the same segment-then-event-then-segment order. 12. Check every existing pending reward's cited deadline at return. An expired unclaimed reward is removed at that deadline. A pending reward is in-scope local state and survives this and later suspensions until the player claims it or its cited deadline expires. 13. Read every continuous item once. Apply each selected choice branch once. Create each return reward from its cited source settlement; a reward row with no settled source produces nothing. A skipped interval therefore creates no return reward. Check a new reward's cited deadline at return. Offer an `automatic` reward to its destination in reward-row order. A `player-claims` reward remains pending until its cited claim event. Destination refusal keeps the same pending reward, and a refused `automatic` reward is offered again at each later return until its destination accepts it or its cited deadline removes it. 14. Present `return-display` after settled state and pending rewards are known. A clock explanation precedes the general return surface. Existing displays used by `visible-before-resume` update before ordinary play. A claim event checks the cited deadline before offering its reward. An expired unclaimed reward is removed; each accepted reward is reported once. 15. Commit the final local state and the next suspension anchor together. On every return the committed anchor is never lower than the previous one. After any backward-clock return, commit the highest of the suspension reading, the return reading, and any trusted-checkpoint reading as the next suspension anchor, retaining the trusted state under that anchor, so repeated clock rollback cannot replay time below the prior anchor. Resume ordinary updates only after all automatic return changes and every required pre-resume display have settled. A later player claim is a new event and never repeats catch-up.",
+    "Every catch-up report carries the interval start and end readings, elapsed time admitted, row id, amount branch, fidelity branch, limit reached, before state, after state, and calendar crossing that split the segment when present. A backward-clock report also carries the selected anchor when one was selected, and whether a notice appeared when the notice question applies. A return-reward report carries its source, destination, delivery, pending, accepted, or expired status, deadline when present, and claim event when present."
+  ],
+  "answers": {
+    "while-in-the-background": "waits-until-closed",
+    "return-display": "state-only",
+    "clock-source": "protected-clock"
+  },
+  "values": {},
+  "rows": {
+    "clock": [
+      {
+        "id": "world-time",
+        "clock-declared-in": "time.world-time"
+      }
+    ],
+    "catch-up-items": [
+      {
+        "id": "pumpkin-growth",
+        "state-declared-in": "contracts.pumpkin-growth-window",
+        "away-amount": "same-as-playing",
+        "catch-up-fidelity": "every-missed-update",
+        "away-limit": "whole-interval"
+      }
+    ],
+    "fixed-items": [],
+    "continuous-items": [],
+    "choice-items": [],
+    "return-rewards": [],
+    "calendar-boundaries": [],
+    "rollback-rules": []
+  },
+  "pack": "sha256:d1ec8edb7c86cda9f923cacba4a1d4a0c6c4af5ee4302842865d39636cd8a81d"
+}

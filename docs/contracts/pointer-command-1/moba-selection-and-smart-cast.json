@@ -1,0 +1,586 @@
+{
+  "contract": "pointer-command",
+  "version": 1,
+  "summary": "Covers pointer gestures that select things in the world and issue commands to or at the world. It records direct world orders, chosen abilities and verbs, added orders, and cancellation. Physical bindings, camera view, readouts, pathfinding, unit AI, and formations stay elsewhere.",
+  "questions": {
+    "command-receiver": {
+      "asks": "Who receives a command made by pointing at the world?",
+      "rationale": "A pointer command may control one standing actor, the current selection, or the pointed place itself.",
+      "options": {
+        "fixed-actor": {
+          "meaning": "One fixed actor or party receives every world command. An ARPG hero moves wherever the ground is clicked.",
+          "semantics": "Every proposed command names the actor or party fixed by its cited command rule. No world selection is required to supply a receiver."
+        },
+        "current-selection": {
+          "meaning": "The current world selection receives every command. An RTS order moves the selected squad.",
+          "semantics": "The receiver set is the complete current selection. An empty set is a rejected receiver."
+        },
+        "world-target": {
+          "meaning": "The command belongs to the pointed place or object, without a selected actor. A colony work order marks one ore tile for any worker.",
+          "semantics": "A proposed command names its world target and no selected receiver. The cited game rule owns any later choice of actor, worker, structure, or world system that carries it out."
+        }
+      }
+    },
+    "near-miss-resolution": {
+      "asks": "When the pointer just misses a target, what can it choose?",
+      "rationale": "The game can require the exact point or choose the nearest candidate inside a declared reach.",
+      "options": {
+        "exact-point-only": {
+          "meaning": "Only the exact pointed place or object counts. A click beside a chest does not choose it.",
+          "semantics": "Candidate lookup uses the exact pointer point and applies no near-miss reach."
+        },
+        "nearest-within-reach": {
+          "meaning": "The nearest candidate inside the game's declared reach counts. A click beside a small lever can choose it.",
+          "semantics": "Candidate lookup chooses the nearest selectable candidate inside the cited reach and uses the cited complete tie-break."
+        }
+      }
+    },
+    "empty-selection": {
+      "asks": "The player clicks or drags to choose units and finds nothing there. What happens to the earlier choice?",
+      "rationale": "An empty click or box can clear the selection or leave the earlier choice in place. The answer binds only through replace rows; with none, it is inert.",
+      "when": {
+        "row-count": {
+          "selection-gestures": "non-empty"
+        }
+      },
+      "otherwise": "No pointer gesture changes the current world selection.",
+      "options": {
+        "clear-selection": {
+          "meaning": "The current selection is cleared. A tactics click on open ground leaves no unit selected.",
+          "semantics": "The declared empty-result consequence is an empty selection."
+        },
+        "keep-selection": {
+          "meaning": "The current selection stays. A colony drag across bare ground leaves the chosen workers selected.",
+          "semantics": "The declared empty-result consequence preserves the earlier selection."
+        }
+      }
+    },
+    "invalid-target": {
+      "asks": "Does the game keep waiting for a place to use the chosen ability or verb?",
+      "rationale": "The next point can retry the choice, or the game can return to ordinary pointing.",
+      "when": {
+        "row-count": {
+          "targeted-verbs": "non-empty"
+        }
+      },
+      "otherwise": "No chosen ability or verb waits for a world target from the pointer.",
+      "options": {
+        "keep-targeting": {
+          "meaning": "The game keeps waiting for another point. An ARPG fire spell still waits after the pointer lands outside its range.",
+          "semantics": "The invalid-target consequence keeps the same chosen verb active."
+        },
+        "leave-targeting": {
+          "meaning": "The game stops waiting after the invalid point. A tower placement returns to ordinary pointing after a blocked tile.",
+          "semantics": "The invalid-target consequence clears the chosen verb."
+        }
+      }
+    },
+    "queued-command-placement": {
+      "asks": "The player holds the key that adds orders to a line. Where does the added order go?",
+      "rationale": "The command may wait behind the full plan or become the next command after the current one.",
+      "when": {
+        "row-count": {
+          "queue-modifiers": "non-empty"
+        }
+      },
+      "otherwise": "No pointer modifier adds a command to a waiting plan.",
+      "options": {
+        "append-at-end": {
+          "meaning": "The command joins the end of the waiting plan. An RTS shift-order adds a final waypoint.",
+          "semantics": "The declared placement is after every waiting command for the same plan owner."
+        },
+        "insert-next": {
+          "meaning": "The command becomes next after the current command. A colony emergency repair runs before work already waiting.",
+          "semantics": "The declared placement is before every waiting command for the same plan owner."
+        }
+      }
+    },
+    "unmodified-command": {
+      "asks": "A new order arrives while another order is waiting. What happens without the add-orders key?",
+      "rationale": "A plain order can replace the waiting line, join it, or be refused while that owner is busy.",
+      "when": {
+        "any": [
+          {
+            "row-count": {
+              "context-commands": "non-empty"
+            }
+          },
+          {
+            "row-count": {
+              "targeted-verbs": "non-empty"
+            }
+          }
+        ]
+      },
+      "otherwise": "No pointer command can enter a waiting plan.",
+      "options": {
+        "replaces-waiting": {
+          "meaning": "The new order replaces every waiting pointer order for that owner. A hero turns toward the newest clicked destination.",
+          "semantics": "The unmodified placement clears waiting pointer commands for the same plan owner."
+        },
+        "always-appends": {
+          "meaning": "The new order joins the end of that owner's waiting line. A colony keeps each new work mark.",
+          "semantics": "The unmodified placement is after every waiting pointer command for the same plan owner."
+        },
+        "rejected-while-busy": {
+          "meaning": "The new order is refused while that owner has work waiting. A build tool accepts no second placement until the first clears.",
+          "semantics": "An unmodified proposal is rejected while its plan owner has a waiting pointer command."
+        }
+      }
+    }
+  },
+  "declares": {
+    "values": {},
+    "rows": {
+      "selection-gestures": {
+        "description": "Pointer gestures that replace, add, remove, or toggle actors or world objects in the current selection.",
+        "when-empty": "No pointer gesture changes the current world selection.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable game-facing name, such as point-select or box-select."
+          },
+          "gesture": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The game-facing pointer action supplied after physical input mapping, such as select-point or select-area."
+          },
+          "resolves-on": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "press",
+              "release",
+              "drag-complete"
+            ],
+            "description": "The pointer phase that settles the selection. A tactics point may settle on release; an RTS box settles when its drag completes."
+          },
+          "shape": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "point",
+              "area"
+            ],
+            "description": "Whether the gesture tests one pointer point or the cited dragged area."
+          },
+          "change": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "replace",
+              "add",
+              "remove",
+              "toggle"
+            ],
+            "description": "How the selectable results change the current selection. A strategy box may replace it while a modified click adds one unit."
+          },
+          "gesture-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule recognizing this game-facing press, release, or drag, including any drag threshold and area geometry."
+          },
+          "candidates-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming selectable target kinds, point or area inclusion, the near-miss reach when used, and a complete tie-break. A point rule may return several candidates, as in double-click select-type."
+          }
+        }
+      },
+      "context-commands": {
+        "description": "Commands chosen directly from the classified world target under a pointer gesture, such as moving on ground or attacking an enemy.",
+        "when-empty": "No pointer gesture chooses a command directly from what lies under it.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable game-facing name, such as move-on-ground or attack-enemy."
+          },
+          "gesture": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The game-facing pointer action, such as world-command or context-order."
+          },
+          "resolves-on": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "press",
+              "release",
+              "drag-complete"
+            ],
+            "description": "The pointer phase that proposes the command. An action RPG may move on release while a colony designation completes as a drag."
+          },
+          "target-kind": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The mutually exclusive world classification that selects this row, such as ground, enemy, door, or buildable-tile."
+          },
+          "command": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The game command proposed by this row, such as move, basic-attack, open-door, or place-tower."
+          },
+          "gesture-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule recognizing the game-facing pointer action and its completion phase."
+          },
+          "target-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule classifying the pointer snapshot, naming the exact target, and stating the reach and tie-break for nearest-within-reach."
+          },
+          "area-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "resolves-on": [
+                  "drag-complete"
+                ]
+              }
+            },
+            "description": "The Fixed rule naming the dragged region, its boundary inclusion, and how the region becomes the command target."
+          },
+          "receiver-condition": {
+            "type": "citation",
+            "description": "An optional Fixed rule limiting this row to a receiver class, such as worker or soldier."
+          },
+          "command-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming the command, receiver, target, per-target waiting-plan owner, permission, unreachable-target result, and complete accepted or rejected effect."
+          }
+        }
+      },
+      "targeted-verbs": {
+        "description": "Abilities and verbs that use a pointer-captured world target, whether the verb or the target arrives first. Every targeting state can be left: through leave-targeting, a targeting cancellation row, or the cited start rule.",
+        "when-empty": "No chosen ability or verb waits for a world target from the pointer.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable game-facing name, such as artillery-target or use-key-on-door."
+          },
+          "verb": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The chosen ability or verb applied to the captured world target."
+          },
+          "order": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "verb-first",
+              "target-first"
+            ],
+            "description": "Whether the verb starts before target capture or arrives from a cited game action after the pointer captures the target."
+          },
+          "confirm-style": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "separate-gesture",
+              "at-entry-position"
+            ],
+            "description": "Whether confirmation needs another pointer gesture or fires from the pointer snapshot captured when this verb entry begins."
+          },
+          "target-gesture": {
+            "type": "string",
+            "pattern": "kebab-case",
+            "when": {
+              "row": {
+                "order": [
+                  "target-first"
+                ]
+              }
+            },
+            "description": "The game-facing pointer action that captures the world target before the verb arrives."
+          },
+          "confirm-gesture": {
+            "type": "string",
+            "pattern": "kebab-case",
+            "when": {
+              "row": {
+                "confirm-style": [
+                  "separate-gesture"
+                ]
+              }
+            },
+            "description": "The game-facing action that separately confirms this target. It may be a pointer gesture or a cited non-pointer action, such as releasing the held ability key."
+          },
+          "resolves-on": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "press",
+              "release",
+              "drag-complete"
+            ],
+            "description": "For separate confirmation, the confirming phase. For a target-first row, the capture phase. For verb-first entry-position casting, the completion phase of the cited entry action. A dragged verb also cites its region rule."
+          },
+          "after-dispatch": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "leave-targeting",
+              "keep-targeting"
+            ],
+            "description": "Whether a valid dispatched command ends targeting or keeps the same verb ready for another target. A tower tool may remain active for repeated placement."
+          },
+          "starts-when-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming the game action that supplies the verb. For target-first, this action arrives after target capture."
+          },
+          "target-gesture-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "order": [
+                  "target-first"
+                ]
+              }
+            },
+            "description": "The Fixed rule recognizing the target-first pointer action and its capture phase."
+          },
+          "confirm-gesture-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "confirm-style": [
+                  "separate-gesture"
+                ]
+              }
+            },
+            "description": "The Fixed rule recognizing the confirmation gesture and its completion phase."
+          },
+          "targets-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming target capture, every valid target, the near-miss reach and tie-break when used, and the complete invalid-target test."
+          },
+          "area-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "resolves-on": [
+                  "drag-complete"
+                ]
+              }
+            },
+            "description": "The Fixed rule naming the dragged region, its boundary inclusion, and how the region becomes the verb's target."
+          },
+          "command-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming the command, receiver, per-target waiting-plan owner, permission, cost, unreachable-target result, and complete effect or rejection."
+          }
+        }
+      },
+      "queue-modifiers": {
+        "description": "Game-facing modifier actions that add matching pointer commands to a waiting command plan.",
+        "when-empty": "No pointer modifier adds a command to a waiting plan.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable game-facing name, such as queue-orders or urgent-work-next."
+          },
+          "modifier-action": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The mapped game action held or active when the pointer command completes."
+          },
+          "modifier-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming when this mapped modifier action is active, any waiting-plan capacity, and what happens when no place is available."
+          },
+          "applies-to-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming every context command and targeted verb to which this modifier applies; it names at least one declared row."
+          }
+        }
+      },
+      "cancellations": {
+        "description": "Game-facing actions that end targeting, abort a selection drag, clear waiting pointer commands, or clear the current selection without proposing another command.",
+        "when-empty": "No game-facing action has a separate cancellation meaning in this adoption.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable game-facing name, such as cancel-ability-target or abort-box-select."
+          },
+          "action": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The game-facing pointer or non-pointer action with a cancellation meaning in the cited state."
+          },
+          "resolves-on": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "press",
+              "release",
+              "drag-cancel"
+            ],
+            "description": "The game-facing action phase that applies the cancellation."
+          },
+          "active-state": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "targeting",
+              "selection-drag",
+              "queued-commands",
+              "selection"
+            ],
+            "description": "The pointer-command state in which this row applies; selection holds when the current selection is non-empty. An ability cancel reads targeting; an RTS stop-planning gesture reads queued commands."
+          },
+          "result": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "ends-targeting",
+              "ends-drag",
+              "empties-queue",
+              "empties-selection"
+            ],
+            "description": "The state change made without another world command. The result matches the row's active state; empties-queue clears the waiting plan named at state-declared-in."
+          },
+          "action-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule recognizing the cancellation action and its completion phase."
+          },
+          "state-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming when the affected targeting, drag, waiting-plan, or selection state exists."
+          }
+        }
+      }
+    }
+  },
+  "rules": {},
+  "origin": "https://opengdd.org/contracts/pointer-command-1",
+  "mechanism": [
+    "This is the single normative authority for what a pointer press, drag, or release over the world means; how selection, context command, and targeting states advance; where a queue modifier places a command; and what a cancellation clears. Questions and rows describe choices and cite game rules. They do not define another sequence.",
+    "A **game-facing pointer action** is the action received after Control options maps a mouse, touch, or stick-driven cursor input. A **pointer phase** is its press, release, completed drag, or cancelled drag. A **pointer snapshot** is the world point and classified object under the pointer at that phase. The broader **game-facing action** also includes a cited non-pointer action that supplies a verb, confirmation, or cancellation; a non-pointer action has one completion phase, recorded as its press unless its cited rule names release. The **current selection** is one set of world objects. It starts empty unless a cited load or scene-entry rule supplies it, lasts until a rule changes it, and may also change through cited control-group recall, unit death, roster change, scene entry, or load. A **selection drag** starts when its cited gesture rule crosses the drag threshold and lasts until that same gesture completes or cancels. A **targeting state** holds one chosen ability or verb, or a target-first snapshot while it waits for the verb. A **command proposal** contains one command, its receiver shape, exact world target, and queue placement. A **waiting plan** contains pointer commands accepted for later execution for the owner named by the cited command rule. The game's Fixed command rules own whether a proposal is accepted and what it does.",
+    "### Recognize the gesture",
+    "1. Control options maps physical input to one game-facing pointer action. The matching cited gesture rule observes its press, movement, and release. This contract does not inspect device identity. 2. On press, record the pointer snapshot needed by the cited gesture rule. A row that resolves on press proceeds immediately, and no later drag or release result is inferred from that press for this contract. 3. While the pointer moves, the cited rule alone decides whether it remains a point gesture, becomes a drag, or is cancelled. Its cited distance, duration, geometry, coordinate space, and boundary rule are read directly; this adoption contributes no number. A cited gesture rule may emit repeated completed phases while a control is held. 4. On release, create the final pointer snapshot. A release row resolves now. A recognized drag creates one `drag-complete` phase; an aborted drag creates one `drag-cancel` phase belonging to that drag's own game-facing action. One physical sequence cannot produce both a point result and a drag result unless the cited rule creates two distinct game-facing actions.",
+    "### Resolve cancellation and targeting",
+    "5. At each completed action phase, check cancellation before any other row. A cancellation row matches on three terms of its own: the game-facing action, its resolving phase, and the currently holding active state, checked in this order: targeting, selection-drag, queued-commands, selection. Apply its declared result and end this phase. It proposes no command and performs no selection change beyond `empties-selection`. 6. For `verb-first`, a game action named by `starts-when-declared-in` supplies the verb and begins its targeting entry. For `target-first`, the capture gesture — matched on its game-facing action, phase, and classified snapshot — captures the world target and begins a target-first state; then the cited game action — a verb coin, pie menu, or command card — supplies the verb. A second entry does not change the active targeting state unless the cited start rule explicitly replaces it. 7. While targeting is active, ordinary selection and direct-command rows do not run. Under `separate-gesture`, a matching confirmation action reads the pointer snapshot at its completion moment — for a non-pointer confirmation such as a key release, the pointer's position at that release. Under `at-entry-position`, confirmation reads the entry-time snapshot: the pointer position when a verb-first entry begins or the already captured target for target-first. A `drag-complete` row also reads its cited region rule, and validity is tested on that region. Apply `near-miss-resolution` through `targets-declared-in`, then test validity. A non-matching pointer action has no meaning here unless it matches a cancellation row. 8. For an invalid target, propose no command. Under `keep-targeting`, preserve the active verb. Under `leave-targeting`, clear it. No context-command fallback occurs from the same pointer phase. 9. For a valid target, create one command proposal from the targeted row and its cited rules; under `current-selection` an empty selection makes it one rejected proposal, as in step 12. Preserve the row's `after-dispatch` result with the proposal. A rejected command is still a dispatched proposal, so rejection does not restore targeting unless the cited game rule starts a new instance.",
+    "### Resolve selection or a context command",
+    "10. With no active targeting state, find the one selection or context row that matches the game-facing action, pointer phase, and classified pointer snapshot. A context row with `receiver-condition` also matches the receiver class named by that citation; receiver class therefore participates in classification when a row cites it. A receiver-conditioned adoption keeps its receiver set homogeneous for that action: when rows cite different receiver classes for one action, phase, and target kind, the selection holds one class at a time under the receiver-condition citation, and issuing different commands per member of one mixed selection is a missing shape recorded in §5. For one game-facing action and phase, selection rows, context rows, and target-first capture gestures have mutually exclusive classifications. Apply `near-miss-resolution` through the row's cited target or candidate rule. If no row matches, change no world-command state and record the unmatched classification in step 16. 11. For a selection row, compute its complete candidate set from the cited point or area rule. With an empty result, a `replace` row applies `empty-selection`; an `add`, `remove`, or `toggle` row always keeps the current selection, because an empty additive result asserts nothing about the earlier choice. With a non-empty result, apply `replace`, `add`, `remove`, or `toggle` to the complete set. Commit the new selection once and end this pointer phase. 12. For a context row, copy its classified point or object as the command target. Under `fixed-actor`, read the fixed receiver from the cited command rule. Under `current-selection`, copy the complete current selection. An empty copy creates one rejected proposal with no world effect and ends at this step; it never reaches queue placement or dispatch. Under `world-target`, attach no selected receiver and read that exact target's plan owner from the cited command rule. Create one command proposal and continue.",
+    "### Place and dispatch the command",
+    "13. Read queue modifiers only after the command, receiver, and target are fixed. A matching modifier changes placement, not meaning. Under `append-at-end`, place the proposal after every waiting pointer command for the same waiting-plan owner. Under `insert-next`, place it before those waiting commands and after the command already being carried out. The cited modifier rule owns plan capacity and the complete rejected result when no place is available; this contract never drops another command implicitly. 14. With a matching modifier, add the proposal at the position from step 13. Without one, read `unmodified-command`: `replaces-waiting` clears waiting pointer commands for the same owner, `always-appends` places the proposal after them, and `rejected-while-busy` records rejection and stops when one is waiting. A proposal exists once per completed phase; a held modifier or update cannot add another copy within that phase. After a targeted proposal is dispatched, placed, or rejected at this step, apply its row's `after-dispatch` result: `leave-targeting` ends the state and `keep-targeting` preserves it. 15. Submit each dispatched proposal to its cited Fixed command rule. That rule owns permission, cost, range, path request, the unreachable-destination case, effect, rejection, and whether the command already being carried out stops. A queued proposal is submitted when it reaches its declared place. Event resolution owns the order when several proposals share one instant. 16. Record the pointer result: gesture id, resolving phase, pointer snapshot, prior and final targeting state, prior and final selection when changed, command and receiver when proposed, target, queue modifier or unmodified placement outcome, cancellation when used, target validity for every targeted verb that reached a validity test, a no-matching-row result when applicable, and the cited game-rule result when available.",
+    "The authority order is therefore: physical mapping, gesture recognition, cancellation, targeting entry, target confirmation, selection or context classification, receiver snapshot, queue placement, command dispatch, game rule, and same-instant event order. A later stage never changes the pointer snapshot or receiver copied by an earlier stage; classification may read receiver class without copying the receiver set."
+  ],
+  "answers": {
+    "command-receiver": "current-selection",
+    "near-miss-resolution": "exact-point-only",
+    "empty-selection": "keep-selection",
+    "invalid-target": "keep-targeting",
+    "unmodified-command": "replaces-waiting"
+  },
+  "values": {},
+  "rows": {
+    "selection-gestures": [
+      {
+        "id": "add-ally-on-press",
+        "gesture": "add-ally",
+        "resolves-on": "press",
+        "shape": "point",
+        "change": "add",
+        "gesture-declared-in": "controls.add-ally",
+        "candidates-declared-in": "units.ally-selection"
+      },
+      {
+        "id": "toggle-hero",
+        "gesture": "toggle-hero",
+        "resolves-on": "release",
+        "shape": "point",
+        "change": "toggle",
+        "gesture-declared-in": "controls.toggle-hero",
+        "candidates-declared-in": "units.hero-selection"
+      },
+      {
+        "id": "remove-defeated-hero",
+        "gesture": "remove-hero",
+        "resolves-on": "release",
+        "shape": "point",
+        "change": "remove",
+        "gesture-declared-in": "controls.remove-hero",
+        "candidates-declared-in": "units.defeated-hero-selection"
+      }
+    ],
+    "context-commands": [
+      {
+        "id": "move-hero-on-ground",
+        "gesture": "hero-order",
+        "resolves-on": "release",
+        "target-kind": "ground",
+        "command": "move-hero",
+        "gesture-declared-in": "controls.hero-order",
+        "target-declared-in": "arena.pointer-target-kinds",
+        "command-declared-in": "orders.move-hero"
+      }
+    ],
+    "targeted-verbs": [
+      {
+        "id": "arc-stun-smart-cast",
+        "verb": "arc-stun",
+        "order": "verb-first",
+        "confirm-style": "at-entry-position",
+        "resolves-on": "press",
+        "after-dispatch": "leave-targeting",
+        "starts-when-declared-in": "abilities.choose-arc-stun",
+        "targets-declared-in": "abilities.arc-stun-targets",
+        "command-declared-in": "abilities.arc-stun-command"
+      }
+    ],
+    "queue-modifiers": [],
+    "cancellations": [
+      {
+        "id": "cancel-aim-mode",
+        "action": "ability-key-again",
+        "resolves-on": "press",
+        "active-state": "targeting",
+        "result": "ends-targeting",
+        "action-declared-in": "controls.ability-key-again",
+        "state-declared-in": "abilities.aim-mode-state"
+      },
+      {
+        "id": "clear-hero-selection",
+        "action": "clear-selection-key",
+        "resolves-on": "press",
+        "active-state": "selection",
+        "result": "empties-selection",
+        "action-declared-in": "controls.clear-selection-key",
+        "state-declared-in": "units.hero-selection-state"
+      }
+    ]
+  },
+  "pack": "sha256:d9dfa01c583bd31d11345ee211618019165be830fbf01231f7d81cd93a27538a"
+}

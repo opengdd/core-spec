@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What a package contains | OpenGDD handbook</title>
+<meta name="description" content="A package is one folder with the complete design of one game. You give that folder to the builder: the person, team or AI that turns your package into a game.">
+<link rel="canonical" href="https://opengdd.org/handbook/what-a-package-contains/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="What a package contains | OpenGDD handbook">
+<meta property="og:description" content="A package is one folder with the complete design of one game. You give that folder to the builder: the person, team or AI that turns your package into a game.">
+<meta property="og:url" content="https://opengdd.org/handbook/what-a-package-contains/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="What a package contains | OpenGDD handbook">
+<meta name="twitter:description" content="A package is one folder with the complete design of one game. You give that folder to the builder: the person, team or AI that turns your package into a game.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/" aria-current="page">Learn</a>
+      <a href="/contracts/">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="Learn"><p class="toc-title">Learn</p>
+<ul class="learn-resources">
+<li><a href="/get-started/">Get started</a></li>
+<li><a href="/handbook/" class="toc-resource-current">Handbook</a></li>
+</ul>
+<div class="toc-group">
+<p class="toc-group-title">Start and foundations</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
+<li class="toc-h2"><a href="/handbook/what-a-package-contains/" class="here" aria-current="page">What a package contains</a></li>
+<li class="toc-h2"><a href="/handbook/player-fantasy/">The player fantasy</a></li>
+<li class="toc-h2"><a href="/handbook/who-decides/">Who decides</a></li>
+<li class="toc-h2"><a href="/handbook/naming-things/">Names and addresses</a></li>
+<li class="toc-h2"><a href="/handbook/tuning/">Tuning</a></li>
+<li class="toc-h2"><a href="/handbook/acceptance-tests/">Acceptance tests</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Content, links and time</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/collections/">Collections</a></li>
+<li class="toc-h2"><a href="/handbook/links/">Links</a></li>
+<li class="toc-h2"><a href="/handbook/runtime-values/">Runtime values</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes and clocks</a></li>
+<li class="toc-h2"><a href="/handbook/seeds/">Seeds and repeatable randomness</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Art direction and variation</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Reusable mechanics</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
+</ul>
+</div>
+<div class="toc-group">
+<p class="toc-group-title">Checking and handoff</p>
+<ul>
+<li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
+</ul>
+</div>
+</nav>
+<article class="doc-body">
+<h1>What a package contains</h1>
+<p class="chapter-scope"><span class="scope-badge">Required</span></p>
+<p>A <strong>package</strong> is one folder with the complete design of one game. You give that folder to the builder: the person, team or AI that turns your package into a game.</p>
+<p><em>the five required files</em></p>
+<pre><code class="lang-text">my-dungeon-crawler/
+  manifest.json       what this is
+  tuning.json         the numbers
+  01-overview.md      the player fantasy and the pitch
+  02-mechanics.md     the rules
+  05-build-plan.md    build stages and acceptance tests</code></pre>
+<p>These five files can describe a complete game. Everything else is optional.</p>
+<p><em>the same package with optional files</em></p>
+<pre><code class="lang-text">my-dungeon-crawler/
+  manifest.json         what this is
+  tuning.json           the numbers
+  01-overview.md        the player fantasy and the pitch
+  02-mechanics.md       the rules
+  03-content.md         prose about the game's content
+  04-presentation.md    art direction and presentation
+  05-build-plan.md      build stages and acceptance tests
+  06-traps.md           a chapter of your own
+  personalization.json  questions the builder answers for one build
+  direction.json        structured art direction
+  clocks.json           for games that mix real time with turns or a pause</code></pre>
+<p>The Markdown files are <strong>chapters</strong>: the design in prose. The JSON files hold data a tool can check.</p>
+<p>A chapter is a file at the top of the folder named <code>NN-name.md</code>. Chapters are read in filename order. Numbers <code>01</code> to <code>05</code> have fixed names: <code>01-overview.md</code>, <code>02-mechanics.md</code>, <code>03-content.md</code>, <code>04-presentation.md</code> and <code>05-build-plan.md</code>. Any other name with one of those numbers fails validation (the check a tool runs on your package before a build). <code>03-content.md</code> and <code>04-presentation.md</code> are optional. Add your own chapters from <code>06</code> upward, with any name after the number. Keep notes that are not part of the design in files without a number, so tools and builders do not read them as chapters.</p>
+<p>The builder reads <code>manifest.json</code> first, then the chapters in order.</p>
+<p><em><code>manifest.json</code>, complete</em></p>
+<pre><code class="lang-json">{
+  &quot;opengdd&quot;: &quot;0.8&quot;,
+  &quot;id&quot;: &quot;my-dungeon-crawler&quot;,
+  &quot;version&quot;: &quot;0.1.0&quot;,
+  &quot;title&quot;: &quot;My Dungeon Crawler&quot;,
+  &quot;designer&quot;: { &quot;name&quot;: &quot;You&quot; },
+  &quot;target&quot;: { &quot;platform&quot;: &quot;web-2d&quot;, &quot;genre&quot;: &quot;dungeon crawler&quot; }
+}</code></pre>
+<p><code>opengdd</code> is the format version. <code>id</code>, <code>version</code>, <code>title</code> and <code>designer</code> say which package this is. <code>target</code> needs <code>platform</code> and <code>genre</code>; <code>session_minutes</code> and <code>audience</code> are optional. <code>genre</code> is free text. The manifest carries the package's identity and target, plus optional commerce terms. It does not list the chapters, the optional files, or the collections. Their presence in the folder is the declaration.</p>
+<p>These are plain Markdown and JSON files. They do not depend on any engine or build system. The authoring tool can create the folder and keep the names in it connected.</p>
+<p>In later JSON examples, <code>…</code> means that unrelated fields were left out.</p>
+<p><em>Full rules: <a href="/spec/#1-package-layout">OpenGDD specification</a>, §1 and <a href="/spec/#3-manifest-json">§3</a>.</em></p>
+<p class="note chapter-pager"><a href="/handbook/complete-example/">← A complete example: Garden Snake</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/player-fantasy/">The player fantasy →</a></p>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+{
+  "contract": "input-forgiveness",
+  "version": 1,
+  "summary": "Covers inputs accepted just before the game allows the action, just after it stops allowing it, or near a target moment such as a beat or impact. It records which game actions receive that help, what arms each case, and when a saved action fires. Physical controls, ordinary action rules, and spatial nudges such as corner correction stay elsewhere.",
+  "questions": {
+    "ready-together": {
+      "asks": "When several helped inputs come due together, which ones does the game try?",
+      "rationale": "A landing, beat, or recovery end can make several helped inputs ready. The game must decide which ones to try.",
+      "when": {
+        "any": [
+          {
+            "row-count": {
+              "late-input-windows": "non-empty"
+            }
+          },
+          {
+            "row-count": {
+              "input-buffers": "non-empty"
+            }
+          },
+          {
+            "row-count": {
+              "target-moment-windows": "non-empty"
+            }
+          }
+        ]
+      },
+      "otherwise": "No forgiveness row can make an input due.",
+      "options": {
+        "all-ready-actions": {
+          "meaning": "The game tries every helped input that comes due. A twin-stick hero may dodge and fire at the same moment.",
+          "semantics": "Every ready forgiven input is submitted once as an action proposal. Event resolution owns their order and the game rules may still reject incompatible actions."
+        },
+        "declared-priority": {
+          "meaning": "One ready input wins by a fixed game priority. A farm tool may water before planting when both become ready.",
+          "semantics": "Exactly one ready forgiven input is submitted. The matching competition-rules row supplies one total priority over every input that can be ready in that situation."
+        },
+        "cannot-coincide": {
+          "meaning": "Two helped inputs can never come due together. A one-button rhythm lane has at most one note action at a beat.",
+          "semantics": "The adoption guarantees that no reachable game state presents two ready forgiven inputs at one moment. Reaching such a state invalidates the design claim."
+        }
+      }
+    }
+  },
+  "declares": {
+    "values": {},
+    "rows": {
+      "late-input-windows": {
+        "description": "Actions accepted just after ordinary permission ends, such as a platformer jump after leaving walkable ground.",
+        "when-empty": "No action remains available through input forgiveness after its ordinary permission ends.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable game-facing name, such as jump-after-ground."
+          },
+          "action": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The game action receiving late forgiveness, such as jump. The reserved all-actions spelling covers the game's complete action set."
+          },
+          "action-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming the action, its ordinary permission, and its complete effect. For the reserved all-actions spelling, it names these for every action in the set."
+          },
+          "arms-when-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming every transition that starts this late case and every similar transition that does not. A platformer may name walking off ground and exclude jumping from it."
+          },
+          "window-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The game's Fixed timing rule for this late window, including its positive duration, unit, inclusive last moment, clock, pause behaviour, and open-state test."
+          },
+          "cancels-when-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming every game event that ends this forgiveness before the cited window closes, or stating that no extra event does."
+          }
+        }
+      },
+      "input-buffers": {
+        "description": "Early presses saved until an action first becomes ordinarily permitted, such as dodge pressed during attack recovery.",
+        "when-empty": "No early press waits for an action to become ordinarily permitted.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable game-facing name, such as dodge-during-recovery."
+          },
+          "action": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The game action whose early press may wait, such as dodge. The reserved all-actions spelling covers the game's complete action set."
+          },
+          "action-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming the action, its ordinary permission, and its complete effect. For the reserved all-actions spelling, it names these for every action in the set."
+          },
+          "arms-when-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming the accepted early states, the excluded states, and the matching action input. A soulslike may accept dodge during recovery but exclude menus, stun, and defeat."
+          },
+          "window-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The game's Fixed timing rule for this saved press, including its positive duration, unit, inclusive last moment, clock, pause behaviour, and open-state test."
+          },
+          "fires-when-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming the first ordinary permission event that releases the saved action. A landing may release jump; recovery end may release dodge."
+          },
+          "cancels-when-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming every event that discards the saved press before it fires, or stating that no extra event does."
+          },
+          "waiting-press": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "first-press-stays",
+              "latest-press-replaces"
+            ],
+            "description": "Which matching press survives while this row already holds one: the first stays, or the latest replaces it. A menu confirm may keep the first click or replace it with the second."
+          },
+          "held-after-fire": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "fresh-press-required",
+              "hold-can-repeat"
+            ],
+            "description": "Whether an uninterrupted hold needs a release and fresh press or may prepare another action after this buffer fires. A racing boost may repeat from one hold."
+          }
+        }
+      },
+      "target-moment-windows": {
+        "description": "Inputs accepted near a cited target moment, such as a rhythm beat or an incoming strike's impact.",
+        "when-empty": "No input is forgiven because it falls near a target moment.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable game-facing name, such as lead-note-hit or sword-impact-parry."
+          },
+          "action": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The game action judged against the target moment, such as hit-note or parry. The reserved all-actions spelling covers the game's complete action set."
+          },
+          "action-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming the action input, its ordinary permission, and its complete attempt. This target row grades an attempt; it does not grant permission. For the reserved all-actions spelling, it names these for every action in the set."
+          },
+          "target-moment-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming the target moment."
+          },
+          "arms-when-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming the event that creates the current target instance and which input events are associated with it."
+          },
+          "window-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The game's one Fixed timing rule for the outer target-relative window, including its early and late bounds of positive width, inclusive last moments, unit, clock, pause behaviour, and open-state test."
+          },
+          "result-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed result rule for an accepted input. It owns any grade boundaries inside this row's one outer window and states any departure from first-accepted settlement; a rhythm note may record perfect, great, or good."
+          },
+          "cancels-when-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming every event that stops this target instance from accepting input before the cited window closes, or stating that no extra event does."
+          }
+        }
+      },
+      "competition-rules": {
+        "description": "Situations where several forgiven inputs are ready together and one fixed game priority selects a single attempt. Rows exist only under the declared-priority answer; an adoption answering otherwise, or answering nothing, has none.",
+        "when-empty": "No competition priority rule is declared.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable game-facing name, such as recovery-end-actions."
+          },
+          "declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule identifying the situation and giving one total priority over every forgiven input that can be ready there."
+          }
+        }
+      }
+    }
+  },
+  "rules": {},
+  "origin": "https://opengdd.org/contracts/input-forgiveness-1",
+  "mechanism": [
+    "This is the single normative authority for when forgiveness arms, what input it captures or accepts, how repeated and competing inputs settle, when an action fires, and what clears the forgiveness state. Questions and rows describe the game's choices and cite its rules; they do not define another sequence.",
+    "An action or input not matched by a row in the current situation receives no forgiveness from this adoption, and no cited game rule outside these rows promises it any.",
+    "An **action input** is the game-facing input event supplied after Control options maps a physical control. **Ordinary permission** is the action's legal state before any forgiveness. A **ready forgiven input** is either an input accepted for immediate submission by a late or target row, or a saved buffered press whose cited firing event has arrived. A **target moment** is the cited beat, impact, cue, or comparable game instant against which input timing is judged. A target instance is **settled** when it may accept no further input; the first accepted input settles it unless the cited result rule says otherwise. A **press** is the arrival of the action input, whichever physical edge the cited action rule uses — a release-triggered action counts. For every family, when §4's agreeing Timed window adoption exists for a cited window, runtime openness reads from it; otherwise the cited Fixed timing rule decides.",
+    "### Arm forgiveness windows",
+    "1. Arming runs on game events, not on input receipt. Whenever a row's cited arming event occurs, it creates one window instance under the cited Fixed timing rule: a late event creates one instance for that loss of permission, and a target event creates one per-target instance, in both cases before and independently of any input. A buffer's per-press instance is the exception: the qualifying press itself creates it at the moment step 6 stores the press. This contract owns those instance scopes.",
+    "### Receive an action input",
+    "2. Map the physical control to its game action through Control options. Read the action's ordinary permission and every matching row for the current situation. Physical device identity does not change a row's settlement. By default, a control already held when a late or target row arms creates no action input; the cited action rule may explicitly define a different input. 3. Ordinary permission gates only late-input and buffer evaluation. When the action is ordinarily permitted, do not evaluate those two families. Do not submit yet: the target branch in step 4 runs whether ordinary permission is present or absent. 4. Evaluate every matching target row for its associated target instance, regardless of ordinary permission. An open row can grade only an otherwise-legal attempt; it never grants ordinary permission. The accepted input becomes ready now, and the first accepted input settles the target unless that result rule says otherwise. Two rows of one family matching one input in the same situation are an invalid adoption rather than an implicit choice. 5. If a target row accepted this input, end this receipt. If no target row accepts and ordinary permission exists, submit the ordinary attempt without forgiveness and end this receipt. Otherwise — ordinary permission is absent — a matching late row may accept after its cited arming event while its window is open. An accepted late input becomes ready now. 6. If neither immediate family accepts, a matching input-buffer row may save the press only while its cited arming rule holds. Storing the press creates its per-press window instance. The row stores at most one press, its action, input moment, and that instance. For a row whose action is the reserved `all-actions` spelling, a press of any covered action is a matching press of that row. If one already waits, apply that row's `waiting-press` field: `first-press-stays` ignores the later press, while `latest-press-replaces` clears the earlier press and creates a fresh instance for the later one.",
+    "### Advance, fire, and clear rows",
+    "7. A live late-input row ends when its action executes, ordinary permission returns, the cited timing window closes, or its cited early-clearing event occurs. Action execution cannot arm a replacement late window. 8. A waiting buffer clears without firing when its cited timing window closes or its cited early-clearing event occurs. If neither happens, the first cited ordinary permission event makes it ready. No later input poll or extra delay is inserted. 9. A target-moment row accepts no further input for a target instance after the cited timing window closes, the target is settled, or its cited early-clearing event occurs. Whether the window was open at the input moment follows the openness rule in this section's definitions. 10. Collect every ready forgiven input at this game moment. A ready input exists once; a repeated update cannot create another copy from the same stored press or accepted input. When two adoptions of this contract produce ready inputs at one moment, settle each adoption independently, then submit all inputs selected by either adoption together.",
+    "### Settle competition and submit attempts",
+    "11. Under `all-ready-actions`, submit every ready forgiven input once. Under `declared-priority`, find the one matching competition row and submit only its highest-priority input; every situation in which forgiven inputs can be ready together has exactly one such row; the cited priority holds stable for the whole settlement moment. Clear every lower-priority ready input without submitting it. Under `cannot-coincide`, two ready inputs invalidate the design claim. 12. Submit selected inputs as action proposals at this moment. Event resolution owns the order of proposals that share the moment. The action's Fixed rules own cost, effect, and any rejection after submission. Forgiveness does not force an otherwise conflicting action to succeed. 13. Clear each submitted or competition-losing buffered press immediately. Clear a submitted late window. A competition-losing late window survives until its own close or clearing event; while it remains open it may accept a new press, and the cleared input is not restored. A losing target instance stays open until settled or closed; under the default first-accepted rule it is already settled. A target input has no saved press after submission. 14. Apply the firing buffer row's `held-after-fire` field only after its action fires and its saved press has been cleared. Under `fresh-press-required`, held state creates nothing until release and a fresh press. Under `hold-can-repeat`, the uninterrupted hold creates one new press when that row's arming condition next holds. If its cited window later closes while the hold and arming condition still hold, clear it and create one fresh waiting press immediately. At most one waits in the row. 15. A rejected action proposal does not restore its cleared forgiveness state. A new attempt needs a new qualifying arming event or press. Event resolution owns the consequences of the rejection; this contract owns only the cleared forgiveness state.",
+    "The authority order is therefore: arming, physical input mapping, ordinary permission, target acceptance, late acceptance, buffer capture, repeated-press choice, cited open-window and early-clearing state, firing event, competition selection, same-moment event order, action rules, clearing, and held-input renewal. A later stage never rewrites an earlier input moment or target moment."
+  ],
+  "answers": {
+    "ready-together": "all-ready-actions"
+  },
+  "values": {},
+  "rows": {
+    "late-input-windows": [
+      {
+        "id": "jump-after-ground",
+        "action": "jump",
+        "action-declared-in": "movement.jump-action",
+        "arms-when-declared-in": "movement.walk-off-ground-arms-jump",
+        "window-declared-in": "movement.jump-six-frame-late-window",
+        "cancels-when-declared-in": "movement.jump-late-window-cancellation"
+      }
+    ],
+    "input-buffers": [
+      {
+        "id": "jump-before-landing",
+        "action": "jump",
+        "action-declared-in": "movement.jump-action",
+        "arms-when-declared-in": "movement.airborne-jump-input",
+        "window-declared-in": "movement.jump-four-frame-buffer",
+        "fires-when-declared-in": "movement.first-walkable-ground-contact",
+        "cancels-when-declared-in": "movement.jump-buffer-cancellation",
+        "waiting-press": "first-press-stays",
+        "held-after-fire": "fresh-press-required"
+      },
+      {
+        "id": "dash-before-ready",
+        "action": "dash",
+        "action-declared-in": "movement.dash-action",
+        "arms-when-declared-in": "movement.dash-input-before-ready",
+        "window-declared-in": "movement.dash-four-frame-buffer",
+        "fires-when-declared-in": "movement.dash-first-ready-moment",
+        "cancels-when-declared-in": "movement.dash-buffer-cancellation",
+        "waiting-press": "first-press-stays",
+        "held-after-fire": "fresh-press-required"
+      }
+    ],
+    "target-moment-windows": [],
+    "competition-rules": []
+  },
+  "pack": "sha256:dc06d707164dbb72befb35426803f2adc6e4bedee5496e3a30a9c8a9c2491120"
+}

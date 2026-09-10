@@ -48,7 +48,7 @@ design decision the builder follows exactly as written. A Delegated statement
 gives the builder a bounded choice.
 
 OpenGDD separates checking into three layers. The
-[Promises and proof](../../forge/handbook/chapters/promises-and-proof.md)
+[Promises and proof](https://opengdd.org/handbook/promises-and-proof/)
 handbook chapter gives the full introduction.
 
 1. **Package checking** asks whether the design is sound on paper. The
@@ -67,7 +67,7 @@ handbook chapter gives the full introduction.
 
 The [OpenGDD specification](../../SPEC.md) defines package and build-record
 conformance. The [build-certification protocol](../../conformance/CERTIFICATION.md)
-defines the experimental runner and audit profiles. Version 0.7 defines no
+defines the experimental runner and audit profiles. Version 0.8 defines no
 normative certification outcome, and the draft protocol grants no right to
 use a certification mark.
 
@@ -79,7 +79,7 @@ test does not replace review of Fixed prose that no test repeats.
 ## manifest.json: identity and target
 
 The [manifest](../tic-tac-toe/manifest.json) opens with
-`"opengdd": "0.7"`. That value selects the package's format version. The
+`"opengdd": "0.8"`. That value selects the package's format version. The
 remaining identity fields give the package id `tic-tac-toe`, design version
 `1.0.0`, title `Tic-Tac-Toe`, and designer name `OpenGDD Examples`.
 
@@ -347,7 +347,7 @@ node conformance/validate.mjs specs/tic-tac-toe
 
 The validator checks required files, JSON shapes, the fantasy block,
 cross-file references, measured-promise coverage, and test block shape and
-numbering. The [Acceptance tests](../../forge/handbook/chapters/acceptance-tests.md)
+numbering. The [Acceptance tests](https://opengdd.org/handbook/acceptance-tests/)
 chapter explains the test checks. This package passes with 0 errors and 0
 warnings; the guide remains outside the package and is not scanned.
 

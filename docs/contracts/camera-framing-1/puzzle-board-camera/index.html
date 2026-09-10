@@ -1,0 +1,1261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Puzzle board camera — Camera framing adoption — OpenGDD</title>
+<meta name="description" content="Puzzle board camera is a Camera framing adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="canonical" href="https://opengdd.org/contracts/camera-framing-1/puzzle-board-camera/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Puzzle board camera — Camera framing adoption — OpenGDD">
+<meta property="og:description" content="Puzzle board camera is a Camera framing adoption with supplied answers, settings and matching acceptance tests.">
+<meta property="og:url" content="https://opengdd.org/contracts/camera-framing-1/puzzle-board-camera/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Puzzle board camera — Camera framing adoption — OpenGDD">
+<meta name="twitter:description" content="Puzzle board camera is a Camera framing adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=ff285f28dd16">
+<script type="module" src="/assets/contracts.mjs?v=ff285f28dd16"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout contract-catalogue contract-entry-page contract-instance-page" data-contract-root data-core-id="camera-framing" data-contract-preset="{&quot;content-visibility&quot;:&quot;declared-content&quot;}" data-contract-facts="{&quot;rowCounts&quot;:{&quot;cameras&quot;:1,&quot;coverage-promises&quot;:1,&quot;camera-activities&quot;:1},&quot;valueForms&quot;:{},&quot;rows&quot;:{&quot;cameras&quot;:[{&quot;id&quot;:&quot;board-camera&quot;,&quot;active-when&quot;:&quot;puzzle.board-in-play&quot;,&quot;view-declared-in&quot;:&quot;presentation.board-play-view&quot;,&quot;follow-mode&quot;:&quot;fixed-view&quot;,&quot;view-size&quot;:&quot;automatic-fit&quot;,&quot;view-size-rule-declared-in&quot;:&quot;presentation.board-fit-zoom&quot;,&quot;failure-response&quot;:&quot;failure-unreachable&quot;,&quot;failure-handling-declared-in&quot;:&quot;puzzle.supported-displays-always-fit-board&quot;}],&quot;coverage-promises&quot;:[{&quot;id&quot;:&quot;whole-board&quot;,&quot;camera-id&quot;:&quot;board-camera&quot;,&quot;subject&quot;:&quot;puzzle.complete-board&quot;,&quot;applies-when&quot;:&quot;puzzle.board-in-play&quot;,&quot;coverage&quot;:&quot;whole-extent&quot;,&quot;visibility-area&quot;:&quot;hud-safe-area&quot;,&quot;safe-area-declared-in&quot;:&quot;presentation.board-safe-area&quot;,&quot;margin-declared-in&quot;:&quot;presentation.board-clearance&quot;}],&quot;camera-activities&quot;:[{&quot;id&quot;:&quot;board-clear-shake&quot;,&quot;camera-id&quot;:&quot;board-camera&quot;,&quot;activity-kind&quot;:&quot;shake&quot;,&quot;applies-when&quot;:&quot;puzzle.board-clear-animation&quot;,&quot;extent-declared-in&quot;:&quot;presentation.board-shake-extent&quot;,&quot;promise-effect&quot;:&quot;keeps-promise&quot;}]}}">
+<nav class="doc-toc contract-nav" aria-label="Contracts">
+<details class="contract-nav-disclosure">
+  <summary>Contracts</summary>
+  <div class="contract-nav-content">
+    <p class="toc-title">Contracts</p>
+    <ul class="contract-nav-home"><li><a href="/contracts/">Overview</a></li><li><a href="/contracts/catalogue/">Contract catalogue</a></li></ul>
+<div class="toc-group contract-page-nav">
+  <p class="toc-group-title">On this page</p>
+  <ul><li><a href="#use-this">Use in your game</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#values">Numbers</a></li>
+<li><a href="#lists">Lists</a></li>
+<li><a href="#tests">Acceptance tests</a></li>
+<li><a href="#adoption-json">JSON</a></li></ul>
+</div>
+  </div>
+</details>
+</nav>
+<article class="doc-body contract-entry-body">
+<p class="label"><a href="/contracts/catalogue/#controls-camera">Controls &amp; camera</a></p>
+<div class="contract-entry-title-row">
+  <div><h1>Puzzle board camera</h1><p class="contract-core-name"><code>puzzle-board-camera</code> · an adoption of <a href="/contracts/camera-framing-1/">Camera framing</a>, version 1</p></div>
+  <div><span class="contract-badge ">Tests included</span></div>
+</div>
+
+<section class="contract-handoff" aria-labelledby="use-this">
+  <h2 id="use-this">Use in your game</h2>
+  <p>Opens the authoring tool with these answers and settings already filled in. You still add your game's own rules and tuning.</p>
+  <div class="contract-actions">
+    <a class="cta" href="/authoring-tool/?contract=camera-framing-1&amp;adoption=puzzle-board-camera">Open in the authoring tool</a>
+    <a class="cta-quiet" href="/contracts/camera-framing-1/puzzle-board-camera.zip" download="puzzle-board-camera.zip">Download ZIP</a>
+  </div>
+  <details><summary>What is in the ZIP</summary><p>The ZIP holds the adoption and its acceptance tests. In the authoring tool, choose <strong>Add contract</strong> and pick this ZIP. If you keep your design as files, put them in <code>contracts/</code>.</p><div class="contract-actions"><a href="/contracts/camera-framing-1/puzzle-board-camera.json" download="puzzle-board-camera.json">Download adoption JSON</a> · <a href="/contracts/camera-framing-1/camera-framing-1.pack.json" download="camera-framing-1.pack.json">Download tests</a><button type="button" class="cta-quiet" data-copy-core data-core-url="/contracts/camera-framing-1/puzzle-board-camera.json" data-copy-kind="adoption">Copy adoption</button><span role="status" aria-live="polite" data-copy-status></span></div></details>
+</section>
+<section class="contract-overview">
+  <h2>The contract behind it</h2>
+  <p>Covers the views used during play and what each one keeps visible. It records fixed, follow, and free-camera modes, manual panning, view size, travel limits, safe areas, clearance, camera activities, and failure handling. Camera feel, physical input mappings, unit commands, HUD layout, and 3D occlusion stay elsewhere.</p>
+  <p><a href="/contracts/camera-framing-1/">Read the full Camera framing contract →</a></p>
+</section>
+<section class="contract-form-section" id="questions">
+  <h2>Questions</h2>
+  <p>The supplied answer is marked on each question. Pick other answers to see what changes. Nothing is saved here: the ZIP and the authoring tool use the supplied answers.</p>
+  <div class="contract-actions contract-question-tools">
+    <button type="button" class="cta-quiet contract-reset" data-reset-choices>Restore supplied answers</button>
+    <label class="contract-switch"><input type="checkbox" data-builder-wording> Show exact wording for builders</label>
+  </div>
+  <div class="contract-question-list">
+  <article class="contract-question" id="question-content-visibility" data-contract-question data-flag="content-visibility" data-when="null">
+  <h3>In normal play, must these cameras keep anything from your game on screen?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for In normal play, must these cameras keep anything from your game on screen?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="camera-framing-content-visibility" value="declared-content" data-contract-choice><span class="contract-option-label">Declared content</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The cameras keep named game content visible. A party view keeps every active hero on screen.</span><p class="contract-option-semantics">Every visibility promise lives in a coverage-promises row and every effect on one lives in a camera-activities row; nothing outside those rows is promised.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="camera-framing-content-visibility" value="no-content-guarantee" data-contract-choice><span class="contract-option-label">No content guarantee</span></label></th>
+  <td><span class="contract-option-meaning">The cameras make no promise about game content staying visible. An endless runner may leave the view during a fast fall.</span><p class="contract-option-semantics">No visibility promise exists; the promise and activity row sets are declared empty.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>A follow target or camera travel limit does not prove that game content remains visible. This choice states whether these cameras make that promise.</p></details>
+</article>
+  </div>
+</section>
+<aside class="contract-relief" aria-labelledby="relief-title">
+  <p class="contract-relief-title" id="relief-title">That was the hard part.</p>
+  <p>The questions are the decisions. Everything below follows from them: the numbers, lists and test inputs this adoption supplies, and the tests that come with it. The authoring tool edits all of it in place. Read on only if you want to check.</p>
+</aside>
+<details class="contract-form-section contract-fold" id="values">
+  <summary><span class="contract-fold-title">Numbers</span><span class="contract-fold-note">no numbers</span></summary>
+  <p>This contract has no numbers to set.</p>
+</details>
+<details class="contract-form-section contract-fold" id="rules">
+  <summary><span class="contract-fold-title">Rules</span><span class="contract-fold-note">no rules</span></summary>
+  <p>A rule is a check between the numbers. Validation reports a rule that fails.</p>
+  <p>This contract has no rules between its numbers.</p>
+</details>
+<details class="contract-form-section contract-fold" id="lists">
+  <summary><span class="contract-fold-title">Lists</span><span class="contract-fold-note">3 lists</span></summary>
+  <p>Each list holds the rows this adoption supplies. A list can be empty.</p>
+  <article class="contract-collection">
+<h3>Cameras</h3>
+<p class="contract-exact-name"><code>cameras</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Active when</th><th>View declared in</th><th>Follow mode</th><th>Follow target declared in</th><th>Manual pan</th><th>Pan actions declared in</th><th>Recenter action declared in</th><th>Travel limit</th><th>Travel limit declared in</th><th>View size</th><th>View size rule declared in</th><th>Failure response</th><th>Failure handling declared in</th></tr></thead>
+<tbody>
+<tr><td><code>board-camera</code></td><td><code>puzzle.board-in-play</code></td><td><code>presentation.board-play-view</code></td><td><code>fixed-view</code></td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><code>automatic-fit</code></td><td><code>presentation.board-fit-zoom</code></td><td><code>failure-unreachable</code></td><td><code>puzzle.supported-displays-always-fit-board</code></td></tr>
+</tbody></table></div>
+</article>
+<article class="contract-collection">
+<h3>Coverage promises</h3>
+<p class="contract-exact-name"><code>coverage-promises</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Camera id</th><th>Subject</th><th>Applies when</th><th>Coverage</th><th>Reference point</th><th>Visibility area</th><th>Safe area declared in</th><th>Margin declared in</th></tr></thead>
+<tbody>
+<tr><td><code>whole-board</code></td><td><code>board-camera</code></td><td><code>puzzle.complete-board</code></td><td><code>puzzle.board-in-play</code></td><td><code>whole-extent</code></td><td>—</td><td><code>hud-safe-area</code></td><td><code>presentation.board-safe-area</code></td><td><code>presentation.board-clearance</code></td></tr>
+</tbody></table></div>
+</article>
+<article class="contract-collection">
+<h3>Camera activities</h3>
+<p class="contract-exact-name"><code>camera-activities</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Camera id</th><th>Activity kind</th><th>Applies when</th><th>Extent declared in</th><th>Actions declared in</th><th>Promises</th><th>Promise effect</th></tr></thead>
+<tbody>
+<tr><td><code>board-clear-shake</code></td><td><code>board-camera</code></td><td><code>shake</code></td><td><code>puzzle.board-clear-animation</code></td><td><code>presentation.board-shake-extent</code></td><td>—</td><td>—</td><td><code>keeps-promise</code></td></tr>
+</tbody></table></div>
+</article>
+</details>
+<details class="contract-form-section contract-fold" id="verification">
+  <summary><span class="contract-fold-title">Test inputs</span><span class="contract-fold-note">scope and seeds</span></summary>
+  <p>Some tests need a scope or seeds from the adoption before they can run.</p>
+  <p>This adoption supplies none; every test uses its defaults.</p>
+</details>
+<details class="contract-form-section contract-fold" id="tests">
+  <summary><span class="contract-fold-title">Acceptance tests</span><span class="contract-fold-note">28 tests apply</span></summary>
+  <p>The contract comes with 51 tests. A test that runs once per row is counted once for each row. Tests that do not apply to these answers are still listed, with the reason.</p>
+  <div class="contract-test-list"><article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>framing-vocabulary-is-observable</code></p>
+      <h3>the framing vocabulary is observed at the displayed result</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to puzzle-board-camera.</p>
+  <p class="contract-test-text">This test fixes two observable meanings. A displayed play moment is the final play image after every listed camera change, scaling, and HUD composition. Any overlap makes two screen areas one play region.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a trace of camera settlement and displayed output for <code class="contract-placeholder">puzzle-board-camera</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>displayed play moments and play regions are classified</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>each displayed play moment is the final play image after follow motion, manual pan, aim or peek offset, player-held zoom, shake, temporary zoom, scripted movement, viewport scaling, and HUD composition</li><li>two play regions are treated as one region whenever their screen areas overlap at all</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-displayed-frame-log</li><li><code class="contract-placeholder">puzzle-board-camera</code>-active-camera-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-candidate-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>declared-content-framing-outcomes-are-observable</code></p>
+      <h3>valid frames and framing failures are observable</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to puzzle-board-camera.</p>
+  <p class="contract-test-text">For declared content, a valid frame satisfies every applicable unsuspended coverage row at its settled margin. A framing failure exists only after every allowed position and size has failed.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a trace of composed views and failure settlement for <code class="contract-placeholder">puzzle-board-camera</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>valid frames and framing failures are classified</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>a frame is valid exactly when every applicable unsuspended coverage row fits at its settled margin</li><li>a framing failure is recorded only when no position and view size allowed by the camera can produce a valid frame</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-failure-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>camera-supplies-region-while-active · board-camera</code></p>
+      <h3><code class="contract-placeholder">board-camera</code> supplies its region exactly while active</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the board-camera row.</p>
+  <p class="contract-test-text">Camera <code class="contract-placeholder">board-camera</code> supplies exactly the play region cited at <code class="contract-placeholder">presentation.board-play-view</code>, and only while the rule cited at <code class="contract-placeholder">puzzle.board-in-play</code> holds. The test names both addresses and restates nothing from them.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>camera row <code class="contract-placeholder">board-camera</code> and the rules cited at <code class="contract-placeholder">puzzle.board-in-play</code> and <code class="contract-placeholder">presentation.board-play-view</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the active-camera trace crosses both edges of the rule cited at <code class="contract-placeholder">puzzle.board-in-play</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">board-camera</code> supplies exactly the play region cited at <code class="contract-placeholder">presentation.board-play-view</code> while <code class="contract-placeholder">puzzle.board-in-play</code> holds</li><li><code class="contract-placeholder">board-camera</code> supplies no play region while <code class="contract-placeholder">puzzle.board-in-play</code> does not hold</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-active-camera-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-displayed-frame-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>active-regions-are-exclusive</code></p>
+      <h3>active cameras occupy exclusive play regions</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to puzzle-board-camera.</p>
+  <p class="contract-test-text">At most one camera is active in one play region. Overlap is the whole test; how two areas are composited is outside this contract. No pair settles independently unless its play regions are distinct, and each distinct camera&#39;s settlement and promise results remain independent. Where the adoption can activate no pair, there is no pair behavior to assert.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>every pair of cameras that <code class="contract-placeholder">puzzle-board-camera</code> can activate at the same displayed play moment; an adoption with no such pair asserts only the no-pair result</p></dd></div>
+<div><dt>When</dt><dd><ul><li>their play regions are compared after display scaling</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>no pair is active where the two screen areas overlap at all; a violating pair is a defect this test fails by construction</li><li>no pair settles independently unless its play regions are distinct; where they are distinct, each camera&#39;s base position, settled view size, suspensions, and promise results are recorded per camera and no value of one is a function of the other&#39;s</li><li>an adoption that can activate no pair has no simultaneous-region settlement to assert</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-active-camera-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-play-region-map</li><li><code class="contract-placeholder">puzzle-board-camera</code>-candidate-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-settled-margin-record</li><li><code class="contract-placeholder">puzzle-board-camera</code>-suspension-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>promise-applies-exactly-when-cited · whole-board</code></p>
+      <h3><code class="contract-placeholder">whole-board</code> applies exactly when its cited rule holds</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per coverage-promises row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the whole-board row.</p>
+  <p class="contract-test-text">Promise <code class="contract-placeholder">whole-board</code> on <code class="contract-placeholder">board-camera</code> applies exactly while the rule cited at <code class="contract-placeholder">puzzle.board-in-play</code> holds. Outside that interval it is not tested and cannot create a framing failure. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>coverage-promises row <code class="contract-placeholder">whole-board</code> for <code class="contract-placeholder">board-camera</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the trace crosses both edges of the rule cited at <code class="contract-placeholder">puzzle.board-in-play</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">whole-board</code> enters the applicable promise set exactly while <code class="contract-placeholder">puzzle.board-in-play</code> holds</li><li>outside that interval <code class="contract-placeholder">whole-board</code> is not tested and cannot create a framing failure</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-visibility-area-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-failure-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>whole-extent-stays-visible · whole-board</code></p>
+      <h3>the whole extent of <code class="contract-placeholder">whole-board</code> remains inside its visibility area</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">per coverage-promises row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the whole-board row.</p>
+  <p class="contract-test-text">The whole extent of <code class="contract-placeholder">whole-board</code>, the subject named at <code class="contract-placeholder">puzzle.complete-board</code>, remains inside this row&#39;s own visibility area at its settled margin on every displayed play moment where the promise is applicable and unsuspended, except on a displayed play moment that has entered failure settlement, where this row is recorded as failed rather than kept. For a set-valued subject, the whole extent is the union of its members&#39; displayed extents. The suspension log shows whether each moment tested this row or left it untested.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Holds</dt><dd><p>on every displayed play moment when <code class="contract-placeholder">whole-board</code> is applicable and unsuspended, the complete displayed extent of the subject named at <code class="contract-placeholder">puzzle.complete-board</code> remains inside this row&#39;s visibility area at its settled margin, except on a displayed play moment that has entered failure settlement, where this row is recorded as failed rather than kept; when the subject is set-valued, that complete extent is the union of its members&#39; displayed extents; the suspension log shows whether each moment tested this row or left it untested</p></dd></div>
+<div><dt>Seeds</dt><dd><p><code class="contract-placeholder">[&quot;camera-route-a&quot;,&quot;camera-route-b&quot;]</code></p></dd></div>
+<div><dt>Scope</dt><dd><p><code class="contract-placeholder">all supported play routes and camera transitions covered by the row&#39;s cited conditions</code></p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-displayed-frame-log</li><li><code class="contract-placeholder">puzzle-board-camera</code>-visibility-area-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-suspension-log</li><li><code class="contract-placeholder">whole-board</code>-displayed-extent</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>reference-point-stays-visible</code></p>
+      <h3>the declared point for <code class="contract-placeholder">Row.id</code> remains inside its visibility area</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">per coverage-promises row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in coverage-promises matches coverage reference point.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>rendered-view-defines-visibility-area</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> uses the rendered play region</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per coverage-promises row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in coverage-promises matches visibility-area rendered view.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>hud-safe-area-defines-visibility-area · whole-board</code></p>
+      <h3><code class="contract-placeholder">whole-board</code> uses its cited HUD-safe area</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per coverage-promises row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the whole-board row.</p>
+  <p class="contract-test-text">Promise <code class="contract-placeholder">whole-board</code> uses the final unobscured shape cited at <code class="contract-placeholder">presentation.board-safe-area</code> after scaling and the HUD placement named by its conditions. HUD-covered space is outside it. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>applicable unsuspended promise <code class="contract-placeholder">whole-board</code> after display scaling and the HUD placement named by its conditions</p></dd></div>
+<div><dt>When</dt><dd><ul><li>its visibility area is constructed</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the visibility area is the final unobscured shape cited at <code class="contract-placeholder">presentation.board-safe-area</code></li><li>HUD-covered space is outside that visibility area</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-visibility-area-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-hud-composition-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>margin-insets-the-visibility-area · whole-board</code></p>
+      <h3><code class="contract-placeholder">whole-board</code> insets its visibility area by four margins</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per coverage-promises row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the whole-board row.</p>
+  <p class="contract-test-text">The four clearances with units cited at <code class="contract-placeholder">presentation.board-clearance</code> inset <code class="contract-placeholder">whole-board</code>&#39;s visibility area. A subject or reference point exactly on the inset boundary fits. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>promise <code class="contract-placeholder">whole-board</code>, its visibility area, and the four clearances with units cited at <code class="contract-placeholder">presentation.board-clearance</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the margin is inset</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the top, right, bottom, and left clearances from <code class="contract-placeholder">presentation.board-clearance</code> inset the visibility area</li><li>a subject or reference point exactly on the boundary of the inset area fits</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-visibility-area-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-settled-margin-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>activity-selects-affected-promises · board-clear-shake</code></p>
+      <h3><code class="contract-placeholder">board-clear-shake</code> affects exactly its selected promises</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per camera-activities row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the board-clear-shake row.</p>
+  <p class="contract-test-text">Activity <code class="contract-placeholder">board-clear-shake</code> affects exactly the applicable promises selected for <code class="contract-placeholder">board-camera</code>. Where this row cites a promises list, that fixed list is exact; where it cites none, every applicable promise on <code class="contract-placeholder">board-camera</code> is affected. The test names no list contents and restates nothing from the citation.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>active activity row <code class="contract-placeholder">board-clear-shake</code> on <code class="contract-placeholder">board-camera</code>, the fixed promise list this row cites in its promises field, when it has one, and every applicable promise on that camera</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the activity&#39;s affected set is built</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>where this row cites a promises list, the affected promises are exactly the ones it names</li><li>where it cites no promises list, the affected set is every applicable promise on <code class="contract-placeholder">board-camera</code></li><li>the affected-promise-set record names each promise the citation lists, or every applicable promise on <code class="contract-placeholder">board-camera</code> when the row cites none</li><li>the selection record distinguishes an unaffected promise from an affected promise that happened not to change</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-activity-log</li><li><code class="contract-placeholder">puzzle-board-camera</code>-affected-promise-set</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>may-suspend-releases-and-restores-promises</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> suspends only its affected promises</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per camera-activities row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in camera-activities matches promise-effect may suspend.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>keeps-promise-preserves-other-suspensions · board-clear-shake</code></p>
+      <h3><code class="contract-placeholder">board-clear-shake</code> keeps its promise without cancelling another suspension</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per camera-activities row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the board-clear-shake row.</p>
+  <p class="contract-test-text">Activity <code class="contract-placeholder">board-clear-shake</code> supplies no suspension of its own. If another active activity suspends the same promise, <code class="contract-placeholder">board-clear-shake</code> does not cancel it; where this adoption cannot construct that overlap, the overlap clause asserts nothing. The interval comes from <code class="contract-placeholder">puzzle.board-clear-animation</code>, whose content this test does not restate.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>active keeps-promise activity <code class="contract-placeholder">board-clear-shake</code> and each overlap with another active suspending activity on the same promise that <code class="contract-placeholder">puzzle-board-camera</code> can construct; where no overlap can be constructed, the overlap clause asserts nothing</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the final promise set is tested during <code class="contract-placeholder">board-clear-shake</code>&#39;s interval cited at <code class="contract-placeholder">puzzle.board-clear-animation</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">board-clear-shake</code> supplies no suspension of its own</li><li>a different active suspension affecting the same promise remains active until its own interval ends</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-suspension-log</li><li><code class="contract-placeholder">puzzle-board-camera</code>-activity-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>recenter-manual-pan-defines-suspension-interval</code></p>
+      <h3>suspending manual pan uses the recentered interval</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per camera-activities row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in camera-activities matches promise-effect may suspend and activity-kind manual pan.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>controller-disposes-of-kept-player-proposals</code></p>
+      <h3>the controller disposes of kept player proposals</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per camera-activities row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in camera-activities matches promise-effect keeps promise and activity-kind manual pan or aim or peek offset.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>camera-without-activity-uses-base-alone</code></p>
+      <h3>a camera without an activity builds from its base alone</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to puzzle-board-camera.</p>
+  <p class="contract-test-text">For each active camera and moment with no active camera-activities row, the candidate is built from the settled base position alone and has no activity offset. If this adoption has no such moment, the test asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each active camera and displayed play moment for which <code class="contract-placeholder">puzzle-board-camera</code> has no active camera-activities row; if every active camera has an activity, this test asserts nothing</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the candidate position is built</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the candidate has the settled base position and no activity offset</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-candidate-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-activity-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fixed-view-uses-authored-base · board-camera</code></p>
+      <h3><code class="contract-placeholder">board-camera</code> uses only its authored base position</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the board-camera row.</p>
+  <p class="contract-test-text">Fixed-view camera <code class="contract-placeholder">board-camera</code> has one base position, named at <code class="contract-placeholder">presentation.board-play-view</code>. No player input moves it; only a declared activity can add an offset. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>active fixed-view camera <code class="contract-placeholder">board-camera</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>its base position is selected and player inputs are offered</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the set this follow mode supplies contains only the base position named at <code class="contract-placeholder">presentation.board-play-view</code></li><li>no player input moves that base position; only a declared activity can add an offset</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-candidate-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-player-proposal-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>locked-follow-uses-target-point</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> follows only its cited target point</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in cameras matches follow-mode locked follow.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>slack-follow-stays-in-allowed-set</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> stays in its cited slack set</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in cameras matches follow-mode slack follow.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>free-camera-starts-from-player-pan</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> starts from its player pan proposal</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in cameras matches follow-mode free view or free with recenter.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>free-with-recenter-selects-target</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> returns to its cited target on recenter</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in cameras matches follow-mode free with recenter.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>no-travel-limit-does-not-clamp</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> applies no camera travel clamp</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in cameras matches travel-limit no camera travel limit.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>travel-limit-clamps-base-position</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> clamps its base position to the cited region</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in cameras matches travel-limit one world region or changes by situation.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>activity-offset-follows-settled-base · board-clear-shake</code></p>
+      <h3><code class="contract-placeholder">board-clear-shake</code> applies its bounded change after the base settles</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per camera-activities row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the board-clear-shake row.</p>
+  <p class="contract-test-text">Activity <code class="contract-placeholder">board-clear-shake</code> applies after the base settles and is bounded by the strongest change cited at <code class="contract-placeholder">presentation.board-shake-extent</code>. A position-changing activity is an offset outside the set this follow mode supplies and can pass any travel limit the camera declares; the final test still decides every promise. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>active activity <code class="contract-placeholder">board-clear-shake</code> at its strongest displacement cited at <code class="contract-placeholder">presentation.board-shake-extent</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the candidate is built after the base position and travel clamp settle</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the activity change is bounded by <code class="contract-placeholder">presentation.board-shake-extent</code> and is applied after the base settles</li><li>a position-changing activity is an activity offset outside the set this follow mode supplies and can carry the candidate past any travel limit the camera declares</li><li>the offset never substitutes for the final composed-view test</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-activity-log</li><li><code class="contract-placeholder">puzzle-board-camera</code>-candidate-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-displayed-frame-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>temporary-zoom-settles-one-proposed-size</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> proposes and settles one temporary view size</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per camera-activities row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in camera-activities matches activity-kind temporary zoom.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>aim-offset-uses-cited-actions</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> receives proposals through its cited aim actions</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per camera-activities row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in camera-activities matches activity-kind aim or peek offset.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fixed-size-uses-authored-size</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> uses its authored view size</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in cameras matches view-size fixed size.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>player-held-zoom-starts-in-cited-range</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> starts from held zoom inside its cited range</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in cameras matches view-size player held zoom.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>automatic-fit-chooses-largest-valid-size · board-camera</code></p>
+      <h3><code class="contract-placeholder">board-camera</code> chooses the largest allowed fitting size</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the board-camera row.</p>
+  <p class="contract-test-text">Automatic-fit camera <code class="contract-placeholder">board-camera</code> follows <code class="contract-placeholder">presentation.board-fit-zoom</code> and chooses the largest allowed size where the subject extent, margins, the strongest cited displacement of every position-changing keeps-promise activity on this camera, and the largest cited size of every size-changing one fit together. If nothing fits, failure settlement begins. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>active automatic-fit camera <code class="contract-placeholder">board-camera</code>, its applicable extents and margins, and every keeps-promise activity row whose camera-id names this camera</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the fit rule cited at <code class="contract-placeholder">presentation.board-fit-zoom</code> settles view size</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the controller chooses the largest allowed size where the subject extent, margins, the strongest cited displacement of every position-changing keeps-promise activity on this camera, and the largest cited size of every size-changing one fit together</li><li>if no allowed size and position fits, failure settlement begins</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-view-size-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-candidate-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-failure-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>automatic-fit-respects-travel-region</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> continues automatic fitting after its centre is clamped</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in cameras matches view-size automatic fit and travel-limit one world region or changes by situation.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>final-composed-test-decides-frame</code></p>
+      <h3>the final composed-view test decides every promise</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to puzzle-board-camera.</p>
+  <p class="contract-test-text">After the final view and HUD are composed, every applicable unsuspended promise is tested against its inset visibility area. That result alone decides validity; no follow trigger, recenter action, travel limit, or earlier candidate substitutes for it. When every applicable unsuspended promise passes, that composed view is the displayed play moment. Exactly one view size settles per displayed play moment on each active camera, and the controller disposes of every size and position proposal under the activity permission and all unsuspended promises together.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each candidate <code class="contract-placeholder">puzzle-board-camera</code> can construct, including candidates that pass an earlier follow, recenter, travel, or position check</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the final view and HUD are composed</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>every applicable unsuspended promise is tested against its inset visibility area</li><li>only this final test decides whether the frame is valid</li><li>no follow trigger, recenter action, travel limit, or earlier candidate substitutes for the final test</li><li>when every applicable unsuspended promise passes, that composed view is the displayed play moment</li><li>exactly one view size settles for each displayed play moment on each active camera</li><li>the controller disposes of every size and position proposal under the activity permission and all unsuspended promises together</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-candidate-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-visibility-area-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-displayed-frame-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>keeps-promise-holds-through-full-interval · board-clear-shake</code></p>
+      <h3><code class="contract-placeholder">board-clear-shake</code> keeps every affected promise for its full interval</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">per camera-activities row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the board-clear-shake row.</p>
+  <p class="contract-test-text">Activity <code class="contract-placeholder">board-clear-shake</code> is demonstrated as keeps-promise only when the final test passes for every affected unsuspended promise on every displayed play moment in its interval at <code class="contract-placeholder">puzzle.board-clear-animation</code>, including the strongest displacement or size change cited at <code class="contract-placeholder">presentation.board-shake-extent</code>. The test names the addresses and restates nothing from them.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Holds</dt><dd><p>the final composed-view test passes for every affected unsuspended promise on every displayed play moment in the interval cited at <code class="contract-placeholder">puzzle.board-clear-animation</code>, including the strongest displacement or size change cited at <code class="contract-placeholder">presentation.board-shake-extent</code></p></dd></div>
+<div><dt>Seeds</dt><dd><p><code class="contract-placeholder">[&quot;activity-route-a&quot;,&quot;activity-route-b&quot;]</code></p></dd></div>
+<div><dt>Scope</dt><dd><p><code class="contract-placeholder">the full cited activity interval, including boundary moments and strongest legal proposals</code></p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-activity-log</li><li><code class="contract-placeholder">puzzle-board-camera</code>-displayed-frame-log</li><li><code class="contract-placeholder">puzzle-board-camera</code>-visibility-area-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>keeps-promise-holds-for-pan-and-zoom</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> keeps every affected promise across its proposals</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">per camera-activities row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in camera-activities matches promise-effect keeps promise and activity-kind manual pan or player zoom.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>failure-record-follows-exhausted-search · board-camera</code></p>
+      <h3><code class="contract-placeholder">board-camera</code> creates one complete failure record after search</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the board-camera row.</p>
+  <p class="contract-test-text">For camera <code class="contract-placeholder">board-camera</code>, one complete framing failure is created only after no allowed candidate passes. It records the camera, failed promises, display size, visibility areas, settled margins, attempted position and size, travel limit, active activities, and selected response. Before that point, the response weakens no coverage row. If this adoption can construct no exhausted search, the failure branch asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>active camera <code class="contract-placeholder">board-camera</code> and each situation the adoption can construct where every allowed candidate fails; where no such situation is reachable, the failure branch asserts nothing</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the allowed position and view-size search is exhausted</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>exactly one framing failure is created only after no allowed candidate passes</li><li>the record contains the camera id, failed promise ids, display size, visibility areas, settled margins, attempted position and view size, travel limit, active activities, and selected failure response</li><li>before this step, the failure response weakens no coverage row</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-candidate-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-failure-record</li><li><code class="contract-placeholder">puzzle-board-camera</code>-visibility-area-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>hold-valid-frame-keeps-invalid-candidate-offscreen</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> holds a valid frame on failure</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in cameras matches failure-response hold valid frame.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>keep-priority-content-displays-best-allowed-frame</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> applies its total priority on failure</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in cameras matches failure-response keep priority content.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>show-framing-failure-adds-cited-state</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> shows its cited framing-failure state</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in cameras matches failure-response show framing failure.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>change-world-reruns-framing-before-display</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> changes the world and reruns framing</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in cameras matches failure-response change world to restore frame.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>failure-unreachable-invalidates-reached-claim · board-camera</code></p>
+      <h3><code class="contract-placeholder">board-camera</code> treats a reached failure as an invalid claim</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the board-camera row.</p>
+  <p class="contract-test-text">Camera <code class="contract-placeholder">board-camera</code> declares no failure handling beyond the failure record itself. A failure record for this camera contradicts the complete unreachability argument cited at <code class="contract-placeholder">puzzle.supported-displays-always-fit-board</code>, and the design claim fails. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>camera <code class="contract-placeholder">board-camera</code> and the complete unreachability argument cited at <code class="contract-placeholder">puzzle.supported-displays-always-fit-board</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the run exercises every supported display size and route named by the cited argument</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>no failure handling beyond the failure record itself is declared</li><li>a failure record for this camera contradicts the argument cited at <code class="contract-placeholder">puzzle.supported-displays-always-fit-board</code> and the design claim fails</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-candidate-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-failure-record</li><li><code class="contract-placeholder">puzzle-board-camera</code>-first-unreachable-counterexample</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>failure-persists-until-valid-or-inactive</code></p>
+      <h3>a framing failure persists until settlement or deactivation</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to puzzle-board-camera.</p>
+  <p class="contract-test-text">Every reached framing failure persists until a later valid settlement or camera deactivation. Priority, a notice, or a started world change does not itself make an invalid frame satisfy a promise. If this adoption cannot reach failure, the template asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each framing failure <code class="contract-placeholder">puzzle-board-camera</code> can reach; if none is reachable, this test asserts nothing</p></dd></div>
+<div><dt>When</dt><dd><ul><li>priority is applied, a notice is shown, a world change starts, and later settlement or deactivation occurs as available</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the failure remains a failure until a later settlement produces a valid frame or the camera deactivates</li><li>priority, a visible notice, or a started world change does not by itself turn an invalid frame into a kept promise</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-failure-record</li><li><code class="contract-placeholder">puzzle-board-camera</code>-displayed-frame-log</li><li><code class="contract-placeholder">puzzle-board-camera</code>-active-camera-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>recovery-and-handover-insert-no-unchecked-frame</code></p>
+      <h3>recovery and handover insert no unchecked frame</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to puzzle-board-camera.</p>
+  <p class="contract-test-text">Neither the end of a suspension nor a camera switch inserts an unchecked frame, and neither leaves two cameras active in one play region. An adoption in which no camera activation follows a deactivation has no handover case to construct.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each suspension end and camera handover <code class="contract-placeholder">puzzle-board-camera</code> can construct; an adoption in which no camera activation follows a deactivation has no handover case to construct</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the next displayed play moment is prepared</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>neither recovery nor switching inserts an unchecked frame or leaves two cameras active in one play region</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-active-camera-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-displayed-frame-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>recovery-and-handover-first-frame-is-settled</code></p>
+      <h3>recovery and handover settle a checked first frame</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to puzzle-board-camera.</p>
+  <p class="contract-test-text">After a suspension ends, the mechanism reruns promise selection through the final composed-view test before the next displayed play moment; that moment is valid or enters failure settlement. A handover runs active-region selection through the final composed-view test with the incoming camera&#39;s own promises and visibility areas. An adoption in which no camera activation follows a deactivation has no handover case to construct.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each suspension end and camera handover <code class="contract-placeholder">puzzle-board-camera</code> can construct; an adoption in which no camera activation follows a deactivation has no handover case to construct</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the next displayed play moment is prepared</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>after a suspension ends, steps 2 through 10 run and the first unsuspended moment is valid or enters steps 11 through 13</li><li>at handover, steps 1 through 10 run with the incoming camera&#39;s own promise set and visibility areas</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-suspension-log</li><li><code class="contract-placeholder">puzzle-board-camera</code>-active-camera-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-displayed-frame-log</li><li><code class="contract-placeholder">puzzle-board-camera</code>-failure-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>camera-first-frame-is-checked · board-camera</code></p>
+      <h3><code class="contract-placeholder">board-camera</code> checks its first frame after every activation</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the board-camera row.</p>
+  <p class="contract-test-text">Whenever camera <code class="contract-placeholder">board-camera</code> becomes active, whether at a handover or a reactivation, its first displayed play moment in the region cited at <code class="contract-placeholder">presentation.board-play-view</code> is tested against this camera&#39;s own applicable promises and visibility areas. It is valid or enters failure settlement under the failure response this camera declares.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each activation of camera <code class="contract-placeholder">board-camera</code>, whether at a handover or a reactivation</p></dd></div>
+<div><dt>When</dt><dd><ul><li>its first displayed play moment is prepared in the region cited at <code class="contract-placeholder">presentation.board-play-view</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the first displayed play moment is tested against this camera&#39;s own applicable promises and visibility areas</li><li>that moment is valid or enters failure settlement under this camera&#39;s own <code class="contract-placeholder">failure-unreachable</code> answer</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-active-camera-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-visibility-area-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-displayed-frame-log</li><li><code class="contract-placeholder">puzzle-board-camera</code>-failure-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>promise-camera-id-joins-one-camera · whole-board</code></p>
+      <h3>declaration check: <code class="contract-placeholder">whole-board</code> names exactly one camera in this adoption</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per coverage-promises row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the whole-board row.</p>
+  <p class="contract-test-text">Declaration check: coverage promise <code class="contract-placeholder">whole-board</code> is legal only when <code class="contract-placeholder">board-camera</code> names exactly one cameras row in this adoption. A missing or ambiguous name is a defect this test fails by construction. This check reads the adoption, not the running game; the validator cannot check this join, so the reviewer does.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>coverage-promises row <code class="contract-placeholder">whole-board</code> with camera-id <code class="contract-placeholder">board-camera</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the cameras rows are inspected</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">board-camera</code> names exactly one cameras row in this adoption; a missing or ambiguous join is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>activity-camera-id-joins-one-camera · board-clear-shake</code></p>
+      <h3>declaration check: <code class="contract-placeholder">board-clear-shake</code> names exactly one camera in this adoption</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per camera-activities row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the board-clear-shake row.</p>
+  <p class="contract-test-text">Declaration check: camera activity <code class="contract-placeholder">board-clear-shake</code> is legal only when <code class="contract-placeholder">board-camera</code> names exactly one cameras row in this adoption. A missing or ambiguous name is a defect this test fails by construction. This check reads the adoption, not the running game; the validator cannot check this join, so the reviewer does.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>camera-activities row <code class="contract-placeholder">board-clear-shake</code> with camera-id <code class="contract-placeholder">board-camera</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the cameras rows are inspected</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">board-camera</code> names exactly one cameras row in this adoption; a missing or ambiguous join is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>activity-promise-list-stays-on-camera · board-clear-shake</code></p>
+      <h3>declaration check: <code class="contract-placeholder">board-clear-shake</code> cites promises only from its own camera</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per camera-activities row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the board-clear-shake row.</p>
+  <p class="contract-test-text">Declaration check: where activity <code class="contract-placeholder">board-clear-shake</code> cites a promises list, every named promise must exist and belong to <code class="contract-placeholder">board-camera</code>. A stale, missing, or foreign-camera name is a defect this test fails by construction. Where the row cites no list, this join test asserts nothing. This check reads the adoption, not the running game. The test names no list contents and restates nothing from its citation.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>camera-activities row <code class="contract-placeholder">board-clear-shake</code> and the fixed promise list this row cites in its promises field, when it has one; where it cites none, the list clause asserts nothing</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the named coverage-promises rows and their camera-id fields are inspected</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>every named promise exists and has camera-id <code class="contract-placeholder">board-camera</code>; a missing promise or a promise on another camera is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>adoption-declares-a-camera</code></p>
+      <h3>declaration check: the adoption declares at least one camera</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to puzzle-board-camera.</p>
+  <p class="contract-test-text">Declaration check: a camera-framing adoption declares at least one cameras row. An adoption with none describes no play view and is a defect this test fails by construction. This check reads the adoption, not the running game.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the cameras row set for <code class="contract-placeholder">puzzle-board-camera</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the adoption is reviewed as a camera-framing adoption</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>at least one cameras row exists; an adoption with none describes no play view and is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>declared-content-has-a-promise</code></p>
+      <h3>declaration check: declared content includes at least one coverage promise</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to puzzle-board-camera.</p>
+  <p class="contract-test-text">Declaration check: an adoption answering declared-content declares at least one coverage-promises row. If it declares none, it has no visibility promise to test and fails this test by construction. This check reads the adoption, not the running game.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p><code class="contract-placeholder">puzzle-board-camera</code> answering declared-content</p></dd></div>
+<div><dt>When</dt><dd><ul><li>its coverage-promises rows are inspected</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>at least one coverage-promises row exists; an adoption that answers declared-content and declares none has no promise to test and is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>free-promise-camera-has-manual-pan-activity</code></p>
+      <h3>declaration check: a free promise-bearing camera declares manual-pan activity</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cameras row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: no row in cameras matches follow-mode free view or free with recenter.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>no-content-guarantee-keeps-promise-shape-empty</code></p>
+      <h3>declaration check: no-content-guarantee declares no promise machinery</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to puzzle-board-camera: content visibility is declared content, not no content guarantee.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>framing-holds</code></p>
+      <h3>the framing authority order holds for the whole run</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to puzzle-board-camera.</p>
+  <p class="contract-test-text">Across <code class="contract-placeholder">sequences of displayed play moments across activations, activities, suspensions, handovers, and failures</code>, every displayed play moment follows the mechanism&#39;s authority order. Later stages never rewrite an earlier declaration, no question answer or row field changes the settlement order, and no displayed moment is both invalid and outside failure settlement. An adoption answering no-content-guarantee audits only the active-region and displayed-moment stages. The adoption supplies the audit seeds through verification inputs.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Holds</dt><dd><p>every displayed play moment passes in order through active play region, applicable promise, each coverage row&#39;s visibility area and margin, activity suspension, player proposal and controller disposal, camera-position travel limit, allowed position and view-size settlement, final composed-view test, and failure response; later stages never rewrite an earlier declaration; no question answer or row field changes the order in which these stages settle; no displayed play moment is both invalid and outside steps 11 through 13; an adoption answering no-content-guarantee audits only the active-region and displayed-moment stages</p></dd></div>
+<div><dt>Seeds</dt><dd><p><code class="contract-placeholder">[&quot;framing-audit-a&quot;,&quot;framing-audit-b&quot;]</code></p></dd></div>
+<div><dt>Scope</dt><dd><p><code class="contract-placeholder">sequences of displayed play moments across activations, activities, suspensions, handovers, and failures</code></p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">puzzle-board-camera</code>-displayed-frame-log</li><li><code class="contract-placeholder">puzzle-board-camera</code>-active-camera-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-candidate-trace</li><li><code class="contract-placeholder">puzzle-board-camera</code>-suspension-log</li><li><code class="contract-placeholder">puzzle-board-camera</code>-failure-record</li><li><code class="contract-placeholder">puzzle-board-camera</code>-first-authority-order-violation</li></ul></dd></div></dl></details>
+</article></div>
+</details>
+<details class="contract-form-section contract-fold" id="adoption-json">
+  <summary><span class="contract-fold-title">JSON</span><span class="contract-fold-note">the adoption as one file</span></summary>
+  <p>The adoption file as supplied. Answers you try on this page are not written into it; to change an adoption, open it in the authoring tool.</p>
+
+  <pre class="contract-json"><code>{
+  &quot;contract&quot;: &quot;camera-framing&quot;,
+  &quot;version&quot;: 1,
+  &quot;summary&quot;: &quot;Covers the views used during play and what each one keeps visible. It records fixed, follow, and free-camera modes, manual panning, view size, travel limits, safe areas, clearance, camera activities, and failure handling. Camera feel, physical input mappings, unit commands, HUD layout, and 3D occlusion stay elsewhere.&quot;,
+  &quot;questions&quot;: {
+    &quot;content-visibility&quot;: {
+      &quot;asks&quot;: &quot;In normal play, must these cameras keep anything from your game on screen?&quot;,
+      &quot;rationale&quot;: &quot;A follow target or camera travel limit does not prove that game content remains visible. This choice states whether these cameras make that promise.&quot;,
+      &quot;options&quot;: {
+        &quot;declared-content&quot;: {
+          &quot;meaning&quot;: &quot;The cameras keep named game content visible. A party view keeps every active hero on screen.&quot;,
+          &quot;semantics&quot;: &quot;Every visibility promise lives in a coverage-promises row and every effect on one lives in a camera-activities row; nothing outside those rows is promised.&quot;
+        },
+        &quot;no-content-guarantee&quot;: {
+          &quot;meaning&quot;: &quot;The cameras make no promise about game content staying visible. An endless runner may leave the view during a fast fall.&quot;,
+          &quot;semantics&quot;: &quot;No visibility promise exists; the promise and activity row sets are declared empty.&quot;
+        }
+      }
+    }
+  },
+  &quot;declares&quot;: {
+    &quot;values&quot;: {},
+    &quot;rows&quot;: {
+      &quot;cameras&quot;: {
+        &quot;description&quot;: &quot;The play views in this camera family and the rules that move or limit each one.&quot;,
+        &quot;when-empty&quot;: &quot;An adoption without a camera row describes no play view, and a reviewer rejects it.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable camera name in game language, such as board-camera or tactical-view.&quot;
+          },
+          &quot;active-when&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The complete rule for when this camera supplies a displayed play view.&quot;
+          },
+          &quot;view-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rule naming this camera&#39;s final play region, aspect handling, and display sizes. For a fixed view it also names the authored base position; for a fixed size it also names the authored view size.&quot;
+          },
+          &quot;follow-mode&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;fixed-view&quot;,
+              &quot;locked-follow&quot;,
+              &quot;slack-follow&quot;,
+              &quot;free-view&quot;,
+              &quot;free-with-recenter&quot;
+            ],
+            &quot;description&quot;: &quot;A fixed room view&#39;s base position never moves or follows anything, and no input moves it; only a declared activity can offset it. Locked follow keeps a hero at the centre. Slack follow lets a runner move before the view follows. A free tactical view begins where the player moves it. A free map with recenter can return to a selected group.&quot;
+          },
+          &quot;follow-target-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;follow-mode&quot;: [
+                  &quot;locked-follow&quot;,
+                  &quot;slack-follow&quot;,
+                  &quot;free-with-recenter&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The rule naming the followed target or the target used by recenter. For slack follow it also names the allowed positions around that target.&quot;
+          },
+          &quot;manual-pan&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;follow-mode&quot;: [
+                  &quot;free-view&quot;,
+                  &quot;free-with-recenter&quot;
+                ]
+              }
+            },
+            &quot;options&quot;: [
+              &quot;edge-scroll&quot;,
+              &quot;drag-view&quot;,
+              &quot;move-view-actions&quot;,
+              &quot;several-methods&quot;
+            ],
+            &quot;description&quot;: &quot;Edge scroll moves a strategy view at the screen edge. Drag view pulls a mission map. Move-view actions pan a tactics camera through mapped actions. Several methods gives a world map at least two of these.&quot;
+          },
+          &quot;pan-actions-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;follow-mode&quot;: [
+                  &quot;free-view&quot;,
+                  &quot;free-with-recenter&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The game actions that pan this camera. Several methods names at least two methods; platform inputs stay with Control options.&quot;
+          },
+          &quot;recenter-action-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;follow-mode&quot;: [
+                  &quot;free-with-recenter&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The game action that returns this view to its cited target.&quot;
+          },
+          &quot;travel-limit&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;follow-mode&quot;: [
+                  &quot;locked-follow&quot;,
+                  &quot;slack-follow&quot;,
+                  &quot;free-view&quot;,
+                  &quot;free-with-recenter&quot;
+                ]
+              }
+            },
+            &quot;options&quot;: [
+              &quot;no-camera-travel-limit&quot;,
+              &quot;one-world-region&quot;,
+              &quot;changes-by-situation&quot;
+            ],
+            &quot;description&quot;: &quot;No limit lets a runner view keep moving. One region keeps a board view inside its room. Situation changes can give a tactical map different regions by mission phase. A fixed view travels nowhere and is not asked.&quot;
+          },
+          &quot;travel-limit-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;travel-limit&quot;: [
+                  &quot;one-world-region&quot;,
+                  &quot;changes-by-situation&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The complete camera-position region and, when needed, the rule selecting the current region.&quot;
+          },
+          &quot;view-size&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;fixed-size&quot;,
+              &quot;player-held-zoom&quot;,
+              &quot;automatic-fit&quot;
+            ],
+            &quot;description&quot;: &quot;Fixed size keeps a runner at its authored view size. Player-held zoom lets a strategy player hold a chosen zoom level. Automatic fit widens a co-op view until the party and margins fit.&quot;
+          },
+          &quot;view-size-rule-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;view-size&quot;: [
+                  &quot;player-held-zoom&quot;,
+                  &quot;automatic-fit&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;For player-held zoom, the zoom actions and allowed range. For automatic fit, the allowed range, aspect response, update timing, and simultaneous-promise rule.&quot;
+          },
+          &quot;failure-response&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;when&quot;: {
+              &quot;flag&quot;: {
+                &quot;content-visibility&quot;: [
+                  &quot;declared-content&quot;
+                ]
+              }
+            },
+            &quot;options&quot;: [
+              &quot;hold-valid-frame&quot;,
+              &quot;keep-priority-content&quot;,
+              &quot;show-framing-failure&quot;,
+              &quot;change-world-to-restore-frame&quot;,
+              &quot;failure-unreachable&quot;
+            ],
+            &quot;description&quot;: &quot;Hold valid frame leaves a puzzle transition on its last valid view. Keep priority content protects a tactics leader and records hidden allies as failed. Show framing failure adds a warning to a strategy view. Change world to restore frame applies a co-op tether or defeat rule. Failure unreachable cites why a fixed arena fits on every reachable display.&quot;
+          },
+          &quot;failure-handling-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;flag&quot;: {
+                &quot;content-visibility&quot;: [
+                  &quot;declared-content&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The exact wait, priority, warning, or game rule used after failure, or the complete argument that failure cannot be reached.&quot;
+          }
+        }
+      },
+      &quot;coverage-promises&quot;: {
+        &quot;description&quot;: &quot;The subjects or areas each camera keeps visible in named play situations.&quot;,
+        &quot;when-empty&quot;: &quot;No camera in this adoption promises to keep game content visible.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable promise name in game language, such as whole-board or selected-group.&quot;
+          },
+          &quot;camera-id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;description&quot;: &quot;The camera that keeps this promise, by the name you gave it.&quot;
+          },
+          &quot;subject&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed game prose naming the subject or area that stays visible.&quot;
+          },
+          &quot;applies-when&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The complete play conditions in which this promise applies.&quot;
+          },
+          &quot;coverage&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;whole-extent&quot;,
+              &quot;reference-point&quot;
+            ],
+            &quot;description&quot;: &quot;Whole extent keeps every edge of a selected squad visible. Reference point keeps a runner&#39;s cited centre visible even when the sprite reaches past the view.&quot;
+          },
+          &quot;reference-point&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;coverage&quot;: [
+                  &quot;reference-point&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The exact point that stays visible.&quot;
+          },
+          &quot;visibility-area&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;rendered-view&quot;,
+              &quot;hud-safe-area&quot;
+            ],
+            &quot;description&quot;: &quot;Rendered view measures a runner from the final view edges, so HUD overlap alone does not fail. HUD safe area measures a tactics objective from the cited unobscured area, so HUD-covered space counts outside.&quot;
+          },
+          &quot;safe-area-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;visibility-area&quot;: [
+                  &quot;hud-safe-area&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The final unobscured rectangle or shape after the HUD elements named by this promise&#39;s conditions are placed.&quot;
+          },
+          &quot;margin-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The top, right, bottom, and left clearance inside the chosen visibility area, with units. Zero is stated explicitly. A camera clamped at its travel limit may hold less than this clearance on the clamped side, but the subject still stays inside the area.&quot;
+          }
+        }
+      },
+      &quot;camera-activities&quot;: {
+        &quot;description&quot;: &quot;Frame-changing situations and whether each one keeps or suspends all or named promises on its camera.&quot;,
+        &quot;when-empty&quot;: &quot;No camera activity has a visibility-promise effect in this adoption. With declared content, the promise-bearing cameras use none of the seven listed activities.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable activity name in game language, such as sprint-look-ahead or boss-hit-shake.&quot;
+          },
+          &quot;camera-id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;description&quot;: &quot;The camera this activity changes, by the name you gave it.&quot;
+          },
+          &quot;activity-kind&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;look-ahead&quot;,
+              &quot;manual-pan&quot;,
+              &quot;aim-or-peek-offset&quot;,
+              &quot;player-zoom&quot;,
+              &quot;shake&quot;,
+              &quot;temporary-zoom&quot;,
+              &quot;scripted-move&quot;
+            ],
+            &quot;description&quot;: &quot;Look-ahead leads a runner. Manual pan moves a tactical view. Aim or peek offsets a follow camera toward a target. Player zoom holds a strategy view at a chosen size. Shake offsets a boss hit. Temporary zoom changes a combat view&#39;s size. A scripted move frames a dialogue reveal.&quot;
+          },
+          &quot;applies-when&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The complete start and end conditions for this camera activity.&quot;
+          },
+          &quot;extent-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;activity-kind&quot;: [
+                  &quot;look-ahead&quot;,
+                  &quot;aim-or-peek-offset&quot;,
+                  &quot;shake&quot;,
+                  &quot;temporary-zoom&quot;,
+                  &quot;scripted-move&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The rule naming this activity&#39;s strongest displacement or size change. Manual pan is bounded by the travel limit and controller instead; player zoom is bounded by the view-size citation.&quot;
+          },
+          &quot;actions-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;activity-kind&quot;: [
+                  &quot;aim-or-peek-offset&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The game actions that produce this offset. Platform inputs stay with Control options.&quot;
+          },
+          &quot;promises&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;description&quot;: &quot;The fixed list of promise names affected by this activity. When absent, the activity affects every promise on its camera.&quot;
+          },
+          &quot;promise-effect&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;keeps-promise&quot;,
+              &quot;may-suspend&quot;
+            ],
+            &quot;description&quot;: &quot;Keeps promise preserves the affected rows, as when runner look-ahead stays inside its margin. May suspend allows those rows to fail only for this activity, as during a boss reveal.&quot;
+          }
+        }
+      }
+    }
+  },
+  &quot;rules&quot;: {},
+  &quot;origin&quot;: &quot;https://opengdd.org/contracts/camera-framing-1&quot;,
+  &quot;mechanism&quot;: [
+    &quot;This is the single normative authority for each displayed play moment: which camera is active, what must remain visible, who moves the view, what may suspend a promise, how travel and view size are applied, what happens when content cannot fit, and when a suspended promise returns. Questions and rows supply choices and cited game rules; they do not define another order.&quot;,
+    &quot;A **displayed play moment** is the final play image presented at one moment, after follow motion, manual pan, aim or peek offset, player-held zoom, shake, temporary zoom, scripted movement, viewport scaling, and HUD composition. A **play region** is the screen area named by `view-declared-in`; two regions are the same region whenever their screen areas overlap at all. A coverage row&#39;s **visibility area** is either the final rendered play region or that row&#39;s cited HUD-safe area. A **valid frame** satisfies every applicable, unsuspended coverage row at its settled margin. A **framing failure** exists only when no camera position and view size allowed by the camera can produce a valid frame.&quot;,
+    &quot;### Select the view and promises&quot;,
+    &quot;1. Read every camera whose `active-when` rule holds. Each active camera supplies the final play region named by `view-declared-in`. At most one camera may be active in one play region. Simultaneous split views settle independently only when their regions are distinct. 2. For each active camera, collect its coverage rows whose `applies-when` rules hold. `whole-extent` contributes the subject&#39;s complete displayed extent. For a set-valued subject, the whole extent is the union of its members&#39; displayed extents. `reference-point` contributes only the cited point. 3. Construct each row&#39;s visibility area after display scaling and the HUD placement named by that row&#39;s conditions. HUD-covered space is outside a HUD-safe area; a rendered-view row deliberately ignores HUD overlap. Inset the area by the cited top, right, bottom, and left margin. Attach the one contract-supplied edge condition: a later travel clamp may reduce only the margin on its clamped side, never the underlying visibility area. A whole extent fits only when all of it lies inside the settled inset area. A reference point fits when that point lies inside it. A subject or point lying exactly on the boundary of the settled inset area fits.&quot;,
+    &quot;### Apply activity permissions&quot;,
+    &quot;4. Read every active activity row for the camera. Its `promises` citation, when present, selects the affected applicable promises; when absent, it selects every applicable promise on that camera. An active `may-suspend` row suspends only that set for its cited interval. Active `keeps-promise` rows do not cancel a different active suspension affecting the same promise. 5. A suspended promise is not tested and cannot create a framing failure. It becomes required again on the first displayed play moment after the last suspending activity affecting it ends. On a free-with-recenter camera, a suspending manual-pan interval begins when the view leaves its recentered state and ends on recenter or camera deactivation. 6. The player proposes motion and held zoom through the cited game actions; the camera controller disposes of the final frame. `free-view` and `free-with-recenter` name who initiates position changes, not who owns the displayed result. A `keeps-promise` manual-pan or aim-or-peek row therefore requires the controller to stop, redirect, or resize the proposed view before an affected promise fails.&quot;,
+    &quot;### Build and test the frame&quot;,
+    &quot;7. Build the candidate position in two stages. Stage one selects the base position inside the follow mode&#39;s set. A fixed view has only the base position named by `view-declared-in`. A locked follow has only its target point. A slack follow may use the allowed positions its citation names around the target. A free view starts from the player&#39;s proposal; a free-with-recenter view does the same until recenter selects its target point. The controller may search only within the set supplied by that mode. Apply any travel limit to the base position; a fixed view declares none. It constrains camera position, not the visible region, and it never proves that a subject is visible. Resolve the step-3 edge condition now: when this clamp alone prevents the subject from meeting a margin, reduce only the clamped-side margin by the exact shortfall, no lower than zero. The subject must still lie inside the underlying, uninset visibility area. Stage two applies each active position-changing activity as an offset to the settled base, bounded by its cited extent. An activity offset is outside the mode&#39;s search set and may carry the view past the travel limit; the final test in step 9 still decides every promise. 8. Settle view size once. `fixed-size` uses the size named by `view-declared-in`. `player-held-zoom` starts from the player&#39;s held level inside the cited range; its `player-zoom` activity row&#39;s effect decides whether the controller must keep every promise or may let the named ones suspend; with no such row, the controller must keep every applicable promise at every held level. `automatic-fit` applies the cited fit rule, choosing the largest allowed size at which the extent, the margins, the strongest cited displacement of every position-changing `keeps-promise` activity, and the largest cited size of every size-changing one fit together. On any view-size answer, an active temporary-zoom activity may propose its cited extent as a temporary size; an accepted temporary size replaces the size the answer would otherwise settle, for the activity&#39;s cited interval, and the authored size, held level, or fit result returns on the first displayed moment after it ends. The controller disposes of every proposal under the activity permission and all unsuspended promises together. The travel region still binds camera position only: if fitting needs a centre outside it, clamp the centre and continue fitting inside the allowed zoom range, even when the visible region extends beyond the travel region. If no allowed size and clamped position fits, step 11 applies. 9. Compose the final view and HUD, then test every unsuspended promise against its inset visibility area. This final test decides the outcome; a follow trigger, recenter action, camera travel limit, or earlier candidate frame never substitutes for it. 10. If every row passes, display the valid frame. A `keeps-promise` activity is demonstrated only when this final test passes on every displayed moment of its cited interval, including the strongest displacement or size change its extent citation names.&quot;,
+    &quot;### Settle a framing failure and recovery&quot;,
+    &quot;11. Only after no allowed candidate can pass, create one framing failure containing the camera id, failed promise ids, display size, visibility areas, settled margins, attempted position and view size, travel limit, active activities, and selected failure response. A failure response is not an ordinary precondition and cannot weaken a coverage row before this step. 12. `hold-valid-frame` does not display the invalid candidate. It keeps the last valid displayed frame or, before one exists, the cited non-play transition surface; the cited game rule decides whether play or a transition advances. `keep-priority-content` applies the cited total priority, displays the best allowed frame, and records each promise that did not fit. `show-framing-failure` displays the best allowed frame with its cited player-facing failure state. `change-world-to-restore-frame` applies the cited game rule to tether, defeat, or move content, then reruns steps 2–10 before another play moment is displayed; the cited rule may not change the active camera set or create a play region. `failure-unreachable` declares no runtime handling: reaching this step contradicts its cited argument and invalidates the design claim. 13. A failure remains a failure until a later settlement produces a valid frame or the camera deactivates. Priority, a visible notice, or starting a cited world change does not by itself turn an invalid frame into a kept promise. 14. When a suspension ends, run steps 2–10 before displaying the next play moment. The first displayed moment without an active suspension must be valid or must enter steps 11–13. At a camera handover, run steps 1–10: the incoming camera brings its own promise set and visibility areas, and its first frame follows this same first-valid-frame recovery path. Switching cannot insert an unchecked frame or leave two cameras active in one region.&quot;,
+    &quot;The authority order is therefore: active play region, applicable promise, each coverage row&#39;s visibility area and margin, activity suspension, player proposal and controller disposal, camera-position travel limit, allowed position and view-size settlement, final composed-view test, failure response. Later stages never rewrite an earlier declaration.&quot;
+  ],
+  &quot;answers&quot;: {
+    &quot;content-visibility&quot;: &quot;declared-content&quot;
+  },
+  &quot;values&quot;: {},
+  &quot;rows&quot;: {
+    &quot;cameras&quot;: [
+      {
+        &quot;id&quot;: &quot;board-camera&quot;,
+        &quot;active-when&quot;: &quot;puzzle.board-in-play&quot;,
+        &quot;view-declared-in&quot;: &quot;presentation.board-play-view&quot;,
+        &quot;follow-mode&quot;: &quot;fixed-view&quot;,
+        &quot;view-size&quot;: &quot;automatic-fit&quot;,
+        &quot;view-size-rule-declared-in&quot;: &quot;presentation.board-fit-zoom&quot;,
+        &quot;failure-response&quot;: &quot;failure-unreachable&quot;,
+        &quot;failure-handling-declared-in&quot;: &quot;puzzle.supported-displays-always-fit-board&quot;
+      }
+    ],
+    &quot;coverage-promises&quot;: [
+      {
+        &quot;id&quot;: &quot;whole-board&quot;,
+        &quot;camera-id&quot;: &quot;board-camera&quot;,
+        &quot;subject&quot;: &quot;puzzle.complete-board&quot;,
+        &quot;applies-when&quot;: &quot;puzzle.board-in-play&quot;,
+        &quot;coverage&quot;: &quot;whole-extent&quot;,
+        &quot;visibility-area&quot;: &quot;hud-safe-area&quot;,
+        &quot;safe-area-declared-in&quot;: &quot;presentation.board-safe-area&quot;,
+        &quot;margin-declared-in&quot;: &quot;presentation.board-clearance&quot;
+      }
+    ],
+    &quot;camera-activities&quot;: [
+      {
+        &quot;id&quot;: &quot;board-clear-shake&quot;,
+        &quot;camera-id&quot;: &quot;board-camera&quot;,
+        &quot;activity-kind&quot;: &quot;shake&quot;,
+        &quot;applies-when&quot;: &quot;puzzle.board-clear-animation&quot;,
+        &quot;extent-declared-in&quot;: &quot;presentation.board-shake-extent&quot;,
+        &quot;promise-effect&quot;: &quot;keeps-promise&quot;
+      }
+    ]
+  },
+  &quot;pack&quot;: &quot;sha256:4caf436eee5950d06c4368a78c14f9c4bff965e124c8d84695700ba82e2e7129&quot;
+}
+</code></pre>
+</details>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

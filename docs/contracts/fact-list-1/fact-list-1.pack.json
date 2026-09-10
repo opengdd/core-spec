@@ -1,0 +1,178 @@
+{
+  "contract": "fact-list",
+  "version": 1,
+  "templates": [
+    {
+      "id": "fact-policy-holds",
+      "title": "the readable-facts list is complete and has no duplicate pair",
+      "type": "general",
+      "expand": "once",
+      "test": {
+        "type": "general",
+        "scope": "{{inputs:scope}}",
+        "holds": "the readable-facts rows are non-empty; every fact the Fixed prose promises the player can read appears in at least one row; no two rows name the same fact citation and the same channel",
+        "diagnostics": [
+          "{{instance}}-fact-list-completeness"
+        ]
+      },
+      "text": "Audit class: observer-judged. Across the supplied scope, the readable-facts rows are non-empty, every fact the Fixed prose promises the player can read appears in at least one row, and no two rows name the same fact citation and the same channel.",
+      "inputs": {
+        "scope": {
+          "default": "all Fixed prose that promises the player can read a fact, and every readable-facts row"
+        }
+      }
+    },
+    {
+      "id": "colour-and-audio-policy-holds",
+      "title": "the promised colour and audio policies hold throughout play",
+      "type": "general",
+      "expand": "once",
+      "bindings": {
+        "colour-result": {
+          "flag": "colour-alone",
+          "map": {
+            "never": "every fact the game shows remains readable after all hue differences are removed",
+            "player-recolourable": "any fact the game shows that otherwise relies on hue alone becomes readable after the player changes every colour carrying it, and the changed presentation is observed before readability is judged"
+          }
+        },
+        "audio-result": {
+          "flag": "audio-alone",
+          "map": {
+            "never": "every promised fact remains readable with audio muted and has at least one row whose channel is text, symbol-or-shape, place-or-size, animation, outline-or-contrast, or haptic",
+            "allowed": "no promised fact becomes unreadable with audio muted except in the play situations its Fixed citation identifies as audio-only"
+          }
+        }
+      },
+      "test": {
+        "type": "general",
+        "scope": "every fact the game's Fixed prose says the player can tell, including facts with no readable-facts row, across the play situations that prose names",
+        "holds": "{{bind:colour-result}}; {{bind:audio-result}}",
+        "diagnostics": [
+          "{{instance}}-fact-observer-results",
+          "{{instance}}-colour-and-audio-state"
+        ]
+      },
+      "text": "Audit class: observer-judged. Across every fact the game's Fixed prose says the player can tell, including facts with no readable-facts row, and the play situations that prose names, {{bind:colour-result}}; {{bind:audio-result}}."
+    },
+    {
+      "id": "presentation-control-visible",
+      "title": "the promised presentation setting changes a fact in play",
+      "type": "general",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "presentation-control": [
+            "player-configurable"
+          ]
+        }
+      },
+      "test": {
+        "type": "general",
+        "scope": "{{inputs:scope}}",
+        "holds": "at least one player-facing setting changes or can disable a channel named by a readable-facts row; every row names every setting that changes or can disable its channel and states the result at each supported end; each declaration matches the running game in every applicable play situation named by the row's fact citation; when a setting can disable the row's channel, the row names another channel row for the same fact that remains readable or states that the fact becomes unreadable, and any unreadable result obeys the selected colour and audio policies",
+        "diagnostics": [
+          "{{instance}}-presentation-settings",
+          "{{instance}}-presentation-observer-results"
+        ]
+      },
+      "text": "Audit class: observer-judged. Across the supplied scope, at least one player-facing setting changes or can disable a channel named by a readable-facts row. Every row names each setting that affects its channel and the result at every supported end, and the running game matches that declaration in every applicable cited situation. A disabled channel points to another readable row for the same fact or admits that the fact becomes unreadable; any admission obeys the selected colour and audio policies.",
+      "inputs": {
+        "scope": {
+          "default": "every player-facing presentation setting that affects a promised fact, across all applicable play situations named by that fact's Fixed citation"
+        }
+      }
+    },
+    {
+      "id": "presentation-setting-effect-holds",
+      "title": "the setting declaration for {{row.id}} matches play",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "readable-facts",
+      "test": {
+        "type": "scenario",
+        "given": "the channel at {{row.fact}}; this row declares: {{row.presentation-settings}}",
+        "when": [
+          "every named setting is observed at both ends of its supported range in every applicable play situation named at {{row.fact}}"
+        ],
+        "then": [
+          "the channel changes or is disabled exactly as declared",
+          "if the channel is disabled, another declared row keeps the fact readable or this row states that the fact becomes unreadable, and that result obeys the selected colour and audio policies"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-presentation-setting-result"
+        ]
+      },
+      "text": "Audit class: observer-judged. For {{row.id}}, observe every named setting at both ends of its supported range in every applicable situation named at {{row.fact}}. The channel changes or is disabled exactly as declared. If disabled, another row keeps the fact readable or this row admits unreadability, and that result obeys the selected colour and audio policies. This row declares: {{row.presentation-settings}}"
+    },
+    {
+      "id": "audio-off-result-holds",
+      "title": "the audio-off result for {{row.id}} matches play",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "readable-facts",
+      "when": {
+        "row": {
+          "channel": [
+            "audio-cue",
+            "spatial-audio",
+            "narration",
+            "audio-description"
+          ]
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the audio channel at {{row.fact}} and this row's audio-off declaration: {{row.without-audio}}",
+        "when": [
+          "audio is turned off in every play situation named at {{row.fact}}"
+        ],
+        "then": [
+          "the player receives the declared non-audio route or the fact becomes unreadable exactly as declared",
+          "an unreadable result occurs only when the selected audio policy allows it"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-audio-off-result"
+        ]
+      },
+      "text": "Audit class: observer-judged. With audio off in every situation named at {{row.fact}}, the row promises: {{row.without-audio}} If that declaration says the fact becomes unreadable, the selected audio policy must allow it."
+    },
+    {
+      "id": "fact-readable-by-channel",
+      "title": "the fact defined at {{row.fact}} is readable through {{bind:channel-route}} alone",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "readable-facts",
+      "bindings": {
+        "channel-route": {
+          "row_field": "channel",
+          "map": {
+            "text": "words or numbers shown to the player",
+            "symbol-or-shape": "a pictorial symbol, distinct shape, or pattern",
+            "place-or-size": "where something sits or how large or full it is",
+            "animation": "movement over time",
+            "outline-or-contrast": "an outline or light-dark contrast",
+            "audio-cue": "a non-spatial audio cue",
+            "spatial-audio": "the direction or position of a sound",
+            "narration": "spoken interface or screen narration",
+            "audio-description": "spoken description of visual action or presentation",
+            "haptic": "vibration or another touch pattern"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the fact defined at {{row.fact}}, checked separately in every play situation named there, with every other route to the fact removed or made identical across the states being distinguished — declared or not — so {{bind:channel-route}} is the only thing that changes with the fact; developer instrumentation that is not a player-facing surface (an audit pane, a debug overlay, or a save file) is not a route",
+        "when": [
+          "within each named play situation, an observer using {{bind:channel-route}} meets each state the cited prose names at least once, in an order the observer does not know, with no prior knowledge of which state is present"
+        ],
+        "then": [
+          "in each named play situation, the observer correctly names the state every time from {{bind:channel-route}} alone"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result"
+        ]
+      },
+      "text": "Audit class: observer-judged. The check repeats in every play situation named at {{row.fact}}. Every other route to the fact is removed or made identical across the states being distinguished — declared or not — so {{bind:channel-route}} is the only thing that changes with the fact; developer instrumentation that is not a player-facing surface (an audit pane, a debug overlay, or a save file) is not a route. Within each named play situation, an observer meets each state the cited prose names at least once, in an order they do not know, and correctly names the state every time from {{bind:channel-route}} alone."
+    }
+  ]
+}

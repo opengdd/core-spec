@@ -24,8 +24,8 @@ numbers. Both keys are fixed as written; this package declares no
 ranges.
 
 - Checkpoint: the built board's width and the marks a win needs are read
-  from the resolved snapshot's `board.size` and `win.line_length`; no
-  literal `3` stands in for either.
+  from the resolved snapshot's `board.size` and `win.line_length`; neither
+  number is written into the code.
 
 ## Phase 4: presentation
 

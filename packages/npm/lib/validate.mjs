@@ -4,13 +4,23 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
-import { formatReport, renderContractTests, validateBuildManifest, validatePackage } from "./validate-core.mjs";
+import { FORMAT_VERSION, VALIDATOR_VERSION, formatReport, renderContractTests, validateBuildManifest, validatePackage } from "./validate-core.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const USAGE = [
-  "node conformance/validate.mjs [--json] <package-dir>",
-  "node conformance/validate.mjs --build <opengdd-build.json> [<spec-dir>]",
-  "node conformance/validate.mjs --render-contract-tests <package-dir>"
+  "Usage:",
+  "  node conformance/validate.mjs [--json] <package-dir>",
+  "  node conformance/validate.mjs --build [--json] <opengdd-build.json> [<package-dir>]",
+  "  node conformance/validate.mjs --render-contract-tests <package-dir>",
+  "  node conformance/validate.mjs --help",
+  "  node conformance/validate.mjs --version",
+  "",
+  "Options:",
+  "  --json                   Write a JSON report.",
+  "  --build                  Validate a build record; <package-dir> is the package it is checked against.",
+  "  --render-contract-tests  Render checked contract tests as Markdown.",
+  "  --help                   Print this help text.",
+  "  --version                Print the validator and format versions."
 ].join("\n");
 
 export function createNodeHost() {
@@ -42,7 +52,8 @@ export function createNodeHost() {
     sha256: bytes => crypto.createHash("sha256").update(bytes).digest("hex"),
     loadSchema: name => {
       const file = path.resolve(HERE, "..", name);
-      return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : undefined;
+      if (!fs.existsSync(file)) throw new Error(`schema ${name} was not found beside conformance/; the schema checks cannot run`);
+      return JSON.parse(fs.readFileSync(file, "utf8"));
     }
   };
 }
@@ -61,6 +72,17 @@ function main(args) {
   const jsonMode = args.includes("--json");
   const buildMode = args.includes("--build");
   const renderMode = args.includes("--render-contract-tests");
+  const helpMode = args.includes("--help");
+  const versionMode = args.includes("--version");
+  if (helpMode || versionMode) {
+    if (args.length !== 1) {
+      usage(jsonMode, `${helpMode ? "--help" : "--version"} cannot be combined with other arguments`);
+      return;
+    }
+    process.stdout.write(helpMode ? `${USAGE}\n` : `opengdd ${VALIDATOR_VERSION} (OpenGDD format ${FORMAT_VERSION})\n`);
+    process.exitCode = 0;
+    return;
+  }
   const positional = args.filter(arg => arg !== "--json" && arg !== "--build" && arg !== "--render-contract-tests");
   const unknownOptions = positional.filter(arg => arg.startsWith("-"));
   // Render checked contract tests for reading. The list exists only in memory;
@@ -84,7 +106,7 @@ function main(args) {
   }
   if (buildMode) {
     if (unknownOptions.length || positional.length < 1 || positional.length > 2) {
-      usage(jsonMode, unknownOptions.length ? `unknown option: ${unknownOptions[0]}` : "--build requires <opengdd-build.json> and an optional <spec-dir>");
+      usage(jsonMode, unknownOptions.length ? `unknown option: ${unknownOptions[0]}` : "--build requires <opengdd-build.json> and an optional <package-dir>");
       return;
     }
     const run = validateBuildManifest(createNodeHost(), positional[0], positional[1]);
@@ -101,4 +123,7 @@ function main(args) {
   process.exitCode = run.summary.errors ? 1 : 0;
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main(process.argv.slice(2));
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try { main(process.argv.slice(2)); }
+  catch (error) { console.error(error.message); process.exitCode = 2; }
+}

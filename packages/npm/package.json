@@ -1,6 +1,6 @@
 {
   "name": "opengdd",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Conformance validator for OpenGDD game design documents.",
   "keywords": [
     "opengdd",
@@ -9,21 +9,30 @@
     "validator"
   ],
   "homepage": "https://opengdd.org",
-  "bugs": "https://github.com/opengdd/core-spec/issues",
+  "bugs": "https://github.com/opengdd/core-spec/discussions",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/opengdd/core-spec.git"
   },
   "license": "MIT",
   "type": "module",
+  "main": "./lib/validate-core.mjs",
+  "exports": {
+    ".": "./lib/validate-core.mjs",
+    "./node-host": "./lib/validate.mjs",
+    "./package-syntax": "./lib/package-syntax.mjs",
+    "./file-map-host": "./lib/file-map-host.mjs",
+    "./migrate": "./lib/migrate.mjs"
+  },
   "bin": {
-    "opengdd": "./bin/opengdd.mjs"
+    "opengdd": "bin/opengdd.mjs"
   },
   "files": [
     "bin",
     "lib",
     "*.schema.json",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "engines": {
     "node": ">=18"

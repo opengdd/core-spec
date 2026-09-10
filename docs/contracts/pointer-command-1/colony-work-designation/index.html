@@ -1,0 +1,1710 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colony work designation — Pointer command adoption — OpenGDD</title>
+<meta name="description" content="Colony work designation is a Pointer command adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="canonical" href="https://opengdd.org/contracts/pointer-command-1/colony-work-designation/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Colony work designation — Pointer command adoption — OpenGDD">
+<meta property="og:description" content="Colony work designation is a Pointer command adoption with supplied answers, settings and matching acceptance tests.">
+<meta property="og:url" content="https://opengdd.org/contracts/pointer-command-1/colony-work-designation/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Colony work designation — Pointer command adoption — OpenGDD">
+<meta name="twitter:description" content="Colony work designation is a Pointer command adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=ff285f28dd16">
+<script type="module" src="/assets/contracts.mjs?v=ff285f28dd16"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout contract-catalogue contract-entry-page contract-instance-page" data-contract-root data-core-id="pointer-command" data-contract-preset="{&quot;command-receiver&quot;:&quot;world-target&quot;,&quot;near-miss-resolution&quot;:&quot;nearest-within-reach&quot;,&quot;empty-selection&quot;:&quot;keep-selection&quot;,&quot;queued-command-placement&quot;:&quot;insert-next&quot;,&quot;unmodified-command&quot;:&quot;always-appends&quot;}" data-contract-facts="{&quot;rowCounts&quot;:{&quot;selection-gestures&quot;:1,&quot;context-commands&quot;:1,&quot;targeted-verbs&quot;:0,&quot;queue-modifiers&quot;:1,&quot;cancellations&quot;:1},&quot;valueForms&quot;:{},&quot;rows&quot;:{&quot;selection-gestures&quot;:[{&quot;id&quot;:&quot;inspect-work-target&quot;,&quot;gesture&quot;:&quot;inspect-work-target&quot;,&quot;resolves-on&quot;:&quot;release&quot;,&quot;shape&quot;:&quot;point&quot;,&quot;change&quot;:&quot;replace&quot;,&quot;gesture-declared-in&quot;:&quot;02-mechanics.md#inspect-work-target-input&quot;,&quot;candidates-declared-in&quot;:&quot;02-mechanics.md#inspectable-work-targets&quot;}],&quot;context-commands&quot;:[{&quot;id&quot;:&quot;drag-designate-mining&quot;,&quot;gesture&quot;:&quot;designate-mining-region&quot;,&quot;resolves-on&quot;:&quot;drag-complete&quot;,&quot;target-kind&quot;:&quot;resource-region&quot;,&quot;command&quot;:&quot;designate-mining&quot;,&quot;gesture-declared-in&quot;:&quot;02-mechanics.md#mining-designation-input&quot;,&quot;target-declared-in&quot;:&quot;02-mechanics.md#resource-target-classification&quot;,&quot;area-declared-in&quot;:&quot;02-mechanics.md#mining-designation-region&quot;,&quot;command-declared-in&quot;:&quot;02-mechanics.md#designate-mining-command&quot;}],&quot;targeted-verbs&quot;:[],&quot;queue-modifiers&quot;:[{&quot;id&quot;:&quot;urgent-work-next&quot;,&quot;modifier-action&quot;:&quot;urgent-work&quot;,&quot;modifier-declared-in&quot;:&quot;02-mechanics.md#urgent-work-input&quot;,&quot;applies-to-declared-in&quot;:&quot;02-mechanics.md#urgent-work-orders&quot;}],&quot;cancellations&quot;:[{&quot;id&quot;:&quot;clear-target-work-queue&quot;,&quot;action&quot;:&quot;cancel-work-plan&quot;,&quot;resolves-on&quot;:&quot;press&quot;,&quot;active-state&quot;:&quot;queued-commands&quot;,&quot;result&quot;:&quot;empties-queue&quot;,&quot;action-declared-in&quot;:&quot;02-mechanics.md#cancel-work-plan-input&quot;,&quot;state-declared-in&quot;:&quot;02-mechanics.md#target-work-plan-state&quot;}]}}">
+<nav class="doc-toc contract-nav" aria-label="Contracts">
+<details class="contract-nav-disclosure">
+  <summary>Contracts</summary>
+  <div class="contract-nav-content">
+    <p class="toc-title">Contracts</p>
+    <ul class="contract-nav-home"><li><a href="/contracts/">Overview</a></li><li><a href="/contracts/catalogue/">Contract catalogue</a></li></ul>
+<div class="toc-group contract-page-nav">
+  <p class="toc-group-title">On this page</p>
+  <ul><li><a href="#use-this">Use in your game</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#values">Numbers</a></li>
+<li><a href="#lists">Lists</a></li>
+<li><a href="#tests">Acceptance tests</a></li>
+<li><a href="#adoption-json">JSON</a></li></ul>
+</div>
+  </div>
+</details>
+</nav>
+<article class="doc-body contract-entry-body">
+<p class="label"><a href="/contracts/catalogue/#controls-camera">Controls &amp; camera</a></p>
+<div class="contract-entry-title-row">
+  <div><h1>Colony work designation</h1><p class="contract-core-name"><code>colony-work-designation</code> · an adoption of <a href="/contracts/pointer-command-1/">Pointer command</a>, version 1</p></div>
+  <div><span class="contract-badge ">Tests included</span></div>
+</div>
+
+<section class="contract-handoff" aria-labelledby="use-this">
+  <h2 id="use-this">Use in your game</h2>
+  <p>Opens the authoring tool with these answers and settings already filled in. You still add your game's own rules and tuning.</p>
+  <div class="contract-actions">
+    <a class="cta" href="/authoring-tool/?contract=pointer-command-1&amp;adoption=colony-work-designation">Open in the authoring tool</a>
+    <a class="cta-quiet" href="/contracts/pointer-command-1/colony-work-designation.zip" download="colony-work-designation.zip">Download ZIP</a>
+  </div>
+  <details><summary>What is in the ZIP</summary><p>The ZIP holds the adoption and its acceptance tests. In the authoring tool, choose <strong>Add contract</strong> and pick this ZIP. If you keep your design as files, put them in <code>contracts/</code>.</p><div class="contract-actions"><a href="/contracts/pointer-command-1/colony-work-designation.json" download="colony-work-designation.json">Download adoption JSON</a> · <a href="/contracts/pointer-command-1/pointer-command-1.pack.json" download="pointer-command-1.pack.json">Download tests</a><button type="button" class="cta-quiet" data-copy-core data-core-url="/contracts/pointer-command-1/colony-work-designation.json" data-copy-kind="adoption">Copy adoption</button><span role="status" aria-live="polite" data-copy-status></span></div></details>
+</section>
+<section class="contract-overview">
+  <h2>The contract behind it</h2>
+  <p>Covers pointer gestures that select things in the world and issue commands to or at the world. It records direct world orders, chosen abilities and verbs, added orders, and cancellation. Physical bindings, camera view, readouts, pathfinding, unit AI, and formations stay elsewhere.</p>
+  <p><a href="/contracts/pointer-command-1/">Read the full Pointer command contract →</a></p>
+</section>
+<section class="contract-form-section" id="questions">
+  <h2>Questions</h2>
+  <p>The supplied answer is marked on each question. Pick other answers to see what changes. Nothing is saved here: the ZIP and the authoring tool use the supplied answers.</p>
+  <div class="contract-actions contract-question-tools">
+    <button type="button" class="cta-quiet contract-reset" data-reset-choices>Restore supplied answers</button>
+    <label class="contract-switch"><input type="checkbox" data-builder-wording> Show exact wording for builders</label>
+  </div>
+  <div class="contract-question-list">
+  <article class="contract-question" id="question-command-receiver" data-contract-question data-flag="command-receiver" data-when="null">
+  <h3>Who receives a command made by pointing at the world?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Who receives a command made by pointing at the world?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="pointer-command-command-receiver" value="fixed-actor" data-contract-choice><span class="contract-option-label">Fixed actor</span></label></th>
+  <td><span class="contract-option-meaning">One fixed actor or party receives every world command. An ARPG hero moves wherever the ground is clicked.</span><p class="contract-option-semantics">Every proposed command names the actor or party fixed by its cited command rule. No world selection is required to supply a receiver.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="pointer-command-command-receiver" value="current-selection" data-contract-choice><span class="contract-option-label">Current selection</span></label></th>
+  <td><span class="contract-option-meaning">The current world selection receives every command. An RTS order moves the selected squad.</span><p class="contract-option-semantics">The receiver set is the complete current selection. An empty set is a rejected receiver.</p></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="pointer-command-command-receiver" value="world-target" data-contract-choice><span class="contract-option-label">World target</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The command belongs to the pointed place or object, without a selected actor. A colony work order marks one ore tile for any worker.</span><p class="contract-option-semantics">A proposed command names its world target and no selected receiver. The cited game rule owns any later choice of actor, worker, structure, or world system that carries it out.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>A pointer command may control one standing actor, the current selection, or the pointed place itself.</p></details>
+</article>
+<article class="contract-question" id="question-near-miss-resolution" data-contract-question data-flag="near-miss-resolution" data-when="null">
+  <h3>When the pointer just misses a target, what can it choose?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for When the pointer just misses a target, what can it choose?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="pointer-command-near-miss-resolution" value="exact-point-only" data-contract-choice><span class="contract-option-label">Exact point only</span></label></th>
+  <td><span class="contract-option-meaning">Only the exact pointed place or object counts. A click beside a chest does not choose it.</span><p class="contract-option-semantics">Candidate lookup uses the exact pointer point and applies no near-miss reach.</p></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="pointer-command-near-miss-resolution" value="nearest-within-reach" data-contract-choice><span class="contract-option-label">Nearest within reach</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The nearest candidate inside the game&#39;s declared reach counts. A click beside a small lever can choose it.</span><p class="contract-option-semantics">Candidate lookup chooses the nearest selectable candidate inside the cited reach and uses the cited complete tie-break.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>The game can require the exact point or choose the nearest candidate inside a declared reach.</p></details>
+</article>
+<article class="contract-question" id="question-empty-selection" data-contract-question data-flag="empty-selection" data-when="{&quot;row-count&quot;:{&quot;selection-gestures&quot;:&quot;non-empty&quot;}}">
+  <h3>The player clicks or drags to choose units and finds nothing there. What happens to the earlier choice?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the selection gestures list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>No pointer gesture changes the current world selection.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for The player clicks or drags to choose units and finds nothing there. What happens to the earlier choice?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="pointer-command-empty-selection" value="clear-selection" data-contract-choice><span class="contract-option-label">Clear selection</span></label></th>
+  <td><span class="contract-option-meaning">The current selection is cleared. A tactics click on open ground leaves no unit selected.</span><p class="contract-option-semantics">The declared empty-result consequence is an empty selection.</p></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="pointer-command-empty-selection" value="keep-selection" data-contract-choice><span class="contract-option-label">Keep selection</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The current selection stays. A colony drag across bare ground leaves the chosen workers selected.</span><p class="contract-option-semantics">The declared empty-result consequence preserves the earlier selection.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>An empty click or box can clear the selection or leave the earlier choice in place. The answer binds only through replace rows; with none, it is inert.</p></details>
+</article>
+<article class="contract-question" id="question-invalid-target" data-contract-question data-flag="invalid-target" data-when="{&quot;row-count&quot;:{&quot;targeted-verbs&quot;:&quot;non-empty&quot;}}">
+  <h3>Does the game keep waiting for a place to use the chosen ability or verb?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the targeted verbs list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>No chosen ability or verb waits for a world target from the pointer.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Does the game keep waiting for a place to use the chosen ability or verb?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="pointer-command-invalid-target" value="keep-targeting" data-contract-choice><span class="contract-option-label">Keep targeting</span></label></th>
+  <td><span class="contract-option-meaning">The game keeps waiting for another point. An ARPG fire spell still waits after the pointer lands outside its range.</span><p class="contract-option-semantics">The invalid-target consequence keeps the same chosen verb active.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="pointer-command-invalid-target" value="leave-targeting" data-contract-choice><span class="contract-option-label">Leave targeting</span></label></th>
+  <td><span class="contract-option-meaning">The game stops waiting after the invalid point. A tower placement returns to ordinary pointing after a blocked tile.</span><p class="contract-option-semantics">The invalid-target consequence clears the chosen verb.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>The next point can retry the choice, or the game can return to ordinary pointing.</p></details>
+</article>
+<article class="contract-question" id="question-queued-command-placement" data-contract-question data-flag="queued-command-placement" data-when="{&quot;row-count&quot;:{&quot;queue-modifiers&quot;:&quot;non-empty&quot;}}">
+  <h3>The player holds the key that adds orders to a line. Where does the added order go?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the queue modifiers list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>No pointer modifier adds a command to a waiting plan.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for The player holds the key that adds orders to a line. Where does the added order go?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="pointer-command-queued-command-placement" value="append-at-end" data-contract-choice><span class="contract-option-label">Append at end</span></label></th>
+  <td><span class="contract-option-meaning">The command joins the end of the waiting plan. An RTS shift-order adds a final waypoint.</span><p class="contract-option-semantics">The declared placement is after every waiting command for the same plan owner.</p></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="pointer-command-queued-command-placement" value="insert-next" data-contract-choice><span class="contract-option-label">Insert next</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The command becomes next after the current command. A colony emergency repair runs before work already waiting.</span><p class="contract-option-semantics">The declared placement is before every waiting command for the same plan owner.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>The command may wait behind the full plan or become the next command after the current one.</p></details>
+</article>
+<article class="contract-question" id="question-unmodified-command" data-contract-question data-flag="unmodified-command" data-when="{&quot;any&quot;:[{&quot;row-count&quot;:{&quot;context-commands&quot;:&quot;non-empty&quot;}},{&quot;row-count&quot;:{&quot;targeted-verbs&quot;:&quot;non-empty&quot;}}]}">
+  <h3>A new order arrives while another order is waiting. What happens without the add-orders key?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the context commands list has at least one row, or the targeted verbs list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>No pointer command can enter a waiting plan.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for A new order arrives while another order is waiting. What happens without the add-orders key?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="pointer-command-unmodified-command" value="replaces-waiting" data-contract-choice><span class="contract-option-label">Replaces waiting</span></label></th>
+  <td><span class="contract-option-meaning">The new order replaces every waiting pointer order for that owner. A hero turns toward the newest clicked destination.</span><p class="contract-option-semantics">The unmodified placement clears waiting pointer commands for the same plan owner.</p></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="pointer-command-unmodified-command" value="always-appends" data-contract-choice><span class="contract-option-label">Always appends</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The new order joins the end of that owner&#39;s waiting line. A colony keeps each new work mark.</span><p class="contract-option-semantics">The unmodified placement is after every waiting pointer command for the same plan owner.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="pointer-command-unmodified-command" value="rejected-while-busy" data-contract-choice><span class="contract-option-label">Rejected while busy</span></label></th>
+  <td><span class="contract-option-meaning">The new order is refused while that owner has work waiting. A build tool accepts no second placement until the first clears.</span><p class="contract-option-semantics">An unmodified proposal is rejected while its plan owner has a waiting pointer command.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>A plain order can replace the waiting line, join it, or be refused while that owner is busy.</p></details>
+</article>
+  </div>
+</section>
+<aside class="contract-relief" aria-labelledby="relief-title">
+  <p class="contract-relief-title" id="relief-title">That was the hard part.</p>
+  <p>The questions are the decisions. Everything below follows from them: the numbers, lists and test inputs this adoption supplies, and the tests that come with it. The authoring tool edits all of it in place. Read on only if you want to check.</p>
+</aside>
+<details class="contract-form-section contract-fold" id="values">
+  <summary><span class="contract-fold-title">Numbers</span><span class="contract-fold-note">no numbers</span></summary>
+  <p>This contract has no numbers to set.</p>
+</details>
+<details class="contract-form-section contract-fold" id="rules">
+  <summary><span class="contract-fold-title">Rules</span><span class="contract-fold-note">no rules</span></summary>
+  <p>A rule is a check between the numbers. Validation reports a rule that fails.</p>
+  <p>This contract has no rules between its numbers.</p>
+</details>
+<details class="contract-form-section contract-fold" id="lists">
+  <summary><span class="contract-fold-title">Lists</span><span class="contract-fold-note">5 lists</span></summary>
+  <p>Each list holds the rows this adoption supplies. A list can be empty.</p>
+  <article class="contract-collection">
+<h3>Selection gestures</h3>
+<p class="contract-exact-name"><code>selection-gestures</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Gesture</th><th>Resolves on</th><th>Shape</th><th>Change</th><th>Gesture declared in</th><th>Candidates declared in</th></tr></thead>
+<tbody>
+<tr><td><code>inspect-work-target</code></td><td><code>inspect-work-target</code></td><td><code>release</code></td><td><code>point</code></td><td><code>replace</code></td><td><code>02-mechanics.md#inspect-work-target-input</code></td><td><code>02-mechanics.md#inspectable-work-targets</code></td></tr>
+</tbody></table></div>
+</article>
+<article class="contract-collection">
+<h3>Context commands</h3>
+<p class="contract-exact-name"><code>context-commands</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Gesture</th><th>Resolves on</th><th>Target kind</th><th>Command</th><th>Gesture declared in</th><th>Target declared in</th><th>Area declared in</th><th>Receiver condition</th><th>Command declared in</th></tr></thead>
+<tbody>
+<tr><td><code>drag-designate-mining</code></td><td><code>designate-mining-region</code></td><td><code>drag-complete</code></td><td><code>resource-region</code></td><td><code>designate-mining</code></td><td><code>02-mechanics.md#mining-designation-input</code></td><td><code>02-mechanics.md#resource-target-classification</code></td><td><code>02-mechanics.md#mining-designation-region</code></td><td>—</td><td><code>02-mechanics.md#designate-mining-command</code></td></tr>
+</tbody></table></div>
+</article>
+<article class="contract-collection">
+<h3>Targeted verbs</h3>
+<p class="contract-exact-name"><code>targeted-verbs</code></p>
+<p>This adoption declares no targeted verbs.</p>
+</article>
+<article class="contract-collection">
+<h3>Queue modifiers</h3>
+<p class="contract-exact-name"><code>queue-modifiers</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Modifier action</th><th>Modifier declared in</th><th>Applies to declared in</th></tr></thead>
+<tbody>
+<tr><td><code>urgent-work-next</code></td><td><code>urgent-work</code></td><td><code>02-mechanics.md#urgent-work-input</code></td><td><code>02-mechanics.md#urgent-work-orders</code></td></tr>
+</tbody></table></div>
+</article>
+<article class="contract-collection">
+<h3>Cancellations</h3>
+<p class="contract-exact-name"><code>cancellations</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Action</th><th>Resolves on</th><th>Active state</th><th>Result</th><th>Action declared in</th><th>State declared in</th></tr></thead>
+<tbody>
+<tr><td><code>clear-target-work-queue</code></td><td><code>cancel-work-plan</code></td><td><code>press</code></td><td><code>queued-commands</code></td><td><code>empties-queue</code></td><td><code>02-mechanics.md#cancel-work-plan-input</code></td><td><code>02-mechanics.md#target-work-plan-state</code></td></tr>
+</tbody></table></div>
+</article>
+</details>
+<details class="contract-form-section contract-fold" id="verification">
+  <summary><span class="contract-fold-title">Test inputs</span><span class="contract-fold-note">scope and seeds</span></summary>
+  <p>Some tests need a scope or seeds from the adoption before they can run.</p>
+  <p>This adoption supplies none; every test uses its defaults.</p>
+</details>
+<details class="contract-form-section contract-fold" id="tests">
+  <summary><span class="contract-fold-title">Acceptance tests</span><span class="contract-fold-note">36 tests apply</span></summary>
+  <p>The contract comes with 64 tests. A test that runs once per row is counted once for each row. Tests that do not apply to these answers are still listed, with the reason.</p>
+  <div class="contract-test-list"><article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>pointer-command-vocabulary</code></p>
+      <h3>pointer command uses actions, phases, snapshots, and states</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">A game-facing pointer action arrives after physical input mapping. Its pointer phase is a press, release, completed drag, or cancelled drag, and its pointer snapshot is the world point and classified object at that phase. A cited non-pointer action has one completion phase. A selection drag and a targeting state begin and end only as the contract states. Device identity, several simultaneous pointers, and camera view or follow behavior assert nothing here.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">colony-work-designation</code> adoption and its cited pointer, action, selection, and command rules</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the contract&#39;s state and records are identified before a pointer phase is resolved</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>a game-facing pointer action is received after physical input mapping and a pointer phase is its press, release, completed drag, or cancelled drag</li><li>a pointer snapshot is the world point and classified object under the pointer at that phase</li><li>a cited non-pointer action that supplies a verb, confirmation, or cancellation has one completion phase, recorded as press unless its cited rule names release</li><li>a selection drag begins when its cited gesture rule crosses the drag threshold and ends when that action completes or cancels</li><li>a targeting state holds one chosen verb or one target-first snapshot waiting for the verb</li><li>device identity, several simultaneous pointers, and camera view or follow behavior are outside this contract and assert nothing here</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li><li><code class="contract-placeholder">colony-work-designation</code>-snapshot-log</li><li><code class="contract-placeholder">colony-work-designation</code>-targeting-state</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>selection-proposal-and-plan-vocabulary</code></p>
+      <h3>selection, proposals, and waiting plans keep distinct meanings</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">The current selection is one set and starts empty unless a cited load or scene-entry rule supplies it. It persists until a cited rule changes it. A command proposal contains one command, receiver shape, exact world target, and queue placement. A waiting plan contains pointer commands accepted for later execution for its cited plan owner.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">colony-work-designation</code> adoption with distinguishable selection, proposal, and waiting-plan records</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a selection change and a pointer command are each followed through their declared route</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the current selection is one set of world objects and begins empty unless a cited load or scene-entry rule supplies it</li><li>the selection persists until a cited pointer, control-group recall, death, roster, scene-entry, or load rule changes it</li><li>one command proposal contains one command, its receiver shape, its exact world target, and its queue placement</li><li>one waiting plan contains pointer commands accepted for later execution for the plan owner named by the cited command rule</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-selection-state</li><li><code class="contract-placeholder">colony-work-designation</code>-proposal-log</li><li><code class="contract-placeholder">colony-work-designation</code>-plan-state</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>selection-gesture-resolves-at-declared-phase · inspect-work-target</code></p>
+      <h3>selection gesture <code class="contract-placeholder">inspect-work-target</code> resolves at its declared phase</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per selection-gestures row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the inspect-work-target row.</p>
+  <p class="contract-test-text">Selection row <code class="contract-placeholder">inspect-work-target</code> matches action <code class="contract-placeholder">inspect-work-target</code> and resolves from the final snapshot at release under <code class="contract-placeholder">02-mechanics.md#inspect-work-target-input</code>. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>selection row <code class="contract-placeholder">inspect-work-target</code> and the gesture rule at <code class="contract-placeholder">02-mechanics.md#inspect-work-target-input</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>game-facing pointer action <code class="contract-placeholder">inspect-work-target</code> is performed through its declared press, movement, and release</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">inspect-work-target</code> resolves from the final snapshot at release</li><li>the row matches only its declared game-facing pointer action and resolving phase</li><li>the test leaves recognition, thresholds, and geometry to <code class="contract-placeholder">02-mechanics.md#inspect-work-target-input</code> and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li><li><code class="contract-placeholder">colony-work-designation</code>-snapshot-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>context-gesture-resolves-at-declared-phase · drag-designate-mining</code></p>
+      <h3>context command <code class="contract-placeholder">drag-designate-mining</code> resolves at its declared phase</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per context-commands row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the drag-designate-mining row.</p>
+  <p class="contract-test-text">Context row <code class="contract-placeholder">drag-designate-mining</code> matches action <code class="contract-placeholder">designate-mining-region</code> and resolves once when the recognized drag completes; an aborted drag creates one drag-cancel phase belonging to <code class="contract-placeholder">designate-mining-region</code> and no proposal under <code class="contract-placeholder">02-mechanics.md#mining-designation-input</code>. Where that cited rule emits repeated completed phases while held, each emitted phase produces exactly one <code class="contract-placeholder">designate-mining</code> proposal; where it emits none, this clause asserts nothing. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>context row <code class="contract-placeholder">drag-designate-mining</code> and the gesture rule at <code class="contract-placeholder">02-mechanics.md#mining-designation-input</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>game-facing pointer action <code class="contract-placeholder">designate-mining-region</code> is performed through its declared press, movement, and release</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">drag-designate-mining</code> resolves once when the recognized drag completes; an aborted drag creates one drag-cancel phase belonging to <code class="contract-placeholder">designate-mining-region</code> and no proposal</li><li>the row matches only its declared game-facing pointer action and resolving phase</li><li>where <code class="contract-placeholder">02-mechanics.md#mining-designation-input</code> emits repeated completed phases while held, each emitted phase produces exactly one <code class="contract-placeholder">designate-mining</code> proposal; where it emits none, this clause asserts nothing</li><li>the test leaves recognition, thresholds, and geometry to <code class="contract-placeholder">02-mechanics.md#mining-designation-input</code> and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li><li><code class="contract-placeholder">colony-work-designation</code>-snapshot-log</li><li><code class="contract-placeholder">colony-work-designation</code>-proposal-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>targeted-verb-resolves-at-declared-phase</code></p>
+      <h3>targeted verb <code class="contract-placeholder">Row.id</code> resolves at its declared phase</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per targeted-verbs row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: targeted-verbs has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>gesture-rule-alone-classifies-motion</code></p>
+      <h3>the cited gesture rule alone classifies motion</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">The cited gesture rule alone decides whether movement stays a point gesture, becomes a drag, or cancels. Its distance, duration, geometry, coordinate space, and boundary rule are read directly; this adoption contributes no number.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each pointer action the <code class="contract-placeholder">colony-work-designation</code> adoption can perform, including positions on either side of every cited gesture boundary</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the action moves and ends</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the cited gesture rule alone decides point, drag, or cancel</li><li>the result follows the cited distance, duration, geometry, coordinate space, and boundary rule</li><li>the adoption contributes no gesture quantity of its own</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li><li><code class="contract-placeholder">colony-work-designation</code>-snapshot-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>one-physical-sequence-one-result</code></p>
+      <h3>one physical sequence produces one pointer result</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">One physical sequence produces a point result or a drag result, never both. If the cited rule creates two distinct game-facing pointer actions, each has its own result; otherwise that exception asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each physical pointer sequence the <code class="contract-placeholder">colony-work-designation</code> adoption can recognize</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the sequence passes through press, movement, and release</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the sequence produces a point result or a drag result, never both</li><li>where the cited gesture rule creates two distinct game-facing pointer actions, each action has its own result; otherwise that exception asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>repeated-completed-phases-stay-distinct</code></p>
+      <h3>each repeated completed command phase produces one proposal</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">Where a cited gesture rule emits repeated completed command phases while held, each phase has its own result and produces exactly one proposal. A held interval with no repeated phase produces no extra proposal. Where no rule emits repeated phases, this test asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a held control whose cited gesture rule emits repeated completed command phases, where the adoption has one</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the control remains held through two cited completed phases</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>each emitted completed phase has its own pointer result</li><li>each completed command phase produces exactly one command proposal</li><li>a held interval that emits no repeated completed phase produces no extra proposal</li><li>where no cited rule emits repeated completed phases, this test asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li><li><code class="contract-placeholder">colony-work-designation</code>-proposal-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>cancellation-applies-before-other-rows · clear-target-work-queue</code></p>
+      <h3>cancellation <code class="contract-placeholder">clear-target-work-queue</code> applies before any other row</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cancellations row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the clear-target-work-queue row.</p>
+  <p class="contract-test-text">Cancellation <code class="contract-placeholder">clear-target-work-queue</code> matches action <code class="contract-placeholder">cancel-work-plan</code>, its press phase, and the holding state in <code class="contract-placeholder">02-mechanics.md#target-work-plan-state</code> before any other row. It empties the waiting pointer commands in the plan named at <code class="contract-placeholder">02-mechanics.md#target-work-plan-state</code>, proposes no command, changes no selection beyond empties-selection, and ends the phase. Where more than one cancellation row could match, the contract checks the holding state in the order targeting, selection-drag, queued-commands, selection. A mismatch does not apply this row and asserts nothing about another cancellation. Area cancellation asserts nothing here.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>cancellation row <code class="contract-placeholder">clear-target-work-queue</code>, action <code class="contract-placeholder">cancel-work-plan</code>, and the cited state at <code class="contract-placeholder">02-mechanics.md#target-work-plan-state</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>a waiting plan has queued pointer commands and <code class="contract-placeholder">cancel-work-plan</code> reaches press</li><li>the nearest action, phase, or holding-state mismatch is also checked</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the complete match is checked before selection, context-command, or targeting rows and empties the waiting pointer commands in the plan named at <code class="contract-placeholder">02-mechanics.md#target-work-plan-state</code></li><li>the matched phase proposes no command, changes no selection beyond empties-selection, and ends immediately</li><li>where more than one cancellation row could match, the holding state is checked in the order targeting, selection-drag, queued-commands, selection</li><li>the mismatch does not apply <code class="contract-placeholder">clear-target-work-queue</code> and asserts nothing about another matching cancellation row</li><li>an area cancellation, if the game has one, asserts nothing here because this row has no dragged cancellation region</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-cancellation-log</li><li><code class="contract-placeholder">colony-work-designation</code>-targeting-state</li><li><code class="contract-placeholder">colony-work-designation</code>-selection-state</li><li><code class="contract-placeholder">colony-work-designation</code>-plan-state</li><li><code class="contract-placeholder">colony-work-designation</code>-proposal-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>verb-first-begins-targeting</code></p>
+      <h3>verb-first row <code class="contract-placeholder">Row.id</code> begins from its cited action</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per targeted-verbs row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: targeted-verbs has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>target-first-captures-before-verb</code></p>
+      <h3>target-first row <code class="contract-placeholder">Row.id</code> captures its target before the verb</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per targeted-verbs row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: targeted-verbs has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>separate-confirmation-reads-completion-snapshot</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> reads the target when confirmation completes</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per targeted-verbs row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: targeted-verbs has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>entry-position-confirmation-keeps-entry-snapshot</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> confirms from its entry snapshot</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per targeted-verbs row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: targeted-verbs has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>targeted-drag-uses-cited-region</code></p>
+      <h3>dragged verb <code class="contract-placeholder">Row.id</code> uses its cited region</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per targeted-verbs row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: targeted-verbs has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>targeted-verb-tests-candidate-and-validity</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> resolves a candidate and tests validity</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per targeted-verbs row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: targeted-verbs has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>invalid-target-keeps-targeting</code></p>
+      <h3>an invalid target keeps targeting</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: invalid target is not asked for colony-work-designation.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>invalid-target-leaves-targeting</code></p>
+      <h3>an invalid target leaves targeting</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: invalid target is not asked for colony-work-designation.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>valid-target-creates-one-proposal</code></p>
+      <h3>a valid target creates one <code class="contract-placeholder">Row.id</code> proposal</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per targeted-verbs row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: targeted-verbs has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>targeting-suppresses-selection-and-context</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> targeting suppresses ordinary selection and context rows</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per targeted-verbs row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: targeted-verbs has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>selection-or-context-row-match</code></p>
+      <h3>one selection or context row matches without targeting</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">With no active targeting state, if a selection or context row matches action, phase, and classification, exactly one proceeds. A target-first capture gesture is resolved at targeting entry and is neither a selection or context row match nor an unmatched classification. If no row matches, no world-command state changes and the unmatched classification is recorded. Where no unmatched classification can be constructed, that branch asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>no active targeting state and each classified pointer snapshot the <code class="contract-placeholder">colony-work-designation</code> adoption can produce, including an unmatched classification where one can be constructed</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the game-facing pointer action reaches a completed phase</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>where a row matches, exactly one selection or context row proceeds from its action, phase, and classification</li><li>a target-first capture gesture is resolved at targeting entry and is neither a selection or context row match nor an unmatched classification</li><li>where no row matches, no world-command state changes and the result records the unmatched classification</li><li>where every constructible classification matches, the unmatched branch asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li><li><code class="contract-placeholder">colony-work-designation</code>-selection-state</li><li><code class="contract-placeholder">colony-work-designation</code>-proposal-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>receiver-conditioned-context-match</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> also matches its cited receiver class</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per context-commands row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: no matching row in context-commands has every field this test uses (receiver-condition).</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>selection-row-uses-complete-candidate-set · inspect-work-target</code></p>
+      <h3>selection row <code class="contract-placeholder">inspect-work-target</code> commits its complete candidate set once</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per selection-gestures row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the inspect-work-target row.</p>
+  <p class="contract-test-text">Selection row <code class="contract-placeholder">inspect-work-target</code> reads the complete candidate set at the pointer point from <code class="contract-placeholder">02-mechanics.md#inspectable-work-targets</code> and replaces the current selection with the complete non-empty set; for an empty set it follows the adoption&#39;s empty-selection answer; a non-empty result, or an empty replace result that changes the selection, is committed once; an unchanged empty result records no selection change. The phase ends without a proposal. Selection layers assert nothing here. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>selection row <code class="contract-placeholder">inspect-work-target</code> with a non-empty and an empty result from <code class="contract-placeholder">02-mechanics.md#inspectable-work-targets</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li><code class="contract-placeholder">inspect-work-target</code> completes at <code class="contract-placeholder">release</code> for each result</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>candidate lookup returns the complete candidate set at the pointer point through <code class="contract-placeholder">02-mechanics.md#inspectable-work-targets</code></li><li>the row replaces the current selection with the complete non-empty set; for an empty set it follows the adoption&#39;s empty-selection answer; a non-empty result, or an empty replace result that changes the selection, is committed once; an unchanged empty result records no selection change</li><li>the pointer phase ends without a command proposal</li><li>the test leaves candidate kinds, inclusion, reach, and tie-break to <code class="contract-placeholder">02-mechanics.md#inspectable-work-targets</code> and restates nothing from it</li><li>selection layers assert nothing here because the result is one set</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-selection-state</li><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li><li><code class="contract-placeholder">colony-work-designation</code>-proposal-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>empty-replace-clears-selection</code></p>
+      <h3>an empty replacement clears the selection</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: empty selection is keep selection, not clear selection.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>empty-replace-keeps-selection</code></p>
+      <h3>an empty replacement keeps the selection</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">When a replace selection row returns an empty complete candidate set, the earlier current selection remains unchanged. The result distinguishes the empty candidate set from a non-empty set with the same final members. The contract says the answer binds only through replace rows; where the adoption declares none, this answer is inert and this test asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each replace selection row in <code class="contract-placeholder">colony-work-designation</code>, a distinguishable current selection, and an empty complete candidate set</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the selection gesture completes</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the earlier current selection remains unchanged</li><li>the result record distinguishes the empty candidate set from a non-empty set that happens to reproduce the same selection</li><li>where the adoption declares no replace selection row, this answer is inert and this test asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-selection-state</li><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>context-row-copies-target-and-creates-proposal · drag-designate-mining</code></p>
+      <h3>context row <code class="contract-placeholder">drag-designate-mining</code> copies its target into one proposal</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per context-commands row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the drag-designate-mining row.</p>
+  <p class="contract-test-text">Context row <code class="contract-placeholder">drag-designate-mining</code> copies the classified <code class="contract-placeholder">resource-region</code> point or object from <code class="contract-placeholder">02-mechanics.md#resource-target-classification</code> as its exact target. One proposal is created with command <code class="contract-placeholder">designate-mining</code> and the receiver shape selected by the command-receiver answer; its Fixed command rule is at <code class="contract-placeholder">02-mechanics.md#designate-mining-command</code>. The copied target and receiver do not change before placement. The test names both addresses and restates nothing from them.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>context row <code class="contract-placeholder">drag-designate-mining</code> and a classified <code class="contract-placeholder">resource-region</code> snapshot under <code class="contract-placeholder">02-mechanics.md#resource-target-classification</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li><code class="contract-placeholder">designate-mining-region</code> completes at <code class="contract-placeholder">drag-complete</code> with no active targeting state</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the row copies the classified point or object as the exact target</li><li>one proposal is created with command <code class="contract-placeholder">designate-mining</code> and the receiver shape selected by the command-receiver answer</li><li>the proposal proceeds to queue placement without changing the copied target or receiver</li><li>the test leaves classification, reach, and tie-break to <code class="contract-placeholder">02-mechanics.md#resource-target-classification</code> and command content to <code class="contract-placeholder">02-mechanics.md#designate-mining-command</code> and restates nothing from them</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-snapshot-log</li><li><code class="contract-placeholder">colony-work-designation</code>-proposal-log</li><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>context-drag-uses-cited-region · drag-designate-mining</code></p>
+      <h3>dragged context row <code class="contract-placeholder">drag-designate-mining</code> uses its cited region</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per context-commands row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the drag-designate-mining row.</p>
+  <p class="contract-test-text">When context row <code class="contract-placeholder">drag-designate-mining</code> reaches drag-complete, the complete region at <code class="contract-placeholder">02-mechanics.md#mining-designation-region</code> becomes its target. The adoption contributes no geometry, coordinate-space, or boundary rule. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>context row <code class="contract-placeholder">drag-designate-mining</code> and the completed dragged region at <code class="contract-placeholder">02-mechanics.md#mining-designation-region</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li><code class="contract-placeholder">designate-mining-region</code> reaches drag-complete</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the complete region from <code class="contract-placeholder">02-mechanics.md#mining-designation-region</code> becomes the command target</li><li>the test contributes no geometry, coordinate-space, or boundary rule</li><li>the test names the address and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-snapshot-log</li><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li><li><code class="contract-placeholder">colony-work-designation</code>-proposal-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fixed-actor-receives-command</code></p>
+      <h3>the cited fixed actor receives each command</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: command receiver is world target, not fixed actor.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>current-selection-receives-command</code></p>
+      <h3>the complete current selection receives each command</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: command receiver is world target, not current selection.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>world-target-owns-command</code></p>
+      <h3>the exact world target owns each command</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">Each proposal attaches no selected receiver and reads the exact world target&#39;s plan owner from its cited command rule. Later actor or worker allocation asserts nothing here.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each matching context command and valid targeted verb in <code class="contract-placeholder">colony-work-designation</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the command proposal is created</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the proposal attaches no selected receiver</li><li>the cited command rule supplies the exact target&#39;s plan owner</li><li>later actor or worker allocation is not performed by this contract and asserts nothing here</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-proposal-log</li><li><code class="contract-placeholder">colony-work-designation</code>-selection-state</li><li><code class="contract-placeholder">colony-work-designation</code>-plan-state</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>exact-point-only-resolves-candidates</code></p>
+      <h3>candidate lookup uses the exact pointer point</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: near miss resolution is nearest within reach, not exact point only.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>nearest-within-reach-resolves-candidates</code></p>
+      <h3>candidate lookup chooses the cited nearest candidate</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">Every candidate lookup chooses the nearest selectable candidate inside the reach cited by its row rule; a candidate outside that reach is not chosen. A tie follows the cited complete tie-break, and where no tie can be constructed that comparison asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each candidate lookup in <code class="contract-placeholder">colony-work-designation</code>, with candidates inside and outside the reach and a cited tie where one can be constructed</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the pointer snapshot is classified through the row&#39;s candidate or target rule</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the nearest selectable candidate inside the cited reach is chosen</li><li>a candidate outside the cited reach is not chosen</li><li>a tie follows the complete tie-break in the cited row rule; where no tie can be constructed, that comparison asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-snapshot-log</li><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>queue-modifier-appends-at-end</code></p>
+      <h3>queue modifier <code class="contract-placeholder">Row.id</code> appends a matching proposal</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per queue-modifiers row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: queued command placement is insert next, not append at end.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>queue-modifier-inserts-next · urgent-work-next</code></p>
+      <h3>queue modifier <code class="contract-placeholder">urgent-work-next</code> inserts a matching proposal next</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per queue-modifiers row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the urgent-work-next row.</p>
+  <p class="contract-test-text">When <code class="contract-placeholder">urgent-work</code> is active under <code class="contract-placeholder">02-mechanics.md#urgent-work-input</code>, modifier <code class="contract-placeholder">urgent-work-next</code> places a matching proposal before every waiting pointer command and after the command already being carried out, without changing its meaning. Capacity and the no-place result stay in that citation, nothing is dropped implicitly, and <code class="contract-placeholder">02-mechanics.md#urgent-work-orders</code> decides applicability. A command that the applicability rule does not name takes the unmodified-command path even while the modifier action is active. Per-row placement differences assert nothing here. The test names both addresses and restates nothing from them.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>queue modifier <code class="contract-placeholder">urgent-work-next</code>, a matching command named through <code class="contract-placeholder">02-mechanics.md#urgent-work-orders</code>, and distinguishable current and waiting commands for one plan owner</p></dd></div>
+<div><dt>When</dt><dd><ul><li><code class="contract-placeholder">urgent-work</code> is active under <code class="contract-placeholder">02-mechanics.md#urgent-work-input</code> when the proposal completes</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the proposal keeps its command, receiver, and target and is placed before every waiting pointer command and after the command already being carried out</li><li>the cited modifier rule decides activity, capacity, and the complete no-place result, and no command is dropped implicitly</li><li>the applicability rule decides which declared commands this modifier reaches</li><li>a command that <code class="contract-placeholder">02-mechanics.md#urgent-work-orders</code> does not name takes the unmodified-command path even while <code class="contract-placeholder">urgent-work</code> is active</li><li>per-row placement differences assert nothing here because the answer is adoption-wide</li><li>the test names both addresses and restates nothing from them</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-proposal-log</li><li><code class="contract-placeholder">colony-work-designation</code>-plan-state</li><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unmodified-command-replaces-waiting</code></p>
+      <h3>an unmodified command replaces waiting pointer commands</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: unmodified command is always appends, not replaces waiting.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unmodified-command-always-appends</code></p>
+      <h3>an unmodified command appends after waiting commands</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">With no matching queue modifier, the proposal is placed after every waiting pointer command for the same owner. Earlier waiting commands keep their order, and the proposal reaches its cited command rule at that place. Per-row placement differences assert nothing because the answer is adoption-wide.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>an unmodified proposal in <code class="contract-placeholder">colony-work-designation</code> for a plan owner with distinguishable waiting pointer commands</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the proposal reaches placement with no matching queue modifier</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the proposal is placed after every waiting pointer command for the same owner</li><li>every earlier waiting command remains in the same order</li><li>the new proposal proceeds to its cited command rule when it reaches that place</li><li>per-row placement differences assert nothing because the answer is adoption-wide</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-proposal-log</li><li><code class="contract-placeholder">colony-work-designation</code>-plan-state</li><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unmodified-command-rejects-while-busy</code></p>
+      <h3>an unmodified command is accepted only when its plan is not busy</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: unmodified command is always appends, not rejected while busy.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>proposal-count-and-targeting-result</code></p>
+      <h3>one completed phase creates no duplicate proposal</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">Each completed phase that creates a proposal creates exactly one. A held modifier or update adds no copy. For a targeted verb, the row&#39;s after-dispatch result applies after placement or rejection; for a context command, that clause asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each completed pointer phase in <code class="contract-placeholder">colony-work-designation</code> that creates a proposal, including one with a held queue modifier where available</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the proposal is created, placed or rejected, and any targeted-verb result is applied</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the completed phase creates exactly one proposal</li><li>a held modifier or update creates no second copy within that phase</li><li>for a targeted verb, its after-dispatch result applies after placement or rejection; for a context command, that clause asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-proposal-log</li><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li><li><code class="contract-placeholder">colony-work-designation</code>-targeting-state</li><li><code class="contract-placeholder">colony-work-designation</code>-plan-state</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>proposal-submission-stops-at-command-rule</code></p>
+      <h3>dispatch stops at the cited command rule</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">Each placed proposal is submitted once to its cited Fixed command rule at its declared place. Permission, cost, range, path, the unreachable case, effect, rejection, and whether a current command stops belong to that rule. Event resolution owns same-instant order. A paired Action legibility adoption asserts nothing here.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each placed proposal in <code class="contract-placeholder">colony-work-designation</code>, including one queued proposal when the adoption can create one</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the proposal reaches its declared place and is submitted</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the proposal is submitted once to its cited Fixed command rule at its declared place</li><li>the pointer contract makes no claim about permission, cost, range, path, the unreachable case, effect, rejection, or whether a current command stops after submission</li><li>when several proposals share one instant, their order is left to Event resolution</li><li>a paired Action legibility adoption asserts nothing here</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-proposal-log</li><li><code class="contract-placeholder">colony-work-designation</code>-plan-state</li><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>pointer-result-record-is-complete</code></p>
+      <h3>the pointer result records the completed phase</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">Every pointer result records its gesture, phase, snapshot, targeting states, changed selection, proposed command and receiver, target, placement outcome, cancellation, tested target validity, unmatched classification, and available cited game-rule result. An optional circumstance the adoption cannot construct asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each completed pointer phase in <code class="contract-placeholder">colony-work-designation</code>, including every optional circumstance the adoption can construct</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the pointer result is read after resolution</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the result records gesture id, resolving phase, pointer snapshot, prior and final targeting state, and prior and final selection when changed</li><li>it records command and receiver when proposed, target, queue modifier or unmodified placement outcome, cancellation when used, and target validity for every targeted verb that reached validity</li><li>it records no-matching-row when applicable and the cited game-rule result when available</li><li>an optional circumstance the adoption cannot construct asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>authority-order-preserves-copies</code></p>
+      <h3>later stages preserve the earlier snapshot and receiver</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">The contract&#39;s authority order is physical mapping, gesture recognition, cancellation, targeting entry, confirmation, selection or context classification, receiver snapshot, placement, dispatch, game rule, and same-instant event order. Later stages never change an earlier snapshot or receiver; classification can read receiver class without copying the set. Questions and rows describe choices and citations, not another sequence.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each completed pointer phase in <code class="contract-placeholder">colony-work-designation</code> with distinguishable snapshot, receiver, placement, and game-rule data</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the phase proceeds through every stage it reaches</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>physical mapping precedes gesture recognition, cancellation, targeting entry, target confirmation, selection or context classification, receiver snapshot, queue placement, command dispatch, game rule, and same-instant event order</li><li>a later stage never changes the pointer snapshot or receiver copied earlier</li><li>classification can read receiver class without copying the receiver set</li><li>questions and rows describe choices and citations but define no second sequence</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li><li><code class="contract-placeholder">colony-work-designation</code>-snapshot-log</li><li><code class="contract-placeholder">colony-work-designation</code>-proposal-log</li><li><code class="contract-placeholder">colony-work-designation</code>-plan-state</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>empty-collections-and-unasked-questions</code></p>
+      <h3>absent rows and unasked questions keep their declared meaning</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">This check reads the adoption shape. Each empty row set has exactly its when-empty meaning. Each gated question the adoption does not answer has exactly its otherwise meaning: without empty-selection, no pointer gesture changes the current world selection; without invalid-target, no chosen ability or verb waits for a world target from the pointer; without queued-command-placement, no pointer modifier adds a command to a waiting plan; without unmodified-command, no pointer command can enter a waiting plan. When the adoption answers a question or fills a row set, that clause asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">colony-work-designation</code> adoption document, including each empty and non-empty row set and each gated question it does or does not answer</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer compares the adoption shape with every row-set when-empty sentence and every gated-question otherwise sentence</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>an empty selection-gestures set means no pointer gesture changes the current selection; when non-empty, this clause asserts nothing</li><li>an empty context-commands set means no pointer gesture chooses a command directly from its world target; when non-empty, this clause asserts nothing</li><li>an empty targeted-verbs set means no chosen verb waits for a pointer target; when non-empty, this clause asserts nothing</li><li>an empty queue-modifiers set means no pointer modifier adds a command to a waiting plan; when non-empty, this clause asserts nothing</li><li>an empty cancellations set means no action has a separate cancellation meaning in this adoption; when non-empty, this clause asserts nothing</li><li>when the adoption does not answer empty-selection, no pointer gesture changes the current world selection; when it answers, this clause asserts nothing</li><li>when the adoption does not answer invalid-target, no chosen ability or verb waits for a world target from the pointer; when it answers, this clause asserts nothing</li><li>when the adoption does not answer queued-command-placement, no pointer modifier adds a command to a waiting plan; when it answers, this clause asserts nothing</li><li>when the adoption does not answer unmodified-command, no pointer command can enter a waiting plan; when it answers, this clause asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>selection-and-context-rows-are-disjoint</code></p>
+      <h3>declaration check: selection and context rows are disjoint</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. Under the contract&#39;s mutually exclusive classifications, no selection and context row, two selection rows, or target-first capture and selection or context row can match the same game-facing action, phase, and classification. No two cancellation rows match the same game-facing action and phase in one holding state under the contract&#39;s targeting, selection-drag, queued-commands, selection order. Context target kinds for one action and phase, together with any cited receiver class, must be mutually exclusive. One completed phase selects or commands, never both. Any other shape is a defect this test fails by construction.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">colony-work-designation</code> adoption, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer compares every selection row, context row, target-first capture gesture, and cancellation row by its contract matching terms</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>no selection row and context row match the same game-facing action, phase, and classification</li><li>no two selection rows match the same game-facing action, phase, and classification</li><li>no target-first capture gesture matches the same game-facing action, phase, and classification as a selection or context row</li><li>no two cancellation rows match the same game-facing action and phase in one holding state</li><li>for one context action and phase, target-kind values together with any cited receiver class are mutually exclusive</li><li>one completed phase therefore selects or commands, never both</li><li>any other shape is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>queue-modifier-targets-declared-rows · urgent-work-next</code></p>
+      <h3>declaration check: modifier <code class="contract-placeholder">urgent-work-next</code> names declared commands and is not inert</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per queue-modifiers row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the urgent-work-next row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">02-mechanics.md#urgent-work-orders</code>, not the running game. The rule must name only declared context-command and targeted-verb rows, and the contract requires it to name at least one declared row. An undeclared target or empty applicability set is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">colony-work-designation</code> adoption and <code class="contract-placeholder">02-mechanics.md#urgent-work-orders</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer compares every command named by the applicability rule with context-command and targeted-verb row ids</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the rule names only declared context-command and targeted-verb rows</li><li>the contract requires the rule to name at least one declared row</li><li>any undeclared target or empty applicability set is a defect this test fails by construction</li><li>the test names the address and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>cancellation-state-can-exist · clear-target-work-queue</code></p>
+      <h3>declaration check: cancellation <code class="contract-placeholder">clear-target-work-queue</code> names a state this adoption can hold</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cancellations row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the clear-target-work-queue row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. For cancellation <code class="contract-placeholder">clear-target-work-queue</code> in <code class="contract-placeholder">queued-commands</code>, the adoption declares a route by which a pointer command can be waiting: a queue modifier, or an unmodified-command answer that leaves one placed, and its result must match that state. Any other shape is a defect this test fails by construction.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">colony-work-designation</code> adoption and cancellation row <code class="contract-placeholder">clear-target-work-queue</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer compares its active state with the adoption&#39;s rows and answers</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>for active state <code class="contract-placeholder">queued-commands</code>, the adoption declares a route by which a pointer command can be waiting: a queue modifier, or an unmodified-command answer that leaves one placed</li><li>the result matches that state: targeting with ends-targeting, selection-drag with ends-drag, queued-commands with empties-queue, or selection with empties-selection</li><li>any other shape is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>current-selection-has-a-source</code></p>
+      <h3>declaration check: current selection has a declared source</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: command receiver is world target, not current selection.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>targeted-verb-has-exit</code></p>
+      <h3>declaration check: targeted verb <code class="contract-placeholder">Row.id</code> has a way to leave targeting</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per targeted-verbs row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: targeted-verbs has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>selection-gesture-citation-duty · inspect-work-target</code></p>
+      <h3>declaration check: <code class="contract-placeholder">inspect-work-target</code> gesture citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per selection-gestures row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the inspect-work-target row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">02-mechanics.md#inspect-work-target-input</code>, not the running game. The citation must satisfy this duty: it recognizes the game-facing pointer action and its completion phase, including drag threshold and area geometry where used. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">colony-work-designation</code> adoption and <code class="contract-placeholder">02-mechanics.md#inspect-work-target-input</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">02-mechanics.md#inspect-work-target-input</code> recognizes the game-facing pointer action and its completion phase, including drag threshold and area geometry where used</li><li>a missing duty is a defect this test fails by construction</li><li>the test names the address and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>selection-candidates-citation-duty · inspect-work-target</code></p>
+      <h3>declaration check: <code class="contract-placeholder">inspect-work-target</code> candidate citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per selection-gestures row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the inspect-work-target row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">02-mechanics.md#inspectable-work-targets</code>, not the running game. The citation must satisfy this duty: it names selectable target kinds, point or area inclusion, near-miss reach when used, and a complete tie-break. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">colony-work-designation</code> adoption and <code class="contract-placeholder">02-mechanics.md#inspectable-work-targets</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">02-mechanics.md#inspectable-work-targets</code> names selectable target kinds, point or area inclusion, near-miss reach when used, and a complete tie-break</li><li>a missing duty is a defect this test fails by construction</li><li>the test names the address and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>context-gesture-citation-duty · drag-designate-mining</code></p>
+      <h3>declaration check: <code class="contract-placeholder">drag-designate-mining</code> gesture citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per context-commands row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the drag-designate-mining row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">02-mechanics.md#mining-designation-input</code>, not the running game. The citation must satisfy this duty: it recognizes the game-facing pointer action and its completion phase. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">colony-work-designation</code> adoption and <code class="contract-placeholder">02-mechanics.md#mining-designation-input</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">02-mechanics.md#mining-designation-input</code> recognizes the game-facing pointer action and its completion phase</li><li>a missing duty is a defect this test fails by construction</li><li>the test names the address and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>context-target-citation-duty · drag-designate-mining</code></p>
+      <h3>declaration check: <code class="contract-placeholder">drag-designate-mining</code> target citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per context-commands row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the drag-designate-mining row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">02-mechanics.md#resource-target-classification</code>, not the running game. The citation must satisfy this duty: it classifies the pointer snapshot, names the exact target, and states reach and a complete tie-break for nearest-within-reach. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">colony-work-designation</code> adoption and <code class="contract-placeholder">02-mechanics.md#resource-target-classification</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">02-mechanics.md#resource-target-classification</code> classifies the pointer snapshot, names the exact target, and states reach and a complete tie-break for nearest-within-reach</li><li>a missing duty is a defect this test fails by construction</li><li>the test names the address and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>context-area-citation-duty · drag-designate-mining</code></p>
+      <h3>declaration check: <code class="contract-placeholder">drag-designate-mining</code> area citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per context-commands row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the drag-designate-mining row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">02-mechanics.md#mining-designation-region</code>, not the running game. The citation must satisfy this duty: it names the dragged region, boundary inclusion, and how that region becomes the command target. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">colony-work-designation</code> adoption and <code class="contract-placeholder">02-mechanics.md#mining-designation-region</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">02-mechanics.md#mining-designation-region</code> names the dragged region, boundary inclusion, and how that region becomes the command target</li><li>a missing duty is a defect this test fails by construction</li><li>the test names the address and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>context-receiver-condition-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code> receiver-condition citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per context-commands row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: no matching row in context-commands has every field this test uses (receiver-condition).</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>context-command-citation-duty · drag-designate-mining</code></p>
+      <h3>declaration check: <code class="contract-placeholder">drag-designate-mining</code> command citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per context-commands row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the drag-designate-mining row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">02-mechanics.md#designate-mining-command</code>, not the running game. The citation must satisfy this duty: it names the command, receiver, target, per-target plan owner, permission, unreachable-target result, and complete accepted or rejected effect. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">colony-work-designation</code> adoption and <code class="contract-placeholder">02-mechanics.md#designate-mining-command</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">02-mechanics.md#designate-mining-command</code> names the command, receiver, target, per-target plan owner, permission, unreachable-target result, and complete accepted or rejected effect</li><li>a missing duty is a defect this test fails by construction</li><li>the test names the address and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>targeted-start-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code> start citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per targeted-verbs row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: targeted-verbs has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>targeted-target-gesture-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code> target-gesture citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per targeted-verbs row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: targeted-verbs has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>targeted-confirm-gesture-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code> confirmation citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per targeted-verbs row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: targeted-verbs has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>targeted-targets-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code> targets citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per targeted-verbs row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: targeted-verbs has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>targeted-area-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code> area citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per targeted-verbs row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: targeted-verbs has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>targeted-command-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code> command citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per targeted-verbs row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to colony-work-designation: targeted-verbs has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>queue-modifier-citation-duty · urgent-work-next</code></p>
+      <h3>declaration check: <code class="contract-placeholder">urgent-work-next</code> modifier citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per queue-modifiers row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the urgent-work-next row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">02-mechanics.md#urgent-work-input</code>, not the running game. The citation must satisfy this duty: it names when the mapped modifier is active, any waiting-plan capacity, and the complete result when no place is available. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">colony-work-designation</code> adoption and <code class="contract-placeholder">02-mechanics.md#urgent-work-input</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">02-mechanics.md#urgent-work-input</code> names when the mapped modifier is active, any waiting-plan capacity, and the complete result when no place is available</li><li>a missing duty is a defect this test fails by construction</li><li>the test names the address and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>queue-applicability-citation-duty · urgent-work-next</code></p>
+      <h3>declaration check: <code class="contract-placeholder">urgent-work-next</code> applicability citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per queue-modifiers row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the urgent-work-next row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">02-mechanics.md#urgent-work-orders</code>, not the running game. The citation must satisfy this duty: it names every declared context command and targeted verb to which this modifier applies. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">colony-work-designation</code> adoption and <code class="contract-placeholder">02-mechanics.md#urgent-work-orders</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">02-mechanics.md#urgent-work-orders</code> names every declared context command and targeted verb to which this modifier applies</li><li>a missing duty is a defect this test fails by construction</li><li>the test names the address and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>cancellation-action-citation-duty · clear-target-work-queue</code></p>
+      <h3>declaration check: <code class="contract-placeholder">clear-target-work-queue</code> action citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cancellations row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the clear-target-work-queue row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">02-mechanics.md#cancel-work-plan-input</code>, not the running game. The citation must satisfy this duty: it recognizes the cancellation action and its completion phase. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">colony-work-designation</code> adoption and <code class="contract-placeholder">02-mechanics.md#cancel-work-plan-input</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">02-mechanics.md#cancel-work-plan-input</code> recognizes the cancellation action and its completion phase</li><li>a missing duty is a defect this test fails by construction</li><li>the test names the address and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>cancellation-state-citation-duty · clear-target-work-queue</code></p>
+      <h3>declaration check: <code class="contract-placeholder">clear-target-work-queue</code> state citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cancellations row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the clear-target-work-queue row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">02-mechanics.md#target-work-plan-state</code>, not the running game. The citation must satisfy this duty: it names when the affected targeting, selection-drag, waiting-plan, or selection state exists. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">colony-work-designation</code> adoption and <code class="contract-placeholder">02-mechanics.md#target-work-plan-state</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">02-mechanics.md#target-work-plan-state</code> names when the affected targeting, selection-drag, waiting-plan, or selection state exists</li><li>a missing duty is a defect this test fails by construction</li><li>the test names the address and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>pointer-command-holds</code></p>
+      <h3>pointer command holds for the whole run</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to colony-work-designation.</p>
+  <p class="contract-test-text">Across <code class="contract-placeholder">every completed pointer phase of the audited run in every state the adoption can be in</code>, every completed phase matches at most one row in the contract&#39;s precedence; every selection change commits once from the complete candidate set; every proposal keeps its copied snapshot and receiver to its declared place; every cancellation clears only its declared state; every targeting state ends only as declared; and no phase produces two proposals.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Holds</dt><dd><p>every completed pointer phase matched at most one row in the precedence the contract fixes; every selection change committed once from the complete candidate set; every command proposal carried its copied snapshot and receiver unchanged to its declared place; every cancellation cleared only its declared state; every targeting state ended only as declared; no phase produced two proposals</p></dd></div>
+<div><dt>Seeds</dt><dd><p><code class="contract-placeholder">[&quot;audit-a&quot;,&quot;audit-b&quot;]</code></p></dd></div>
+<div><dt>Scope</dt><dd><p><code class="contract-placeholder">every completed pointer phase of the audited run in every state the adoption can be in</code></p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">colony-work-designation</code>-pointer-result</li><li><code class="contract-placeholder">colony-work-designation</code>-snapshot-log</li><li><code class="contract-placeholder">colony-work-designation</code>-selection-state</li><li><code class="contract-placeholder">colony-work-designation</code>-targeting-state</li><li><code class="contract-placeholder">colony-work-designation</code>-proposal-log</li><li><code class="contract-placeholder">colony-work-designation</code>-plan-state</li><li><code class="contract-placeholder">colony-work-designation</code>-cancellation-log</li></ul></dd></div></dl></details>
+</article></div>
+</details>
+<details class="contract-form-section contract-fold" id="adoption-json">
+  <summary><span class="contract-fold-title">JSON</span><span class="contract-fold-note">the adoption as one file</span></summary>
+  <p>The adoption file as supplied. Answers you try on this page are not written into it; to change an adoption, open it in the authoring tool.</p>
+
+  <pre class="contract-json"><code>{
+  &quot;contract&quot;: &quot;pointer-command&quot;,
+  &quot;version&quot;: 1,
+  &quot;summary&quot;: &quot;Covers pointer gestures that select things in the world and issue commands to or at the world. It records direct world orders, chosen abilities and verbs, added orders, and cancellation. Physical bindings, camera view, readouts, pathfinding, unit AI, and formations stay elsewhere.&quot;,
+  &quot;questions&quot;: {
+    &quot;command-receiver&quot;: {
+      &quot;asks&quot;: &quot;Who receives a command made by pointing at the world?&quot;,
+      &quot;rationale&quot;: &quot;A pointer command may control one standing actor, the current selection, or the pointed place itself.&quot;,
+      &quot;options&quot;: {
+        &quot;fixed-actor&quot;: {
+          &quot;meaning&quot;: &quot;One fixed actor or party receives every world command. An ARPG hero moves wherever the ground is clicked.&quot;,
+          &quot;semantics&quot;: &quot;Every proposed command names the actor or party fixed by its cited command rule. No world selection is required to supply a receiver.&quot;
+        },
+        &quot;current-selection&quot;: {
+          &quot;meaning&quot;: &quot;The current world selection receives every command. An RTS order moves the selected squad.&quot;,
+          &quot;semantics&quot;: &quot;The receiver set is the complete current selection. An empty set is a rejected receiver.&quot;
+        },
+        &quot;world-target&quot;: {
+          &quot;meaning&quot;: &quot;The command belongs to the pointed place or object, without a selected actor. A colony work order marks one ore tile for any worker.&quot;,
+          &quot;semantics&quot;: &quot;A proposed command names its world target and no selected receiver. The cited game rule owns any later choice of actor, worker, structure, or world system that carries it out.&quot;
+        }
+      }
+    },
+    &quot;near-miss-resolution&quot;: {
+      &quot;asks&quot;: &quot;When the pointer just misses a target, what can it choose?&quot;,
+      &quot;rationale&quot;: &quot;The game can require the exact point or choose the nearest candidate inside a declared reach.&quot;,
+      &quot;options&quot;: {
+        &quot;exact-point-only&quot;: {
+          &quot;meaning&quot;: &quot;Only the exact pointed place or object counts. A click beside a chest does not choose it.&quot;,
+          &quot;semantics&quot;: &quot;Candidate lookup uses the exact pointer point and applies no near-miss reach.&quot;
+        },
+        &quot;nearest-within-reach&quot;: {
+          &quot;meaning&quot;: &quot;The nearest candidate inside the game&#39;s declared reach counts. A click beside a small lever can choose it.&quot;,
+          &quot;semantics&quot;: &quot;Candidate lookup chooses the nearest selectable candidate inside the cited reach and uses the cited complete tie-break.&quot;
+        }
+      }
+    },
+    &quot;empty-selection&quot;: {
+      &quot;asks&quot;: &quot;The player clicks or drags to choose units and finds nothing there. What happens to the earlier choice?&quot;,
+      &quot;rationale&quot;: &quot;An empty click or box can clear the selection or leave the earlier choice in place. The answer binds only through replace rows; with none, it is inert.&quot;,
+      &quot;when&quot;: {
+        &quot;row-count&quot;: {
+          &quot;selection-gestures&quot;: &quot;non-empty&quot;
+        }
+      },
+      &quot;otherwise&quot;: &quot;No pointer gesture changes the current world selection.&quot;,
+      &quot;options&quot;: {
+        &quot;clear-selection&quot;: {
+          &quot;meaning&quot;: &quot;The current selection is cleared. A tactics click on open ground leaves no unit selected.&quot;,
+          &quot;semantics&quot;: &quot;The declared empty-result consequence is an empty selection.&quot;
+        },
+        &quot;keep-selection&quot;: {
+          &quot;meaning&quot;: &quot;The current selection stays. A colony drag across bare ground leaves the chosen workers selected.&quot;,
+          &quot;semantics&quot;: &quot;The declared empty-result consequence preserves the earlier selection.&quot;
+        }
+      }
+    },
+    &quot;invalid-target&quot;: {
+      &quot;asks&quot;: &quot;Does the game keep waiting for a place to use the chosen ability or verb?&quot;,
+      &quot;rationale&quot;: &quot;The next point can retry the choice, or the game can return to ordinary pointing.&quot;,
+      &quot;when&quot;: {
+        &quot;row-count&quot;: {
+          &quot;targeted-verbs&quot;: &quot;non-empty&quot;
+        }
+      },
+      &quot;otherwise&quot;: &quot;No chosen ability or verb waits for a world target from the pointer.&quot;,
+      &quot;options&quot;: {
+        &quot;keep-targeting&quot;: {
+          &quot;meaning&quot;: &quot;The game keeps waiting for another point. An ARPG fire spell still waits after the pointer lands outside its range.&quot;,
+          &quot;semantics&quot;: &quot;The invalid-target consequence keeps the same chosen verb active.&quot;
+        },
+        &quot;leave-targeting&quot;: {
+          &quot;meaning&quot;: &quot;The game stops waiting after the invalid point. A tower placement returns to ordinary pointing after a blocked tile.&quot;,
+          &quot;semantics&quot;: &quot;The invalid-target consequence clears the chosen verb.&quot;
+        }
+      }
+    },
+    &quot;queued-command-placement&quot;: {
+      &quot;asks&quot;: &quot;The player holds the key that adds orders to a line. Where does the added order go?&quot;,
+      &quot;rationale&quot;: &quot;The command may wait behind the full plan or become the next command after the current one.&quot;,
+      &quot;when&quot;: {
+        &quot;row-count&quot;: {
+          &quot;queue-modifiers&quot;: &quot;non-empty&quot;
+        }
+      },
+      &quot;otherwise&quot;: &quot;No pointer modifier adds a command to a waiting plan.&quot;,
+      &quot;options&quot;: {
+        &quot;append-at-end&quot;: {
+          &quot;meaning&quot;: &quot;The command joins the end of the waiting plan. An RTS shift-order adds a final waypoint.&quot;,
+          &quot;semantics&quot;: &quot;The declared placement is after every waiting command for the same plan owner.&quot;
+        },
+        &quot;insert-next&quot;: {
+          &quot;meaning&quot;: &quot;The command becomes next after the current command. A colony emergency repair runs before work already waiting.&quot;,
+          &quot;semantics&quot;: &quot;The declared placement is before every waiting command for the same plan owner.&quot;
+        }
+      }
+    },
+    &quot;unmodified-command&quot;: {
+      &quot;asks&quot;: &quot;A new order arrives while another order is waiting. What happens without the add-orders key?&quot;,
+      &quot;rationale&quot;: &quot;A plain order can replace the waiting line, join it, or be refused while that owner is busy.&quot;,
+      &quot;when&quot;: {
+        &quot;any&quot;: [
+          {
+            &quot;row-count&quot;: {
+              &quot;context-commands&quot;: &quot;non-empty&quot;
+            }
+          },
+          {
+            &quot;row-count&quot;: {
+              &quot;targeted-verbs&quot;: &quot;non-empty&quot;
+            }
+          }
+        ]
+      },
+      &quot;otherwise&quot;: &quot;No pointer command can enter a waiting plan.&quot;,
+      &quot;options&quot;: {
+        &quot;replaces-waiting&quot;: {
+          &quot;meaning&quot;: &quot;The new order replaces every waiting pointer order for that owner. A hero turns toward the newest clicked destination.&quot;,
+          &quot;semantics&quot;: &quot;The unmodified placement clears waiting pointer commands for the same plan owner.&quot;
+        },
+        &quot;always-appends&quot;: {
+          &quot;meaning&quot;: &quot;The new order joins the end of that owner&#39;s waiting line. A colony keeps each new work mark.&quot;,
+          &quot;semantics&quot;: &quot;The unmodified placement is after every waiting pointer command for the same plan owner.&quot;
+        },
+        &quot;rejected-while-busy&quot;: {
+          &quot;meaning&quot;: &quot;The new order is refused while that owner has work waiting. A build tool accepts no second placement until the first clears.&quot;,
+          &quot;semantics&quot;: &quot;An unmodified proposal is rejected while its plan owner has a waiting pointer command.&quot;
+        }
+      }
+    }
+  },
+  &quot;declares&quot;: {
+    &quot;values&quot;: {},
+    &quot;rows&quot;: {
+      &quot;selection-gestures&quot;: {
+        &quot;description&quot;: &quot;Pointer gestures that replace, add, remove, or toggle actors or world objects in the current selection.&quot;,
+        &quot;when-empty&quot;: &quot;No pointer gesture changes the current world selection.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable game-facing name, such as point-select or box-select.&quot;
+          },
+          &quot;gesture&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;description&quot;: &quot;The game-facing pointer action supplied after physical input mapping, such as select-point or select-area.&quot;
+          },
+          &quot;resolves-on&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;press&quot;,
+              &quot;release&quot;,
+              &quot;drag-complete&quot;
+            ],
+            &quot;description&quot;: &quot;The pointer phase that settles the selection. A tactics point may settle on release; an RTS box settles when its drag completes.&quot;
+          },
+          &quot;shape&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;point&quot;,
+              &quot;area&quot;
+            ],
+            &quot;description&quot;: &quot;Whether the gesture tests one pointer point or the cited dragged area.&quot;
+          },
+          &quot;change&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;replace&quot;,
+              &quot;add&quot;,
+              &quot;remove&quot;,
+              &quot;toggle&quot;
+            ],
+            &quot;description&quot;: &quot;How the selectable results change the current selection. A strategy box may replace it while a modified click adds one unit.&quot;
+          },
+          &quot;gesture-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule recognizing this game-facing press, release, or drag, including any drag threshold and area geometry.&quot;
+          },
+          &quot;candidates-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming selectable target kinds, point or area inclusion, the near-miss reach when used, and a complete tie-break. A point rule may return several candidates, as in double-click select-type.&quot;
+          }
+        }
+      },
+      &quot;context-commands&quot;: {
+        &quot;description&quot;: &quot;Commands chosen directly from the classified world target under a pointer gesture, such as moving on ground or attacking an enemy.&quot;,
+        &quot;when-empty&quot;: &quot;No pointer gesture chooses a command directly from what lies under it.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable game-facing name, such as move-on-ground or attack-enemy.&quot;
+          },
+          &quot;gesture&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;description&quot;: &quot;The game-facing pointer action, such as world-command or context-order.&quot;
+          },
+          &quot;resolves-on&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;press&quot;,
+              &quot;release&quot;,
+              &quot;drag-complete&quot;
+            ],
+            &quot;description&quot;: &quot;The pointer phase that proposes the command. An action RPG may move on release while a colony designation completes as a drag.&quot;
+          },
+          &quot;target-kind&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;description&quot;: &quot;The mutually exclusive world classification that selects this row, such as ground, enemy, door, or buildable-tile.&quot;
+          },
+          &quot;command&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;description&quot;: &quot;The game command proposed by this row, such as move, basic-attack, open-door, or place-tower.&quot;
+          },
+          &quot;gesture-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule recognizing the game-facing pointer action and its completion phase.&quot;
+          },
+          &quot;target-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule classifying the pointer snapshot, naming the exact target, and stating the reach and tie-break for nearest-within-reach.&quot;
+          },
+          &quot;area-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;resolves-on&quot;: [
+                  &quot;drag-complete&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The Fixed rule naming the dragged region, its boundary inclusion, and how the region becomes the command target.&quot;
+          },
+          &quot;receiver-condition&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;description&quot;: &quot;An optional Fixed rule limiting this row to a receiver class, such as worker or soldier.&quot;
+          },
+          &quot;command-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming the command, receiver, target, per-target waiting-plan owner, permission, unreachable-target result, and complete accepted or rejected effect.&quot;
+          }
+        }
+      },
+      &quot;targeted-verbs&quot;: {
+        &quot;description&quot;: &quot;Abilities and verbs that use a pointer-captured world target, whether the verb or the target arrives first. Every targeting state can be left: through leave-targeting, a targeting cancellation row, or the cited start rule.&quot;,
+        &quot;when-empty&quot;: &quot;No chosen ability or verb waits for a world target from the pointer.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable game-facing name, such as artillery-target or use-key-on-door.&quot;
+          },
+          &quot;verb&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;description&quot;: &quot;The chosen ability or verb applied to the captured world target.&quot;
+          },
+          &quot;order&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;verb-first&quot;,
+              &quot;target-first&quot;
+            ],
+            &quot;description&quot;: &quot;Whether the verb starts before target capture or arrives from a cited game action after the pointer captures the target.&quot;
+          },
+          &quot;confirm-style&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;separate-gesture&quot;,
+              &quot;at-entry-position&quot;
+            ],
+            &quot;description&quot;: &quot;Whether confirmation needs another pointer gesture or fires from the pointer snapshot captured when this verb entry begins.&quot;
+          },
+          &quot;target-gesture&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;order&quot;: [
+                  &quot;target-first&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The game-facing pointer action that captures the world target before the verb arrives.&quot;
+          },
+          &quot;confirm-gesture&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;confirm-style&quot;: [
+                  &quot;separate-gesture&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The game-facing action that separately confirms this target. It may be a pointer gesture or a cited non-pointer action, such as releasing the held ability key.&quot;
+          },
+          &quot;resolves-on&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;press&quot;,
+              &quot;release&quot;,
+              &quot;drag-complete&quot;
+            ],
+            &quot;description&quot;: &quot;For separate confirmation, the confirming phase. For a target-first row, the capture phase. For verb-first entry-position casting, the completion phase of the cited entry action. A dragged verb also cites its region rule.&quot;
+          },
+          &quot;after-dispatch&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;leave-targeting&quot;,
+              &quot;keep-targeting&quot;
+            ],
+            &quot;description&quot;: &quot;Whether a valid dispatched command ends targeting or keeps the same verb ready for another target. A tower tool may remain active for repeated placement.&quot;
+          },
+          &quot;starts-when-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming the game action that supplies the verb. For target-first, this action arrives after target capture.&quot;
+          },
+          &quot;target-gesture-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;order&quot;: [
+                  &quot;target-first&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The Fixed rule recognizing the target-first pointer action and its capture phase.&quot;
+          },
+          &quot;confirm-gesture-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;confirm-style&quot;: [
+                  &quot;separate-gesture&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The Fixed rule recognizing the confirmation gesture and its completion phase.&quot;
+          },
+          &quot;targets-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming target capture, every valid target, the near-miss reach and tie-break when used, and the complete invalid-target test.&quot;
+          },
+          &quot;area-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;resolves-on&quot;: [
+                  &quot;drag-complete&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The Fixed rule naming the dragged region, its boundary inclusion, and how the region becomes the verb&#39;s target.&quot;
+          },
+          &quot;command-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming the command, receiver, per-target waiting-plan owner, permission, cost, unreachable-target result, and complete effect or rejection.&quot;
+          }
+        }
+      },
+      &quot;queue-modifiers&quot;: {
+        &quot;description&quot;: &quot;Game-facing modifier actions that add matching pointer commands to a waiting command plan.&quot;,
+        &quot;when-empty&quot;: &quot;No pointer modifier adds a command to a waiting plan.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable game-facing name, such as queue-orders or urgent-work-next.&quot;
+          },
+          &quot;modifier-action&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;description&quot;: &quot;The mapped game action held or active when the pointer command completes.&quot;
+          },
+          &quot;modifier-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming when this mapped modifier action is active, any waiting-plan capacity, and what happens when no place is available.&quot;
+          },
+          &quot;applies-to-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming every context command and targeted verb to which this modifier applies; it names at least one declared row.&quot;
+          }
+        }
+      },
+      &quot;cancellations&quot;: {
+        &quot;description&quot;: &quot;Game-facing actions that end targeting, abort a selection drag, clear waiting pointer commands, or clear the current selection without proposing another command.&quot;,
+        &quot;when-empty&quot;: &quot;No game-facing action has a separate cancellation meaning in this adoption.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable game-facing name, such as cancel-ability-target or abort-box-select.&quot;
+          },
+          &quot;action&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;description&quot;: &quot;The game-facing pointer or non-pointer action with a cancellation meaning in the cited state.&quot;
+          },
+          &quot;resolves-on&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;press&quot;,
+              &quot;release&quot;,
+              &quot;drag-cancel&quot;
+            ],
+            &quot;description&quot;: &quot;The game-facing action phase that applies the cancellation.&quot;
+          },
+          &quot;active-state&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;targeting&quot;,
+              &quot;selection-drag&quot;,
+              &quot;queued-commands&quot;,
+              &quot;selection&quot;
+            ],
+            &quot;description&quot;: &quot;The pointer-command state in which this row applies; selection holds when the current selection is non-empty. An ability cancel reads targeting; an RTS stop-planning gesture reads queued commands.&quot;
+          },
+          &quot;result&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;ends-targeting&quot;,
+              &quot;ends-drag&quot;,
+              &quot;empties-queue&quot;,
+              &quot;empties-selection&quot;
+            ],
+            &quot;description&quot;: &quot;The state change made without another world command. The result matches the row&#39;s active state; empties-queue clears the waiting plan named at state-declared-in.&quot;
+          },
+          &quot;action-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule recognizing the cancellation action and its completion phase.&quot;
+          },
+          &quot;state-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming when the affected targeting, drag, waiting-plan, or selection state exists.&quot;
+          }
+        }
+      }
+    }
+  },
+  &quot;rules&quot;: {},
+  &quot;origin&quot;: &quot;https://opengdd.org/contracts/pointer-command-1&quot;,
+  &quot;mechanism&quot;: [
+    &quot;This is the single normative authority for what a pointer press, drag, or release over the world means; how selection, context command, and targeting states advance; where a queue modifier places a command; and what a cancellation clears. Questions and rows describe choices and cite game rules. They do not define another sequence.&quot;,
+    &quot;A **game-facing pointer action** is the action received after Control options maps a mouse, touch, or stick-driven cursor input. A **pointer phase** is its press, release, completed drag, or cancelled drag. A **pointer snapshot** is the world point and classified object under the pointer at that phase. The broader **game-facing action** also includes a cited non-pointer action that supplies a verb, confirmation, or cancellation; a non-pointer action has one completion phase, recorded as its press unless its cited rule names release. The **current selection** is one set of world objects. It starts empty unless a cited load or scene-entry rule supplies it, lasts until a rule changes it, and may also change through cited control-group recall, unit death, roster change, scene entry, or load. A **selection drag** starts when its cited gesture rule crosses the drag threshold and lasts until that same gesture completes or cancels. A **targeting state** holds one chosen ability or verb, or a target-first snapshot while it waits for the verb. A **command proposal** contains one command, its receiver shape, exact world target, and queue placement. A **waiting plan** contains pointer commands accepted for later execution for the owner named by the cited command rule. The game&#39;s Fixed command rules own whether a proposal is accepted and what it does.&quot;,
+    &quot;### Recognize the gesture&quot;,
+    &quot;1. Control options maps physical input to one game-facing pointer action. The matching cited gesture rule observes its press, movement, and release. This contract does not inspect device identity. 2. On press, record the pointer snapshot needed by the cited gesture rule. A row that resolves on press proceeds immediately, and no later drag or release result is inferred from that press for this contract. 3. While the pointer moves, the cited rule alone decides whether it remains a point gesture, becomes a drag, or is cancelled. Its cited distance, duration, geometry, coordinate space, and boundary rule are read directly; this adoption contributes no number. A cited gesture rule may emit repeated completed phases while a control is held. 4. On release, create the final pointer snapshot. A release row resolves now. A recognized drag creates one `drag-complete` phase; an aborted drag creates one `drag-cancel` phase belonging to that drag&#39;s own game-facing action. One physical sequence cannot produce both a point result and a drag result unless the cited rule creates two distinct game-facing actions.&quot;,
+    &quot;### Resolve cancellation and targeting&quot;,
+    &quot;5. At each completed action phase, check cancellation before any other row. A cancellation row matches on three terms of its own: the game-facing action, its resolving phase, and the currently holding active state, checked in this order: targeting, selection-drag, queued-commands, selection. Apply its declared result and end this phase. It proposes no command and performs no selection change beyond `empties-selection`. 6. For `verb-first`, a game action named by `starts-when-declared-in` supplies the verb and begins its targeting entry. For `target-first`, the capture gesture — matched on its game-facing action, phase, and classified snapshot — captures the world target and begins a target-first state; then the cited game action — a verb coin, pie menu, or command card — supplies the verb. A second entry does not change the active targeting state unless the cited start rule explicitly replaces it. 7. While targeting is active, ordinary selection and direct-command rows do not run. Under `separate-gesture`, a matching confirmation action reads the pointer snapshot at its completion moment — for a non-pointer confirmation such as a key release, the pointer&#39;s position at that release. Under `at-entry-position`, confirmation reads the entry-time snapshot: the pointer position when a verb-first entry begins or the already captured target for target-first. A `drag-complete` row also reads its cited region rule, and validity is tested on that region. Apply `near-miss-resolution` through `targets-declared-in`, then test validity. A non-matching pointer action has no meaning here unless it matches a cancellation row. 8. For an invalid target, propose no command. Under `keep-targeting`, preserve the active verb. Under `leave-targeting`, clear it. No context-command fallback occurs from the same pointer phase. 9. For a valid target, create one command proposal from the targeted row and its cited rules; under `current-selection` an empty selection makes it one rejected proposal, as in step 12. Preserve the row&#39;s `after-dispatch` result with the proposal. A rejected command is still a dispatched proposal, so rejection does not restore targeting unless the cited game rule starts a new instance.&quot;,
+    &quot;### Resolve selection or a context command&quot;,
+    &quot;10. With no active targeting state, find the one selection or context row that matches the game-facing action, pointer phase, and classified pointer snapshot. A context row with `receiver-condition` also matches the receiver class named by that citation; receiver class therefore participates in classification when a row cites it. A receiver-conditioned adoption keeps its receiver set homogeneous for that action: when rows cite different receiver classes for one action, phase, and target kind, the selection holds one class at a time under the receiver-condition citation, and issuing different commands per member of one mixed selection is a missing shape recorded in §5. For one game-facing action and phase, selection rows, context rows, and target-first capture gestures have mutually exclusive classifications. Apply `near-miss-resolution` through the row&#39;s cited target or candidate rule. If no row matches, change no world-command state and record the unmatched classification in step 16. 11. For a selection row, compute its complete candidate set from the cited point or area rule. With an empty result, a `replace` row applies `empty-selection`; an `add`, `remove`, or `toggle` row always keeps the current selection, because an empty additive result asserts nothing about the earlier choice. With a non-empty result, apply `replace`, `add`, `remove`, or `toggle` to the complete set. Commit the new selection once and end this pointer phase. 12. For a context row, copy its classified point or object as the command target. Under `fixed-actor`, read the fixed receiver from the cited command rule. Under `current-selection`, copy the complete current selection. An empty copy creates one rejected proposal with no world effect and ends at this step; it never reaches queue placement or dispatch. Under `world-target`, attach no selected receiver and read that exact target&#39;s plan owner from the cited command rule. Create one command proposal and continue.&quot;,
+    &quot;### Place and dispatch the command&quot;,
+    &quot;13. Read queue modifiers only after the command, receiver, and target are fixed. A matching modifier changes placement, not meaning. Under `append-at-end`, place the proposal after every waiting pointer command for the same waiting-plan owner. Under `insert-next`, place it before those waiting commands and after the command already being carried out. The cited modifier rule owns plan capacity and the complete rejected result when no place is available; this contract never drops another command implicitly. 14. With a matching modifier, add the proposal at the position from step 13. Without one, read `unmodified-command`: `replaces-waiting` clears waiting pointer commands for the same owner, `always-appends` places the proposal after them, and `rejected-while-busy` records rejection and stops when one is waiting. A proposal exists once per completed phase; a held modifier or update cannot add another copy within that phase. After a targeted proposal is dispatched, placed, or rejected at this step, apply its row&#39;s `after-dispatch` result: `leave-targeting` ends the state and `keep-targeting` preserves it. 15. Submit each dispatched proposal to its cited Fixed command rule. That rule owns permission, cost, range, path request, the unreachable-destination case, effect, rejection, and whether the command already being carried out stops. A queued proposal is submitted when it reaches its declared place. Event resolution owns the order when several proposals share one instant. 16. Record the pointer result: gesture id, resolving phase, pointer snapshot, prior and final targeting state, prior and final selection when changed, command and receiver when proposed, target, queue modifier or unmodified placement outcome, cancellation when used, target validity for every targeted verb that reached a validity test, a no-matching-row result when applicable, and the cited game-rule result when available.&quot;,
+    &quot;The authority order is therefore: physical mapping, gesture recognition, cancellation, targeting entry, target confirmation, selection or context classification, receiver snapshot, queue placement, command dispatch, game rule, and same-instant event order. A later stage never changes the pointer snapshot or receiver copied by an earlier stage; classification may read receiver class without copying the receiver set.&quot;
+  ],
+  &quot;answers&quot;: {
+    &quot;command-receiver&quot;: &quot;world-target&quot;,
+    &quot;near-miss-resolution&quot;: &quot;nearest-within-reach&quot;,
+    &quot;empty-selection&quot;: &quot;keep-selection&quot;,
+    &quot;queued-command-placement&quot;: &quot;insert-next&quot;,
+    &quot;unmodified-command&quot;: &quot;always-appends&quot;
+  },
+  &quot;values&quot;: {},
+  &quot;rows&quot;: {
+    &quot;selection-gestures&quot;: [
+      {
+        &quot;id&quot;: &quot;inspect-work-target&quot;,
+        &quot;gesture&quot;: &quot;inspect-work-target&quot;,
+        &quot;resolves-on&quot;: &quot;release&quot;,
+        &quot;shape&quot;: &quot;point&quot;,
+        &quot;change&quot;: &quot;replace&quot;,
+        &quot;gesture-declared-in&quot;: &quot;02-mechanics.md#inspect-work-target-input&quot;,
+        &quot;candidates-declared-in&quot;: &quot;02-mechanics.md#inspectable-work-targets&quot;
+      }
+    ],
+    &quot;context-commands&quot;: [
+      {
+        &quot;id&quot;: &quot;drag-designate-mining&quot;,
+        &quot;gesture&quot;: &quot;designate-mining-region&quot;,
+        &quot;resolves-on&quot;: &quot;drag-complete&quot;,
+        &quot;target-kind&quot;: &quot;resource-region&quot;,
+        &quot;command&quot;: &quot;designate-mining&quot;,
+        &quot;gesture-declared-in&quot;: &quot;02-mechanics.md#mining-designation-input&quot;,
+        &quot;target-declared-in&quot;: &quot;02-mechanics.md#resource-target-classification&quot;,
+        &quot;area-declared-in&quot;: &quot;02-mechanics.md#mining-designation-region&quot;,
+        &quot;command-declared-in&quot;: &quot;02-mechanics.md#designate-mining-command&quot;
+      }
+    ],
+    &quot;targeted-verbs&quot;: [],
+    &quot;queue-modifiers&quot;: [
+      {
+        &quot;id&quot;: &quot;urgent-work-next&quot;,
+        &quot;modifier-action&quot;: &quot;urgent-work&quot;,
+        &quot;modifier-declared-in&quot;: &quot;02-mechanics.md#urgent-work-input&quot;,
+        &quot;applies-to-declared-in&quot;: &quot;02-mechanics.md#urgent-work-orders&quot;
+      }
+    ],
+    &quot;cancellations&quot;: [
+      {
+        &quot;id&quot;: &quot;clear-target-work-queue&quot;,
+        &quot;action&quot;: &quot;cancel-work-plan&quot;,
+        &quot;resolves-on&quot;: &quot;press&quot;,
+        &quot;active-state&quot;: &quot;queued-commands&quot;,
+        &quot;result&quot;: &quot;empties-queue&quot;,
+        &quot;action-declared-in&quot;: &quot;02-mechanics.md#cancel-work-plan-input&quot;,
+        &quot;state-declared-in&quot;: &quot;02-mechanics.md#target-work-plan-state&quot;
+      }
+    ]
+  },
+  &quot;pack&quot;: &quot;sha256:d9dfa01c583bd31d11345ee211618019165be830fbf01231f7d81cd93a27538a&quot;
+}
+</code></pre>
+</details>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

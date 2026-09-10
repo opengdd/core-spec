@@ -1,0 +1,1514 @@
+{
+  "contract": "action-legibility",
+  "version": 1,
+  "templates": [
+    {
+      "id": "action-legibility-vocabulary",
+      "title": "action legibility uses one action input, action cases, candidates, and offered actions",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "where the adoption or its cited control rules name an action input; where none is named, this trial asserts nothing; the {{instance}} adoption and a player-facing physical control",
+        "when": [
+          "the control path, matching action cases, candidate actions, and offered result are identified"
+        ],
+        "then": [
+          "the action input is one game-facing signal from Control options when adopted and otherwise from the game's Fixed control rule",
+          "each action case is one action in one cited situation",
+          "a candidate is an action the input carries whose binding context, when one exists, holds and whose ordinary permission or Input forgiveness acceptance holds at the accepted moment",
+          "an action is offered only when it is identified to the player as the result of selection"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-set",
+          "{{instance}}-offered-action"
+        ]
+      },
+      "text": "An action input is one game-facing signal from Control options when that contract is adopted, otherwise from the game's Fixed control rule. An action case is one action in one cited situation. A candidate is an action the input carries whose permission or forgiveness acceptance holds at the accepted moment. An action is offered when selection identifies it to the player."
+    },
+    {
+      "id": "no-action-case-makes-no-promise",
+      "title": "no matching action case makes no action-legibility promise",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption, its action-cases rows, and its game-wide answers",
+        "when": [
+          "the adoption's action-legibility promises are read"
+        ],
+        "then": [
+          "where no matching action case exists because the adoption has no action-cases row, the adoption makes no discovery, unavailable-presentation, or availability promise and the game-wide discovery and unavailable-action answers are both absent; where an action case exists, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "Where no matching action case exists because the adoption has no action-cases row, the adoption makes no discovery, unavailable-presentation, or availability promise and both game-wide answers are absent. Where an action case exists, this test asserts nothing."
+    },
+    {
+      "id": "action-case-matches-cited-situation",
+      "title": "{{row.id}} applies exactly in its cited situations",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the action case {{row.id}} and the Fixed situation rule at {{row.situation-declared-in}}",
+        "when": [
+          "the cited covered situations and the nearest similar excluded situations are each reached"
+        ],
+        "then": [
+          "{{row.id}} applies in every situation the citation covers",
+          "{{row.id}} does not apply in any situation the citation excludes",
+          "{{row.id}} applies on every platform the adoption covers; platform variation lives only in availability-presentations rows",
+          "a situation the citation neither covers nor excludes asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-situation-trace"
+        ]
+      },
+      "text": "Action case {{row.id}} applies in every situation named at {{row.situation-declared-in}} and does not apply in any situation excluded there. It applies on every platform the adoption covers; platform variation lives only in availability-presentations rows. The test leaves the rule's content to that citation. A situation the citation does not classify asserts nothing."
+    },
+    {
+      "id": "discovery-looks-usable-override",
+      "title": "{{row.id}} looks usable by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "row": {
+          "discoverability": [
+            "looks-usable"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} available in a situation at {{row.situation-declared-in}}, before an attempt",
+        "when": [
+          "an observer examines the matching availability presentations"
+        ],
+        "then": [
+          "at least one presentation identifies {{row.id}} as an action that can be attempted in the current situation before the attempt"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: while {{row.id}} is available, at least one matching availability presentation identifies the action as attemptable before the attempt."
+    },
+    {
+      "id": "discovery-looks-usable-default",
+      "title": "{{row.id}} looks usable by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "flag": {
+          "action-discovery-default": [
+            "looks-usable"
+          ]
+        },
+        "row": {
+          "discoverability": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} available in a situation at {{row.situation-declared-in}}, before an attempt",
+        "when": [
+          "an observer examines the matching availability presentations"
+        ],
+        "then": [
+          "at least one presentation identifies {{row.id}} as an action that can be attempted in the current situation before the attempt"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: while {{row.id}} is available, at least one matching availability presentation identifies the action as attemptable before the attempt."
+    },
+    {
+      "id": "discovery-explanation-on-demand-override",
+      "title": "{{row.id}} has an explanation route by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "row": {
+          "discoverability": [
+            "explanation-on-demand"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} matters in a situation at {{row.situation-declared-in}}",
+        "when": [
+          "an observer uses the discovery route declared at {{row.presentation-rule-declared-in}}"
+        ],
+        "then": [
+          "the route is available in the current situation",
+          "the route names the action and explains how to attempt it"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: while {{row.id}} matters, the route at {{row.presentation-rule-declared-in}} is available in the situation, names the action, and explains how to attempt it. The test restates nothing from the cited rule."
+    },
+    {
+      "id": "discovery-explanation-on-demand-default",
+      "title": "{{row.id}} has an explanation route by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "flag": {
+          "action-discovery-default": [
+            "explanation-on-demand"
+          ]
+        },
+        "row": {
+          "discoverability": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} matters in a situation at {{row.situation-declared-in}}",
+        "when": [
+          "an observer uses the discovery route declared at {{row.presentation-rule-declared-in}}"
+        ],
+        "then": [
+          "the route is available in the current situation",
+          "the route names the action and explains how to attempt it"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: while {{row.id}} matters, the route at {{row.presentation-rule-declared-in}} is available in the situation, names the action, and explains how to attempt it. The test restates nothing from the cited rule."
+    },
+    {
+      "id": "discovery-current-binding-override",
+      "title": "{{row.id}} shows the current device control by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "row": {
+          "discoverability": [
+            "current-binding-is-shown"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "every prompt for {{row.id}} on each covered device, including a touch device where covered",
+        "when": [
+          "an observer compares the prompt with the current device control under the applicable control rule"
+        ],
+        "then": [
+          "every prompt names the actual current device control",
+          "no prompt names an old binding or a wrong-device binding as current",
+          "on a touch platform, the prompt names the actual touch region or gesture rather than a hardware glyph"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-prompt-bindings"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: every prompt for {{row.id}} names the actual current device control. An old binding, a wrong-device binding, or a hardware glyph in place of the actual touch region or gesture fails."
+    },
+    {
+      "id": "discovery-current-binding-default",
+      "title": "{{row.id}} shows the current device control by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "flag": {
+          "action-discovery-default": [
+            "current-binding-is-shown"
+          ]
+        },
+        "row": {
+          "discoverability": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "every prompt for {{row.id}} on each covered device, including a touch device where covered",
+        "when": [
+          "an observer compares the prompt with the current device control under the applicable control rule"
+        ],
+        "then": [
+          "every prompt names the actual current device control",
+          "no prompt names an old binding or a wrong-device binding as current",
+          "on a touch platform, the prompt names the actual touch region or gesture rather than a hardware glyph"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-prompt-bindings"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: every prompt for {{row.id}} names the actual current device control. An old binding, a wrong-device binding, or a hardware glyph in place of the actual touch region or gesture fails."
+    },
+    {
+      "id": "discovery-assistive-name-override",
+      "title": "{{row.id}} exposes its name and role by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "row": {
+          "discoverability": [
+            "assistive-tech-can-name-it"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} available through a player-facing interface element in a covered situation",
+        "when": [
+          "an observer inspects that element through each supported assistive technology"
+        ],
+        "then": [
+          "the assistive interface exposes a determinable action name and role for {{row.id}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-assistive-tree"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: a player-facing interface element for {{row.id}} exposes a determinable action name and role to supported assistive technology."
+    },
+    {
+      "id": "discovery-assistive-name-default",
+      "title": "{{row.id}} exposes its name and role by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "flag": {
+          "action-discovery-default": [
+            "assistive-tech-can-name-it"
+          ]
+        },
+        "row": {
+          "discoverability": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} available through a player-facing interface element in a covered situation",
+        "when": [
+          "an observer inspects that element through each supported assistive technology"
+        ],
+        "then": [
+          "the assistive interface exposes a determinable action name and role for {{row.id}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-assistive-tree"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: a player-facing interface element for {{row.id}} exposes a determinable action name and role to supported assistive technology."
+    },
+    {
+      "id": "discovery-none-override",
+      "title": "{{row.id}} promises no discovery route by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "row": {
+          "discoverability": [
+            "none"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} before an attempt in every situation at {{row.situation-declared-in}}",
+        "when": [
+          "an observer examines every player-facing presentation before the attempt"
+        ],
+        "then": [
+          "no presentation promises the action's identity or availability before the attempt",
+          "accidental discovery and memorable authored content do not fail this answer"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: {{row.id}} promises no identity or availability before the attempt. Accidental discovery and memorable content do not violate this answer; secrecy beyond that promise is outside the contract."
+    },
+    {
+      "id": "discovery-none-default",
+      "title": "{{row.id}} promises no discovery route by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "flag": {
+          "action-discovery-default": [
+            "none"
+          ]
+        },
+        "row": {
+          "discoverability": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} before an attempt in every situation at {{row.situation-declared-in}}",
+        "when": [
+          "an observer examines every player-facing presentation before the attempt"
+        ],
+        "then": [
+          "no presentation promises the action's identity or availability before the attempt",
+          "accidental discovery and memorable authored content do not fail this answer"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: {{row.id}} promises no identity or availability before the attempt. Accidental discovery and memorable content do not violate this answer; secrecy beyond that promise is outside the contract."
+    },
+    {
+      "id": "action-permission-remains-cited",
+      "title": "{{row.id}} uses its cited ordinary permission",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the action at {{row.action-declared-in}} in an ordinarily permitted state and, where the cited action rule admits one, an ordinarily unavailable state in a covered situation",
+        "when": [
+          "the player attempts the action in each state"
+        ],
+        "then": [
+          "ordinary permission is read from {{row.action-declared-in}}",
+          "this contract grants no permission",
+          "where an unavailable state exists, the unavailable attempt does not succeed because of any discovery route, availability presentation, or shared-input selection; where none exists, this clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-permission-trace"
+        ]
+      },
+      "text": "Ordinary permission for {{row.id}} stays at {{row.action-declared-in}}. This contract grants none and does not make an unavailable action succeed. Where the cited rule admits no unavailable state, that comparison asserts nothing. The test restates nothing from the cited action rule."
+    },
+    {
+      "id": "presentation-applies-on-covered-platforms",
+      "title": "{{row.id}} applies on its covered platform scope",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "availability-presentations",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "availability presentation {{row.id}} for the case named {{row.action-case}}",
+        "when": [
+          "the case is reached on each platform it covers"
+        ],
+        "then": [
+          "the row applies on every platform its action case covers unless a platform citation narrows it, and that narrower scope is carried by its platform citation"
+        ],
+        "diagnostics": [
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "Availability presentation {{row.id}} applies on every platform its action case covers unless a platform citation narrows it, and that narrower scope is carried by its platform citation."
+    },
+    {
+      "id": "listed-action-presentations-agree",
+      "title": "action presentations agree with the cited action cases",
+      "type": "general",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "scope": "every player-facing prompt, explanation, control reminder, and availability presentation",
+        "holds": "each presentation of an action case agrees with its Fixed action citation and never presents one covered action as another; a player-facing presentation outside this scope asserts nothing",
+        "diagnostics": [
+          "{{instance}}-observer-result",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. Every player-facing presentation of a covered action agrees with that action case's Fixed action citation and never presents it as another covered action. A presentation outside the stated scope asserts nothing."
+    },
+    {
+      "id": "remapped-prompt-updates-override",
+      "title": "{{row.id}} prompts update after a binding change by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "row": {
+          "discoverability": [
+            "current-binding-is-shown"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the control source for {{row.id}} and its current device control",
+        "when": [
+          "where Control options is adopted and permits a binding change, it changes the action to another supported current device control and an observer compares every later prompt, hint, reminder, and control summary with the configured control; otherwise this trial asserts nothing"
+        ],
+        "then": [
+          "each later presentation names the new current device control",
+          "none names the old control as current"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-prompt-bindings"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. Where Control options changes {{row.id}}'s binding, every later prompt, hint, reminder, and control summary names the new current device control, and none names the old control as current. This contract checks the presentation; Control options performs the remap. Where the adoption cannot construct that change, this trial asserts nothing."
+    },
+    {
+      "id": "remapped-prompt-updates-default",
+      "title": "{{row.id}} prompts update after a binding change by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "flag": {
+          "action-discovery-default": [
+            "current-binding-is-shown"
+          ]
+        },
+        "row": {
+          "discoverability": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the control source for {{row.id}} and its current device control",
+        "when": [
+          "where Control options is adopted and permits a binding change, it changes the action to another supported current device control and an observer compares every later prompt, hint, reminder, and control summary with the configured control; otherwise this trial asserts nothing"
+        ],
+        "then": [
+          "each later presentation names the new current device control",
+          "none names the old control as current"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-prompt-bindings"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. Where Control options changes {{row.id}}'s binding, every later prompt, hint, reminder, and control summary names the new current device control, and none names the old control as current. This contract checks the presentation; Control options performs the remap. Where the adoption cannot construct that change, this trial asserts nothing."
+    },
+    {
+      "id": "unavailable-hidden-override",
+      "title": "{{row.id}} is hidden while unavailable by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "row": {
+          "when-unavailable": [
+            "hidden"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} available and then unavailable in a covered situation",
+        "when": [
+          "an observer compares the player-facing availability presentation in both states"
+        ],
+        "then": [
+          "the available state follows the case's effective discovery promise",
+          "the action's availability presentation is absent while the action is unavailable"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: {{row.id}} follows its effective discovery promise while available and its availability presentation is absent while unavailable."
+    },
+    {
+      "id": "unavailable-hidden-default",
+      "title": "{{row.id}} is hidden while unavailable by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "flag": {
+          "unavailable-action-default": [
+            "hidden"
+          ]
+        },
+        "row": {
+          "when-unavailable": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} available and then unavailable in a covered situation",
+        "when": [
+          "an observer compares the player-facing availability presentation in both states"
+        ],
+        "then": [
+          "the available state follows the case's effective discovery promise",
+          "the action's availability presentation is absent while the action is unavailable"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: {{row.id}} follows its effective discovery promise while available and its availability presentation is absent while unavailable."
+    },
+    {
+      "id": "unavailable-shown-override",
+      "title": "{{row.id}} stays identifiable and distinctly unavailable by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "row": {
+          "when-unavailable": [
+            "shown-unavailable"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} available and then unavailable in a covered situation",
+        "when": [
+          "an observer compares its availability presentation in both states"
+        ],
+        "then": [
+          "the action remains identifiable while unavailable",
+          "the unavailable presentation is distinct from the available presentation"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: while unavailable, {{row.id}} stays identifiable and has a distinct unavailable state."
+    },
+    {
+      "id": "unavailable-shown-default",
+      "title": "{{row.id}} stays identifiable and distinctly unavailable by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "flag": {
+          "unavailable-action-default": [
+            "shown-unavailable"
+          ]
+        },
+        "row": {
+          "when-unavailable": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} available and then unavailable in a covered situation",
+        "when": [
+          "an observer compares its availability presentation in both states"
+        ],
+        "then": [
+          "the action remains identifiable while unavailable",
+          "the unavailable presentation is distinct from the available presentation"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: while unavailable, {{row.id}} stays identifiable and has a distinct unavailable state."
+    },
+    {
+      "id": "unavailable-reason-override",
+      "title": "{{row.id}} names its current block by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "row": {
+          "when-unavailable": [
+            "reason-is-shown"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} unavailable for each current block admitted by {{row.action-declared-in}}",
+        "when": [
+          "an observer examines its availability presentation"
+        ],
+        "then": [
+          "the presentation identifies the action",
+          "the presentation marks the action unavailable",
+          "the presentation names the current blocking reason"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: while {{row.id}} is unavailable, its presentation identifies it, marks it unavailable, and names the current block under {{row.presentation-rule-declared-in}}. The test restates nothing from the cited rule."
+    },
+    {
+      "id": "unavailable-reason-default",
+      "title": "{{row.id}} names its current block by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "flag": {
+          "unavailable-action-default": [
+            "reason-is-shown"
+          ]
+        },
+        "row": {
+          "when-unavailable": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} unavailable for each current block admitted by {{row.action-declared-in}}",
+        "when": [
+          "an observer examines its availability presentation"
+        ],
+        "then": [
+          "the presentation identifies the action",
+          "the presentation marks the action unavailable",
+          "the presentation names the current blocking reason"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: while {{row.id}} is unavailable, its presentation identifies it, marks it unavailable, and names the current block under {{row.presentation-rule-declared-in}}. The test restates nothing from the cited rule."
+    },
+    {
+      "id": "unavailable-unchanged-override",
+      "title": "{{row.id}} looks identical across availability states by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "row": {
+          "when-unavailable": [
+            "unchanged"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "any player-facing presentation of {{row.id}} that exists once the action is available and once it is unavailable in the same covered situation",
+        "when": [
+          "an observer compares the two states"
+        ],
+        "then": [
+          "where a player-facing presentation exists, it is identical across the available and unavailable states; where none exists, this comparison asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: any player-facing presentation of {{row.id}} that exists is identical while available and unavailable. If none exists, the comparison asserts nothing."
+    },
+    {
+      "id": "unavailable-unchanged-default",
+      "title": "{{row.id}} looks identical across availability states by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "flag": {
+          "unavailable-action-default": [
+            "unchanged"
+          ]
+        },
+        "row": {
+          "when-unavailable": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "any player-facing presentation of {{row.id}} that exists once the action is available and once it is unavailable in the same covered situation",
+        "when": [
+          "an observer compares the two states"
+        ],
+        "then": [
+          "where a player-facing presentation exists, it is identical across the available and unavailable states; where none exists, this comparison asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: any player-facing presentation of {{row.id}} that exists is identical while available and unavailable. If none exists, the comparison asserts nothing."
+    },
+    {
+      "id": "unavailable-never-override",
+      "title": "{{row.id}} has no reachable unavailable state by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "row": {
+          "when-unavailable": [
+            "never-unavailable"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "every reachable state in every covered situation for {{row.id}}",
+        "when": [
+          "an observer checks ordinary permission throughout those states"
+        ],
+        "then": [
+          "no reachable state makes {{row.id}} unavailable"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-permission-trace"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: no reachable state in a covered situation makes {{row.id}} unavailable."
+    },
+    {
+      "id": "unavailable-never-default",
+      "title": "{{row.id}} has no reachable unavailable state by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "when": {
+        "flag": {
+          "unavailable-action-default": [
+            "never-unavailable"
+          ]
+        },
+        "row": {
+          "when-unavailable": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "every reachable state in every covered situation for {{row.id}}",
+        "when": [
+          "an observer checks ordinary permission throughout those states"
+        ],
+        "then": [
+          "no reachable state makes {{row.id}} unavailable"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-permission-trace"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: no reachable state in a covered situation makes {{row.id}} unavailable."
+    },
+    {
+      "id": "action-channel-announces",
+      "title": "{{row.id}} presents its channel form through {{bind:channel-phrase}} alone",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "availability-presentations",
+      "bindings": {
+        "channel-phrase": {
+          "row_field": "channel",
+          "map": {
+            "text": "written text",
+            "icon": "a pictorial symbol",
+            "shape": "a distinct shape or pattern",
+            "outline-or-contrast": "an outline or light-dark contrast",
+            "audio-cue": "a non-spatial audio cue",
+            "spatial-audio": "the direction or position of a sound",
+            "narration": "spoken interface or screen narration",
+            "audio-description": "spoken description of visual action or presentation",
+            "haptic": "vibration or another touch pattern"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "on every platform where this row applies, controlled presentations for the action case named {{row.action-case}}: the available and unavailable forms where its effective unavailable answer admits a distinct unavailable form, the available form and its absence under hidden, the available and unavailable state presentations under unchanged, and the available form alone under never-unavailable; every other discovery route and availability presentation is removed or held identical across the states being compared, so the observer meets {{bind:channel-phrase}} alone; developer instrumentation that is not player-facing and a frozen background held identical are not routes",
+        "when": [
+          "where both states are presented, an observer meets at least two presentations of each with the balance undisclosed and the order unknown; under hidden, the unavailable form is the absence of this channel, and the observer meets at least two presentations of the available form and at least two of its absence; under never-unavailable, the observer meets at least two presentations of the available form alone"
+        ],
+        "then": [
+          "where the effective unavailable answer of the case this row names admits a distinct unavailable form, the observer correctly names availability every time from {{bind:channel-phrase}} alone; under unchanged, the observer instead cannot distinguish the two forms above chance, and under never-unavailable this clause asserts nothing",
+          "the presented form or forms follow {{row.channel-rule-declared-in}}",
+          "where {{row.channel-rule-declared-in}} states that this channel also identifies the action, the observer correctly names which action it is and that identity agrees with the case this row names; where it does not, the identity clause asserts nothing",
+          "where the case this row names has a reachable unavailable state, the channel presents exactly the state its effective unavailable answer requires; where it has none, this clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The channel-rule-declared-in field says a channel is judged by an observer who meets that channel alone. On every platform where this row applies, every other discovery route and availability presentation is removed or held identical, so the observer meets {{bind:channel-phrase}} alone. Where both states are presented, the observer meets at least two presentations of each with the balance undisclosed and order unknown; under hidden, the unavailable form is the absence of this channel and the observer meets at least two presentations of the available form and at least two of its absence; under never-unavailable, the observer meets at least two presentations of the available form alone. Where the effective unavailable answer of the case this row names admits a distinct unavailable form, the observer names availability every time from that channel alone; under unchanged, the observer cannot distinguish the two forms above chance; under never-unavailable, that clause asserts nothing. Where {{row.channel-rule-declared-in}} states that this channel also identifies the action, the observer names which action it is and that identity agrees with the case this row names; where it does not, the identity clause asserts nothing. The presented form or forms follow {{row.channel-rule-declared-in}}; the test restates nothing from it."
+    },
+    {
+      "id": "shared-input-stays-one",
+      "title": "one action input stays one signal with its candidates",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "where the adoption or its cited control rules name an action input; where none is named, this trial asserts nothing; one action input carrying its candidate actions at an accepted moment",
+        "when": [
+          "the candidate set is read"
+        ],
+        "then": [
+          "the action input is consumed once with all its candidates and is never split into several inputs",
+          "when exactly one candidate remains, that candidate is offered and no shared-input-cases row is needed, as the contract says",
+          "when no candidate or several candidates remain, the at-most-one clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-set",
+          "{{instance}}-offered-action"
+        ]
+      },
+      "text": "Where the adoption or its cited control rules name an action input, one action input is consumed once with all its candidates; where none is named, this trial asserts nothing. With exactly one candidate at the accepted moment, that candidate is offered and no shared-input-cases row is needed, as the contract says. With no candidate or several candidates, that offering clause asserts nothing."
+    },
+    {
+      "id": "shared-input-rule-selects-one",
+      "title": "{{row.id}} offers one rule-selected candidate",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "shared-input-cases",
+      "when": {
+        "row": {
+          "selection": [
+            "rule-selects-one"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "action input {{row.action-input}} with several candidates from {{row.actions-declared-in}} in the situation at {{row.situation-declared-in}}",
+        "when": [
+          "the accepted moment arrives, after any Input forgiveness shift"
+        ],
+        "then": [
+          "{{row.selection-rule-declared-in}} selects exactly one candidate by its ordering or situation test and breaks every reachable tie",
+          "the selected action is offered under {{row.presentation-rule-declared-in}} before the accepted input becomes an attempt",
+          "no other candidate is presented as what will happen now",
+          "one action proposal follows",
+          "ordering, rejection, and effects after that proposal assert nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-set",
+          "{{instance}}-offered-action",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "For {{row.id}}, the rule at {{row.selection-rule-declared-in}} selects exactly one candidate by its declared ordering or situation test at the accepted moment, after any forgiveness shift. The action is offered under {{row.presentation-rule-declared-in}} before the input becomes an attempt; no other candidate is presented as what will happen now. One action proposal follows. The test restates neither cited rule, and ordering, rejection, and effects after the proposal assert nothing."
+    },
+    {
+      "id": "shared-input-player-selects-one",
+      "title": "{{row.id}} offers one player-selected candidate",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "shared-input-cases",
+      "when": {
+        "row": {
+          "selection": [
+            "player-selects-one"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "action input {{row.action-input}} with several candidates from {{row.actions-declared-in}} in the situation at {{row.situation-declared-in}}",
+        "when": [
+          "the accepted moment arrives, after any Input forgiveness shift, and the player makes the explicit choice required at {{row.selection-rule-declared-in}}"
+        ],
+        "then": [
+          "the explicit choice completes before the input becomes an attempt and selects exactly one candidate",
+          "the selected action is offered under {{row.presentation-rule-declared-in}} before the accepted input becomes an attempt",
+          "no other candidate is presented as what will happen now",
+          "one action proposal follows",
+          "ordering, rejection, and effects after that proposal assert nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-set",
+          "{{instance}}-offered-action",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "For {{row.id}}, the player makes the explicit choice required at {{row.selection-rule-declared-in}} at the accepted moment, after any forgiveness shift. Exactly one action is offered under {{row.presentation-rule-declared-in}} before the input becomes an attempt; no other candidate is presented as what will happen now. One action proposal follows. The test restates neither cited rule, and ordering, rejection, and effects after the proposal assert nothing."
+    },
+    {
+      "id": "buffered-shared-input-reads-accepted-situation",
+      "title": "{{row.id}} reads a buffered shared input in its accepted situation",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "shared-input-cases",
+      "when": {
+        "row": {
+          "selection": [
+            "rule-selects-one",
+            "player-selects-one"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an input pressed in one covered situation and accepted in another after an Input forgiveness shift; where the adoption cannot construct a buffered input, this test asserts nothing",
+        "when": [
+          "the input waits and then reaches its accepted moment"
+        ],
+        "then": [
+          "the candidate set and the offered action are read in the accepted situation",
+          "no candidate is presented as what will happen now while the input waits",
+          "where forgiveness shifts acceptance for one candidate only, the settlement reads that shifted moment"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-set",
+          "{{instance}}-offered-action",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "For {{row.id}}, a buffered input reads its candidate set and offered action in the accepted situation, not the situation where it was pressed. No candidate is presented as what will happen now while the input waits. Where forgiveness shifts acceptance for one candidate only, the settlement reads that shifted moment. Where the adoption cannot construct a buffered input, this test asserts nothing."
+    },
+    {
+      "id": "presentation-refreshes-after-change",
+      "title": "availability and offered-action presentations refresh after relevant changes",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "where the adoption has a live availability or offered-action presentation, that presentation followed separately by a change in availability, situation, platform, binding, or candidate eligibility; where it has none, this trial asserts nothing",
+        "when": [
+          "each change settles"
+        ],
+        "then": [
+          "the presentation is recomputed from the fresh situation and matching declarations",
+          "the previous prompt or selection remains current only when the cited rules still select it",
+          "a kind of change the adoption cannot construct asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-refresh-log",
+          "{{instance}}-prompt-bindings",
+          "{{instance}}-offered-action"
+        ]
+      },
+      "text": "Where an availability or offered-action presentation exists, a change in availability, situation, platform, binding, or candidate eligibility recomputes it from the fresh situation and declarations. A previous prompt or selection stays current only when the cited rules still select it. Without a presentation, or for a change the adoption cannot construct, the corresponding clause asserts nothing."
+    },
+    {
+      "id": "action-legibility-authority-order",
+      "title": "action legibility keeps its authority order",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a covered action input and situation that exercise every applicable part of the {{instance}} adoption",
+        "when": [
+          "the action input is settled"
+        ],
+        "then": [
+          "the game reads situation, row defaults, ordinary permission, discovery, unavailable presentation, candidate set, shared-input selection at the accepted moment with its offered-action presentation, one action proposal, current-device binding, and refresh in that order",
+          "a part the adoption does not exercise asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-presentation-trace",
+          "{{instance}}-candidate-set",
+          "{{instance}}-offered-action",
+          "{{instance}}-refresh-log"
+        ]
+      },
+      "text": "The contract reads situation, row defaults, ordinary permission, discovery, unavailable presentation, candidate set, shared-input selection at the accepted moment with its offered-action presentation, one action proposal, current-device binding, and refresh in that order. A part this adoption does not exercise asserts nothing."
+    },
+    {
+      "id": "legibility-boundaries",
+      "title": "the adoption makes no promise beyond action legibility",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and features outside its declared answers and rows",
+        "when": [
+          "the adoption's promise boundary is reviewed"
+        ],
+        "then": [
+          "physical controls assert nothing",
+          "input timing help asserts nothing",
+          "displayed game facts assert nothing",
+          "event order asserts nothing",
+          "a route that highlights without naming an action or explaining how to attempt it is not a discovery answer",
+          "a control layout the game's Fixed rules do not make a cited situation is not a situation of this contract"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "Physical controls, input timing help, displayed game facts, and event order each assert nothing here. A route that highlights without naming an action or explaining how to attempt it is not a discovery answer. A control layout the game's Fixed rules do not make a cited situation is not a situation of this contract."
+    },
+    {
+      "id": "effective-answers-have-legal-presentation-shape",
+      "title": "declaration check: {{row.id}} has the presentation shape its effective answers require",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption, its two answers, and action case {{row.id}}, not the running game",
+        "when": [
+          "a reviewer resolves the row's effective discovery and unavailable answers"
+        ],
+        "then": [
+          "when the effective discovery answer is not none, then for each platform the case covers, at least one availability-presentations row that applies on that platform names {{row.id}}, as the action-cases description requires; under none, this clause asserts nothing",
+          "when the effective discovery answer is none, no availability-presentations row names {{row.id}}, as the action-cases description requires; under another answer, this clause asserts nothing",
+          "the effective answers are never none together with reason-is-shown, as the action-cases description requires",
+          "a missing row, forbidden row, or forbidden effective pair is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. The action-cases description supplies all three duties. Resolve {{row.id}}'s effective answers from its row and the game defaults. For every platform the case covers, every effective discovery answer except none requires an applicable presentation row; none requires no presentation row; and none cannot pair with reason-is-shown. The inapplicable branch asserts nothing. Any other shape is a defect this test fails by construction."
+    },
+    {
+      "id": "presentation-action-case-join",
+      "title": "declaration check: {{row.id}} names an action case in this adoption",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "availability-presentations",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and availability presentation {{row.id}}, not the running game",
+        "when": [
+          "a reviewer checks the action-case join"
+        ],
+        "then": [
+          "an action-cases row with id {{row.action-case}} exists in this adoption",
+          "a missing or misspelled action case is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. The action-case field says the value is the id of an action-cases row of this adoption presented through the channel. Availability presentation {{row.id}} must therefore name an existing action case: {{row.action-case}}. A missing or misspelled join is a defect this test fails by construction."
+    },
+    {
+      "id": "shared-input-completeness",
+      "title": "declaration check: {{row.id}} lists every candidate and always selects one",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "shared-input-cases",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and shared-input case {{row.id}}, not the running game",
+        "when": [
+          "a reviewer compares the cited candidate and selection rules in every reachable cited situation"
+        ],
+        "then": [
+          "{{row.actions-declared-in}} lists every candidate that {{row.action-input}} can carry in the situation at {{row.situation-declared-in}} and states each eligibility condition",
+          "{{row.selection-rule-declared-in}} selects exactly one candidate and breaks every reachable tie",
+          "a missing candidate, uncovered result, or reachable tie is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record",
+          "{{instance}}-candidate-set"
+        ]
+      },
+      "text": "This declaration check reads the adoption and its cited prose, not the running game. For {{row.id}}, {{row.actions-declared-in}} must list every candidate the input can carry in the cited situation and each eligibility condition; {{row.selection-rule-declared-in}} must select exactly one and break every reachable tie. Any other shape is a defect this test fails by construction. The test names the addresses and restates nothing from them."
+    },
+    {
+      "id": "multi-candidate-input-has-one-row",
+      "title": "declaration check: every multi-candidate input has exactly one matching row",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and every cited situation where one action input can have several candidates, not the running game",
+        "when": [
+          "a reviewer matches shared-input-cases rows to those situations and inputs"
+        ],
+        "then": [
+          "each action input with several candidates has exactly one matching shared-input-cases row",
+          "an input with at most one candidate needs no row and asserts nothing in the multi-candidate comparison",
+          "a missing or duplicate match is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and its cited prose, not the running game. Every situation where one action input has several candidates must have exactly one matching shared-input-cases row. An input with at most one candidate asserts nothing in that comparison. A missing or duplicate match is a defect this test fails by construction."
+    },
+    {
+      "id": "rows-do-not-repeat-or-overlap",
+      "title": "declaration check: presentation pairs do not repeat and action cases do not overlap",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and its cited prose, not the running game",
+        "when": [
+          "a reviewer compares every presentation-row pair and every pair of action cases"
+        ],
+        "then": [
+          "no two availability-presentations rows repeat one action-case and channel pair",
+          "no two action-cases rows cover the same action in overlapping situations",
+          "the contract imposes no maximum row count",
+          "a repeated pair or overlapping action case is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and its cited prose, not the running game. The availability-presentations description forbids a repeated action-case and channel pair, and the action-cases description forbids two cases for the same action in overlapping situations. The contract sets no maximum row count. A repetition or overlap is a defect this test fails by construction."
+    },
+    {
+      "id": "action-citation-duty",
+      "title": "declaration check: {{row.id}}'s action citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.action-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.action-declared-in}} names the action, its ordinary permission, and its complete effect",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.action-declared-in}}, not the running game. The citation must name {{row.id}}'s action, ordinary permission, and complete effect. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "action-situation-citation-duty",
+      "title": "declaration check: {{row.id}}'s situation citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.situation-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.situation-declared-in}} names every play situation covered by {{row.id}} and the nearest similar situations excluded from it",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.situation-declared-in}}, not the running game. The citation must name every covered play situation and the nearest similar excluded situations for {{row.id}}. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "action-presentation-citation-duty",
+      "title": "declaration check: {{row.id}}'s presentation citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-cases",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.presentation-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.presentation-rule-declared-in}} states every discovery route and unavailable state for {{row.id}}, including an explicit statement when no route exists",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.presentation-rule-declared-in}}, not the running game. The citation must state every discovery route and unavailable state for {{row.id}}, including an explicit no-route statement where applicable. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "presentation-platform-citation-duty",
+      "title": "declaration check: {{row.id}}'s platform citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "availability-presentations",
+      "bindings": {
+        "platform-citation": {
+          "row_field": "channel",
+          "map": {
+            "text": "{{row.platform-declared-in}}",
+            "icon": "{{row.platform-declared-in}}",
+            "shape": "{{row.platform-declared-in}}",
+            "outline-or-contrast": "{{row.platform-declared-in}}",
+            "audio-cue": "{{row.platform-declared-in}}",
+            "spatial-audio": "{{row.platform-declared-in}}",
+            "narration": "{{row.platform-declared-in}}",
+            "audio-description": "{{row.platform-declared-in}}",
+            "haptic": "{{row.platform-declared-in}}"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{bind:platform-citation}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{bind:platform-citation}} names the platform on which {{row.id}} applies",
+          "the row applies only on that platform",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{bind:platform-citation}}, not the running game. The citation must name the platform on which {{row.id}} applies, and the row applies only there. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "channel-rule-citation-duty",
+      "title": "declaration check: {{row.id}}'s channel citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "availability-presentations",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.channel-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.channel-rule-declared-in}} states {{row.id}}'s available and unavailable forms, or the available form alone for a never-unavailable or unchanged case, and whether the channel identifies the action",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.channel-rule-declared-in}}, not the running game. The channel-rule-declared-in field requires both forms, or the available form alone for a never-unavailable or unchanged case, and says the citation states whether the channel identifies the action. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "shared-situation-citation-duty",
+      "title": "declaration check: the situation citation of {{row.id}} states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "shared-input-cases",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.situation-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.situation-declared-in}} names the situation in which several actions share {{row.action-input}}",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.situation-declared-in}}, not the running game. The citation must name the situation in which several actions share {{row.action-input}}. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "shared-actions-citation-duty",
+      "title": "declaration check: the candidate citation of {{row.id}} states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "shared-input-cases",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.actions-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.actions-declared-in}} lists every candidate action for {{row.action-input}} in the cited situation and the conditions that make each candidate eligible",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.actions-declared-in}}, not the running game. The citation must list every candidate for {{row.action-input}} in the cited situation and each eligibility condition. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "shared-action-input-citation-duty",
+      "title": "declaration check: the action-input citation of {{row.id}} states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "shared-input-cases",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.action-input-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.action-input-declared-in}} names the shared action input {{row.action-input}} and the physical activation that produces it",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.action-input-declared-in}}, not the running game. The Fixed control rule must name shared action input {{row.action-input}} and the physical activation that produces it. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "shared-selection-citation-duty",
+      "title": "declaration check: the selection citation of {{row.id}} states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "shared-input-cases",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.selection-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.selection-rule-declared-in}} selects exactly one offered action and breaks every reachable tie",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.selection-rule-declared-in}}, not the running game. The citation must select exactly one offered action and break every reachable tie. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "shared-presentation-citation-duty",
+      "title": "declaration check: the presentation citation of {{row.id}} states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "shared-input-cases",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.presentation-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.presentation-rule-declared-in}} identifies the selected offered action before {{row.action-input}} becomes an action attempt",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.presentation-rule-declared-in}}, not the running game. The citation must identify the selected offered action before {{row.action-input}} becomes an action attempt. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "legibility-holds",
+      "title": "action legibility holds for the whole run",
+      "type": "general",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "every available covered action met its effective discovery promise; every unavailable covered action met its effective unavailable answer; every availability-presentation channel distinguished the states it promises; every shared input offered exactly one action before the attempt; no prompt named a stale binding; a case the adoption cannot construct asserts nothing",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-observer-result",
+          "{{instance}}-presentation-trace",
+          "{{instance}}-prompt-bindings",
+          "{{instance}}-candidate-set",
+          "{{instance}}-offered-action",
+          "{{instance}}-refresh-log"
+        ]
+      },
+      "text": "Across {{inputs:scope}}, every available covered action meets its effective discovery promise; every unavailable covered action meets its effective unavailable answer; every channel distinguishes the states it promises; every shared input offers exactly one action before the attempt; and no prompt names a stale binding. A case the adoption cannot construct asserts nothing.",
+      "inputs": {
+        "scope": {
+          "default": "every covered situation of the audited run on every covered platform"
+        },
+        "seeds": {
+          "default": [
+            "audit-a",
+            "audit-b"
+          ]
+        }
+      }
+    }
+  ]
+}

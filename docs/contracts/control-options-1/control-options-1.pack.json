@@ -1,0 +1,2145 @@
+{
+  "contract": "control-options",
+  "version": 1,
+  "templates": [
+    {
+      "id": "control-options-vocabulary",
+      "title": "control options uses control sets, presets, bindings, action inputs, and demanding inputs",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and its cited control rules",
+        "when": [
+          "the control path is identified from platform selection through physical activation"
+        ],
+        "then": [
+          "a control set is the complete current mapping for one platform and input method",
+          "a preset is an immutable named source set that can become current",
+          "a binding joins one physical input and press style to one candidate action",
+          "one physical activation emits one action input carrying every matched binding's action",
+          "a demanding input is a timed, held, rapid, repeated, double, simultaneous, input-sequence, or required-device-motion input"
+        ],
+        "diagnostics": [
+          "{{instance}}-current-set",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "A control set is the complete current mapping for one platform and input method. A preset is an immutable named source set that can become current. A binding joins one physical input and press style to one candidate action. One physical activation emits one action input carrying every matched binding's action. A demanding input is a timed, held, rapid, repeated, double, simultaneous, input-sequence, or required-device-motion input."
+    },
+    {
+      "id": "platform-row-selects-exactly-when-cited",
+      "title": "{{row.id}} is selected exactly for its cited platform and devices",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "platform-control-set row {{row.id}} and the Fixed platform rule at {{row.platform-declared-in}}",
+        "when": [
+          "the game runs on each cited platform, edition, and supported device combination and on the nearest combination the citation excludes"
+        ],
+        "then": [
+          "{{row.id}} is the one selected row for every combination the citation covers",
+          "{{row.id}} is not selected for a combination the citation excludes",
+          "the test leaves the covered combinations to {{row.platform-declared-in}} and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-platform-selection"
+        ]
+      },
+      "text": "Platform row {{row.id}} is the one selected row exactly on the platform, edition, and supported devices at {{row.platform-declared-in}}. It is not selected where that citation excludes it. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "starting-control-set-follows-platform-rule",
+      "title": "{{row.id}} starts with the control set chosen by its cited rule",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a first play on platform row {{row.id}} and the Fixed settings rule at {{row.settings-rule-declared-in}}",
+        "when": [
+          "the current set is first established"
+        ],
+        "then": [
+          "the complete starting control set is the one selected through {{row.settings-rule-declared-in}}",
+          "every first binding lookup reads that current set",
+          "the test restates nothing from the cited rule"
+        ],
+        "diagnostics": [
+          "{{instance}}-current-set"
+        ]
+      },
+      "text": "On first play for {{row.id}}, the complete starting control set comes from {{row.settings-rule-declared-in}}, and every first binding lookup reads it as current. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "preset-selection-copies-complete-set",
+      "title": "preset {{row.id}} becomes current through its cited route",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "control-presets",
+      "bindings": {
+        "availability-result": {
+          "row_field": "availability",
+          "map": {
+            "starting-and-selectable": "is current on first play and remains selectable afterward",
+            "player-selectable": "does not become current before selection and becomes current when the player selects it",
+            "mode-selected": "becomes current when the cited player mode is entered and not before that cited selection"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "preset {{row.id}} labeled {{row.label}} for platform row {{row.platform-control-set}} and the Fixed route at {{row.selection-rule-declared-in}}",
+        "when": [
+          "the cited route is used and the current set is inspected before and after selection"
+        ],
+        "then": [
+          "{{row.id}} {{bind:availability-result}}",
+          "selection copies every matching action-binding row into one complete current set",
+          "the source preset remains unchanged",
+          "the test restates nothing from {{row.selection-rule-declared-in}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-current-set",
+          "{{instance}}-change-log"
+        ]
+      },
+      "text": "Preset {{row.id}}, labeled {{row.label}}, belongs to {{row.platform-control-set}}. Through {{row.selection-rule-declared-in}}, it {{bind:availability-result}}. Selection copies every matching binding into one complete current set and leaves the source preset unchanged. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "input-method-coverage-holds",
+      "title": "{{row.id}} input methods cover its actions as promised",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "bindings": {
+        "coverage-procedure": {
+          "row_field": "input-method-coverage",
+          "map": {
+            "one-method-covers-all": "the one complete method named by the citation performs every action bound on the platform without another method",
+            "player-chooses-method": "each complete method named by the citation separately performs every action bound on the platform without switching to another method",
+            "mixed-methods-needed": "all named methods together perform every action bound on the platform in that set; where at least one bound action in that set requires the cited switch, the switch occurs where the citation places it; where none does, the switch comparison asserts nothing"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "platform row {{row.id}}, every action bound on that platform, and the complete methods and any required switch at {{row.methods-declared-in}}",
+        "when": [
+          "in each preset-derived current set the platform can make current, an observer performs every action bound on the platform using the named method or methods"
+        ],
+        "then": [
+          "{{bind:coverage-procedure}}",
+          "an observer, not the running game, judges this",
+          "the test restates nothing from the cited rule"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this in each preset-derived current set {{row.id}} can make current. For every action bound on the platform, under the complete methods and any required switch at {{row.methods-declared-in}}: {{bind:coverage-procedure}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "remapping-fixed-override",
+      "title": "{{row.id}} keeps fixed bindings by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "when": {
+        "row": {
+          "remapping": [
+            "fixed-bindings"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the current set for {{row.id}} and its control setting route at {{row.settings-rule-declared-in}}",
+        "when": [
+          "an observer attempts to change an action's physical input and press style, then performs the action"
+        ],
+        "then": [
+          "every control change is refused and the current set is unchanged",
+          "the existing binding still performs the action",
+          "where this platform has a movable or resizable touch control, changing its layout while keeping its action is not a control change; where it has none, this comparison asserts nothing",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-change-log",
+          "{{instance}}-current-set"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: every attempted change to an action's physical input or press style is refused, the current set stays unchanged, and the existing binding performs the action. Where this platform has a movable or resizable touch control, changing its layout while keeping its action is not a control change; where it has none, this comparison asserts nothing. The route is at {{row.settings-rule-declared-in}}; the test restates nothing from it."
+    },
+    {
+      "id": "remapping-fixed-default",
+      "title": "{{row.id}} keeps fixed bindings by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "when": {
+        "flag": {
+          "remapping-default": [
+            "fixed-bindings"
+          ]
+        },
+        "row": {
+          "remapping": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the current set for {{row.id}} and its control setting route at {{row.settings-rule-declared-in}}",
+        "when": [
+          "an observer attempts to change an action's physical input and press style, then performs the action"
+        ],
+        "then": [
+          "every control change is refused and the current set is unchanged",
+          "the existing binding still performs the action",
+          "where this platform has a movable or resizable touch control, changing its layout while keeping its action is not a control change; where it has none, this comparison asserts nothing",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-change-log",
+          "{{instance}}-current-set"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: every attempted change to an action's physical input or press style is refused, the current set stays unchanged, and the existing binding performs the action. Where this platform has a movable or resizable touch control, changing its layout while keeping its action is not a control change; where it has none, this comparison asserts nothing. The route is at {{row.settings-rule-declared-in}}; the test restates nothing from it."
+    },
+    {
+      "id": "remapping-swap-override",
+      "title": "{{row.id}} permits only exchanges by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "when": {
+        "row": {
+          "remapping": [
+            "swap-only"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two supported existing assignments and one otherwise unused supported input in {{row.id}}, changed through {{row.settings-rule-declared-in}}",
+        "when": [
+          "an observer exchanges the two assignments, performs both actions, and then tries to move one action independently to the unused input"
+        ],
+        "then": [
+          "the exchange is accepted as one swap and the resulting complete set becomes current",
+          "each new binding performs its exchanged action and each old binding no longer performs the action moved away from it",
+          "the independent move is refused and leaves the current set unchanged",
+          "every later binding lookup reads the new current set",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-change-log",
+          "{{instance}}-current-set",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: an exchange of two existing assignments is accepted, each new binding performs its exchanged action, and each old binding stops performing the action moved away from it. An independent move to an unused input is refused. The complete result becomes current for every later lookup. The route is at {{row.settings-rule-declared-in}}; the test restates nothing from it."
+    },
+    {
+      "id": "remapping-swap-default",
+      "title": "{{row.id}} permits only exchanges by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "when": {
+        "flag": {
+          "remapping-default": [
+            "swap-only"
+          ]
+        },
+        "row": {
+          "remapping": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two supported existing assignments and one otherwise unused supported input in {{row.id}}, changed through {{row.settings-rule-declared-in}}",
+        "when": [
+          "an observer exchanges the two assignments, performs both actions, and then tries to move one action independently to the unused input"
+        ],
+        "then": [
+          "the exchange is accepted as one swap and the resulting complete set becomes current",
+          "each new binding performs its exchanged action and each old binding no longer performs the action moved away from it",
+          "the independent move is refused and leaves the current set unchanged",
+          "every later binding lookup reads the new current set",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-change-log",
+          "{{instance}}-current-set",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: an exchange of two existing assignments is accepted, each new binding performs its exchanged action, and each old binding stops performing the action moved away from it. An independent move to an unused input is refused. The complete result becomes current for every later lookup. The route is at {{row.settings-rule-declared-in}}; the test restates nothing from it."
+    },
+    {
+      "id": "remapping-presets-override",
+      "title": "{{row.id}} permits only preset selection by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "when": {
+        "row": {
+          "remapping": [
+            "presets-only"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two complete selectable declared presets for {{row.id}} and the settings route at {{row.settings-rule-declared-in}}",
+        "when": [
+          "an observer selects another starting-and-selectable or player-selectable preset through the settings route, performs an action whose binding differs, and then tries to change one binding through that route"
+        ],
+        "then": [
+          "preset selection is accepted and its complete copy becomes current",
+          "the new binding performs the action and the old binding does not",
+          "the individual binding change is refused and leaves the current set unchanged",
+          "every later binding lookup reads the new current set",
+          "a mode-selected preset is entered through its cited mode and asserts nothing in this selection trial",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-change-log",
+          "{{instance}}-current-set",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: selecting another starting-and-selectable or player-selectable preset through {{row.settings-rule-declared-in}} is accepted, its complete copy becomes current, its new binding performs the action, and the old binding does not. An individual binding change through that route is refused. Every later lookup reads the new current set. A mode-selected preset is entered through its cited mode and asserts nothing in this selection trial. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "remapping-presets-default",
+      "title": "{{row.id}} permits only preset selection by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "when": {
+        "flag": {
+          "remapping-default": [
+            "presets-only"
+          ]
+        },
+        "row": {
+          "remapping": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two complete selectable declared presets for {{row.id}} and the settings route at {{row.settings-rule-declared-in}}",
+        "when": [
+          "an observer selects another starting-and-selectable or player-selectable preset through the settings route, performs an action whose binding differs, and then tries to change one binding through that route"
+        ],
+        "then": [
+          "preset selection is accepted and its complete copy becomes current",
+          "the new binding performs the action and the old binding does not",
+          "the individual binding change is refused and leaves the current set unchanged",
+          "every later binding lookup reads the new current set",
+          "a mode-selected preset is entered through its cited mode and asserts nothing in this selection trial",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-change-log",
+          "{{instance}}-current-set",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: selecting another starting-and-selectable or player-selectable preset through {{row.settings-rule-declared-in}} is accepted, its complete copy becomes current, its new binding performs the action, and the old binding does not. An individual binding change through that route is refused. Every later lookup reads the new current set. A mode-selected preset is entered through its cited mode and asserts nothing in this selection trial. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "remapping-free-override",
+      "title": "{{row.id}} permits free assignment by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "when": {
+        "row": {
+          "remapping": [
+            "any-action-any-input"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each covered action, each supported remappable input including an unused one, and {{row.settings-rule-declared-in}} for {{row.id}}",
+        "when": [
+          "an observer independently assigns an action to each supported input, resolves a conflicting assignment, performs the action, and attempts one unsupported assignment"
+        ],
+        "then": [
+          "every supported independent assignment is accepted, including assignment to the unused input",
+          "a conflict is resolved visibly before use",
+          "the new binding performs the action and the old binding does not",
+          "after an accepted change, each binding row's promises follow its action to the input the current set assigns",
+          "the unsupported assignment is refused and leaves the current set unchanged",
+          "every accepted complete result becomes current for every later lookup",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-change-log",
+          "{{instance}}-current-set",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: every covered action can move independently to every supported remappable input, including an unused one; conflicts resolve visibly before use; the new binding performs the action and the old one does not. After an accepted change, the contract makes each binding row's promises follow its action to the input the current set assigns. An unsupported assignment is refused. Each accepted complete result becomes current for every later lookup. The route is at {{row.settings-rule-declared-in}}; the test restates nothing from it."
+    },
+    {
+      "id": "remapping-free-default",
+      "title": "{{row.id}} permits free assignment by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "when": {
+        "flag": {
+          "remapping-default": [
+            "any-action-any-input"
+          ]
+        },
+        "row": {
+          "remapping": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each covered action, each supported remappable input including an unused one, and {{row.settings-rule-declared-in}} for {{row.id}}",
+        "when": [
+          "an observer independently assigns an action to each supported input, resolves a conflicting assignment, performs the action, and attempts one unsupported assignment"
+        ],
+        "then": [
+          "every supported independent assignment is accepted, including assignment to the unused input",
+          "a conflict is resolved visibly before use",
+          "the new binding performs the action and the old binding does not",
+          "after an accepted change, each binding row's promises follow its action to the input the current set assigns",
+          "the unsupported assignment is refused and leaves the current set unchanged",
+          "every accepted complete result becomes current for every later lookup",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-change-log",
+          "{{instance}}-current-set",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: every covered action can move independently to every supported remappable input, including an unused one; conflicts resolve visibly before use; the new binding performs the action and the old one does not. After an accepted change, the contract makes each binding row's promises follow its action to the input the current set assigns. An unsupported assignment is refused. Each accepted complete result becomes current for every later lookup. The route is at {{row.settings-rule-declared-in}}; the test restates nothing from it."
+    },
+    {
+      "id": "remapping-press-style-override",
+      "title": "{{row.id}} permits input and press-style changes by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "when": {
+        "row": {
+          "remapping": [
+            "action-and-press-style"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each covered action, each supported remappable input, each press style offered for that action by {{row.settings-rule-declared-in}}, and one unsupported choice",
+        "when": [
+          "an observer changes the input and offered press style, performs the action with the new combination, then attempts the unsupported choice"
+        ],
+        "then": [
+          "every supported input change and every offered press-style change is accepted",
+          "the new binding and press style perform the action and the old combination does not",
+          "after an accepted change, each binding row's promises follow its action to the input the current set assigns",
+          "the unsupported choice is refused and leaves the current set unchanged",
+          "every accepted complete result becomes current for every later lookup",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-change-log",
+          "{{instance}}-setting-state",
+          "{{instance}}-current-set",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: every covered action can move to every supported remappable input and use every press style offered for it; the new combination performs the action and the old one does not. After an accepted change, the contract makes each binding row's promises follow its action to the input the current set assigns. An unsupported choice is refused. Each accepted complete result becomes current for every later lookup. Offered choices and the route stay at {{row.settings-rule-declared-in}}; the test restates nothing from it."
+    },
+    {
+      "id": "remapping-press-style-default",
+      "title": "{{row.id}} permits input and press-style changes by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "when": {
+        "flag": {
+          "remapping-default": [
+            "action-and-press-style"
+          ]
+        },
+        "row": {
+          "remapping": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each covered action, each supported remappable input, each press style offered for that action by {{row.settings-rule-declared-in}}, and one unsupported choice",
+        "when": [
+          "an observer changes the input and offered press style, performs the action with the new combination, then attempts the unsupported choice"
+        ],
+        "then": [
+          "every supported input change and every offered press-style change is accepted",
+          "the new binding and press style perform the action and the old combination does not",
+          "after an accepted change, each binding row's promises follow its action to the input the current set assigns",
+          "the unsupported choice is refused and leaves the current set unchanged",
+          "every accepted complete result becomes current for every later lookup",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-change-log",
+          "{{instance}}-setting-state",
+          "{{instance}}-current-set",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: every covered action can move to every supported remappable input and use every press style offered for it; the new combination performs the action and the old one does not. After an accepted change, the contract makes each binding row's promises follow its action to the input the current set assigns. An unsupported choice is refused. Each accepted complete result becomes current for every later lookup. Offered choices and the route stay at {{row.settings-rule-declared-in}}; the test restates nothing from it."
+    },
+    {
+      "id": "binding-scope-follows-current-set",
+      "title": "{{row.id}} exists in its declared control-set scope",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}} on platform row {{row.platform-control-set}}",
+        "when": [
+          "the current set is inspected across its reachable control-set and play contexts"
+        ],
+        "then": [
+          "the binding belongs to its named preset while that preset is current, where the row names one; otherwise it belongs to the platform's base or freely remappable set",
+          "the binding exists throughout the selected control set, or only in the cited context where the row names one",
+          "a preset or context the row does not name asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-current-set",
+          "{{instance}}-match-trace"
+        ]
+      },
+      "text": "Binding {{row.id}} belongs to its named preset while that preset is current, where the row names one; otherwise it belongs to {{row.platform-control-set}}'s base or freely remappable set. It exists throughout the selected control set, or only in the cited context where the row names one. A preset or context the row does not name asserts nothing."
+    },
+    {
+      "id": "binding-matches-cited-performance",
+      "title": "{{row.id}} matches only its cited {{row.press-style}} performance",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "bindings": {
+        "performance": {
+          "row_field": "press-style",
+          "map": {
+            "press": "the cited input is pressed",
+            "release": "the cited input is released",
+            "timed-press": "the cited input is pressed at its cited target moment",
+            "hold": "the cited input is held for its cited completion",
+            "rapid-presses": "the cited input is pressed at its cited rate",
+            "repeated-presses": "the cited input reaches its cited activation count",
+            "double-press": "the cited input completes its cited double activation",
+            "simultaneous-inputs": "the cited input group is performed simultaneously",
+            "continuous-axis": "the cited axis is performed in its cited range and direction",
+            "gesture": "the cited gesture completes",
+            "input-sequence": "the cited directional sequence is completed by its press"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}}, action {{row.action-declared-in}}, and the physical input, device, and performance at {{row.physical-input-declared-in}}",
+        "when": [
+          "{{bind:performance}} in the current platform, device, method, and set, then the nearest non-matching performance is attempted"
+        ],
+        "then": [
+          "the matching performance emits one action input carrying the action at {{row.action-declared-in}}",
+          "the non-matching performance emits nothing from this binding",
+          "the test leaves the physical details to {{row.physical-input-declared-in}} and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "For {{row.id}}, when {{bind:performance}} under {{row.physical-input-declared-in}}, one action input carries the action at {{row.action-declared-in}}. The nearest non-matching performance emits nothing from this binding. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "binding-context-settles-at-accepted-moment",
+      "title": "{{row.id}} settles its context at the accepted moment",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "bindings": {
+        "context": {
+          "row_field": "press-style",
+          "map": {
+            "press": "{{row.context-declared-in}}",
+            "release": "{{row.context-declared-in}}",
+            "timed-press": "{{row.context-declared-in}}",
+            "hold": "{{row.context-declared-in}}",
+            "rapid-presses": "{{row.context-declared-in}}",
+            "repeated-presses": "{{row.context-declared-in}}",
+            "double-press": "{{row.context-declared-in}}",
+            "simultaneous-inputs": "{{row.context-declared-in}}",
+            "continuous-axis": "{{row.context-declared-in}}",
+            "gesture": "{{row.context-declared-in}}",
+            "input-sequence": "{{row.context-declared-in}}"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "a physical performance matching {{row.id}} whose context is cited at {{bind:context}}",
+        "when": [
+          "the input is accepted once while the cited context holds and once while it does not"
+        ],
+        "then": [
+          "the match remains provisional until the accepted moment",
+          "the action at {{row.action-declared-in}} is a candidate only when the cited context holds at that moment",
+          "the test restates nothing from {{bind:context}} and asserts nothing about how an accepted moment is shifted"
+        ],
+        "diagnostics": [
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "For {{row.id}}, the physical match remains provisional until the accepted moment. Its action is a candidate only when the context at {{bind:context}} holds then. The test names the address, restates nothing from it, and asserts nothing about how an accepted moment is shifted."
+    },
+    {
+      "id": "binding-preset-is-current",
+      "title": "{{row.id}} exists only while preset {{bind:preset}} is current",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "bindings": {
+        "preset": {
+          "row_field": "press-style",
+          "map": {
+            "press": "{{row.preset}}",
+            "release": "{{row.preset}}",
+            "timed-press": "{{row.preset}}",
+            "hold": "{{row.preset}}",
+            "rapid-presses": "{{row.preset}}",
+            "repeated-presses": "{{row.preset}}",
+            "double-press": "{{row.preset}}",
+            "simultaneous-inputs": "{{row.preset}}",
+            "continuous-axis": "{{row.preset}}",
+            "gesture": "{{row.preset}}",
+            "input-sequence": "{{row.preset}}"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}} assigned to preset {{bind:preset}}",
+        "when": [
+          "its cited physical performance occurs while a set derived from {{bind:preset}} is current, after an accepted change to that current copy, and while a set derived from another preset is current"
+        ],
+        "then": [
+          "{{row.id}} can match while a set derived from {{bind:preset}} is current",
+          "an accepted change on that current copy does not remove the binding",
+          "{{row.id}} cannot match through this row while a set derived from another preset is current"
+        ],
+        "diagnostics": [
+          "{{instance}}-current-set",
+          "{{instance}}-match-trace"
+        ]
+      },
+      "text": "Under the contract, preset {{bind:preset}} is the starting source set for binding {{row.id}}. Its cited performance can match through a current set derived from that preset, and an accepted change on the current copy does not remove the binding. It cannot match through this row while a set derived from another preset is current."
+    },
+    {
+      "id": "shared-physical-activation-stays-one-input",
+      "title": "{{row.id}} shares action input {{bind:action-input}} consistently",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "bindings": {
+        "action-input": {
+          "row_field": "press-style",
+          "map": {
+            "press": "{{row.action-input}}",
+            "release": "{{row.action-input}}",
+            "timed-press": "{{row.action-input}}",
+            "hold": "{{row.action-input}}",
+            "rapid-presses": "{{row.action-input}}",
+            "repeated-presses": "{{row.action-input}}",
+            "double-press": "{{row.action-input}}",
+            "simultaneous-inputs": "{{row.action-input}}",
+            "continuous-axis": "{{row.action-input}}",
+            "gesture": "{{row.action-input}}",
+            "input-sequence": "{{row.action-input}}"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the physical activation at {{row.physical-input-declared-in}} shared by {{row.id}} and rows that can be current with it",
+        "when": [
+          "matching bindings on the same platform row are read from one current set"
+        ],
+        "then": [
+          "every row that can be current with {{row.id}}, on the same platform row, all omitting a preset or all naming the same preset, with no disjoint cited contexts, names action input {{bind:action-input}}",
+          "rows in another preset or a disjoint cited context are not in this group and assert nothing about its shared value",
+          "one {{bind:action-input}} is emitted and carries every matched binding's action as a candidate",
+          "the test asserts nothing about a paired Action legibility adoption"
+        ],
+        "diagnostics": [
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log",
+          "{{instance}}-candidate-set"
+        ]
+      },
+      "text": "Under the contract, rows form one shared-activation group only when they can be current together: they belong to the same platform row, either all omit a preset or all name the same preset, have no disjoint cited contexts, and share the physical activation at {{row.physical-input-declared-in}}. Every row that can be current with {{row.id}} agrees on action input {{bind:action-input}}. Rows in another preset or a disjoint context assert nothing about this shared value. One such input is emitted with every matched binding's action as a candidate. The test asserts nothing about a paired Action legibility adoption."
+    },
+    {
+      "id": "simpler-input-matches-named-binding",
+      "title": "{{row.id}} matches as binding {{row.action-binding}}",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "simpler-inputs",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "simpler route {{row.id}} at {{row.alternative-declared-in}} for binding {{row.action-binding}}",
+        "when": [
+          "the cited alternative input is performed and the current set contains the named binding"
+        ],
+        "then": [
+          "the input matches as if it were {{row.action-binding}}",
+          "it emits that binding's action input",
+          "it contributes the same action as the named binding",
+          "the test restates nothing from the cited alternative rule"
+        ],
+        "diagnostics": [
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Simpler route {{row.id}} uses the input at {{row.alternative-declared-in}}. It matches as if it were binding {{row.action-binding}}, emits that binding's action input, and contributes the same action. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "demanding-none-override",
+      "title": "{{row.id}} has an ordinary route by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "when": {
+        "row": {
+          "demanding-input": [
+            "no-demanding-presses"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}} and its cited action and physical-input rules",
+        "when": [
+          "an observer performs the covered action through its ordinary route without changing a setting"
+        ],
+        "then": [
+          "the ordinary route produces an action input carrying the action at {{row.action-declared-in}}",
+          "no demanding input is the action's only route",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: the action for {{row.id}} has an ordinary route without a setting change, and performing that route emits an action input carrying the action. A demanding input is not its only route."
+    },
+    {
+      "id": "demanding-none-default",
+      "title": "{{row.id}} has an ordinary route by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "when": {
+        "flag": {
+          "demanding-input-default": [
+            "no-demanding-presses"
+          ]
+        },
+        "row": {
+          "demanding-input": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}} and its cited action and physical-input rules",
+        "when": [
+          "an observer performs the covered action through its ordinary route without changing a setting"
+        ],
+        "then": [
+          "the ordinary route produces an action input carrying the action at {{row.action-declared-in}}",
+          "no demanding input is the action's only route",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: the action for {{row.id}} has an ordinary route without a setting change, and performing that route emits an action input carrying the action. A demanding input is not its only route."
+    },
+    {
+      "id": "demanding-simpler-press-style-override",
+      "title": "the demanding press style of {{row.id}} follows simpler-alternative by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "when": {
+        "row": {
+          "demanding-input": [
+            "simpler-alternative"
+          ],
+          "press-style": [
+            "timed-press",
+            "hold",
+            "rapid-presses",
+            "repeated-presses",
+            "double-press",
+            "simultaneous-inputs",
+            "input-sequence"
+          ],
+          "motion-use": [
+            "no-motion",
+            "optional-motion"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}}, its cited demanding press style, and every simpler-inputs row naming it",
+        "when": [
+          "an observer completes the demanding press style, performs every simpler route without configuration, and separately stops before completion"
+        ],
+        "then": [
+          "the completed demanding route emits the binding's action input",
+          "every simpler route remains available at the same time and emits the same action through its distinct input",
+          "failure to finish the demanding route emits neither the demanding action input nor a simpler alternative by itself",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default. The contract treats the press style of {{row.id}} as demanding. Its completed demanding route and every declared simpler route stay available together without configuration and emit the same action through distinct inputs; failing to finish the demanding route triggers neither route."
+    },
+    {
+      "id": "demanding-simpler-required-motion-override",
+      "title": "the required motion of {{row.id}} follows simpler-alternative by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "when": {
+        "row": {
+          "demanding-input": [
+            "simpler-alternative"
+          ],
+          "motion-use": [
+            "required-motion"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}}, its cited required motion, and every simpler-inputs row naming it",
+        "when": [
+          "an observer completes the required motion, performs every simpler route without configuration, and separately makes a non-motion attempt"
+        ],
+        "then": [
+          "the completed required-motion route emits the binding's action input",
+          "every simpler route remains available at the same time and emits the same action through its distinct input",
+          "the non-motion attempt emits neither the demanding action input nor a simpler alternative by itself",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default. The contract makes {{row.id}} demanding because it requires device motion. Its completed motion route and every declared simpler route stay available together without configuration and emit the same action through distinct inputs; a non-motion attempt triggers neither route."
+    },
+    {
+      "id": "demanding-simpler-press-style-default",
+      "title": "the demanding press style of {{row.id}} follows simpler-alternative by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "when": {
+        "flag": {
+          "demanding-input-default": [
+            "simpler-alternative"
+          ]
+        },
+        "row": {
+          "demanding-input": [
+            "use-game-default"
+          ],
+          "press-style": [
+            "timed-press",
+            "hold",
+            "rapid-presses",
+            "repeated-presses",
+            "double-press",
+            "simultaneous-inputs",
+            "input-sequence"
+          ],
+          "motion-use": [
+            "no-motion",
+            "optional-motion"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}}, its cited demanding press style, and every simpler-inputs row naming it",
+        "when": [
+          "an observer completes the demanding press style, performs every simpler route without configuration, and separately stops before completion"
+        ],
+        "then": [
+          "the completed demanding route emits the binding's action input",
+          "every simpler route remains available at the same time and emits the same action through its distinct input",
+          "failure to finish the demanding route emits neither the demanding action input nor a simpler alternative by itself",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default. The contract treats the press style of {{row.id}} as demanding. Its completed demanding route and every declared simpler route stay available together without configuration and emit the same action through distinct inputs; failing to finish the demanding route triggers neither route."
+    },
+    {
+      "id": "demanding-simpler-required-motion-default",
+      "title": "the required motion of {{row.id}} follows simpler-alternative by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "when": {
+        "flag": {
+          "demanding-input-default": [
+            "simpler-alternative"
+          ]
+        },
+        "row": {
+          "demanding-input": [
+            "use-game-default"
+          ],
+          "motion-use": [
+            "required-motion"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}}, its cited required motion, and every simpler-inputs row naming it",
+        "when": [
+          "an observer completes the required motion, performs every simpler route without configuration, and separately makes a non-motion attempt"
+        ],
+        "then": [
+          "the completed required-motion route emits the binding's action input",
+          "every simpler route remains available at the same time and emits the same action through its distinct input",
+          "the non-motion attempt emits neither the demanding action input nor a simpler alternative by itself",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default. The contract makes {{row.id}} demanding because it requires device motion. Its completed motion route and every declared simpler route stay available together without configuration and emit the same action through distinct inputs; a non-motion attempt triggers neither route."
+    },
+    {
+      "id": "demanding-setting-press-style-override",
+      "title": "the demanding press style of {{row.id}} follows player-can-change-it by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "when": {
+        "row": {
+          "demanding-input": [
+            "player-can-change-it"
+          ],
+          "press-style": [
+            "timed-press",
+            "hold",
+            "rapid-presses",
+            "repeated-presses",
+            "double-press",
+            "simultaneous-inputs",
+            "input-sequence"
+          ],
+          "motion-use": [
+            "no-motion",
+            "optional-motion"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}}, its cited demanding press style, and the player-facing demanding-input setting for its declared easier press style, which is not a control-remapping route",
+        "when": [
+          "an observer changes the setting and then performs the action with the easier current press style"
+        ],
+        "then": [
+          "the setting replaces the demanding press style before the binding is used",
+          "the easier press style does not remove any device motion the binding requires",
+          "the observer's easier performance emits the action input carrying the action at {{row.action-declared-in}}",
+          "the result is judged from performed play and not from a stored setting alone",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-setting-state",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default. The contract treats the press style of {{row.id}} as demanding. The observer changes the player-facing demanding-input setting, which is not a control-remapping route, and performs the action with the declared easier current press style; that performance emits the action input. The easier press style does not remove any device motion the binding requires. A stored setting alone is not evidence."
+    },
+    {
+      "id": "demanding-setting-required-motion-override",
+      "title": "the required motion of {{row.id}} follows player-can-change-it by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "when": {
+        "row": {
+          "demanding-input": [
+            "player-can-change-it"
+          ],
+          "motion-use": [
+            "required-motion"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}}, its cited required motion, and the player-facing demanding-input setting for its declared easier press style, which is not a control-remapping route",
+        "when": [
+          "an observer changes the setting and then completes the required motion with the easier current press style"
+        ],
+        "then": [
+          "the setting supplies the easier press style before the binding is used, and the required motion stays required",
+          "the easier press style never relieves the device-motion requirement",
+          "the observer's easier performance with the required motion emits the action input carrying the action at {{row.action-declared-in}}",
+          "the result is judged from performed play and not from a stored setting alone",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-setting-state",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default. The contract makes {{row.id}} demanding because it requires device motion. The demanding-input setting, which is not a control-remapping route, supplies an easier press style and never relieves the motion requirement; performed play with the required motion emits the action input. A stored setting alone is not evidence."
+    },
+    {
+      "id": "demanding-setting-press-style-default",
+      "title": "the demanding press style of {{row.id}} follows player-can-change-it by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "when": {
+        "flag": {
+          "demanding-input-default": [
+            "player-can-change-it"
+          ]
+        },
+        "row": {
+          "demanding-input": [
+            "use-game-default"
+          ],
+          "press-style": [
+            "timed-press",
+            "hold",
+            "rapid-presses",
+            "repeated-presses",
+            "double-press",
+            "simultaneous-inputs",
+            "input-sequence"
+          ],
+          "motion-use": [
+            "no-motion",
+            "optional-motion"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}}, its cited demanding press style, and the player-facing demanding-input setting for its declared easier press style, which is not a control-remapping route",
+        "when": [
+          "an observer changes the setting and then performs the action with the easier current press style"
+        ],
+        "then": [
+          "the setting replaces the demanding press style before the binding is used",
+          "the easier press style does not remove any device motion the binding requires",
+          "the observer's easier performance emits the action input carrying the action at {{row.action-declared-in}}",
+          "the result is judged from performed play and not from a stored setting alone",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-setting-state",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default. The contract treats the press style of {{row.id}} as demanding. The observer changes the player-facing demanding-input setting, which is not a control-remapping route, and performs the action with the declared easier current press style; that performance emits the action input. The easier press style does not remove any device motion the binding requires. A stored setting alone is not evidence."
+    },
+    {
+      "id": "demanding-setting-required-motion-default",
+      "title": "the required motion of {{row.id}} follows player-can-change-it by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "when": {
+        "flag": {
+          "demanding-input-default": [
+            "player-can-change-it"
+          ]
+        },
+        "row": {
+          "demanding-input": [
+            "use-game-default"
+          ],
+          "motion-use": [
+            "required-motion"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}}, its cited required motion, and the player-facing demanding-input setting for its declared easier press style, which is not a control-remapping route",
+        "when": [
+          "an observer changes the setting and then completes the required motion with the easier current press style"
+        ],
+        "then": [
+          "the setting supplies the easier press style before the binding is used, and the required motion stays required",
+          "the easier press style never relieves the device-motion requirement",
+          "the observer's easier performance with the required motion emits the action input carrying the action at {{row.action-declared-in}}",
+          "the result is judged from performed play and not from a stored setting alone",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-setting-state",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default. The contract makes {{row.id}} demanding because it requires device motion. The demanding-input setting, which is not a control-remapping route, supplies an easier press style and never relieves the motion requirement; performed play with the required motion emits the action input. A stored setting alone is not evidence."
+    },
+    {
+      "id": "demanding-required-press-style-override",
+      "title": "the demanding press style of {{row.id}} follows required-as-written by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "when": {
+        "row": {
+          "demanding-input": [
+            "required-as-written"
+          ],
+          "press-style": [
+            "timed-press",
+            "hold",
+            "rapid-presses",
+            "repeated-presses",
+            "double-press",
+            "simultaneous-inputs",
+            "input-sequence"
+          ],
+          "motion-use": [
+            "no-motion",
+            "optional-motion"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}} and its cited demanding press style",
+        "when": [
+          "an observer completes the demanding press style and separately stops before completion"
+        ],
+        "then": [
+          "the complete demanding input emits the action input carrying the action at {{row.action-declared-in}}",
+          "the incomplete demanding input emits no action input from this contract",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default. The contract treats the press style of {{row.id}} as demanding: completing it emits the action input and stopping before completion emits none from this contract."
+    },
+    {
+      "id": "demanding-required-required-motion-override",
+      "title": "the required motion of {{row.id}} follows required-as-written by its row answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "when": {
+        "row": {
+          "demanding-input": [
+            "required-as-written"
+          ],
+          "motion-use": [
+            "required-motion"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}} and its cited required motion",
+        "when": [
+          "an observer completes the required motion and separately makes a non-motion attempt"
+        ],
+        "then": [
+          "the complete required-motion input emits the action input carrying the action at {{row.action-declared-in}}",
+          "the non-motion attempt emits no action input from this contract",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default. The contract makes {{row.id}} demanding because it requires device motion: completing the motion emits the action input and a non-motion attempt emits none from this contract."
+    },
+    {
+      "id": "demanding-required-press-style-default",
+      "title": "the demanding press style of {{row.id}} follows required-as-written by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "when": {
+        "flag": {
+          "demanding-input-default": [
+            "required-as-written"
+          ]
+        },
+        "row": {
+          "demanding-input": [
+            "use-game-default"
+          ],
+          "press-style": [
+            "timed-press",
+            "hold",
+            "rapid-presses",
+            "repeated-presses",
+            "double-press",
+            "simultaneous-inputs",
+            "input-sequence"
+          ],
+          "motion-use": [
+            "no-motion",
+            "optional-motion"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}} and its cited demanding press style",
+        "when": [
+          "an observer completes the demanding press style and separately stops before completion"
+        ],
+        "then": [
+          "the complete demanding input emits the action input carrying the action at {{row.action-declared-in}}",
+          "the incomplete demanding input emits no action input from this contract",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default. The contract treats the press style of {{row.id}} as demanding: completing it emits the action input and stopping before completion emits none from this contract."
+    },
+    {
+      "id": "demanding-required-required-motion-default",
+      "title": "the required motion of {{row.id}} follows required-as-written by the game default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "when": {
+        "flag": {
+          "demanding-input-default": [
+            "required-as-written"
+          ]
+        },
+        "row": {
+          "demanding-input": [
+            "use-game-default"
+          ],
+          "motion-use": [
+            "required-motion"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}} and its cited required motion",
+        "when": [
+          "an observer completes the required motion and separately makes a non-motion attempt"
+        ],
+        "then": [
+          "the complete required-motion input emits the action input carrying the action at {{row.action-declared-in}}",
+          "the non-motion attempt emits no action input from this contract",
+          "an observer, not the running game, judges this"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default. The contract makes {{row.id}} demanding because it requires device motion: completing the motion emits the action input and a non-motion attempt emits none from this contract."
+    },
+    {
+      "id": "simpler-route-is-distinct",
+      "title": "{{row.id}} performs the same action without resembling a failed demanding input",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "simpler-inputs",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "simpler route {{row.id}}, its ordinary input at {{row.alternative-declared-in}}, and its distinction rule at {{row.distinction-rule-declared-in}}",
+        "when": [
+          "an observer successfully performs the simpler route and separately fails to finish binding {{row.action-binding}}"
+        ],
+        "then": [
+          "the successful simpler route emits the named binding's action input and contributes the same action",
+          "the failed demanding route emits no alternative action input by itself",
+          "the two records remain distinguishable under {{row.distinction-rule-declared-in}}",
+          "an observer, not the running game, judges this",
+          "the test restates nothing from either cited rule"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-observer-result",
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "Audit class: observer-judged. An observer, not the running game, judges this. Performing {{row.id}} through {{row.alternative-declared-in}} emits binding {{row.action-binding}}'s action input and contributes the same action. Failing to finish the demanding route does not trigger the alternative, and {{row.distinction-rule-declared-in}} keeps the records distinguishable. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "device-motion-rule-holds",
+      "title": "{{row.id}} follows its {{row.motion-use}} device-motion rule",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "bindings": {
+        "motion-procedure": {
+          "row_field": "motion-use",
+          "map": {
+            "no-motion": "no device motion is read while the cited non-motion performance emits the action input",
+            "optional-motion": "the completed motion gesture and its matching non-motion alternative each emit an action input carrying the same action",
+            "required-motion": "the completed cited motion performance emits the action input, while a non-motion attempt emits no action input from this binding"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "binding {{row.id}} and its physical input and device at {{row.physical-input-declared-in}}",
+        "when": [
+          "the cited performance and the corresponding motion or non-motion comparison are each attempted"
+        ],
+        "then": [
+          "{{bind:motion-procedure}}",
+          "the test asserts nothing about device-motion quality"
+        ],
+        "diagnostics": [
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "For {{row.id}} under {{row.physical-input-declared-in}}: {{bind:motion-procedure}}. The test names the address, restates nothing from it, and asserts nothing about device-motion quality."
+    },
+    {
+      "id": "one-physical-activation-emits-one-action-input",
+      "title": "one physical activation emits one action input with all matched candidates",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each reachable physical activation in the {{instance}} adoption, including one that matches several bindings where the adoption declares one",
+        "when": [
+          "the current set is matched and the contract emits its game-facing result"
+        ],
+        "then": [
+          "the activation emits one action input",
+          "that one input carries every matched binding's action as a candidate",
+          "N matched actions remain one input with N candidates and never become N inputs",
+          "where no activation matches several bindings, the multi-candidate comparison asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log",
+          "{{instance}}-candidate-set"
+        ]
+      },
+      "text": "Each reachable physical activation emits one action input carrying every matched binding's action as a candidate. N matched actions remain one input with N candidates, never N inputs. Where no activation matches several bindings, that comparison asserts nothing."
+    },
+    {
+      "id": "action-input-stops-at-handoff",
+      "title": "the action input stops at the contract boundary",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one action input emitted by the {{instance}} adoption with all matched candidates",
+        "when": [
+          "the input crosses the contract boundary"
+        ],
+        "then": [
+          "the emitted input is handed to Input forgiveness when adopted, which can supply the accepted moment, and then to Action legibility when adopted for candidate selection before one action proposal",
+          "without Action legibility, the game's cited Fixed selection rule owns shared-candidate selection",
+          "this test stops at emission and asserts nothing about forgiveness windows, offered-action presentation, candidate ordering, proposal rejection, or action effects"
+        ],
+        "diagnostics": [
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "The contract emits one action input with all matched candidates and stops there. Input forgiveness can supply the accepted moment; Action legibility, when adopted, selects a candidate before one action proposal. Otherwise the game's cited Fixed selection rule owns shared-candidate selection. This test asserts nothing about forgiveness windows, offered-action presentation, candidate ordering, proposal rejection, or action effects."
+    },
+    {
+      "id": "control-options-authority-order",
+      "title": "control options keeps its authority order",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a run that reaches platform selection, control setup, a physical activation, and the action-input boundary",
+        "when": [
+          "the decision trace is read in order"
+        ],
+        "then": [
+          "the trace orders platform, defaults, starting set, accepted control change, current set, physical match, demanding-input answer, simpler route, device-motion rule, one action-input creation, accepted-moment shared-action choice, and one action proposal",
+          "a later stage does not rewrite an earlier decision"
+        ],
+        "diagnostics": [
+          "{{instance}}-platform-selection",
+          "{{instance}}-change-log",
+          "{{instance}}-current-set",
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log"
+        ]
+      },
+      "text": "The authority order is platform, defaults, starting set, accepted control change, current set, physical match, demanding-input answer, simpler route, device-motion rule, one action-input creation, accepted-moment shared-action choice, and one action proposal. A later stage does not rewrite an earlier decision."
+    },
+    {
+      "id": "control-options-boundaries",
+      "title": "the adoption makes no promise beyond control options",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and features adjacent to its control rules",
+        "when": [
+          "the adoption's promise boundary is reviewed"
+        ],
+        "then": [
+          "the contract asserts nothing about system-level remapping, virtual-control layout editing, chord member lists, device-motion quality, or saved profiles",
+          "moving or resizing a touch control while keeping its action is not a control change",
+          "presentation of the current binding is owned by Action legibility when adopted, otherwise by the game's UI rules",
+          "the contract asserts nothing about action-input behavior after emission except the stated hand-off order"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "The contract asserts nothing about system-level remapping, virtual-control layout editing, chord member lists, device-motion quality, or saved profiles. Moving or resizing a touch control while keeping its action is not a control change. Presentation of the current binding is owned by Action legibility when adopted, otherwise by the game's UI rules. Beyond its stated hand-off order, the contract asserts nothing about an action input after emission."
+    },
+    {
+      "id": "empty-row-sets-make-no-promise",
+      "title": "empty row sets and unanswered defaults make no promise",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption, not the running game",
+        "when": [
+          "a reviewer checks each row set and the two defaults that depend on a platform row"
+        ],
+        "then": [
+          "where no platform-control-sets row exists, no platform receives a physical-control promise from this adoption; where a row exists, this clause asserts nothing",
+          "where no control-presets row exists, no named control preset is offered; where a row exists, this clause asserts nothing",
+          "where no action-bindings row exists, no physical input is promised to produce a game action; where a row exists, this clause asserts nothing",
+          "where no simpler-inputs row exists, no demanding binding promises a separate simpler input without a setting change; where a row exists, this clause asserts nothing",
+          "where no platform-control-sets row exists, this adoption makes no game-wide remapping promise; where a platform row exists, this clause asserts nothing",
+          "where no platform-control-sets row exists, this adoption makes no game-wide demanding-input promise; where a platform row exists, this clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. Where no platform row exists, no platform receives a physical-control promise, and the adoption makes no game-wide remapping or demanding-input promise; where a platform row exists, each clause asserts nothing. Where no preset, binding, or simpler-input row exists, its row set makes its stated empty-set promise; where a row exists, that clause asserts nothing."
+    },
+    {
+      "id": "preset-platform-join",
+      "title": "declaration check: preset {{row.id}} names a platform row in this adoption",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "control-presets",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and preset {{row.id}}, not the running game",
+        "when": [
+          "a reviewer checks its platform-control-set join"
+        ],
+        "then": [
+          "a platform-control-sets row with id {{row.platform-control-set}} exists in this adoption",
+          "a missing or misspelled platform row is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. Preset {{row.id}} must name an existing platform-control-sets row in this adoption: {{row.platform-control-set}}. A missing or misspelled join is a defect this test fails by construction."
+    },
+    {
+      "id": "binding-platform-join",
+      "title": "declaration check: binding {{row.id}} names a platform row in this adoption",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and binding {{row.id}}, not the running game",
+        "when": [
+          "a reviewer checks its platform-control-set join"
+        ],
+        "then": [
+          "a platform-control-sets row with id {{row.platform-control-set}} exists in this adoption",
+          "a missing or misspelled platform row is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. Binding {{row.id}} must name an existing platform-control-sets row in this adoption: {{row.platform-control-set}}. A missing or misspelled join is a defect this test fails by construction."
+    },
+    {
+      "id": "binding-preset-join",
+      "title": "declaration check: binding {{row.id}} names a preset on the same platform",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "bindings": {
+        "preset": {
+          "row_field": "press-style",
+          "map": {
+            "press": "{{row.preset}}",
+            "release": "{{row.preset}}",
+            "timed-press": "{{row.preset}}",
+            "hold": "{{row.preset}}",
+            "rapid-presses": "{{row.preset}}",
+            "repeated-presses": "{{row.preset}}",
+            "double-press": "{{row.preset}}",
+            "simultaneous-inputs": "{{row.preset}}",
+            "continuous-axis": "{{row.preset}}",
+            "gesture": "{{row.preset}}",
+            "input-sequence": "{{row.preset}}"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and binding {{row.id}}, not the running game",
+        "when": [
+          "a reviewer checks preset {{bind:preset}} and both platform names"
+        ],
+        "then": [
+          "a control-presets row with id {{bind:preset}} exists in this adoption",
+          "that preset names platform row {{row.platform-control-set}}",
+          "a missing preset or cross-platform join is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. Binding {{row.id}} must name an existing preset, {{bind:preset}}, and that preset must name the binding's platform row, {{row.platform-control-set}}. A missing preset or cross-platform join is a defect this test fails by construction."
+    },
+    {
+      "id": "optional-motion-has-no-motion-sibling",
+      "title": "declaration check: optional-motion binding {{row.id}} has a no-motion sibling",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "when": {
+        "row": {
+          "motion-use": [
+            "optional-motion"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and optional-motion binding {{row.id}}, not the running game",
+        "when": [
+          "a reviewer compares its action, platform row, preset, and motion use with the other action-bindings rows"
+        ],
+        "then": [
+          "another binding for the same action on platform row {{row.platform-control-set}} and the same preset has motion-use no-motion",
+          "any other shape is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. The contract requires optional-motion binding {{row.id}} to have another binding for the same action on platform row {{row.platform-control-set}} and the same preset with motion-use no-motion. Any other shape is a defect this test fails by construction."
+    },
+    {
+      "id": "simpler-binding-join",
+      "title": "declaration check: simpler route {{row.id}} names a binding in this adoption",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "simpler-inputs",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and simpler route {{row.id}}, not the running game",
+        "when": [
+          "a reviewer checks its action-binding join"
+        ],
+        "then": [
+          "an action-bindings row with id {{row.action-binding}} exists in this adoption",
+          "that binding's effective demanding-input answer is simpler-alternative",
+          "a missing, misspelled, or wrongly answered binding is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. The contract limits simpler-inputs rows to bindings whose effective demanding-input answer promises an alternative. Simpler route {{row.id}} must name an existing action-bindings row in this adoption, {{row.action-binding}}, and that binding's effective answer must be simpler-alternative. A missing, misspelled, or wrongly answered join is a defect this test fails by construction."
+    },
+    {
+      "id": "presets-only-has-complete-choice",
+      "title": "declaration check: every presets-only platform has two selectable complete presets",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption, not the running game",
+        "when": [
+          "a reviewer resolves each platform row's effective remapping answer and compares its preset and binding rows"
+        ],
+        "then": [
+          "each platform whose effective answer is presets-only has at least two control-presets rows whose availability is starting-and-selectable or player-selectable",
+          "every preset for that platform maps every action bound on the platform with a matching action-bindings row",
+          "a platform with another effective answer asserts nothing in this comparison",
+          "a missing choice or incomplete preset is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. Under the contract, every platform whose effective answer is presets-only must have at least two presets whose availability is starting-and-selectable or player-selectable, and every preset maps every action bound on that platform. Another effective answer asserts nothing in this comparison. A missing choice or incomplete preset is a defect this test fails by construction."
+    },
+    {
+      "id": "simpler-answer-has-row",
+      "title": "declaration check: every demanding simpler-alternative binding has a simpler row",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and binding {{row.id}}, not the running game",
+        "when": [
+          "a reviewer resolves the binding's effective demanding-input answer and classifies its cited performance"
+        ],
+        "then": [
+          "if {{row.id}} has a demanding press style or requires device motion, and its effective answer is simpler-alternative, at least one simpler-inputs row names it",
+          "otherwise this requirement asserts nothing",
+          "a missing simpler row is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. If {{row.id}} has a demanding press style or requires device motion, and its effective answer is simpler-alternative, at least one simpler-inputs row must name it. Otherwise the requirement asserts nothing. A missing simpler row is a defect this test fails by construction."
+    },
+    {
+      "id": "no-demanding-answer-has-ordinary-route",
+      "title": "declaration check: every no-demanding binding has an ordinary route",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption, binding {{row.id}}, and its cited prose, not the running game",
+        "when": [
+          "a reviewer resolves the binding's effective demanding-input answer"
+        ],
+        "then": [
+          "if the effective answer is no-demanding-presses, {{row.id}} has a non-demanding press style and does not require device motion, or its cited prose states an ordinary route to the same action",
+          "otherwise this requirement asserts nothing",
+          "a demanding-only route is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and its cited prose, not the running game. Under an effective no-demanding-presses answer, {{row.id}} must have a non-demanding press style and not require device motion, or have a cited ordinary route to the same action. Another answer asserts nothing here. A demanding-only route is a defect this test fails by construction."
+    },
+    {
+      "id": "forbidden-effective-pair-does-not-reappear",
+      "title": "declaration check: no platform or binding recreates the forbidden effective pair",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption, not the running game",
+        "when": [
+          "a reviewer resolves every platform's effective remapping answer and every binding's effective demanding-input answer"
+        ],
+        "then": [
+          "no binding has effective required-as-written on a platform with effective action-and-press-style",
+          "any platform-row or binding-row override that recreates that pair is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. The contract's demanding-input field forbids a binding from having effective required-as-written on a platform with effective action-and-press-style. A row override that recreates this forbidden pair is a defect this test fails by construction."
+    },
+    {
+      "id": "settings-citation-covers-effective-change-policy",
+      "title": "declaration check: {{row.id}}'s settings citation covers its effective policy",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption, platform row {{row.id}}, and {{row.settings-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer resolves the row's effective remapping answer and checks the cited rule"
+        ],
+        "then": [
+          "under any-action-any-input or action-and-press-style, the citation states visible conflict handling before use",
+          "under action-and-press-style, the citation states the press styles offered for each action",
+          "under swap-only, the citation states that a swap exchanges two existing assignments",
+          "under presets-only, the citation states that selection replaces the whole set and an individual binding change is refused",
+          "under fixed-bindings, the citation states the absence of changes",
+          "a missing duty is a defect this test fails by construction",
+          "the test asserts nothing about reachability beyond what the citation states"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.settings-rule-declared-in}}, not the running game. Under any-action-any-input or action-and-press-style, that citation must state visible conflict handling before use; action-and-press-style must also state the press styles offered for each action. Under swap-only, it must state that a swap exchanges two existing assignments. Under presets-only, it must state that selection replaces the whole set and an individual binding change is refused. Under fixed-bindings, it must state the absence of changes. A missing duty is a defect this test fails by construction, and the test asserts nothing about reachability beyond what the citation states."
+    },
+    {
+      "id": "shared-action-input-declaration-agrees",
+      "title": "declaration check: rows sharing an activation agree on one action input",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the physical activations, platforms, presets, and contexts described by its binding rows and citations, not the running game",
+        "when": [
+          "a reviewer groups rows that can be current together and share one physical activation"
+        ],
+        "then": [
+          "one group contains only rows on the same platform row that either all omit a preset or all name the same preset, have no disjoint cited contexts, and share one physical activation",
+          "rows in mutually exclusive presets or disjoint cited contexts are not one group and assert nothing about each other's action-input value",
+          "every group with several bindings supplies one action-input value shared by every row in that group",
+          "the emitted input carries every matched binding's action as a candidate",
+          "a lone binding's action-input name can remain implicit and asserts nothing in the shared-value comparison",
+          "a missing, different, or split shared value is a defect this test fails by construction",
+          "the test asserts nothing about a paired Action legibility adoption"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record",
+          "{{instance}}-candidate-set"
+        ]
+      },
+      "text": "This declaration check reads the adoption and its cited physical activations and contexts, not the running game. Under the contract, one group contains only rows that can be current together: they use the same platform row, either all omit a preset or all name the same preset, have no disjoint cited contexts, and share one physical activation. Rows in mutually exclusive presets or disjoint contexts are not one group and assert nothing about each other's action-input value. Every row in a multi-binding group supplies and agrees on one value, and the emitted input carries every matched action as a candidate. A lone binding's name can remain implicit and asserts nothing in the shared-value comparison. A missing, different, or split value is a defect this test fails by construction. The check asserts nothing about a paired Action legibility adoption."
+    },
+    {
+      "id": "rows-do-not-duplicate-meaning",
+      "title": "declaration check: no two rows mean the same platform, preset, or binding",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and its cited prose, not the running game",
+        "when": [
+          "a reviewer compares every pair of rows in each row set"
+        ],
+        "then": [
+          "no two platform-control-sets rows mean the same platform, edition, devices, and policy scope",
+          "no two control-presets rows mean the same preset",
+          "no two action-bindings rows mean the same binding",
+          "no two simpler-inputs rows mean the same alternative for one binding",
+          "the contract imposes no maximum row count",
+          "a duplicate meaning is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and its cited prose, not the running game. No two rows can mean the same platform, preset, binding, or simpler alternative for one binding. The contract sets no maximum row count. A duplicate meaning is a defect this test fails by construction."
+    },
+    {
+      "id": "platform-citation-duty",
+      "title": "declaration check: {{row.id}}'s platform citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.platform-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.platform-declared-in}} names one platform or edition and its supported devices, with different control behavior in another row",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.platform-declared-in}}, not the running game. The citation must name one platform or edition and its supported devices; different control behavior belongs in another row. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "methods-citation-duty",
+      "title": "declaration check: {{row.id}}'s methods citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.methods-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.methods-declared-in}} lists every complete input method for {{row.id}} and any required switch between methods",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.methods-declared-in}}, not the running game. The citation must list every complete input method for {{row.id}} and any required switch. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "settings-rule-citation-duty",
+      "title": "declaration check: {{row.id}}'s settings citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "platform-control-sets",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.settings-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer resolves {{row.id}}'s effective remapping answer and checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.settings-rule-declared-in}} states {{row.id}}'s control menu",
+          "where the platform has a control-presets row, the citation states preset selection; where it has none, this clause asserts nothing",
+          "under effective any-action-any-input or action-and-press-style, the citation states conflict handling; under another effective answer, this clause asserts nothing",
+          "under effective action-and-press-style, the citation states the press styles offered for each action; under another effective answer, this clause asserts nothing",
+          "under effective fixed-bindings, the citation states the explicit absence of changes; under another effective answer, this clause asserts nothing",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.settings-rule-declared-in}}, not the running game. The citation must always state {{row.id}}'s control menu. Where the platform declares a preset, it must state preset selection. Under effective any-action-any-input or action-and-press-style, it must state conflict handling; action-and-press-style must also state the press styles offered for each action. Under effective fixed-bindings, it must state the explicit absence of changes. A duty outside its stated condition asserts nothing. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "preset-selection-citation-duty",
+      "title": "declaration check: preset {{row.id}}'s selection citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "control-presets",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.selection-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.selection-rule-declared-in}} states the route that selects preset {{row.id}} and makes its matching action-binding rows current",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.selection-rule-declared-in}}, not the running game. The citation must state the route that selects preset {{row.id}} and makes its matching bindings current. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "binding-action-citation-duty",
+      "title": "declaration check: {{row.id}}'s action citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.action-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.action-declared-in}} names the game-facing action that {{row.id}} contributes as a candidate",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.action-declared-in}}, not the running game. The citation must name the game-facing action that {{row.id}} contributes as a candidate. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "binding-physical-input-citation-duty",
+      "title": "declaration check: {{row.id}}'s physical-input citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "bindings": {
+        "performance-duty": {
+          "row_field": "press-style",
+          "map": {
+            "press": "the press performance",
+            "release": "the release performance",
+            "timed-press": "the target moment for the timed press",
+            "hold": "the hold completion",
+            "rapid-presses": "the rapid-press rate",
+            "repeated-presses": "the repeated-press count",
+            "double-press": "the double-activation timing",
+            "simultaneous-inputs": "the simultaneous input group",
+            "continuous-axis": "the axis range and direction",
+            "gesture": "the gesture completion",
+            "input-sequence": "the directional sequence and completing press"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.physical-input-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.physical-input-declared-in}} names the physical input, its supplying device, and {{bind:performance-duty}} for {{row.id}}",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.physical-input-declared-in}}, not the running game. The citation must name {{row.id}}'s physical input, supplying device, and {{bind:performance-duty}}. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "binding-context-citation-duty",
+      "title": "declaration check: {{row.id}}'s context citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "action-bindings",
+      "bindings": {
+        "context": {
+          "row_field": "press-style",
+          "map": {
+            "press": "{{row.context-declared-in}}",
+            "release": "{{row.context-declared-in}}",
+            "timed-press": "{{row.context-declared-in}}",
+            "hold": "{{row.context-declared-in}}",
+            "rapid-presses": "{{row.context-declared-in}}",
+            "repeated-presses": "{{row.context-declared-in}}",
+            "double-press": "{{row.context-declared-in}}",
+            "simultaneous-inputs": "{{row.context-declared-in}}",
+            "continuous-axis": "{{row.context-declared-in}}",
+            "gesture": "{{row.context-declared-in}}",
+            "input-sequence": "{{row.context-declared-in}}"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{bind:context}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{bind:context}} states the context in which binding {{row.id}} exists",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{bind:context}}, not the running game. The citation must state the context in which binding {{row.id}} exists. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "simpler-alternative-citation-duty",
+      "title": "declaration check: {{row.id}}'s alternative citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "simpler-inputs",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.alternative-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.alternative-declared-in}} states the physical input and ordinary press style that perform the same action as binding {{row.action-binding}} without a setting change",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.alternative-declared-in}}, not the running game. The citation must state the physical input and ordinary press style that perform the same action as binding {{row.action-binding}} without a setting change. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "simpler-distinction-citation-duty",
+      "title": "declaration check: {{row.id}}'s distinction citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "simpler-inputs",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and {{row.distinction-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.distinction-rule-declared-in}} proves that success on {{row.id}} cannot be mistaken for failure to finish binding {{row.action-binding}}",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.distinction-rule-declared-in}}, not the running game. The citation must prove that success on {{row.id}} cannot be mistaken for failure to finish binding {{row.action-binding}}. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "control-options-hold",
+      "title": "control options holds for the whole run",
+      "type": "general",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "every accepted control change followed the platform's effective remapping answer and every refused change was refused; every binding matched only under its cited performance and emitted one action input; every demanding binding met its effective answer; every simpler route produced the same action distinguishably; every device-motion rule held; no physical activation produced more than one action input",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-platform-selection",
+          "{{instance}}-change-log",
+          "{{instance}}-current-set",
+          "{{instance}}-match-trace",
+          "{{instance}}-action-input-log",
+          "{{instance}}-observer-result",
+          "{{instance}}-setting-state"
+        ]
+      },
+      "text": "Across {{inputs:scope}}, every accepted control change follows the platform's effective remapping answer and every refused change is refused; every binding matches only under its cited performance and emits one action input; every demanding binding meets its effective answer; every simpler route produces the same action distinguishably; every device-motion rule holds; and no physical activation produces more than one action input.",
+      "inputs": {
+        "scope": {
+          "default": "every platform row on its cited devices, every preset, every binding, and every simpler route of the audited run"
+        },
+        "seeds": {
+          "default": [
+            "audit-a",
+            "audit-b"
+          ]
+        }
+      }
+    }
+  ]
+}

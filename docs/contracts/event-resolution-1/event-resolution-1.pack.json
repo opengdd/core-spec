@@ -1,0 +1,2500 @@
+{
+  "contract": "event-resolution",
+  "version": 1,
+  "templates": [
+    {
+      "id": "instant-and-turn-boundary",
+      "title": "an instant is one simultaneous moment",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "events at one moment {{instance}} treats as simultaneous, including a turn boundary where the adoption has one",
+        "when": [
+          "the moment is resolved"
+        ],
+        "then": [
+          "all events belong to one instant and follow one lifecycle",
+          "a constructed turn boundary is handled as an instant like any other; where no turn boundary exists, that clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-instant-trace"
+        ]
+      },
+      "text": "An instant is one moment the game treats as simultaneous. A turn boundary the adoption can construct is an instant like any other; where there is no turn boundary, that clause asserts nothing."
+    },
+    {
+      "id": "waiting-active-and-first-boundary",
+      "title": "waiting and active events are distinguishable",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an accepted event before and during resolution",
+        "when": [
+          "the event enters the waiting set and is selected"
+        ],
+        "then": [
+          "before selection it is recorded as a waiting event that has not begun",
+          "during ordered effect application it is recorded as the active event",
+          "the active event visits an effect boundary before its first effect"
+        ],
+        "diagnostics": [
+          "{{instance}}-waiting-set",
+          "{{instance}}-event-trace"
+        ]
+      },
+      "text": "A waiting event is accepted but has not begun. An active event is applying ordered effects. Every active event visits an effect boundary before its first effect."
+    },
+    {
+      "id": "ending-event-records-nothing",
+      "title": "ending events record no outcome while resolving",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each ending event the adoption can construct whose effects make an ending condition hold",
+        "when": [
+          "the ending event resolves and the instant later reaches settlement"
+        ],
+        "then": [
+          "resolving the ending event records no match outcome",
+          "an outcome is recorded only after the waiting set is empty at step 15",
+          "the ending record distinguishes event resolution from outcome recording",
+          "where no ending event exists, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-event-trace",
+          "{{instance}}-ending-record"
+        ]
+      },
+      "text": "Each ending event the adoption can construct follows the ordinary event lifecycle but records no outcome when it resolves. Only step 15 records an outcome, after the waiting set is empty. Where none exists, this test asserts nothing."
+    },
+    {
+      "id": "file-order-never-decides-resolution",
+      "title": "container order never decides event resolution",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two equivalent {{instance}} adoption documents whose container order or document order differs, with the same recorded random inputs where a declared random order is used",
+        "when": [
+          "the same instant is resolved from the same pre-instant state under each document"
+        ],
+        "then": [
+          "the two runs select and resolve the same events in the same declared order",
+          "no event order is taken from container order or document order"
+        ],
+        "diagnostics": [
+          "{{instance}}-order-trace",
+          "{{instance}}-settlement-report"
+        ]
+      },
+      "text": "Changing container order or document order without changing declarations never changes event resolution. Rank, a rank tie, and within-class order decide the sequence; document order never does. Step 5 says container order in the adoption file never selects an event."
+    },
+    {
+      "id": "rejection-case-nothing-changes",
+      "title": "{{row.id}} rejects with nothing-changes",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rejection-cases",
+      "when": {
+        "row": {
+          "result": [
+            "nothing-changes"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a proposal that meets the rejection case at {{row.declared-in}}",
+        "when": [
+          "the proposal is checked from a recorded pre-attempt state"
+        ],
+        "then": [
+          "the proposal ends without creating an event",
+          "no game state changes, no cost is spent, and no clock advances because of the rejection",
+          "the proposal log distinguishes this rejection from an accepted action that later produces no effect"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-state-before-after"
+        ]
+      },
+      "text": "{{row.id}} overrides or repeats the default with nothing-changes: it creates no event, changes no game state, spends no cost, and advances no clock because of the rejection. {{row.declared-in}} identifies the case; the test names the address and restates nothing from it."
+    },
+    {
+      "id": "rejection-case-cost-taken",
+      "title": "{{row.id}} rejects with cost-taken",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rejection-cases",
+      "when": {
+        "row": {
+          "result": [
+            "cost-taken"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a proposal that meets the rejection case at {{row.declared-in}} with a distinguishable complete declared cost",
+        "when": [
+          "the proposal is checked"
+        ],
+        "then": [
+          "the proposal ends without creating an event",
+          "the complete declared cost is applied once, no action effect is produced, and no clock advances because of the rejection",
+          "the proposal log distinguishes rejection with cost from acceptance followed by failure"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-cost-log"
+        ]
+      },
+      "text": "{{row.id}} rejects and applies the complete declared cost once, creates no event, produces no action effect, and advances no clock because of the rejection. {{row.declared-in}} identifies the case; the test names the address and restates nothing from it."
+    },
+    {
+      "id": "rejection-case-clock-advances",
+      "title": "{{row.id}} rejects and advances its cited clock",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rejection-cases",
+      "when": {
+        "row": {
+          "result": [
+            "clock-advances"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a proposal that meets the rejection case at {{row.declared-in}} and a distinguishable clock state governed at {{row.clock-rule-declared-in}}",
+        "when": [
+          "the proposal is checked"
+        ],
+        "then": [
+          "the proposal ends without creating an event",
+          "the clock selected by {{row.clock-rule-declared-in}} advances once, no cost is applied, and no action effect is produced",
+          "the proposal log distinguishes this rejection-driven advance from independently advancing time"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-clock-trace"
+        ]
+      },
+      "text": "{{row.id}} rejects, spends no cost, produces no action effect, and advances once the clock selected by {{row.clock-rule-declared-in}}. The test demands that observable consequence, names the address, and restates nothing from it or {{row.declared-in}}."
+    },
+    {
+      "id": "rejection-case-cost-and-clock",
+      "title": "{{row.id}} rejects with its cost and cited clock advance",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rejection-cases",
+      "when": {
+        "row": {
+          "result": [
+            "cost-and-clock"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a proposal that meets the rejection case at {{row.declared-in}}, its complete declared cost, and a distinguishable clock state governed at {{row.clock-rule-declared-in}}",
+        "when": [
+          "the proposal is checked"
+        ],
+        "then": [
+          "the proposal ends without creating an event",
+          "the complete declared cost is applied once and the clock selected by {{row.clock-rule-declared-in}} advances once",
+          "no action effect is produced and the proposal log distinguishes rejection from acceptance"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-cost-log",
+          "{{instance}}-clock-trace"
+        ]
+      },
+      "text": "{{row.id}} rejects, applies the complete declared cost once, advances once the clock selected by {{row.clock-rule-declared-in}}, and produces no action effect. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "rejection-case-derates-and-enters-lifecycle",
+      "title": "{{row.id}} accepts a scaled action",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rejection-cases",
+      "when": {
+        "row": {
+          "result": [
+            "derate"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a proposal that meets the case at {{row.declared-in}} and can be scaled by {{row.scale-rule-declared-in}}",
+        "when": [
+          "the proposal is checked and the accepted event settles"
+        ],
+        "then": [
+          "the scale rule at {{row.scale-rule-declared-in}} produces the action's complete scaled effect and cost",
+          "the proposal is recorded as accepted rather than rejected, creates one payload once, and continues through the event lifecycle",
+          "the proposal log distinguishes the accepted scaled action from a rejected action"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-event-trace",
+          "{{instance}}-cost-log"
+        ]
+      },
+      "text": "{{row.id}} accepts a scaled action rather than rejecting it. {{row.scale-rule-declared-in}} supplies the scale; the accepted action creates one payload once and continues through the event lifecycle. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "rejection-default-applies-without-row",
+      "title": "the rejected-action default governs cases without rows",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "rejected-action-effect": [
+            "nothing-changes",
+            "cost-taken",
+            "not-applicable"
+          ]
+        }
+      },
+      "bindings": {
+        "result": {
+          "flag": "rejected-action-effect",
+          "map": {
+            "nothing-changes": "each such proposal ends without an event, changes no state, spends no cost, and advances no clock because of the rejection; the proposal log distinguishes rejection from ordinary acceptance; where no such rejected proposal exists, this test asserts nothing",
+            "cost-taken": "each such proposal ends without an event, applies its complete declared cost once, produces no effect, and advances no clock because of the rejection; the proposal log distinguishes rejection from ordinary acceptance; where no such rejected proposal exists, this test asserts nothing",
+            "not-applicable": "no proposal in this family has a rejection branch; every proposal is admitted and the proposal log records each as an ordinary acceptance"
+          }
+        },
+        "given": {
+          "flag": "rejected-action-effect",
+          "map": {
+            "nothing-changes": "each rejected proposal that matches no rejection-cases row",
+            "cost-taken": "each rejected proposal that matches no rejection-cases row",
+            "not-applicable": "each proposal this adoption governs"
+          }
+        },
+        "text": {
+          "flag": "rejected-action-effect",
+          "map": {
+            "nothing-changes": "For every rejected proposal with no matching rejection-cases row, the selected default applies once: it ends without an event, changes no state, spends no cost, and advances no clock because of the rejection. Where no such rejected proposal exists, this test asserts nothing.",
+            "cost-taken": "For every rejected proposal with no matching rejection-cases row, the selected default applies once: it ends without an event, applies its complete declared cost once, produces no effect, and advances no clock because of the rejection. Where no such rejected proposal exists, this test asserts nothing.",
+            "not-applicable": "No proposal in this family has a rejection branch: every proposal is admitted, and the proposal log records each as an ordinary acceptance."
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{bind:given}}",
+        "when": [
+          "the proposal is checked"
+        ],
+        "then": [
+          "{{bind:result}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-cost-log",
+          "{{instance}}-clock-trace"
+        ]
+      },
+      "text": "{{bind:text}}"
+    },
+    {
+      "id": "rejection-is-repeatable-from-identical-state",
+      "title": "a rejected proposal is repeatable from identical state",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two executions of each rejecting proposal the adoption can construct from identical recorded pre-attempt states",
+        "when": [
+          "the proposal is checked in each execution"
+        ],
+        "then": [
+          "both executions produce the same rejection result and the same recorded cost and clock consequence",
+          "the comparison starts from identical pre-attempt state rather than the state left by the first execution",
+          "where no rejecting proposal exists, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-state-before-after"
+        ]
+      },
+      "text": "The same proposal rejected from an identical pre-attempt state produces the same result. The comparison resets the whole pre-attempt state; it does not repeat from state changed by an earlier attempt."
+    },
+    {
+      "id": "accepted-proposal-creates-one-event",
+      "title": "an accepted proposal commits once and creates one event",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a valid proposal with distinguishable payload values, event class, due instant, and an ordinary cost where its Fixed rule declares one",
+        "when": [
+          "the proposal is accepted and its event is admitted",
+          "where the adoption can construct later source loss, the source becomes unavailable before a captured value is used"
+        ],
+        "then": [
+          "where an ordinary cost is declared, it is committed once at the point its Fixed game rule names; otherwise the cost clause asserts nothing",
+          "one event payload is created once and enters its declared event class at its due instant",
+          "the payload contains every value required to survive later source loss, while uncaptured state is read only when an effect resolves",
+          "where later source loss cannot be constructed, the payload-survival observation asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-cost-log",
+          "{{instance}}-waiting-set",
+          "{{instance}}-event-trace"
+        ]
+      },
+      "text": "An accepted proposal creates one payload once and enters its declared event class at its due instant. Where it has an ordinary cost, that cost commits once at the point its rule names; otherwise the cost clause asserts nothing. The payload captures every value that must survive later source loss; where no such loss can occur, that observation asserts nothing."
+    },
+    {
+      "id": "new-event-uses-one-admission-path",
+      "title": "a new event uses the interrupt path or caused-event path",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "events created after an instant opens, including valid declared interrupts and other new events where the adoption can construct them",
+        "when": [
+          "each new event is admitted"
+        ],
+        "then": [
+          "an event backed by a valid interrupts row enters only through the interrupt path and is governed by interrupt-entry",
+          "every other new event due now follows caused-events",
+          "a branch the adoption cannot construct asserts nothing and no event uses both paths"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-interrupt-report",
+          "{{instance}}-caused-event-report"
+        ]
+      },
+      "text": "After an instant opens, a valid declared interrupt enters only through the interrupt path. Every other newly created event due now follows caused-events. An unavailable branch asserts nothing, and no event uses both paths."
+    },
+    {
+      "id": "lowest-eligible-rank-resolves-first",
+      "title": "the lowest eligible rank resolves first",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each instant the adoption can construct with eligible waiting events from at least two declared ranks",
+        "when": [
+          "the next waiting event is selected repeatedly"
+        ],
+        "then": [
+          "each selection comes from the lowest rank that is eligible at that selection",
+          "selection does not change the selected event's payload",
+          "where no instant has two eligible ranks, the comparison asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-waiting-set",
+          "{{instance}}-order-trace"
+        ]
+      },
+      "text": "At every selection, the lowest eligible rank resolves first without changing the selected event's payload. Where no instant has two eligible ranks, the comparison asserts nothing. Step 4 selects the lowest eligible rank; step 5 selects within the class without changing the payload."
+    },
+    {
+      "id": "event-class-never-passes-lower-rank",
+      "title": "{{row.id}} at rank {{row.rank}} never passes a lower rank",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "event-classes",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an eligible {{row.id}} event and an eligible event of a lower declared rank in the same instant",
+        "when": [
+          "the waiting set is selected"
+        ],
+        "then": [
+          "the lower-rank event is selected before the {{row.id}} event",
+          "where no lower-rank event is eligible with {{row.id}}, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-waiting-set",
+          "{{instance}}-order-trace"
+        ]
+      },
+      "text": "An event of {{row.id}} at rank {{row.rank}} never resolves before an eligible lower-rank event in the same instant. Where the adoption cannot construct that pairing, the test asserts nothing."
+    },
+    {
+      "id": "within-class-stable-index",
+      "title": "{{row.class-id}} uses stable index order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "within-class-rules",
+      "when": {
+        "row": {
+          "order": [
+            "stable-index"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two eligible {{row.class-id}} events with different {{row.index-name}} values, plus equal first values where the row names a second index and the adoption can construct them",
+        "when": [
+          "their within-class order is selected"
+        ],
+        "then": [
+          "the event with the lower {{row.index-name}} resolves first",
+          "where the row names a second index, equal first numbers resolve by the lower second number; otherwise equal first numbers cannot arise or cannot change the result",
+          "the order trace distinguishes selection by stable index from selection by rank or container order"
+        ],
+        "diagnostics": [
+          "{{instance}}-order-trace"
+        ]
+      },
+      "text": "Within {{row.class-id}}, lower {{row.index-name}} resolves first. Where the row names a second index, equal first numbers resolve by it; otherwise equal first numbers cannot arise or cannot change the result."
+    },
+    {
+      "id": "within-class-arrival-order",
+      "title": "{{row.class-id}} uses stable arrival order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "within-class-rules",
+      "when": {
+        "row": {
+          "order": [
+            "arrival-order"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two eligible {{row.class-id}} events admitted at distinguishable times in one instant",
+        "when": [
+          "their within-class order is selected more than once during the instant"
+        ],
+        "then": [
+          "the earlier admitted event resolves first",
+          "admission order remains stable for the complete instant and never changes with container order"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-order-trace"
+        ]
+      },
+      "text": "Within {{row.class-id}}, earlier admission resolves first, and admission order remains stable for the complete instant."
+    },
+    {
+      "id": "within-class-map-reading-order",
+      "title": "{{row.class-id}} follows its cited map reading order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "within-class-rules",
+      "when": {
+        "row": {
+          "order": [
+            "map-reading-order"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "eligible {{row.class-id}} events in different rows and columns of the grid cited at {{row.grid-declared-in}}",
+        "when": [
+          "their within-class order is selected"
+        ],
+        "then": [
+          "the event in the grid's own first row resolves first and, within one row, the event in its own first column resolves first",
+          "the order trace attributes the result to map reading order rather than container order"
+        ],
+        "diagnostics": [
+          "{{instance}}-order-trace"
+        ]
+      },
+      "text": "Within {{row.class-id}}, the grid at {{row.grid-declared-in}} supplies its own first row and first column. The first row resolves first, then the first column. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "within-class-clockwise-order",
+      "title": "{{row.class-id}} follows its cited clockwise order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "within-class-rules",
+      "when": {
+        "row": {
+          "order": [
+            "clockwise"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "eligible {{row.class-id}} events around the centre and first direction of the grid at {{row.grid-declared-in}}, including equal angle and distance",
+        "when": [
+          "their within-class order is selected"
+        ],
+        "then": [
+          "events resolve by clockwise angle from the grid's centre and first direction",
+          "equal angle and distance resolve by lower {{row.index-name}}",
+          "the order trace attributes the result to clockwise order and its stable-index tie-break"
+        ],
+        "diagnostics": [
+          "{{instance}}-order-trace"
+        ]
+      },
+      "text": "Within {{row.class-id}}, the grid at {{row.grid-declared-in}} supplies the centre, first direction, and clockwise sense. Clockwise angle orders the events, and lower {{row.index-name}} breaks equal angle and distance. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "within-class-no-visible-order",
+      "title": "{{row.class-id}} exposes no within-class order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "within-class-rules",
+      "when": {
+        "row": {
+          "order": [
+            "no-visible-order"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "every permitted execution order of eligible {{row.class-id}} events from the same pre-instant state",
+        "when": [
+          "the instant settles under each permitted order"
+        ],
+        "then": [
+          "no {{row.class-id}} event observes another event of that class during the instant",
+          "every permitted order produces the same game state and player-facing result",
+          "where two such events cannot be ready together, the comparison asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-order-trace",
+          "{{instance}}-settlement-report"
+        ]
+      },
+      "text": "{{row.class-id}} exposes no within-class order: no event observes another of that class, and every permitted order yields the same game state and player-facing result. If two cannot be ready together, the comparison asserts nothing."
+    },
+    {
+      "id": "within-class-declared-random-order",
+      "title": "{{row.class-id}} uses its cited random order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "within-class-rules",
+      "when": {
+        "row": {
+          "order": [
+            "declared-random"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "eligible {{row.class-id}} events and recorded random inputs for the rule at {{row.rule-declared-in}}",
+        "when": [
+          "the rule produces their within-class order"
+        ],
+        "then": [
+          "one total order is produced for the instant and the events resolve in it",
+          "container order never selects or changes the result",
+          "the order trace records the cited rule and the order it produced"
+        ],
+        "diagnostics": [
+          "{{instance}}-order-trace",
+          "{{instance}}-random-record"
+        ]
+      },
+      "text": "Within {{row.class-id}}, the random rule at {{row.rule-declared-in}} produces one total order for the instant; container order never decides it. The test demands the produced order and restates nothing from the cited rule."
+    },
+    {
+      "id": "within-class-game-rule-order",
+      "title": "{{row.class-id}} uses its cited game rule order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "within-class-rules",
+      "when": {
+        "row": {
+          "order": [
+            "game-rule"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "eligible {{row.class-id}} events whose order is governed at {{row.rule-declared-in}}",
+        "when": [
+          "their within-class order is selected"
+        ],
+        "then": [
+          "the cited rule produces one total deterministic order and the events resolve in it",
+          "container order never selects or changes the result",
+          "the order trace records the cited rule and produced order"
+        ],
+        "diagnostics": [
+          "{{instance}}-order-trace"
+        ]
+      },
+      "text": "Within {{row.class-id}}, {{row.rule-declared-in}} produces one total deterministic order; container order never decides it. The test demands the produced order and restates nothing from the cited rule."
+    },
+    {
+      "id": "rank-tie-stable-index",
+      "title": "{{row.id}} orders its tied classes by stable index",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rank-ties",
+      "when": {
+        "row": {
+          "tie-break": [
+            "stable-index"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "eligible events of the classes listed by {{row.class-ids}} at shared rank {{row.rank}} with different {{row.index-name}} values, plus equal first values where the row names a second index",
+        "when": [
+          "the shared-rank order is selected"
+        ],
+        "then": [
+          "one total order over all events of all listed classes is produced with lower {{row.index-name}} first",
+          "where the row names a second index, equal first numbers resolve by the lower second number; otherwise equal first numbers cannot arise or cannot change the result",
+          "the order trace distinguishes the rank tie from ordinary within-class selection"
+        ],
+        "diagnostics": [
+          "{{instance}}-order-trace"
+        ]
+      },
+      "text": "At rank {{row.rank}}, {{row.id}} produces one total order over {{row.class-ids}} with lower {{row.index-name}} first. Where the row names a second index, equal first numbers resolve by it; otherwise equal first numbers cannot arise or cannot change the result."
+    },
+    {
+      "id": "rank-tie-arrival-order",
+      "title": "{{row.id}} orders its tied classes by stable arrival",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rank-ties",
+      "when": {
+        "row": {
+          "tie-break": [
+            "arrival-order"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "events of the classes listed by {{row.class-ids}} admitted at distinguishable times at shared rank {{row.rank}}",
+        "when": [
+          "the shared-rank order is selected"
+        ],
+        "then": [
+          "one total order over all events of all listed classes is produced with earlier admission first",
+          "admission order remains stable for the complete instant"
+        ],
+        "diagnostics": [
+          "{{instance}}-proposal-log",
+          "{{instance}}-order-trace"
+        ]
+      },
+      "text": "At rank {{row.rank}}, {{row.id}} produces one total order over {{row.class-ids}} with earlier admission first, and admission order stays stable for the instant."
+    },
+    {
+      "id": "rank-tie-map-reading-order",
+      "title": "{{row.id}} follows its cited map reading order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rank-ties",
+      "when": {
+        "row": {
+          "tie-break": [
+            "map-reading-order"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "eligible events of {{row.class-ids}} in different rows and columns of the grid at {{row.grid-declared-in}}",
+        "when": [
+          "the shared-rank order is selected"
+        ],
+        "then": [
+          "one total order over all events of all listed classes follows the grid's own first row and then its own first column",
+          "the order trace distinguishes the rank tie from container order"
+        ],
+        "diagnostics": [
+          "{{instance}}-order-trace"
+        ]
+      },
+      "text": "For {{row.id}}, the grid at {{row.grid-declared-in}} supplies its own first row and first column and produces one total order over {{row.class-ids}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "rank-tie-clockwise-order",
+      "title": "{{row.id}} follows its cited clockwise order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rank-ties",
+      "when": {
+        "row": {
+          "tie-break": [
+            "clockwise"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "eligible events of {{row.class-ids}} around the centre and first direction of {{row.grid-declared-in}}, including equal angle and distance",
+        "when": [
+          "the shared-rank order is selected"
+        ],
+        "then": [
+          "one total order over all events of all listed classes follows clockwise angle from the grid's centre and first direction",
+          "equal angle and distance resolve by lower {{row.index-name}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-order-trace"
+        ]
+      },
+      "text": "For {{row.id}}, {{row.grid-declared-in}} supplies the centre, first direction, and clockwise sense for one total order over {{row.class-ids}}; lower {{row.index-name}} breaks equal angle and distance. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "rank-tie-no-visible-order",
+      "title": "{{row.id}} exposes no shared-rank order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rank-ties",
+      "when": {
+        "row": {
+          "tie-break": [
+            "no-visible-order"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "every permitted total order of eligible events from {{row.class-ids}} at rank {{row.rank}}",
+        "when": [
+          "the instant settles under each permitted order"
+        ],
+        "then": [
+          "no event in the tied classes observes another tied event during the instant",
+          "every permitted total order produces the same game state and player-facing result",
+          "where events from two listed classes cannot be ready together, that comparison asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-order-trace",
+          "{{instance}}-settlement-report"
+        ]
+      },
+      "text": "For {{row.id}}, any total order over {{row.class-ids}} is permitted only because no tied event observes another and every permitted order yields the same state and player-facing result. An unavailable pairing asserts nothing."
+    },
+    {
+      "id": "rank-tie-declared-random-order",
+      "title": "{{row.id}} uses its cited random order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rank-ties",
+      "when": {
+        "row": {
+          "tie-break": [
+            "declared-random"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "eligible events of {{row.class-ids}} and recorded random inputs for {{row.rule-declared-in}}",
+        "when": [
+          "the shared-rank order is selected"
+        ],
+        "then": [
+          "the cited rule produces one total order over all listed classes for the instant and the events resolve in it",
+          "container order never selects or changes the result"
+        ],
+        "diagnostics": [
+          "{{instance}}-order-trace",
+          "{{instance}}-random-record"
+        ]
+      },
+      "text": "For {{row.id}}, the random rule at {{row.rule-declared-in}} produces one total order over {{row.class-ids}}; container order never decides it. The test demands the produced order and restates nothing from the cited rule."
+    },
+    {
+      "id": "rank-tie-game-rule-order",
+      "title": "{{row.id}} uses its cited game rule order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rank-ties",
+      "when": {
+        "row": {
+          "tie-break": [
+            "game-rule"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "eligible events of {{row.class-ids}} governed at {{row.rule-declared-in}}",
+        "when": [
+          "the shared-rank order is selected"
+        ],
+        "then": [
+          "the cited rule produces one total deterministic order over all listed classes and the events resolve in it",
+          "container order never selects or changes the result"
+        ],
+        "diagnostics": [
+          "{{instance}}-order-trace"
+        ]
+      },
+      "text": "For {{row.id}}, {{row.rule-declared-in}} produces one total deterministic order over {{row.class-ids}}; container order never decides it. The test demands the produced order and restates nothing from the cited rule."
+    },
+    {
+      "id": "general-within-class-order",
+      "title": "the general within-class answer covers classes without another order",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "within-class-order": [
+            "stable-index",
+            "arrival-order",
+            "map-reading-order",
+            "clockwise",
+            "no-visible-order",
+            "declared-random"
+          ]
+        }
+      },
+      "bindings": {
+        "order": {
+          "flag": "within-class-order",
+          "map": {
+            "stable-index": "the general answer has no named data to compare here, so two ready events cannot arise or cannot change the result",
+            "arrival-order": "earlier admission resolves first and admission order remains stable for the instant",
+            "map-reading-order": "the general answer has no named data to compare here, so two ready events cannot arise or cannot change the result",
+            "clockwise": "the general answer has no named data to compare here, so two ready events cannot arise or cannot change the result",
+            "no-visible-order": "no event observes another of its class and every permitted order produces the same game state and player-facing result",
+            "declared-random": "the general answer has no named data to compare here, so two ready events cannot arise or cannot change the result"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "each event class with no within-class-rules row and no shared rank",
+        "when": [
+          "two events of that class are ready together where the adoption can construct them"
+        ],
+        "then": [
+          "{{bind:order}}",
+          "where no such class or pair exists, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-order-trace",
+          "{{instance}}-settlement-report"
+        ]
+      },
+      "text": "For every class without a class row and without a shared rank, {{bind:order}}. Where no such class or pair exists, this test asserts nothing."
+    },
+    {
+      "id": "presentation-never-holds-event",
+      "title": "{{row.event-class}} never waits for {{row.presentation-cue}}",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "presentation-driven-events",
+      "when": {
+        "flag": {
+          "presentation-timing": [
+            "never"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected {{row.event-class}} event while {{row.presentation-cue}} is unfinished",
+        "when": [
+          "presentation waiting is checked"
+        ],
+        "then": [
+          "the event is admitted immediately and never waits for the cue",
+          "the instant's order and game timing are unchanged by that cue"
+        ],
+        "diagnostics": [
+          "{{instance}}-order-trace",
+          "{{instance}}-presentation-trace"
+        ]
+      },
+      "text": "{{row.event-class}} events never wait for {{row.presentation-cue}}. {{row.declared-in}} names the cue rule; the test names the address and restates nothing from it."
+    },
+    {
+      "id": "presentation-delay-holds-following-events",
+      "title": "{{row.event-class}} waits for {{row.presentation-cue}} without reordering",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "presentation-driven-events",
+      "when": {
+        "flag": {
+          "presentation-timing": [
+            "may-delay"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected {{row.event-class}} event with unfinished {{row.presentation-cue}} and a later eligible event",
+        "when": [
+          "the cue remains unfinished and then finishes under {{row.declared-in}}"
+        ],
+        "then": [
+          "the selected event and every event behind it remain held until the cue finishes",
+          "no later event passes it, and the held event then resumes with its original payload",
+          "the instant remains open while the event is held"
+        ],
+        "diagnostics": [
+          "{{instance}}-waiting-set",
+          "{{instance}}-presentation-trace",
+          "{{instance}}-order-trace"
+        ]
+      },
+      "text": "An unfinished {{row.presentation-cue}} holds {{row.event-class}} and every event behind it until the cue finishes; none passes it, and the instant cannot close. {{row.declared-in}} names the cue rule; the test names the address and restates nothing from it."
+    },
+    {
+      "id": "presentation-delay-skips-only-held-event",
+      "title": "{{row.event-class}} may be passed while {{row.presentation-cue}} is unfinished",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "presentation-driven-events",
+      "when": {
+        "flag": {
+          "presentation-timing": [
+            "may-delay-and-reorder"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected {{row.event-class}} event with unfinished {{row.presentation-cue}} and a later eligible event",
+        "when": [
+          "presentation waiting skips the selected event and the cue later finishes under {{row.declared-in}}"
+        ],
+        "then": [
+          "only the held event is skipped and selection returns to the waiting set",
+          "the later eligible event resolves before it, while the held event keeps its original payload",
+          "the held event becomes eligible when the cue finishes and the instant remains open until it resolves"
+        ],
+        "diagnostics": [
+          "{{instance}}-waiting-set",
+          "{{instance}}-presentation-trace",
+          "{{instance}}-order-trace"
+        ]
+      },
+      "text": "While {{row.presentation-cue}} is unfinished, only the selected {{row.event-class}} event is skipped; later eligible events pass it, its original payload remains, and the instant cannot close. {{row.declared-in}} names the cue rule; the test names the address and restates nothing from it."
+    },
+    {
+      "id": "unnamed-event-has-no-presentation-wait",
+      "title": "events with no presentation row wait for no cue of their own",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each selected event class not named by a presentation-driven-events row",
+        "when": [
+          "presentation waiting is checked"
+        ],
+        "then": [
+          "the event never waits for a cue of its own; where the adoption answers may-delay and it stands behind a held event, it waits with that event; otherwise it is admitted at once",
+          "where every selected class is named by a presentation row, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-presentation-trace",
+          "{{instance}}-order-trace"
+        ]
+      },
+      "text": "A selected event named by no presentation-driven-events row never waits for a cue of its own; where the adoption answers may-delay and it stands behind a held event, it waits with that event; otherwise it is admitted at once. Where every selected class has a row, this test asserts nothing. This follows the presentation-timing option semantics and step 6."
+    },
+    {
+      "id": "terminal-collision-rows-cover-ending-pairs",
+      "title": "declaration check: terminal-collision rows cover every ending pair",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the ending pairs its Fixed rules can construct, not the running game",
+        "when": [
+          "a reviewer compares every pair with terminal-collisions"
+        ],
+        "then": [
+          "a terminal-collisions row exists for every pair that can produce a win and a loss at the same instant",
+          "the terminal-collisions when-empty sentence supplies the empty direction",
+          "a constructible pair with no row is a defect this test fails by construction; where no pair can meet, this check asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record",
+          "{{instance}}-ending-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and its Fixed ending rules, not the running game. A terminal-collisions row must exist for every win-and-loss pair that can meet at one instant; the collection's when-empty sentence supplies the empty direction. A constructible pair with no row is a defect this test fails by construction; where no pair can meet, the check asserts nothing."
+    },
+    {
+      "id": "same-target-rows-cover-removal-collisions",
+      "title": "declaration check: same-target rows cover every removal collision",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the target-removal cases its Fixed rules can construct, not the running game",
+        "when": [
+          "a reviewer compares every target kind with same-target-cases and same-target-exceptions"
+        ],
+        "then": [
+          "a same-target-cases or same-target-exceptions row exists for every target kind for which two events can each remove one target at one instant",
+          "the two row sets' when-empty sentences supply the empty direction",
+          "a constructible target kind with no row is a defect this test fails by construction; where no such collision can occur, this check asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record",
+          "{{instance}}-collision-report"
+        ]
+      },
+      "text": "This declaration check reads the adoption and its Fixed removal rules, not the running game. A same-target-cases or same-target-exceptions row must exist for every target kind with a same-instant removal collision; the row sets' when-empty sentences supply the empty direction. A constructible target kind with no row is a defect this test fails by construction; where none can occur, the check asserts nothing. This says nothing about a shared target with no removal."
+    },
+    {
+      "id": "caused-event-rows-cover-due-now-causes",
+      "title": "declaration check: caused-event rows cover every due-now cause",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the non-interrupt event causes its Fixed rules can construct, not the running game",
+        "when": [
+          "a reviewer compares every newly caused due-now kind with caused-event-kinds"
+        ],
+        "then": [
+          "a caused-event-kinds row exists for every non-interrupt event caused due in the same instant",
+          "the caused-event-kinds when-empty sentence supplies the empty direction",
+          "a constructible due-now caused event with no row is a defect this test fails by construction; where no such event exists, this check asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record",
+          "{{instance}}-caused-event-report"
+        ]
+      },
+      "text": "This declaration check reads the adoption and its Fixed cause rules, not the running game. A caused-event-kinds row must exist for every non-interrupt event caused due in the same instant; the collection's when-empty sentence supplies the empty direction. A constructible due-now caused event with no row is a defect this test fails by construction; where none exists, the check asserts nothing."
+    },
+    {
+      "id": "interrupt-rows-cover-stops-and-replacements",
+      "title": "declaration check: interrupt rows cover every stop and replacement",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the event interactions its Fixed rules can construct after resolution starts, not the running game",
+        "when": [
+          "a reviewer compares every stopping or replacement interaction with interrupts"
+        ],
+        "then": [
+          "an interrupts row exists for every event that stops or replaces another after selection, including before its first effect",
+          "the interrupts when-empty sentence supplies the empty direction",
+          "a constructible stopping or replacement interaction with no row is a defect this test fails by construction; where no such interaction exists, this check asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record",
+          "{{instance}}-interrupt-report"
+        ]
+      },
+      "text": "This declaration check reads the adoption and its Fixed interaction rules, not the running game. An interrupts row must exist for every event that stops or replaces another after selection, including before its first effect; the collection's when-empty sentence supplies the empty direction. A constructible stopping or replacement interaction with no row is a defect this test fails by construction; where none exists, the check asserts nothing."
+    },
+    {
+      "id": "same-target-general-resolution",
+      "title": "{{row.target-kind}} uses the general collision result",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "same-target-cases",
+      "when": {
+        "flag": {
+          "two-events-one-target": [
+            "only-first-resolves",
+            "all-resolve-one-ending",
+            "all-resolve-each-ending"
+          ]
+        }
+      },
+      "bindings": {
+        "result": {
+          "flag": "two-events-one-target",
+          "map": {
+            "only-first-resolves": "the first ordered event applies to the target and removes it; every later group member applies nothing to that target",
+            "all-resolve-one-ending": "all group members apply to the target in order, removal waits until the complete group ends, and one removal consequence is recorded",
+            "all-resolve-each-ending": "all group members apply in order and each records its own declared removal consequence, even after an earlier member recorded one"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "two events in one instant that can each remove one {{row.target-kind}} under {{row.declared-in}}",
+        "when": [
+          "their collision group resolves"
+        ],
+        "then": [
+          "{{bind:result}}",
+          "the collision report distinguishes this result from an orphan result or an ordinary event with no effect"
+        ],
+        "diagnostics": [
+          "{{instance}}-collision-report",
+          "{{instance}}-event-trace"
+        ]
+      },
+      "text": "For {{row.target-kind}}, {{bind:result}}. {{row.declared-in}} identifies the collision case; the test names the address and restates nothing from it."
+    },
+    {
+      "id": "same-target-exception-resolution",
+      "title": "{{row.target-kind}} uses its collision exception",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "same-target-exceptions",
+      "when": {
+        "row": {
+          "resolution": [
+            "only-first-resolves",
+            "all-resolve-one-ending",
+            "all-resolve-each-ending"
+          ]
+        }
+      },
+      "bindings": {
+        "result": {
+          "row_field": "resolution",
+          "map": {
+            "only-first-resolves": "the first ordered event applies to the target and removes it; every later group member applies nothing to that target",
+            "all-resolve-one-ending": "all group members apply to the target in order, removal waits until the complete group ends, and one removal consequence is recorded",
+            "all-resolve-each-ending": "all group members apply in order and each records its own declared removal consequence, even after an earlier member recorded one"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "two events in one instant that can each remove one {{row.target-kind}} under {{row.declared-in}}",
+        "when": [
+          "their collision group resolves"
+        ],
+        "then": [
+          "{{bind:result}}",
+          "this row replaces the general answer only for {{row.target-kind}}",
+          "the collision report distinguishes this result from an orphan result"
+        ],
+        "diagnostics": [
+          "{{instance}}-collision-report",
+          "{{instance}}-event-trace"
+        ]
+      },
+      "text": "{{row.target-kind}} is an exception: {{bind:result}}. The row replaces the general answer only for this target kind. {{row.declared-in}} identifies the collision; the test names the address and restates nothing from it."
+    },
+    {
+      "id": "collision-precedes-orphan-check",
+      "title": "same-target grouping precedes the orphan check",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each same-target collision group the adoption can construct, plus each non-member event that can resolve before deferred removal",
+        "when": [
+          "the group is settled and source and target availability are checked"
+        ],
+        "then": [
+          "the same-target decision is settled before the general orphan check",
+          "removal inside the group never turns another group member into an orphan",
+          "under all-resolve-one-ending, the target remains live for group members and any non-member that resolves before the group ends",
+          "where no such group or non-member exists, the corresponding clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-collision-report",
+          "{{instance}}-orphan-report",
+          "{{instance}}-event-trace"
+        ]
+      },
+      "text": "For each same-target collision group the adoption can construct, grouping settles before the orphan check and removal inside it never orphans another member. Under all-resolve-one-ending, the target stays live for members and for a non-member that resolves before the group ends. An unavailable case asserts nothing."
+    },
+    {
+      "id": "orphan-override-resolves-what-remains",
+      "title": "{{row.id}} resolves what remains",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "orphan-cases",
+      "when": {
+        "row": {
+          "resolution": [
+            "resolves-what-remains"
+          ]
+        }
+      },
+      "bindings": {
+        "object": {
+          "row_field": "missing",
+          "map": {
+            "source": "source",
+            "target": "target",
+            "source-or-target": "source or target"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "a waiting and then active {{row.event-class}} event whose required {{bind:object}} becomes unavailable under {{row.declared-in}}",
+        "when": [
+          "availability is checked before the first effect and at every later effect boundary"
+        ],
+        "then": [
+          "the event keeps its captured payload and skips only effects requiring the missing object",
+          "every independent remaining effect resolves in declared order",
+          "the orphan report distinguishes this route from cancellation and from an event that independently had no applicable effect"
+        ],
+        "diagnostics": [
+          "{{instance}}-orphan-report",
+          "{{instance}}-event-trace"
+        ]
+      },
+      "text": "For {{row.id}}, a missing {{bind:object}} leaves the captured payload in place. Only effects needing that object are skipped; every independent effect resolves. {{row.declared-in}} identifies the case; the test names the address and restates nothing from it."
+    },
+    {
+      "id": "orphan-override-is-cancelled",
+      "title": "{{row.id}} is cancelled",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "orphan-cases",
+      "when": {
+        "row": {
+          "resolution": [
+            "is-cancelled"
+          ]
+        }
+      },
+      "bindings": {
+        "object": {
+          "row_field": "missing",
+          "map": {
+            "source": "source",
+            "target": "target",
+            "source-or-target": "source or target"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "waiting and active {{row.event-class}} events whose required {{bind:object}} becomes unavailable under {{row.declared-in}}",
+        "when": [
+          "availability is checked before the first effect and at every later effect boundary"
+        ],
+        "then": [
+          "a waiting event is removed and an active event discards every remaining effect",
+          "no committed cost or effect is restored",
+          "the orphan report distinguishes cancellation from resolving what remains and from an event that independently produced no effect"
+        ],
+        "diagnostics": [
+          "{{instance}}-orphan-report",
+          "{{instance}}-event-trace",
+          "{{instance}}-cost-log"
+        ]
+      },
+      "text": "For {{row.id}}, losing the required {{bind:object}} removes a waiting event or discards an active event's remaining effects. Committed costs and effects remain. {{row.declared-in}} identifies the case; the test names the address and restates nothing from it."
+    },
+    {
+      "id": "orphan-default-row",
+      "title": "{{row.id}} uses the orphan default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "orphan-cases",
+      "when": {
+        "flag": {
+          "orphaned-events": [
+            "resolves-what-remains",
+            "is-cancelled"
+          ]
+        },
+        "row": {
+          "resolution": [
+            "default"
+          ]
+        }
+      },
+      "bindings": {
+        "object": {
+          "row_field": "missing",
+          "map": {
+            "source": "source",
+            "target": "target",
+            "source-or-target": "source or target"
+          }
+        },
+        "result": {
+          "flag": "orphaned-events",
+          "map": {
+            "resolves-what-remains": "keeps its captured payload, skips only effects requiring the missing object, and resolves every independent remaining effect",
+            "is-cancelled": "is removed while waiting or discards every remaining effect while active, without restoring committed cost or effects"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "a waiting and then active {{row.event-class}} event whose required {{bind:object}} becomes unavailable under {{row.declared-in}}",
+        "when": [
+          "availability is checked before the first effect and at every later effect boundary"
+        ],
+        "then": [
+          "the event {{bind:result}}",
+          "the orphan report identifies use of the adoption default and distinguishes its observable result from the other route"
+        ],
+        "diagnostics": [
+          "{{instance}}-orphan-report",
+          "{{instance}}-event-trace",
+          "{{instance}}-cost-log"
+        ]
+      },
+      "text": "{{row.id}} selects the adoption default for a missing {{bind:object}}: the event {{bind:result}}. {{row.declared-in}} identifies the case; the test names the address and restates nothing from it."
+    },
+    {
+      "id": "undeclared-orphan-is-invalid",
+      "title": "declaration check: an undeclared missing object has no implied result",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each event that can lose a required source or target while waiting or resolving",
+        "when": [
+          "a reviewer compares that case with orphan-cases before the build is audited"
+        ],
+        "then": [
+          "every such case has a matching orphan-cases row",
+          "a missing object outside those rows is an invalid adoption and receives no implied cancellation or remaining-effects result",
+          "an undeclared case is a defect this test fails by construction; where no event can lose a required object, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-orphan-report",
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. Every event that can lose a required source or target has an orphan-cases row. Outside those rows, missing-object behavior is invalid rather than implied and is a defect this test fails by construction. Where no event can become an orphan, this test asserts nothing."
+    },
+    {
+      "id": "active-event-commits-effects-in-order",
+      "title": "an active event commits each effect before the next boundary",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an eligible event with two or more ordered effects where the adoption can construct one",
+        "when": [
+          "the event becomes active and applies its effects"
+        ],
+        "then": [
+          "the event visits the boundary before its first effect",
+          "effects are applied in the order stated by the event's Fixed game rule",
+          "each effect commits before the next declared boundary is visited",
+          "where no multi-effect event exists, the between-effects observation asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-event-trace",
+          "{{instance}}-interrupt-report"
+        ]
+      },
+      "text": "An active event visits the boundary before its first effect, applies effects in its Fixed rule's order, and commits each effect before the next boundary. If no multi-effect event exists, the between-effects observation asserts nothing."
+    },
+    {
+      "id": "interrupt-stops-original",
+      "title": "{{row.id}} enters and stops the original event",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "interrupts",
+      "when": {
+        "flag": {
+          "interrupt-entry": [
+            "before-next-effect",
+            "after-current-effect",
+            "at-normal-rank"
+          ]
+        },
+        "row": {
+          "result": [
+            "stop-original"
+          ]
+        }
+      },
+      "bindings": {
+        "entry": {
+          "flag": "interrupt-entry",
+          "map": {
+            "before-next-effect": "enters before the next effect, including before the first effect",
+            "after-current-effect": "enters after the just-finished effect has committed",
+            "at-normal-rank": "joins this instant when its class is current or has not passed, otherwise joins the next instant, and selection returns to step 4"
+          }
+        },
+        "result": {
+          "flag": "interrupt-entry",
+          "map": {
+            "before-next-effect": "after it resolves, every remaining original effect is discarded while committed effects and costs remain",
+            "after-current-effect": "after it resolves, every remaining original effect is discarded while committed effects and costs remain",
+            "at-normal-rank": "where the interrupt joins the current instant, every remaining original effect is discarded while committed effects and costs remain; where its class has already passed and it joins the next instant, the active event finishes unchanged in this instant and the interrupt stops only events of {{row.active-class}} still waiting or active when it resolves"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "an active {{row.active-class}} event whose {{row.boundary-granularity}} boundaries are named at {{row.declared-in}}, and a valid {{row.interrupt-class}} interrupt offered at one of them",
+        "when": [
+          "the valid interrupt is discovered, selected, and resolved"
+        ],
+        "then": [
+          "one interrupt event is created through the interrupt path and {{bind:entry}}",
+          "where the interrupt enters at a boundary of the active event: when several interrupts are valid, event rank, the shared-rank order, and then within-class order select one; the active event advances only to boundaries {{row.declared-in}} permits while it waits; and the interrupt passes through presentation waiting, collision grouping, orphan checks, and its own boundaries before changing that event",
+          "where the interrupt joins the next instant instead, the active event runs to completion in this one",
+          "{{bind:result}}",
+          "only one selected interrupt resolves at a time and the report distinguishes a valid interrupt from an invalid offer",
+          "where presentation skips the interrupt, control returns to the interrupted event's boundary rather than step 4; where no such skip is possible, this clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-interrupt-report",
+          "{{instance}}-event-trace",
+          "{{instance}}-cost-log"
+        ]
+      },
+      "text": "For an active {{row.active-class}} event whose {{row.boundary-granularity}} boundaries are named at {{row.declared-in}}, {{row.id}} creates one valid {{row.interrupt-class}} interrupt offered at a named boundary and {{bind:entry}}. Where the interrupt enters at a boundary of the active event, event order selects one valid interrupt, the active event advances only to permitted boundaries while it waits, and the interrupt passes through steps 6 to 11 before changing that event; where it joins the next instant instead, the active event runs to completion in this one. Then {{bind:result}}. A presentation skip returns to the interrupted boundary; where none is possible, that clause asserts nothing. {{row.declared-in}} supplies validity and the finite chain; the test names the address and restates nothing from it."
+    },
+    {
+      "id": "interrupt-replaces-remaining-effects",
+      "title": "{{row.id}} enters and replaces the remaining effects",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "interrupts",
+      "when": {
+        "flag": {
+          "interrupt-entry": [
+            "before-next-effect",
+            "after-current-effect",
+            "at-normal-rank"
+          ]
+        },
+        "row": {
+          "result": [
+            "replace-remaining-effects"
+          ]
+        }
+      },
+      "bindings": {
+        "entry": {
+          "flag": "interrupt-entry",
+          "map": {
+            "before-next-effect": "enters before the next effect, including before the first effect",
+            "after-current-effect": "enters after the just-finished effect has committed",
+            "at-normal-rank": "joins this instant when its class is current or has not passed, otherwise joins the next instant, and selection returns to step 4"
+          }
+        },
+        "result": {
+          "flag": "interrupt-entry",
+          "map": {
+            "before-next-effect": "after it resolves, every remaining original effect is discarded and the complete replacement at {{row.replacement-declared-in}} is installed in its stated order while committed effects and costs remain",
+            "after-current-effect": "after it resolves, every remaining original effect is discarded and the complete replacement at {{row.replacement-declared-in}} is installed in its stated order while committed effects and costs remain",
+            "at-normal-rank": "where the interrupt joins the current instant, every remaining original effect is discarded and the complete replacement cited at {{row.replacement-declared-in}} is installed in its stated order while committed effects and costs remain; where its class has already passed and it joins the next instant, the active event finishes unchanged in this instant and the interrupt replaces only events of {{row.active-class}} still waiting or active when it resolves"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "an active {{row.active-class}} event whose {{row.boundary-granularity}} boundaries are named at {{row.declared-in}}, and a valid {{row.interrupt-class}} interrupt offered at one of them",
+        "when": [
+          "the valid interrupt is discovered, selected, and resolved"
+        ],
+        "then": [
+          "one interrupt event is created through the interrupt path and {{bind:entry}}",
+          "where the interrupt enters at a boundary of the active event: when several interrupts are valid, event rank, the shared-rank order, and then within-class order select one; the active event advances only to boundaries {{row.declared-in}} permits while it waits; and the interrupt passes through presentation waiting, collision grouping, orphan checks, and its own boundaries before changing that event",
+          "where the interrupt joins the next instant instead, the active event runs to completion in this one",
+          "{{bind:result}}",
+          "only one selected interrupt resolves at a time, and the report distinguishes replacement from an invalid offer",
+          "where presentation skips the interrupt, control returns to the interrupted event's boundary rather than step 4; where no such skip is possible, this clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-interrupt-report",
+          "{{instance}}-event-trace",
+          "{{instance}}-cost-log"
+        ]
+      },
+      "text": "For an active {{row.active-class}} event whose {{row.boundary-granularity}} boundaries are named at {{row.declared-in}}, {{row.id}} creates one valid {{row.interrupt-class}} interrupt offered at a named boundary and {{bind:entry}}. Where the interrupt enters at a boundary of the active event, event order selects one valid interrupt, the active event advances only to permitted boundaries while it waits, and the interrupt passes through steps 6 to 11 before changing that event; where it joins the next instant instead, the active event runs to completion in this one. Then {{bind:result}}. A presentation skip returns to the interrupted boundary; where none is possible, that clause asserts nothing. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "invalid-interrupt-does-not-enter",
+      "title": "{{row.id}} refuses an invalid interrupt offer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "interrupts",
+      "when": {
+        "flag": {
+          "interrupt-entry": [
+            "before-next-effect",
+            "after-current-effect",
+            "at-normal-rank"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an interrupt of {{row.interrupt-class}} offered outside the validity window named at {{row.declared-in}}, or at a point that is not one of the {{row.boundary-granularity}} boundaries",
+        "when": [
+          "the interrupt offer is checked"
+        ],
+        "then": [
+          "no interrupt event is created",
+          "the active {{row.active-class}} event advances unchanged",
+          "the interrupt report distinguishes an invalid offer from a valid interrupt that was not selected",
+          "where the adoption cannot construct an invalid offer, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-interrupt-report",
+          "{{instance}}-event-trace"
+        ]
+      },
+      "text": "An interrupt of {{row.interrupt-class}} offered outside the validity window named at {{row.declared-in}}, or at a point that is not one of the {{row.boundary-granularity}} boundaries, creates no interrupt event. The active {{row.active-class}} event advances unchanged, and the interrupt report distinguishes the invalid offer from a valid interrupt that was not selected. Where the adoption cannot construct an invalid offer, this test asserts nothing."
+    },
+    {
+      "id": "caused-event-follows-declared-route",
+      "title": "{{row.id}} creates one caused event on its declared route",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "caused-event-kinds",
+      "when": {
+        "flag": {
+          "caused-events": [
+            "resolves-now",
+            "waits-for-its-place",
+            "next-instant"
+          ]
+        }
+      },
+      "bindings": {
+        "route": {
+          "flag": "caused-events",
+          "map": {
+            "resolves-now": "resolves at the current effect boundary before the active event continues",
+            "waits-for-its-place": "joins its declared class's place in the current instant when that class is current or has not passed, and otherwise joins the next instant",
+            "next-instant": "joins the next instant and none of its effects resolves in the instant that created it"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "an effect that causes {{row.id}} due now under the finite chain rule at {{row.declared-in}}",
+        "when": [
+          "the causing effect commits and the caused event is admitted"
+        ],
+        "then": [
+          "one caused event of class {{row.event-class}} is created once and {{bind:route}}",
+          "no chain runs past the bound named at {{row.declared-in}}",
+          "the caused-event report distinguishes this accepted route from rejection and from an interrupt"
+        ],
+        "diagnostics": [
+          "{{instance}}-caused-event-report",
+          "{{instance}}-event-trace",
+          "{{instance}}-waiting-set"
+        ]
+      },
+      "text": "{{row.id}} creates one caused event of class {{row.event-class}} once; it {{bind:route}}, and no chain runs past the bound named at {{row.declared-in}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "active-event-finishes-and-loop-continues",
+      "title": "a finished event returns resolution to the waiting set",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each active event, including a collision-group member where the adoption can construct one",
+        "when": [
+          "the active event finishes"
+        ],
+        "then": [
+          "any deferred target removal due at that point is applied and each selected consequence is recorded once",
+          "the event is removed from the waiting set and selection returns to step 4",
+          "the instant continues until the waiting set is empty, waiting for a cited cue when only presentation-held events remain",
+          "where no deferred removal or held event exists, the corresponding clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-event-trace",
+          "{{instance}}-waiting-set",
+          "{{instance}}-collision-report"
+        ]
+      },
+      "text": "Finishing an active event applies any due deferred removal, records each selected consequence once, removes the event, and returns to step 4. The instant drains the waiting set and waits for any held cue; unavailable branches assert nothing."
+    },
+    {
+      "id": "single-ending-records-after-waiting-set-empties",
+      "title": "a single ending records from final settled state",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each instant the adoption can construct whose final settled state makes one ending hold outside every declared terminal collision",
+        "when": [
+          "the waiting set becomes empty and step 15 runs"
+        ],
+        "then": [
+          "the game's cited ending rule records that ending once from final settled state",
+          "no earlier ending-event resolution or class rank records or overrides it",
+          "where no such single ending can hold, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-waiting-set",
+          "{{instance}}-ending-record"
+        ]
+      },
+      "text": "After the waiting set is empty, a single ending that holds in final settled state is recorded once through the game's cited ending rule. Earlier ending-event resolution and class rank do not record or override it. If no single ending can hold, this test asserts nothing."
+    },
+    {
+      "id": "terminal-collision-follows-precedence",
+      "title": "{{row.id}} records its selected ending result",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "terminal-collisions",
+      "when": {
+        "flag": {
+          "terminal-precedence": [
+            "loss-only",
+            "win-only",
+            "both-recorded"
+          ]
+        }
+      },
+      "bindings": {
+        "ending": {
+          "flag": "terminal-precedence",
+          "map": {
+            "loss-only": "records only the loss and does not record the win",
+            "win-only": "records only the win and does not record the loss",
+            "both-recorded": "records both the win and the loss"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "an instant whose final settled state makes {{row.win-condition}} and {{row.loss-condition}} both hold under {{row.declared-in}}",
+        "when": [
+          "the waiting set becomes empty and step 15 reads the pair"
+        ],
+        "then": [
+          "the lifecycle {{bind:ending}}",
+          "the result is unchanged by event rank or the order in which the two conditions were detected",
+          "the ending record distinguishes this terminal collision from single-ending recording"
+        ],
+        "diagnostics": [
+          "{{instance}}-ending-record",
+          "{{instance}}-settlement-report"
+        ]
+      },
+      "text": "When {{row.win-condition}} and {{row.loss-condition}} both hold in final settled state, {{row.id}} {{bind:ending}}, regardless of rank or detection order. {{row.declared-in}} identifies the pair; the test names the address and restates nothing from it."
+    },
+    {
+      "id": "instant-commits-state-and-next-waiting-set-together",
+      "title": "the instant commits state and next-instant work together",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an instant with distinguishable final state and next-instant waiting events where the adoption can construct them",
+        "when": [
+          "step 16 closes the instant"
+        ],
+        "then": [
+          "the final state and next-instant waiting set commit together",
+          "no event from the closed instant later re-enters it",
+          "where no next-instant event exists, its membership observation asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-instant-trace",
+          "{{instance}}-waiting-set"
+        ]
+      },
+      "text": "Step 16 commits final state and the next-instant waiting set together. No event from a closed instant can re-enter it. Where there is no next-instant event, that membership observation asserts nothing."
+    },
+    {
+      "id": "settlement-report-carries-lifecycle-fields",
+      "title": "each settlement report carries the lifecycle record",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each event settled by {{instance}}, with optional tie, interrupt, replacement, caused event, removal, and terminal result where present",
+        "when": [
+          "its settlement report is read"
+        ],
+        "then": [
+          "the report carries instant, event id, class, rank, tie-break when used, within-class order, source and target availability, effects applied, interrupt and replacement when present, caused-event destination, removal result, and terminal result when present",
+          "an optional circumstance the adoption cannot construct asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-settlement-report"
+        ]
+      },
+      "text": "Every settlement report carries the instant, event id, class, rank, tie-break when used, within-class order, source and target availability, applied effects, interrupt and replacement when present, caused-event destination, removal result, and terminal result when present. An unavailable optional circumstance asserts nothing."
+    },
+    {
+      "id": "within-class-row-class-join",
+      "title": "declaration check: {{row.class-id}} names an existing event class",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "within-class-rules",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer compares {{row.class-id}} with event-classes ids"
+        ],
+        "then": [
+          "{{row.class-id}} names exactly one event-classes row in this adoption; any other shape is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. {{row.class-id}} must name exactly one event class in this adoption. Any other shape is a defect this test fails by construction."
+    },
+    {
+      "id": "presentation-row-class-join",
+      "title": "declaration check: {{row.event-class}} names an existing event class",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "presentation-driven-events",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer compares {{row.event-class}} with event-classes ids"
+        ],
+        "then": [
+          "{{row.event-class}} names exactly one event-classes row in this adoption; any other shape is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. {{row.event-class}} must name exactly one event class in this adoption. Any other shape is a defect this test fails by construction."
+    },
+    {
+      "id": "caused-row-class-join",
+      "title": "declaration check: {{row.event-class}} names an existing event class",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "caused-event-kinds",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer compares {{row.event-class}} with event-classes ids"
+        ],
+        "then": [
+          "{{row.event-class}} names exactly one event-classes row in this adoption; any other shape is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. {{row.event-class}} must name exactly one event class in this adoption. Any other shape is a defect this test fails by construction."
+    },
+    {
+      "id": "orphan-row-class-join",
+      "title": "declaration check: {{row.event-class}} names an existing event class",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "orphan-cases",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer compares {{row.event-class}} with event-classes ids"
+        ],
+        "then": [
+          "{{row.event-class}} names exactly one event-classes row in this adoption; any other shape is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. {{row.event-class}} must name exactly one event class in this adoption. Any other shape is a defect this test fails by construction."
+    },
+    {
+      "id": "interrupt-active-class-join",
+      "title": "declaration check: {{row.active-class}} names an existing event class",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "interrupts",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer compares {{row.active-class}} with event-classes ids"
+        ],
+        "then": [
+          "{{row.active-class}} names exactly one event-classes row in this adoption; any other shape is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. {{row.active-class}} must name exactly one event class in this adoption. Any other shape is a defect this test fails by construction."
+    },
+    {
+      "id": "interrupt-class-join",
+      "title": "declaration check: {{row.interrupt-class}} names an existing event class",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "interrupts",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer compares {{row.interrupt-class}} with event-classes ids"
+        ],
+        "then": [
+          "{{row.interrupt-class}} names exactly one event-classes row in this adoption; any other shape is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. {{row.interrupt-class}} must name exactly one event class in this adoption. Any other shape is a defect this test fails by construction."
+    },
+    {
+      "id": "rank-tie-rows-match-shared-ranks",
+      "title": "declaration check: shared ranks and rank-tie rows match exactly",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer groups event-classes rows by rank and compares the groups with rank-ties rows"
+        ],
+        "then": [
+          "every rank shared by two or more event classes has exactly one rank-ties row, and every rank-ties row names a rank shared by at least two event classes",
+          "each rank-ties class-ids string lists every and only event-classes id at that rank; the class-ids description requires each id to be listed once",
+          "any other shape is a defect this test fails by construction; when no rank is shared and no rank-ties row exists, this check asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. Shared ranks and rank-ties rows must match one-for-one. Each comma-separated class-ids string lists every and only event class at that rank; the class-ids description requires each id to be listed once. Any other shape is a defect this test fails by construction; with no shared rank and no row, the check asserts nothing."
+    },
+    {
+      "id": "tied-classes-have-no-within-class-row",
+      "title": "declaration check: tied classes have no class-specific order row",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer compares every class named by rank-ties with within-class-rules class-id fields"
+        ],
+        "then": [
+          "no event class named by a rank-ties row has a within-class-rules row",
+          "a matching class row is inert and is a defect this test fails by construction; with no rank tie, this check asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. A class already ordered by a rank-ties row must have no within-class-rules row. An inert class row is a defect this test fails by construction; with no rank tie, the check asserts nothing."
+    },
+    {
+      "id": "same-target-kinds-do-not-overlap",
+      "title": "declaration check: collision cases and exceptions do not overlap",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer compares target-kind across same-target-cases and same-target-exceptions"
+        ],
+        "then": [
+          "no target kind is named in both row sets",
+          "any overlap is a defect this test fails by construction; when either set is empty, the cross-set comparison asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. same-target-cases and same-target-exceptions must not name the same target kind. An overlap is a defect this test fails by construction; with either set empty, the comparison asserts nothing."
+    },
+    {
+      "id": "only-first-needs-visible-order",
+      "title": "declaration check: only-first collisions have a visible order",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer finds every event class that can supply two events to a collision resolved by only-first-resolves through the general answer or a same-target-exceptions row"
+        ],
+        "then": [
+          "every such class has a visible order: a within-class-rules row whose order is not no-visible-order, a rank-ties row whose tie-break is not no-visible-order, or a general within-class-order answer other than no-visible-order",
+          "any other shape is a defect this test fails by construction; where no target kind is resolved by only-first-resolves, this check asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. Every event class that can supply two events to a collision resolved by only-first-resolves, through the general answer or a same-target-exceptions row, must have a visible class-row, rank-tie, or general order. A no-visible-order path or any other shape is a defect this test fails by construction; where no target kind uses only-first-resolves, the check asserts nothing. The only-first-resolves semantics supplies this duty."
+    },
+    {
+      "id": "same-target-exception-differs-from-general",
+      "title": "declaration check: each same-target exception differs from the general answer",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "two-events-one-target": [
+            "only-first-resolves",
+            "all-resolve-one-ending",
+            "all-resolve-each-ending"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer compares every same-target-exceptions resolution with the general two-events-one-target answer"
+        ],
+        "then": [
+          "no same-target-exceptions row names the same resolution as the general answer",
+          "an inert exception is a defect this test fails by construction; with no exception row, this check asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. No same-target-exceptions row may repeat the general two-events-one-target answer. An inert exception is a defect this test fails by construction; with no exception row, the check asserts nothing. The same-target-exceptions description supplies this duty."
+    },
+    {
+      "id": "stable-index-second-index-duty",
+      "title": "declaration check: stable indexes settle equal first numbers",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document and its Fixed event rules, not the running game",
+        "when": [
+          "a reviewer checks every within-class-rules row and every rank-ties row using stable-index"
+        ],
+        "then": [
+          "every such row either names a second index or belongs to a class or tied group that cannot produce equal first numbers that change the result",
+          "any other shape is a defect this test fails by construction; with no stable-index row, this check asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and its Fixed event rules, not the running game. Every stable-index class row or rank tie must name a second index or belong to a class or tied group that cannot produce equal first numbers that change the result. Any other shape is a defect this test fails by construction; with no stable-index row, the check asserts nothing."
+    },
+    {
+      "id": "visible-tie-needs-class-row",
+      "title": "declaration check: visible ties have class rows when named data is needed",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document and the event classes its Fixed rules can tie visibly, not the running game",
+        "when": [
+          "a reviewer compares each such class outside a rank tie with within-class-rules and the general within-class-order answer"
+        ],
+        "then": [
+          "every class that can have a visible tie and is not in a rank tie has a within-class-rules row when the general answer needs named data: stable-index, map-reading-order, clockwise, or declared-random",
+          "any other shape is a defect this test fails by construction; where the general answer is arrival-order or no-visible-order, or no such class exists, this check asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and its Fixed event rules, not the running game. A class that can have a visible tie outside a rank tie must have a within-class-rules row when the general answer is stable-index, map-reading-order, clockwise, or declared-random. Any other shape is a defect this test fails by construction; for arrival-order or no-visible-order, or with no such class, the check asserts nothing."
+    },
+    {
+      "id": "rejection-default-citations-have-rows",
+      "title": "declaration check: citing rejection defaults have rows for every case",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "rejected-action-effect": [
+            "derate",
+            "clock-advances",
+            "cost-and-clock"
+          ]
+        }
+      },
+      "bindings": {
+        "duty": {
+          "flag": "rejected-action-effect",
+          "map": {
+            "derate": "a scale-rule-declared-in citation",
+            "clock-advances": "a clock-rule-declared-in citation",
+            "cost-and-clock": "a clock-rule-declared-in citation"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document and every proposal case that can take the selected default, not the running game",
+        "when": [
+          "a reviewer compares those cases with rejection-cases rows"
+        ],
+        "then": [
+          "every case that can take the selected default has a rejection-cases row carrying {{bind:duty}}",
+          "a missing row or citation is a defect this test fails by construction; where no rejecting case exists, this check asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. Every rejecting case under this default must have a rejection-cases row carrying {{bind:duty}}. A missing row or citation is a defect this test fails by construction; if no rejecting case exists, the check asserts nothing."
+    },
+    {
+      "id": "event-class-list-is-complete",
+      "title": "declaration check: event-classes covers every event due at an instant",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and its Fixed event rules, not the running game",
+        "when": [
+          "a reviewer compares every event due at an instant with event-classes"
+        ],
+        "then": [
+          "every event due at an instant belongs to exactly one event-classes row",
+          "a game whose source convention is higher-first has inverted its authored numbers once in event-classes rather than reversing them at runtime",
+          "an omitted event class or a list of simulation stages presented as classes is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and its Fixed event rules, not the running game. event-classes must cover every event due at an instant exactly once, must name event classes rather than simulation stages, and must invert authored numbers once when the game's source convention is higher-first. An omission, category error, or runtime reversal is a defect this test fails by construction."
+    },
+    {
+      "id": "event-class-citation-states-membership",
+      "title": "declaration check: the citation for {{row.id}} names its class and members",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "event-classes",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.declared-in}} names {{row.id}}, labelled {{row.label}} in the game's own words, and the events belonging to it",
+          "another meaning is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.declared-in}}, not the running game. The citation must name {{row.id}}, labelled {{row.label}} in the game's own words, and the events belonging to it. Another meaning is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "within-class-grid-citation-duty",
+      "title": "declaration check: the grid citation for {{row.id}} supplies its order frame",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "within-class-rules",
+      "when": {
+        "row": {
+          "order": [
+            "map-reading-order",
+            "clockwise"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.grid-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the cited Grid and direction rule"
+        ],
+        "then": [
+          "the citation supplies the row's required first row and first column, or centre, first direction, and clockwise sense",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.grid-declared-in}}, not the running game. The citation must supply the order frame selected by {{row.id}}. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "within-class-rule-citation-duty",
+      "title": "declaration check: the rule citation for {{row.id}} supplies one total order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "within-class-rules",
+      "when": {
+        "row": {
+          "order": [
+            "declared-random",
+            "game-rule"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the cited random or custom order rule"
+        ],
+        "then": [
+          "the citation supplies the complete draw or deterministic rule that produces one total order for the instant and never points back to this row",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.rule-declared-in}}, not the running game. The citation must supply one complete total-order rule and never point back to this row. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "rank-tie-grid-citation-duty",
+      "title": "declaration check: the grid citation for {{row.id}} supplies its order frame",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rank-ties",
+      "when": {
+        "row": {
+          "tie-break": [
+            "map-reading-order",
+            "clockwise"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.grid-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the cited Grid and direction rule"
+        ],
+        "then": [
+          "the citation supplies the row's required first row and first column, or centre, first direction, and clockwise sense",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.grid-declared-in}}, not the running game. The citation must supply the order frame selected by {{row.id}}. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "rank-tie-rule-citation-duty",
+      "title": "declaration check: the rule citation for {{row.id}} supplies one total order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rank-ties",
+      "when": {
+        "row": {
+          "tie-break": [
+            "declared-random",
+            "game-rule"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the cited random or custom order rule"
+        ],
+        "then": [
+          "the citation supplies the complete draw or deterministic rule that produces one total order for the instant and never points back to this row",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.rule-declared-in}}, not the running game. The citation must supply one complete total-order rule and never point back to this row. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "rejection-scale-citation-duty",
+      "title": "declaration check: the scale citation for {{row.id}} covers effect and cost",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rejection-cases",
+      "when": {
+        "row": {
+          "result": [
+            "derate"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.scale-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the cited scale rule"
+        ],
+        "then": [
+          "the citation supplies how the complete effect and cost are scaled",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.scale-rule-declared-in}}, not the running game. The citation must scale the complete effect and cost. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "rejection-clock-citation-duty",
+      "title": "declaration check: the clock citation for {{row.id}} names one advance",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rejection-cases",
+      "when": {
+        "row": {
+          "result": [
+            "clock-advances",
+            "cost-and-clock"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.clock-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the cited clock or turn rule"
+        ],
+        "then": [
+          "the citation names exactly one clock advance caused by this rejection",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.clock-rule-declared-in}}, not the running game. The citation must name exactly one advance caused by this rejection. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "presentation-cue-citation-duty",
+      "title": "declaration check: the presentation citation for {{row.id}} supplies a finite cue",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "presentation-driven-events",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the cited presentation rule"
+        ],
+        "then": [
+          "{{row.declared-in}} relates the game timing of {{row.event-class}} to {{row.presentation-cue}} and shows the cue finishes in finite game or real time, which is what keeps an instant from waiting forever",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.declared-in}}, not the running game. The citation must relate the game timing of {{row.event-class}} to {{row.presentation-cue}} and show that the cue finishes in finite game or real time, keeping an instant from waiting forever. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "caused-event-citation-duty",
+      "title": "declaration check: the caused-event citation for {{row.id}} supplies its bound",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "caused-event-kinds",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the cited caused-event rule"
+        ],
+        "then": [
+          "{{row.declared-in}} names the cause, the new {{row.event-class}} event, and the finite bound on repeated caused events",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.declared-in}}, not the running game. The citation must name the cause, the new {{row.event-class}} event, and the finite bound on repeated caused events. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "interrupt-citation-duty",
+      "title": "declaration check: the interrupt citation for {{row.id}} supplies its entry rule",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "interrupts",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the cited interrupt rule"
+        ],
+        "then": [
+          "{{row.declared-in}} names the validity window, the {{row.boundary-granularity}} effect boundaries, and the stop result",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.declared-in}}, not the running game. The citation must name the validity window, the {{row.boundary-granularity}} effect boundaries, and the stop result. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "interrupt-replacement-citation-duty",
+      "title": "declaration check: the replacement citation for {{row.id}} supplies every effect in order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "interrupts",
+      "when": {
+        "row": {
+          "result": [
+            "replace-remaining-effects"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.replacement-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the cited replacement rule"
+        ],
+        "then": [
+          "{{row.replacement-declared-in}} states every replacement effect and its order",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.replacement-declared-in}}, not the running game. The citation must state every replacement effect and its order. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "orphan-case-citation-duty",
+      "title": "declaration check: the orphan citation for {{row.id}} supplies its case",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "orphan-cases",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the cited orphan rule"
+        ],
+        "then": [
+          "{{row.declared-in}} identifies the case, when it applies, the captured payload, and the source or target requirement",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.declared-in}}, not the running game. The citation must identify the case, when it applies, the captured payload, and the source or target requirement. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "resolution-holds",
+      "title": "event resolution holds for the whole run",
+      "type": "general",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "for every instant of the audited run that this adoption owns in full, every event resolved at or after every eligible lower-rank event; every rank tie and within-class selection followed its declared order; every rejection followed its matching case or default; every accepted proposal created one payload once; every valid interrupt entered at its declared point and took effect; every caused event was created once and followed its route; every orphan followed its row; every ending was recorded once at step 15; an instant shared with another adoption asserts nothing here; a case the adoption cannot construct asserts nothing",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-instant-trace",
+          "{{instance}}-proposal-log",
+          "{{instance}}-order-trace",
+          "{{instance}}-collision-report",
+          "{{instance}}-orphan-report",
+          "{{instance}}-interrupt-report",
+          "{{instance}}-ending-record",
+          "{{instance}}-settlement-report",
+          "{{instance}}-first-ordering-violation"
+        ]
+      },
+      "text": "Across {{inputs:scope}}, lower eligible ranks never resolve late, each tie and within-class order holds, each proposal follows its case or default, each accepted proposal creates one payload, each valid interrupt takes effect at its entry point, each caused event follows its route, each orphan follows its row, and each ending records once at step 15. An instant shared with another adoption asserts nothing here. A case the adoption cannot construct asserts nothing.",
+      "inputs": {
+        "scope": {
+          "default": "every instant of the audited run that this adoption owns in full"
+        },
+        "seeds": {
+          "default": [
+            "audit-a",
+            "audit-b"
+          ]
+        }
+      }
+    }
+  ]
+}

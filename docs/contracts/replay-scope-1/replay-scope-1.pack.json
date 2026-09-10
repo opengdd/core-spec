@@ -1,0 +1,1461 @@
+{
+  "contract": "replay-scope",
+  "version": 1,
+  "templates": [
+    {
+      "id": "sealed-record-carries-replay-identity",
+      "title": "{{row.id}} sealed records carry the complete replay identity",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "bindings": {
+        "record-shape": {
+          "flag": "replay-record",
+          "map": {
+            "seed-only": "the seed and no input log",
+            "seed-and-input-log": "the seed and ordered input log",
+            "input-log-from-fixed-start": "the fixed-start identity and ordered input log and no separate seed"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "a sealed record made from replay family {{row.id}} and its manifest at {{row.recording-declared-in}}",
+        "when": [
+          "the record is inspected before playback"
+        ],
+        "then": [
+          "the record carries its own stable instance identity, recording version, platform, content-set identity, settings and mod identity, {{bind:record-shape}}, and every reproduction claim's comparison reference or sealed source data for deterministic recomputation",
+          "each comparison reference is captured during recording or deterministically recomputed from the sealed record, never obtained from live play"
+        ],
+        "diagnostics": [
+          "{{instance}}-record-manifest",
+          "{{instance}}-reference-source"
+        ]
+      },
+      "text": "Each sealed {{row.id}} record has its own instance identity and carries, as named at {{row.recording-declared-in}}, the replay identity fields and {{bind:record-shape}}, together with every claim's captured reference or sealed recomputation source. A reference never comes from live play. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "migrated-record-keeps-source-identity",
+      "title": "a migrated record has its own identity and keeps its source",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "when": {
+        "flag": {
+          "after-an-update": [
+            "migrate-then-replay"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a sealed source record from replay family {{row.id}} and a different running version",
+        "when": [
+          "the deterministic migration at {{row.migration-declared-in}} succeeds"
+        ],
+        "then": [
+          "one derived record is created with its own stable instance identity and a link to the unchanged source record",
+          "the derived record names the source version, target version, and migration rule"
+        ],
+        "diagnostics": [
+          "{{instance}}-record-manifest",
+          "{{instance}}-migration-record"
+        ]
+      },
+      "text": "A successful migration under {{row.migration-declared-in}} creates one derived record with its own identity, the two versions, the migration rule, and a link to the unchanged source. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "playback-result-uses-closed-vocabulary",
+      "title": "the terminal playback result uses the closed vocabulary",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each {{instance}} playback from start until it ends",
+        "when": [
+          "the playback result is read before and after termination"
+        ],
+        "then": [
+          "before termination the playback is in progress",
+          "at termination the playback result is exactly one of diverged, rejected, or complete, and never two of them"
+        ],
+        "diagnostics": [
+          "{{instance}}-playback-result"
+        ]
+      },
+      "text": "{{instance}} playback is in progress until it ends. Its terminal playback result is exactly one of diverged, rejected, or complete."
+    },
+    {
+      "id": "record-establishes-declared-start",
+      "title": "{{row.id}} records its selected start before claimed results",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "bindings": {
+        "start-capture": {
+          "flag": "replay-record",
+          "map": {
+            "seed-only": "captures the seed before any claimed seeded result is generated",
+            "seed-and-input-log": "captures the seed before any claimed seeded result is generated",
+            "input-log-from-fixed-start": "captures the fixed-start identity before the first input so the cited state rule can verify it"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "a new {{row.id}} recording about to begin, with its manifest at {{row.recording-declared-in}}",
+        "when": [
+          "recording establishes its start"
+        ],
+        "then": [
+          "the recorder {{bind:start-capture}}",
+          "the recording version, platform, content-set identity, settings, and mod identity are fixed from {{row.recording-declared-in}} before the first captured seed, start, or input and do not change for the life of the recording"
+        ],
+        "diagnostics": [
+          "{{instance}}-record-manifest",
+          "{{instance}}-recording-trace"
+        ]
+      },
+      "text": "The recording version, platform, content-set identity, settings, and mod identity are fixed from {{row.recording-declared-in}} before the first captured seed, start, or input and do not change for the life of the recording. {{row.id}} then {{bind:start-capture}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "input-log-captures-complete-action-order",
+      "title": "{{row.id}} captures every mapped action in cited order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "when": {
+        "flag": {
+          "replay-record": [
+            "seed-and-input-log",
+            "input-log-from-fixed-start"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one {{row.id}} recording with mapped game actions before and after the cited start",
+        "when": [
+          "input capture runs from the start named at {{row.recording-declared-in}} using the clock, step, or turn at {{row.input-clock-declared-in}}"
+        ],
+        "then": [
+          "every mapped game action after capture begins enters one ordered input log in complete order at the cited clock, step, or turn",
+          "no action before capture begins enters the log"
+        ],
+        "diagnostics": [
+          "{{instance}}-input-log-trace",
+          "{{instance}}-recording-trace"
+        ]
+      },
+      "text": "From the start at {{row.recording-declared-in}}, {{row.id}} captures every mapped game action in complete order at the clock, step, or turn cited at {{row.input-clock-declared-in}}. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "seed-only-record-captures-no-input",
+      "title": "{{row.id}} captures no input log",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "when": {
+        "flag": {
+          "replay-record": [
+            "seed-only"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a complete {{row.id}} recording with player actions during its lifetime",
+        "when": [
+          "the sealed record is inspected"
+        ],
+        "then": [
+          "the record carries its seed and no recorded input log"
+        ],
+        "diagnostics": [
+          "{{instance}}-record-manifest",
+          "{{instance}}-input-log-trace"
+        ]
+      },
+      "text": "A sealed seed-only {{row.id}} record carries its seed and no input log."
+    },
+    {
+      "id": "claim-records-reference-or-recomputation-source",
+      "title": "{{row.id}} records its comparison reference source",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "recording reaches each {{row.id}} comparison point cited at {{row.comparison-points}}",
+        "when": [
+          "the recorder handles the claim at that point"
+        ],
+        "then": [
+          "the record captures the comparison reference required by {{row.id}}'s matching standard or all sealed source data required by the family row's cited recomputation method",
+          "the record distinguishes a captured reference from sealed recomputation source data"
+        ],
+        "diagnostics": [
+          "{{instance}}-reference-source",
+          "{{instance}}-recording-trace"
+        ]
+      },
+      "text": "At every point cited at {{row.comparison-points}}, recording captures the reference {{row.id}} needs or all sealed data the family row's cited method needs to recompute it. The record distinguishes those two sources. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "record-seals-at-boundary",
+      "title": "{{row.id}} seals one immutable record at its boundary",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one {{row.id}} recording approaching the end boundary at {{row.recording-declared-in}}",
+        "when": [
+          "capture reaches that boundary and a later edit is requested"
+        ],
+        "then": [
+          "capture ends at the cited boundary and seals the record's instance identity and contents",
+          "the later edit creates a different record instance in the same replay family and leaves the sealed record unchanged"
+        ],
+        "diagnostics": [
+          "{{instance}}-record-manifest",
+          "{{instance}}-recording-trace"
+        ]
+      },
+      "text": "At the boundary cited at {{row.recording-declared-in}}, {{row.id}} seals its instance identity and contents. Any later edit creates a different instance in the same replay family. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "record-wide-identity-precedes-consumption",
+      "title": "{{row.id}} checks record-wide identity before consumption",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "sealed {{row.id}} records in which each record-wide identity this adoption carries fails in turn — content-set identity, settings, mods, and the fixed start where present — including a content patch whose version id is unchanged",
+        "when": [
+          "playback selection begins"
+        ],
+        "then": [
+          "the version, platform, content-set identity, settings, and mod identity at {{row.recording-declared-in}} and every cited compatibility condition are read before any seed, start, or input is consumed",
+          "each failed record-wide identity the adoption carries rejects the record and presents the incompatibility report through {{row.difference-report-declared-in}} before any seed, start, or input is consumed",
+          "the unchanged version id does not turn the failed content identity into a pass",
+          "the update policy is not used to excuse a failed identity"
+        ],
+        "diagnostics": [
+          "{{instance}}-identity-check-trace",
+          "{{instance}}-rejection-report",
+          "{{instance}}-input-log-trace"
+        ]
+      },
+      "text": "Before consuming a seed, start, or input, {{row.id}} reads the record identity at {{row.recording-declared-in}} and the cited compatibility conditions. Each record-wide identity it carries rejects through {{row.difference-report-declared-in}} when it fails; neither an unchanged version id nor the update policy excuses a failed identity. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "compatible-record-is-played",
+      "title": "{{row.id}} plays a compatible record",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a sealed {{row.id}} record whose version, platform, content-set identity, settings, mods, and start all match the running game and whose cited compatibility conditions hold",
+        "when": [
+          "playback selection checks the compatible record"
+        ],
+        "then": [
+          "playback is not rejected",
+          "playback consumes the seed, start, or inputs the record carries",
+          "playback reaches a terminal result that is complete or diverged, never rejected"
+        ],
+        "diagnostics": [
+          "{{instance}}-identity-check-trace",
+          "{{instance}}-playback-result"
+        ]
+      },
+      "text": "A sealed {{row.id}} record whose complete replay identity matches the running game and whose cited compatibility conditions hold is played rather than rejected. Playback consumes the seed, start, or inputs it carries and reaches complete or diverged, never rejected."
+    },
+    {
+      "id": "recorded-platform-only-excludes-other-platforms",
+      "title": "{{row.id}} compares only on the recording platform",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "when": {
+        "row": {
+          "platform-reach": [
+            "recorded-platform-only"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a playback on a platform different from the recording platform with {{row.id}} and at least one other eligible claim where the adoption can construct one",
+        "when": [
+          "claim platform reach is selected"
+        ],
+        "then": [
+          "{{row.id}} is not compared and cannot cause divergence",
+          "every other eligible claim continues; where no other eligible claim exists, this clause asserts nothing",
+          "the comparison log records platform exclusion rather than a match"
+        ],
+        "diagnostics": [
+          "{{instance}}-comparison-log",
+          "{{instance}}-playback-result"
+        ]
+      },
+      "text": "On another platform, recorded-platform-only claim {{row.id}} is excluded, is not compared, and cannot diverge. Other eligible claims continue where they exist. The comparison log distinguishes exclusion from a match."
+    },
+    {
+      "id": "every-supported-platform-excludes-only-unsupported-platforms",
+      "title": "{{row.id}} compares on every supported platform",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "when": {
+        "row": {
+          "platform-reach": [
+            "every-supported-platform"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} playback on each supported platform and on each unsupported running platform the adoption can construct",
+        "when": [
+          "claim platform reach is selected"
+        ],
+        "then": [
+          "{{row.id}} remains eligible on every supported platform",
+          "on each constructible unsupported running platform it is not compared and cannot cause divergence, while every other eligible claim continues; where none is constructible, this clause asserts nothing",
+          "the comparison log distinguishes unsupported-platform exclusion from a match"
+        ],
+        "diagnostics": [
+          "{{instance}}-platform-matrix",
+          "{{instance}}-comparison-log"
+        ]
+      },
+      "text": "Claim {{row.id}} remains eligible on every supported platform. It is excluded without divergence on an unsupported platform, and other eligible claims continue. The comparison log distinguishes exclusion from a match."
+    },
+    {
+      "id": "same-version-only-rejects-version-mismatch",
+      "title": "{{row.id}} rejects a different running version",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "when": {
+        "flag": {
+          "after-an-update": [
+            "same-version-only"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a sealed {{row.id}} record whose recorded version id differs from the running version id",
+        "when": [
+          "the update policy is applied"
+        ],
+        "then": [
+          "the playback result becomes rejected and the incompatibility report is presented through {{row.difference-report-declared-in}}",
+          "no seed, start, or input is consumed"
+        ],
+        "diagnostics": [
+          "{{instance}}-rejection-report",
+          "{{instance}}-input-log-trace",
+          "{{instance}}-playback-result"
+        ]
+      },
+      "text": "When version ids differ, same-version-only rejects {{row.id}} through {{row.difference-report-declared-in}} before consuming a seed, start, or input. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "migration-runs-once-before-playback",
+      "title": "{{row.id}} migrates once or rejects",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "when": {
+        "flag": {
+          "after-an-update": [
+            "migrate-then-replay"
+          ]
+        }
+      },
+      "bindings": {
+        "input-clock-requirement": {
+          "flag": "replay-record",
+          "map": {
+            "seed-only": "the record carries no input clock, so no clock mapping is required",
+            "seed-and-input-log": "where the migration ran, the recorded input clock maps to an existing running-version clock before any input is consumed",
+            "input-log-from-fixed-start": "where the migration ran, the recorded input clock maps to an existing running-version clock before any input is consumed"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "sealed {{row.id}} records whose version ids are equal to and differ from the running version, including successful and failed migration and each input-log record this adoption can construct with and without a running-version clock mapping",
+        "when": [
+          "playback selection applies the update policy at {{row.migration-declared-in}}"
+        ],
+        "then": [
+          "when the recorded and running version ids differ, the migration rule runs once; success creates the derived record and playback consumes only that derived record",
+          "when the recorded and running version ids are equal, no migration runs, no derived record is created, and playback consumes the source record",
+          "{{bind:input-clock-requirement}}",
+          "failed migration, or failed clock mapping where an input clock exists, rejects through {{row.difference-report-declared-in}} before any seed, start, or input is consumed"
+        ],
+        "diagnostics": [
+          "{{instance}}-migration-record",
+          "{{instance}}-rejection-report",
+          "{{instance}}-input-log-trace"
+        ]
+      },
+      "text": "For differing versions, {{row.id}} runs {{row.migration-declared-in}} once. Success creates the derived record, playback consumes only that record, and {{bind:input-clock-requirement}}. Migration or clock-mapping failure rejects through {{row.difference-report-declared-in}} before consumption. For equal version ids, no migration runs, no derived record is created, and playback consumes the source record. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "best-effort-presents-known-differences",
+      "title": "{{row.id}} presents known cross-version differences before playback",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "when": {
+        "flag": {
+          "after-an-update": [
+            "best-effort-with-declared-divergence"
+          ]
+        }
+      },
+      "bindings": {
+        "input-clock-requirement": {
+          "flag": "replay-record",
+          "map": {
+            "seed-only": "no input clock exists, so the clock-existence rejection cannot arise",
+            "seed-and-input-log": "no clock mapping is performed and the input clock the record cites must still exist in the running version",
+            "input-log-from-fixed-start": "no clock mapping is performed and the input clock the record cites must still exist in the running version"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "sealed {{row.id}} source records whose version ids are equal to and differ from the running version and, for each record with a cited input clock, running versions where that clock exists and no longer exists",
+        "when": [
+          "best-effort selection applies the update policy at {{row.cross-version-divergence-declared-in}}"
+        ],
+        "then": [
+          "when the version ids differ, the cited known differences are presented before playback consumes the source record, and the source record remains unchanged",
+          "when the version ids are equal, the cross-version notice is not presented and playback proceeds on the source record",
+          "for a differing version, {{bind:input-clock-requirement}}",
+          "where the record carries a cited input clock and that clock no longer exists, playback rejects through {{row.difference-report-declared-in}} before consuming an input",
+          "where no rejection occurs, later actual mismatches follow the selected divergence response"
+        ],
+        "diagnostics": [
+          "{{instance}}-cross-version-notice",
+          "{{instance}}-record-manifest",
+          "{{instance}}-rejection-report"
+        ]
+      },
+      "text": "For differing versions, best-effort presents the differences at {{row.cross-version-divergence-declared-in}} before consuming the unchanged source record; {{bind:input-clock-requirement}}. A missing running-version clock rejects through {{row.difference-report-declared-in}} before input consumption. For equal version ids, the cross-version notice is not presented and playback proceeds on the source record. Every non-rejected mismatch follows the divergence response. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "seeded-playback-recreates-start",
+      "title": "{{row.id}} supplies the recorded seed or rejects",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "when": {
+        "flag": {
+          "replay-record": [
+            "seed-only",
+            "seed-and-input-log"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a playable {{row.id}} record, once with its recorded seed available and once with the required seed unavailable",
+        "when": [
+          "playback recreates the start"
+        ],
+        "then": [
+          "the available run supplies the recorded seed before generating a claimed seeded result",
+          "the unavailable run becomes rejected before consuming any input"
+        ],
+        "diagnostics": [
+          "{{instance}}-start-trace",
+          "{{instance}}-playback-result"
+        ]
+      },
+      "text": "Seeded {{row.id}} playback supplies the recorded seed before generating a claimed seeded result. If the seed cannot be established, playback rejects before input consumption."
+    },
+    {
+      "id": "fixed-start-playback-verifies-or-restores",
+      "title": "{{row.id}} verifies or restores the fixed start",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "when": {
+        "flag": {
+          "replay-record": [
+            "input-log-from-fixed-start"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a playable {{row.id}} record, once with its fixed start available and once with it unavailable",
+        "when": [
+          "playback applies the state rule at {{row.fixed-start-declared-in}}"
+        ],
+        "then": [
+          "the available run verifies or restores the fixed starting state of the record playback consumes, which is the derived record wherever a migration ran, before the first input",
+          "the unavailable run becomes rejected before consuming an input"
+        ],
+        "diagnostics": [
+          "{{instance}}-start-trace",
+          "{{instance}}-playback-result"
+        ]
+      },
+      "text": "Fixed-start {{row.id}} playback verifies or restores the fixed starting state of the record playback consumes, which is the derived record wherever a migration ran, through {{row.fixed-start-declared-in}} before the first input. If it cannot establish the state, playback rejects. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "input-log-playback-consumes-cited-order",
+      "title": "{{row.id}} consumes recorded inputs in cited order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "when": {
+        "flag": {
+          "replay-record": [
+            "seed-and-input-log",
+            "input-log-from-fixed-start"
+          ]
+        }
+      },
+      "bindings": {
+        "clock-after-migration": {
+          "flag": "after-an-update",
+          "map": {
+            "same-version-only": "",
+            "migrate-then-replay": ", or, where a migration ran, at the running-version clock that migration mapped it to",
+            "best-effort-with-declared-divergence": ""
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "a playable {{row.id}} record with distinct mapped actions in its input log",
+        "when": [
+          "playback runs at the clock, step, or turn cited at {{row.input-clock-declared-in}}"
+        ],
+        "then": [
+          "every recorded input is consumed once in recorded order at the clock, step, or turn cited at {{row.input-clock-declared-in}}{{bind:clock-after-migration}}",
+          "no live input replaces or reorders a recorded action"
+        ],
+        "diagnostics": [
+          "{{instance}}-input-log-trace",
+          "{{instance}}-playback-result"
+        ]
+      },
+      "text": "{{row.id}} playback consumes the recorded input log once, in its recorded order, at the clock, step, or turn cited at {{row.input-clock-declared-in}}{{bind:clock-after-migration}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "seed-only-playback-accepts-live-input",
+      "title": "{{row.id}} accepts live input without a recorded log",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "when": {
+        "flag": {
+          "replay-record": [
+            "seed-only"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "playable {{row.id}} records with the same seed and different live input histories",
+        "when": [
+          "playback runs"
+        ],
+        "then": [
+          "each run accepts its live inputs and consumes no recorded input log",
+          "each reproduction claim follows its own live-input answer"
+        ],
+        "diagnostics": [
+          "{{instance}}-live-input-trace",
+          "{{instance}}-comparison-log"
+        ]
+      },
+      "text": "Seed-only {{row.id}} playback accepts live input and consumes no recorded input log. Each claim follows its own live-input answer."
+    },
+    {
+      "id": "seed-fixed-claim-ignores-live-input-variation",
+      "title": "{{row.id}} cannot change when live inputs vary",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "when": {
+        "row": {
+          "shifts-with-live-input": [
+            "seed-fixes-this-claim"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "playbacks from the same sealed seed-only record with different live input histories",
+        "when": [
+          "{{row.id}} is read at each comparison point at {{row.comparison-points}}"
+        ],
+        "then": [
+          "the result named for {{row.id}} does not change between runs"
+        ],
+        "diagnostics": [
+          "{{instance}}-live-input-trace",
+          "{{instance}}-comparison-log"
+        ]
+      },
+      "text": "With the same sealed seed-only record, varying live inputs cannot change {{row.id}} at the points cited at {{row.comparison-points}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "live-input-shifted-claim-reads-only-cited-facts",
+      "title": "{{row.id}} reads only its cited live-input facts",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "when": {
+        "row": {
+          "shifts-with-live-input": [
+            "live-input-may-shift-this-claim"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "playbacks from the same sealed seed-only record whose live input histories vary inside and outside the facts at {{row.live-input-dependence-declared-in}}",
+        "when": [
+          "{{row.id}} reaches each comparison point at {{row.comparison-points}}"
+        ],
+        "then": [
+          "the claimed result reads no live-input fact outside {{row.live-input-dependence-declared-in}}",
+          "a result differing only as that citation permits is recorded as not compared and does not diverge",
+          "where that citation recomputes a comparison reference for the actual inputs, the reference is deterministically recomputed from the sealed record before comparison"
+        ],
+        "diagnostics": [
+          "{{instance}}-live-input-trace",
+          "{{instance}}-reference-source",
+          "{{instance}}-comparison-log"
+        ]
+      },
+      "text": "Claim {{row.id}} reads no live-input fact outside {{row.live-input-dependence-declared-in}}. A difference permitted there is not compared and does not diverge; if that rule recomputes the actual-input reference, deterministic recomputation happens first. Comparison points are at {{row.comparison-points}}. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "claim-reference-comes-from-sealed-record",
+      "title": "{{row.id}} obtains its reference from the sealed record",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} playbacks using a captured reference and, where the adoption can construct one, a deterministically recomputed reference",
+        "when": [
+          "playback reaches the points at {{row.comparison-points}}"
+        ],
+        "then": [
+          "the reference is read from the sealed record or deterministically recomputed from it using the family row's cited method and {{row.comparison-points}}",
+          "the reference-source record distinguishes capture from recomputation and proves no reference was read from live play",
+          "where the adoption cannot construct one of the two reference forms, that form asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-reference-source",
+          "{{instance}}-comparison-log"
+        ]
+      },
+      "text": "At {{row.comparison-points}}, {{row.id}} reads a captured comparison reference or deterministically recomputes it from the sealed record through the family row's cited method. The reference-source record distinguishes the two and proves live play supplied neither. An unavailable form asserts nothing. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "unmet-claim-condition-skips-comparison",
+      "title": "{{row.id}} reads conditions before comparison",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each {{row.id}} comparison point this adoption can construct where the conditions at {{row.conditions}} are not met",
+        "when": [
+          "playback reaches that point"
+        ],
+        "then": [
+          "the conditions are read before a comparison is attempted",
+          "the claim is recorded as not compared and does not mark a divergence",
+          "the playback is not rejected and does not become terminal because of that claim's unmet condition alone",
+          "every other eligible claim is still compared at its own comparison points; where no other eligible claim exists, this clause asserts nothing",
+          "where no unmet-condition point can be constructed, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-condition-trace",
+          "{{instance}}-comparison-log",
+          "{{instance}}-playback-result"
+        ]
+      },
+      "text": "At each constructible point where {{row.conditions}} is not met, {{row.id}} is not compared, does not diverge, and does not reject or make playback terminal because of that condition alone. Every other eligible claim, where the adoption declares one, is still compared at its own points, and the logs distinguish the skip from a match. If no such point exists, the test asserts nothing. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "bit-exact-claim-compares-declared-bytes",
+      "title": "{{row.id}} compares every included byte",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "when": {
+        "row": {
+          "matching-standard": [
+            "bit-exact-state"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "eligible {{row.id}} comparisons with each included byte changed in turn and, where {{row.excludes}} names excluded state, that state changed separately",
+        "when": [
+          "playback compares the result to its comparison reference"
+        ],
+        "then": [
+          "every state byte named at {{row.reproduces}} after subtracting {{row.excludes}} is compared bit for bit",
+          "each changed included byte fails the matching standard; changed excluded state is never compared, and where the cited section says nothing is excluded that clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-comparison-log",
+          "{{instance}}-reference-source"
+        ]
+      },
+      "text": "Bit-exact claim {{row.id}} compares every byte named at {{row.reproduces}} after subtracting {{row.excludes}}. Excluded state is never compared. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "outcome-equivalent-claim-compares-declared-fields",
+      "title": "{{row.id}} compares every included outcome field",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "when": {
+        "row": {
+          "matching-standard": [
+            "outcome-equivalent"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "eligible {{row.id}} comparisons with each included outcome field changed in turn and, where {{row.excludes}} names excluded state, that state changed separately",
+        "when": [
+          "playback compares the result to its comparison reference"
+        ],
+        "then": [
+          "every outcome field named at {{row.reproduces}} after subtracting {{row.excludes}} is compared",
+          "each changed included field fails the matching standard; changed excluded state is never compared, and where the cited section says nothing is excluded that clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-comparison-log",
+          "{{instance}}-reference-source"
+        ]
+      },
+      "text": "Outcome-equivalent claim {{row.id}} compares every outcome field named at {{row.reproduces}} after subtracting {{row.excludes}}. Excluded state is never compared. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "position-claim-uses-adoption-gap",
+      "title": "{{row.id}} passes only within the declared allowed gap",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "when": {
+        "row": {
+          "matching-standard": [
+            "allowed-position-gap"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "eligible {{row.id}} comparisons whose distance in the space cited at {{row.reproduces}} is below, equal to, and above the value at {{value-cite:allowed-position-gap}}",
+        "when": [
+          "playback applies the allowed-position-gap matching standard"
+        ],
+        "then": [
+          "the measured distance uses the cited space and excludes the state at {{row.excludes}}",
+          "the comparison passes exactly when the distance is no greater than the declared allowed gap and fails when it is greater",
+          "every position claim in this adoption reads the same adoption-wide value at {{value-cite:allowed-position-gap}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-comparison-log",
+          "{{instance}}-allowed-gap-source"
+        ]
+      },
+      "text": "Position claim {{row.id}} measures distance in the space at {{row.reproduces}}, subtracts {{row.excludes}}, and passes exactly when the distance is no greater than the declared allowed gap at {{value-cite:allowed-position-gap}}. Every position claim in this adoption uses that one value. The test names the addresses and restates neither the gap nor the cited rules."
+    },
+    {
+      "id": "seed-fixed-claim-repeats-from-declared-record",
+      "title": "the {{row.artifact}} result repeats from the declared seed record",
+      "type": "general",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "when": {
+        "flag": {
+          "replay-record": [
+            "seed-only"
+          ]
+        },
+        "row": {
+          "shifts-with-live-input": [
+            "seed-fixes-this-claim"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "for every case in scope where the conditions at {{row.conditions}} hold, playback using the same sealed seed-only record satisfies {{row.id}}'s selected matching standard at the points cited at {{row.comparison-points}}",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-record-manifest",
+          "{{instance}}-comparison-log"
+        ]
+      },
+      "text": "Across {{inputs:scope}}, the {{row.artifact}} result from the same sealed seed-only record satisfies {{row.id}}'s matching standard at {{row.comparison-points}} whenever the conditions at {{row.conditions}} hold. The test names both addresses and restates nothing from it.",
+      "inputs": {
+        "scope": {
+          "default": "recorded runs where this claim is eligible"
+        },
+        "seeds": {
+          "default": [
+            "audit-a",
+            "audit-b"
+          ]
+        }
+      }
+    },
+    {
+      "id": "live-input-shifted-claim-repeats-within-cited-rule",
+      "title": "the {{row.artifact}} result repeats within its cited live-input rule",
+      "type": "general",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "when": {
+        "flag": {
+          "replay-record": [
+            "seed-only"
+          ]
+        },
+        "row": {
+          "shifts-with-live-input": [
+            "live-input-may-shift-this-claim"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "for every case in scope where the conditions at {{row.conditions}} hold and no difference permitted by {{row.live-input-dependence-declared-in}} applies, playback from the same sealed seed-only record satisfies the claim's matching standard at the points cited at {{row.comparison-points}}; a result that differs only as that citation permits is recorded as not compared",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-record-manifest",
+          "{{instance}}-condition-trace",
+          "{{instance}}-live-input-trace",
+          "{{instance}}-comparison-log"
+        ]
+      },
+      "text": "Across {{inputs:scope}}, a {{row.artifact}} case is eligible where the conditions at {{row.conditions}} hold and no difference permitted by {{row.live-input-dependence-declared-in}} applies. In every eligible case, playback from the same sealed seed-only record satisfies the claim's matching standard at {{row.comparison-points}}. A result that differs only as the live-input citation permits is recorded as not compared. The test names the addresses and restates nothing from them.",
+      "inputs": {
+        "scope": {
+          "default": "recorded runs spanning the cited conditions and permitted live-input differences"
+        },
+        "seeds": {
+          "default": [
+            "audit-a",
+            "audit-b"
+          ]
+        }
+      }
+    },
+    {
+      "id": "seed-and-input-claim-repeats-from-declared-record",
+      "title": "the {{row.artifact}} result repeats from the declared seed and input record",
+      "type": "general",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "when": {
+        "flag": {
+          "replay-record": [
+            "seed-and-input-log"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "for every eligible case for the {{row.artifact}} result in scope, playback using the same sealed seed and ordered input log satisfies {{row.id}}'s selected matching standard at the points cited at {{row.comparison-points}}",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-record-manifest",
+          "{{instance}}-input-log-trace",
+          "{{instance}}-comparison-log"
+        ]
+      },
+      "text": "Across {{inputs:scope}}, the {{row.artifact}} result from the same sealed seed and ordered input log satisfies {{row.id}}'s matching standard at {{row.comparison-points}} whenever the claim is eligible. The test names the address and restates nothing from it.",
+      "inputs": {
+        "scope": {
+          "default": "recorded runs where this claim is eligible"
+        },
+        "seeds": {
+          "default": [
+            "audit-a",
+            "audit-b"
+          ]
+        }
+      }
+    },
+    {
+      "id": "fixed-start-input-claim-repeats-from-declared-record",
+      "title": "the {{row.artifact}} result repeats from the declared fixed start and input record",
+      "type": "general",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "when": {
+        "flag": {
+          "replay-record": [
+            "input-log-from-fixed-start"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "for every eligible case for the {{row.artifact}} result in scope, playback using the same sealed fixed-start identity and ordered input log satisfies {{row.id}}'s selected matching standard at the points cited at {{row.comparison-points}}",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-record-manifest",
+          "{{instance}}-input-log-trace",
+          "{{instance}}-comparison-log"
+        ]
+      },
+      "text": "Across {{inputs:scope}}, the {{row.artifact}} result from the same sealed fixed-start identity and ordered input log satisfies {{row.id}}'s matching standard at {{row.comparison-points}} whenever the claim is eligible. The test names the address and restates nothing from it.",
+      "inputs": {
+        "scope": {
+          "default": "recorded runs where this claim is eligible"
+        },
+        "seeds": {
+          "default": [
+            "audit-a",
+            "audit-b"
+          ]
+        }
+      }
+    },
+    {
+      "id": "outside-conditions-make-no-promise",
+      "title": "changes outside cited conditions do not fail this contract",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each change outside the cited conditions that the {{instance}} adoption can construct",
+        "when": [
+          "the change is observed during playback"
+        ],
+        "then": [
+          "no change outside the cited conditions is itself a ground for rejection or for a divergence mark; a divergence arises only from a failed comparison of a claimed result at an eligible comparison point",
+          "where no such change can be constructed, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-condition-trace",
+          "{{instance}}-comparison-log",
+          "{{instance}}-playback-result"
+        ]
+      },
+      "text": "A change outside the cited conditions is never itself a reason to reject a record or to mark a divergence. A divergence arises only when a claimed result fails its comparison at an eligible comparison point. If the adoption can construct no such change, the test asserts nothing."
+    },
+    {
+      "id": "first-difference-retains-complete-record",
+      "title": "{{row.id}} retains the first failed eligible comparison",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one {{row.id}} playback with a first failed eligible comparison, with a last consumed input where this record has one",
+        "when": [
+          "the comparison fails its claim's matching standard"
+        ],
+        "then": [
+          "the playback result becomes diverged at that first difference",
+          "the retained divergence record holds the claim id, comparison point, expected result, observed result, recorded and running versions, recorded and running platforms, and last consumed input when present",
+          "the retained record distinguishes this failed comparison from a skipped comparison"
+        ],
+        "diagnostics": [
+          "{{instance}}-divergence-record",
+          "{{instance}}-playback-result",
+          "{{instance}}-comparison-log"
+        ]
+      },
+      "text": "At the first failed eligible comparison, {{row.id}} becomes diverged and retains the claim, point, expected and observed results, versions, platforms, and last consumed input when present. The records distinguish failure from a skipped comparison."
+    },
+    {
+      "id": "stop-and-report-ends-at-first-difference",
+      "title": "{{row.id}} reports and stops at the first difference",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "when": {
+        "flag": {
+          "divergence-response": [
+            "stop-and-report"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one {{row.id}} playback whose next eligible comparison is its first difference, with a later recorded or live input where playback can have one",
+        "when": [
+          "the difference is retained"
+        ],
+        "then": [
+          "the difference is presented through {{row.difference-report-declared-in}} before any later input is consumed",
+          "no later input is consumed and playback ends with result diverged"
+        ],
+        "diagnostics": [
+          "{{instance}}-divergence-record",
+          "{{instance}}-difference-report",
+          "{{instance}}-input-log-trace"
+        ]
+      },
+      "text": "At the first difference, {{row.id}} presents the retained difference through {{row.difference-report-declared-in}}, consumes no later input, and ends diverged. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "continue-and-flag-keeps-visible-divergence",
+      "title": "{{row.id}} reports and continues from playback state",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "when": {
+        "flag": {
+          "divergence-response": [
+            "continue-and-flag"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one {{row.id}} playback at its first difference with later playback remaining",
+        "when": [
+          "the difference is retained"
+        ],
+        "then": [
+          "the difference is presented through {{row.difference-report-declared-in}} before the next input is consumed",
+          "a visible diverged mark remains and playback continues from its own state"
+        ],
+        "diagnostics": [
+          "{{instance}}-divergence-record",
+          "{{instance}}-difference-report",
+          "{{instance}}-playback-result"
+        ]
+      },
+      "text": "At the first difference, {{row.id}} presents it through {{row.difference-report-declared-in}} before the next input, keeps a visible diverged mark, and continues from playback's own state. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "continue-silently-keeps-internal-divergence",
+      "title": "{{row.id}} continues with an internal diverged mark",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "when": {
+        "flag": {
+          "divergence-response": [
+            "continue-silently"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one {{row.id}} playback at its first difference with later playback remaining",
+        "when": [
+          "the difference is retained"
+        ],
+        "then": [
+          "the replay controller marks the mismatch internally, emits no player-facing, ordinary-log, or telemetry report, and continues from playback's own state",
+          "the playback result remains diverged rather than appearing complete"
+        ],
+        "diagnostics": [
+          "{{instance}}-divergence-record",
+          "{{instance}}-outward-report-audit",
+          "{{instance}}-playback-result"
+        ]
+      },
+      "text": "At the first difference, {{row.id}} marks divergence inside the replay controller, emits no player-facing, ordinary-log, or telemetry report, and continues from playback's own state. It remains diverged."
+    },
+    {
+      "id": "later-comparisons-never-resynchronise",
+      "title": "later comparisons are informational only",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "divergence-response": [
+            "continue-and-flag",
+            "continue-silently"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each continuing {{instance}} playback that can construct a first difference, with and without later comparison points",
+        "when": [
+          "playback continues after the first difference"
+        ],
+        "then": [
+          "later comparisons are retained as informational and never replace the first difference",
+          "playback is never resynchronised to a comparison reference and advances only from its own state",
+          "where a continuing run has no later comparison point, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-divergence-record",
+          "{{instance}}-comparison-log",
+          "{{instance}}-playback-state-trace"
+        ]
+      },
+      "text": "For each constructible continuing run, later comparisons are informational: they do not replace the first difference or resynchronise playback to a reference. Playback advances from its own state. A continuing run with no later comparison point asserts nothing."
+    },
+    {
+      "id": "complete-means-all-made-comparisons-matched",
+      "title": "complete means every comparison actually made matched",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "replay-record",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one {{row.id}} record reaching the end boundary at {{row.recording-declared-in}} with no failed eligible comparison",
+        "when": [
+          "the terminal playback result is assigned"
+        ],
+        "then": [
+          "the playback result becomes complete exactly when every comparison actually made matched",
+          "the comparison log separately records excluded claims, unmet conditions, and excluded state, and complete makes no promise about them"
+        ],
+        "diagnostics": [
+          "{{instance}}-playback-result",
+          "{{instance}}-comparison-log"
+        ]
+      },
+      "text": "When {{row.id}} reaches its end at {{row.recording-declared-in}} without an eligible failure, complete means every comparison actually made matched. It promises nothing about excluded claims, unmet conditions, or excluded state, which the log distinguishes from matches. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "same-moment-events-preserve-event-resolution-order",
+      "title": "same-moment events preserve Event resolution order",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two or more events offered at the same {{instance}} replay moment in a known total order from Event resolution",
+        "when": [
+          "the events enter the replay lifecycle"
+        ],
+        "then": [
+          "the lifecycle processes them in exactly the supplied total order",
+          "the replay lifecycle introduces no reordering of its own between the supplied order and processing"
+        ],
+        "diagnostics": [
+          "{{instance}}-event-order-trace"
+        ]
+      },
+      "text": "Events at the same replay moment enter in the total order Event resolution supplies. The replay lifecycle introduces no reordering of its own between the supplied order and processing."
+    },
+    {
+      "id": "adoption-declares-exactly-one-replay-record",
+      "title": "declaration check: the adoption declares exactly one replay-record row",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer counts replay-record rows"
+        ],
+        "then": [
+          "the adoption has exactly one replay-record row; zero rows or more than one row is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. A legal adoption has exactly one replay-record row. Any other count is a defect this test fails by construction; the validator does not enforce the maximum."
+    },
+    {
+      "id": "adoption-declares-at-least-one-reproduction-claim",
+      "title": "declaration check: the adoption declares at least one reproduction claim",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer counts reproduction-claims rows"
+        ],
+        "then": [
+          "the adoption has at least one reproduction-claims row; an empty list is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. A legal adoption has at least one reproduction claim. An empty claim list is a defect this test fails by construction; the validator does not enforce the minimum."
+    },
+    {
+      "id": "claim-standard-agrees-with-cited-prose",
+      "title": "declaration check: {{row.id}}'s matching standard agrees with its cited prose",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.reproduces}} and {{row.excludes}}, not the running game",
+        "when": [
+          "a reviewer compares the selected matching-standard with the included and excluded result description"
+        ],
+        "then": [
+          "the prose names bytes for bit-exact-state, outcome fields for outcome-equivalent, or positions and their space for allowed-position-gap, matching the row's selected standard",
+          "any disagreement is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.reproduces}} with {{row.excludes}}, not the running game. The cited prose must describe the kind of result selected by {{row.id}}'s matching standard; any other pairing is a defect this test fails by construction. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "every-platform-claim-has-multiple-platform-evidence",
+      "title": "declaration check: {{row.id}} was tested on more than one platform",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "when": {
+        "row": {
+          "platform-reach": [
+            "every-supported-platform"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and its verification evidence, not a new running-game execution",
+        "when": [
+          "a reviewer checks the evidence for every-supported-platform claim {{row.id}}"
+        ],
+        "then": [
+          "the evidence records this claim tested on more than one supported platform; one platform or none is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-platform-matrix",
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and existing verification evidence, not the running game. Every-supported-platform claim {{row.id}} is legal only with evidence from more than one supported platform; any narrower evidence is a defect this test fails by construction."
+    },
+    {
+      "id": "claim-excludes-cites-separate-section",
+      "title": "declaration check: {{row.id}} has a separate exclusions section",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.reproduces}} and {{row.excludes}}, not the running game",
+        "when": [
+          "a reviewer checks the two cited sections"
+        ],
+        "then": [
+          "{{row.excludes}} names a section separate from {{row.reproduces}} and that section names every exclusion or states explicitly that nothing is excluded",
+          "a shared section, an omitted exclusion, or silence when nothing is excluded is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and cited prose, not the running game. {{row.excludes}} must be a section separate from {{row.reproduces}} and must name exclusions or explicitly say there are none. Any other shape is a defect this test fails by construction. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "claim-citations-state-their-own-duties",
+      "title": "declaration check: {{row.id}}'s four required citations state their own duties",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.reproduces}}, {{row.excludes}}, {{row.conditions}}, and {{row.comparison-points}}, not the running game",
+        "when": [
+          "a reviewer checks the meaning of each required citation"
+        ],
+        "then": [
+          "the four addresses respectively name the included result, the separate exclusions, the promise conditions, and the capture-or-recomputation and comparison points",
+          "a citation with another meaning is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and cited prose, not the running game. {{row.reproduces}}, {{row.excludes}}, {{row.conditions}}, and {{row.comparison-points}} must respectively state the included result, separate exclusions, conditions, and reference and comparison points. Any wrong meaning is a defect this test fails by construction. The test names every address and restates nothing from them."
+    },
+    {
+      "id": "live-input-shifted-claim-cites-dependence-rule",
+      "title": "declaration check: {{row.id}} cites its live-input dependence rule",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "when": {
+        "row": {
+          "shifts-with-live-input": [
+            "live-input-may-shift-this-claim"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.live-input-dependence-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks live-input-may-shift-this-claim row {{row.id}}"
+        ],
+        "then": [
+          "the citation names every live-input history fact allowed to change this claimed result, and unlisted live input is excluded",
+          "a missing citation or a citation with another meaning is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.live-input-dependence-declared-in}}, not the running game. A live-input-sensitive {{row.id}} claim is legal only when that citation names every permitted input-history fact and excludes all others. Any other shape is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "shared-conditions-section-covers-every-citing-claim",
+      "title": "declaration check: {{row.id}}'s shared conditions section covers every citing claim",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the cited prose at {{row.conditions}}, not the running game",
+        "when": [
+          "a reviewer checks every reproduction claim that cites the same conditions section"
+        ],
+        "then": [
+          "where the section at {{row.conditions}} is also cited by another claim in this adoption, it states the conditions for each citing claim by name",
+          "where no other claim cites it, this check asserts nothing",
+          "any shared section that covers only some citing claims is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and the cited prose at {{row.conditions}}, not the running game. A section cited by more than one claim states the conditions for every citing claim by name; a shared section covering only some citing claims is a defect this test fails by construction. Where no other claim cites the section, this check asserts nothing."
+    },
+    {
+      "id": "position-gap-unit-matches-cited-space",
+      "title": "declaration check: {{row.id}}'s position gap unit matches its cited space",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reproduction-claims",
+      "when": {
+        "row": {
+          "matching-standard": [
+            "allowed-position-gap"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the cited prose at {{row.reproduces}} and {{value-cite:allowed-position-gap}}, not the running game",
+        "when": [
+          "a reviewer compares the cited position space with the adoption's allowed gap value"
+        ],
+        "then": [
+          "the space cited at {{row.reproduces}} names a position unit, and the adoption's gap value at {{value-cite:allowed-position-gap}}, whether a number or a cited rule, is one distance in that unit",
+          "any other pairing is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and the cited prose at {{row.reproduces}} and {{value-cite:allowed-position-gap}}, not the running game. The cited space names a position unit, and the adoption's gap value, whether a number or a cited rule, is one distance in that unit. Any other pairing is a defect this test fails by construction."
+    },
+    {
+      "id": "replay-holds",
+      "title": "the replay mechanism holds for the whole run",
+      "type": "general",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "every playback entered the mechanism's numbered stages in order, left them only at a terminal result, and never revisited an earlier stage; no comparison read a comparison reference from live play; no rejected or diverged playback consumed an input that its selected response or rejection forbade it to consume; every terminal playback result was exactly one of diverged, rejected, or complete",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-recording-trace",
+          "{{instance}}-identity-check-trace",
+          "{{instance}}-reference-source",
+          "{{instance}}-comparison-log",
+          "{{instance}}-input-log-trace",
+          "{{instance}}-playback-result",
+          "{{instance}}-first-ordering-violation"
+        ]
+      },
+      "text": "Across {{inputs:scope}}, every playback enters the mechanism's stages in order, leaves them only at a terminal result, and never revisits an earlier stage. References never come from live play; rejected or diverged playback consumes no forbidden input; each terminal result is exactly diverged, rejected, or complete. The pack's default audit seeds apply unless the adoption supplies its own.",
+      "inputs": {
+        "scope": {
+          "default": "recorded runs across every claim, each platform reach the adoption declares, an update where the adoption allows one, and a first difference where one can be constructed"
+        },
+        "seeds": {
+          "default": [
+            "audit-a",
+            "audit-b"
+          ]
+        }
+      }
+    }
+  ]
+}

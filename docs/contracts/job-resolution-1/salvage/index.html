@@ -1,0 +1,2028 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salvage — Job resolution adoption — OpenGDD</title>
+<meta name="description" content="Salvage is a Job resolution adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="canonical" href="https://opengdd.org/contracts/job-resolution-1/salvage/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Salvage — Job resolution adoption — OpenGDD">
+<meta property="og:description" content="Salvage is a Job resolution adoption with supplied answers, settings and matching acceptance tests.">
+<meta property="og:url" content="https://opengdd.org/contracts/job-resolution-1/salvage/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Salvage — Job resolution adoption — OpenGDD">
+<meta name="twitter:description" content="Salvage is a Job resolution adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=ff285f28dd16">
+<script type="module" src="/assets/contracts.mjs?v=ff285f28dd16"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout contract-catalogue contract-entry-page contract-instance-page" data-contract-root data-core-id="job-resolution" data-contract-preset="{&quot;job-inputs&quot;:&quot;no-inputs&quot;,&quot;delivery-trigger&quot;:&quot;automatic&quot;,&quot;output-full&quot;:&quot;try-destinations&quot;}" data-contract-facts="{&quot;rowCounts&quot;:{&quot;job&quot;:1,&quot;redelivery-events&quot;:1,&quot;output-destinations&quot;:1,&quot;read-first&quot;:0,&quot;work-phases&quot;:0,&quot;interruptions&quot;:0,&quot;reversal-rules&quot;:0,&quot;progress-rounding-rules&quot;:0,&quot;cancel-return-rules&quot;:0,&quot;collection-events&quot;:0,&quot;readmission-events&quot;:0,&quot;work-limits&quot;:0,&quot;standing-orders&quot;:0,&quot;failures&quot;:0,&quot;cancellations&quot;:0,&quot;dependent-cancellations&quot;:0,&quot;delivery-cases&quot;:0},&quot;valueForms&quot;:{},&quot;rows&quot;:{&quot;job&quot;:[{&quot;job-declared-in&quot;:&quot;salvage.recovered-gems&quot;,&quot;normal-destination-declared-in&quot;:&quot;salvage.player-backpack&quot;,&quot;output-kind&quot;:&quot;new-thing&quot;}],&quot;redelivery-events&quot;:[{&quot;id&quot;:&quot;storage-changed&quot;,&quot;redelivery-declared-in&quot;:&quot;salvage.storage-capacity-changed&quot;}],&quot;output-destinations&quot;:[{&quot;id&quot;:&quot;mine-cart&quot;,&quot;destination-declared-in&quot;:&quot;salvage.mine-cart-capacity&quot;}],&quot;read-first&quot;:[],&quot;work-phases&quot;:[],&quot;interruptions&quot;:[],&quot;reversal-rules&quot;:[],&quot;progress-rounding-rules&quot;:[],&quot;cancel-return-rules&quot;:[],&quot;collection-events&quot;:[],&quot;readmission-events&quot;:[],&quot;work-limits&quot;:[],&quot;standing-orders&quot;:[],&quot;failures&quot;:[],&quot;cancellations&quot;:[],&quot;dependent-cancellations&quot;:[],&quot;delivery-cases&quot;:[]}}">
+<nav class="doc-toc contract-nav" aria-label="Contracts">
+<details class="contract-nav-disclosure">
+  <summary>Contracts</summary>
+  <div class="contract-nav-content">
+    <p class="toc-title">Contracts</p>
+    <ul class="contract-nav-home"><li><a href="/contracts/">Overview</a></li><li><a href="/contracts/catalogue/">Contract catalogue</a></li></ul>
+<div class="toc-group contract-page-nav">
+  <p class="toc-group-title">On this page</p>
+  <ul><li><a href="#use-this">Use in your game</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#values">Numbers</a></li>
+<li><a href="#lists">Lists</a></li>
+<li><a href="#tests">Acceptance tests</a></li>
+<li><a href="#adoption-json">JSON</a></li></ul>
+</div>
+  </div>
+</details>
+</nav>
+<article class="doc-body contract-entry-body">
+<p class="label"><a href="/contracts/catalogue/#crafting-exchange">Crafting &amp; exchange</a></p>
+<div class="contract-entry-title-row">
+  <div><h1>Salvage</h1><p class="contract-core-name"><code>salvage</code> · an adoption of <a href="/contracts/job-resolution-1/">Job resolution</a>, version 1</p></div>
+  <div><span class="contract-badge ">Tests included</span></div>
+</div>
+
+<section class="contract-handoff" aria-labelledby="use-this">
+  <h2 id="use-this">Use in your game</h2>
+  <p>Opens the authoring tool with these answers and settings already filled in. You still add your game's own rules and tuning.</p>
+  <div class="contract-actions">
+    <a class="cta" href="/authoring-tool/?contract=job-resolution-1&amp;adoption=salvage">Open in the authoring tool</a>
+    <a class="cta-quiet" href="/contracts/job-resolution-1/salvage.zip" download="salvage.zip">Download ZIP</a>
+  </div>
+  <details><summary>What is in the ZIP</summary><p>The ZIP holds the adoption and its acceptance tests. In the authoring tool, choose <strong>Add contract</strong> and pick this ZIP. If you keep your design as files, put them in <code>contracts/</code>.</p><div class="contract-actions"><a href="/contracts/job-resolution-1/salvage.json" download="salvage.json">Download adoption JSON</a> · <a href="/contracts/job-resolution-1/job-resolution-1.pack.json" download="job-resolution-1.pack.json">Download tests</a><button type="button" class="cta-quiet" data-copy-core data-core-url="/contracts/job-resolution-1/salvage.json" data-copy-kind="adoption">Copy adoption</button><span role="status" aria-live="polite" data-copy-status></span></div></details>
+</section>
+<section class="contract-overview">
+  <h2>The contract behind it</h2>
+  <p>Covers crafting benches, build queues, research, and cooking: one job rule decides inputs, claims, work, interruption, limits, delivery, and failure, written down once. What a recipe makes and what it is worth stay with the game&#39;s own rules.</p>
+  <p><a href="/contracts/job-resolution-1/">Read the full Job resolution contract →</a></p>
+</section>
+<section class="contract-form-section" id="questions">
+  <h2>Questions</h2>
+  <p>The supplied answer is marked on each question. Pick other answers to see what changes. Nothing is saved here: the ZIP and the authoring tool use the supplied answers.</p>
+  <div class="contract-actions contract-question-tools">
+    <button type="button" class="cta-quiet contract-reset" data-reset-choices>Restore supplied answers</button>
+    <label class="contract-switch"><input type="checkbox" data-builder-wording> Show exact wording for builders</label>
+  </div>
+  <div class="contract-question-list">
+  <article class="contract-question" id="question-job-inputs" data-contract-question data-flag="job-inputs" data-when="null">
+  <h3>Does this job need inputs that can be claimed and spent?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Does this job need inputs that can be claimed and spent?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-job-inputs" value="required-inputs" data-contract-choice><span class="contract-option-label">Required inputs</span></label></th>
+  <td><span class="contract-option-meaning">The job needs one or more inputs. Brewing one potion may need two herbs and one bottle.</span><p class="contract-option-semantics">The request checks the required share at the request gate. The lifecycle claims and spends that share at the selected times.</p></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-job-inputs" value="no-inputs" data-contract-choice><span class="contract-option-label">No inputs</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The job claims and spends no input. Researching Pottery may need an unlocked lab but no material.</span><p class="contract-option-semantics">Input checks, claims, returns, and spending are empty. Eligibility conditions may still prevent the game from offering the request.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+</article>
+<article class="contract-question" id="question-partial-work" data-contract-question data-flag="partial-work" data-when="{&quot;row-count&quot;:{&quot;work-phases&quot;:&quot;non-empty&quot;}}">
+  <h3>What happens to recorded work when this job stops?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the work phases list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>The job has no work span before finish; start and finish settle in one batch, unless an allowed delivery answer leaves the result visibly finished. No partial work is recorded, and no interruption can stop the job before its finish gate. A recoverable failure while waiting still lands it in stopped, with the start gate as its resume point.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for What happens to recorded work when this job stops?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-partial-work" value="keep-with-job" data-contract-choice><span class="contract-option-label">Keep with job</span></label></th>
+  <td><span class="contract-option-meaning">Recorded work stays with the same job. A half-built wall remains halfway built after rain stops the work.</span><p class="contract-option-semantics">A normal stop preserves all recorded work. Only this job can resume from it.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-partial-work" value="reverse-while-stopped" data-contract-choice><span class="contract-option-label">Reverse while stopped</span></label></th>
+  <td><span class="contract-option-meaning">Recorded work falls while the job is stopped. A cooling forge loses heat while no smith works.</span><p class="contract-option-semantics">Recorded work decreases under reversal-declared-in and never passes below no work. Claim changes caused by the decrease settle through lifecycle step 12.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-partial-work" value="reset-at-stop" data-contract-choice><span class="contract-option-label">Reset at stop</span></label></th>
+  <td><span class="contract-option-meaning">Recorded work returns to none when the job stops. An interrupted lockpick attempt starts again from the beginning.</span><p class="contract-option-semantics">The first ordinary stop records no work. Cancellation records no terminal work after its input snapshot is taken.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+</article>
+<article class="contract-question" id="question-failure-result" data-contract-question data-flag="failure-result" data-when="{&quot;row-count&quot;:{&quot;failures&quot;:&quot;non-empty&quot;}}">
+  <h3>What does a listed failure do unless that failure says otherwise?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the failures list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>No accepted or finished job fails; refusal, stopping, cancellation, and blocked delivery are different outcomes.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for What does a listed failure do unless that failure says otherwise?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-failure-result" value="partial-inputs-or-work" data-contract-choice><span class="contract-option-label">Partial inputs or work</span></label></th>
+  <td><span class="contract-option-meaning">Failure may lose part of the current inputs, recorded work, or both, whichever exist. A spill may lose one cup of broth while the same soup remains unfinished.</span><p class="contract-option-semantics">The cited failure rule may lose a strict subset of claimed inputs, reduce recorded work without passing below no work, or do both. It creates no successful output and leaves the same job stopped.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-failure-result" value="job-ruined" data-contract-choice><span class="contract-option-label">Job ruined</span></label></th>
+  <td><span class="contract-option-meaning">Failure ends this job for good. An overcooked meal is ruined and cannot finish as the same meal.</span><p class="contract-option-semantics">The job enters terminal failed and creates no successful output. A finished but undelivered new output is destroyed.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+</article>
+<article class="contract-question" id="question-cancel-return" data-contract-question data-flag="cancel-return" data-when="{&quot;row-count&quot;:{&quot;cancellations&quot;:&quot;non-empty&quot;}}">
+  <h3>What happens to inputs this job still claims when it is cancelled?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the cancellations list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>An accepted job cannot be cancelled. A reviewer confirms this before the adoption relies on it.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for What happens to inputs this job still claims when it is cancelled?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-cancel-return" value="return-claimed" data-contract-choice><span class="contract-option-label">Return claimed</span></label></th>
+  <td><span class="contract-option-meaning">Every surviving claimed input returns to its source. Cancelling a queued soldier returns the 50 gold already set aside.</span><p class="contract-option-semantics">Release every unit still claimed by the job. Do not add units that were never claimed or were already lost.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-cancel-return" value="return-nothing" data-contract-choice><span class="contract-option-label">Return nothing</span></label></th>
+  <td><span class="contract-option-meaning">No claimed input returns. Cancelling a fired clay pot spends the clay already placed in the kiln.</span><p class="contract-option-semantics">Spend every unit still claimed by the job and release none. Inputs not yet claimed remain at their sources.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-cancel-return" value="return-by-rule" data-contract-choice><span class="contract-option-label">Return by rule</span></label></th>
+  <td><span class="contract-option-meaning">A game rule chooses the returned share. Cancelling a half-built wall may return unused bricks but not dried mortar.</span><p class="contract-option-semantics">Release the subset named by cancel-return-declared-in, never more than the current claim, and spend the rest.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+</article>
+<article class="contract-question" id="question-cancel-dependents" data-contract-question data-flag="cancel-dependents" data-when="{&quot;row-count&quot;:{&quot;dependent-cancellations&quot;:&quot;non-empty&quot;}}">
+  <h3>What happens to later waiting jobs that needed a cancelled job&#39;s output?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the dependent cancellations list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>Cancelling a job leaves later waiting jobs in place, even when they needed its output.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for What happens to later waiting jobs that needed a cancelled job&#39;s output?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-cancel-dependents" value="end-dependents" data-contract-choice><span class="contract-option-label">End dependents</span></label></th>
+  <td><span class="contract-option-meaning">Later jobs that can no longer get the needed output are cancelled too. Cancelling an iron ingot also cancels the waiting sword that needed it.</span><p class="contract-option-semantics">Cancel every transitively dependent later waiting job whose requirement can no longer be met. Settle them in waiting order.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-cancel-dependents" value="leave-dependents" data-contract-choice><span class="contract-option-label">Leave dependents</span></label></th>
+  <td><span class="contract-option-meaning">Later jobs remain waiting. A sword order may wait for another iron ingot after its first ingot job is cancelled.</span><p class="contract-option-semantics">Leave every later dependent job waiting. The wait ends only when the requirement is met again or the job is cancelled.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+</article>
+<article class="contract-question" id="question-input-claim-timing" data-contract-question data-flag="input-claim-timing" data-when="{&quot;flag&quot;:{&quot;job-inputs&quot;:[&quot;required-inputs&quot;]}}">
+  <h3>When do required inputs become unavailable to other rules?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>Job inputs is Required inputs.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>This job claims no input, so there is no claim time to choose.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for When do required inputs become unavailable to other rules?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-input-claim-timing" value="taken-at-request" data-contract-choice><span class="contract-option-label">Taken at request</span></label></th>
+  <td><span class="contract-option-meaning">All inputs are claimed when the request is accepted. A queued soldier reserves its full gold cost before training starts.</span><p class="contract-option-semantics">Atomically claim the full requirement at admission, whether the job waits or starts.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-input-claim-timing" value="taken-at-start" data-contract-choice><span class="contract-option-label">Taken at start</span></label></th>
+  <td><span class="contract-option-meaning">All inputs are claimed when work starts. A workbench leaves wood available until the bench begins the chair.</span><p class="contract-option-semantics">Atomically claim the full requirement at start. No other rule can use claimed units.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-input-claim-timing" value="taken-at-finish" data-contract-choice><span class="contract-option-label">Taken at finish</span></label></th>
+  <td><span class="contract-option-meaning">Inputs stay available until successful finish. A ritual checks for three crystals only when the casting completes.</span><p class="contract-option-semantics">Claim and spend the full requirement at the finish gate. No pre-finish input claim exists.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-input-claim-timing" value="with-progress" data-contract-choice><span class="contract-option-label">With progress</span></label></th>
+  <td><span class="contract-option-meaning">Inputs are claimed as work advances. A wall claims half its bricks when it reaches half of its recorded work.</span><p class="contract-option-semantics">Before each observable advance, claim the rounded share required at the proposed work point. Release the matching share when work reverses.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+</article>
+<article class="contract-question" id="question-stopped-claims" data-contract-question data-flag="stopped-claims" data-when="{&quot;flag&quot;:{&quot;partial-work&quot;:[&quot;keep-with-job&quot;,&quot;reverse-while-stopped&quot;,&quot;reset-at-stop&quot;],&quot;input-claim-timing&quot;:[&quot;taken-at-request&quot;,&quot;taken-at-start&quot;,&quot;with-progress&quot;]}}">
+  <h3>Does a stopped job keep the inputs it has already claimed?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>Partial work is Keep with job or Reverse while stopped or Reset at stop and Input claim timing is Taken at request or Taken at start or With progress.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>When no pre-finish claim exists there is nothing to hold; otherwise the stopped job keeps its claim.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Does a stopped job keep the inputs it has already claimed?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-stopped-claims" value="hold" data-contract-choice><span class="contract-option-label">Hold</span></label></th>
+  <td><span class="contract-option-meaning">The job keeps the claim while stopped. A paused wall keeps its reserved bricks at the site.</span><p class="contract-option-semantics">Retain the current claim while stopped. Work changes may first reduce a progress-based claim.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-stopped-claims" value="release-and-reclaim" data-contract-choice><span class="contract-option-label">Release and reclaim</span></label></th>
+  <td><span class="contract-option-meaning">The claim returns while stopped and must be claimed again before resuming. A paused research topic releases its points for another topic.</span><p class="contract-option-semantics">Release the current claim while stopped. Reclaim the required share before resuming; remain stopped if that share is unavailable.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+</article>
+<article class="contract-question" id="question-delivery-trigger" data-contract-question data-flag="delivery-trigger" data-when="{&quot;any&quot;:[{&quot;row-count&quot;:{&quot;delivery-cases&quot;:&quot;non-empty&quot;}},{&quot;row-count&quot;:{&quot;output-destinations&quot;:&quot;non-empty&quot;}},{&quot;row-count&quot;:{&quot;collection-events&quot;:&quot;non-empty&quot;}},{&quot;row-count&quot;:{&quot;readmission-events&quot;:&quot;non-empty&quot;}},{&quot;row-count&quot;:{&quot;redelivery-events&quot;:&quot;non-empty&quot;}}]}">
+  <h3>When is the completed result delivered?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the delivery cases list has at least one row, or the output destinations list has at least one row, or the collection events list has at least one row, or the readmission events list has at least one row, or the redelivery events list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>A finished output is delivered automatically as soon as its normal destination accepts it.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for When is the completed result delivered?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-delivery-trigger" value="automatic" data-contract-choice><span class="contract-option-label">Automatic</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">Delivery happens as soon as a destination accepts the output. A trained unit leaves the barracks for its rally point at once.</span><p class="contract-option-semantics">Move from finished to delivered immediately after the capacity policy accepts one destination.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-delivery-trigger" value="on-collection" data-contract-choice><span class="contract-option-label">On collection</span></label></th>
+  <td><span class="contract-option-meaning">The output waits for collection at its accepted place. A cooked meal stays on the stove until a player picks it up.</span><p class="contract-option-semantics">Keep the accessible output in finished until collection-declared-in occurs, then report delivery once.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+</article>
+<article class="contract-question" id="question-output-full" data-contract-question data-flag="output-full" data-when="null">
+  <h3>What happens when the whole output does not fit at its normal destination?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for What happens when the whole output does not fit at its normal destination?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-output-full" value="never-full" data-contract-choice><span class="contract-option-label">Never full</span></label></th>
+  <td><span class="contract-option-meaning">The normal destination always accepts the output. Completed research always fits in the research ledger.</span><p class="contract-option-semantics">No job reaches a capacity-blocked state. A reviewer confirms the capacity promise before the adoption relies on it. An in-place output always answers this way. If the capacity promise is false, the adoption is broken; there is no fallback lifecycle branch.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-output-full" value="wait-before-start" data-contract-choice><span class="contract-option-label">Wait before start</span></label></th>
+  <td><span class="contract-option-meaning">The job waits before starting until room is reserved. A bakery starts a loaf only after one shelf space is held for it.</span><p class="contract-option-semantics">Keep admission pending until the whole output has reserved room. Hold that reservation through delivery.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-output-full" value="wait-until-space" data-contract-choice><span class="contract-option-label">Wait until space</span></label></th>
+  <td><span class="contract-option-meaning">Completed work stops at the finish gate until the output fits. An assembler holds a finished engine while its output slot is full.</span><p class="contract-option-semantics">The job moves to stopped at its finish gate, work phase or not, and retains completed work until capacity clears.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-output-full" value="hold-undelivered" data-contract-choice><span class="contract-option-label">Hold undelivered</span></label></th>
+  <td><span class="contract-option-meaning">The job finishes and owns one inaccessible output until delivery can retry. A forge holds one finished sword while the rack is full.</span><p class="contract-option-semantics">Spend inputs and keep one owned output in finished. Only redelivery-declared-in retries the normal destination; work is not repeated.</p></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="job-resolution-output-full" value="try-destinations" data-contract-choice><span class="contract-option-label">Try destinations</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The job tries named places in order. A mined gem tries the backpack, then the cart, then waits if both refuse it.</span><p class="contract-option-semantics">Try the normal destination, then output-destinations in written order. Keep the same output in finished if all refuse; only redelivery-declared-in retries the route.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+</article>
+  </div>
+</section>
+<aside class="contract-relief" aria-labelledby="relief-title">
+  <p class="contract-relief-title" id="relief-title">That was the hard part.</p>
+  <p>The questions are the decisions. Everything below follows from them: the numbers, lists and test inputs this adoption supplies, and the tests that come with it. The authoring tool edits all of it in place. Read on only if you want to check.</p>
+</aside>
+<details class="contract-form-section contract-fold" id="values">
+  <summary><span class="contract-fold-title">Numbers</span><span class="contract-fold-note">no numbers</span></summary>
+  <p>This contract has no numbers to set.</p>
+</details>
+<details class="contract-form-section contract-fold" id="rules">
+  <summary><span class="contract-fold-title">Rules</span><span class="contract-fold-note">3 rules</span></summary>
+  <p>A rule is a check between the numbers. Validation reports a rule that fails.</p>
+  <ul class="contract-rule-list"><li id="rule-progress-does-not-reset-on-stop"><p class="contract-rule-message">Progress-based input claims cannot reset all work when inputs run out; keep or reverse the work, or claim inputs at another time.</p>
+  <p class="contract-condition">Forbidden when Input claim timing is With progress and Partial work is Reset at stop.</p></li>
+<li id="rule-progress-reversal-warning"><p class="contract-rule-message">Reversing work while inputs are claimed with progress can make the same materials leave and return repeatedly.</p>
+  <p class="contract-condition">Forbidden when Input claim timing is With progress and Partial work is Reverse while stopped. (a warning, not an error)</p></li>
+<li id="rule-collection-needs-a-placed-output"><p class="contract-rule-message">A collected result must already be at an accepted destination; choose a destination rule that puts it there first.</p>
+  <p class="contract-condition">Forbidden when Delivery trigger is On collection and Output full is Hold undelivered, or Delivery trigger is On collection and Output full is Try destinations.</p></li></ul>
+</details>
+<details class="contract-form-section contract-fold" id="lists">
+  <summary><span class="contract-fold-title">Lists</span><span class="contract-fold-note">17 lists</span></summary>
+  <p>Each list holds the rows this adoption supplies. A list can be empty.</p>
+  <article class="contract-collection">
+<h3>Job</h3>
+<p class="contract-exact-name"><code>job</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Job declared in</th><th>Normal destination declared in</th><th>Output kind</th></tr></thead>
+<tbody>
+<tr><td><code>salvage.recovered-gems</code></td><td><code>salvage.player-backpack</code></td><td><code>new-thing</code></td></tr>
+</tbody></table></div>
+</article>
+<article class="contract-collection">
+<h3>Read first</h3>
+<p class="contract-exact-name"><code>read-first</code></p>
+<p>This adoption declares no read first.</p>
+</article>
+<article class="contract-collection">
+<h3>Work phases</h3>
+<p class="contract-exact-name"><code>work-phases</code></p>
+<p>This adoption declares no work phases.</p>
+</article>
+<article class="contract-collection">
+<h3>Interruptions</h3>
+<p class="contract-exact-name"><code>interruptions</code></p>
+<p>This adoption declares no interruptions.</p>
+</article>
+<article class="contract-collection">
+<h3>Reversal rules</h3>
+<p class="contract-exact-name"><code>reversal-rules</code></p>
+<p>This adoption declares no reversal rules.</p>
+</article>
+<article class="contract-collection">
+<h3>Progress rounding rules</h3>
+<p class="contract-exact-name"><code>progress-rounding-rules</code></p>
+<p>This adoption declares no progress rounding rules.</p>
+</article>
+<article class="contract-collection">
+<h3>Cancel return rules</h3>
+<p class="contract-exact-name"><code>cancel-return-rules</code></p>
+<p>This adoption declares no cancel return rules.</p>
+</article>
+<article class="contract-collection">
+<h3>Collection events</h3>
+<p class="contract-exact-name"><code>collection-events</code></p>
+<p>This adoption declares no collection events.</p>
+</article>
+<article class="contract-collection">
+<h3>Readmission events</h3>
+<p class="contract-exact-name"><code>readmission-events</code></p>
+<p>This adoption declares no readmission events.</p>
+</article>
+<article class="contract-collection">
+<h3>Redelivery events</h3>
+<p class="contract-exact-name"><code>redelivery-events</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Redelivery declared in</th></tr></thead>
+<tbody>
+<tr><td><code>storage-changed</code></td><td><code>salvage.storage-capacity-changed</code></td></tr>
+</tbody></table></div>
+</article>
+<article class="contract-collection">
+<h3>Work limits</h3>
+<p class="contract-exact-name"><code>work-limits</code></p>
+<p>This adoption declares no work limits.</p>
+</article>
+<article class="contract-collection">
+<h3>Standing orders</h3>
+<p class="contract-exact-name"><code>standing-orders</code></p>
+<p>This adoption declares no standing orders.</p>
+</article>
+<article class="contract-collection">
+<h3>Failures</h3>
+<p class="contract-exact-name"><code>failures</code></p>
+<p>This adoption declares no failures.</p>
+</article>
+<article class="contract-collection">
+<h3>Cancellations</h3>
+<p class="contract-exact-name"><code>cancellations</code></p>
+<p>This adoption declares no cancellations.</p>
+</article>
+<article class="contract-collection">
+<h3>Dependent cancellations</h3>
+<p class="contract-exact-name"><code>dependent-cancellations</code></p>
+<p>This adoption declares no dependent cancellations.</p>
+</article>
+<article class="contract-collection">
+<h3>Delivery cases</h3>
+<p class="contract-exact-name"><code>delivery-cases</code></p>
+<p>This adoption declares no delivery cases.</p>
+</article>
+<article class="contract-collection">
+<h3>Output destinations</h3>
+<p class="contract-exact-name"><code>output-destinations</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Destination declared in</th></tr></thead>
+<tbody>
+<tr><td><code>mine-cart</code></td><td><code>salvage.mine-cart-capacity</code></td></tr>
+</tbody></table></div>
+</article>
+</details>
+<details class="contract-form-section contract-fold" id="verification">
+  <summary><span class="contract-fold-title">Test inputs</span><span class="contract-fold-note">scope and seeds</span></summary>
+  <p>Some tests need a scope or seeds from the adoption before they can run.</p>
+  <p>This adoption supplies none; every test uses its defaults.</p>
+</details>
+<details class="contract-form-section contract-fold" id="tests">
+  <summary><span class="contract-fold-title">Acceptance tests</span><span class="contract-fold-note">21 tests apply</span></summary>
+  <p>The contract comes with 66 tests. A test that runs once per row is counted once for each row. Tests that do not apply to these answers are still listed, with the reason.</p>
+  <div class="contract-test-list"><article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>reports-identify-the-run</code></p>
+      <h3>reports identify their job run and state change</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">A request reads the rule cited at job-declared-in once, makes any pool and place assignment, and reports job-requested. Across the runs needed to reach every constructible report, every report in each run keeps that run&#39;s id and the same job id and records the cause, work, claim changes, and chosen destination. Every report except job-requested carries old and new state; job-requested carries a new state only. job-rejected is not a state; destination-refused is a finished-to-finished report.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the set of <code class="contract-placeholder">salvage</code> job runs needed to reach every transition and stateless report the adoption can construct</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the report log is read in settlement order</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the request reads the rule cited at job-declared-in once, assigns exactly one pool and one cited place where those declarations exist, then reports job-requested</li><li>every report in each run carries that run&#39;s id and the same job id, plus cause, work before and after, units newly claimed, released, spent, or lost, and the destination when one is chosen</li><li>every report except job-requested carries old and new state; job-requested carries a new state only and sits outside any ordered instant batch</li><li>job-rejected ends the run without becoming a lifecycle state, and destination-refused has old and new state both finished</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-job-rule-read-log</li><li><code class="contract-placeholder">salvage</code>-report-log</li><li><code class="contract-placeholder">salvage</code>-state-trace</li><li><code class="contract-placeholder">salvage</code>-work-before-after</li><li><code class="contract-placeholder">salvage</code>-claim-ledger</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>claims-keep-their-source</code></p>
+      <h3>claims preserve ownership and settle once</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">A claim makes its units unavailable everywhere else but keeps their source known. Release returns surviving units there. Spending and loss remove units, so neither kind can later be released. A no-input adoption has no claim event to assert.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each claim, release, spend, and loss that a run of <code class="contract-placeholder">salvage</code> can construct; a no-input adoption has an empty claim ledger here</p></dd></div>
+<div><dt>When</dt><dd><ul><li>another rule tries to use a claimed unit and the run later settles that unit</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the claimed unit is unavailable to every other rule while its source remains recorded</li><li>release returns each surviving unit to that source</li><li>spending or losing removes the unit, and no removed unit is later released</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-claim-ledger</li><li><code class="contract-placeholder">salvage</code>-source-record</li><li><code class="contract-placeholder">salvage</code>-usable-inputs</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>exact-inputs-required</code></p>
+      <h3>a request with a missing tested share is rejected cleanly</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: job inputs is no inputs, not required inputs.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>no-input-check-is-empty</code></p>
+      <h3>a no-input job skips the input check</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">This job needs no input, so its input check and every input settlement are empty. Pool, place, capacity, and other admission gates still apply.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>an otherwise eligible <code class="contract-placeholder">salvage</code> request</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the request reaches its availability check</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the input check is skipped and the claim, release, spend, and loss fields remain empty</li><li>non-input admission gates still decide whether the request is admitted</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-admission-trace</li><li><code class="contract-placeholder">salvage</code>-claim-ledger</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>request-time-claim-is-atomic</code></p>
+      <h3>request-time inputs are claimed at admission</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: input claim timing is not asked for salvage.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>waiting-admission-uses-pool-capacity</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> accounts for waiting admission</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per work-limits row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: work-limits has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>readmission-event-pairs-with-reservation</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> is legal exactly for pre-start reservation</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readmission-events row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: readmission-events has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>reservation-needs-a-readmission-event</code></p>
+      <h3>pre-start reservation declares a readmission event</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: output full is try destinations, not wait before start.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>waiting-records-every-current-reason</code></p>
+      <h3>waiting records reasons but no work</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">Each waiting shape this adoption can construct reports every current reason and records no work. Only the taken-at-request answer can already hold an input claim there; an adoption with no waiting shape has no assertion in this test.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each admitted <code class="contract-placeholder">salvage</code> request that the adoption can construct with one or more reasons it cannot start; an adoption that constructs none asserts nothing here</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the admitted request enters waiting</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>job-waiting reports every current reason</li><li>no work is recorded and no input is claimed in waiting except an already-required request-time claim</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-report-log</li><li><code class="contract-placeholder">salvage</code>-state-trace</li><li><code class="contract-placeholder">salvage</code>-claim-ledger</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>start-time-claim-is-atomic</code></p>
+      <h3>start-time inputs are claimed before start</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: input claim timing is not asked for salvage.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>finish-time-inputs-stay-at-source</code></p>
+      <h3>finish-time inputs remain usable before the finish gate</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: input claim timing is not asked for salvage.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>progress-claim-starts-with-rounded-share</code></p>
+      <h3>progress claiming begins with the initial share</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: input claim timing is not asked for salvage.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>start-counts-settle-before-report</code></p>
+      <h3>start exchanges waiting room for working room</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">At job-started, the job has left any waiting count and acquired any selected working count. No job rests in started; it is a transition boundary. A pre-start output reservation remains held. Shapes this adoption cannot construct add no assertion.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each admitted <code class="contract-placeholder">salvage</code> job that can start, with and without a pool where those shapes exist</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the job crosses the start boundary</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>any waiting count is left and any selected working count is acquired before job-started</li><li>an output reservation, where the selected answer created one, remains held through delivery</li><li>no job is ever observed resting in started; it is a transition boundary</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-count-trace</li><li><code class="contract-placeholder">salvage</code>-reservation-ledger</li><li><code class="contract-placeholder">salvage</code>-report-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>work-phase-enters-working</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> enters working and reaches the finish gate</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per work-phases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: work-phases has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>instant-start-settles-finish-in-one-batch</code></p>
+      <h3>a job without work settles start and finish together</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">With no work phase, start and finish settle in one batch unless hold-undelivered, an all-refused try-destinations route, or on-collection parks the job in visible finished, or a finish-gate cause stops it at the gate: an unavailable finish-time claim or a wait-until-space capacity wait. An adoption with a work phase has no assertion here.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the absence case: if <code class="contract-placeholder">salvage</code> has no work-phases row, a request that passes its gates; if it has a work phase, this template asserts nothing</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the job starts</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>start and finish settle in one ordered batch</li><li>the ordered batch ends early only when hold-undelivered, an all-refused try-destinations route, or on-collection parks the job in visible finished, or a finish-gate cause stops it at the gate: an unavailable finish-time claim or a wait-until-space capacity wait</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-report-log</li><li><code class="contract-placeholder">salvage</code>-state-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>no-stop-before-the-finish-gate</code></p>
+      <h3>a job without work does not stop before finish</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">An adoption with no work-phases row records no partial work and never enters stopped for an interruption of work before its finish gate. A recoverable failure while waiting is a failure, not an interruption: it lands in stopped under step 16 with the start gate as its resume point. An adoption with a work phase asserts nothing here.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the absence case where <code class="contract-placeholder">salvage</code> has no work-phases row; an adoption with a work phase asserts nothing here</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an admitted job advances to its finish gate</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>no partial work is recorded</li><li>the job never enters stopped for an interruption of work before its finish gate; a recoverable failure while waiting lands in stopped under step 16 with the start gate as its resume point</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-work-before-after</li><li><code class="contract-placeholder">salvage</code>-state-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>progress-rounding-rule-pairs-with-progress</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> is legal exactly for progress claiming</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per progress-rounding-rules row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: progress-rounding-rules has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>progress-needs-a-rounding-rule</code></p>
+      <h3>progress claiming declares a rounding rule</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: input claim timing is not asked for salvage.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>declared-interruption-stops-once</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> records an ordinary stop once</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per interruptions row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: interruptions has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unnamed-instructions-cannot-stop</code></p>
+      <h3>only named instructions can stop work</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">An instruction absent from every interruptions row is not an allowed stop. With an empty list, stops arise only from lifecycle inability. An adoption with no working state, or no unnamed instruction, asserts nothing here.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each instruction this adoption can construct that is absent from all interruptions rows; an adoption with no working state, or no unnamed instruction, asserts nothing here</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the instruction is offered to a <code class="contract-placeholder">salvage</code> job in working, where that state exists</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the instruction does not add a stop cause and does not report job-stopped</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-stop-causes</li><li><code class="contract-placeholder">salvage</code>-report-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>kept-work-stays-with-the-job</code></p>
+      <h3>an ordinary stop preserves recorded work</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: partial work is not asked for salvage.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>reversal-rule-pairs-with-reversing-work</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> is legal exactly for reversing stopped work</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reversal-rules row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: reversal-rules has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>reversing-work-needs-a-reversal-rule</code></p>
+      <h3>reversing stopped work declares a reversal rule</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: partial work is not asked for salvage.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>reset-work-clears-on-ordinary-stop</code></p>
+      <h3>an ordinary stop resets recorded work</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: partial work is not asked for salvage.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>stopped-job-holds-claim</code></p>
+      <h3>a stopped job keeps its current claim</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: stopped claims is not asked for salvage.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>stopped-job-releases-and-reclaims</code></p>
+      <h3>a stopped job releases and must reclaim inputs</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: stopped claims is not asked for salvage.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>resume-waits-for-every-cause</code></p>
+      <h3>the same job resumes only after every cause clears</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">The same job resumes only after every active cause clears and every gate passes. It competes for room through its pool where the adoption declares one, and otherwise proceeds without a pool. If a gate or claim is unavailable, it remains stopped and keeps the room free; on success it reports job-resumed and returns to its recorded resume point without creating another request.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each stopped <code class="contract-placeholder">salvage</code> shape the adoption can construct, including overlapping causes where constructible</p></dd></div>
+<div><dt>When</dt><dd><ul><li>causes clear one at a time and the last cause clears</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>no resume occurs while a cause remains</li><li>after the last cause clears, the same job rechecks gates and competes for room through its pool where the adoption declares one, and otherwise proceeds without a pool; it reports job-resumed only on success and creates no new request</li><li>if a gate or claim is unavailable, the job remains stopped and keeps the room free</li><li>an interrupted-work resume returns to its recorded work point, while a waiting-origin recoverable failure returns to the start gate</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-stop-causes</li><li><code class="contract-placeholder">salvage</code>-resume-point</li><li><code class="contract-placeholder">salvage</code>-run-id-trace</li><li><code class="contract-placeholder">salvage</code>-report-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unasked-stopped-claim-answer-holds</code></p>
+      <h3>an unasked stopped-claim choice defaults to hold</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">Where stopped-claims was not asked, a request-time claim held by a job stopped from waiting or by a finish-gate cause remains assigned after any progress adjustment. An adoption with an explicit answer, or without that live shape, has no assertion here.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each <code class="contract-placeholder">salvage</code> request-time claim held while its job is stopped from waiting or by a finish-gate cause and stopped-claims was not asked; an adoption with an answer or no such claim asserts nothing here</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the stop settles</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the current claim remains assigned to the stopped job after any progress-based adjustment</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-claim-ledger</li><li><code class="contract-placeholder">salvage</code>-stop-causes</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>finish-gate-wait-retains-completed-work</code></p>
+      <h3>a full destination stops at the finish gate</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: output full is try destinations, not wait until space.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>finish-claim-wait-is-slot-retaining</code></p>
+      <h3>an unavailable finish claim stops at the gate</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: input claim timing is not asked for salvage.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>work-limit-offers-room-and-releases-counts</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> offers and releases room in lifecycle order</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per work-limits row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: work-limits has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>pool-releases-at-finished</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> releases working room after finish</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per work-limits row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: work-limits has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>pool-releases-at-delivered</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> releases working room after delivery</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per work-limits row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: work-limits has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>each-place-pool-assigns-one-place</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> keeps separate counts per place</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per work-limits row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: work-limits has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>shared-pool-uses-one-count</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> shares one count</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per work-limits row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: work-limits has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>request-order-pool-offers-in-admission-order</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> offers room in request order</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per work-limits row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: work-limits has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>game-rule-pool-offers-in-cited-order</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> offers room in its cited order</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per work-limits row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: work-limits has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>no-pool-means-every-ready-job-starts</code></p>
+      <h3>without a pool every ready job starts</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">An adoption with no work-limits row starts every otherwise-ready job and never reports job-waiting with a pool cause. An adoption with pools asserts nothing here.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the absence case where <code class="contract-placeholder">salvage</code> has no work-limits row; an adoption with pools asserts nothing here</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an otherwise-ready job reaches its start gate</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>every otherwise-ready job starts</li><li>no job reports job-waiting with a pool cause</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-state-trace</li><li><code class="contract-placeholder">salvage</code>-report-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>standing-order-scans-are-level-triggered</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> is scanned in written order until room is filled</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per standing-orders row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: standing-orders has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>read-first-note-precedes-verification</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> is read before the adoption is trusted</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per read-first row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: read-first has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>failure-row-fires-from-its-state</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> resolves only from <code class="contract-placeholder">Row.from state</code></h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per failures row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: failure result is not asked for salvage.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>failure-row-result-recoverable</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> applies its recoverable result</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per failures row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: failures has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>failure-row-result-ruined</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> applies its ruined result</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per failures row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: failures has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>progress-failure-adjusts-claim-after-loss</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> settles progress claims after failure loss</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per failures row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: input claim timing is not asked for salvage.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>no-failure-without-a-failure-row</code></p>
+      <h3>accepted jobs do not fail without a declared failure</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">An adoption with no failures row never reports job-failed from an accepted or finished job. An adoption with a failure row asserts nothing here.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the absence case where <code class="contract-placeholder">salvage</code> has no failures row; an adoption with a failure row asserts nothing here</p></dd></div>
+<div><dt>When</dt><dd><ul><li>accepted and finished jobs are observed</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>no accepted or finished job reports job-failed</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-report-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>declared-cancellation-settles-one-job</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> snapshots and cancels one job</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cancellations row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: cancel return is not asked for salvage.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>cancel-return-rule-pairs-with-rule-sized-return</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> is legal exactly for rule-sized cancellation return</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per cancel-return-rules row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: cancel-return-rules has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>rule-sized-return-needs-a-return-rule</code></p>
+      <h3>rule-sized cancellation return declares a return rule</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: cancel return is not asked for salvage.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>no-cancellation-without-a-cancellation-row</code></p>
+      <h3>accepted jobs cannot be cancelled without a declared cancellation</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">An adoption with no cancellations row never reports job-cancelled, and a reviewer confirms that promise before the adoption relies on it. An adoption with a cancellation row asserts nothing here.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the absence case where <code class="contract-placeholder">salvage</code> has no cancellations row; an adoption with a cancellation row asserts nothing here</p></dd></div>
+<div><dt>When</dt><dd><ul><li>accepted jobs are observed and the adoption prepares to rely on this promise</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>no accepted job reports job-cancelled</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-report-log</li><li><code class="contract-placeholder">salvage</code>-review-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>dependent-cancellation-follows-answer</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> settles later dependent jobs</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per dependent-cancellations row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: cancel dependents is not asked for salvage.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>finish-spends-and-establishes-one-output</code></p>
+      <h3>the finish gate commits inputs and one output atomically</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">At the finish gate, required claims are spent and one successful output is established in the same commit before job-finished. A compound result is still one unit. For an in-place job, the state change at the site is the delivery; it has no destination capacity and answers never-full. A new thing follows the selected delivery path.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a job in <code class="contract-placeholder">salvage</code> at the finish gate with every required claim and capacity gate satisfied</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the job finishes</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>required claims are spent and exactly one successful output is established atomically before job-finished</li><li>a compound output remains one delivery unit</li><li>where the job row declares in-place, the state change at the site is the in-place delivery; an in-place output has no destination capacity, so the adoption answers never-full and no capacity branch is taken; where it declares new-thing, the one output follows the selected delivery rules</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-claim-ledger</li><li><code class="contract-placeholder">salvage</code>-output-identity</li><li><code class="contract-placeholder">salvage</code>-state-trace</li><li><code class="contract-placeholder">salvage</code>-report-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>delivery-case-invokes-selected-answer</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> invokes the selected capacity response</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per delivery-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: delivery-cases has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>normal-destination-never-blocks</code></p>
+      <h3>the normal destination accepts every whole output</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: output full is try destinations, not never full.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>pre-start-reservation-blocks-admission</code></p>
+      <h3>a job waits before admission for reserved output room</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: output full is try destinations, not wait before start.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>held-output-retries-only-on-event</code></p>
+      <h3>a held output remains one inaccessible owned result</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: output full is try destinations, not hold undelivered.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>held-output-needs-a-redelivery-event</code></p>
+      <h3>a held output declares a redelivery event</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: output full is try destinations, not hold undelivered.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>redelivery-event-pairs-with-retry-answer · storage-changed</code></p>
+      <h3><code class="contract-placeholder">storage-changed</code> is legal exactly for a refused-output retry</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per redelivery-events row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the storage-changed row.</p>
+  <p class="contract-test-text">Row <code class="contract-placeholder">storage-changed</code> is legal exactly when output-full is hold-undelivered or try-destinations. After refusal, only <code class="contract-placeholder">salvage.storage-capacity-changed</code> retries delivery, using the same output without repeating work. A row under another answer is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>redelivery-events row <code class="contract-placeholder">storage-changed</code> in the adoption</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the output-full answer is checked and, under hold-undelivered or try-destinations, <code class="contract-placeholder">salvage.storage-capacity-changed</code> occurs after refusal</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the row is legal only under hold-undelivered or try-destinations; its presence under any other answer fails this test by construction</li><li>under either legal answer the lifecycle retries only on the cited event and keeps the same output without repeating work</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-event-log</li><li><code class="contract-placeholder">salvage</code>-delivery-attempts</li><li><code class="contract-placeholder">salvage</code>-output-identity</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fallback-destination-pairs-with-ordered-route · mine-cart</code></p>
+      <h3><code class="contract-placeholder">mine-cart</code> is legal exactly for the ordered route</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per output-destinations row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the mine-cart row.</p>
+  <p class="contract-test-text">Fallback row <code class="contract-placeholder">mine-cart</code> at <code class="contract-placeholder">salvage.mine-cart-capacity</code> is legal only when output-full is try-destinations. Its presence under any other answer is a defect this test fails by construction.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>output-destinations row <code class="contract-placeholder">mine-cart</code> in the adoption</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the output-full answer is checked</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the row is legal only under try-destinations; its presence under any other answer is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fallback-destination-keeps-written-order · mine-cart</code></p>
+      <h3><code class="contract-placeholder">mine-cart</code> is tried in its written place</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per output-destinations row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the mine-cart row.</p>
+  <p class="contract-test-text">The ordered route tries the normal destination, then fallback <code class="contract-placeholder">mine-cart</code> at <code class="contract-placeholder">salvage.mine-cart-capacity</code> in written order. Each refusal reports destination-refused. When this row accepts, it receives the whole output and no later row is tried. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>one whole output, its normal destination and every fallback before <code class="contract-placeholder">mine-cart</code> refusing it, with <code class="contract-placeholder">mine-cart</code> able to accept it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the route reaches <code class="contract-placeholder">salvage.mine-cart-capacity</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>each refusal before acceptance reports destination-refused with both states finished</li><li>the whole output is delivered at <code class="contract-placeholder">mine-cart</code>, no later fallback is tried, and the output is never split</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-delivery-attempts</li><li><code class="contract-placeholder">salvage</code>-report-log</li><li><code class="contract-placeholder">salvage</code>-output-location</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>ordered-route-keeps-one-output</code></p>
+      <h3>the ordered route tries whole-output destinations in order</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">For a new-thing job, the route tries the normal destination and every fallback in written order, delivers the whole output to the first place that accepts, and stops there. Each refusal reports. If all refuse, the same output stays finished without polling and cited redelivery events restart the route. Where every destination can refuse, the adoption declares a redelivery event; a route no destination can wholly refuse needs none. An in-place job answers never-full, so this test never applies to it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a finished <code class="contract-placeholder">salvage</code> output whose normal destination refuses it, with each fallback acceptance pattern the adoption can construct; an in-place job answers never-full, so this test never applies to it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the route tries the normal destination and fallback rows in written order</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>every refusal reports destination-refused and the first accepting destination receives the whole output</li><li>no later destination is tried after acceptance and the output is never split</li><li>if all destinations refuse, the same output stays finished without polling; each cited redelivery event retries from the normal destination, and an adoption with no such event never retries</li><li>where every destination on the route can refuse the output, the adoption declares a redelivery event; a route no destination can wholly refuse needs none</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-delivery-attempts</li><li><code class="contract-placeholder">salvage</code>-output-identity</li><li><code class="contract-placeholder">salvage</code>-report-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>automatic-delivery-reports-once</code></p>
+      <h3>an accepted output is delivered immediately</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">Under the automatic answer, or where delivery-trigger was never asked and delivery is therefore automatic, an accepted output moves from finished to delivered and reports job-delivered exactly once. An adoption answering on-collection asserts nothing here, and where the job row declares in-place this test asserts nothing beyond the single report.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a finished <code class="contract-placeholder">salvage</code> output accepted by its chosen destination under the automatic answer, or where delivery-trigger was never asked and delivery is therefore automatic; an adoption answering on-collection asserts nothing here, and where the job row declares in-place this test asserts nothing beyond the single report</p></dd></div>
+<div><dt>When</dt><dd><ul><li>capacity resolution accepts it</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the job moves finished to delivered immediately and reports job-delivered exactly once</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-state-trace</li><li><code class="contract-placeholder">salvage</code>-report-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>collection-event-pairs-with-collection-delivery</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> is legal exactly for collection delivery</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per collection-events row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: collection-events has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>collection-needs-a-collection-event</code></p>
+      <h3>collection delivery declares a collection event</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: delivery trigger is automatic, not on collection.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>collection-delivery-waits-for-event</code></p>
+      <h3>an accepted output remains accessible until collection</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to salvage: delivery trigger is automatic, not on collection.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>rejection-ends-the-requested-run</code></p>
+      <h3>a rejected run is not retried by the lifecycle</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">Rejection ends its run. Clearing the reason does not revive it: a later retry belongs to the requester, unless a standing order creates a new run. Where this adoption declares no standing-orders row, no request repeats automatically.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each <code class="contract-placeholder">salvage</code> request that the adoption can construct as rejected</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the rejection settles and its cause later clears</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the rejected run remains ended and the lifecycle creates no retry</li><li>a later retry has a new run created by the requester unless a standing-order scan creates it</li><li>where this adoption declares no standing-orders row, no request repeats automatically</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-run-id-trace</li><li><code class="contract-placeholder">salvage</code>-request-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>lifecycle-holds</code></p>
+      <h3>the lifecycle and settlement order hold for the whole run</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to salvage.</p>
+  <p class="contract-test-text">Across <code class="contract-placeholder">sequences of requests, starts, advances, interruptions, resumes, failures, cancellations, finishes, and deliveries over one run</code>, each transition settles with its claim changes and reports before the next begins. Claim changes precede the report unless a numbered step says otherwise. The stated forward and side paths are the only observed transitions. Instant automatic delivery keeps job-started, job-finished, and job-delivered in one batch. Same-moment order comes from Event resolution, not this contract. The adoption supplies the audit seeds through verification inputs.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Holds</dt><dd><p>one transition, all of its claim changes, and all of its reports settle before another transition begins; claim changes precede the transition report unless a numbered step states otherwise; an instant start with an accepting destination keeps job-started, job-finished, and job-delivered in one ordered batch with no outside event between them; only the forward path requested to waiting to started to working to finished to delivered, with unvisited states skipped without changing order, the stopped and resume side path, the cancellation side path, terminal failure, and recoverable failure into stopped are observed; same-moment events enter one at a time in the order Event resolution supplies, and this contract adds no ordering rule</p></dd></div>
+<div><dt>Seeds</dt><dd><p><code class="contract-placeholder">[&quot;audit-a&quot;,&quot;audit-b&quot;]</code></p></dd></div>
+<div><dt>Scope</dt><dd><p><code class="contract-placeholder">sequences of requests, starts, advances, interruptions, resumes, failures, cancellations, finishes, and deliveries over one run</code></p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">salvage</code>-state-trace</li><li><code class="contract-placeholder">salvage</code>-claim-ledger</li><li><code class="contract-placeholder">salvage</code>-report-log</li><li><code class="contract-placeholder">salvage</code>-first-ordering-violation</li></ul></dd></div></dl></details>
+</article></div>
+</details>
+<details class="contract-form-section contract-fold" id="adoption-json">
+  <summary><span class="contract-fold-title">JSON</span><span class="contract-fold-note">the adoption as one file</span></summary>
+  <p>The adoption file as supplied. Answers you try on this page are not written into it; to change an adoption, open it in the authoring tool.</p>
+
+  <pre class="contract-json"><code>{
+  &quot;questions&quot;: {
+    &quot;job-inputs&quot;: {
+      &quot;asks&quot;: &quot;Does this job need inputs that can be claimed and spent?&quot;,
+      &quot;options&quot;: {
+        &quot;required-inputs&quot;: {
+          &quot;meaning&quot;: &quot;The job needs one or more inputs. Brewing one potion may need two herbs and one bottle.&quot;,
+          &quot;semantics&quot;: &quot;The request checks the required share at the request gate. The lifecycle claims and spends that share at the selected times.&quot;
+        },
+        &quot;no-inputs&quot;: {
+          &quot;meaning&quot;: &quot;The job claims and spends no input. Researching Pottery may need an unlocked lab but no material.&quot;,
+          &quot;semantics&quot;: &quot;Input checks, claims, returns, and spending are empty. Eligibility conditions may still prevent the game from offering the request.&quot;
+        }
+      }
+    },
+    &quot;partial-work&quot;: {
+      &quot;asks&quot;: &quot;What happens to recorded work when this job stops?&quot;,
+      &quot;when&quot;: {
+        &quot;row-count&quot;: {
+          &quot;work-phases&quot;: &quot;non-empty&quot;
+        }
+      },
+      &quot;otherwise&quot;: &quot;The job has no work span before finish; start and finish settle in one batch, unless an allowed delivery answer leaves the result visibly finished. No partial work is recorded, and no interruption can stop the job before its finish gate. A recoverable failure while waiting still lands it in stopped, with the start gate as its resume point.&quot;,
+      &quot;options&quot;: {
+        &quot;keep-with-job&quot;: {
+          &quot;meaning&quot;: &quot;Recorded work stays with the same job. A half-built wall remains halfway built after rain stops the work.&quot;,
+          &quot;semantics&quot;: &quot;A normal stop preserves all recorded work. Only this job can resume from it.&quot;
+        },
+        &quot;reverse-while-stopped&quot;: {
+          &quot;meaning&quot;: &quot;Recorded work falls while the job is stopped. A cooling forge loses heat while no smith works.&quot;,
+          &quot;semantics&quot;: &quot;Recorded work decreases under reversal-declared-in and never passes below no work. Claim changes caused by the decrease settle through lifecycle step 12.&quot;
+        },
+        &quot;reset-at-stop&quot;: {
+          &quot;meaning&quot;: &quot;Recorded work returns to none when the job stops. An interrupted lockpick attempt starts again from the beginning.&quot;,
+          &quot;semantics&quot;: &quot;The first ordinary stop records no work. Cancellation records no terminal work after its input snapshot is taken.&quot;
+        }
+      }
+    },
+    &quot;failure-result&quot;: {
+      &quot;asks&quot;: &quot;What does a listed failure do unless that failure says otherwise?&quot;,
+      &quot;when&quot;: {
+        &quot;row-count&quot;: {
+          &quot;failures&quot;: &quot;non-empty&quot;
+        }
+      },
+      &quot;otherwise&quot;: &quot;No accepted or finished job fails; refusal, stopping, cancellation, and blocked delivery are different outcomes.&quot;,
+      &quot;options&quot;: {
+        &quot;partial-inputs-or-work&quot;: {
+          &quot;meaning&quot;: &quot;Failure may lose part of the current inputs, recorded work, or both, whichever exist. A spill may lose one cup of broth while the same soup remains unfinished.&quot;,
+          &quot;semantics&quot;: &quot;The cited failure rule may lose a strict subset of claimed inputs, reduce recorded work without passing below no work, or do both. It creates no successful output and leaves the same job stopped.&quot;
+        },
+        &quot;job-ruined&quot;: {
+          &quot;meaning&quot;: &quot;Failure ends this job for good. An overcooked meal is ruined and cannot finish as the same meal.&quot;,
+          &quot;semantics&quot;: &quot;The job enters terminal failed and creates no successful output. A finished but undelivered new output is destroyed.&quot;
+        }
+      }
+    },
+    &quot;cancel-return&quot;: {
+      &quot;asks&quot;: &quot;What happens to inputs this job still claims when it is cancelled?&quot;,
+      &quot;when&quot;: {
+        &quot;row-count&quot;: {
+          &quot;cancellations&quot;: &quot;non-empty&quot;
+        }
+      },
+      &quot;otherwise&quot;: &quot;An accepted job cannot be cancelled. A reviewer confirms this before the adoption relies on it.&quot;,
+      &quot;options&quot;: {
+        &quot;return-claimed&quot;: {
+          &quot;meaning&quot;: &quot;Every surviving claimed input returns to its source. Cancelling a queued soldier returns the 50 gold already set aside.&quot;,
+          &quot;semantics&quot;: &quot;Release every unit still claimed by the job. Do not add units that were never claimed or were already lost.&quot;
+        },
+        &quot;return-nothing&quot;: {
+          &quot;meaning&quot;: &quot;No claimed input returns. Cancelling a fired clay pot spends the clay already placed in the kiln.&quot;,
+          &quot;semantics&quot;: &quot;Spend every unit still claimed by the job and release none. Inputs not yet claimed remain at their sources.&quot;
+        },
+        &quot;return-by-rule&quot;: {
+          &quot;meaning&quot;: &quot;A game rule chooses the returned share. Cancelling a half-built wall may return unused bricks but not dried mortar.&quot;,
+          &quot;semantics&quot;: &quot;Release the subset named by cancel-return-declared-in, never more than the current claim, and spend the rest.&quot;
+        }
+      }
+    },
+    &quot;cancel-dependents&quot;: {
+      &quot;asks&quot;: &quot;What happens to later waiting jobs that needed a cancelled job&#39;s output?&quot;,
+      &quot;when&quot;: {
+        &quot;row-count&quot;: {
+          &quot;dependent-cancellations&quot;: &quot;non-empty&quot;
+        }
+      },
+      &quot;otherwise&quot;: &quot;Cancelling a job leaves later waiting jobs in place, even when they needed its output.&quot;,
+      &quot;options&quot;: {
+        &quot;end-dependents&quot;: {
+          &quot;meaning&quot;: &quot;Later jobs that can no longer get the needed output are cancelled too. Cancelling an iron ingot also cancels the waiting sword that needed it.&quot;,
+          &quot;semantics&quot;: &quot;Cancel every transitively dependent later waiting job whose requirement can no longer be met. Settle them in waiting order.&quot;
+        },
+        &quot;leave-dependents&quot;: {
+          &quot;meaning&quot;: &quot;Later jobs remain waiting. A sword order may wait for another iron ingot after its first ingot job is cancelled.&quot;,
+          &quot;semantics&quot;: &quot;Leave every later dependent job waiting. The wait ends only when the requirement is met again or the job is cancelled.&quot;
+        }
+      }
+    },
+    &quot;input-claim-timing&quot;: {
+      &quot;asks&quot;: &quot;When do required inputs become unavailable to other rules?&quot;,
+      &quot;when&quot;: {
+        &quot;flag&quot;: {
+          &quot;job-inputs&quot;: [
+            &quot;required-inputs&quot;
+          ]
+        }
+      },
+      &quot;otherwise&quot;: &quot;This job claims no input, so there is no claim time to choose.&quot;,
+      &quot;options&quot;: {
+        &quot;taken-at-request&quot;: {
+          &quot;meaning&quot;: &quot;All inputs are claimed when the request is accepted. A queued soldier reserves its full gold cost before training starts.&quot;,
+          &quot;semantics&quot;: &quot;Atomically claim the full requirement at admission, whether the job waits or starts.&quot;
+        },
+        &quot;taken-at-start&quot;: {
+          &quot;meaning&quot;: &quot;All inputs are claimed when work starts. A workbench leaves wood available until the bench begins the chair.&quot;,
+          &quot;semantics&quot;: &quot;Atomically claim the full requirement at start. No other rule can use claimed units.&quot;
+        },
+        &quot;taken-at-finish&quot;: {
+          &quot;meaning&quot;: &quot;Inputs stay available until successful finish. A ritual checks for three crystals only when the casting completes.&quot;,
+          &quot;semantics&quot;: &quot;Claim and spend the full requirement at the finish gate. No pre-finish input claim exists.&quot;
+        },
+        &quot;with-progress&quot;: {
+          &quot;meaning&quot;: &quot;Inputs are claimed as work advances. A wall claims half its bricks when it reaches half of its recorded work.&quot;,
+          &quot;semantics&quot;: &quot;Before each observable advance, claim the rounded share required at the proposed work point. Release the matching share when work reverses.&quot;
+        }
+      }
+    },
+    &quot;stopped-claims&quot;: {
+      &quot;asks&quot;: &quot;Does a stopped job keep the inputs it has already claimed?&quot;,
+      &quot;when&quot;: {
+        &quot;flag&quot;: {
+          &quot;partial-work&quot;: [
+            &quot;keep-with-job&quot;,
+            &quot;reverse-while-stopped&quot;,
+            &quot;reset-at-stop&quot;
+          ],
+          &quot;input-claim-timing&quot;: [
+            &quot;taken-at-request&quot;,
+            &quot;taken-at-start&quot;,
+            &quot;with-progress&quot;
+          ]
+        }
+      },
+      &quot;otherwise&quot;: &quot;When no pre-finish claim exists there is nothing to hold; otherwise the stopped job keeps its claim.&quot;,
+      &quot;options&quot;: {
+        &quot;hold&quot;: {
+          &quot;meaning&quot;: &quot;The job keeps the claim while stopped. A paused wall keeps its reserved bricks at the site.&quot;,
+          &quot;semantics&quot;: &quot;Retain the current claim while stopped. Work changes may first reduce a progress-based claim.&quot;
+        },
+        &quot;release-and-reclaim&quot;: {
+          &quot;meaning&quot;: &quot;The claim returns while stopped and must be claimed again before resuming. A paused research topic releases its points for another topic.&quot;,
+          &quot;semantics&quot;: &quot;Release the current claim while stopped. Reclaim the required share before resuming; remain stopped if that share is unavailable.&quot;
+        }
+      }
+    },
+    &quot;delivery-trigger&quot;: {
+      &quot;asks&quot;: &quot;When is the completed result delivered?&quot;,
+      &quot;when&quot;: {
+        &quot;any&quot;: [
+          {
+            &quot;row-count&quot;: {
+              &quot;delivery-cases&quot;: &quot;non-empty&quot;
+            }
+          },
+          {
+            &quot;row-count&quot;: {
+              &quot;output-destinations&quot;: &quot;non-empty&quot;
+            }
+          },
+          {
+            &quot;row-count&quot;: {
+              &quot;collection-events&quot;: &quot;non-empty&quot;
+            }
+          },
+          {
+            &quot;row-count&quot;: {
+              &quot;readmission-events&quot;: &quot;non-empty&quot;
+            }
+          },
+          {
+            &quot;row-count&quot;: {
+              &quot;redelivery-events&quot;: &quot;non-empty&quot;
+            }
+          }
+        ]
+      },
+      &quot;otherwise&quot;: &quot;A finished output is delivered automatically as soon as its normal destination accepts it.&quot;,
+      &quot;options&quot;: {
+        &quot;automatic&quot;: {
+          &quot;meaning&quot;: &quot;Delivery happens as soon as a destination accepts the output. A trained unit leaves the barracks for its rally point at once.&quot;,
+          &quot;semantics&quot;: &quot;Move from finished to delivered immediately after the capacity policy accepts one destination.&quot;
+        },
+        &quot;on-collection&quot;: {
+          &quot;meaning&quot;: &quot;The output waits for collection at its accepted place. A cooked meal stays on the stove until a player picks it up.&quot;,
+          &quot;semantics&quot;: &quot;Keep the accessible output in finished until collection-declared-in occurs, then report delivery once.&quot;
+        }
+      }
+    },
+    &quot;output-full&quot;: {
+      &quot;asks&quot;: &quot;What happens when the whole output does not fit at its normal destination?&quot;,
+      &quot;options&quot;: {
+        &quot;never-full&quot;: {
+          &quot;meaning&quot;: &quot;The normal destination always accepts the output. Completed research always fits in the research ledger.&quot;,
+          &quot;semantics&quot;: &quot;No job reaches a capacity-blocked state. A reviewer confirms the capacity promise before the adoption relies on it. An in-place output always answers this way. If the capacity promise is false, the adoption is broken; there is no fallback lifecycle branch.&quot;
+        },
+        &quot;wait-before-start&quot;: {
+          &quot;meaning&quot;: &quot;The job waits before starting until room is reserved. A bakery starts a loaf only after one shelf space is held for it.&quot;,
+          &quot;semantics&quot;: &quot;Keep admission pending until the whole output has reserved room. Hold that reservation through delivery.&quot;
+        },
+        &quot;wait-until-space&quot;: {
+          &quot;meaning&quot;: &quot;Completed work stops at the finish gate until the output fits. An assembler holds a finished engine while its output slot is full.&quot;,
+          &quot;semantics&quot;: &quot;The job moves to stopped at its finish gate, work phase or not, and retains completed work until capacity clears.&quot;
+        },
+        &quot;hold-undelivered&quot;: {
+          &quot;meaning&quot;: &quot;The job finishes and owns one inaccessible output until delivery can retry. A forge holds one finished sword while the rack is full.&quot;,
+          &quot;semantics&quot;: &quot;Spend inputs and keep one owned output in finished. Only redelivery-declared-in retries the normal destination; work is not repeated.&quot;
+        },
+        &quot;try-destinations&quot;: {
+          &quot;meaning&quot;: &quot;The job tries named places in order. A mined gem tries the backpack, then the cart, then waits if both refuse it.&quot;,
+          &quot;semantics&quot;: &quot;Try the normal destination, then output-destinations in written order. Keep the same output in finished if all refuse; only redelivery-declared-in retries the route.&quot;
+        }
+      }
+    }
+  },
+  &quot;declares&quot;: {
+    &quot;values&quot;: {},
+    &quot;rows&quot;: {
+      &quot;job&quot;: {
+        &quot;description&quot;: &quot;Give the job rule and the normal output destination. One adoption has exactly one row.&quot;,
+        &quot;when-empty&quot;: &quot;An empty job list is never a behavior choice: this adoption requires exactly one job row, and a reviewer rejects a file without it.&quot;,
+        &quot;record&quot;: {
+          &quot;job-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rule naming required inputs, one successful output unit, any in-place target, and game-owned choices or quality rules.&quot;
+          },
+          &quot;normal-destination-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rule naming the output&#39;s ordinary destination.&quot;
+          },
+          &quot;output-kind&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;new-thing&quot;,
+              &quot;in-place&quot;
+            ],
+            &quot;description&quot;: &quot;Whether success creates a new thing or transforms the cited target in place.&quot;
+          }
+        }
+      },
+      &quot;read-first&quot;: {
+        &quot;description&quot;: &quot;Optionally point a reviewer to prose that must be read before trusting the adoption.&quot;,
+        &quot;when-empty&quot;: &quot;No advance reading is required.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name this reviewer note.&quot;
+          },
+          &quot;read-first&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The prose a reviewer should read first.&quot;
+          }
+        }
+      },
+      &quot;work-phases&quot;: {
+        &quot;description&quot;: &quot;List the work span before finish. One adoption has at most one row.&quot;,
+        &quot;when-empty&quot;: &quot;Start and finish settle in one batch.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name the work span in the game&#39;s words.&quot;
+          },
+          &quot;duration-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The duration and clock rule, or the event rule that completes the work.&quot;
+          }
+        }
+      },
+      &quot;interruptions&quot;: {
+        &quot;description&quot;: &quot;List the game rules allowed to instruct a working job to stop.&quot;,
+        &quot;when-empty&quot;: &quot;Stops arise only from lifecycle inability.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name this interruption.&quot;
+          },
+          &quot;interruptions-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rules allowed to instruct the stop.&quot;
+          }
+        }
+      },
+      &quot;reversal-rules&quot;: {
+        &quot;description&quot;: &quot;Give the work-decrease rule exactly when stopped work reverses.&quot;,
+        &quot;when-empty&quot;: &quot;Stopped work does not reverse.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name this reversal rule.&quot;
+          },
+          &quot;reversal-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rule that determines how recorded work decreases while stopped.&quot;
+          }
+        }
+      },
+      &quot;progress-rounding-rules&quot;: {
+        &quot;description&quot;: &quot;Give the proportional rounding rule exactly when inputs are claimed with progress.&quot;,
+        &quot;when-empty&quot;: &quot;Inputs are not claimed with progress.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name this rounding rule.&quot;
+          },
+          &quot;progress-rounding-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rule that rounds each divisible input&#39;s proportional claim.&quot;
+          }
+        }
+      },
+      &quot;cancel-return-rules&quot;: {
+        &quot;description&quot;: &quot;Give the return rule exactly when cancellation returns a rule-sized share.&quot;,
+        &quot;when-empty&quot;: &quot;Cancellation does not return a rule-sized share.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name this cancellation return rule.&quot;
+          },
+          &quot;cancel-return-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rule naming the part of the current claim returned on cancellation.&quot;
+          }
+        }
+      },
+      &quot;collection-events&quot;: {
+        &quot;description&quot;: &quot;Give the collection event exactly when a finished output waits for collection.&quot;,
+        &quot;when-empty&quot;: &quot;A finished output does not wait for collection.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name this collection event.&quot;
+          },
+          &quot;collection-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The event that accepts the finished output and delivers it.&quot;
+          }
+        }
+      },
+      &quot;readmission-events&quot;: {
+        &quot;description&quot;: &quot;Give the readmission event exactly when output room is reserved before start.&quot;,
+        &quot;when-empty&quot;: &quot;Output room is not reserved before start.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name this readmission event.&quot;
+          },
+          &quot;readmission-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rule or event that tries admission again without polling.&quot;
+          }
+        }
+      },
+      &quot;redelivery-events&quot;: {
+        &quot;description&quot;: &quot;Give the retry event when a held output or a route that can be refused may actually try delivery again.&quot;,
+        &quot;when-empty&quot;: &quot;A held output or a route that can be refused does not retry delivery.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name this redelivery event.&quot;
+          },
+          &quot;redelivery-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rule or event that tries delivery again without polling.&quot;
+          }
+        }
+      },
+      &quot;work-limits&quot;: {
+        &quot;description&quot;: &quot;List each working and waiting pool.&quot;,
+        &quot;when-empty&quot;: &quot;Jobs share no work limit and every otherwise-ready job starts.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name this pool in the game&#39;s words.&quot;
+          },
+          &quot;covers-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rule identifying exactly which requests use this pool.&quot;
+          },
+          &quot;scope&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;each-place&quot;,
+              &quot;shared&quot;
+            ],
+            &quot;description&quot;: &quot;Whether each cited place has separate counts or all covered jobs share one set.&quot;
+          },
+          &quot;places-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;scope&quot;: [
+                  &quot;each-place&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;For separate place counts, the rule identifying those places.&quot;
+          },
+          &quot;place-assignment-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;scope&quot;: [
+                  &quot;each-place&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;For separate place counts, the rule assigning each request to one place.&quot;
+          },
+          &quot;working-limit-key&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The positive whole number of jobs that may occupy the working count.&quot;
+          },
+          &quot;waiting-limit-key&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: false,
+            &quot;description&quot;: &quot;The non-negative whole number that may remain waiting. Omission means no finite waiting limit.&quot;
+          },
+          &quot;waiting-order&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;request-order&quot;,
+              &quot;game-rule-order&quot;
+            ],
+            &quot;description&quot;: &quot;Whether room goes by request order or a cited total ordering rule.&quot;
+          },
+          &quot;order-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;waiting-order&quot;: [
+                  &quot;game-rule-order&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The total ordering rule when game-rule order applies.&quot;
+          },
+          &quot;releases-working-at&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: false,
+            &quot;options&quot;: [
+              &quot;finished&quot;,
+              &quot;delivered&quot;
+            ],
+            &quot;description&quot;: &quot;The successful transition after whose report the working count is released. Omission means finished.&quot;
+          }
+        }
+      },
+      &quot;standing-orders&quot;: {
+        &quot;description&quot;: &quot;List retained repeat orders.&quot;,
+        &quot;when-empty&quot;: &quot;No request repeats automatically.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name this repeating order.&quot;
+          },
+          &quot;work-limit&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The work-limit row whose free room may create the job.&quot;
+          },
+          &quot;requests-job-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The job kind this row requests.&quot;
+          },
+          &quot;eligible-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rule deciding whether another request may be created.&quot;
+          }
+        }
+      },
+      &quot;failures&quot;: {
+        &quot;description&quot;: &quot;List failures that may happen after acceptance.&quot;,
+        &quot;when-empty&quot;: &quot;Accepted and finished jobs do not fail.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name this failure, such as overcooked or storm-damage.&quot;
+          },
+          &quot;from-state&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;waiting&quot;,
+              &quot;working&quot;,
+              &quot;stopped&quot;,
+              &quot;finished&quot;
+            ],
+            &quot;description&quot;: &quot;The state from which this failure may happen.&quot;
+          },
+          &quot;trigger-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rule giving the chance, condition, or event and any permitted loss.&quot;
+          },
+          &quot;result&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: false,
+            &quot;options&quot;: [
+              &quot;partial-inputs-or-work&quot;,
+              &quot;job-ruined&quot;
+            ],
+            &quot;description&quot;: &quot;A result for this failure. Omission uses the shared answer.&quot;
+          }
+        }
+      },
+      &quot;cancellations&quot;: {
+        &quot;description&quot;: &quot;List controls or events that may cancel an unfinished job.&quot;,
+        &quot;when-empty&quot;: &quot;An accepted job cannot be cancelled; a reviewer confirms this before the adoption relies on it.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name the cancellation in the game&#39;s words.&quot;
+          },
+          &quot;trigger-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The control or event that cancels the unfinished job.&quot;
+          }
+        }
+      },
+      &quot;dependent-cancellations&quot;: {
+        &quot;description&quot;: &quot;List static links through which a later waiting job needs an earlier job&#39;s output.&quot;,
+        &quot;when-empty&quot;: &quot;No later waiting job has a static dependency on an earlier job&#39;s output.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name this dependency case.&quot;
+          },
+          &quot;cancellation&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The matching cancellation row.&quot;
+          },
+          &quot;link-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The static link from the later requirement to the earlier output.&quot;
+          }
+        }
+      },
+      &quot;delivery-cases&quot;: {
+        &quot;description&quot;: &quot;List a real capacity or delivery condition not already carried by a collection, readmission, redelivery, or fallback row.&quot;,
+        &quot;when-empty&quot;: &quot;When every other delivery row set is also empty, delivery is automatic and the normal destination always accepts the output. A reviewer confirms both promises before the adoption relies on them.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name this delivery situation.&quot;
+          },
+          &quot;condition-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The capacity or collection rule that makes the situation relevant.&quot;
+          }
+        }
+      },
+      &quot;output-destinations&quot;: {
+        &quot;description&quot;: &quot;List fallback destinations after the normal destination, in the order tried.&quot;,
+        &quot;when-empty&quot;: &quot;No fallback destination follows the normal destination.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name this fallback destination.&quot;
+          },
+          &quot;destination-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rule naming the destination and how it accepts the whole output.&quot;
+          }
+        }
+      }
+    }
+  },
+  &quot;rules&quot;: {
+    &quot;progress-does-not-reset-on-stop&quot;: {
+      &quot;forbid&quot;: {
+        &quot;flag&quot;: {
+          &quot;input-claim-timing&quot;: [
+            &quot;with-progress&quot;
+          ],
+          &quot;partial-work&quot;: [
+            &quot;reset-at-stop&quot;
+          ]
+        }
+      },
+      &quot;message&quot;: &quot;Progress-based input claims cannot reset all work when inputs run out; keep or reverse the work, or claim inputs at another time.&quot;
+    },
+    &quot;progress-reversal-warning&quot;: {
+      &quot;forbid&quot;: {
+        &quot;flag&quot;: {
+          &quot;input-claim-timing&quot;: [
+            &quot;with-progress&quot;
+          ],
+          &quot;partial-work&quot;: [
+            &quot;reverse-while-stopped&quot;
+          ]
+        }
+      },
+      &quot;severity&quot;: &quot;warning&quot;,
+      &quot;message&quot;: &quot;Reversing work while inputs are claimed with progress can make the same materials leave and return repeatedly.&quot;
+    },
+    &quot;collection-needs-a-placed-output&quot;: {
+      &quot;forbid&quot;: {
+        &quot;any&quot;: [
+          {
+            &quot;flag&quot;: {
+              &quot;delivery-trigger&quot;: [
+                &quot;on-collection&quot;
+              ],
+              &quot;output-full&quot;: [
+                &quot;hold-undelivered&quot;
+              ]
+            }
+          },
+          {
+            &quot;flag&quot;: {
+              &quot;delivery-trigger&quot;: [
+                &quot;on-collection&quot;
+              ],
+              &quot;output-full&quot;: [
+                &quot;try-destinations&quot;
+              ]
+            }
+          }
+        ]
+      },
+      &quot;message&quot;: &quot;A collected result must already be at an accepted destination; choose a destination rule that puts it there first.&quot;
+    }
+  },
+  &quot;contract&quot;: &quot;job-resolution&quot;,
+  &quot;version&quot;: 1,
+  &quot;summary&quot;: &quot;Covers crafting benches, build queues, research, and cooking: one job rule decides inputs, claims, work, interruption, limits, delivery, and failure, written down once. What a recipe makes and what it is worth stay with the game&#39;s own rules.&quot;,
+  &quot;origin&quot;: &quot;https://opengdd.org/contracts/job-resolution-1&quot;,
+  &quot;mechanism&quot;: [
+    &quot;This is the single normative authority for states, event order, input claims, and reports. Questions describe choices used here; they do not redefine these steps.&quot;,
+    &quot;A **job run** begins with one request and ends at rejection, cancellation, terminal failure, or delivery. Every report carries the same job id and run id. It also carries old and new lifecycle state, cause, recorded work before and after, input units newly claimed, released, spent, or lost, and the output destination when chosen. Amounts use units and numbers from the cited game rules. `job-requested` has no old state and sits outside the ordered instant batch. `job-rejected` ends the run but is not a lifecycle state. `destination-refused` is stateless: old and new state are both `finished`.&quot;,
+    &quot;A claim makes inputs unavailable to every other rule while keeping their source known. Releasing a claim returns surviving units to that source. Spending or losing units removes them; neither can later be released.&quot;,
+    &quot;The forward path is `requested -&gt; waiting -&gt; started -&gt; working -&gt; finished -&gt; delivered`. Side paths are `working -&gt; stopped -&gt; working`, `requested/waiting/working/stopped -&gt; cancelled`, and `waiting/working/stopped/finished -&gt; failed`. A recoverable failure reports `job-failed` and lands in `stopped` instead.&quot;,
+    &quot;Not every job visits every state. `waiting` and `stopped` can return to the forward path. `cancelled`, terminal `failed`, and `delivered` are terminal. `started` is a transition boundary, not a waiting state. Entry to any terminal state immediately releases every working or waiting count. `releases-working-at` affects only the success path and never delays terminal release.&quot;,
+    &quot;Every stopped job records all active stop causes and its resume point. It resumes only after every cause clears. Finish-gate causes are `output-full` and `inputs-unavailable-at-finish`; they are slot-retaining. Every other cause is non-retaining. Entry to `stopped` always releases a waiting count. A stopped job retains its working count only while every active cause is slot-retaining; the first non-retaining cause releases it. `partial-work` applies once when the first ordinary stop cause joins the set, never for a finish-gate cause. `failure-recovery` is neither: it is non-retaining, and `partial-work` never applies to it, because step 16 has already settled the loss.&quot;,
+    &quot;Whenever a pool has free working room, it first offers that room to admitted jobs eligible to start or resume, in the pool&#39;s waiting order. A job stopped by an instruction joins that order at the stop moment and never outranks the job that displaced it. A cleared reason also causes a waiting or stopped job to be offered free room again. After those offers, the pool scans standing orders in written order. It also scans when created, after a rejection of a request the pool did not create in this scan, and when cited eligibility becomes true. A scan keeps creating eligible requests until no row is eligible or no room remains. A scan may create more than one job from the same row, filling all free room. These are level-triggered scans, not one-time edges.&quot;,
+    &quot;### Request and accept&quot;,
+    &quot;1. Read `job-declared-in` once. It names required inputs, one successful output unit, any in-place target, and game-owned choice or quality rules. If work limits exist, assign the request to exactly one pool. For separate place counts, assign it to exactly one cited place. Report `job-requested`. 2. Check availability without reserving anything. For required inputs, test the full requirement under the three whole-claim timings. Under progress-based claiming, test only the initial rounded share. A game rule may require a stricter offer check. If the tested share is missing, report `job-rejected` with cause `missing-inputs`; claim nothing, record no work, and create no output. Jobs with no inputs skip the check. 3. Decide whether the request would enter `waiting`, including a free pool whose order places an earlier admitted job first. Waiting admission always consumes waiting capacity. If that limit is full, reject with cause `job-limit-full`. A request that starts immediately uses no waiting count. 4. Attempt admission. When room must be reserved before start, reserve the whole output atomically. If room is unavailable, the request stays `requested`; `readmission-declared-in` causes another attempt without polling. Recheck input and waiting limits on delayed admission. On admission, accept the request. Claim the full requirement in the same batch when inputs are taken at request. An admitted request that cannot start enters `waiting`; report `job-waiting` and every current reason. No work is recorded in `waiting`, and no input is claimed there except the claim made by `taken-at-request`.&quot;,
+    &quot;### Start&quot;,
+    &quot;5. Recheck every admission and start gate. Claim the full requirement under start timing. Under progress-based timing, claim the initial share. A failed claim enters `waiting`, consuming waiting capacity; if the waiting limit is full, reject with cause `job-limit-full` and release any output reservation. Otherwise report `job-waiting` with cause `inputs-unavailable`. Inputs taken at request are already held; inputs taken at finish remain at their source. 6. Keep any output reservation through delivery; other output answers reserve nothing. Leave the waiting count, acquire the working count, and report `job-started`. 7. Without a work-phase row, resolve start and finish in one batch. The reports stay ordered unless `hold-undelivered`, all-refused `try-destinations`, or `on-collection` legally parks the job in visible `finished`, or a finish-gate cause stops it there. With a work phase, enter `working` and report `job-working`.&quot;,
+    &quot;### Work and input claims&quot;,
+    &quot;8. Work completes as `duration-declared-in` says: its clock advances or its completion event occurs. Record exposed work points at full precision. A display meter is outside this contract. 9. With progress-based timing, every observable advance first claims the rounded share for the proposed work point. If unavailable, do not record the advance; stop with cause `inputs-unavailable`. Whole-claim timings keep their full claim. Finish timing keeps inputs available elsewhere. 10. Reaching the required work moves to the finish gate. It does not yet spend inputs or create the successful output.&quot;,
+    &quot;### Stop, resume, and interrupt&quot;,
+    &quot;11. An interruption is a temporary inability or instruction to advance that is not refusal, failure, cancellation, or delivery. It moves `working -&gt; stopped`, adds its cause, applies `partial-work` and the claim policy, then reports `job-stopped`. An instructed stop must be named by `interruptions-declared-in`. A later cause joins the set and reports `stopped -&gt; stopped`; it does not apply the work answer again. 12. First adjust a progress-based claim to any reduced work. Then apply `stopped-claims`: hold the claim, or release it to its source. Whole claims taken at request or start follow the same answer. Finish timing has no claim. When the question is not asked, the claim is held. 13. When every cause clears, the job competes for free working room through its pool, or proceeds without a pool. Recheck every gate and reclaim any released share. If a gate or claim is unavailable, remain stopped and keep the room free. Otherwise report `job-resumed` and return to the recorded resume point: a waiting-origin failure continues at step 5 and acquires the selected count at step 6, while interrupted work reacquires the count and enters `working`. The same job resumes; no new request is created. 14. The finish gate tests capacity and any finish-time claim together. The finish-gate wait answer adds `output-full`; an unavailable claim adds `inputs-unavailable-at-finish`. These causes preserve completed work and retain working room unless another active cause releases it. They never apply `partial-work`. `stopped-claims` applies to finish-gate stops exactly as in step 12. When every cause clears and any released claim is reclaimed, report `job-resumed` and return directly to the finish gate.&quot;,
+    &quot;### Fail&quot;,
+    &quot;15. A failure row may fire only from its named state. A failure from `finished` is always terminal; no recoverable result exists there. Resolve its row result, or the shared failure answer when the row has none, atomically. For a recoverable result, apply the stopped-claim policy before the one `job-failed` report. 16. A partial result may lose a strict subset of claimed inputs, reduce work without passing below none, or do both. It creates no successful output. Under progress-based timing, apply losses first. If the claim is held, reduce work to the highest point the surviving claim supports and release excess claim. If the claim was released, reduce work only by the named loss. The same job lands in `stopped` with cause `failure-recovery`; its recorded resume point is the start gate for a waiting-origin failure, the prior work point for a working failure, or the already-recorded point for a stopped failure. Later recovery follows the normal resume rule. 17. A ruined job enters terminal `failed`, can never finish as the same job, and creates no successful output. Failure from `finished` destroys its one undelivered new output. For in-place work, it ruins the transformation, not the target&#39;s existence. The cited failure rule owns the damaged state. Failure itself returns no claimed input; remaining claims stay assigned to the failed job unless the cited failure rule disposes of them. After cited claim changes, terminal entry releases every count and reports `job-failed`.&quot;,
+    &quot;### Cancel&quot;,
+    &quot;18. A declared cancellation may target `requested`, `waiting`, `working`, or `stopped`. Snapshot current claims, release every count, apply the return answer when asked, enter `cancelled`, and report `job-cancelled`. Under the reset answer, terminal work becomes none after the snapshot. Cancellation creates no output and never undoes a finished or delivered output. 19. Returning claimed inputs releases every surviving claimed unit. Returning nothing spends them. A rule-sized return releases exactly its named subset and spends the rest. No answer recreates a unit already lost, and unclaimed inputs remain where they are. 20. A dependency is the declared static link from a later waiting job&#39;s requirement to the cancelled job&#39;s output. Ending dependents finds every transitive later waiting job whose requirement can no longer be met. After the first cancellation settles, cancel those jobs in waiting order, each with its own claim settlement and report. Leaving dependents keeps them waiting. Completed intermediate jobs and delivered outputs remain.&quot;,
+    &quot;### Finish and deliver&quot;,
+    &quot;21. At the finish gate, finish-time timing tries to claim the full input. If unavailable, follow the finish-gate stop rule. Other timings must hold the required claim. Atomically spend inputs and establish the one successful output: a new thing or a cited target transformed in place. An in-place output is delivered by that state change at its site. A compound output is still one atomic delivery unit. Report `job-finished`. 22. Resolve capacity by the selected answer. An always-accepting destination takes the whole output. A pre-start reservation is already held. A finish-gate wait follows the stop rule. A held output remains one owned, inaccessible output until its cited retry. An ordered route tries the normal destination and then fallback rows. Every refusal by any destination, including a held output&#39;s first refusal and each refusal on a cited retry, reports `destination-refused`. If all refuse, keep the same output until the cited retry. Delivery never polls. An in-place output has no destination capacity: it is delivered by the state change of step 21, and the adoption answers `never-full`. 23. Automatic delivery moves an accepted result `finished -&gt; delivered` immediately. Collection keeps it accessible at its chosen destination until the cited event, then moves it to `delivered`. Report `job-delivered` exactly once. 24. On success, release working room after the transition named by the pool row and after that transition&#39;s report. Then run the room-offer and standing-order process. Rejection ends its run; a later retry belongs to the requester unless a standing order creates it.&quot;,
+    &quot;### Ordering guarantee&quot;,
+    &quot;One transition, all claim changes, and all reports settle before another transition begins. Claim changes happen before the transition report unless a step says otherwise. Automatic delivery to an accepting destination after an instant start keeps `job-started`, `job-finished`, and `job-delivered` in one ordered batch with no outside event between them. Events offered at the same moment enter this lifecycle one at a time in the order supplied by **Event resolution**. This contract creates no same-moment ordering rule.&quot;
+  ],
+  &quot;answers&quot;: {
+    &quot;job-inputs&quot;: &quot;no-inputs&quot;,
+    &quot;delivery-trigger&quot;: &quot;automatic&quot;,
+    &quot;output-full&quot;: &quot;try-destinations&quot;
+  },
+  &quot;values&quot;: {},
+  &quot;rows&quot;: {
+    &quot;job&quot;: [
+      {
+        &quot;job-declared-in&quot;: &quot;salvage.recovered-gems&quot;,
+        &quot;normal-destination-declared-in&quot;: &quot;salvage.player-backpack&quot;,
+        &quot;output-kind&quot;: &quot;new-thing&quot;
+      }
+    ],
+    &quot;redelivery-events&quot;: [
+      {
+        &quot;id&quot;: &quot;storage-changed&quot;,
+        &quot;redelivery-declared-in&quot;: &quot;salvage.storage-capacity-changed&quot;
+      }
+    ],
+    &quot;output-destinations&quot;: [
+      {
+        &quot;id&quot;: &quot;mine-cart&quot;,
+        &quot;destination-declared-in&quot;: &quot;salvage.mine-cart-capacity&quot;
+      }
+    ],
+    &quot;read-first&quot;: [],
+    &quot;work-phases&quot;: [],
+    &quot;interruptions&quot;: [],
+    &quot;reversal-rules&quot;: [],
+    &quot;progress-rounding-rules&quot;: [],
+    &quot;cancel-return-rules&quot;: [],
+    &quot;collection-events&quot;: [],
+    &quot;readmission-events&quot;: [],
+    &quot;work-limits&quot;: [],
+    &quot;standing-orders&quot;: [],
+    &quot;failures&quot;: [],
+    &quot;cancellations&quot;: [],
+    &quot;dependent-cancellations&quot;: [],
+    &quot;delivery-cases&quot;: []
+  },
+  &quot;pack&quot;: &quot;sha256:bfbe0f8482c06bd771e70af5afb44d53afad291161ea87d85f32021397ab2c3b&quot;
+}
+</code></pre>
+</details>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

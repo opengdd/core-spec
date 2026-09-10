@@ -1,0 +1,1754 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lives refill while away — Suspension and catch-up adoption — OpenGDD</title>
+<meta name="description" content="Lives refill while away is a Suspension and catch-up adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="canonical" href="https://opengdd.org/contracts/suspension-and-catch-up-1/lives-refill-while-away/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Lives refill while away — Suspension and catch-up adoption — OpenGDD">
+<meta property="og:description" content="Lives refill while away is a Suspension and catch-up adoption with supplied answers, settings and matching acceptance tests.">
+<meta property="og:url" content="https://opengdd.org/contracts/suspension-and-catch-up-1/lives-refill-while-away/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Lives refill while away — Suspension and catch-up adoption — OpenGDD">
+<meta name="twitter:description" content="Lives refill while away is a Suspension and catch-up adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=ff285f28dd16">
+<script type="module" src="/assets/contracts.mjs?v=ff285f28dd16"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout contract-catalogue contract-entry-page contract-instance-page" data-contract-root data-core-id="suspension-and-catch-up" data-contract-preset="{&quot;while-in-the-background&quot;:&quot;counts-as-away&quot;,&quot;return-display&quot;:&quot;visible-before-resume&quot;,&quot;clock-source&quot;:&quot;protected-clock&quot;}" data-contract-facts="{&quot;rowCounts&quot;:{&quot;clock&quot;:1,&quot;catch-up-items&quot;:1,&quot;fixed-items&quot;:0,&quot;continuous-items&quot;:0,&quot;choice-items&quot;:0,&quot;return-rewards&quot;:0,&quot;calendar-boundaries&quot;:0,&quot;rollback-rules&quot;:0},&quot;valueForms&quot;:{},&quot;rows&quot;:{&quot;clock&quot;:[{&quot;id&quot;:&quot;life-clock&quot;,&quot;clock-declared-in&quot;:&quot;time.account-time&quot;}],&quot;catch-up-items&quot;:[{&quot;id&quot;:&quot;lives&quot;,&quot;state-declared-in&quot;:&quot;mechanics.life-refill&quot;,&quot;away-amount&quot;:&quot;same-as-playing&quot;,&quot;catch-up-fidelity&quot;:&quot;one-derived-change&quot;,&quot;fidelity-rule-declared-in&quot;:&quot;lives.from-elapsed-time&quot;,&quot;away-limit&quot;:&quot;state-ceiling&quot;,&quot;limit-rule-declared-in&quot;:&quot;contracts.player-lives.max&quot;}],&quot;fixed-items&quot;:[],&quot;continuous-items&quot;:[],&quot;choice-items&quot;:[],&quot;return-rewards&quot;:[],&quot;calendar-boundaries&quot;:[],&quot;rollback-rules&quot;:[]}}">
+<nav class="doc-toc contract-nav" aria-label="Contracts">
+<details class="contract-nav-disclosure">
+  <summary>Contracts</summary>
+  <div class="contract-nav-content">
+    <p class="toc-title">Contracts</p>
+    <ul class="contract-nav-home"><li><a href="/contracts/">Overview</a></li><li><a href="/contracts/catalogue/">Contract catalogue</a></li></ul>
+<div class="toc-group contract-page-nav">
+  <p class="toc-group-title">On this page</p>
+  <ul><li><a href="#use-this">Use in your game</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#values">Numbers</a></li>
+<li><a href="#lists">Lists</a></li>
+<li><a href="#tests">Acceptance tests</a></li>
+<li><a href="#adoption-json">JSON</a></li></ul>
+</div>
+  </div>
+</details>
+</nav>
+<article class="doc-body contract-entry-body">
+<p class="label"><a href="/contracts/catalogue/#determinism-replay">Determinism &amp; replay</a></p>
+<div class="contract-entry-title-row">
+  <div><h1>Lives refill while away</h1><p class="contract-core-name"><code>lives-refill-while-away</code> · an adoption of <a href="/contracts/suspension-and-catch-up-1/">Suspension and catch-up</a>, version 1</p></div>
+  <div><span class="contract-badge ">Tests included</span></div>
+</div>
+
+<section class="contract-handoff" aria-labelledby="use-this">
+  <h2 id="use-this">Use in your game</h2>
+  <p>Opens the authoring tool with these answers and settings already filled in. You still add your game's own rules and tuning.</p>
+  <div class="contract-actions">
+    <a class="cta" href="/authoring-tool/?contract=suspension-and-catch-up-1&amp;adoption=lives-refill-while-away">Open in the authoring tool</a>
+    <a class="cta-quiet" href="/contracts/suspension-and-catch-up-1/lives-refill-while-away.zip" download="lives-refill-while-away.zip">Download ZIP</a>
+  </div>
+  <details><summary>What is in the ZIP</summary><p>The ZIP holds the adoption and its acceptance tests. In the authoring tool, choose <strong>Add contract</strong> and pick this ZIP. If you keep your design as files, put them in <code>contracts/</code>.</p><div class="contract-actions"><a href="/contracts/suspension-and-catch-up-1/lives-refill-while-away.json" download="lives-refill-while-away.json">Download adoption JSON</a> · <a href="/contracts/suspension-and-catch-up-1/suspension-and-catch-up-1.pack.json" download="suspension-and-catch-up-1.pack.json">Download tests</a><button type="button" class="cta-quiet" data-copy-core data-core-url="/contracts/suspension-and-catch-up-1/lives-refill-while-away.json" data-copy-kind="adoption">Copy adoption</button><span role="status" aria-live="polite" data-copy-status></span></div></details>
+</section>
+<section class="contract-overview">
+  <h2>The contract behind it</h2>
+  <p>Covers state that pauses, catches up, or continues while a game is closed or in the background. It also covers return rewards, calendar crossings, clock changes, and what appears before play resumes. Normal rates, timer rules, inventory capacity, save lifetime, and replay guarantees stay elsewhere.</p>
+  <p><a href="/contracts/suspension-and-catch-up-1/">Read the full Suspension and catch-up contract →</a></p>
+</section>
+<section class="contract-form-section" id="questions">
+  <h2>Questions</h2>
+  <p>The supplied answer is marked on each question. Pick other answers to see what changes. Nothing is saved here: the ZIP and the authoring tool use the supplied answers.</p>
+  <div class="contract-actions contract-question-tools">
+    <button type="button" class="cta-quiet contract-reset" data-reset-choices>Restore supplied answers</button>
+    <label class="contract-switch"><input type="checkbox" data-builder-wording> Show exact wording for builders</label>
+  </div>
+  <div class="contract-question-list">
+  <article class="contract-question" id="question-while-in-the-background" data-contract-question data-flag="while-in-the-background" data-when="null">
+  <h3>What happens while the game stays open in the background?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for What happens while the game stays open in the background?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-while-in-the-background" value="counts-as-away" data-contract-choice><span class="contract-option-label">Counts as away</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">Background time uses the same suspension rules as closed time. Ten minutes in another tab refills energy like ten minutes with the game closed.</span><p class="contract-option-semantics">The lifecycle treats the background interval as a suspension interval. Ordinary updates do not also apply that interval.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-while-in-the-background" value="keeps-playing" data-contract-choice><span class="contract-option-label">Keeps playing</span></label></th>
+  <td><span class="contract-option-meaning">Ordinary play continues in the background. A browser farm keeps growing crops while the player uses another tab.</span><p class="contract-option-semantics">The ordinary update path continues, including platform throttling. Foregrounding adds no catch-up for the same interval.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-while-in-the-background" value="waits-until-closed" data-contract-choice><span class="contract-option-label">Waits until closed</span></label></th>
+  <td><span class="contract-option-meaning">The open game stays still, and away progress starts only after closing. A crop timer pauses in the app switcher but advances after the app closes.</span><p class="contract-option-semantics">The open-background interval receives neither ordinary updates nor catch-up.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>An open game may use away handling, keep playing, or stay still until it closes. The same time must never count twice.</p></details>
+</article>
+<article class="contract-question" id="question-return-display" data-contract-question data-flag="return-display" data-when="null">
+  <h3>What appears before ordinary play resumes?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for What appears before ordinary play resumes?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-return-display" value="state-only" data-contract-choice><span class="contract-option-label">State only</span></label></th>
+  <td><span class="contract-option-meaning">No separate return surface appears. A match-3 game simply shows that three lives are ready.</span><p class="contract-option-semantics">The lifecycle adds no player-facing return surface. Existing game displays may show the settled state after ordinary play resumes. Developer or diagnostic instrumentation that is not player-facing is out of scope.</p></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-return-display" value="visible-before-resume" data-contract-choice><span class="contract-option-label">Visible before resume</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">Existing displays show the change before play resumes. A life counter ticks from two lives to five on the map screen.</span><p class="contract-option-semantics">At least one existing player-facing display presents the affected state during return settlement.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-return-display" value="return-summary" data-contract-choice><span class="contract-option-label">Return summary</span></label></th>
+  <td><span class="contract-option-meaning">A return surface names each result. An idle game shows energy gained and coins waiting for collection.</span><p class="contract-option-semantics">A player-facing return surface identifies each affected row and its settled result.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-return-display" value="detailed-return-summary" data-contract-choice><span class="contract-option-label">Detailed return summary</span></label></th>
+  <td><span class="contract-option-meaning">A return surface also explains the calculation. A factory screen shows six hours away, its energy ceiling, and the final gain.</span><p class="contract-option-semantics">The return surface reports elapsed time, applicable limits, amount rules, fidelity, and settled results.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Changed state may speak for itself, animate before play, or appear in a return summary.</p></details>
+</article>
+<article class="contract-question" id="question-clock-source" data-contract-question data-flag="clock-source" data-when="{&quot;row-count&quot;:{&quot;clock&quot;:&quot;non-empty&quot;}}">
+  <h3>Can the player change the clock that measures time away?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the clock list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>No clock row exists, so this adoption measures no elapsed suspension time.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Can the player change the clock that measures time away?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-clock-source" value="device-clock" data-contract-choice><span class="contract-option-label">Device clock</span></label></th>
+  <td><span class="contract-option-meaning">The game reads a clock from the device. Moving a phone clock forward by two hours gives an idle mine two more measured hours.</span><p class="contract-option-semantics">The elapsed interval comes from a clock the player can change through device settings. Both backward-clock questions are asked.</p></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-clock-source" value="protected-clock" data-contract-choice><span class="contract-option-label">Protected clock</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The game reads a clock outside device settings. Changing a phone clock does not refill a match-3 life sooner.</span><p class="contract-option-semantics">The elapsed interval comes from a clock the player cannot change through device settings. The backward-clock questions are not asked.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>The player can move a device clock through settings. A protected clock stays outside those settings, though the service behind it can correct it.</p></details>
+</article>
+<article class="contract-question" id="question-backward-clock-anchor" data-contract-question data-flag="backward-clock-anchor" data-when="{&quot;flag&quot;:{&quot;clock-source&quot;:[&quot;device-clock&quot;]}}">
+  <h3>If the player moves the device clock backward, which state does the game keep?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>Clock source is Device clock.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>No device clock is read, either because no clock row exists or because the clock is protected, so no rollback anchor is selected. A protected-clock resync may still move its reading backward; the lifecycle then keeps the loaded state.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for If the player moves the device clock backward, which state does the game keep?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-backward-clock-anchor" value="suspension-snapshot" data-contract-choice><span class="contract-option-label">Suspension snapshot</span></label></th>
+  <td><span class="contract-option-meaning">The game returns to the state captured when suspension began. An idle mine returns to the ore count recorded when the app closed.</span><p class="contract-option-semantics">Every in-scope local item is restored from the suspension snapshot. Elapsed time for this interval is zero.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-backward-clock-anchor" value="last-trusted-checkpoint" data-contract-choice><span class="contract-option-label">Last trusted checkpoint</span></label></th>
+  <td><span class="contract-option-meaning">The game returns to the latest state accepted by a trusted rule. An online workshop returns to its last server-confirmed stock count.</span><p class="contract-option-semantics">The one rollback rule supplies a trusted state and matching clock reading. The current suspension interval contributes zero elapsed time.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-backward-clock-anchor" value="keep-return-state" data-contract-choice><span class="contract-option-label">Keep return state</span></label></th>
+  <td><span class="contract-option-meaning">The game keeps the state loaded at return but adds no away change. A newer cloud save from another device keeps its crops.</span><p class="contract-option-semantics">No state is restored by this contract. The loaded return state remains, and elapsed time for this interval is zero. That state may be newer than the suspension snapshot because of a cloud save, a second device, or a mid-session autosave.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Zero elapsed time does not say which saved state survives a backward clock. The anchor prevents duplicate or reversed gains.</p></details>
+</article>
+<article class="contract-question" id="question-backward-clock-notice" data-contract-question data-flag="backward-clock-notice" data-when="{&quot;flag&quot;:{&quot;clock-source&quot;:[&quot;device-clock&quot;]}}">
+  <h3>Does the game explain the backward clock result?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>Clock source is Device clock.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>No device clock is read, either because no clock row exists or because the clock is protected, so no player-caused clock-change notice is selected. A protected-clock resync may still produce zero elapsed time.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Does the game explain the backward clock result?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-backward-clock-notice" value="silent" data-contract-choice><span class="contract-option-label">Silent</span></label></th>
+  <td><span class="contract-option-meaning">The game adds no clock-change notice. A life refill stays unchanged without a pop-up.</span><p class="contract-option-semantics">The lifecycle adds no player-facing explanation for the backward-clock branch.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-backward-clock-notice" value="explain" data-contract-choice><span class="contract-option-label">Explain</span></label></th>
+  <td><span class="contract-option-meaning">The game explains that the clock change blocked away time. An idle game shows a short clock-change message beside unchanged energy.</span><p class="contract-option-semantics">The lifecycle presents a player-facing clock-change explanation after the anchor is applied and before ordinary play resumes.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>The same backward-clock outcome can be silent or visible to the player.</p></details>
+</article>
+<article class="contract-question" id="question-crossed-calendar-boundaries" data-contract-question data-flag="crossed-calendar-boundaries" data-when="{&quot;row-count&quot;:{&quot;calendar-boundaries&quot;:&quot;non-empty&quot;}}">
+  <h3>Several calendar boundaries passed while the game was away. Which ones count on return?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the calendar boundaries list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>No calendar boundary is tracked, so return settlement creates no calendar crossing.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Several calendar boundaries passed while the game was away. Which ones count on return?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-crossed-calendar-boundaries" value="every-crossing-in-order" data-contract-choice><span class="contract-option-label">Every crossing in order</span></label></th>
+  <td><span class="contract-option-meaning">Every crossed boundary settles in time order. A farm processes Friday, Saturday, and Sunday crop resets separately.</span><p class="contract-option-semantics">The lifecycle inserts every crossed boundary into the return timeline in ascending time order.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-crossed-calendar-boundaries" value="latest-crossing-only" data-contract-choice><span class="contract-option-label">Latest crossing only</span></label></th>
+  <td><span class="contract-option-meaning">Only the latest crossed boundary settles. A daily reward calendar opens on today&#39;s entry without granting missed days.</span><p class="contract-option-semantics">The lifecycle inserts only the latest crossed boundary for each calendar row and omits earlier crossings.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-crossed-calendar-boundaries" value="one-combined-crossing" data-contract-choice><span class="contract-option-label">One combined crossing</span></label></th>
+  <td><span class="contract-option-meaning">All crossings become one return event. A weekly shop refreshes once and receives the number of missed weeks.</span><p class="contract-option-semantics">The lifecycle inserts one return-time event per calendar row, carrying that row&#39;s number and span of crossed boundaries.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>A daily or weekly rule may run for every crossing, only the latest one, or one combined return event.</p></details>
+</article>
+  </div>
+</section>
+<aside class="contract-relief" aria-labelledby="relief-title">
+  <p class="contract-relief-title" id="relief-title">That was the hard part.</p>
+  <p>The questions are the decisions. Everything below follows from them: the numbers, lists and test inputs this adoption supplies, and the tests that come with it. The authoring tool edits all of it in place. Read on only if you want to check.</p>
+</aside>
+<details class="contract-form-section contract-fold" id="values">
+  <summary><span class="contract-fold-title">Numbers</span><span class="contract-fold-note">no numbers</span></summary>
+  <p>This contract has no numbers to set.</p>
+</details>
+<details class="contract-form-section contract-fold" id="rules">
+  <summary><span class="contract-fold-title">Rules</span><span class="contract-fold-note">no rules</span></summary>
+  <p>A rule is a check between the numbers. Validation reports a rule that fails.</p>
+  <p>This contract has no rules between its numbers.</p>
+</details>
+<details class="contract-form-section contract-fold" id="lists">
+  <summary><span class="contract-fold-title">Lists</span><span class="contract-fold-note">8 lists</span></summary>
+  <p>Each list holds the rows this adoption supplies. A list can be empty.</p>
+  <article class="contract-collection">
+<h3>Clock</h3>
+<p class="contract-exact-name"><code>clock</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Clock declared in</th></tr></thead>
+<tbody>
+<tr><td><code>life-clock</code></td><td><code>time.account-time</code></td></tr>
+</tbody></table></div>
+</article>
+<article class="contract-collection">
+<h3>Fixed items</h3>
+<p class="contract-exact-name"><code>fixed-items</code></p>
+<p>This adoption declares no fixed items.</p>
+</article>
+<article class="contract-collection">
+<h3>Catch up items</h3>
+<p class="contract-exact-name"><code>catch-up-items</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>State declared in</th><th>Away amount</th><th>Amount rule declared in</th><th>Catch up fidelity</th><th>Fidelity rule declared in</th><th>Away limit</th><th>Limit rule declared in</th></tr></thead>
+<tbody>
+<tr><td><code>lives</code></td><td><code>mechanics.life-refill</code></td><td><code>same-as-playing</code></td><td>—</td><td><code>one-derived-change</code></td><td><code>lives.from-elapsed-time</code></td><td><code>state-ceiling</code></td><td><code>contracts.player-lives.max</code></td></tr>
+</tbody></table></div>
+</article>
+<article class="contract-collection">
+<h3>Continuous items</h3>
+<p class="contract-exact-name"><code>continuous-items</code></p>
+<p>This adoption declares no continuous items.</p>
+</article>
+<article class="contract-collection">
+<h3>Choice items</h3>
+<p class="contract-exact-name"><code>choice-items</code></p>
+<p>This adoption declares no choice items.</p>
+</article>
+<article class="contract-collection">
+<h3>Return rewards</h3>
+<p class="contract-exact-name"><code>return-rewards</code></p>
+<p>This adoption declares no return rewards.</p>
+</article>
+<article class="contract-collection">
+<h3>Calendar boundaries</h3>
+<p class="contract-exact-name"><code>calendar-boundaries</code></p>
+<p>This adoption declares no calendar boundaries.</p>
+</article>
+<article class="contract-collection">
+<h3>Rollback rules</h3>
+<p class="contract-exact-name"><code>rollback-rules</code></p>
+<p>This adoption declares no rollback rules.</p>
+</article>
+</details>
+<details class="contract-form-section contract-fold" id="verification">
+  <summary><span class="contract-fold-title">Test inputs</span><span class="contract-fold-note">scope and seeds</span></summary>
+  <p>Some tests need a scope or seeds from the adoption before they can run.</p>
+  <p>This adoption supplies none; every test uses its defaults.</p>
+</details>
+<details class="contract-form-section contract-fold" id="tests">
+  <summary><span class="contract-fold-title">Acceptance tests</span><span class="contract-fold-note">28 tests apply</span></summary>
+  <p>The contract comes with 80 tests. A test that runs once per row is counted once for each row. Tests that do not apply to these answers are still listed, with the reason.</p>
+  <div class="contract-test-list"><article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>suspension-interval-boundaries</code></p>
+      <h3>a suspension interval has one beginning and one return</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to lives-refill-while-away.</p>
+  <p class="contract-test-text">A suspension interval begins once, at the earlier background transition, and ends once at return processing, at the return clock reading where a clock row exists. The interval contains no time outside those boundaries.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a covered close-and-return cycle after the selected background handling</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the lifecycle records the interval boundaries</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the suspension interval begins once, at the earlier background transition, and ends once at return processing, at the return clock reading where a clock row exists</li><li>no time before its beginning or after its end enters that interval</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-suspension-interval</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>suspension-snapshot-vocabulary</code></p>
+      <h3>the suspension snapshot is one coherent starting state</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to lives-refill-while-away.</p>
+  <p class="contract-test-text">The suspension snapshot is one coherent starting state for every in-scope local item. Where this adoption has a clock row, the starting reading is captured in the same batch; without one, that clause asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>distinguishable values for every in-scope local item when a suspension interval begins</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the suspension snapshot is captured</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the snapshot contains the same-instant starting value of every in-scope local item</li><li>where a clock row exists, its starting reading belongs to the same snapshot batch; without a clock row, the reading clause asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-suspension-snapshot</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>pending-reward-vocabulary-and-expiry</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> stays pending until acceptance or expiry</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: return-rewards has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>expiry-deadline-enforced</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> is removed when its cited deadline expires</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: return-rewards has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>background-counts-as-away</code></p>
+      <h3>background time begins the suspension interval</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to lives-refill-while-away.</p>
+  <p class="contract-test-text">The background transition begins the suspension interval. Ordinary updates do not also apply that interval, so the same time is counted once.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the game open with distinguishable covered state before it enters the background</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the background transition occurs and the game later returns</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the suspension interval begins at the background transition</li><li>ordinary updates do not also apply any time in that interval</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-suspension-interval</li><li><code class="contract-placeholder">lives-refill-while-away</code>-return-timeline</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>background-keeps-playing</code></p>
+      <h3>background time stays on the ordinary update path</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: while in the background is counts as away, not keeps playing.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>background-waits-until-closed</code></p>
+      <h3>background state waits until closure</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: while in the background is counts as away, not waits until closed.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>closure-captures-one-snapshot</code></p>
+      <h3>closure begins an interval and captures one snapshot</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to lives-refill-while-away.</p>
+  <p class="contract-test-text">Closing always begins a suspension interval. One coherent suspension snapshot is captured before covered local state can change, and the same time never follows two paths.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a game closure with distinguishable covered state</p></dd></div>
+<div><dt>When</dt><dd><ul><li>closure begins a suspension interval</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>one coherent suspension snapshot is captured before any covered local state can change</li><li>the same time is never applied by two lifecycle paths</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-suspension-snapshot</li><li><code class="contract-placeholder">lives-refill-while-away</code>-suspension-interval</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>clock-starting-reading · life-clock</code></p>
+      <h3><code class="contract-placeholder">life-clock</code> starts at the higher available reading</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per clock row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the life-clock row.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">life-clock</code> is read in the suspension snapshot batch from <code class="contract-placeholder">time.account-time</code>. The interval starts at the higher of that reading and the committed anchor, so time below the anchor is never replayed.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a committed anchor and a starting reading supplied by <code class="contract-placeholder">time.account-time</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the suspension snapshot and starting reading are captured in one batch</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the interval starts from the higher of the sampled reading and the committed anchor</li><li>time below the committed anchor is never replayed</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-clock-readings</li><li><code class="contract-placeholder">lives-refill-while-away</code>-suspension-snapshot</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fixed-item-held-at-snapshot</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> stays at its suspension snapshot state</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per fixed-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: fixed-items has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>catch-up-item-held-at-snapshot · lives</code></p>
+      <h3><code class="contract-placeholder">lives</code> waits at its suspension snapshot state</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the lives row.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">lives</code> remains at its suspension snapshot state while away. Local catch-up does not appear before return settlement.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p><code class="contract-placeholder">lives</code> at a distinguishable state when suspension begins</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the suspension interval is still away</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">lives</code> remains at its suspension snapshot state and shows no local catch-up advance</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-suspension-snapshot</li><li><code class="contract-placeholder">lives-refill-while-away</code>-catch-up-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>choice-item-resolves-selection</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> resolves its cited selection</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per choice-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: choice-items has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>continuous-item-stays-with-authority</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> stays under its cited authority</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per continuous-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: continuous-items has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>catch-up-waits-for-return · lives</code></p>
+      <h3><code class="contract-placeholder">lives</code> records reach and settles only on return</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the lives row.</p>
+  <p class="contract-test-text">While ordinary updates are stopped, <code class="contract-placeholder">lives</code> shows no visible local advance. The interval records reach only, and settlement waits for return.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>ordinary updates stopped with <code class="contract-placeholder">lives</code> at its suspension snapshot state</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the suspension interval advances and then return processing begins</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the away interval records clock reach only and shows no visible local advance</li><li><code class="contract-placeholder">lives</code> begins settlement only during return processing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-clock-readings</li><li><code class="contract-placeholder">lives-refill-while-away</code>-catch-up-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>continuous-item-is-not-predicted</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> is neither predicted nor duplicated locally</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per continuous-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: continuous-items has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>calendar-crossings-wait-for-return</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> crossings are discovered before settlement</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per calendar-boundaries row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: calendar-boundaries has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>no-clock-return-path</code></p>
+      <h3>the no-clock return path continues from fixed state</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to lives-refill-while-away.</p>
+  <p class="contract-test-text">Without a clock row, this adoption measures no elapsed time, performs no local catch-up, creates no calendar crossing, and continues from unchanged fixed state at step 12. Where a clock row exists, this test asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">lives-refill-while-away</code> adoption document and a return from suspension</p></dd></div>
+<div><dt>When</dt><dd><ul><li>return processing checks whether a clock row exists</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>without a clock row, this adoption measures no elapsed time, performs no local catch-up, creates no calendar crossing, and continues from unchanged fixed state at step 12</li><li>where a clock row exists, this test asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-return-timeline</li><li><code class="contract-placeholder">lives-refill-while-away</code>-fixed-state-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>no-calendar-row-creates-no-crossing</code></p>
+      <h3>the no-calendar path creates no crossing</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to lives-refill-while-away.</p>
+  <p class="contract-test-text">Without a calendar-boundaries row, return settlement creates no calendar crossing. Where a row exists, this test asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">lives-refill-while-away</code> adoption document and a return from suspension</p></dd></div>
+<div><dt>When</dt><dd><ul><li>return processing checks whether a calendar-boundaries row exists</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>without a calendar-boundaries row, return settlement creates no calendar crossing</li><li>where a calendar-boundaries row exists, this test asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-calendar-report</li><li><code class="contract-placeholder">lives-refill-while-away</code>-return-timeline</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>protected-clock-return-paths · life-clock</code></p>
+      <h3><code class="contract-placeholder">life-clock</code> accepts forward time and skips negative time</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per clock row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the life-clock row.</p>
+  <p class="contract-test-text">A non-negative <code class="contract-placeholder">life-clock</code> interval uses the suspension snapshot and elapsed difference. A negative protected-clock interval keeps the loaded state, records zero elapsed time, skips steps 9 to 11, and creates no return reward. Device settings do not control this reading, so no rollback anchor or player-caused clock-change notice is selected.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>two returns using <code class="contract-placeholder">life-clock</code>, one with a non-negative difference and one after a protected-clock resync produces a negative difference</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the return reading is sampled once in each run</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the non-negative run uses the suspension snapshot and the elapsed difference and proceeds through steps 9 to 11</li><li>the negative run keeps the loaded state, records zero elapsed time, skips steps 9 to 11, and creates no return reward</li><li>changing device settings does not change the reading supplied by this protected clock</li><li>no rollback anchor or player-caused clock-change notice is selected; the protected-clock resync branch keeps the loaded state</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-clock-readings</li><li><code class="contract-placeholder">lives-refill-while-away</code>-return-timeline</li><li><code class="contract-placeholder">lives-refill-while-away</code>-reward-report</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>device-clock-non-negative-return</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> uses the device-clock difference on an ordinary return</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per clock row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: clock source is protected clock, not device clock.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>device-clock-restores-suspension-snapshot</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> restores the suspension snapshot after a backward reading</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per clock row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: clock source is protected clock, not device clock.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>device-clock-restores-trusted-checkpoint</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> restores the trusted checkpoint after a backward reading</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per clock row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: clock source is protected clock, not device clock.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>device-clock-keeps-return-state</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> keeps the loaded return state after a backward reading</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per clock row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: clock source is protected clock, not device clock.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>backward-clock-notice-silent</code></p>
+      <h3>a backward device clock adds no explanation</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: backward clock notice is not asked for lives-refill-while-away.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>backward-clock-notice-explain</code></p>
+      <h3>a backward device clock is explained before the return surface</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: backward clock notice is not asked for lives-refill-while-away.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>rollback-reading-protects-next-anchor</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> supplies one state and matching trusted reading</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per rollback-rules row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: rollback-rules has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>backward-return-anchor-is-monotonic</code></p>
+      <h3>a backward return commits an anchor that cannot replay earlier time</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: clock source is protected clock, not device clock.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>non-negative-catch-up-settles · lives</code></p>
+      <h3><code class="contract-placeholder">lives</code> settles an ordinary non-negative interval</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the lives row.</p>
+  <p class="contract-test-text">A non-negative interval settles <code class="contract-placeholder">lives</code> from the suspension snapshot and elapsed difference. The trace distinguishes this accepted interval from a skipped or zero-length one.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p><code class="contract-placeholder">lives</code> at a distinguishable suspension snapshot state and a non-negative elapsed difference</p></dd></div>
+<div><dt>When</dt><dd><ul><li>return processing builds this row&#39;s pass timeline</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">lives</code> settles from the suspension snapshot and elapsed difference</li><li>the return trace distinguishes this accepted interval from a skipped or zero-length interval</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-return-timeline</li><li><code class="contract-placeholder">lives-refill-while-away</code>-catch-up-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>whole-interval-limit</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> admits the whole measured interval</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: no row in catch-up-items matches away-limit whole interval.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>time-limit</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> admits no time past its cited point</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: no row in catch-up-items matches away-limit time limit.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>less-after-a-point-limit</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> uses its later amount rule past the cited point</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: no row in catch-up-items matches away-limit less after a point.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>state-ceiling-limit · lives</code></p>
+      <h3><code class="contract-placeholder">lives</code> stops at its cited state ceiling</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the lives row.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">lives</code> stops at the ceiling at <code class="contract-placeholder">contracts.player-lives.max</code>; the fidelity rule this row cites owns this ceiling; return processing derives the admitted span from it for crossing selection only, and the lifecycle does not re-apply it. Where the citation says the ordinary-play maximum applies, that is the ceiling used here. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a settlement for <code class="contract-placeholder">lives</code> whose amount would move the state below, to, and past the ceiling at <code class="contract-placeholder">contracts.player-lives.max</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the declared limit is applied and the admitted span is derived</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the row reaches but never passes that ceiling</li><li>the fidelity rule this row cites owns this ceiling; return processing derives the admitted span from it for crossing selection only, and the lifecycle does not re-apply it</li><li>where the citation says the same ceiling applies during ordinary play, that ordinary maximum is the one used here</li><li>the test names <code class="contract-placeholder">contracts.player-lives.max</code> and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-return-timeline</li><li><code class="contract-placeholder">lives-refill-while-away</code>-catch-up-report</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>same-as-playing-amount · lives</code></p>
+      <h3><code class="contract-placeholder">lives</code> uses the ordinary amount for equal time</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the lives row.</p>
+  <p class="contract-test-text">For equal elapsed time, <code class="contract-placeholder">lives</code> uses the ordinary-play amount. Fidelity and limits remain separate decisions in the report.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>matching ordinary-play and admitted-away segments for <code class="contract-placeholder">lives</code> with equal elapsed time and the same starting state</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the amount for each segment is computed before fidelity is applied</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>both segments define the same ordinary amount</li><li>fidelity and limits remain separate recorded decisions</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-catch-up-report</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>reduced-amount</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> uses only its cited reduced amount rule</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: no row in catch-up-items matches away-amount reduced.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>away-rule-amount</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> uses only its cited away amount rule</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: no row in catch-up-items matches away-amount away rule.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>every-missed-update-fidelity</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> clips each segment by its limit, where one applies</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: no row in catch-up-items matches catch-up-fidelity every missed update.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>larger-steps-fidelity</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> gives amount and limit to its larger-step rule</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: no row in catch-up-items matches catch-up-fidelity larger steps.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>one-derived-change-fidelity · lives</code></p>
+      <h3><code class="contract-placeholder">lives</code> gives amount and limit to its one-change rule</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the lives row.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">lives.from-elapsed-time</code> receives the separately computed amount and declared limit for <code class="contract-placeholder">lives</code>, owns the limit, and returns one change. The lifecycle applies it once and does not re-apply the limit. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the separately computed amount and declared limit for <code class="contract-placeholder">lives</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>both are handed to <code class="contract-placeholder">lives.from-elapsed-time</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the cited rule owns the limit and returns one change</li><li>the lifecycle applies that change once and does not re-apply the limit</li><li>the test names <code class="contract-placeholder">lives.from-elapsed-time</code> and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-catch-up-trace</li><li><code class="contract-placeholder">lives-refill-while-away</code>-catch-up-report</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>away-rule-one-change-composition</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> keeps amount and one-change distribution separate</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: no row in catch-up-items matches away-amount away rule and catch-up-fidelity one derived change.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>calendar-every-crossing-in-order</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> settles every crossing in ascending order</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per calendar-boundaries row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: crossed calendar boundaries is not asked for lives-refill-while-away.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>calendar-latest-crossing-only</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> settles only its latest crossing</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per calendar-boundaries row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: crossed calendar boundaries is not asked for lives-refill-while-away.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>calendar-one-combined-crossing</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> combines its crossings into one return event</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per calendar-boundaries row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: crossed calendar boundaries is not asked for lives-refill-while-away.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>segments-events-and-ties-stay-ordered</code></p>
+      <h3>row order breaks equal-timestamp ties</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to lives-refill-while-away.</p>
+  <p class="contract-test-text">Row order breaks equal-timestamp ties before Event resolution receives them. Where no equal-timestamp tie is constructible, this test asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>equal-timestamp calendar events where the adoption can construct them</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the return timeline orders the events before settlement</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>row order breaks an equal-timestamp tie before Event resolution receives the events</li><li>where no equal-timestamp tie is constructible, this test asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-return-timeline</li><li><code class="contract-placeholder">lives-refill-while-away</code>-calendar-report</li><li><code class="contract-placeholder">lives-refill-while-away</code>-catch-up-report</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>crossing-inside-admitted-span-settles-in-order</code></p>
+      <h3>a crossing inside the admitted span for <code class="contract-placeholder">Row.id</code> settles in order</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: crossed calendar boundaries is not asked for lives-refill-while-away.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>return-reward-created-from-source</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> is created only from its cited source settlement</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: return-rewards has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>automatic-reward-delivery</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> is offered automatically in reward-row order</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: return-rewards has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>player-claims-reward-delivery</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> stays pending until its cited claim event</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: return-rewards has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>continuous-item-read-once-at-return</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> applies its authority reading once</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per continuous-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: continuous-items has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>choice-item-applied-once-at-return</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> applies its selected branch once</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per choice-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: choice-items has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>state-only-return-display</code></p>
+      <h3>return adds no player-facing surface</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: return display is visible before resume, not state only.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>visible-before-resume-return-display</code></p>
+      <h3>settled state is visible before ordinary play</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to lives-refill-while-away.</p>
+  <p class="contract-test-text">After settled state and pending rewards are known, at least one existing player-facing display presents the affected state before ordinary play resumes. Any clock explanation comes first.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a return that affects at least one covered row</p></dd></div>
+<div><dt>When</dt><dd><ul><li>settled state and pending rewards are known</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>at least one existing player-facing display presents the affected state before ordinary play resumes</li><li>where a clock explanation applies, it precedes this display update</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-return-display-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>return-summary-display</code></p>
+      <h3>the return surface names each affected row and result</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: return display is visible before resume, not return summary.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>detailed-return-summary-display</code></p>
+      <h3>the return surface explains each affected result</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: return display is visible before resume, not detailed return summary.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>final-state-and-anchor-commit-together</code></p>
+      <h3>final state and the next anchor commit together</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to lives-refill-while-away.</p>
+  <p class="contract-test-text">Final local state and the next suspension anchor commit together where an anchor exists; without one, that clause asserts nothing. Where an anchor exists, step 15 requires it never to be lower than the previous one on any return. Ordinary updates resume only after automatic return changes and required pre-resume displays settle.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a completed return with final local state and, where they exist, distinguishable automatic changes and required pre-resume displays</p></dd></div>
+<div><dt>When</dt><dd><ul><li>return processing reaches step 15</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>final local state and the next suspension anchor commit together where an anchor exists; without one, the anchor clause asserts nothing</li><li>where an anchor exists, the committed anchor is never lower than the previous one on any return, as step 15 requires</li><li>ordinary updates resume only after every automatic return change and required pre-resume display has settled</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-anchor-commit</li><li><code class="contract-placeholder">lives-refill-while-away</code>-return-display-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>empty-row-sets-create-nothing</code></p>
+      <h3>empty row sets create no suspension work</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to lives-refill-while-away.</p>
+  <p class="contract-test-text">An empty fixed-items set fixes no covered state; an empty catch-up-items set calculates no covered state from missed time on return; an empty continuous-items set means no covered state continued elsewhere; an empty choice-items set selects no away behaviour at runtime; an empty return-rewards set creates no separately delivered reward; and an empty rollback-rules set uses no trusted checkpoint as a backward-clock anchor. Where a row exists, that clause asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">lives-refill-while-away</code> adoption document and its optionally empty row sets</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the lifecycle follows each row set&#39;s declared empty consequence</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>where fixed-items is empty, no covered state is fixed by suspension; where a row exists, this clause asserts nothing</li><li>where catch-up-items is empty, no covered state is calculated from missed time on return; where a row exists, this clause asserts nothing</li><li>where continuous-items is empty, no covered state continued elsewhere during suspension; where a row exists, this clause asserts nothing</li><li>where choice-items is empty, no covered state selects between away behaviours at runtime; where a row exists, this clause asserts nothing</li><li>where return-rewards is empty, return settlement creates no separately delivered reward; where a row exists, this clause asserts nothing</li><li>where rollback-rules is empty, no trusted checkpoint is used as a backward-clock anchor; where a row exists, this clause asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-declaration-record</li><li><code class="contract-placeholder">lives-refill-while-away</code>-return-timeline</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>catch-up-report-fields · lives</code></p>
+      <h3>the catch-up report for <code class="contract-placeholder">lives</code> carries the lifecycle fields</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the lives row.</p>
+  <p class="contract-test-text">Each catch-up report for <code class="contract-placeholder">lives</code> records the interval readings, admitted elapsed time, row, amount, fidelity, limit, before and after state, and any crossing that split the segment.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each catch-up report produced for <code class="contract-placeholder">lives</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer reads the report</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>each report records interval start and end readings, elapsed time admitted, row id, amount branch, fidelity branch, limit reached, before state, after state, and the calendar crossing that split the segment when present</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-catch-up-report</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>backward-clock-report-fields</code></p>
+      <h3>each backward-clock report records its selected response</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to lives-refill-while-away.</p>
+  <p class="contract-test-text">A backward-clock report records its selected anchor when one was selected and whether a notice appeared when that question applies. Where no such report exists, this test asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each backward-clock report produced by <code class="contract-placeholder">lives-refill-while-away</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer reads the report</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the report records the selected anchor when one was selected and whether a notice appeared when the notice question applies</li><li>where this adoption produces no backward-clock report, this test asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-clock-readings</li><li><code class="contract-placeholder">lives-refill-while-away</code>-anchor-commit</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>return-reward-report-fields</code></p>
+      <h3>the return-reward report for <code class="contract-placeholder">Row.id</code> carries its delivery fields</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: return-rewards has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>trusted-checkpoint-row-shape</code></p>
+      <h3>declaration check: last-trusted-checkpoint has exactly one rollback row</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: backward clock anchor is not asked for lives-refill-while-away.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>rollback-row-only-for-trusted-checkpoint</code></p>
+      <h3>declaration check: rollback rows exist only for last-trusted-checkpoint</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to lives-refill-while-away.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and cites the rollback-rules description, not the running game. A rollback-rules row is legal only under the last-trusted-checkpoint anchor; that anchor&#39;s exactly-one duty is checked separately. A protected clock, another anchor, or an adoption with no clock row must have none, and an adoption with no clock row answers no anchor. Any other shape is a defect this test fails by construction.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">lives-refill-while-away</code> adoption document and the rollback-rules description, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer compares its clock source, backward-clock anchor when answered, and rollback-rules rows</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>a protected clock and each device-clock anchor other than last-trusted-checkpoint have no rollback-rules row</li><li>an adoption with no clock row answers no anchor and has no rollback-rules row</li><li>under last-trusted-checkpoint this check asserts nothing because the exactly-one check owns that shape</li><li>any other shape is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>at-most-one-clock-row</code></p>
+      <h3>declaration check: clock has at most one row</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to lives-refill-while-away.</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. Clock has at most one row. More than one is a defect this test fails by construction. With no row, the check asserts nothing about elapsed time.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">lives-refill-while-away</code> adoption document, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer counts clock rows</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the clock collection has zero or one row</li><li>more than one row is a defect this test fails by construction; with no clock row, the count duty still passes and this check asserts nothing about elapsed time</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>at-most-one-rollback-row</code></p>
+      <h3>declaration check: rollback-rules has at most one row</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to lives-refill-while-away.</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. Rollback-rules has at most one row. More than one is a defect this test fails by construction. With no row, the check asserts nothing about a trusted checkpoint.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">lives-refill-while-away</code> adoption document, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer counts rollback-rules rows</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the rollback-rules collection has zero or one row</li><li>more than one row is a defect this test fails by construction; with no rollback row, this check asserts nothing about a trusted checkpoint</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>player-claim-needs-return-surface</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code> has a claim-capable return surface</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: return-rewards has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>clock-citation-duty · life-clock</code></p>
+      <h3>declaration check: <code class="contract-placeholder">life-clock</code>&#39;s clock citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per clock row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the life-clock row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">time.account-time</code>, not the running game. The citation must name <code class="contract-placeholder">life-clock</code>&#39;s reading, unit, and sampling. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">lives-refill-while-away</code> adoption and the prose at <code class="contract-placeholder">time.account-time</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">time.account-time</code> names the reading, its unit, and when it is sampled</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fixed-state-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s state citation names complete fixed state</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per fixed-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: fixed-items has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>catch-up-state-citation-duty · lives</code></p>
+      <h3>declaration check: <code class="contract-placeholder">lives</code>&#39;s state citation names ordinary changes and unit</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the lives row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">mechanics.life-refill</code>, not the running game. The citation must identify <code class="contract-placeholder">lives</code>, its ordinary changes, and its unit. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">lives-refill-while-away</code> adoption and the prose at <code class="contract-placeholder">mechanics.life-refill</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">mechanics.life-refill</code> identifies <code class="contract-placeholder">lives</code>, its ordinary changes, and its unit</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>amount-rule-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s amount citation states the complete amount and its unit</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: no row in catch-up-items matches away-amount reduced or away rule.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fidelity-rule-citation-duty · lives</code></p>
+      <h3>declaration check: <code class="contract-placeholder">lives</code>&#39;s fidelity citation states its distribution</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the lives row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">lives.from-elapsed-time</code>, not the running game. The citation must state the derivation of the single return change without changing the promised amount for <code class="contract-placeholder">lives</code>. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">lives-refill-while-away</code> adoption and the prose at <code class="contract-placeholder">lives.from-elapsed-time</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">lives.from-elapsed-time</code> states the derivation of the single return change without changing the promised amount for <code class="contract-placeholder">lives</code></li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>limit-rule-citation-duty · lives</code></p>
+      <h3>declaration check: <code class="contract-placeholder">lives</code>&#39;s limit citation states its complete boundary</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the lives row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">contracts.player-lives.max</code>, not the running game. The citation must state the state ceiling that stops away gain for <code class="contract-placeholder">lives</code>. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">lives-refill-while-away</code> adoption and the prose at <code class="contract-placeholder">contracts.player-lives.max</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">contracts.player-lives.max</code> states the state ceiling that stops away gain for <code class="contract-placeholder">lives</code></li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>continuous-state-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s state citation supplies its return reading</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per continuous-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: continuous-items has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>choice-rule-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s choice citation states both paths and selection</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per choice-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: choice-items has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>reward-rule-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s reward citation states source and derivation</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: return-rewards has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>destination-rule-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s destination citation states acceptance</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: return-rewards has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>claim-rule-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s claim citation names one event</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: return-rewards has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>expiry-rule-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s expiry citation states one deadline</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: return-rewards has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>calendar-boundary-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s boundary citation states the calendar test</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per calendar-boundaries row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: calendar-boundaries has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>calendar-settlement-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s settlement citation states immediate effects</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per calendar-boundaries row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: calendar-boundaries has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>trusted-state-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s trusted-state citation supplies a matched pair</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per rollback-rules row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: rollback-rules has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>away-limit-declaration-is-visible</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code> declares a state ceiling when one governs away gain</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to lives-refill-while-away: no row in catch-up-items matches away-limit whole interval.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>suspension-holds</code></p>
+      <h3>suspension and catch-up hold for the whole run</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to lives-refill-while-away.</p>
+  <p class="contract-test-text">Across <code class="contract-placeholder">every suspend-and-return cycle of the audited run, including a background transition, a backward device clock where the adoption has one, and a crossed calendar boundary where it has one</code>, no elapsed time is counted twice; each catch-up row follows its amount, fidelity, and limit; each selected crossing settles once in order; each reward reaches its destination or stays pending; skipped intervals create no reward; and the next anchor never falls below the prior one. A case this adoption cannot construct asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Holds</dt><dd><p>across every covered cycle, no elapsed time was counted twice; every catch-up row followed its amount, fidelity, and limit; every selected crossing settled once in its selected order; every created reward reached its destination or stayed pending as declared; every skipped interval created no reward; and each next anchor never fell below its prior anchor; a case the adoption cannot construct asserts nothing</p></dd></div>
+<div><dt>Seeds</dt><dd><p><code class="contract-placeholder">[&quot;audit-a&quot;,&quot;audit-b&quot;]</code></p></dd></div>
+<div><dt>Scope</dt><dd><p><code class="contract-placeholder">every suspend-and-return cycle of the audited run, including a background transition, a backward device clock where the adoption has one, and a crossed calendar boundary where it has one</code></p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">lives-refill-while-away</code>-suspension-interval</li><li><code class="contract-placeholder">lives-refill-while-away</code>-return-timeline</li><li><code class="contract-placeholder">lives-refill-while-away</code>-catch-up-report</li><li><code class="contract-placeholder">lives-refill-while-away</code>-calendar-report</li><li><code class="contract-placeholder">lives-refill-while-away</code>-reward-report</li><li><code class="contract-placeholder">lives-refill-while-away</code>-anchor-commit</li><li><code class="contract-placeholder">lives-refill-while-away</code>-first-ordering-violation</li></ul></dd></div></dl></details>
+</article></div>
+</details>
+<details class="contract-form-section contract-fold" id="adoption-json">
+  <summary><span class="contract-fold-title">JSON</span><span class="contract-fold-note">the adoption as one file</span></summary>
+  <p>The adoption file as supplied. Answers you try on this page are not written into it; to change an adoption, open it in the authoring tool.</p>
+
+  <pre class="contract-json"><code>{
+  &quot;contract&quot;: &quot;suspension-and-catch-up&quot;,
+  &quot;version&quot;: 1,
+  &quot;summary&quot;: &quot;Covers state that pauses, catches up, or continues while a game is closed or in the background. It also covers return rewards, calendar crossings, clock changes, and what appears before play resumes. Normal rates, timer rules, inventory capacity, save lifetime, and replay guarantees stay elsewhere.&quot;,
+  &quot;questions&quot;: {
+    &quot;while-in-the-background&quot;: {
+      &quot;asks&quot;: &quot;What happens while the game stays open in the background?&quot;,
+      &quot;rationale&quot;: &quot;An open game may use away handling, keep playing, or stay still until it closes. The same time must never count twice.&quot;,
+      &quot;options&quot;: {
+        &quot;counts-as-away&quot;: {
+          &quot;meaning&quot;: &quot;Background time uses the same suspension rules as closed time. Ten minutes in another tab refills energy like ten minutes with the game closed.&quot;,
+          &quot;semantics&quot;: &quot;The lifecycle treats the background interval as a suspension interval. Ordinary updates do not also apply that interval.&quot;
+        },
+        &quot;keeps-playing&quot;: {
+          &quot;meaning&quot;: &quot;Ordinary play continues in the background. A browser farm keeps growing crops while the player uses another tab.&quot;,
+          &quot;semantics&quot;: &quot;The ordinary update path continues, including platform throttling. Foregrounding adds no catch-up for the same interval.&quot;
+        },
+        &quot;waits-until-closed&quot;: {
+          &quot;meaning&quot;: &quot;The open game stays still, and away progress starts only after closing. A crop timer pauses in the app switcher but advances after the app closes.&quot;,
+          &quot;semantics&quot;: &quot;The open-background interval receives neither ordinary updates nor catch-up.&quot;
+        }
+      }
+    },
+    &quot;return-display&quot;: {
+      &quot;asks&quot;: &quot;What appears before ordinary play resumes?&quot;,
+      &quot;rationale&quot;: &quot;Changed state may speak for itself, animate before play, or appear in a return summary.&quot;,
+      &quot;options&quot;: {
+        &quot;state-only&quot;: {
+          &quot;meaning&quot;: &quot;No separate return surface appears. A match-3 game simply shows that three lives are ready.&quot;,
+          &quot;semantics&quot;: &quot;The lifecycle adds no player-facing return surface. Existing game displays may show the settled state after ordinary play resumes. Developer or diagnostic instrumentation that is not player-facing is out of scope.&quot;
+        },
+        &quot;visible-before-resume&quot;: {
+          &quot;meaning&quot;: &quot;Existing displays show the change before play resumes. A life counter ticks from two lives to five on the map screen.&quot;,
+          &quot;semantics&quot;: &quot;At least one existing player-facing display presents the affected state during return settlement.&quot;
+        },
+        &quot;return-summary&quot;: {
+          &quot;meaning&quot;: &quot;A return surface names each result. An idle game shows energy gained and coins waiting for collection.&quot;,
+          &quot;semantics&quot;: &quot;A player-facing return surface identifies each affected row and its settled result.&quot;
+        },
+        &quot;detailed-return-summary&quot;: {
+          &quot;meaning&quot;: &quot;A return surface also explains the calculation. A factory screen shows six hours away, its energy ceiling, and the final gain.&quot;,
+          &quot;semantics&quot;: &quot;The return surface reports elapsed time, applicable limits, amount rules, fidelity, and settled results.&quot;
+        }
+      }
+    },
+    &quot;clock-source&quot;: {
+      &quot;asks&quot;: &quot;Can the player change the clock that measures time away?&quot;,
+      &quot;rationale&quot;: &quot;The player can move a device clock through settings. A protected clock stays outside those settings, though the service behind it can correct it.&quot;,
+      &quot;when&quot;: {
+        &quot;row-count&quot;: {
+          &quot;clock&quot;: &quot;non-empty&quot;
+        }
+      },
+      &quot;otherwise&quot;: &quot;No clock row exists, so this adoption measures no elapsed suspension time.&quot;,
+      &quot;options&quot;: {
+        &quot;device-clock&quot;: {
+          &quot;meaning&quot;: &quot;The game reads a clock from the device. Moving a phone clock forward by two hours gives an idle mine two more measured hours.&quot;,
+          &quot;semantics&quot;: &quot;The elapsed interval comes from a clock the player can change through device settings. Both backward-clock questions are asked.&quot;
+        },
+        &quot;protected-clock&quot;: {
+          &quot;meaning&quot;: &quot;The game reads a clock outside device settings. Changing a phone clock does not refill a match-3 life sooner.&quot;,
+          &quot;semantics&quot;: &quot;The elapsed interval comes from a clock the player cannot change through device settings. The backward-clock questions are not asked.&quot;
+        }
+      }
+    },
+    &quot;backward-clock-anchor&quot;: {
+      &quot;asks&quot;: &quot;If the player moves the device clock backward, which state does the game keep?&quot;,
+      &quot;rationale&quot;: &quot;Zero elapsed time does not say which saved state survives a backward clock. The anchor prevents duplicate or reversed gains.&quot;,
+      &quot;when&quot;: {
+        &quot;flag&quot;: {
+          &quot;clock-source&quot;: [
+            &quot;device-clock&quot;
+          ]
+        }
+      },
+      &quot;otherwise&quot;: &quot;No device clock is read, either because no clock row exists or because the clock is protected, so no rollback anchor is selected. A protected-clock resync may still move its reading backward; the lifecycle then keeps the loaded state.&quot;,
+      &quot;options&quot;: {
+        &quot;suspension-snapshot&quot;: {
+          &quot;meaning&quot;: &quot;The game returns to the state captured when suspension began. An idle mine returns to the ore count recorded when the app closed.&quot;,
+          &quot;semantics&quot;: &quot;Every in-scope local item is restored from the suspension snapshot. Elapsed time for this interval is zero.&quot;
+        },
+        &quot;last-trusted-checkpoint&quot;: {
+          &quot;meaning&quot;: &quot;The game returns to the latest state accepted by a trusted rule. An online workshop returns to its last server-confirmed stock count.&quot;,
+          &quot;semantics&quot;: &quot;The one rollback rule supplies a trusted state and matching clock reading. The current suspension interval contributes zero elapsed time.&quot;
+        },
+        &quot;keep-return-state&quot;: {
+          &quot;meaning&quot;: &quot;The game keeps the state loaded at return but adds no away change. A newer cloud save from another device keeps its crops.&quot;,
+          &quot;semantics&quot;: &quot;No state is restored by this contract. The loaded return state remains, and elapsed time for this interval is zero. That state may be newer than the suspension snapshot because of a cloud save, a second device, or a mid-session autosave.&quot;
+        }
+      }
+    },
+    &quot;backward-clock-notice&quot;: {
+      &quot;asks&quot;: &quot;Does the game explain the backward clock result?&quot;,
+      &quot;rationale&quot;: &quot;The same backward-clock outcome can be silent or visible to the player.&quot;,
+      &quot;when&quot;: {
+        &quot;flag&quot;: {
+          &quot;clock-source&quot;: [
+            &quot;device-clock&quot;
+          ]
+        }
+      },
+      &quot;otherwise&quot;: &quot;No device clock is read, either because no clock row exists or because the clock is protected, so no player-caused clock-change notice is selected. A protected-clock resync may still produce zero elapsed time.&quot;,
+      &quot;options&quot;: {
+        &quot;silent&quot;: {
+          &quot;meaning&quot;: &quot;The game adds no clock-change notice. A life refill stays unchanged without a pop-up.&quot;,
+          &quot;semantics&quot;: &quot;The lifecycle adds no player-facing explanation for the backward-clock branch.&quot;
+        },
+        &quot;explain&quot;: {
+          &quot;meaning&quot;: &quot;The game explains that the clock change blocked away time. An idle game shows a short clock-change message beside unchanged energy.&quot;,
+          &quot;semantics&quot;: &quot;The lifecycle presents a player-facing clock-change explanation after the anchor is applied and before ordinary play resumes.&quot;
+        }
+      }
+    },
+    &quot;crossed-calendar-boundaries&quot;: {
+      &quot;asks&quot;: &quot;Several calendar boundaries passed while the game was away. Which ones count on return?&quot;,
+      &quot;rationale&quot;: &quot;A daily or weekly rule may run for every crossing, only the latest one, or one combined return event.&quot;,
+      &quot;when&quot;: {
+        &quot;row-count&quot;: {
+          &quot;calendar-boundaries&quot;: &quot;non-empty&quot;
+        }
+      },
+      &quot;otherwise&quot;: &quot;No calendar boundary is tracked, so return settlement creates no calendar crossing.&quot;,
+      &quot;options&quot;: {
+        &quot;every-crossing-in-order&quot;: {
+          &quot;meaning&quot;: &quot;Every crossed boundary settles in time order. A farm processes Friday, Saturday, and Sunday crop resets separately.&quot;,
+          &quot;semantics&quot;: &quot;The lifecycle inserts every crossed boundary into the return timeline in ascending time order.&quot;
+        },
+        &quot;latest-crossing-only&quot;: {
+          &quot;meaning&quot;: &quot;Only the latest crossed boundary settles. A daily reward calendar opens on today&#39;s entry without granting missed days.&quot;,
+          &quot;semantics&quot;: &quot;The lifecycle inserts only the latest crossed boundary for each calendar row and omits earlier crossings.&quot;
+        },
+        &quot;one-combined-crossing&quot;: {
+          &quot;meaning&quot;: &quot;All crossings become one return event. A weekly shop refreshes once and receives the number of missed weeks.&quot;,
+          &quot;semantics&quot;: &quot;The lifecycle inserts one return-time event per calendar row, carrying that row&#39;s number and span of crossed boundaries.&quot;
+        }
+      }
+    }
+  },
+  &quot;declares&quot;: {
+    &quot;values&quot;: {},
+    &quot;rows&quot;: {
+      &quot;clock&quot;: {
+        &quot;description&quot;: &quot;The elapsed-time rule for this behaviour family. At most one row is valid.&quot;,
+        &quot;when-empty&quot;: &quot;No elapsed suspension time is measured by this adoption.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable name for the elapsed clock, such as away-clock.&quot;
+          },
+          &quot;clock-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The game rule naming the reading, its unit, and when it is sampled.&quot;
+          }
+        }
+      },
+      &quot;fixed-items&quot;: {
+        &quot;description&quot;: &quot;State that remains at its suspension anchor until ordinary play resumes.&quot;,
+        &quot;when-empty&quot;: &quot;No covered state is fixed by suspension.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;The state item in game language, such as round-score or player-position.&quot;
+          },
+          &quot;state-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The game rule that identifies the complete state held fixed.&quot;
+          }
+        }
+      },
+      &quot;catch-up-items&quot;: {
+        &quot;description&quot;: &quot;State calculated from elapsed time when the suspension interval returns.&quot;,
+        &quot;when-empty&quot;: &quot;No covered state is calculated from missed time on return.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;The state item in game language, such as energy, crops, or lives.&quot;
+          },
+          &quot;state-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The game rule identifying the state, its ordinary changes, and its unit.&quot;
+          },
+          &quot;away-amount&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;same-as-playing&quot;,
+              &quot;reduced&quot;,
+              &quot;away-rule&quot;
+            ],
+            &quot;description&quot;: &quot;The amount earned from equal elapsed time: the ordinary amount, a lower amount, or an amount from a separate away rule. An energy refill may keep its normal one point per minute.&quot;
+          },
+          &quot;amount-rule-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;away-amount&quot;: [
+                  &quot;reduced&quot;,
+                  &quot;away-rule&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The rule for the lower or separate away amount. It states the complete amount calculation and its unit. Only the cited rule binds this row; uncited game prose does not.&quot;
+          },
+          &quot;catch-up-fidelity&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;every-missed-update&quot;,
+              &quot;larger-steps&quot;,
+              &quot;one-derived-change&quot;
+            ],
+            &quot;description&quot;: &quot;How missed play changes this state between calendar events: every missed update, larger catch-up steps, or one derived change. A crop may replay every growth tick while a life refill may derive one total.&quot;
+          },
+          &quot;fidelity-rule-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;catch-up-fidelity&quot;: [
+                  &quot;larger-steps&quot;,
+                  &quot;one-derived-change&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The rule naming step size and order, or the rule deriving the single return change. It distributes the promised amount and does not change it. Only the cited rule binds this row; uncited game prose does not.&quot;
+          },
+          &quot;away-limit&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;whole-interval&quot;,
+              &quot;time-limit&quot;,
+              &quot;less-after-a-point&quot;,
+              &quot;state-ceiling&quot;
+            ],
+            &quot;description&quot;: &quot;How much time or gain is allowed away: all time, a hard time stop, a lower amount past a point, or a state ceiling. A normal full-energy maximum is a valid state ceiling. A maximum that limits away gain is declared here as a state ceiling, not left under whole-interval.&quot;
+          },
+          &quot;limit-rule-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;away-limit&quot;: [
+                  &quot;time-limit&quot;,
+                  &quot;less-after-a-point&quot;,
+                  &quot;state-ceiling&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The time point, later amount rule, or state ceiling. A state ceiling may be the same maximum that applies during ordinary play. Only the cited rule binds this row; uncited game prose does not.&quot;
+          }
+        }
+      },
+      &quot;continuous-items&quot;: {
+        &quot;description&quot;: &quot;State that continued under another authority while the local game was suspended.&quot;,
+        &quot;when-empty&quot;: &quot;No covered state continued elsewhere during suspension.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;The state item in game language, such as skill-training or life-service.&quot;
+          },
+          &quot;state-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The external or protected rule that continued the state and supplies its return reading.&quot;
+          }
+        }
+      },
+      &quot;choice-items&quot;: {
+        &quot;description&quot;: &quot;State whose away behaviour is selected by a setting, platform, unlock, or other game rule.&quot;,
+        &quot;when-empty&quot;: &quot;No covered state selects between away behaviours at runtime.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;The state item in game language, such as harvest-mode.&quot;
+          },
+          &quot;choice-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The game rule naming both possible behaviours, their complete data, the condition selecting one, and the time at which the selection is made.&quot;
+          }
+        }
+      },
+      &quot;return-rewards&quot;: {
+        &quot;description&quot;: &quot;Rewards created by catch-up or a crossed calendar boundary, then delivered or left for the player to claim.&quot;,
+        &quot;when-empty&quot;: &quot;Return settlement creates no separately delivered reward.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;The reward in game language, such as offline-coins or daily-gift.&quot;
+          },
+          &quot;reward-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The game rule deriving the reward and identifying its source settlement.&quot;
+          },
+          &quot;destination-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The destination rule that accepts the complete reward or leaves it pending.&quot;
+          },
+          &quot;delivery&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;automatic&quot;,
+              &quot;player-claims&quot;
+            ],
+            &quot;description&quot;: &quot;Whether this reward enters its destination automatically or waits on a return surface for the player to claim it. A player-claims reward requires a return-display answer that supplies a return surface: return-summary or detailed-return-summary.&quot;
+          },
+          &quot;claim-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;delivery&quot;: [
+                  &quot;player-claims&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The player event that claims this pending reward from the return surface.&quot;
+          },
+          &quot;expires-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: false,
+            &quot;description&quot;: &quot;The optional rule naming when an unclaimed reward expires and is removed. Omission means an unclaimed reward never expires.&quot;
+          }
+        }
+      },
+      &quot;calendar-boundaries&quot;: {
+        &quot;description&quot;: &quot;Daily, weekly, seasonal, or other calendar boundaries that may pass during suspension.&quot;,
+        &quot;when-empty&quot;: &quot;Return settlement creates no calendar crossing.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;The boundary in game language, such as daily-reset or new-week.&quot;
+          },
+          &quot;boundary-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rule naming the calendar, time zone, boundary test, exact crossing time, and what happens when local civil time skips or repeats a boundary.&quot;
+          },
+          &quot;settlement-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The game rule that receives each selected crossing and states its immediate effects.&quot;
+          }
+        }
+      },
+      &quot;rollback-rules&quot;: {
+        &quot;description&quot;: &quot;The trusted checkpoint rule used by the backward-clock checkpoint answer. Exactly one row under last-trusted-checkpoint; no row under any other anchor, a protected clock, or no clock.&quot;,
+        &quot;when-empty&quot;: &quot;No trusted checkpoint is used as a backward-clock anchor.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable name for the trusted checkpoint rule.&quot;
+          },
+          &quot;trusted-state-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rule that supplies one coherent state snapshot and its matching trusted clock reading.&quot;
+          }
+        }
+      }
+    }
+  },
+  &quot;origin&quot;: &quot;https://opengdd.org/contracts/suspension-and-catch-up-1&quot;,
+  &quot;mechanism&quot;: [
+    &quot;This is the one normative authority for suspension state, elapsed time, catch-up, calendar crossings, return rewards, and report order. Questions and rows supply choices and game rules to this lifecycle; they do not define a second sequence.&quot;,
+    &quot;A **suspension interval** begins at game closure, or at the earlier open-background transition selected by `counts-as-away`, and ends at return processing, at the return clock reading when a clock row exists. A **suspension snapshot** contains every in-scope local item and the starting clock reading. A **return timeline** is the ordered elapsed span, split at the calendar crossings selected by the calendar answer. A **pending reward** has been created but not accepted by its destination.&quot;,
+    &quot;An unclaimed reward with an expiry rule is removed at its cited deadline. The lifecycle checks that deadline at return and immediately before a claim.&quot;,
+    &quot;### Suspend&quot;,
+    &quot;1. **Closing the game always begins a suspension interval.** Route an earlier open-background transition through `while-in-the-background`. `counts-as-away` begins the interval at that transition. `keeps-playing` continues ordinary play and creates no return catch-up for background time. `waits-until-closed` holds state unchanged until closure begins the interval. 2. When an interval begins, capture one coherent suspension snapshot before any covered state can change. If a clock row exists, read its starting value in the same batch; the interval&#39;s starting value is the higher of that reading and the committed anchor from the previous return, so time below the anchor is never replayed. A protected authority may keep changing a `continuous-items` row after the snapshot. 3. Hold every fixed and catch-up item at its snapshot state. A choice row resolves its cited selection at the time named by that rule. A selected continuous branch stays under its cited authority; other selected branches follow their matching lifecycle paths.&quot;,
+    &quot;### While away&quot;,
+    &quot;4. Local catch-up items do not advance visibly while ordinary updates are stopped. The interval records clock reach only; settlement waits for return. 5. Continuous items keep changing under their cited authority. This lifecycle neither predicts those changes nor duplicates them locally. 6. Calendar crossings are discovered from the cited calendar and clock. They are not settled yet. Return processing selects and orders them.&quot;,
+    &quot;### Return&quot;,
+    &quot;7. If a clock row exists, read the return clock once. A non-negative interval uses the suspension snapshot and the elapsed difference. Any negative protected-clock interval counts as zero elapsed with the loaded state retained, because a service resync can move even a protected clock back; skip steps 9–11 and continue at step 12. That skipped interval creates no return reward. Without a clock row, local catch-up and calendar crossings are absent; continue with the unchanged fixed state at step 12. 8. If a device clock reads earlier, apply `backward-clock-anchor` before any catch-up. Restore the suspension snapshot, restore the cited trusted checkpoint, or keep the loaded return state. The current interval then has zero elapsed time. A skipped interval creates no return reward. Apply the selected clock notice, skip steps 9–11, and continue at step 12. 9. Build one calendar return timeline and one pass timeline for each catch-up row. A calendar row admits the full non-negative measured interval because it declares no away limit. For a catch-up row, this lifecycle derives the admitted span from the row&#39;s declared limit for crossing selection only; that derivation is not the limit application step 10 assigns, and a state-dependent ceiling discovers its endpoint during the chronological pass. Crossings inside that admitted span settle against the row, and crossings beyond it do not. A state-dependent ceiling discovers its endpoint during the chronological pass, so no later crossing enters that row&#39;s pass. A catch-up row&#39;s limit does not cancel an independent calendar event: the row shape declares no such link, and the event settles once on the calendar timeline. `every-crossing-in-order` keeps all remaining crossings in ascending time order. `latest-crossing-only` keeps the last remaining crossing for each calendar row. `one-combined-crossing` creates one return-time event per calendar row with its count and span. Row order breaks a tie between equal timestamps before **Event resolution** receives them. 10. Compute each catch-up row&#39;s segments as step 11 hands them over, keeping amount separate from fidelity; step 11 owns the ordering. `same-as-playing` defines the ordinary amount for equal elapsed time; `reduced` and `away-rule` use only their cited amount rule. Under `every-missed-update`, this lifecycle applies the away limit as a per-segment clip and then feeds only the remaining missed updates to the game rules. Under `larger-steps`, the cited fidelity rule receives the amount and limit, owns both the larger-step distribution and the limit, and returns the ordered changes. Under `one-derived-change`, the cited fidelity rule receives the amount and limit, owns the limit, and returns one change. The lifecycle does not re-apply a limit owned by a cited fidelity rule. When `away-rule` and `one-derived-change` compose, the amount rule defines the total and the fidelity rule distributes it. 11. Settle each selected calendar event once through `settlement-declared-in`. For every catch-up row containing that crossing, settle the preceding segment first, then the event&#39;s immediate effect, then the following segment. The row&#39;s clip already excluded later crossings, so this order cannot re-admit time or events beyond its limit. Reports keep the same segment-then-event-then-segment order. 12. Check every existing pending reward&#39;s cited deadline at return. An expired unclaimed reward is removed at that deadline. A pending reward is in-scope local state and survives this and later suspensions until the player claims it or its cited deadline expires. 13. Read every continuous item once. Apply each selected choice branch once. Create each return reward from its cited source settlement; a reward row with no settled source produces nothing. A skipped interval therefore creates no return reward. Check a new reward&#39;s cited deadline at return. Offer an `automatic` reward to its destination in reward-row order. A `player-claims` reward remains pending until its cited claim event. Destination refusal keeps the same pending reward, and a refused `automatic` reward is offered again at each later return until its destination accepts it or its cited deadline removes it. 14. Present `return-display` after settled state and pending rewards are known. A clock explanation precedes the general return surface. Existing displays used by `visible-before-resume` update before ordinary play. A claim event checks the cited deadline before offering its reward. An expired unclaimed reward is removed; each accepted reward is reported once. 15. Commit the final local state and the next suspension anchor together. On every return the committed anchor is never lower than the previous one. After any backward-clock return, commit the highest of the suspension reading, the return reading, and any trusted-checkpoint reading as the next suspension anchor, retaining the trusted state under that anchor, so repeated clock rollback cannot replay time below the prior anchor. Resume ordinary updates only after all automatic return changes and every required pre-resume display have settled. A later player claim is a new event and never repeats catch-up.&quot;,
+    &quot;Every catch-up report carries the interval start and end readings, elapsed time admitted, row id, amount branch, fidelity branch, limit reached, before state, after state, and calendar crossing that split the segment when present. A backward-clock report also carries the selected anchor when one was selected, and whether a notice appeared when the notice question applies. A return-reward report carries its source, destination, delivery, pending, accepted, or expired status, deadline when present, and claim event when present.&quot;
+  ],
+  &quot;answers&quot;: {
+    &quot;while-in-the-background&quot;: &quot;counts-as-away&quot;,
+    &quot;return-display&quot;: &quot;visible-before-resume&quot;,
+    &quot;clock-source&quot;: &quot;protected-clock&quot;
+  },
+  &quot;values&quot;: {},
+  &quot;rows&quot;: {
+    &quot;clock&quot;: [
+      {
+        &quot;id&quot;: &quot;life-clock&quot;,
+        &quot;clock-declared-in&quot;: &quot;time.account-time&quot;
+      }
+    ],
+    &quot;catch-up-items&quot;: [
+      {
+        &quot;id&quot;: &quot;lives&quot;,
+        &quot;state-declared-in&quot;: &quot;mechanics.life-refill&quot;,
+        &quot;away-amount&quot;: &quot;same-as-playing&quot;,
+        &quot;catch-up-fidelity&quot;: &quot;one-derived-change&quot;,
+        &quot;fidelity-rule-declared-in&quot;: &quot;lives.from-elapsed-time&quot;,
+        &quot;away-limit&quot;: &quot;state-ceiling&quot;,
+        &quot;limit-rule-declared-in&quot;: &quot;contracts.player-lives.max&quot;
+      }
+    ],
+    &quot;fixed-items&quot;: [],
+    &quot;continuous-items&quot;: [],
+    &quot;choice-items&quot;: [],
+    &quot;return-rewards&quot;: [],
+    &quot;calendar-boundaries&quot;: [],
+    &quot;rollback-rules&quot;: []
+  },
+  &quot;pack&quot;: &quot;sha256:d1ec8edb7c86cda9f923cacba4a1d4a0c6c4af5ee4302842865d39636cd8a81d&quot;
+}
+</code></pre>
+</details>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

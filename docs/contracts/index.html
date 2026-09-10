@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contracts — OpenGDD</title>
+<meta name="description" content="What contracts and adoptions are, with a short stamina example.">
+<link rel="canonical" href="https://opengdd.org/contracts/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Contracts — OpenGDD">
+<meta property="og:description" content="What contracts and adoptions are, with a short stamina example.">
+<meta property="og:url" content="https://opengdd.org/contracts/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Contracts — OpenGDD">
+<meta name="twitter:description" content="What contracts and adoptions are, with a short stamina example.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=ff285f28dd16">
+<script type="module" src="/assets/contracts.mjs?v=ff285f28dd16"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout contract-catalogue">
+<nav class="doc-toc contract-nav" aria-label="Contracts">
+<details class="contract-nav-disclosure">
+  <summary>Contracts</summary>
+  <div class="contract-nav-content">
+    <p class="toc-title">Contracts</p>
+    <ul class="contract-nav-home"><li><a href="/contracts/" aria-current="page">Overview</a></li><li><a href="/contracts/catalogue/">Contract catalogue</a></li></ul>
+<div class="toc-group contract-page-nav">
+  <p class="toc-group-title">On this page</p>
+  <ul><li><a href="#concept">Contract and adoption</a></li>
+<li><a href="#starting-points">Your first adoption</a></li></ul>
+</div>
+  </div>
+</details>
+</nav>
+<article class="doc-body contract-index-body"><h1>Contracts</h1>
+<p class="contract-positioning">A <strong>contract</strong> is a short list of questions about one game mechanic, such as a stamina bar or a backpack. Answer the questions, and the mechanic is defined well enough to build and test. Contracts are optional: a package is complete without one.</p>
+<section class="contract-concept" aria-labelledby="concept">
+<h2 id="concept">Contract and adoption</h2>
+<p>A contract asks the questions about one mechanic. An <strong>adoption</strong> is one set of answers to those questions, and a set of answers is one specific behaviour. Answer <a href="/contracts/ranged-value-1/">Ranged value</a> one way and you have an XP bar that fills into the next level; answer it another way and you have a stamina bar that refuses an attack you cannot afford. <a href="/contracts/ranged-value-1/health/">Health</a>, <a href="/contracts/ranged-value-1/stamina/">Stamina</a> and <a href="/contracts/ranged-value-1/oxygen/">Oxygen</a> are three adoptions of the same contract.</p>
+<ol class="contract-flow">
+<li><h3>Contract</h3><p>The questions about one mechanic. 15 for Ranged value.</p></li>
+<li><h3>Adoption</h3><p>One set of answers, which is one behaviour. Change an answer and you have a different adoption.</p></li>
+</ol>
+<p>The Ranged value contract asks, among its 15 questions:</p>
+<div class="contract-table-scroll" role="region" aria-label="Two stamina questions and their answers" tabindex="0"><table class="contract-concept-table"><thead><tr><th scope="col">The contract asks</th><th scope="col">The Stamina adoption answers</th></tr></thead><tbody>
+<tr><th scope="row">You have 10 stamina. An attack costs 20. Can you attack?</th><td>No. You need the full cost.</td></tr>
+<tr><th scope="row">A hit would take stamina below zero. What happens?</th><td>It stops at zero and the extra is lost.</td></tr>
+</tbody></table></div>
+<p>The numbers stay yours: how much stamina there is, how fast it recovers, how long the wait is. Every contract also comes with acceptance tests, the checks a finished game must pass.</p>
+</section>
+<section class="contract-start-choice" aria-labelledby="starting-points">
+<h2 id="starting-points">Your first adoption</h2>
+<ol class="contract-mini-flow">
+<li><strong>Find the contract</strong> for your mechanic in the <a href="/contracts/catalogue/">catalogue</a>. Search with the word you already use: health bar, backpack, coyote time, autosave.</li>
+<li><strong>Pick the adoption</strong> closest to your game. If none fits, start from the contract itself and answer the questions yourself.</li>
+<li><strong>Open it in the authoring tool</strong> with the button on its page, change the answers and numbers that do not fit, and save it into your package.</li>
+</ol>
+<p>That is the whole workflow. The files that come out of it are ordinary package files; <a href="/handbook/contracts/">the Handbook chapter</a> shows what they look like.</p>
+</section>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

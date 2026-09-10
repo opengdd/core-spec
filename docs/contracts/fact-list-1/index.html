@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fact list contract — OpenGDD</title>
+<meta name="description" content="Decides which game facts players can always read, and how each one reaches them without relying on colour alone.">
+<link rel="canonical" href="https://opengdd.org/contracts/fact-list-1/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Fact list contract — OpenGDD">
+<meta property="og:description" content="Decides which game facts players can always read, and how each one reaches them without relying on colour alone.">
+<meta property="og:url" content="https://opengdd.org/contracts/fact-list-1/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Fact list contract — OpenGDD">
+<meta name="twitter:description" content="Decides which game facts players can always read, and how each one reaches them without relying on colour alone.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=ff285f28dd16">
+<script type="module" src="/assets/contracts.mjs?v=ff285f28dd16"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout contract-catalogue contract-entry-page" data-contract-root data-core-id="fact-list">
+<nav class="doc-toc contract-nav" aria-label="Contracts">
+<details class="contract-nav-disclosure">
+  <summary>Contracts</summary>
+  <div class="contract-nav-content">
+    <p class="toc-title">Contracts</p>
+    <ul class="contract-nav-home"><li><a href="/contracts/">Overview</a></li><li><a href="/contracts/catalogue/">Contract catalogue</a></li></ul>
+<div class="toc-group contract-page-nav">
+  <p class="toc-group-title">On this page</p>
+  <ul><li><a href="#use-this">Use in your game</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#rows">Lists</a></li>
+<li><a href="#for-builders">For builders</a></li></ul>
+</div>
+  </div>
+</details>
+</nav>
+<article class="doc-body contract-entry-body">
+<p class="label"><a href="/contracts/catalogue/#legibility">Legibility</a></p>
+<div class="contract-entry-title-row">
+  <div><h1>Fact list</h1><p class="contract-core-name"><code>fact-list-1</code></p></div>
+  <div><span class="contract-badge ">Tests included</span></div>
+</div>
+<p class="contract-entry-hook">This contract defines the behaviour of facts a player must always be able to read: health, ammo, or a status effect.</p>
+<p class="contract-entry-summary">It decides which game facts players can always read, and how each one reaches them without relying on colour alone.</p>
+<ul class="contract-facts">
+  <li><a href="#questions">3 questions</a></li>
+  <li>no numbers</li>
+  <li><a href="#rows">1 list</a></li>
+  <li><a href="#for-builders">6 tests</a></li>
+</ul>
+<aside class="contract-relief contract-adoption-start" id="adoptions" aria-labelledby="adoptions-title">
+  <p class="contract-relief-title" id="adoptions-title">Start from an adoption</p>
+  <p>An adoption is this contract with the answers already filled in for one kind of game. Open the one closest to yours, change what does not fit, and skip the questions below.</p>
+  <p class="contract-adoption-links"><a class="contract-adoption-chip" href="/contracts/fact-list-1/card-keyword-state/">Card keyword state</a><a class="contract-adoption-chip" href="/contracts/fact-list-1/squad-tactics-readouts/">Squad tactics readouts</a></p>
+</aside>
+<section class="contract-handoff" aria-labelledby="use-this">
+  <h2 id="use-this">Use in your game</h2>
+  <p>Opens the authoring tool with this contract added and its questions unanswered. Or download the ZIP and add it later.</p>
+  <div class="contract-actions">
+    <a class="cta" href="/authoring-tool/?contract=fact-list-1">Open in the authoring tool</a>
+    <a class="cta-quiet" href="/contracts/fact-list-1/fact-list-1.zip" download="fact-list-1.zip">Download ZIP</a>
+  </div>
+  <details><summary>What is in the ZIP</summary><p>The ZIP holds the contract and its acceptance tests. In the authoring tool, choose <strong>Add contract</strong> and pick this ZIP. If you keep your design as files, put them in <code>contracts/</code> and fill in the answers there.</p><div class="contract-actions"><a href="/contracts/fact-list-1/core.json" download="fact-list-1.core.json">Download contract JSON</a> · <a href="/contracts/fact-list-1/fact-list-1.pack.json" download="fact-list-1.pack.json">Download tests</a><button type="button" class="cta-quiet" data-copy-core data-core-url="/contracts/fact-list-1/core.json" data-copy-kind="contract">Copy contract</button><span role="status" aria-live="polite" data-copy-status></span></div></details>
+</section>
+<section class="contract-decision-overview">
+  <h2 id="questions">Questions</h2>
+<p>3 questions.</p>
+<ol class="contract-decision-list"><li><a href="#question-colour-alone">Can a fact shown by the game use colour as its only clue?</a></li>
+<li><a href="#question-audio-alone">Can a fact listed here use sound as its only clue?</a></li>
+<li><a href="#question-presentation-control">Are you promising a player setting for any listed fact?</a></li></ol>
+</section>
+<section class="contract-form-section" id="try-answers">
+  <h2>Try the answers</h2>
+  <p class="contract-choice-note">Pick answers to see which rules and tests apply. Nothing is saved here: the ZIP and the authoring tool start unanswered.</p>
+  <div class="contract-actions contract-question-tools">
+    <button type="button" class="cta-quiet contract-reset" data-reset-choices>Clear choices</button>
+    <label class="contract-switch"><input type="checkbox" data-builder-wording> Show exact wording for builders</label>
+  </div>
+  <div class="contract-question-list">
+  <article class="contract-question" id="question-colour-alone" data-contract-question data-flag="colour-alone" data-when="null">
+  <h3>Can a fact shown by the game use colour as its only clue?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Can a fact shown by the game use colour as its only clue?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="fact-list-colour-alone" value="never" data-contract-choice><span class="contract-option-label">Never</span></label><span class="contract-option-mark"><span class="contract-suggested">Suggested</span><span class="contract-suggested-note">Suggested marks the answer the evidence supports. It is not a default.</span></span></th>
+  <td><span class="contract-option-meaning">Colour is never the only clue. Red enemies and green allies also differ by an outline or label.</span><p class="contract-option-semantics">Every fact the game shows remains readable when all hue differences are removed. Player colour settings may still be offered, but they do not replace this requirement.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="fact-list-colour-alone" value="player-recolourable" data-contract-choice><span class="contract-option-label">Player recolourable</span></label></th>
+  <td><span class="contract-option-meaning">Colour may be the only clue when the player can replace it. A player who cannot separate red and green can choose two clear colours.</span><p class="contract-option-semantics">Any fact the game shows may use hue as its sole distinction only when a player-facing setting lets the player change every colour carrying that fact. The changed presentation must preserve the same fact.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Colour can merge for some players. A second clue keeps enemies and allies distinct for everyone; a colour setting helps only the player who finds it.</p></details>
+</article>
+<article class="contract-question" id="question-audio-alone" data-contract-question data-flag="audio-alone" data-when="null">
+  <h3>Can a fact listed here use sound as its only clue?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Can a fact listed here use sound as its only clue?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="fact-list-audio-alone" value="never" data-contract-choice><span class="contract-option-label">Never</span></label><span class="contract-option-mark"><span class="contract-suggested">Suggested</span></span></th>
+  <td><span class="contract-option-meaning">Sound is never the only clue for a listed fact. A danger tone also has a label or icon.</span><p class="contract-option-semantics">Every promised fact remains readable with audio muted. The reviewer groups rows by fact citation and confirms at least one non-audio channel per fact: text, symbol-or-shape, place-or-size, animation, outline-or-contrast, or haptic.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="fact-list-audio-alone" value="allowed" data-contract-choice><span class="contract-option-label">Allowed</span></label></th>
+  <td><span class="contract-option-meaning">A listed fact may use sound as its only clue. Muting a rising danger tone may hide how close a timer is to ending.</span><p class="contract-option-semantics">A promised fact may become unreadable when all audio is muted. Its Fixed citation must identify every play situation in which the audio-only promise applies.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>A sound-only warning disappears when the game is muted or a player cannot hear it. This choice says whether another clue is required.</p></details>
+</article>
+<article class="contract-question" id="question-presentation-control" data-contract-question data-flag="presentation-control" data-when="null">
+  <h3>Are you promising a player setting for any listed fact?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Are you promising a player setting for any listed fact?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="fact-list-presentation-control" value="fixed-by-game" data-contract-choice><span class="contract-option-label">Fixed by game</span></label></th>
+  <td><span class="contract-option-meaning">This answer promises no player-facing setting for the listed facts. A row may still name a setting your game happens to have. Any colour setting promised by your colour answer still stands.</span><p class="contract-option-semantics">Every row still declares any player-facing setting that changes or can disable its channel. The adoption promises none of those settings through this answer, even when a row names a setting the game happens to have. A setting a row does name is still binding: its declared result is audited like any other row fact. Answering colour-alone with player-recolourable independently promises its colour setting.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="fact-list-presentation-control" value="player-configurable" data-contract-choice><span class="contract-option-label">Player configurable</span></label><span class="contract-option-mark"><span class="contract-suggested">Suggested</span></span></th>
+  <td><span class="contract-option-meaning">Your game promises a player-facing setting for at least one listed fact. A warning-volume setting changes the same warning wherever it appears.</span><p class="contract-option-semantics">The adoption promises at least one player-facing setting that changes or can disable a channel named by a readable-facts row. Every affected row names the setting and its result. The changed presentation is observable in every applicable play situation named by the citation of each affected fact.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Different players need different ways to read a fact. This choice says whether your game promises any presentation setting.</p></details>
+</article>
+  </div>
+</section>
+<aside class="contract-relief" aria-labelledby="relief-title">
+  <p class="contract-relief-title" id="relief-title">That was the hard part.</p>
+  <p>The questions are the decisions. Everything below follows from them: the numbers and lists an adoption fills in, and the exact wording and tests for builders. The authoring tool handles the filling in. Read on only if you want to check.</p>
+</aside>
+
+<details class="contract-form-section contract-fold" id="rows">
+  <summary><span class="contract-fold-title">Lists</span><span class="contract-fold-note">1 list</span></summary>
+  <p>Some settings are lists of rows.</p><p class="contract-citation-help">A reference points to a number or a rule in your design. For a number, use its address in your tuning. For a rule, use its file and heading, such as <code>02-mechanics.md#recovery</code>. Each field's description says what it needs.</p><article class="contract-collection">
+<h3>Readable facts</h3>
+<p class="contract-exact-name"><code>readable-facts</code></p>
+<p>List every fact and every independent way players can read it without colour. Use one row per pair, with no repeats. Two ways for health need two rows with the same citation. A finished adoption needs at least one row. The validator (the checking tool) does not count rows; a reviewer does.</p>
+<p class="contract-row-shape">Each row is: <code>id</code>, <code>fact</code>, <code>channel</code>, <code>presentation-settings</code>, <code>without-audio</code>.</p>
+<details class="contract-fields-detail"><summary>Every field</summary>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Field</th><th>Kind</th><th>When it appears</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr data-contract-dependent data-when="null">
+  <td><code>id</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>A short, stable name for this fact and its channel. Use a different name for each row.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>fact</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>Where your fixed game prose defines the fact and its states. The same prose must name every play situation covered.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>channel</code></td>
+  <td>choice: text, symbol-or-shape, place-or-size, animation, outline-or-contrast, audio-cue, spatial-audio, narration, audio-description, haptic</td>
+  <td>Required</td>
+  <td>The non-colour way that carries this fact by itself. In each named situation, an observer must identify every state from this way alone. Symbol-or-shape uses a pictorial symbol, bare form, or pattern, such as a shield badge or hatching. Place-or-size uses where something sits or how large or full it is, such as a threat arrow&#39;s direction. Animation uses movement over time, such as a pulsing border. Narration reads interface content. Audio description explains visual action that the interface does not name.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>presentation-settings</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>Name every player-facing setting that changes or can disable this row&#39;s channel, and say what happens at each end of the setting&#39;s range — for a switch, when it is on and when it is off. Write &#39;none&#39; when no setting affects it. If a setting can disable the channel, name another row for the same fact that remains readable or state that the fact becomes unreadable. Unreadable is only allowed when your colour and sound answers do not require the fact to stay readable. The validator checks that this field exists; a reviewer checks its truth.</td>
+</tr>
+<tr data-contract-dependent data-when="{&quot;row&quot;:{&quot;channel&quot;:[&quot;audio-cue&quot;,&quot;spatial-audio&quot;,&quot;narration&quot;,&quot;audio-description&quot;]}}">
+  <td><code>without-audio</code></td>
+  <td>string</td>
+  <td>Present when row channel is Audio cue or Spatial audio or Narration or Audio description.</td>
+  <td>Say what a player gets when audio is off. Name a non-audio row for the same fact, or state that the fact becomes unreadable. Unreadable is only allowed when your colour and sound answers do not require the fact to stay readable. The validator checks that this field is present on an audio row; a reviewer checks its truth.</td>
+</tr>
+</tbody></table></div>
+</details>
+</article>
+</details>
+<section class="contract-form-section" id="for-builders">
+  <h2>For builders</h2>
+  <details class="contract-builder-details">
+    <summary>Exact mechanism wording and 6 pack tests</summary>
+    <div class="contract-builder-block">
+      <h3>Exact mechanism wording</h3>
+      <div class="contract-mechanism"><p>Each readable-facts row is one fact-and-channel promise. A fact carried by several non-colour channels repeats the same Fixed citation in several rows; a fact with no row makes no channel-readability promise under this contract.</p>
+<p>A row promises that its channel alone lets a player distinguish the states the cited Fixed prose defines in every play situation the citation names. The check repeats for each named situation, with every other route to the fact removed or made identical across the states being distinguished — declared or not — so the named channel is the only thing that changes with the fact; developer instrumentation that is not a player-facing surface (an audit pane, a debug overlay, or a save file) is not a route. Within each named play situation, an observer meets each state the cited prose names at least once, in an order they do not know, and must name the state every time from the named channel alone.</p>
+<p>A fact carried by memorable authored content, such as a published deck or a fixed map, can be readable through a route the channel rows do not describe; the rows promise presentation, not secrecy.</p>
+<p>The ten channel ids are text, symbol-or-shape, place-or-size, animation, outline-or-contrast, audio-cue, spatial-audio, narration, audio-description, and haptic. Colour is not another channel: colour-alone is a game-wide policy for every fact the game shows, including a fact with no row, while a fact appears in readable-facts only when at least one non-colour channel carries it.</p>
+<p>A listed fact may be a unit state, warning direction, resource amount, or card state. This contract records whether that fact is readable; it does not define tutorials, controls, or how the state changes.</p>
+<p>Each row declares every player-facing setting that changes or can disable its channel. If a setting can disable that row&#39;s channel, the adoption either names another row for the same fact that remains readable or states that the fact becomes unreadable. The unreadable result is forbidden whenever another selected policy requires the fact to remain readable under that setting.</p>
+<p>Package validation checks the list&#39;s shape, ids, channel choices, Fixed citations, and required setting declarations. The verification pack separately audits list completeness, the game-wide colour and audio policies, each setting declaration, and whether each channel distinguishes the cited states. Under fixed-by-game a row may declare no affected setting, but a setting a row does declare is binding and audited like any other row fact; colour-alone: player-recolourable independently still promises its colour setting.</p></div>
+    </div>
+    <section class="contract-builder-block">
+  <h3>Verification pack</h3>
+  <p><code>sha256:d026a70c9b4f1e60109b61fb4c8f5645cbd8aff4e2cd6bfb28a9622ffa782771</code></p>
+
+  <p>The format calls an adoption with its matching pack <strong>Checked</strong>: the tests travel with it, but a game has not necessarily passed them. Without the pack the adoption is <strong>Promised</strong>: the builder still owes the chosen behavior.</p>
+  <h3>6 pack tests</h3>
+  <p>Placeholders are filled from the adoption's answers, values, rows, and verification inputs.</p>
+<div class="contract-test-list"><details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>the readable-facts list is complete and has no duplicate pair</summary>
+  <p class="contract-exact-name"><code>fact-policy-holds</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Audit class: observer-judged. Across the supplied scope, the readable-facts rows are non-empty, every fact the Fixed prose promises the player can read appears in at least one row, and no two rows name the same fact citation and the same channel.</p>
+  <dl class="contract-test-steps"><div><dt>Scope</dt><dd><p><code class="contract-placeholder">Inputs scope</code></p></dd></div>
+<div><dt>Holds</dt><dd><p>the readable-facts rows are non-empty; every fact the Fixed prose promises the player can read appears in at least one row; no two rows name the same fact citation and the same channel</p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-fact-list-completeness</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[&quot;colour-alone&quot;,&quot;audio-alone&quot;]">
+  <summary>the promised colour and audio policies hold throughout play</summary>
+  <p class="contract-exact-name"><code>colour-and-audio-policy-holds</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Audit class: observer-judged. Across every fact the game&#39;s Fixed prose says the player can tell, including facts with no readable-facts row, and the play situations that prose names, <code class="contract-placeholder">Bind colour result</code>; <code class="contract-placeholder">Bind audio result</code>.</p>
+  <dl class="contract-test-steps"><div><dt>Scope</dt><dd><p>every fact the game&#39;s Fixed prose says the player can tell, including facts with no readable-facts row, across the play situations that prose names</p></dd></div>
+<div><dt>Holds</dt><dd><p><code class="contract-placeholder">Bind colour result</code>; <code class="contract-placeholder">Bind audio result</code></p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-fact-observer-results</li><li><code class="contract-placeholder">Instance</code>-colour-and-audio-state</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;presentation-control&quot;:[&quot;player-configurable&quot;]}}" data-dependencies="[&quot;presentation-control&quot;]">
+  <summary>the promised presentation setting changes a fact in play</summary>
+  <p class="contract-exact-name"><code>presentation-control-visible</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Presentation control is Player configurable.</p>
+  <p class="contract-test-text">Audit class: observer-judged. Across the supplied scope, at least one player-facing setting changes or can disable a channel named by a readable-facts row. Every row names each setting that affects its channel and the result at every supported end, and the running game matches that declaration in every applicable cited situation. A disabled channel points to another readable row for the same fact or admits that the fact becomes unreadable; any admission obeys the selected colour and audio policies.</p>
+  <dl class="contract-test-steps"><div><dt>Scope</dt><dd><p><code class="contract-placeholder">Inputs scope</code></p></dd></div>
+<div><dt>Holds</dt><dd><p>at least one player-facing setting changes or can disable a channel named by a readable-facts row; every row names every setting that changes or can disable its channel and states the result at each supported end; each declaration matches the running game in every applicable play situation named by the row&#39;s fact citation; when a setting can disable the row&#39;s channel, the row names another channel row for the same fact that remains readable or states that the fact becomes unreadable, and any unreadable result obeys the selected colour and audio policies</p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-presentation-settings</li><li><code class="contract-placeholder">Instance</code>-presentation-observer-results</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>the setting declaration for <code class="contract-placeholder">Row.id</code> matches play</summary>
+  <p class="contract-exact-name"><code>presentation-setting-effect-holds</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Audit class: observer-judged. For <code class="contract-placeholder">Row.id</code>, observe every named setting at both ends of its supported range in every applicable situation named at <code class="contract-placeholder">Row.fact</code>. The channel changes or is disabled exactly as declared. If disabled, another row keeps the fact readable or this row admits unreadability, and that result obeys the selected colour and audio policies. This row declares: <code class="contract-placeholder">Row.presentation settings</code></p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the channel at <code class="contract-placeholder">Row.fact</code>; this row declares: <code class="contract-placeholder">Row.presentation settings</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>every named setting is observed at both ends of its supported range in every applicable play situation named at <code class="contract-placeholder">Row.fact</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the channel changes or is disabled exactly as declared</li><li>if the channel is disabled, another declared row keeps the fact readable or this row states that the fact becomes unreadable, and that result obeys the selected colour and audio policies</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-presentation-setting-result</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;channel&quot;:[&quot;audio-cue&quot;,&quot;spatial-audio&quot;,&quot;narration&quot;,&quot;audio-description&quot;]}}" data-dependencies="[]">
+  <summary>the audio-off result for <code class="contract-placeholder">Row.id</code> matches play</summary>
+  <p class="contract-exact-name"><code>audio-off-result-holds</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row channel is Audio cue or Spatial audio or Narration or Audio description.</p>
+  <p class="contract-test-text">Audit class: observer-judged. With audio off in every situation named at <code class="contract-placeholder">Row.fact</code>, the row promises: <code class="contract-placeholder">Row.without audio</code> If that declaration says the fact becomes unreadable, the selected audio policy must allow it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the audio channel at <code class="contract-placeholder">Row.fact</code> and this row&#39;s audio-off declaration: <code class="contract-placeholder">Row.without audio</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>audio is turned off in every play situation named at <code class="contract-placeholder">Row.fact</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the player receives the declared non-audio route or the fact becomes unreadable exactly as declared</li><li>an unreadable result occurs only when the selected audio policy allows it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-audio-off-result</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>the fact defined at <code class="contract-placeholder">Row.fact</code> is readable through <code class="contract-placeholder">Bind channel route</code> alone</summary>
+  <p class="contract-exact-name"><code>fact-readable-by-channel</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Audit class: observer-judged. The check repeats in every play situation named at <code class="contract-placeholder">Row.fact</code>. Every other route to the fact is removed or made identical across the states being distinguished — declared or not — so <code class="contract-placeholder">Bind channel route</code> is the only thing that changes with the fact; developer instrumentation that is not a player-facing surface (an audit pane, a debug overlay, or a save file) is not a route. Within each named play situation, an observer meets each state the cited prose names at least once, in an order they do not know, and correctly names the state every time from <code class="contract-placeholder">Bind channel route</code> alone.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the fact defined at <code class="contract-placeholder">Row.fact</code>, checked separately in every play situation named there, with every other route to the fact removed or made identical across the states being distinguished — declared or not — so <code class="contract-placeholder">Bind channel route</code> is the only thing that changes with the fact; developer instrumentation that is not a player-facing surface (an audit pane, a debug overlay, or a save file) is not a route</p></dd></div>
+<div><dt>When</dt><dd><ul><li>within each named play situation, an observer using <code class="contract-placeholder">Bind channel route</code> meets each state the cited prose names at least once, in an order the observer does not know, with no prior knowledge of which state is present</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>in each named play situation, the observer correctly names the state every time from <code class="contract-placeholder">Bind channel route</code> alone</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li></ul></dd></div></dl>
+</details></div>
+</section>
+  </details>
+</section>
+<p class="contract-related"><strong>Related groups:</strong> <a href="/contracts/catalogue/#controls-camera">Controls &amp; camera</a></p>
+<p><a href="#use-this">Use this contract in your game ↑</a></p>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

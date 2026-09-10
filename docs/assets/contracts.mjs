@@ -30,8 +30,52 @@ function setupSearch() {
   input.addEventListener("input", update);
 }
 
-function flagCondition(when, selections) {
-  const flags = when?.flag ?? {};
+// Evaluates a condition to "active", "inactive", or "unresolved". Answer
+// (flag) conditions read the explored selections; the widened forms
+// (value-form, row-count, row-has) read the adoption facts a filled-form
+// page embeds, and stay "unresolved" on a bare entry page without them.
+function flagCondition(when, selections, facts) {
+  if (!when || typeof when !== "object") return "active";
+  if (Array.isArray(when.any)) {
+    const states = when.any.map((branch) => flagCondition(branch, selections, facts));
+    if (states.includes("active")) return "active";
+    return states.every((state) => state === "inactive") ? "inactive" : "unresolved";
+  }
+  if (Array.isArray(when.all)) {
+    const states = when.all.map((branch) => flagCondition(branch, selections, facts));
+    if (states.includes("inactive")) return "inactive";
+    return states.every((state) => state === "active") ? "active" : "unresolved";
+  }
+  if (when["value-form"]) {
+    if (!facts) return "unresolved";
+    for (const [name, forms] of Object.entries(when["value-form"])) {
+      const form = facts.valueForms?.[name];
+      if (!form || !forms.includes(form)) return "inactive";
+    }
+    return "active";
+  }
+  if (when["row-count"]) {
+    if (!facts) return "unresolved";
+    for (const [name, cardinality] of Object.entries(when["row-count"])) {
+      const count = facts.rowCounts?.[name] ?? 0;
+      const holds = cardinality === "empty" ? count === 0
+        : cardinality === "non-empty" ? count > 0
+        : count >= 2;
+      if (!holds) return "inactive";
+    }
+    return "active";
+  }
+  if (when["row-has"]) {
+    if (!facts) return "unresolved";
+    for (const [rowSet, fields] of Object.entries(when["row-has"])) {
+      const rows = Array.isArray(facts.rows?.[rowSet]) ? facts.rows[rowSet] : [];
+      const found = rows.some((row) => Object.entries(fields ?? {})
+        .every(([field, allowed]) => allowed.includes(row?.[field])));
+      if (!found) return "inactive";
+    }
+    return "active";
+  }
+  const flags = when.flag ?? {};
   let unresolved = false;
   for (const [flag, allowed] of Object.entries(flags)) {
     if (!selections.has(flag)) unresolved = true;
@@ -42,6 +86,7 @@ function flagCondition(when, selections) {
 
 function setupExploration(root) {
   const selections = new Map();
+  const facts = parseData(root.dataset.contractFacts ?? "", null);
   const questions = [...root.querySelectorAll("[data-contract-question]")];
   const dependents = [...root.querySelectorAll("[data-contract-dependent]")];
   const tests = [...root.querySelectorAll("[data-contract-test]")];
@@ -50,27 +95,27 @@ function setupExploration(root) {
 
   const update = () => {
     for (const question of questions) {
-      const state = flagCondition(parseData(question.dataset.when, null), selections);
+      const state = flagCondition(parseData(question.dataset.when, null), selections, facts);
       question.classList.toggle("is-not-applicable", state === "inactive");
       question.classList.toggle("is-unresolved", state === "unresolved");
     }
     for (const item of dependents) {
-      const state = flagCondition(parseData(item.dataset.when, null), selections);
+      const state = flagCondition(parseData(item.dataset.when, null), selections, facts);
       item.classList.toggle("is-not-applicable", state === "inactive");
       item.classList.toggle("is-unresolved", state === "unresolved");
     }
     for (const test of tests) {
-      const state = flagCondition(parseData(test.dataset.when, null), selections);
+      const state = flagCondition(parseData(test.dataset.when, null), selections, facts);
       const dependencies = parseData(test.dataset.dependencies, []);
       const affected = dependencies.some((flag) => selections.has(flag));
       test.classList.toggle("is-not-applicable", state === "inactive");
       test.classList.toggle("is-unresolved", state === "unresolved");
       test.classList.toggle("is-affected", affected);
       const status = test.querySelector("[data-test-status]");
-      if (state === "inactive") status.textContent = "Does not apply to the choices currently being explored.";
-      else if (state === "active" && Object.keys(parseData(test.dataset.when, {})?.flag ?? {}).length) status.textContent = "Applies to the choices currently being explored.";
+      if (state === "inactive") status.textContent = "Does not apply to these answers.";
+      else if (state === "active" && Object.keys(parseData(test.dataset.when, {})?.flag ?? {}).length) status.textContent = "Applies to these answers.";
       else if (state === "unresolved") status.textContent = status.dataset.defaultText;
-      else status.textContent = affected ? "Always applies; the explored choice affects this test." : status.dataset.defaultText;
+      else status.textContent = affected ? "Always applies. Your answer changes what it checks." : status.dataset.defaultText;
     }
   };
 
@@ -119,11 +164,11 @@ function setupCopy(root) {
     const status = button.closest(".contract-actions")?.querySelector("[data-copy-status]");
     try {
       const response = await fetch(button.dataset.coreUrl);
-      if (!response.ok) throw new Error("Definition could not be loaded.");
+      if (!response.ok) throw new Error("The file could not be loaded.");
       await navigator.clipboard.writeText(await response.text());
-      if (status) status.textContent = "Definition copied.";
+      if (status) status.textContent = `${button.dataset.copyKind === "adoption" ? "Adoption" : "Contract"} copied.`;
     } catch {
-      if (status) status.textContent = "Copy failed — use Download.";
+      if (status) status.textContent = "Copy failed. Use the download link instead.";
     }
   });
 }
@@ -139,11 +184,41 @@ function setupNav() {
   wide.addEventListener("change", sync);
 }
 
+// A sidebar link to a folded section, or a URL that arrives with its hash,
+// opens the fold and any fold around the target before the jump.
+function setupAnchors() {
+  const reveal = (hash) => {
+    if (!hash || hash.length < 2) return;
+    let target;
+    try { target = document.getElementById(decodeURIComponent(hash.slice(1))); } catch { return; }
+    if (!target) return;
+    for (let node = target; node; node = node.parentElement) {
+      if (node.tagName === "DETAILS") node.open = true;
+    }
+  };
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest('a[href^="#"]');
+    if (link) reveal(link.getAttribute("href"));
+  });
+  addEventListener("hashchange", () => reveal(location.hash));
+  reveal(location.hash);
+}
+
+function setupBuilderWording(root) {
+  const toggle = root.querySelector("[data-builder-wording]");
+  if (!toggle) return;
+  const sync = () => root.classList.toggle("is-showing-builder-wording", toggle.checked);
+  toggle.addEventListener("change", sync);
+  sync();
+}
+
 setupSearch();
 setupNav();
+setupAnchors();
 const contractRoot = document.querySelector("[data-contract-root]");
 if (contractRoot) {
   setupExploration(contractRoot);
   setupPreset(contractRoot);
   setupCopy(contractRoot);
+  setupBuilderWording(contractRoot);
 }

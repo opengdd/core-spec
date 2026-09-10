@@ -1,0 +1,1882 @@
+{
+  "contract": "job-resolution",
+  "version": 1,
+  "templates": [
+    {
+      "id": "reports-identify-the-run",
+      "title": "reports identify their job run and state change",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the set of {{instance}} job runs needed to reach every transition and stateless report the adoption can construct",
+        "when": [
+          "the report log is read in settlement order"
+        ],
+        "then": [
+          "the request reads the rule cited at job-declared-in once, assigns exactly one pool and one cited place where those declarations exist, then reports job-requested",
+          "every report in each run carries that run's id and the same job id, plus cause, work before and after, units newly claimed, released, spent, or lost, and the destination when one is chosen",
+          "every report except job-requested carries old and new state; job-requested carries a new state only and sits outside any ordered instant batch",
+          "job-rejected ends the run without becoming a lifecycle state, and destination-refused has old and new state both finished"
+        ],
+        "diagnostics": [
+          "{{instance}}-job-rule-read-log",
+          "{{instance}}-report-log",
+          "{{instance}}-state-trace",
+          "{{instance}}-work-before-after",
+          "{{instance}}-claim-ledger"
+        ]
+      },
+      "text": "A request reads the rule cited at job-declared-in once, makes any pool and place assignment, and reports job-requested. Across the runs needed to reach every constructible report, every report in each run keeps that run's id and the same job id and records the cause, work, claim changes, and chosen destination. Every report except job-requested carries old and new state; job-requested carries a new state only. job-rejected is not a state; destination-refused is a finished-to-finished report."
+    },
+    {
+      "id": "claims-keep-their-source",
+      "title": "claims preserve ownership and settle once",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each claim, release, spend, and loss that a run of {{instance}} can construct; a no-input adoption has an empty claim ledger here",
+        "when": [
+          "another rule tries to use a claimed unit and the run later settles that unit"
+        ],
+        "then": [
+          "the claimed unit is unavailable to every other rule while its source remains recorded",
+          "release returns each surviving unit to that source",
+          "spending or losing removes the unit, and no removed unit is later released"
+        ],
+        "diagnostics": [
+          "{{instance}}-claim-ledger",
+          "{{instance}}-source-record",
+          "{{instance}}-usable-inputs"
+        ]
+      },
+      "text": "A claim makes its units unavailable everywhere else but keeps their source known. Release returns surviving units there. Spending and loss remove units, so neither kind can later be released. A no-input adoption has no claim event to assert."
+    },
+    {
+      "id": "exact-inputs-required",
+      "title": "a request with a missing tested share is rejected cleanly",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "job-inputs": [
+            "required-inputs"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a request for {{instance}} with less than the tested input share available — the full requirement for a whole-claim timing; for progress claiming both gates test at least the initial rounded share and never the full requirement by default, while a stricter offer check named by the rule cited at job-declared-in may test more, and the test reads that rule to decide",
+        "when": [
+          "the availability check runs without reserving inputs"
+        ],
+        "then": [
+          "job-rejected reports cause missing-inputs and ends the run",
+          "no input is claimed, no work is recorded, and no output is created"
+        ],
+        "diagnostics": [
+          "{{instance}}-report-log",
+          "{{instance}}-claim-ledger",
+          "{{instance}}-work-before-after",
+          "{{instance}}-output-identity"
+        ]
+      },
+      "text": "A request cannot pass with less than its tested share. Whole-claim timings test the full requirement. For progress claiming, both gates test at least the initial rounded share and never the full requirement by default; a stricter offer check named by the rule cited at job-declared-in may test more, and the test reads that rule to decide. Rejection claims nothing, records no work, and creates no output."
+    },
+    {
+      "id": "no-input-check-is-empty",
+      "title": "a no-input job skips the input check",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "job-inputs": [
+            "no-inputs"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an otherwise eligible {{instance}} request",
+        "when": [
+          "the request reaches its availability check"
+        ],
+        "then": [
+          "the input check is skipped and the claim, release, spend, and loss fields remain empty",
+          "non-input admission gates still decide whether the request is admitted"
+        ],
+        "diagnostics": [
+          "{{instance}}-admission-trace",
+          "{{instance}}-claim-ledger"
+        ]
+      },
+      "text": "This job needs no input, so its input check and every input settlement are empty. Pool, place, capacity, and other admission gates still apply."
+    },
+    {
+      "id": "request-time-claim-is-atomic",
+      "title": "request-time inputs are claimed at admission",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "input-claim-timing": [
+            "taken-at-request"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each admission shape {{instance}} can construct, the waiting shape asserted only where one exists",
+        "when": [
+          "each constructible admission runs"
+        ],
+        "then": [
+          "the full requirement is claimed atomically in the admission batch",
+          "the claim precedes job-started in the report order, and where the job waits, precedes job-waiting",
+          "no partial claim is observable"
+        ],
+        "diagnostics": [
+          "{{instance}}-admission-trace",
+          "{{instance}}-claim-ledger",
+          "{{instance}}-report-order"
+        ]
+      },
+      "text": "In each constructible admission shape, the whole requirement is claimed in one batch before job-started and, where the job waits, before job-waiting. An adoption with no waiting shape asserts only the immediate-start case."
+    },
+    {
+      "id": "waiting-admission-uses-pool-capacity",
+      "title": "{{row.id}} accounts for waiting admission",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "work-limits",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "requests assigned to pool {{row.id}}, including one that can start immediately and one that would wait; where this pool declares a waiting limit, also fill that limit",
+        "when": [
+          "each request reaches admission under the coverage rule cited at {{row.covers-declared-in}}"
+        ],
+        "then": [
+          "an admitted waiting request consumes one waiting count, while an immediate start consumes none",
+          "where the pool declares a waiting limit, a request that would exceed it reports job-rejected with cause job-limit-full",
+          "where the row declares no waiting limit, no request is ever rejected with job-limit-full by this pool's waiting count"
+        ],
+        "diagnostics": [
+          "{{instance}}-count-trace",
+          "{{instance}}-report-log",
+          "{{instance}}-pool-assignment"
+        ]
+      },
+      "text": "Pool {{row.id}} is selected under {{row.covers-declared-in}}. Waiting admission consumes its waiting capacity; an immediate start does not. Where the row declares a waiting limit, reaching it makes the next would-wait request reject with job-limit-full. With no waiting limit, this pool's waiting count never causes job-limit-full. This test names the address and restates nothing from it."
+    },
+    {
+      "id": "readmission-event-pairs-with-reservation",
+      "title": "{{row.id}} is legal exactly for pre-start reservation",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "readmission-events",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "readmission-events row {{row.id}} in the adoption",
+        "when": [
+          "the output-full answer is checked"
+        ],
+        "then": [
+          "the row is legal only under wait-before-start; its presence under any other answer fails this test by construction",
+          "the lifecycle consults the rule cited at {{row.readmission-declared-in}} under that answer"
+        ],
+        "diagnostics": [
+          "{{instance}}-admission-trace",
+          "{{instance}}-event-log"
+        ]
+      },
+      "text": "Row {{row.id}} is legal exactly when output-full is wait-before-start. Under that answer, the lifecycle consults the rule cited at {{row.readmission-declared-in}}. A row under another answer is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "reservation-needs-a-readmission-event",
+      "title": "pre-start reservation declares a readmission event",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "output-full": [
+            "wait-before-start"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an adoption answering wait-before-start",
+        "when": [
+          "its readmission-events rows are inspected"
+        ],
+        "then": [
+          "the adoption declares at least one readmission-events row, and an adoption with none fails this test by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "An adoption answering wait-before-start declares at least one readmission-events row. An adoption with none fails this test by construction."
+    },
+    {
+      "id": "waiting-records-every-current-reason",
+      "title": "waiting records reasons but no work",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each admitted {{instance}} request that the adoption can construct with one or more reasons it cannot start; an adoption that constructs none asserts nothing here",
+        "when": [
+          "the admitted request enters waiting"
+        ],
+        "then": [
+          "job-waiting reports every current reason",
+          "no work is recorded and no input is claimed in waiting except an already-required request-time claim"
+        ],
+        "diagnostics": [
+          "{{instance}}-report-log",
+          "{{instance}}-state-trace",
+          "{{instance}}-claim-ledger"
+        ]
+      },
+      "text": "Each waiting shape this adoption can construct reports every current reason and records no work. Only the taken-at-request answer can already hold an input claim there; an adoption with no waiting shape has no assertion in this test."
+    },
+    {
+      "id": "start-time-claim-is-atomic",
+      "title": "start-time inputs are claimed before start",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "input-claim-timing": [
+            "taken-at-start"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an admitted {{instance}} job at its start gate",
+        "when": [
+          "the full requirement is available, then in a second run is unavailable"
+        ],
+        "then": [
+          "the available run claims the full requirement atomically before job-started",
+          "the unavailable run enters waiting with cause inputs-unavailable, or rejects with job-limit-full where its full waiting limit prevents admission, releasing any output reservation on rejection"
+        ],
+        "diagnostics": [
+          "{{instance}}-claim-ledger",
+          "{{instance}}-report-log",
+          "{{instance}}-reservation-ledger"
+        ]
+      },
+      "text": "The full requirement is claimed atomically at the start gate. If it cannot be claimed, the job waits with inputs-unavailable; if a declared waiting limit is full, it rejects with job-limit-full and releases any output reservation."
+    },
+    {
+      "id": "finish-time-inputs-stay-at-source",
+      "title": "finish-time inputs remain usable before the finish gate",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "input-claim-timing": [
+            "taken-at-finish"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an admitted {{instance}} job before its finish gate",
+        "when": [
+          "the job waits, starts, and records every pre-finish work point it can construct"
+        ],
+        "then": [
+          "the full required inputs remain at their source and no pre-finish claim exists"
+        ],
+        "diagnostics": [
+          "{{instance}}-claim-ledger",
+          "{{instance}}-usable-inputs"
+        ]
+      },
+      "text": "Before the finish gate, all required inputs remain at their source and available to other rules."
+    },
+    {
+      "id": "progress-claim-starts-with-rounded-share",
+      "title": "progress claiming begins with the initial share",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "input-claim-timing": [
+            "with-progress"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a request and start for {{instance}} whose initial rounded share can be observed",
+        "when": [
+          "the request check and then the start gate run"
+        ],
+        "then": [
+          "both gates test at least the initial rounded share and never the full requirement by default; a stricter offer check named by the rule cited at job-declared-in may test more, and the test reads that rule to decide",
+          "start claims that share before job-started, and an unavailable share follows the start-time waiting or rejection rule"
+        ],
+        "diagnostics": [
+          "{{instance}}-claim-ledger",
+          "{{instance}}-report-log"
+        ]
+      },
+      "text": "The request and start gates test at least the initial rounded share and never the full requirement by default. A stricter offer check named by the rule cited at job-declared-in may test more, and the test reads that rule to decide. Start claims the required share before reporting job-started."
+    },
+    {
+      "id": "start-counts-settle-before-report",
+      "title": "start exchanges waiting room for working room",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each admitted {{instance}} job that can start, with and without a pool where those shapes exist",
+        "when": [
+          "the job crosses the start boundary"
+        ],
+        "then": [
+          "any waiting count is left and any selected working count is acquired before job-started",
+          "an output reservation, where the selected answer created one, remains held through delivery",
+          "no job is ever observed resting in started; it is a transition boundary"
+        ],
+        "diagnostics": [
+          "{{instance}}-count-trace",
+          "{{instance}}-reservation-ledger",
+          "{{instance}}-report-log"
+        ]
+      },
+      "text": "At job-started, the job has left any waiting count and acquired any selected working count. No job rests in started; it is a transition boundary. A pre-start output reservation remains held. Shapes this adoption cannot construct add no assertion."
+    },
+    {
+      "id": "work-phase-enters-working",
+      "title": "{{row.id}} enters working and reaches the finish gate",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "work-phases",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a started {{instance}} job using work phase {{row.id}}",
+        "when": [
+          "the job enters working and completes as {{row.duration-declared-in}} says"
+        ],
+        "then": [
+          "job-working reports entry to working",
+          "exposed work points use full precision and any display meter remains outside this contract",
+          "reaching required work moves to the finish gate without yet spending inputs or creating output"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-trace",
+          "{{instance}}-work-before-after",
+          "{{instance}}-claim-ledger",
+          "{{instance}}-output-identity"
+        ]
+      },
+      "text": "Work phase {{row.id}} enters working, reports job-working, and completes as {{row.duration-declared-in}} says. Work is recorded at full precision. Reaching the required amount reaches the finish gate but does not spend inputs or create output. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "instant-start-settles-finish-in-one-batch",
+      "title": "a job without work settles start and finish together",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the absence case: if {{instance}} has no work-phases row, a request that passes its gates; if it has a work phase, this template asserts nothing",
+        "when": [
+          "the job starts"
+        ],
+        "then": [
+          "start and finish settle in one ordered batch",
+          "the ordered batch ends early only when hold-undelivered, an all-refused try-destinations route, or on-collection parks the job in visible finished, or a finish-gate cause stops it at the gate: an unavailable finish-time claim or a wait-until-space capacity wait"
+        ],
+        "diagnostics": [
+          "{{instance}}-report-log",
+          "{{instance}}-state-trace"
+        ]
+      },
+      "text": "With no work phase, start and finish settle in one batch unless hold-undelivered, an all-refused try-destinations route, or on-collection parks the job in visible finished, or a finish-gate cause stops it at the gate: an unavailable finish-time claim or a wait-until-space capacity wait. An adoption with a work phase has no assertion here."
+    },
+    {
+      "id": "no-stop-before-the-finish-gate",
+      "title": "a job without work does not stop before finish",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the absence case where {{instance}} has no work-phases row; an adoption with a work phase asserts nothing here",
+        "when": [
+          "an admitted job advances to its finish gate"
+        ],
+        "then": [
+          "no partial work is recorded",
+          "the job never enters stopped for an interruption of work before its finish gate; a recoverable failure while waiting lands in stopped under step 16 with the start gate as its resume point"
+        ],
+        "diagnostics": [
+          "{{instance}}-work-before-after",
+          "{{instance}}-state-trace"
+        ]
+      },
+      "text": "An adoption with no work-phases row records no partial work and never enters stopped for an interruption of work before its finish gate. A recoverable failure while waiting is a failure, not an interruption: it lands in stopped under step 16 with the start gate as its resume point. An adoption with a work phase asserts nothing here."
+    },
+    {
+      "id": "progress-rounding-rule-pairs-with-progress",
+      "title": "{{row.id}} is legal exactly for progress claiming",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "progress-rounding-rules",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "progress-rounding-rules row {{row.id}} in the adoption",
+        "when": [
+          "the input-claim-timing answer is checked"
+        ],
+        "then": [
+          "the row is legal only under with-progress; its presence under any other answer fails this test by construction",
+          "the lifecycle consults the rule cited at {{row.progress-rounding-declared-in}} under that answer"
+        ],
+        "diagnostics": [
+          "{{instance}}-claim-ledger",
+          "{{instance}}-work-before-after"
+        ]
+      },
+      "text": "Row {{row.id}} is legal exactly when input-claim-timing is with-progress. Under that answer, the lifecycle consults the rule cited at {{row.progress-rounding-declared-in}}. A row under another answer is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "progress-needs-a-rounding-rule",
+      "title": "progress claiming declares a rounding rule",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "input-claim-timing": [
+            "with-progress"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an adoption answering with-progress",
+        "when": [
+          "its progress-rounding-rules rows are inspected"
+        ],
+        "then": [
+          "the adoption declares at least one progress-rounding-rules row, and an adoption with none fails this test by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "An adoption answering with-progress declares at least one progress-rounding-rules row. An adoption with none fails this test by construction."
+    },
+    {
+      "id": "declared-interruption-stops-once",
+      "title": "{{row.id}} records an ordinary stop once",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "interruptions",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a working {{instance}} job and the instruction allowed by {{row.interruptions-declared-in}}; an interruptions row in an adoption with no work-phases row is a defect this test fails by construction",
+        "when": [
+          "{{row.id}} adds the first ordinary cause and a second cause later joins while the job is stopped"
+        ],
+        "then": [
+          "the first cause moves working to stopped, records every active cause and its resume point, applies partial-work and the claim policy once, releases any waiting count the adoption's pool gives it, then reports job-stopped",
+          "the later cause reports stopped to stopped and does not apply the work answer again"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-trace",
+          "{{instance}}-stop-causes",
+          "{{instance}}-work-before-after",
+          "{{instance}}-report-log"
+        ]
+      },
+      "text": "Instruction {{row.id}} is allowed by {{row.interruptions-declared-in}}. A row without a work phase is a defect this test fails by construction. Entry to stopped records every active cause and its resume point, releases any waiting count the adoption's pool gives it (an adoption with no work-limits row has none), and applies the work and claim answers once before job-stopped; a later cause reports stopped to stopped without applying the work answer again. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "unnamed-instructions-cannot-stop",
+      "title": "only named instructions can stop work",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each instruction this adoption can construct that is absent from all interruptions rows; an adoption with no working state, or no unnamed instruction, asserts nothing here",
+        "when": [
+          "the instruction is offered to a {{instance}} job in working, where that state exists"
+        ],
+        "then": [
+          "the instruction does not add a stop cause and does not report job-stopped"
+        ],
+        "diagnostics": [
+          "{{instance}}-stop-causes",
+          "{{instance}}-report-log"
+        ]
+      },
+      "text": "An instruction absent from every interruptions row is not an allowed stop. With an empty list, stops arise only from lifecycle inability. An adoption with no working state, or no unnamed instruction, asserts nothing here."
+    },
+    {
+      "id": "kept-work-stays-with-the-job",
+      "title": "an ordinary stop preserves recorded work",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "partial-work": [
+            "keep-with-job"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each {{instance}} job with recorded work that the adoption can drive to a first ordinary stop; an adoption that can construct no ordinary stop asserts nothing here, and a finish-gate stop never applies this answer",
+        "when": [
+          "the stop settles and that same job later resumes"
+        ],
+        "then": [
+          "the same job retains the same recorded amount through the stop and resumes from it",
+          "no other job receives that work"
+        ],
+        "diagnostics": [
+          "{{instance}}-work-before-after",
+          "{{instance}}-run-id-trace"
+        ]
+      },
+      "text": "The same job keeps all recorded work through an ordinary stop and resumes from that amount; the work is never transferred to another job. An adoption that can construct no ordinary stop asserts nothing here, and a finish-gate stop never applies this answer."
+    },
+    {
+      "id": "reversal-rule-pairs-with-reversing-work",
+      "title": "{{row.id}} is legal exactly for reversing stopped work",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "reversal-rules",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "reversal-rules row {{row.id}} in the adoption",
+        "when": [
+          "the partial-work answer is checked"
+        ],
+        "then": [
+          "the row is legal only under reverse-while-stopped; its presence under any other answer fails this test by construction",
+          "the lifecycle consults the rule cited at {{row.reversal-declared-in}} under that answer",
+          "under that answer recorded work decreases while the job is stopped as the cited rule says and never passes below no work"
+        ],
+        "diagnostics": [
+          "{{instance}}-reversal-log"
+        ]
+      },
+      "text": "Row {{row.id}} is legal exactly when partial-work is reverse-while-stopped. Under that answer, the lifecycle consults the rule cited at {{row.reversal-declared-in}}: recorded work decreases while the job is stopped as that rule says and never passes below no work. A row under another answer is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "reversing-work-needs-a-reversal-rule",
+      "title": "reversing stopped work declares a reversal rule",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "partial-work": [
+            "reverse-while-stopped"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an adoption answering reverse-while-stopped",
+        "when": [
+          "its reversal-rules rows are inspected"
+        ],
+        "then": [
+          "the adoption declares at least one reversal-rules row, and an adoption with none fails this test by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "An adoption answering reverse-while-stopped declares at least one reversal-rules row. An adoption with none fails this test by construction."
+    },
+    {
+      "id": "reset-work-clears-on-ordinary-stop",
+      "title": "an ordinary stop resets recorded work",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "partial-work": [
+            "reset-at-stop"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each {{instance}} job with recorded work that can reach a first ordinary stop, and each separate cancellable run the adoption can construct",
+        "when": [
+          "each available ordinary stop settles and, separately where cancellation is constructible, cancellation occurs"
+        ],
+        "then": [
+          "the ordinary stop records no work",
+          "where cancellation is constructible, its claim snapshot is taken before terminal work becomes none, and no terminal work remains after cancellation"
+        ],
+        "diagnostics": [
+          "{{instance}}-work-before-after",
+          "{{instance}}-claim-snapshot",
+          "{{instance}}-state-trace"
+        ]
+      },
+      "text": "Each first ordinary stop this adoption can construct resets recorded work to none. Where cancellation exists, it first snapshots the claim and leaves no terminal work. A recoverable failure is not an ordinary stop and does not reset work here; step 16 alone settles its loss."
+    },
+    {
+      "id": "stopped-job-holds-claim",
+      "title": "a stopped job keeps its current claim",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "stopped-claims": [
+            "hold"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each {{instance}} stop the adoption can construct with a current claim; an adoption with no such stop asserts nothing here",
+        "when": [
+          "any work decrease and progress-based claim adjustment settle and the stop remains active"
+        ],
+        "then": [
+          "where reverse-while-stopped applies, claim changes caused by the decrease settle through the stopped-claims step",
+          "a whole claim taken at request or at start follows this answer exactly as a progress claim does, after any progress claim is first reduced to the recorded work",
+          "the adjusted current claim stays assigned to the job and unavailable elsewhere until another lifecycle step settles it"
+        ],
+        "diagnostics": [
+          "{{instance}}-claim-ledger",
+          "{{instance}}-stop-causes"
+        ]
+      },
+      "text": "Where stopped work reverses, claim changes caused by the decrease settle through this stopped-claims step. A whole claim taken at request or start then follows hold exactly as a progress claim does, after any progress claim is first reduced to the recorded work. The adjusted claim remains assigned to the job."
+    },
+    {
+      "id": "stopped-job-releases-and-reclaims",
+      "title": "a stopped job releases and must reclaim inputs",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "stopped-claims": [
+            "release-and-reclaim"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each {{instance}} stop the adoption can construct with a current claim; an adoption with no such stop asserts nothing here",
+        "when": [
+          "any work decrease and progress-based claim adjustment settle, then all causes clear once with the required share available and once without it"
+        ],
+        "then": [
+          "where reverse-while-stopped applies, claim changes caused by the decrease settle through the stopped-claims step",
+          "a whole claim taken at request or at start follows this answer exactly as a progress claim does, after any progress claim is first reduced to the recorded work",
+          "the adjusted claim is released while stopped",
+          "the available run reclaims the required share before job-resumed, while the unavailable run remains stopped and leaves working room free"
+        ],
+        "diagnostics": [
+          "{{instance}}-claim-ledger",
+          "{{instance}}-state-trace",
+          "{{instance}}-count-trace"
+        ]
+      },
+      "text": "Where stopped work reverses, claim changes caused by the decrease settle through this stopped-claims step. A whole claim taken at request or start then follows release-and-reclaim exactly as a progress claim does, after any progress claim is first reduced to the recorded work. Resume must reclaim the required share; if it cannot, the same job stays stopped and leaves the room free."
+    },
+    {
+      "id": "resume-waits-for-every-cause",
+      "title": "the same job resumes only after every cause clears",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each stopped {{instance}} shape the adoption can construct, including overlapping causes where constructible",
+        "when": [
+          "causes clear one at a time and the last cause clears"
+        ],
+        "then": [
+          "no resume occurs while a cause remains",
+          "after the last cause clears, the same job rechecks gates and competes for room through its pool where the adoption declares one, and otherwise proceeds without a pool; it reports job-resumed only on success and creates no new request",
+          "if a gate or claim is unavailable, the job remains stopped and keeps the room free",
+          "an interrupted-work resume returns to its recorded work point, while a waiting-origin recoverable failure returns to the start gate"
+        ],
+        "diagnostics": [
+          "{{instance}}-stop-causes",
+          "{{instance}}-resume-point",
+          "{{instance}}-run-id-trace",
+          "{{instance}}-report-log"
+        ]
+      },
+      "text": "The same job resumes only after every active cause clears and every gate passes. It competes for room through its pool where the adoption declares one, and otherwise proceeds without a pool. If a gate or claim is unavailable, it remains stopped and keeps the room free; on success it reports job-resumed and returns to its recorded resume point without creating another request."
+    },
+    {
+      "id": "unasked-stopped-claim-answer-holds",
+      "title": "an unasked stopped-claim choice defaults to hold",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each {{instance}} request-time claim held while its job is stopped from waiting or by a finish-gate cause and stopped-claims was not asked; an adoption with an answer or no such claim asserts nothing here",
+        "when": [
+          "the stop settles"
+        ],
+        "then": [
+          "the current claim remains assigned to the stopped job after any progress-based adjustment"
+        ],
+        "diagnostics": [
+          "{{instance}}-claim-ledger",
+          "{{instance}}-stop-causes"
+        ]
+      },
+      "text": "Where stopped-claims was not asked, a request-time claim held by a job stopped from waiting or by a finish-gate cause remains assigned after any progress adjustment. An adoption with an explicit answer, or without that live shape, has no assertion here."
+    },
+    {
+      "id": "finish-gate-wait-retains-completed-work",
+      "title": "a full destination stops at the finish gate",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "output-full": [
+            "wait-until-space"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a job in {{instance}} with completed work, or an instant job at the finish gate of its one batch, and no room for the whole output",
+        "when": [
+          "the finish gate first blocks and later gains room"
+        ],
+        "then": [
+          "the job stops with slot-retaining cause output-full, preserves completed work, retains its working count while every active cause is slot-retaining, and does not apply partial-work",
+          "the first active non-retaining cause releases the working count, and no successful output is established while output-full remains",
+          "where a current claim exists, the explicit stopped-claims answer applies; if that question was not asked, the claim is held",
+          "when every cause clears it reports job-resumed and returns directly to the finish gate without repeating work"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-trace",
+          "{{instance}}-work-before-after",
+          "{{instance}}-count-trace",
+          "{{instance}}-report-log"
+        ]
+      },
+      "text": "A full destination adds the slot-retaining output-full cause at the finish gate, work phase or not. Completed work and working room remain; partial-work does not apply; resume returns directly to the finish gate. An instant job stops there too, and its one batch ends at that gate."
+    },
+    {
+      "id": "finish-claim-wait-is-slot-retaining",
+      "title": "an unavailable finish claim stops at the gate",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "input-claim-timing": [
+            "taken-at-finish"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a job in {{instance}} at the finish gate without its full required input; an adoption that always has its inputs at the gate constructs no wait and asserts nothing here",
+        "when": [
+          "the claim fails and later becomes available"
+        ],
+        "then": [
+          "the job stops with slot-retaining cause inputs-unavailable-at-finish, preserves completed work, retains any working count while every active cause is slot-retaining, and does not apply partial-work",
+          "the first active non-retaining cause releases the working count",
+          "any other current claim follows the explicit stopped-claims answer, or is held when that question was not asked",
+          "after every cause clears it claims the full requirement, reports job-resumed, and returns directly to the finish gate"
+        ],
+        "diagnostics": [
+          "{{instance}}-claim-ledger",
+          "{{instance}}-state-trace",
+          "{{instance}}-count-trace"
+        ]
+      },
+      "text": "A missing finish-time claim adds inputs-unavailable-at-finish. It retains the slot and completed work, never applies partial-work, and returns directly to the finish gate after the claim succeeds. An adoption that always has its inputs at the gate constructs no wait and asserts nothing here."
+    },
+    {
+      "id": "work-limit-offers-room-and-releases-counts",
+      "title": "{{row.id}} offers and releases room in lifecycle order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "work-limits",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "pool {{row.id}} at its working limit {{row.working-limit-key}}, with admitted jobs eligible to start or resume and active jobs driven through each success or terminal side path the adoption can construct",
+        "when": [
+          "room becomes free, a reason clears, a terminal state is entered, and a successful job reaches the transition this row selects"
+        ],
+        "then": [
+          "free room is offered first to admitted eligible jobs in the pool's waiting order, and a cleared reason re-offers room",
+          "where the adoption declares an interruption, a job stopped by instruction is ordered at its stop moment and never outranks the job that displaced it",
+          "entry to cancelled, terminal failed, or delivered releases every count immediately",
+          "on success, releases-working-at finished releases after finished and job-finished, releases-working-at delivered releases after delivered and job-delivered, and omission follows finished; room offers and standing-order scans then run"
+        ],
+        "diagnostics": [
+          "{{instance}}-count-trace",
+          "{{instance}}-pool-offer-log",
+          "{{instance}}-report-log",
+          "{{instance}}-standing-order-scan-log"
+        ]
+      },
+      "text": "Pool {{row.id}} uses working limit {{row.working-limit-key}}. It offers free room to admitted jobs before scanning standing orders. Terminal entry releases every count immediately. On success, finished or omission releases after job-finished; delivered releases after job-delivered. The cited coverage and limit rules are at {{row.covers-declared-in}} and {{row.working-limit-key}}; this test restates neither."
+    },
+    {
+      "id": "pool-releases-at-finished",
+      "title": "{{row.id}} releases working room after finish",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "work-limits",
+      "when": {
+        "row": {
+          "releases-working-at": [
+            "finished"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a successful {{instance}} job in pool {{row.id}} reaching finished",
+        "when": [
+          "job-finished is reported"
+        ],
+        "then": [
+          "the working count is released after job-finished",
+          "the room offer and standing-order scan run after that report"
+        ],
+        "diagnostics": [
+          "{{instance}}-count-trace",
+          "{{instance}}-pool-offer-log",
+          "{{instance}}-standing-order-scan-log",
+          "{{instance}}-report-log"
+        ]
+      },
+      "text": "Pool {{row.id}} declares release at finished. The working count is released after job-finished, and the room offer and standing-order scan run after that report."
+    },
+    {
+      "id": "pool-releases-at-delivered",
+      "title": "{{row.id}} releases working room after delivery",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "work-limits",
+      "when": {
+        "row": {
+          "releases-working-at": [
+            "delivered"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a successful {{instance}} job in pool {{row.id}} reaching delivered",
+        "when": [
+          "job-delivered is reported"
+        ],
+        "then": [
+          "the working count is released after job-delivered",
+          "the room offer and standing-order scan run after that report"
+        ],
+        "diagnostics": [
+          "{{instance}}-count-trace",
+          "{{instance}}-pool-offer-log",
+          "{{instance}}-standing-order-scan-log",
+          "{{instance}}-report-log"
+        ]
+      },
+      "text": "Pool {{row.id}} declares release at delivered. The working count is released after job-delivered, and the room offer and standing-order scan run after that report."
+    },
+    {
+      "id": "each-place-pool-assigns-one-place",
+      "title": "{{row.id}} keeps separate counts per place",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "work-limits",
+      "when": {
+        "row": {
+          "scope": [
+            "each-place"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two places from {{row.places-declared-in}} and requests covered by {{row.covers-declared-in}}",
+        "when": [
+          "{{row.place-assignment-declared-in}} assigns each request"
+        ],
+        "then": [
+          "every request belongs to exactly one cited place and consumes only that place's working and waiting counts",
+          "free room at one place does not change another place's counts"
+        ],
+        "diagnostics": [
+          "{{instance}}-pool-assignment",
+          "{{instance}}-count-trace"
+        ]
+      },
+      "text": "Pool {{row.id}} keeps separate counts for the places at {{row.places-declared-in}} and assigns each request through {{row.place-assignment-declared-in}}. Each request uses exactly one place. The test names the addresses and restates nothing from them."
+    },
+    {
+      "id": "shared-pool-uses-one-count",
+      "title": "{{row.id}} shares one count",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "work-limits",
+      "when": {
+        "row": {
+          "scope": [
+            "shared"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "requests covered by {{row.covers-declared-in}} from every place the adoption can construct",
+        "when": [
+          "the requests enter pool {{row.id}}"
+        ],
+        "then": [
+          "all requests consume the same shared working and waiting counts"
+        ],
+        "diagnostics": [
+          "{{instance}}-pool-assignment",
+          "{{instance}}-count-trace"
+        ]
+      },
+      "text": "Every request covered by {{row.covers-declared-in}} uses the one shared count in pool {{row.id}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "request-order-pool-offers-in-admission-order",
+      "title": "{{row.id}} offers room in request order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "work-limits",
+      "when": {
+        "row": {
+          "waiting-order": [
+            "request-order"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two eligible admitted jobs in pool {{row.id}} with a known admission order",
+        "when": [
+          "one working place becomes free"
+        ],
+        "then": [
+          "the earlier admitted eligible job receives the first offer",
+          "a request whose pool has free room still enters waiting when the pool's order places an earlier admitted job first"
+        ],
+        "diagnostics": [
+          "{{instance}}-pool-offer-log",
+          "{{instance}}-waiting-order-record"
+        ]
+      },
+      "text": "Pool {{row.id}} offers room to eligible jobs in request order. A request enters waiting even with free room when an earlier admitted job is first."
+    },
+    {
+      "id": "game-rule-pool-offers-in-cited-order",
+      "title": "{{row.id}} offers room in its cited order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "work-limits",
+      "when": {
+        "row": {
+          "waiting-order": [
+            "game-rule-order"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two eligible admitted jobs in pool {{row.id}} whose order can be distinguished by {{row.order-declared-in}}",
+        "when": [
+          "one working place becomes free"
+        ],
+        "then": [
+          "offers follow the order named by {{row.order-declared-in}}, subject to the stop-moment rule that a displaced job never outranks its displacer",
+          "a request whose pool has free room still enters waiting when the pool's order places an earlier admitted job first"
+        ],
+        "diagnostics": [
+          "{{instance}}-pool-offer-log",
+          "{{instance}}-waiting-order-record"
+        ]
+      },
+      "text": "Pool {{row.id}} follows the order named by {{row.order-declared-in}}, subject to the stop-moment rule that a displaced job never outranks its displacer. A request enters waiting even with free room when that order places an earlier admitted job first. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "no-pool-means-every-ready-job-starts",
+      "title": "without a pool every ready job starts",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the absence case where {{instance}} has no work-limits row; an adoption with pools asserts nothing here",
+        "when": [
+          "an otherwise-ready job reaches its start gate"
+        ],
+        "then": [
+          "every otherwise-ready job starts",
+          "no job reports job-waiting with a pool cause"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-trace",
+          "{{instance}}-report-log"
+        ]
+      },
+      "text": "An adoption with no work-limits row starts every otherwise-ready job and never reports job-waiting with a pool cause. An adoption with pools asserts nothing here."
+    },
+    {
+      "id": "standing-order-scans-are-level-triggered",
+      "title": "{{row.id}} is scanned in written order until room is filled",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "standing-orders",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "standing order {{row.id}} attached to pool {{row.work-limit}}, with its cited eligibility false and then true and enough room for more than one job",
+        "when": [
+          "the pool is created, finishes room offers, observes eligibility become true, and later receives a rejected request that this scan did not create"
+        ],
+        "then": [
+          "each scan considers rows in written order after room offers and consults {{row.eligible-declared-in}}",
+          "while this row remains eligible, one scan can create more than one request named by {{row.requests-job-declared-in}} until no row is eligible or no room remains",
+          "creation of the pool, fresh eligibility, and the stated rejection each cause a scan; the row remains for later scans"
+        ],
+        "diagnostics": [
+          "{{instance}}-standing-order-scan-log",
+          "{{instance}}-request-log",
+          "{{instance}}-count-trace"
+        ]
+      },
+      "text": "Standing order {{row.id}} belongs to {{row.work-limit}}. After room offers, scans consult {{row.eligible-declared-in}} in written order and can create repeated requests from {{row.requests-job-declared-in}} until eligibility or room ends. Scans also run at pool creation, when eligibility becomes true, and after the specified outside rejection. The test names the addresses and restates nothing from them."
+    },
+    {
+      "id": "read-first-note-precedes-verification",
+      "title": "{{row.id}} is read before the adoption is trusted",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "read-first",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "review of the {{instance}} adoption",
+        "when": [
+          "the reviewer begins lifecycle verification"
+        ],
+        "then": [
+          "the reviewer reads {{row.read-first}} before accepting results that depend on it"
+        ],
+        "diagnostics": [
+          "{{instance}}-review-record"
+        ]
+      },
+      "text": "Before trusting this adoption, the reviewer reads {{row.read-first}} for note {{row.id}}. This test names the address and restates nothing from it."
+    },
+    {
+      "id": "failure-row-fires-from-its-state",
+      "title": "{{row.id}} resolves only from {{row.from-state}}",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "failures",
+      "bindings": {
+        "shared-result": {
+          "flag": "failure-result",
+          "map": {
+            "partial-inputs-or-work": "the shared recoverable answer applies: every named input loss is a strict subset of the current claim, work never falls below none, the failure creates no successful output, any waiting count is released, and the same job stops with cause failure-recovery and one job-failed report after claim settlement; under reset-at-stop the work answer does not apply, because a recoverable failure is not an ordinary stop; the resume point is the start gate from waiting, the prior work point from working, or the already-recorded point from stopped; a recoverable result from finished is a defect this test fails by construction",
+            "job-ruined": "the shared ruined answer applies: cited claim changes settle first, then terminal entry releases every count, then job-failed; the job enters terminal failed, creates no new successful output, returns no claim by failure, and keeps remaining claims assigned unless the cited rule disposes of them; where the job row declares new-thing and failure starts from finished, the undelivered output is destroyed; where it declares in-place, the transformation is ruined but the target still exists; the damaged state is owned by the cited trigger rule and this test reads it only to confirm the job is terminal"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} job runs in {{row.from-state}} and in each other reachable state where the adoption can offer failure {{row.id}} through {{row.trigger-declared-in}}",
+        "when": [
+          "the trigger is offered in each state"
+        ],
+        "then": [
+          "the failure fires only from {{row.from-state}}, resolves atomically, and reports job-failed once",
+          "a row that declares its own result is governed by that result's own test below; this test asserts only the firing state and the report for such a row",
+          "for a row that omits result, {{bind:shared-result}}",
+          "where {{row.from-state}} is finished, the resolved result is job-ruined; a recoverable result from finished is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-failure-log",
+          "{{instance}}-state-trace",
+          "{{instance}}-claim-ledger",
+          "{{instance}}-resume-point",
+          "{{instance}}-output-identity"
+        ]
+      },
+      "text": "Failure {{row.id}} can fire only from {{row.from-state}} under {{row.trigger-declared-in}} and reports job-failed once. A row that declares its own result is governed by that result's own test below; this test asserts only the firing state and report for such a row. For a row that omits result, {{bind:shared-result}}. A failure from finished is always terminal; a row from finished that resolves to a recoverable result is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "failure-row-result-recoverable",
+      "title": "{{row.id}} applies its recoverable result",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "failures",
+      "when": {
+        "row": {
+          "result": [
+            "partial-inputs-or-work"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "failure {{row.id}} resolving from {{row.from-state}} under {{row.trigger-declared-in}} with its declared recoverable result",
+        "when": [
+          "the failure settles"
+        ],
+        "then": [
+          "every named input loss is a strict subset of the current claim, work never falls below none, and the failure creates no successful output; under reset-at-stop the work answer does not apply, because a recoverable failure is not an ordinary stop",
+          "any waiting count is released, and the same job stops with cause failure-recovery and one job-failed report after claim settlement",
+          "the resume point is the start gate from waiting, the prior work point from working, or the already-recorded point from stopped; a recoverable result from finished is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-failure-log",
+          "{{instance}}-state-trace",
+          "{{instance}}-claim-ledger",
+          "{{instance}}-resume-point",
+          "{{instance}}-output-identity"
+        ]
+      },
+      "text": "Failure {{row.id}} declares a recoverable result. It settles losses, creates no successful output, releases any waiting count, stops the same job with cause failure-recovery, and reports job-failed once. Under reset-at-stop the work answer does not apply: a recoverable failure is not an ordinary stop, and step 16 alone settles the loss. The resume point is the start gate from waiting, the prior work point from working, or the already-recorded point from stopped. A recoverable result from finished is a defect this test fails by construction."
+    },
+    {
+      "id": "failure-row-result-ruined",
+      "title": "{{row.id}} applies its ruined result",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "failures",
+      "when": {
+        "row": {
+          "result": [
+            "job-ruined"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "failure {{row.id}} resolving from {{row.from-state}} under {{row.trigger-declared-in}} with its declared ruined result",
+        "when": [
+          "the failure settles"
+        ],
+        "then": [
+          "cited claim changes settle first, then terminal entry releases every count, then job-failed",
+          "the job enters terminal failed, creates no new successful output, returns no claim by failure, and keeps remaining claims assigned unless the cited rule disposes of them",
+          "where the job row declares new-thing and failure starts from finished, the undelivered output is destroyed; where it declares in-place, the transformation is ruined but the target still exists",
+          "the damaged state is owned by the rule at {{row.trigger-declared-in}} and this test reads it only to confirm the job is terminal"
+        ],
+        "diagnostics": [
+          "{{instance}}-failure-log",
+          "{{instance}}-state-trace",
+          "{{instance}}-claim-ledger",
+          "{{instance}}-count-trace",
+          "{{instance}}-report-log",
+          "{{instance}}-output-identity"
+        ]
+      },
+      "text": "Failure {{row.id}} declares a ruined result. Cited claim changes settle first, terminal entry releases every count next, and job-failed follows. The job is terminal and creates no new successful output. The damaged state belongs to {{row.trigger-declared-in}}; this test reads that rule only to confirm the job is terminal."
+    },
+    {
+      "id": "progress-failure-adjusts-claim-after-loss",
+      "title": "{{row.id}} settles progress claims after failure loss",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "failures",
+      "when": {
+        "flag": {
+          "input-claim-timing": [
+            "with-progress"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each recoverable {{row.id}} outcome the cited rule can construct with an input loss or work reduction; ruined outcomes assert nothing here",
+        "when": [
+          "{{row.trigger-declared-in}} resolves the failure with the stopped claim held in one run and released in another"
+        ],
+        "then": [
+          "losses settle first",
+          "with a held claim, work is reduced to the highest point the surviving claim supports and excess claim is released",
+          "with a released claim, work is reduced only by the named loss"
+        ],
+        "diagnostics": [
+          "{{instance}}-claim-ledger",
+          "{{instance}}-work-before-after"
+        ]
+      },
+      "text": "For each recoverable {{row.id}} outcome that changes inputs or work, progress-based settlement applies losses first. A held claim caps work at the highest supported point and releases excess; a released claim reduces work only by the named loss. Ruined outcomes add no assertion. The cited rule is {{row.trigger-declared-in}}; this test restates nothing from it."
+    },
+    {
+      "id": "no-failure-without-a-failure-row",
+      "title": "accepted jobs do not fail without a declared failure",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the absence case where {{instance}} has no failures row; an adoption with a failure row asserts nothing here",
+        "when": [
+          "accepted and finished jobs are observed"
+        ],
+        "then": [
+          "no accepted or finished job reports job-failed"
+        ],
+        "diagnostics": [
+          "{{instance}}-report-log"
+        ]
+      },
+      "text": "An adoption with no failures row never reports job-failed from an accepted or finished job. An adoption with a failure row asserts nothing here."
+    },
+    {
+      "id": "declared-cancellation-settles-one-job",
+      "title": "{{row.id}} snapshots and cancels one job",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cancellations",
+      "bindings": {
+        "return-result": {
+          "flag": "cancel-return",
+          "map": {
+            "return-claimed": "releases every surviving claimed unit",
+            "return-nothing": "spends every surviving claimed unit and releases none",
+            "return-by-rule": "releases exactly the rule-named subset of the current claim and spends the rest"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} jobs in each of requested, waiting, working, and stopped that the adoption can construct, with cancellation {{row.id}} offered through {{row.trigger-declared-in}}",
+        "when": [
+          "each legal cancellation settles"
+        ],
+        "then": [
+          "the current claim is snapshotted before settlement, every count is released, the answer {{bind:return-result}}, and the job enters cancelled before job-cancelled",
+          "no answer returns more than the current claim, recreates a lost unit, or moves an unclaimed input",
+          "cancellation creates no output and never undoes a finished or delivered output",
+          "where this adoption declares no dependent-cancellations row, every later waiting job stays in place"
+        ],
+        "diagnostics": [
+          "{{instance}}-claim-snapshot",
+          "{{instance}}-claim-ledger",
+          "{{instance}}-count-trace",
+          "{{instance}}-report-log"
+        ]
+      },
+      "text": "Cancellation {{row.id}} is legal from requested, waiting, working, and stopped where those states exist. It snapshots claims, releases counts, {{bind:return-result}}, enters cancelled, and reports job-cancelled. It never recreates lost units or undoes finished output. Where this adoption declares no dependent-cancellations row, every later waiting job stays in place. The trigger is cited at {{row.trigger-declared-in}}; this test restates nothing from it."
+    },
+    {
+      "id": "cancel-return-rule-pairs-with-rule-sized-return",
+      "title": "{{row.id}} is legal exactly for rule-sized cancellation return",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "cancel-return-rules",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "cancel-return-rules row {{row.id}} in the adoption",
+        "when": [
+          "the cancel-return answer is checked"
+        ],
+        "then": [
+          "the row is legal only under return-by-rule; its presence under any other answer fails this test by construction",
+          "the lifecycle consults the rule cited at {{row.cancel-return-declared-in}} under that answer"
+        ],
+        "diagnostics": [
+          "{{instance}}-claim-snapshot",
+          "{{instance}}-claim-ledger"
+        ]
+      },
+      "text": "Row {{row.id}} is legal exactly when cancel-return is return-by-rule. Under that answer, the lifecycle consults the rule cited at {{row.cancel-return-declared-in}}. A row under another answer is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "rule-sized-return-needs-a-return-rule",
+      "title": "rule-sized cancellation return declares a return rule",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "cancel-return": [
+            "return-by-rule"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an adoption answering return-by-rule",
+        "when": [
+          "its cancel-return-rules rows are inspected"
+        ],
+        "then": [
+          "the adoption declares at least one cancel-return-rules row, and an adoption with none fails this test by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "An adoption answering return-by-rule declares at least one cancel-return-rules row. An adoption with none fails this test by construction."
+    },
+    {
+      "id": "no-cancellation-without-a-cancellation-row",
+      "title": "accepted jobs cannot be cancelled without a declared cancellation",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the absence case where {{instance}} has no cancellations row; an adoption with a cancellation row asserts nothing here",
+        "when": [
+          "accepted jobs are observed and the adoption prepares to rely on this promise"
+        ],
+        "then": [
+          "no accepted job reports job-cancelled"
+        ],
+        "diagnostics": [
+          "{{instance}}-report-log",
+          "{{instance}}-review-record"
+        ]
+      },
+      "text": "An adoption with no cancellations row never reports job-cancelled, and a reviewer confirms that promise before the adoption relies on it. An adoption with a cancellation row asserts nothing here."
+    },
+    {
+      "id": "dependent-cancellation-follows-answer",
+      "title": "{{row.id}} settles later dependent jobs",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "dependent-cancellations",
+      "bindings": {
+        "dependent-result": {
+          "flag": "cancel-dependents",
+          "map": {
+            "end-dependents": "finds every transitive later waiting job whose requirement can no longer be met and cancels them in waiting order after the first cancellation settles, each with its own claim settlement and job-cancelled report",
+            "leave-dependents": "keeps every later dependent job waiting; the wait ends only when the requirement is met again or the dependent job is cancelled"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "cancellation {{row.cancellation}} and later waiting jobs connected by the static dependency at {{row.link-declared-in}}",
+        "when": [
+          "the earlier job is cancelled before producing the required output"
+        ],
+        "then": [
+          "the adoption {{bind:dependent-result}}",
+          "completed intermediate jobs and delivered outputs remain"
+        ],
+        "diagnostics": [
+          "{{instance}}-dependency-trace",
+          "{{instance}}-waiting-order-record",
+          "{{instance}}-claim-ledger",
+          "{{instance}}-report-log"
+        ]
+      },
+      "text": "For dependency {{row.id}} after cancellation {{row.cancellation}}, the adoption {{bind:dependent-result}}. Completed intermediate jobs and delivered outputs remain. The link is cited at {{row.link-declared-in}}; this test restates nothing from it."
+    },
+    {
+      "id": "finish-spends-and-establishes-one-output",
+      "title": "the finish gate commits inputs and one output atomically",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a job in {{instance}} at the finish gate with every required claim and capacity gate satisfied",
+        "when": [
+          "the job finishes"
+        ],
+        "then": [
+          "required claims are spent and exactly one successful output is established atomically before job-finished",
+          "a compound output remains one delivery unit",
+          "where the job row declares in-place, the state change at the site is the in-place delivery; an in-place output has no destination capacity, so the adoption answers never-full and no capacity branch is taken; where it declares new-thing, the one output follows the selected delivery rules"
+        ],
+        "diagnostics": [
+          "{{instance}}-claim-ledger",
+          "{{instance}}-output-identity",
+          "{{instance}}-state-trace",
+          "{{instance}}-report-log"
+        ]
+      },
+      "text": "At the finish gate, required claims are spent and one successful output is established in the same commit before job-finished. A compound result is still one unit. For an in-place job, the state change at the site is the delivery; it has no destination capacity and answers never-full. A new thing follows the selected delivery path."
+    },
+    {
+      "id": "delivery-case-invokes-selected-answer",
+      "title": "{{row.id}} invokes the selected capacity response",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "delivery-cases",
+      "bindings": {
+        "capacity-response": {
+          "flag": "output-full",
+          "map": {
+            "never-full": "the normal destination accepts the whole output; refusal is an adoption defect and no fallback branch exists",
+            "wait-before-start": "admission remains pending until room for the whole output is reserved, and that reservation remains held through delivery",
+            "wait-until-space": "a job with a work phase stops at the finish gate with completed work retained until capacity clears",
+            "hold-undelivered": "the job finishes and owns one inaccessible output until a cited redelivery event retries the normal destination",
+            "try-destinations": "the route tries the normal destination and then fallback rows in written order, keeps the same output finished if all refuse, and retries only on a cited redelivery event"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "a whole {{instance}} output and delivery case {{row.id}}",
+        "when": [
+          "the condition at {{row.condition-declared-in}} holds"
+        ],
+        "then": [
+          "the lifecycle applies exactly the selected output-full answer to the whole output, without splitting it or inventing another capacity response: {{bind:capacity-response}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-delivery-attempts"
+        ]
+      },
+      "text": "When {{row.condition-declared-in}} establishes delivery case {{row.id}}, the lifecycle applies the selected output-full answer to the whole output: {{bind:capacity-response}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "normal-destination-never-blocks",
+      "title": "the normal destination accepts every whole output",
+      "type": "general",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "output-full": [
+            "never-full"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "scope": "{{inputs:scope}}",
+        "holds": "under the never-full answer, every successful whole output is accepted without a capacity-blocked state, fallback, or inaccessible held output; an in-place output is delivered by the state change at its site and no capacity branch exists for it; if the capacity promise fails, the adoption fails rather than taking another lifecycle branch",
+        "diagnostics": [
+          "{{instance}}-delivery-attempts"
+        ]
+      },
+      "text": "Across {{inputs:scope}}, under never-full, the normal destination accepts every whole output. An in-place output is delivered by the state change at its site, so no capacity branch exists for it. There is no capacity-blocked fallback; a refusal is a defect in the adoption.",
+      "inputs": {
+        "scope": {
+          "default": "successful jobs covering every output size and compound shape this adoption supports"
+        }
+      }
+    },
+    {
+      "id": "pre-start-reservation-blocks-admission",
+      "title": "a job waits before admission for reserved output room",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "output-full": [
+            "wait-before-start"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a request for {{instance}} whose whole output does not have reservable room; an adoption whose destination always has room constructs no block and asserts nothing here; an in-place job answers never-full, so this test never applies to it",
+        "when": [
+          "admission is attempted"
+        ],
+        "then": [
+          "the request remains requested, records no work, and makes no admission-time claim until a cited readmission event retries admission",
+          "when room exists, the whole output is reserved atomically and the reservation is held through delivery",
+          "an adoption declaring no such readmission event can never leave requested, which the paired existence test reports as a defect"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-trace",
+          "{{instance}}-reservation-ledger",
+          "{{instance}}-claim-ledger"
+        ]
+      },
+      "text": "Without room for the whole output, the request stays requested and waits for its cited readmission event. An adoption declaring no such event can never leave requested, which the paired existence test reports as a defect. Successful admission reserves the whole space atomically and holds it through delivery. An adoption whose destination always has room constructs no block and asserts nothing here; an in-place job answers never-full, so this test never applies to it."
+    },
+    {
+      "id": "held-output-retries-only-on-event",
+      "title": "a held output remains one inaccessible owned result",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "output-full": [
+            "hold-undelivered"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a finished {{instance}} job whose normal destination refuses the whole output; an in-place job answers never-full, so this test never applies to it",
+        "when": [
+          "time passes and, where the adoption declares one, a cited redelivery event later occurs"
+        ],
+        "then": [
+          "exactly one owned inaccessible output remains in finished with its inputs spent, and no polling or repeated work occurs",
+          "each cited event retries the normal destination and no duplicate output appears; the first refusal and every refusal on retry report destination-refused; an adoption with no redelivery event can never deliver, which the paired existence test reports as a defect",
+          "the retry that succeeds reports job-delivered exactly once"
+        ],
+        "diagnostics": [
+          "{{instance}}-output-location",
+          "{{instance}}-delivery-attempts",
+          "{{instance}}-claim-ledger"
+        ]
+      },
+      "text": "For a new-thing job, a refused normal destination leaves one owned inaccessible output in finished. Inputs stay spent; time alone does not retry; work is not repeated. The first refusal and every refusal on retry report destination-refused. Each cited redelivery event retries without creating a duplicate, and a successful retry reports job-delivered exactly once. An adoption with no such row can never deliver; the paired existence test reports that as a defect. An in-place job answers never-full, so this test never applies to it."
+    },
+    {
+      "id": "held-output-needs-a-redelivery-event",
+      "title": "a held output declares a redelivery event",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "output-full": [
+            "hold-undelivered"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an adoption answering hold-undelivered",
+        "when": [
+          "its redelivery-events rows are inspected"
+        ],
+        "then": [
+          "the adoption declares at least one redelivery-events row, and an adoption with none fails this test by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "An adoption answering hold-undelivered declares at least one redelivery-events row. An adoption with none fails this test by construction."
+    },
+    {
+      "id": "redelivery-event-pairs-with-retry-answer",
+      "title": "{{row.id}} is legal exactly for a refused-output retry",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "redelivery-events",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "redelivery-events row {{row.id}} in the adoption",
+        "when": [
+          "the output-full answer is checked and, under hold-undelivered or try-destinations, {{row.redelivery-declared-in}} occurs after refusal"
+        ],
+        "then": [
+          "the row is legal only under hold-undelivered or try-destinations; its presence under any other answer fails this test by construction",
+          "under either legal answer the lifecycle retries only on the cited event and keeps the same output without repeating work"
+        ],
+        "diagnostics": [
+          "{{instance}}-event-log",
+          "{{instance}}-delivery-attempts",
+          "{{instance}}-output-identity"
+        ]
+      },
+      "text": "Row {{row.id}} is legal exactly when output-full is hold-undelivered or try-destinations. After refusal, only {{row.redelivery-declared-in}} retries delivery, using the same output without repeating work. A row under another answer is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "fallback-destination-pairs-with-ordered-route",
+      "title": "{{row.id}} is legal exactly for the ordered route",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "output-destinations",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "output-destinations row {{row.id}} in the adoption",
+        "when": [
+          "the output-full answer is checked"
+        ],
+        "then": [
+          "the row is legal only under try-destinations; its presence under any other answer is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "Fallback row {{row.id}} at {{row.destination-declared-in}} is legal only when output-full is try-destinations. Its presence under any other answer is a defect this test fails by construction."
+    },
+    {
+      "id": "fallback-destination-keeps-written-order",
+      "title": "{{row.id}} is tried in its written place",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "output-destinations",
+      "when": {
+        "flag": {
+          "output-full": [
+            "try-destinations"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one whole output, its normal destination and every fallback before {{row.id}} refusing it, with {{row.id}} able to accept it",
+        "when": [
+          "the route reaches {{row.destination-declared-in}}"
+        ],
+        "then": [
+          "each refusal before acceptance reports destination-refused with both states finished",
+          "the whole output is delivered at {{row.id}}, no later fallback is tried, and the output is never split"
+        ],
+        "diagnostics": [
+          "{{instance}}-delivery-attempts",
+          "{{instance}}-report-log",
+          "{{instance}}-output-location"
+        ]
+      },
+      "text": "The ordered route tries the normal destination, then fallback {{row.id}} at {{row.destination-declared-in}} in written order. Each refusal reports destination-refused. When this row accepts, it receives the whole output and no later row is tried. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "ordered-route-keeps-one-output",
+      "title": "the ordered route tries whole-output destinations in order",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "output-full": [
+            "try-destinations"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a finished {{instance}} output whose normal destination refuses it, with each fallback acceptance pattern the adoption can construct; an in-place job answers never-full, so this test never applies to it",
+        "when": [
+          "the route tries the normal destination and fallback rows in written order"
+        ],
+        "then": [
+          "every refusal reports destination-refused and the first accepting destination receives the whole output",
+          "no later destination is tried after acceptance and the output is never split",
+          "if all destinations refuse, the same output stays finished without polling; each cited redelivery event retries from the normal destination, and an adoption with no such event never retries",
+          "where every destination on the route can refuse the output, the adoption declares a redelivery event; a route no destination can wholly refuse needs none"
+        ],
+        "diagnostics": [
+          "{{instance}}-delivery-attempts",
+          "{{instance}}-output-identity",
+          "{{instance}}-report-log"
+        ]
+      },
+      "text": "For a new-thing job, the route tries the normal destination and every fallback in written order, delivers the whole output to the first place that accepts, and stops there. Each refusal reports. If all refuse, the same output stays finished without polling and cited redelivery events restart the route. Where every destination can refuse, the adoption declares a redelivery event; a route no destination can wholly refuse needs none. An in-place job answers never-full, so this test never applies to it."
+    },
+    {
+      "id": "automatic-delivery-reports-once",
+      "title": "an accepted output is delivered immediately",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a finished {{instance}} output accepted by its chosen destination under the automatic answer, or where delivery-trigger was never asked and delivery is therefore automatic; an adoption answering on-collection asserts nothing here, and where the job row declares in-place this test asserts nothing beyond the single report",
+        "when": [
+          "capacity resolution accepts it"
+        ],
+        "then": [
+          "the job moves finished to delivered immediately and reports job-delivered exactly once"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-trace",
+          "{{instance}}-report-log"
+        ]
+      },
+      "text": "Under the automatic answer, or where delivery-trigger was never asked and delivery is therefore automatic, an accepted output moves from finished to delivered and reports job-delivered exactly once. An adoption answering on-collection asserts nothing here, and where the job row declares in-place this test asserts nothing beyond the single report."
+    },
+    {
+      "id": "collection-event-pairs-with-collection-delivery",
+      "title": "{{row.id}} is legal exactly for collection delivery",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "collection-events",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "collection-events row {{row.id}} in the adoption",
+        "when": [
+          "the delivery-trigger answer is checked"
+        ],
+        "then": [
+          "the row is legal only under on-collection; its presence under any other answer fails this test by construction",
+          "the lifecycle consults the rule cited at {{row.collection-declared-in}} under that answer"
+        ],
+        "diagnostics": [
+          "{{instance}}-event-log"
+        ]
+      },
+      "text": "Row {{row.id}} is legal exactly when delivery-trigger is on-collection. Under that answer, the lifecycle consults the rule cited at {{row.collection-declared-in}}. A row under another answer is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "collection-needs-a-collection-event",
+      "title": "collection delivery declares a collection event",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "delivery-trigger": [
+            "on-collection"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an adoption answering on-collection",
+        "when": [
+          "its collection-events rows are inspected"
+        ],
+        "then": [
+          "the adoption declares at least one collection-events row, and an adoption with none fails this test by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "An adoption answering on-collection declares at least one collection-events row. An adoption with none fails this test by construction."
+    },
+    {
+      "id": "collection-delivery-waits-for-event",
+      "title": "an accepted output remains accessible until collection",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "delivery-trigger": [
+            "on-collection"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an accepted {{instance}} output at its chosen destination; an adoption that can construct no accepted output asserts nothing here",
+        "when": [
+          "time passes and, where the adoption declares one, a cited collection event occurs"
+        ],
+        "then": [
+          "the output remains accessible in finished before the event",
+          "the event moves it to delivered and job-delivered reports exactly once",
+          "an adoption declaring no such collection event can never leave finished, which the paired existence test reports as a defect"
+        ],
+        "diagnostics": [
+          "{{instance}}-output-location",
+          "{{instance}}-event-log",
+          "{{instance}}-report-log"
+        ]
+      },
+      "text": "An accepted output stays accessible at its chosen destination in finished until a cited collection event occurs. That event delivers it and reports job-delivered exactly once. An adoption declaring no such event can never leave finished, which the paired existence test reports as a defect. An adoption that can construct no accepted output asserts nothing here."
+    },
+    {
+      "id": "rejection-ends-the-requested-run",
+      "title": "a rejected run is not retried by the lifecycle",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each {{instance}} request that the adoption can construct as rejected",
+        "when": [
+          "the rejection settles and its cause later clears"
+        ],
+        "then": [
+          "the rejected run remains ended and the lifecycle creates no retry",
+          "a later retry has a new run created by the requester unless a standing-order scan creates it",
+          "where this adoption declares no standing-orders row, no request repeats automatically"
+        ],
+        "diagnostics": [
+          "{{instance}}-run-id-trace",
+          "{{instance}}-request-log"
+        ]
+      },
+      "text": "Rejection ends its run. Clearing the reason does not revive it: a later retry belongs to the requester, unless a standing order creates a new run. Where this adoption declares no standing-orders row, no request repeats automatically."
+    },
+    {
+      "id": "lifecycle-holds",
+      "title": "the lifecycle and settlement order hold for the whole run",
+      "type": "general",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "one transition, all of its claim changes, and all of its reports settle before another transition begins; claim changes precede the transition report unless a numbered step states otherwise; an instant start with an accepting destination keeps job-started, job-finished, and job-delivered in one ordered batch with no outside event between them; only the forward path requested to waiting to started to working to finished to delivered, with unvisited states skipped without changing order, the stopped and resume side path, the cancellation side path, terminal failure, and recoverable failure into stopped are observed; same-moment events enter one at a time in the order Event resolution supplies, and this contract adds no ordering rule",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-state-trace",
+          "{{instance}}-claim-ledger",
+          "{{instance}}-report-log",
+          "{{instance}}-first-ordering-violation"
+        ]
+      },
+      "text": "Across {{inputs:scope}}, each transition settles with its claim changes and reports before the next begins. Claim changes precede the report unless a numbered step says otherwise. The stated forward and side paths are the only observed transitions. Instant automatic delivery keeps job-started, job-finished, and job-delivered in one batch. Same-moment order comes from Event resolution, not this contract. The adoption supplies the audit seeds through verification inputs.",
+      "inputs": {
+        "scope": {
+          "default": "sequences of requests, starts, advances, interruptions, resumes, failures, cancellations, finishes, and deliveries over one run"
+        },
+        "seeds": {
+          "default": [
+            "audit-a",
+            "audit-b"
+          ]
+        }
+      }
+    }
+  ]
+}

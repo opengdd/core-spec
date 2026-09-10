@@ -1,0 +1,1080 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Race start throttle — Input forgiveness adoption — OpenGDD</title>
+<meta name="description" content="Race start throttle is a Input forgiveness adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="canonical" href="https://opengdd.org/contracts/input-forgiveness-1/race-start-throttle/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Race start throttle — Input forgiveness adoption — OpenGDD">
+<meta property="og:description" content="Race start throttle is a Input forgiveness adoption with supplied answers, settings and matching acceptance tests.">
+<meta property="og:url" content="https://opengdd.org/contracts/input-forgiveness-1/race-start-throttle/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Race start throttle — Input forgiveness adoption — OpenGDD">
+<meta name="twitter:description" content="Race start throttle is a Input forgiveness adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=ff285f28dd16">
+<script type="module" src="/assets/contracts.mjs?v=ff285f28dd16"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout contract-catalogue contract-entry-page contract-instance-page" data-contract-root data-core-id="input-forgiveness" data-contract-preset="{&quot;ready-together&quot;:&quot;cannot-coincide&quot;}" data-contract-facts="{&quot;rowCounts&quot;:{&quot;late-input-windows&quot;:0,&quot;input-buffers&quot;:0,&quot;target-moment-windows&quot;:1,&quot;competition-rules&quot;:0},&quot;valueForms&quot;:{},&quot;rows&quot;:{&quot;late-input-windows&quot;:[],&quot;input-buffers&quot;:[],&quot;target-moment-windows&quot;:[{&quot;id&quot;:&quot;launch-near-go&quot;,&quot;action&quot;:&quot;throttle&quot;,&quot;action-declared-in&quot;:&quot;race.throttle-action&quot;,&quot;target-moment-declared-in&quot;:&quot;race.go-signal&quot;,&quot;arms-when-declared-in&quot;:&quot;race.start-line-attempt-created&quot;,&quot;window-declared-in&quot;:&quot;race.go-signal-forgiveness-window&quot;,&quot;result-declared-in&quot;:&quot;race.launch-grade&quot;,&quot;cancels-when-declared-in&quot;:&quot;race.start-attempt-cancellation&quot;}],&quot;competition-rules&quot;:[]}}">
+<nav class="doc-toc contract-nav" aria-label="Contracts">
+<details class="contract-nav-disclosure">
+  <summary>Contracts</summary>
+  <div class="contract-nav-content">
+    <p class="toc-title">Contracts</p>
+    <ul class="contract-nav-home"><li><a href="/contracts/">Overview</a></li><li><a href="/contracts/catalogue/">Contract catalogue</a></li></ul>
+<div class="toc-group contract-page-nav">
+  <p class="toc-group-title">On this page</p>
+  <ul><li><a href="#use-this">Use in your game</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#values">Numbers</a></li>
+<li><a href="#lists">Lists</a></li>
+<li><a href="#tests">Acceptance tests</a></li>
+<li><a href="#adoption-json">JSON</a></li></ul>
+</div>
+  </div>
+</details>
+</nav>
+<article class="doc-body contract-entry-body">
+<p class="label"><a href="/contracts/catalogue/#controls-camera">Controls &amp; camera</a></p>
+<div class="contract-entry-title-row">
+  <div><h1>Race start throttle</h1><p class="contract-core-name"><code>race-start-throttle</code> · an adoption of <a href="/contracts/input-forgiveness-1/">Input forgiveness</a>, version 1</p></div>
+  <div><span class="contract-badge ">Tests included</span></div>
+</div>
+
+<section class="contract-handoff" aria-labelledby="use-this">
+  <h2 id="use-this">Use in your game</h2>
+  <p>Opens the authoring tool with these answers and settings already filled in. You still add your game's own rules and tuning.</p>
+  <div class="contract-actions">
+    <a class="cta" href="/authoring-tool/?contract=input-forgiveness-1&amp;adoption=race-start-throttle">Open in the authoring tool</a>
+    <a class="cta-quiet" href="/contracts/input-forgiveness-1/race-start-throttle.zip" download="race-start-throttle.zip">Download ZIP</a>
+  </div>
+  <details><summary>What is in the ZIP</summary><p>The ZIP holds the adoption and its acceptance tests. In the authoring tool, choose <strong>Add contract</strong> and pick this ZIP. If you keep your design as files, put them in <code>contracts/</code>.</p><div class="contract-actions"><a href="/contracts/input-forgiveness-1/race-start-throttle.json" download="race-start-throttle.json">Download adoption JSON</a> · <a href="/contracts/input-forgiveness-1/input-forgiveness-1.pack.json" download="input-forgiveness-1.pack.json">Download tests</a><button type="button" class="cta-quiet" data-copy-core data-core-url="/contracts/input-forgiveness-1/race-start-throttle.json" data-copy-kind="adoption">Copy adoption</button><span role="status" aria-live="polite" data-copy-status></span></div></details>
+</section>
+<section class="contract-overview">
+  <h2>The contract behind it</h2>
+  <p>Covers inputs accepted just before the game allows the action, just after it stops allowing it, or near a target moment such as a beat or impact. It records which game actions receive that help, what arms each case, and when a saved action fires. Physical controls, ordinary action rules, and spatial nudges such as corner correction stay elsewhere.</p>
+  <p><a href="/contracts/input-forgiveness-1/">Read the full Input forgiveness contract →</a></p>
+</section>
+<section class="contract-form-section" id="questions">
+  <h2>Questions</h2>
+  <p>The supplied answer is marked on each question. Pick other answers to see what changes. Nothing is saved here: the ZIP and the authoring tool use the supplied answers.</p>
+  <div class="contract-actions contract-question-tools">
+    <button type="button" class="cta-quiet contract-reset" data-reset-choices>Restore supplied answers</button>
+    <label class="contract-switch"><input type="checkbox" data-builder-wording> Show exact wording for builders</label>
+  </div>
+  <div class="contract-question-list">
+  <article class="contract-question" id="question-ready-together" data-contract-question data-flag="ready-together" data-when="{&quot;any&quot;:[{&quot;row-count&quot;:{&quot;late-input-windows&quot;:&quot;non-empty&quot;}},{&quot;row-count&quot;:{&quot;input-buffers&quot;:&quot;non-empty&quot;}},{&quot;row-count&quot;:{&quot;target-moment-windows&quot;:&quot;non-empty&quot;}}]}">
+  <h3>When several helped inputs come due together, which ones does the game try?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the late input windows list has at least one row, or the input buffers list has at least one row, or the target moment windows list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>No forgiveness row can make an input due.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for When several helped inputs come due together, which ones does the game try?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="input-forgiveness-ready-together" value="all-ready-actions" data-contract-choice><span class="contract-option-label">All ready actions</span></label></th>
+  <td><span class="contract-option-meaning">The game tries every helped input that comes due. A twin-stick hero may dodge and fire at the same moment.</span><p class="contract-option-semantics">Every ready forgiven input is submitted once as an action proposal. Event resolution owns their order and the game rules may still reject incompatible actions.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="input-forgiveness-ready-together" value="declared-priority" data-contract-choice><span class="contract-option-label">Declared priority</span></label></th>
+  <td><span class="contract-option-meaning">One ready input wins by a fixed game priority. A farm tool may water before planting when both become ready.</span><p class="contract-option-semantics">Exactly one ready forgiven input is submitted. The matching competition-rules row supplies one total priority over every input that can be ready in that situation.</p></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="input-forgiveness-ready-together" value="cannot-coincide" data-contract-choice><span class="contract-option-label">Cannot coincide</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">Two helped inputs can never come due together. A one-button rhythm lane has at most one note action at a beat.</span><p class="contract-option-semantics">The adoption guarantees that no reachable game state presents two ready forgiven inputs at one moment. Reaching such a state invalidates the design claim.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>A landing, beat, or recovery end can make several helped inputs ready. The game must decide which ones to try.</p></details>
+</article>
+  </div>
+</section>
+<aside class="contract-relief" aria-labelledby="relief-title">
+  <p class="contract-relief-title" id="relief-title">That was the hard part.</p>
+  <p>The questions are the decisions. Everything below follows from them: the numbers, lists and test inputs this adoption supplies, and the tests that come with it. The authoring tool edits all of it in place. Read on only if you want to check.</p>
+</aside>
+<details class="contract-form-section contract-fold" id="values">
+  <summary><span class="contract-fold-title">Numbers</span><span class="contract-fold-note">no numbers</span></summary>
+  <p>This contract has no numbers to set.</p>
+</details>
+<details class="contract-form-section contract-fold" id="rules">
+  <summary><span class="contract-fold-title">Rules</span><span class="contract-fold-note">no rules</span></summary>
+  <p>A rule is a check between the numbers. Validation reports a rule that fails.</p>
+  <p>This contract has no rules between its numbers.</p>
+</details>
+<details class="contract-form-section contract-fold" id="lists">
+  <summary><span class="contract-fold-title">Lists</span><span class="contract-fold-note">4 lists</span></summary>
+  <p>Each list holds the rows this adoption supplies. A list can be empty.</p>
+  <article class="contract-collection">
+<h3>Late input windows</h3>
+<p class="contract-exact-name"><code>late-input-windows</code></p>
+<p>This adoption declares no late input windows.</p>
+</article>
+<article class="contract-collection">
+<h3>Input buffers</h3>
+<p class="contract-exact-name"><code>input-buffers</code></p>
+<p>This adoption declares no input buffers.</p>
+</article>
+<article class="contract-collection">
+<h3>Target moment windows</h3>
+<p class="contract-exact-name"><code>target-moment-windows</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Action</th><th>Action declared in</th><th>Target moment declared in</th><th>Arms when declared in</th><th>Window declared in</th><th>Result declared in</th><th>Cancels when declared in</th></tr></thead>
+<tbody>
+<tr><td><code>launch-near-go</code></td><td><code>throttle</code></td><td><code>race.throttle-action</code></td><td><code>race.go-signal</code></td><td><code>race.start-line-attempt-created</code></td><td><code>race.go-signal-forgiveness-window</code></td><td><code>race.launch-grade</code></td><td><code>race.start-attempt-cancellation</code></td></tr>
+</tbody></table></div>
+</article>
+<article class="contract-collection">
+<h3>Competition rules</h3>
+<p class="contract-exact-name"><code>competition-rules</code></p>
+<p>This adoption declares no competition rules.</p>
+</article>
+</details>
+<details class="contract-form-section contract-fold" id="verification">
+  <summary><span class="contract-fold-title">Test inputs</span><span class="contract-fold-note">scope and seeds</span></summary>
+  <p>Some tests need a scope or seeds from the adoption before they can run.</p>
+  <p>This adoption supplies none; every test uses its defaults.</p>
+</details>
+<details class="contract-form-section contract-fold" id="tests">
+  <summary><span class="contract-fold-title">Acceptance tests</span><span class="contract-fold-note">24 tests apply</span></summary>
+  <p>The contract comes with 49 tests. A test that runs once per row is counted once for each row. Tests that do not apply to these answers are still listed, with the reason.</p>
+  <div class="contract-test-list"><article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>forgiveness-vocabulary-and-openness</code></p>
+      <h3>input forgiveness uses game-facing input and cited openness</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to race-start-throttle.</p>
+  <p class="contract-test-text">For a declared row, an action input is the game-facing event after Control options maps a physical control; device identity does not change settlement. Ordinary permission is the action&#39;s legal state before forgiveness, and a press uses the edge named by the cited action rule. Openness comes from the agreeing Timed window adoption where one exists, otherwise from the cited Fixed timing rule. A family this adoption does not declare asserts nothing in the clause that names it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a physical control mapped through Control options to an action input that reaches a declared forgiveness row</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the row reads ordinary permission, its input edge, and whether its window instance is open</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the action input is the game-facing event after mapping, independent of physical device identity</li><li>ordinary permission is the action&#39;s legal state before forgiveness</li><li>the press arrives on the edge named by the cited action rule, including a release edge where that rule names one</li><li>openness comes from the agreeing Timed window adoption where one exists and otherwise from the row&#39;s cited Fixed timing rule</li><li>an accepted late or target input, or a saved press whose firing event has arrived, is one ready forgiven input</li><li>a family this adoption does not declare asserts nothing in the clause that names it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-input-receipt</li><li><code class="contract-placeholder">race-start-throttle</code>-window-instances</li><li><code class="contract-placeholder">race-start-throttle</code>-ready-set</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unmatched-input-receives-no-forgiveness</code></p>
+      <h3>an unmatched action input receives no forgiveness</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to race-start-throttle.</p>
+  <p class="contract-test-text">An action input with no matching row in the current situation receives no forgiveness. Ordinary permission alone decides whether the action is submitted.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>an action input with no matching late-input-windows, input-buffers, or target-moment-windows row in the current situation</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the game receives that action input</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>ordinary permission alone decides whether the action is submitted</li><li>the adoption creates no ready forgiven input, saved press, or target grade for it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-input-receipt</li><li><code class="contract-placeholder">race-start-throttle</code>-ready-set</li><li><code class="contract-placeholder">race-start-throttle</code>-waiting-press-state</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>empty-row-families-create-no-forgiveness</code></p>
+      <h3>empty row families create no forgiveness state</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to race-start-throttle.</p>
+  <p class="contract-test-text">An empty late-input-windows set keeps no action available after ordinary permission ends; an empty input-buffers set means no early press waits for an action to become ordinarily permitted; an empty target-moment-windows set forgives no input near a target moment; and an empty competition-rules set declares no priority. Where the named set has a row, that clause asserts nothing. If all three forgiveness families are empty, no forgiveness row can make an input due and the competition-rules description requires no competition rows; any row is a defect this test fails by construction. Where any forgiveness family has a row, that last clause asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">race-start-throttle</code> adoption document and its row sets</p></dd></div>
+<div><dt>When</dt><dd><ul><li>each empty row set&#39;s declared consequence is read</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>where late-input-windows is empty, no action remains available through forgiveness after ordinary permission ends; where a row exists, this clause asserts nothing</li><li>where input-buffers is empty, no early press waits for an action to become ordinarily permitted; where a row exists, this clause asserts nothing</li><li>where target-moment-windows is empty, no input is forgiven because it falls near a target moment; where a row exists, this clause asserts nothing</li><li>where competition-rules is empty, no competition priority rule is declared; where a row exists, this clause asserts nothing</li><li>where all three forgiveness row families are empty, no forgiveness row can make an input due; where any family has a row, this clause asserts nothing</li><li>where all three forgiveness row families are empty, competition-rules has no rows and any row is a defect this test fails by construction; where any family has a row, this clause asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>late-window-arms-on-cited-event</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> arms one late window on its cited event</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per late-input-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: late-input-windows has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>target-instance-arms-on-cited-event · launch-near-go</code></p>
+      <h3><code class="contract-placeholder">launch-near-go</code> creates one instance for each cited target</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per target-moment-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the launch-near-go row.</p>
+  <p class="contract-test-text">For every target moment at <code class="contract-placeholder">race.go-signal</code>, the event at <code class="contract-placeholder">race.start-line-attempt-created</code> creates one separate <code class="contract-placeholder">launch-near-go</code> target instance under <code class="contract-placeholder">race.go-signal-forgiveness-window</code> before and independently of input.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>two distinct target moments named by <code class="contract-placeholder">race.go-signal</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the creating event at <code class="contract-placeholder">race.start-line-attempt-created</code> occurs for each target before any associated action input</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>each target receives one separate <code class="contract-placeholder">launch-near-go</code> target instance under <code class="contract-placeholder">race.go-signal-forgiveness-window</code></li><li>each instance exists before and independently of its associated input</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-arming-log</li><li><code class="contract-placeholder">race-start-throttle</code>-window-instances</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>buffer-arms-on-qualifying-press</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> creates no instance before its qualifying press</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per input-buffers row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: input-buffers has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>receipt-maps-before-settlement</code></p>
+      <h3>input receipt maps the control before reading forgiveness</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to race-start-throttle.</p>
+  <p class="contract-test-text">Control options maps a physical control before forgiveness reads ordinary permission and matching rows. Device identity does not change settlement. A control already held when a late or target row arms creates no action input unless its cited action rule defines one; without either family, that observation asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>two physical devices mapped by Control options to the same action input, plus a control already held when a late or target row arms where the adoption can construct one</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the game receives each mapped input and observes the already-held control</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>both mapped action inputs read the same ordinary permission and matching rows regardless of device identity</li><li>the already-held control creates no action input at arming unless the cited action rule explicitly defines one</li><li>where the adoption has no late or target row, the already-held observation asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-input-receipt</li><li><code class="contract-placeholder">race-start-throttle</code>-arming-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>receipt-family-order</code></p>
+      <h3>target, late, buffer, and ordinary receipt keep their fixed order</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to race-start-throttle.</p>
+  <p class="contract-test-text">A receipt evaluates target rows first whether ordinary permission exists or not. If none accepts and permission exists, it submits the ordinary attempt without forgiveness. Without permission, late rows run next and a buffer captures only if neither immediate family accepts. A family this adoption does not declare asserts nothing in the clause that names it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>action-input receipts that exercise every forgiveness family the <code class="contract-placeholder">race-start-throttle</code> adoption declares</p></dd></div>
+<div><dt>When</dt><dd><ul><li>ordinary permission is present in one receipt and absent in another</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>every matching target row is evaluated regardless of ordinary permission before any late or buffer row</li><li>ordinary permission prevents late and buffer evaluation but does not prevent target evaluation</li><li>if no target row accepts and ordinary permission exists, the ordinary attempt is submitted without forgiveness and the receipt ends</li><li>with no ordinary permission, late rows run before buffer rows, and a buffer captures only if neither immediate family accepts</li><li>a family absent from this adoption asserts nothing in the clauses that name it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-input-receipt</li><li><code class="contract-placeholder">race-start-throttle</code>-submission-log</li><li><code class="contract-placeholder">race-start-throttle</code>-waiting-press-state</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>target-input-accepts-and-grades · launch-near-go</code></p>
+      <h3><code class="contract-placeholder">launch-near-go</code> accepts and grades only an open, otherwise-legal attempt</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per target-moment-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the launch-near-go row.</p>
+  <p class="contract-test-text">While <code class="contract-placeholder">race.go-signal-forgiveness-window</code> records a <code class="contract-placeholder">launch-near-go</code> target instance open, including its cited early and late inclusive moments, an otherwise-legal <code class="contract-placeholder">throttle</code> input is accepted, becomes ready now, and is graded by <code class="contract-placeholder">race.launch-grade</code>. An otherwise-illegal input while open is not accepted, becomes no ready forgiven input, receives no result, and gains no ordinary permission. An input before the cited early bound or after that target instance closes is not accepted. The first accepted input settles that target instance unless the cited result rule declares otherwise, and acceptance ends the receipt.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>four associated <code class="contract-placeholder">throttle</code> inputs for separate <code class="contract-placeholder">launch-near-go</code> target instances: an otherwise-legal input while <code class="contract-placeholder">race.go-signal-forgiveness-window</code> records its own target instance open, including its cited early and late inclusive moments, an otherwise-illegal input while that target instance is open, an otherwise-legal input after that target instance closes, and an otherwise-legal input before the cited early bound</p></dd></div>
+<div><dt>When</dt><dd><ul><li>each input is evaluated against its target instance</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the open otherwise-legal input is accepted, becomes ready now, and receives the result at <code class="contract-placeholder">race.launch-grade</code></li><li>the otherwise-illegal input while open is not accepted, becomes no ready forgiven input, and receives no result at <code class="contract-placeholder">race.launch-grade</code>; the row grants it no ordinary permission</li><li>the closed instance accepts and grades nothing</li><li>the input before the cited early bound is not accepted by <code class="contract-placeholder">launch-near-go</code></li><li>the first accepted input settles its target instance unless <code class="contract-placeholder">race.launch-grade</code> declares a different settlement</li><li>acceptance ends that action-input receipt before late or buffer evaluation</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-input-receipt</li><li><code class="contract-placeholder">race-start-throttle</code>-ready-set</li><li><code class="contract-placeholder">race-start-throttle</code>-target-grades</li><li><code class="contract-placeholder">race-start-throttle</code>-window-instances</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>late-input-accepts-only-while-open</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> accepts through its cited last moment and not later</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per late-input-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: late-input-windows has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>buffer-captures-one-press</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> stores one press and follows <code class="contract-placeholder">Row.waiting press</code></h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per input-buffers row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: input-buffers has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>late-window-clears-on-four-ends</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> ends on execution, permission, close, or early clearing</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per late-input-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: late-input-windows has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>buffer-fires-or-clears-at-first-boundary</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> fires once at its first cited event or clears without firing</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per input-buffers row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: input-buffers has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>target-instance-stops-accepting · launch-near-go</code></p>
+      <h3><code class="contract-placeholder">launch-near-go</code> accepts nothing after close, settlement, or early clearing</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per target-moment-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the launch-near-go row.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">launch-near-go</code> accepts nothing for a target instance after <code class="contract-placeholder">race.go-signal-forgiveness-window</code> closes it, <code class="contract-placeholder">race.launch-grade</code> settles it, or <code class="contract-placeholder">race.start-attempt-cancellation</code> ends it early. Openness is read at the recorded input moment.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>three <code class="contract-placeholder">launch-near-go</code> target instances, one closed by <code class="contract-placeholder">race.go-signal-forgiveness-window</code>, one settled under <code class="contract-placeholder">race.launch-grade</code>, and one ended by <code class="contract-placeholder">race.start-attempt-cancellation</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>an otherwise-legal associated <code class="contract-placeholder">throttle</code> input reaches each instance afterward</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>none of the three instances accepts the later input or creates another target grade</li><li>the recorded input moment, not a later update, decides whether the cited window was open</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-input-receipt</li><li><code class="contract-placeholder">race-start-throttle</code>-window-instances</li><li><code class="contract-placeholder">race-start-throttle</code>-target-grades</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>ready-input-exists-once</code></p>
+      <h3>each ready forgiven input exists once</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to race-start-throttle.</p>
+  <p class="contract-test-text">A stored press or accepted input contributes one ready forgiven input, and repeated updates create no copy. If two adoptions produce ready inputs at one moment, each settles independently and both selected sets are submitted together; where that case cannot occur, the clause asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a stored press or accepted input that becomes ready, plus two adoptions producing ready inputs at one moment where the game can construct that case</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the game updates the ready state repeatedly and settles the moment</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the same stored press or accepted input contributes exactly one ready forgiven input</li><li>a repeated update creates no copy</li><li>where two adoptions contribute, each settles independently and the inputs selected by both are submitted together</li><li>where no shared-adoption moment can occur, the shared-adoption clause asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-ready-set</li><li><code class="contract-placeholder">race-start-throttle</code>-submission-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>all-ready-actions-submit-every-input</code></p>
+      <h3>all-ready-actions submits every ready input once</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: ready together is cannot coincide, not all ready actions.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>declared-priority-submits-one-winner</code></p>
+      <h3>declared-priority submits one stable winner</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: ready together is cannot coincide, not declared priority.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>cannot-coincide-invalidates-two-ready-inputs</code></p>
+      <h3>cannot-coincide rejects a reachable pair of ready inputs</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to race-start-throttle.</p>
+  <p class="contract-test-text">Under cannot-coincide, no reachable game state has two ready forgiven inputs at one moment. One observed pair invalidates the design claim; this contract does not choose a winner.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the adoption&#39;s reachable-state claim for ready forgiven inputs</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the audit searches for a game moment with two ready forgiven inputs</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>no reachable game state contains that pair</li><li>one observed pair invalidates the design claim rather than selecting an implicit winner</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-ready-set</li><li><code class="contract-placeholder">race-start-throttle</code>-coincidence-violation</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>selected-inputs-stop-at-proposal-boundary</code></p>
+      <h3>selected inputs become proposals at this moment</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to race-start-throttle.</p>
+  <p class="contract-test-text">A selected input becomes an action proposal at the current game moment. Event resolution owns same-moment proposal order, and the action&#39;s Fixed rules own cost, effect, and rejection. This contract stops at submission and does not force a conflicting action to succeed.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>one or more inputs selected for submission</p></dd></div>
+<div><dt>When</dt><dd><ul><li>input forgiveness submits them</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>each selected input enters Event resolution as an action proposal at the current game moment</li><li>the input-forgiveness trace performs no ordering of proposals that share the moment</li><li>cost, effect, conflict rejection, and proposal order are absent from input-forgiveness settlement and remain owned by the cited action rules and Event resolution</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-submission-log</li><li><code class="contract-placeholder">race-start-throttle</code>-ready-set</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>buffer-clears-after-submission</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> clears after submission</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per input-buffers row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: input-buffers has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>buffer-clears-after-competition-loss</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> clears after competition loss</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per input-buffers row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: ready together is cannot coincide, not declared priority.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>late-window-clears-after-submission</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> clears on submission</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per late-input-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: late-input-windows has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>late-window-survives-competition-loss</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> is not ended by a competition loss</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per late-input-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: ready together is cannot coincide, not declared priority.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>target-input-after-submission · launch-near-go</code></p>
+      <h3><code class="contract-placeholder">launch-near-go</code> leaves no saved press after submission</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per target-moment-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the launch-near-go row.</p>
+  <p class="contract-test-text">A selected <code class="contract-placeholder">launch-near-go</code> target input leaves no saved press after submission.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>one input accepted by <code class="contract-placeholder">launch-near-go</code> and selected for submission</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the selected target input is submitted</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the target input leaves no saved press after submission</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-submission-log</li><li><code class="contract-placeholder">race-start-throttle</code>-waiting-press-state</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>target-instance-after-competition-loss</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> remains open after competition loss until settled or closed</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per target-moment-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: ready together is cannot coincide, not declared priority.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>held-control-after-buffer-fire</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> follows <code class="contract-placeholder">Row.held after fire</code> after its action fires</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per input-buffers row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: input-buffers has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>rejected-proposal-restores-nothing</code></p>
+      <h3>a rejected proposal restores no forgiveness state</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to race-start-throttle.</p>
+  <p class="contract-test-text">Rejecting a submitted action proposal restores no cleared forgiveness state. A new attempt needs a new qualifying arming event or press. Rejection consequences belong to Event resolution and assert nothing here.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a submitted forgiven action proposal after the submission-time clearing for its family</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the cited action rule or Event resolution rejects the proposal</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the cleared forgiveness state remains absent</li><li>a new attempt appears only after a new qualifying arming event or press</li><li>the consequences of rejection assert nothing in this contract</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-submission-log</li><li><code class="contract-placeholder">race-start-throttle</code>-clearing-log</li><li><code class="contract-placeholder">race-start-throttle</code>-window-instances</li><li><code class="contract-placeholder">race-start-throttle</code>-waiting-press-state</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>forgiveness-authority-order</code></p>
+      <h3>the forgiveness authority order never rewrites earlier moments</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to race-start-throttle.</p>
+  <p class="contract-test-text">Arming, input mapping, ordinary permission, target acceptance, late acceptance, buffer capture, repeated-press choice, open and early-clearing state, firing, competition, Event resolution order, action rules, clearing, and held-input renewal remain in that authority order. No later stage rewrites an earlier input moment or target moment. A stage absent from the case asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a receipt and settlement trace with distinguishable arming, mapped input, ordinary permission, acceptance or capture, open state, firing, competition, submission, action result, clearing, and held-input records where those stages occur</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the trace is compared with the mechanism&#39;s authority order</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>each stage reads the result of every earlier applicable stage in the listed order</li><li>no later stage rewrites an earlier input moment or target moment</li><li>a stage absent from the constructed case asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-input-receipt</li><li><code class="contract-placeholder">race-start-throttle</code>-arming-log</li><li><code class="contract-placeholder">race-start-throttle</code>-ready-set</li><li><code class="contract-placeholder">race-start-throttle</code>-submission-log</li><li><code class="contract-placeholder">race-start-throttle</code>-clearing-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>row-families-do-not-overlap</code></p>
+      <h3>declaration check: no family has two rows matching one input</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to race-start-throttle.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and its cited prose, not the running game. The contract makes two rows of one family matching one input in the same situation an invalid adoption rather than an implicit choice. An overlapping pair is a defect this test fails by construction. For a family with fewer than two rows, its pair comparison asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">race-start-throttle</code> adoption and its cited prose, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer compares every pair of rows within late-input-windows, input-buffers, and target-moment-windows</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>no two rows in one family can match one action input in the same situation</li><li>an overlapping pair is a defect this test fails by construction; for a family with fewer than two rows, its pair comparison asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>declared-priority-has-one-matching-rule</code></p>
+      <h3>declaration check: declared-priority has one matching competition row</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: ready together is cannot coincide, not declared priority.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>non-priority-answers-have-no-competition-rows</code></p>
+      <h3>declaration check: non-priority answers declare no competition rows</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to race-start-throttle.</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. The competition-rules description says rows exist only under declared-priority, so under all-ready-actions or cannot-coincide the set must be empty. Any row is a defect this test fails by construction.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">race-start-throttle</code> adoption document, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer counts competition-rules rows</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>competition-rules has no rows</li><li>any competition-rules row is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>no-external-rule-promises-forgiveness</code></p>
+      <h3>declaration check: unmatched actions have no external forgiveness promise</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to race-start-throttle.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and its cited prose, not the running game. The contract says no cited game rule outside these rows promises forgiveness for an unmatched action or input. Any such promise is a defect this test fails by construction.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">race-start-throttle</code> adoption and all prose it cites, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer searches outside these rows for a promise that an unmatched action or input receives forgiveness</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>no cited game rule outside these rows promises forgiveness for an unmatched action or input</li><li>any such promise is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>late-action-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s action citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per late-input-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: late-input-windows has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>late-arming-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s arming citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per late-input-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: late-input-windows has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>late-window-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s window citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per late-input-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: late-input-windows has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>late-cancellation-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s cancellation citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per late-input-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: late-input-windows has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>buffer-action-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s action citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per input-buffers row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: input-buffers has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>buffer-arming-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s arming citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per input-buffers row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: input-buffers has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>buffer-window-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s window citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per input-buffers row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: input-buffers has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>buffer-firing-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s firing citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per input-buffers row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: input-buffers has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>buffer-cancellation-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s cancellation citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per input-buffers row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: input-buffers has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>target-action-citation-duty · launch-near-go</code></p>
+      <h3>declaration check: <code class="contract-placeholder">launch-near-go</code>&#39;s action citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per target-moment-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the launch-near-go row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">race.throttle-action</code>, not the running game. The action-declared-in description requires the citation to identify <code class="contract-placeholder">throttle</code> as the row&#39;s action-input scope and name ordinary permission and the complete attempt; for the reserved all-actions spelling, it names these for every action in the set. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">race-start-throttle</code> adoption and the prose at <code class="contract-placeholder">race.throttle-action</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">race.throttle-action</code> identifies the row&#39;s action-input scope and names ordinary permission and the complete attempt; for the reserved all-actions spelling, it names these for every action in the set, as the action-declared-in description requires</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>target-moment-citation-duty · launch-near-go</code></p>
+      <h3>declaration check: <code class="contract-placeholder">launch-near-go</code>&#39;s target citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per target-moment-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the launch-near-go row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">race.go-signal</code>, not the running game. The citation must name the target moment for <code class="contract-placeholder">launch-near-go</code>. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">race-start-throttle</code> adoption and the prose at <code class="contract-placeholder">race.go-signal</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">race.go-signal</code> names the target moment for <code class="contract-placeholder">launch-near-go</code></li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>target-arming-citation-duty · launch-near-go</code></p>
+      <h3>declaration check: <code class="contract-placeholder">launch-near-go</code>&#39;s arming citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per target-moment-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the launch-near-go row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">race.start-line-attempt-created</code>, not the running game. The citation must name the event that creates each <code class="contract-placeholder">launch-near-go</code> target instance and every associated input event. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">race-start-throttle</code> adoption and the prose at <code class="contract-placeholder">race.start-line-attempt-created</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">race.start-line-attempt-created</code> names the event that creates each <code class="contract-placeholder">launch-near-go</code> target instance and every associated input event</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>target-window-citation-duty · launch-near-go</code></p>
+      <h3>declaration check: <code class="contract-placeholder">launch-near-go</code>&#39;s window citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per target-moment-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the launch-near-go row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">race.go-signal-forgiveness-window</code>, not the running game. The window-declared-in description requires the citation to state one outer window with early and late bounds of positive width, inclusive last moments, unit, clock, pause behaviour, and open-state test for <code class="contract-placeholder">launch-near-go</code>. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">race-start-throttle</code> adoption and the prose at <code class="contract-placeholder">race.go-signal-forgiveness-window</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">race.go-signal-forgiveness-window</code> states one outer window with early and late bounds of positive width, inclusive last moments, unit, clock, pause behaviour, and open-state test for <code class="contract-placeholder">launch-near-go</code>, as the window-declared-in description requires</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>target-result-citation-duty · launch-near-go</code></p>
+      <h3>declaration check: <code class="contract-placeholder">launch-near-go</code>&#39;s result citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per target-moment-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the launch-near-go row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">race.launch-grade</code>, not the running game. The result-declared-in description requires the citation to state the result for an accepted <code class="contract-placeholder">launch-near-go</code> input, every grade boundary inside the outer window, and any departure from first-accepted settlement. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">race-start-throttle</code> adoption and the prose at <code class="contract-placeholder">race.launch-grade</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">race.launch-grade</code> states the result for an accepted <code class="contract-placeholder">launch-near-go</code> input, every grade boundary inside the outer window, and any departure from first-accepted settlement, as the result-declared-in description requires</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>target-cancellation-citation-duty · launch-near-go</code></p>
+      <h3>declaration check: <code class="contract-placeholder">launch-near-go</code>&#39;s cancellation citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per target-moment-windows row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the launch-near-go row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">race.start-attempt-cancellation</code>, not the running game. The citation must name every event that stops a <code class="contract-placeholder">launch-near-go</code> target instance before its window closes or state that no extra event does. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">race-start-throttle</code> adoption and the prose at <code class="contract-placeholder">race.start-attempt-cancellation</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">race.start-attempt-cancellation</code> names every event that stops a <code class="contract-placeholder">launch-near-go</code> target instance before its cited window closes or states that no extra event does</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>competition-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s competition citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per competition-rules row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to race-start-throttle: competition-rules has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>forgiveness-holds</code></p>
+      <h3>input forgiveness holds for the whole run</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to race-start-throttle.</p>
+  <p class="contract-test-text">Across <code class="contract-placeholder">every armed window, saved press, and target instance of the audited run</code>, every forgiven input follows its row and cited rules; unmatched inputs receive no forgiveness; no row holds more than one press; no press is stored or fired twice; every competition follows its declaration; and rejection restores no cleared state. A case this adoption cannot construct asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Holds</dt><dd><p>across every armed window, saved press, and target instance of the audited run, every forgiven input was accepted, stored, fired, submitted, or cleared exactly as its row and cited rules state; no unmatched input received forgiveness; no row held more than one press; no press was stored twice or fired twice; every competition selected as declared; no rejected proposal restored cleared forgiveness state; a case the adoption cannot construct asserts nothing</p></dd></div>
+<div><dt>Seeds</dt><dd><p><code class="contract-placeholder">[&quot;audit-a&quot;,&quot;audit-b&quot;]</code></p></dd></div>
+<div><dt>Scope</dt><dd><p><code class="contract-placeholder">every armed window, saved press, and target instance of the audited run</code></p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">race-start-throttle</code>-arming-log</li><li><code class="contract-placeholder">race-start-throttle</code>-input-receipt</li><li><code class="contract-placeholder">race-start-throttle</code>-waiting-press-state</li><li><code class="contract-placeholder">race-start-throttle</code>-window-instances</li><li><code class="contract-placeholder">race-start-throttle</code>-ready-set</li><li><code class="contract-placeholder">race-start-throttle</code>-submission-log</li><li><code class="contract-placeholder">race-start-throttle</code>-clearing-log</li><li><code class="contract-placeholder">race-start-throttle</code>-target-grades</li></ul></dd></div></dl></details>
+</article></div>
+</details>
+<details class="contract-form-section contract-fold" id="adoption-json">
+  <summary><span class="contract-fold-title">JSON</span><span class="contract-fold-note">the adoption as one file</span></summary>
+  <p>The adoption file as supplied. Answers you try on this page are not written into it; to change an adoption, open it in the authoring tool.</p>
+
+  <pre class="contract-json"><code>{
+  &quot;contract&quot;: &quot;input-forgiveness&quot;,
+  &quot;version&quot;: 1,
+  &quot;summary&quot;: &quot;Covers inputs accepted just before the game allows the action, just after it stops allowing it, or near a target moment such as a beat or impact. It records which game actions receive that help, what arms each case, and when a saved action fires. Physical controls, ordinary action rules, and spatial nudges such as corner correction stay elsewhere.&quot;,
+  &quot;questions&quot;: {
+    &quot;ready-together&quot;: {
+      &quot;asks&quot;: &quot;When several helped inputs come due together, which ones does the game try?&quot;,
+      &quot;rationale&quot;: &quot;A landing, beat, or recovery end can make several helped inputs ready. The game must decide which ones to try.&quot;,
+      &quot;when&quot;: {
+        &quot;any&quot;: [
+          {
+            &quot;row-count&quot;: {
+              &quot;late-input-windows&quot;: &quot;non-empty&quot;
+            }
+          },
+          {
+            &quot;row-count&quot;: {
+              &quot;input-buffers&quot;: &quot;non-empty&quot;
+            }
+          },
+          {
+            &quot;row-count&quot;: {
+              &quot;target-moment-windows&quot;: &quot;non-empty&quot;
+            }
+          }
+        ]
+      },
+      &quot;otherwise&quot;: &quot;No forgiveness row can make an input due.&quot;,
+      &quot;options&quot;: {
+        &quot;all-ready-actions&quot;: {
+          &quot;meaning&quot;: &quot;The game tries every helped input that comes due. A twin-stick hero may dodge and fire at the same moment.&quot;,
+          &quot;semantics&quot;: &quot;Every ready forgiven input is submitted once as an action proposal. Event resolution owns their order and the game rules may still reject incompatible actions.&quot;
+        },
+        &quot;declared-priority&quot;: {
+          &quot;meaning&quot;: &quot;One ready input wins by a fixed game priority. A farm tool may water before planting when both become ready.&quot;,
+          &quot;semantics&quot;: &quot;Exactly one ready forgiven input is submitted. The matching competition-rules row supplies one total priority over every input that can be ready in that situation.&quot;
+        },
+        &quot;cannot-coincide&quot;: {
+          &quot;meaning&quot;: &quot;Two helped inputs can never come due together. A one-button rhythm lane has at most one note action at a beat.&quot;,
+          &quot;semantics&quot;: &quot;The adoption guarantees that no reachable game state presents two ready forgiven inputs at one moment. Reaching such a state invalidates the design claim.&quot;
+        }
+      }
+    }
+  },
+  &quot;declares&quot;: {
+    &quot;values&quot;: {},
+    &quot;rows&quot;: {
+      &quot;late-input-windows&quot;: {
+        &quot;description&quot;: &quot;Actions accepted just after ordinary permission ends, such as a platformer jump after leaving walkable ground.&quot;,
+        &quot;when-empty&quot;: &quot;No action remains available through input forgiveness after its ordinary permission ends.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable game-facing name, such as jump-after-ground.&quot;
+          },
+          &quot;action&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;description&quot;: &quot;The game action receiving late forgiveness, such as jump. The reserved all-actions spelling covers the game&#39;s complete action set.&quot;
+          },
+          &quot;action-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming the action, its ordinary permission, and its complete effect. For the reserved all-actions spelling, it names these for every action in the set.&quot;
+          },
+          &quot;arms-when-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming every transition that starts this late case and every similar transition that does not. A platformer may name walking off ground and exclude jumping from it.&quot;
+          },
+          &quot;window-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The game&#39;s Fixed timing rule for this late window, including its positive duration, unit, inclusive last moment, clock, pause behaviour, and open-state test.&quot;
+          },
+          &quot;cancels-when-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming every game event that ends this forgiveness before the cited window closes, or stating that no extra event does.&quot;
+          }
+        }
+      },
+      &quot;input-buffers&quot;: {
+        &quot;description&quot;: &quot;Early presses saved until an action first becomes ordinarily permitted, such as dodge pressed during attack recovery.&quot;,
+        &quot;when-empty&quot;: &quot;No early press waits for an action to become ordinarily permitted.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable game-facing name, such as dodge-during-recovery.&quot;
+          },
+          &quot;action&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;description&quot;: &quot;The game action whose early press may wait, such as dodge. The reserved all-actions spelling covers the game&#39;s complete action set.&quot;
+          },
+          &quot;action-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming the action, its ordinary permission, and its complete effect. For the reserved all-actions spelling, it names these for every action in the set.&quot;
+          },
+          &quot;arms-when-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming the accepted early states, the excluded states, and the matching action input. A soulslike may accept dodge during recovery but exclude menus, stun, and defeat.&quot;
+          },
+          &quot;window-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The game&#39;s Fixed timing rule for this saved press, including its positive duration, unit, inclusive last moment, clock, pause behaviour, and open-state test.&quot;
+          },
+          &quot;fires-when-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming the first ordinary permission event that releases the saved action. A landing may release jump; recovery end may release dodge.&quot;
+          },
+          &quot;cancels-when-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming every event that discards the saved press before it fires, or stating that no extra event does.&quot;
+          },
+          &quot;waiting-press&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;first-press-stays&quot;,
+              &quot;latest-press-replaces&quot;
+            ],
+            &quot;description&quot;: &quot;Which matching press survives while this row already holds one: the first stays, or the latest replaces it. A menu confirm may keep the first click or replace it with the second.&quot;
+          },
+          &quot;held-after-fire&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;fresh-press-required&quot;,
+              &quot;hold-can-repeat&quot;
+            ],
+            &quot;description&quot;: &quot;Whether an uninterrupted hold needs a release and fresh press or may prepare another action after this buffer fires. A racing boost may repeat from one hold.&quot;
+          }
+        }
+      },
+      &quot;target-moment-windows&quot;: {
+        &quot;description&quot;: &quot;Inputs accepted near a cited target moment, such as a rhythm beat or an incoming strike&#39;s impact.&quot;,
+        &quot;when-empty&quot;: &quot;No input is forgiven because it falls near a target moment.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable game-facing name, such as lead-note-hit or sword-impact-parry.&quot;
+          },
+          &quot;action&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;description&quot;: &quot;The game action judged against the target moment, such as hit-note or parry. The reserved all-actions spelling covers the game&#39;s complete action set.&quot;
+          },
+          &quot;action-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming the action input, its ordinary permission, and its complete attempt. This target row grades an attempt; it does not grant permission. For the reserved all-actions spelling, it names these for every action in the set.&quot;
+          },
+          &quot;target-moment-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming the target moment.&quot;
+          },
+          &quot;arms-when-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming the event that creates the current target instance and which input events are associated with it.&quot;
+          },
+          &quot;window-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The game&#39;s one Fixed timing rule for the outer target-relative window, including its early and late bounds of positive width, inclusive last moments, unit, clock, pause behaviour, and open-state test.&quot;
+          },
+          &quot;result-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed result rule for an accepted input. It owns any grade boundaries inside this row&#39;s one outer window and states any departure from first-accepted settlement; a rhythm note may record perfect, great, or good.&quot;
+          },
+          &quot;cancels-when-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming every event that stops this target instance from accepting input before the cited window closes, or stating that no extra event does.&quot;
+          }
+        }
+      },
+      &quot;competition-rules&quot;: {
+        &quot;description&quot;: &quot;Situations where several forgiven inputs are ready together and one fixed game priority selects a single attempt. Rows exist only under the declared-priority answer; an adoption answering otherwise, or answering nothing, has none.&quot;,
+        &quot;when-empty&quot;: &quot;No competition priority rule is declared.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable game-facing name, such as recovery-end-actions.&quot;
+          },
+          &quot;declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule identifying the situation and giving one total priority over every forgiven input that can be ready there.&quot;
+          }
+        }
+      }
+    }
+  },
+  &quot;rules&quot;: {},
+  &quot;origin&quot;: &quot;https://opengdd.org/contracts/input-forgiveness-1&quot;,
+  &quot;mechanism&quot;: [
+    &quot;This is the single normative authority for when forgiveness arms, what input it captures or accepts, how repeated and competing inputs settle, when an action fires, and what clears the forgiveness state. Questions and rows describe the game&#39;s choices and cite its rules; they do not define another sequence.&quot;,
+    &quot;An action or input not matched by a row in the current situation receives no forgiveness from this adoption, and no cited game rule outside these rows promises it any.&quot;,
+    &quot;An **action input** is the game-facing input event supplied after Control options maps a physical control. **Ordinary permission** is the action&#39;s legal state before any forgiveness. A **ready forgiven input** is either an input accepted for immediate submission by a late or target row, or a saved buffered press whose cited firing event has arrived. A **target moment** is the cited beat, impact, cue, or comparable game instant against which input timing is judged. A target instance is **settled** when it may accept no further input; the first accepted input settles it unless the cited result rule says otherwise. A **press** is the arrival of the action input, whichever physical edge the cited action rule uses — a release-triggered action counts. For every family, when §4&#39;s agreeing Timed window adoption exists for a cited window, runtime openness reads from it; otherwise the cited Fixed timing rule decides.&quot;,
+    &quot;### Arm forgiveness windows&quot;,
+    &quot;1. Arming runs on game events, not on input receipt. Whenever a row&#39;s cited arming event occurs, it creates one window instance under the cited Fixed timing rule: a late event creates one instance for that loss of permission, and a target event creates one per-target instance, in both cases before and independently of any input. A buffer&#39;s per-press instance is the exception: the qualifying press itself creates it at the moment step 6 stores the press. This contract owns those instance scopes.&quot;,
+    &quot;### Receive an action input&quot;,
+    &quot;2. Map the physical control to its game action through Control options. Read the action&#39;s ordinary permission and every matching row for the current situation. Physical device identity does not change a row&#39;s settlement. By default, a control already held when a late or target row arms creates no action input; the cited action rule may explicitly define a different input. 3. Ordinary permission gates only late-input and buffer evaluation. When the action is ordinarily permitted, do not evaluate those two families. Do not submit yet: the target branch in step 4 runs whether ordinary permission is present or absent. 4. Evaluate every matching target row for its associated target instance, regardless of ordinary permission. An open row can grade only an otherwise-legal attempt; it never grants ordinary permission. The accepted input becomes ready now, and the first accepted input settles the target unless that result rule says otherwise. Two rows of one family matching one input in the same situation are an invalid adoption rather than an implicit choice. 5. If a target row accepted this input, end this receipt. If no target row accepts and ordinary permission exists, submit the ordinary attempt without forgiveness and end this receipt. Otherwise — ordinary permission is absent — a matching late row may accept after its cited arming event while its window is open. An accepted late input becomes ready now. 6. If neither immediate family accepts, a matching input-buffer row may save the press only while its cited arming rule holds. Storing the press creates its per-press window instance. The row stores at most one press, its action, input moment, and that instance. For a row whose action is the reserved `all-actions` spelling, a press of any covered action is a matching press of that row. If one already waits, apply that row&#39;s `waiting-press` field: `first-press-stays` ignores the later press, while `latest-press-replaces` clears the earlier press and creates a fresh instance for the later one.&quot;,
+    &quot;### Advance, fire, and clear rows&quot;,
+    &quot;7. A live late-input row ends when its action executes, ordinary permission returns, the cited timing window closes, or its cited early-clearing event occurs. Action execution cannot arm a replacement late window. 8. A waiting buffer clears without firing when its cited timing window closes or its cited early-clearing event occurs. If neither happens, the first cited ordinary permission event makes it ready. No later input poll or extra delay is inserted. 9. A target-moment row accepts no further input for a target instance after the cited timing window closes, the target is settled, or its cited early-clearing event occurs. Whether the window was open at the input moment follows the openness rule in this section&#39;s definitions. 10. Collect every ready forgiven input at this game moment. A ready input exists once; a repeated update cannot create another copy from the same stored press or accepted input. When two adoptions of this contract produce ready inputs at one moment, settle each adoption independently, then submit all inputs selected by either adoption together.&quot;,
+    &quot;### Settle competition and submit attempts&quot;,
+    &quot;11. Under `all-ready-actions`, submit every ready forgiven input once. Under `declared-priority`, find the one matching competition row and submit only its highest-priority input; every situation in which forgiven inputs can be ready together has exactly one such row; the cited priority holds stable for the whole settlement moment. Clear every lower-priority ready input without submitting it. Under `cannot-coincide`, two ready inputs invalidate the design claim. 12. Submit selected inputs as action proposals at this moment. Event resolution owns the order of proposals that share the moment. The action&#39;s Fixed rules own cost, effect, and any rejection after submission. Forgiveness does not force an otherwise conflicting action to succeed. 13. Clear each submitted or competition-losing buffered press immediately. Clear a submitted late window. A competition-losing late window survives until its own close or clearing event; while it remains open it may accept a new press, and the cleared input is not restored. A losing target instance stays open until settled or closed; under the default first-accepted rule it is already settled. A target input has no saved press after submission. 14. Apply the firing buffer row&#39;s `held-after-fire` field only after its action fires and its saved press has been cleared. Under `fresh-press-required`, held state creates nothing until release and a fresh press. Under `hold-can-repeat`, the uninterrupted hold creates one new press when that row&#39;s arming condition next holds. If its cited window later closes while the hold and arming condition still hold, clear it and create one fresh waiting press immediately. At most one waits in the row. 15. A rejected action proposal does not restore its cleared forgiveness state. A new attempt needs a new qualifying arming event or press. Event resolution owns the consequences of the rejection; this contract owns only the cleared forgiveness state.&quot;,
+    &quot;The authority order is therefore: arming, physical input mapping, ordinary permission, target acceptance, late acceptance, buffer capture, repeated-press choice, cited open-window and early-clearing state, firing event, competition selection, same-moment event order, action rules, clearing, and held-input renewal. A later stage never rewrites an earlier input moment or target moment.&quot;
+  ],
+  &quot;answers&quot;: {
+    &quot;ready-together&quot;: &quot;cannot-coincide&quot;
+  },
+  &quot;values&quot;: {},
+  &quot;rows&quot;: {
+    &quot;late-input-windows&quot;: [],
+    &quot;input-buffers&quot;: [],
+    &quot;target-moment-windows&quot;: [
+      {
+        &quot;id&quot;: &quot;launch-near-go&quot;,
+        &quot;action&quot;: &quot;throttle&quot;,
+        &quot;action-declared-in&quot;: &quot;race.throttle-action&quot;,
+        &quot;target-moment-declared-in&quot;: &quot;race.go-signal&quot;,
+        &quot;arms-when-declared-in&quot;: &quot;race.start-line-attempt-created&quot;,
+        &quot;window-declared-in&quot;: &quot;race.go-signal-forgiveness-window&quot;,
+        &quot;result-declared-in&quot;: &quot;race.launch-grade&quot;,
+        &quot;cancels-when-declared-in&quot;: &quot;race.start-attempt-cancellation&quot;
+      }
+    ],
+    &quot;competition-rules&quot;: []
+  },
+  &quot;pack&quot;: &quot;sha256:dc06d707164dbb72befb35426803f2adc6e4bedee5496e3a30a9c8a9c2491120&quot;
+}
+</code></pre>
+</details>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

@@ -1,0 +1,1176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patched racing ghost — Replay scope adoption — OpenGDD</title>
+<meta name="description" content="Patched racing ghost is a Replay scope adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="canonical" href="https://opengdd.org/contracts/replay-scope-1/patched-racing-ghost/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Patched racing ghost — Replay scope adoption — OpenGDD">
+<meta property="og:description" content="Patched racing ghost is a Replay scope adoption with supplied answers, settings and matching acceptance tests.">
+<meta property="og:url" content="https://opengdd.org/contracts/replay-scope-1/patched-racing-ghost/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Patched racing ghost — Replay scope adoption — OpenGDD">
+<meta name="twitter:description" content="Patched racing ghost is a Replay scope adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=ff285f28dd16">
+<script type="module" src="/assets/contracts.mjs?v=ff285f28dd16"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout contract-catalogue contract-entry-page contract-instance-page" data-contract-root data-core-id="replay-scope" data-contract-preset="{&quot;replay-record&quot;:&quot;seed-and-input-log&quot;,&quot;after-an-update&quot;:&quot;best-effort-with-declared-divergence&quot;,&quot;divergence-response&quot;:&quot;continue-and-flag&quot;}" data-contract-facts="{&quot;rowCounts&quot;:{&quot;replay-record&quot;:1,&quot;reproduction-claims&quot;:1},&quot;valueForms&quot;:{&quot;allowed-position-gap&quot;:&quot;citation&quot;},&quot;rows&quot;:{&quot;replay-record&quot;:[{&quot;id&quot;:&quot;social-ghost&quot;,&quot;recording-declared-in&quot;:&quot;racing.social-ghost-recording&quot;,&quot;input-clock-declared-in&quot;:&quot;racing.physics-steps&quot;,&quot;cross-version-divergence-declared-in&quot;:&quot;racing.patch-ghost-notice&quot;,&quot;difference-report-declared-in&quot;:&quot;racing.social-ghost-status&quot;}],&quot;reproduction-claims&quot;:[{&quot;id&quot;:&quot;patched-car-path&quot;,&quot;artifact&quot;:&quot;social ghost car path&quot;,&quot;platform-reach&quot;:&quot;recorded-platform-only&quot;,&quot;matching-standard&quot;:&quot;allowed-position-gap&quot;,&quot;reproduces&quot;:&quot;racing.social-ghost-position&quot;,&quot;excludes&quot;:&quot;racing.social-ghost-exclusions&quot;,&quot;conditions&quot;:&quot;racing.social-ghost-conditions&quot;,&quot;comparison-points&quot;:&quot;racing.social-ghost-samples&quot;}]}}">
+<nav class="doc-toc contract-nav" aria-label="Contracts">
+<details class="contract-nav-disclosure">
+  <summary>Contracts</summary>
+  <div class="contract-nav-content">
+    <p class="toc-title">Contracts</p>
+    <ul class="contract-nav-home"><li><a href="/contracts/">Overview</a></li><li><a href="/contracts/catalogue/">Contract catalogue</a></li></ul>
+<div class="toc-group contract-page-nav">
+  <p class="toc-group-title">On this page</p>
+  <ul><li><a href="#use-this">Use in your game</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#values">Numbers</a></li>
+<li><a href="#lists">Lists</a></li>
+<li><a href="#tests">Acceptance tests</a></li>
+<li><a href="#adoption-json">JSON</a></li></ul>
+</div>
+  </div>
+</details>
+</nav>
+<article class="doc-body contract-entry-body">
+<p class="label"><a href="/contracts/catalogue/#determinism-replay">Determinism &amp; replay</a></p>
+<div class="contract-entry-title-row">
+  <div><h1>Patched racing ghost</h1><p class="contract-core-name"><code>patched-racing-ghost</code> · an adoption of <a href="/contracts/replay-scope-1/">Replay scope</a>, version 1</p></div>
+  <div><span class="contract-badge ">Tests included</span></div>
+</div>
+
+<section class="contract-handoff" aria-labelledby="use-this">
+  <h2 id="use-this">Use in your game</h2>
+  <p>Opens the authoring tool with these answers and settings already filled in. You still add your game's own rules and tuning.</p>
+  <div class="contract-actions">
+    <a class="cta" href="/authoring-tool/?contract=replay-scope-1&amp;adoption=patched-racing-ghost">Open in the authoring tool</a>
+    <a class="cta-quiet" href="/contracts/replay-scope-1/patched-racing-ghost.zip" download="patched-racing-ghost.zip">Download ZIP</a>
+  </div>
+  <details><summary>What is in the ZIP</summary><p>The ZIP holds the adoption and its acceptance tests. In the authoring tool, choose <strong>Add contract</strong> and pick this ZIP. If you keep your design as files, put them in <code>contracts/</code>.</p><div class="contract-actions"><a href="/contracts/replay-scope-1/patched-racing-ghost.json" download="patched-racing-ghost.json">Download adoption JSON</a> · <a href="/contracts/replay-scope-1/replay-scope-1.pack.json" download="replay-scope-1.pack.json">Download tests</a><button type="button" class="cta-quiet" data-copy-core data-core-url="/contracts/replay-scope-1/patched-racing-ghost.json" data-copy-kind="adoption">Copy adoption</button><span role="status" aria-live="polite" data-copy-status></span></div></details>
+</section>
+<section class="contract-overview">
+  <h2>The contract behind it</h2>
+  <p>Covers racing ghosts, daily seeds, observer replays, solution shares, and other recorded reruns. It decides what the record contains, whether an update can still play it, what must match, and what happens at the first difference. Input encoding, random-number methods, storage, cameras, and networking stay in the game&#39;s own rules.</p>
+  <p><a href="/contracts/replay-scope-1/">Read the full Replay scope contract →</a></p>
+</section>
+<section class="contract-form-section" id="questions">
+  <h2>Questions</h2>
+  <p>The supplied answer is marked on each question. Pick other answers to see what changes. Nothing is saved here: the ZIP and the authoring tool use the supplied answers.</p>
+  <div class="contract-actions contract-question-tools">
+    <button type="button" class="cta-quiet contract-reset" data-reset-choices>Restore supplied answers</button>
+    <label class="contract-switch"><input type="checkbox" data-builder-wording> Show exact wording for builders</label>
+  </div>
+  <div class="contract-question-list">
+  <article class="contract-question" id="question-replay-record" data-contract-question data-flag="replay-record" data-when="null">
+  <h3>What does this replay need to run again?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for What does this replay need to run again?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="replay-scope-replay-record" value="seed-only" data-contract-choice><span class="contract-option-label">Seed only</span></label></th>
+  <td><span class="contract-option-meaning">The replay needs only the seed. A roguelike daily run rebuilds the day&#39;s dungeon before new play begins.</span><p class="contract-option-semantics">The record carries the seed but no input log; each claim&#39;s comparison reference is carried or recomputed from the record. Playback consumes the seed, accepts live inputs, and applies each claim&#39;s live-input answer.</p></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="replay-scope-replay-record" value="seed-and-input-log" data-contract-choice><span class="contract-option-label">Seed and input log</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The replay needs the seed and the recorded inputs. A racing ghost follows the recorded steering on the same generated track.</span><p class="contract-option-semantics">The record carries the seed and one ordered input log; each claim&#39;s comparison reference is carried or recomputed from the record. Playback consumes the seed and log from the declared starting point; changing either creates a different record instance.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="replay-scope-replay-record" value="input-log-from-fixed-start" data-contract-choice><span class="contract-option-label">Input log from fixed start</span></label></th>
+  <td><span class="contract-option-meaning">The replay needs recorded inputs and one fixed start. A puzzle solution begins from the shared board and repeats the saved moves.</span><p class="contract-option-semantics">The record carries one fixed-start identity and one ordered input log; each claim&#39;s comparison reference is carried or recomputed from the record. Seed identity is not a separate requirement.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>A daily seed recreates a challenge. A racing ghost also needs the driver&#39;s recorded inputs.</p></details>
+</article>
+<article class="contract-question" id="question-after-an-update" data-contract-question data-flag="after-an-update" data-when="null">
+  <h3>What happens to a recorded replay after the game updates?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for What happens to a recorded replay after the game updates?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="replay-scope-after-an-update" value="same-version-only" data-contract-choice><span class="contract-option-label">Same version only</span></label></th>
+  <td><span class="contract-option-meaning">The replay works only in the version that recorded it. A patched racing game labels an older ghost as incompatible.</span><p class="contract-option-semantics">When the recorded and running version ids differ, reject the replay before consuming its seed, start, or inputs. Equal version ids do not override failed content, mod, or settings checks.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="replay-scope-after-an-update" value="migrate-then-replay" data-contract-choice><span class="contract-option-label">Migrate then replay</span></label></th>
+  <td><span class="contract-option-meaning">The game converts the replay before playing it. A puzzle update maps an old move list onto the revised board rules.</span><p class="contract-option-semantics">When the version ids differ, a cited migration rule derives a new record for the running version while preserving the source record. Playback consumes only a successful migrated record and identifies both versions and the migration used.</p></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="replay-scope-after-an-update" value="best-effort-with-declared-divergence" data-contract-choice><span class="contract-option-label">Best effort with declared divergence</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The game tries the old replay and states what may differ. An RTS update names changed unit balance before the observer replay starts.</span><p class="contract-option-semantics">When the version ids differ, the running version consumes the original record after presenting the cited known cross-version differences. Actual mismatches still follow the divergence-response answer.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>A patch can change rules, content, or timing. The replay needs a clear version promise before playback starts.</p></details>
+</article>
+<article class="contract-question" id="question-divergence-response" data-contract-question data-flag="divergence-response" data-when="null">
+  <h3>What happens at the first result that does not match?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for What happens at the first result that does not match?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="replay-scope-divergence-response" value="stop-and-report" data-contract-choice><span class="contract-option-label">Stop and report</span></label></th>
+  <td><span class="contract-option-meaning">Stop the replay and report the first difference. A puzzle solution stops on the first move that produces the wrong board.</span><p class="contract-option-semantics">Do not consume the next recorded input. Report the failed claim, comparison point, expected result, observed result, versions, and platforms, then end playback as diverged.</p></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="replay-scope-divergence-response" value="continue-and-flag" data-contract-choice><span class="contract-option-label">Continue and flag</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">Keep playing and mark the replay as diverged. An RTS observer can watch the rest after a unit first appears in the wrong place.</span><p class="contract-option-semantics">Report the first difference, mark playback as diverged, and continue from playback&#39;s own state. Later comparisons are informational; they do not replace the first report or resynchronise playback to the reference.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="replay-scope-divergence-response" value="continue-silently" data-contract-choice><span class="contract-option-label">Continue silently</span></label></th>
+  <td><span class="contract-option-meaning">Keep playing without showing the difference. A racing ghost can finish the lap after it drifts past the allowed gap.</span><p class="contract-option-semantics">Mark the mismatch inside the replay controller, emit no player-facing, ordinary-log, or telemetry report, and continue from playback&#39;s own state. Later comparisons are informational and playback remains diverged.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>A replay can stop, continue with a warning, or continue without showing the difference.</p></details>
+</article>
+  </div>
+</section>
+<aside class="contract-relief" aria-labelledby="relief-title">
+  <p class="contract-relief-title" id="relief-title">That was the hard part.</p>
+  <p>The questions are the decisions. Everything below follows from them: the numbers, lists and test inputs this adoption supplies, and the tests that come with it. The authoring tool edits all of it in place. Read on only if you want to check.</p>
+</aside>
+<details class="contract-form-section contract-fold" id="values">
+  <summary><span class="contract-fold-title">Numbers</span><span class="contract-fold-note">1 number</span></summary>
+  <p>Each value is either a number set here or a reference to one of your tuning keys.</p>
+<div class="contract-detail-grid"><article class="contract-detail-card">
+  <div class="contract-detail-heading"><h3>Allowed position gap = tuning.social-ghost-gap</h3><span class="contract-badge ">read from your tuning</span></div>
+  <p class="contract-exact-name"><code>allowed-position-gap</code></p>
+  <p>The greatest allowed distance between recorded and replayed positions, in the position unit named by every position claim in this adoption.</p>
+</article></div>
+</details>
+<details class="contract-form-section contract-fold" id="rules">
+  <summary><span class="contract-fold-title">Rules</span><span class="contract-fold-note">1 rule</span></summary>
+  <p>A rule is a check between the numbers. Validation reports a rule that fails.</p>
+  <ul class="contract-rule-list"><li id="rule-best-effort-must-be-visible"><p class="contract-rule-message">Best-effort replay after an update needs a visible difference notice; show and flag differences, or keep the replay on its recorded version.</p>
+  <p class="contract-condition">Forbidden when After an update is Best effort with declared divergence and Divergence response is Continue silently.</p></li></ul>
+</details>
+<details class="contract-form-section contract-fold" id="lists">
+  <summary><span class="contract-fold-title">Lists</span><span class="contract-fold-note">2 lists</span></summary>
+  <p>Each list holds the rows this adoption supplies. A list can be empty.</p>
+  <article class="contract-collection">
+<h3>Replay record</h3>
+<p class="contract-exact-name"><code>replay-record</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Recording declared in</th><th>Input clock declared in</th><th>Fixed start declared in</th><th>Migration declared in</th><th>Cross version divergence declared in</th><th>Difference report declared in</th></tr></thead>
+<tbody>
+<tr><td><code>social-ghost</code></td><td><code>racing.social-ghost-recording</code></td><td><code>racing.physics-steps</code></td><td>—</td><td>—</td><td><code>racing.patch-ghost-notice</code></td><td><code>racing.social-ghost-status</code></td></tr>
+</tbody></table></div>
+</article>
+<article class="contract-collection">
+<h3>Reproduction claims</h3>
+<p class="contract-exact-name"><code>reproduction-claims</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Artifact</th><th>Platform reach</th><th>Shifts with live input</th><th>Live input dependence declared in</th><th>Matching standard</th><th>Reproduces</th><th>Excludes</th><th>Conditions</th><th>Comparison points</th></tr></thead>
+<tbody>
+<tr><td><code>patched-car-path</code></td><td><code>social ghost car path</code></td><td><code>recorded-platform-only</code></td><td>—</td><td>—</td><td><code>allowed-position-gap</code></td><td><code>racing.social-ghost-position</code></td><td><code>racing.social-ghost-exclusions</code></td><td><code>racing.social-ghost-conditions</code></td><td><code>racing.social-ghost-samples</code></td></tr>
+</tbody></table></div>
+</article>
+</details>
+<details class="contract-form-section contract-fold" id="verification">
+  <summary><span class="contract-fold-title">Test inputs</span><span class="contract-fold-note">scope and seeds</span></summary>
+  <p>Some tests need a scope or seeds from the adoption before they can run.</p>
+  <p>This adoption supplies none; every test uses its defaults.</p>
+</details>
+<details class="contract-form-section contract-fold" id="tests">
+  <summary><span class="contract-fold-title">Acceptance tests</span><span class="contract-fold-note">30 tests apply</span></summary>
+  <p>The contract comes with 48 tests. A test that runs once per row is counted once for each row. Tests that do not apply to these answers are still listed, with the reason.</p>
+  <div class="contract-test-list"><article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>sealed-record-carries-replay-identity · social-ghost</code></p>
+      <h3><code class="contract-placeholder">social-ghost</code> sealed records carry the complete replay identity</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the social-ghost row.</p>
+  <p class="contract-test-text">Each sealed <code class="contract-placeholder">social-ghost</code> record has its own instance identity and carries, as named at <code class="contract-placeholder">racing.social-ghost-recording</code>, the replay identity fields and the seed and ordered input log, together with every claim&#39;s captured reference or sealed recomputation source. A reference never comes from live play. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a sealed record made from replay family <code class="contract-placeholder">social-ghost</code> and its manifest at <code class="contract-placeholder">racing.social-ghost-recording</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the record is inspected before playback</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the record carries its own stable instance identity, recording version, platform, content-set identity, settings and mod identity, the seed and ordered input log, and every reproduction claim&#39;s comparison reference or sealed source data for deterministic recomputation</li><li>each comparison reference is captured during recording or deterministically recomputed from the sealed record, never obtained from live play</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-record-manifest</li><li><code class="contract-placeholder">patched-racing-ghost</code>-reference-source</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>migrated-record-keeps-source-identity</code></p>
+      <h3>a migrated record has its own identity and keeps its source</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: after an update is best effort with declared divergence, not migrate then replay.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>playback-result-uses-closed-vocabulary</code></p>
+      <h3>the terminal playback result uses the closed vocabulary</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to patched-racing-ghost.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">patched-racing-ghost</code> playback is in progress until it ends. Its terminal playback result is exactly one of diverged, rejected, or complete.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each <code class="contract-placeholder">patched-racing-ghost</code> playback from start until it ends</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the playback result is read before and after termination</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>before termination the playback is in progress</li><li>at termination the playback result is exactly one of diverged, rejected, or complete, and never two of them</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-playback-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>record-establishes-declared-start · social-ghost</code></p>
+      <h3><code class="contract-placeholder">social-ghost</code> records its selected start before claimed results</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the social-ghost row.</p>
+  <p class="contract-test-text">The recording version, platform, content-set identity, settings, and mod identity are fixed from <code class="contract-placeholder">racing.social-ghost-recording</code> before the first captured seed, start, or input and do not change for the life of the recording. <code class="contract-placeholder">social-ghost</code> then captures the seed before any claimed seeded result is generated. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a new <code class="contract-placeholder">social-ghost</code> recording about to begin, with its manifest at <code class="contract-placeholder">racing.social-ghost-recording</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>recording establishes its start</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the recorder captures the seed before any claimed seeded result is generated</li><li>the recording version, platform, content-set identity, settings, and mod identity are fixed from <code class="contract-placeholder">racing.social-ghost-recording</code> before the first captured seed, start, or input and do not change for the life of the recording</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-record-manifest</li><li><code class="contract-placeholder">patched-racing-ghost</code>-recording-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>input-log-captures-complete-action-order · social-ghost</code></p>
+      <h3><code class="contract-placeholder">social-ghost</code> captures every mapped action in cited order</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the social-ghost row.</p>
+  <p class="contract-test-text">From the start at <code class="contract-placeholder">racing.social-ghost-recording</code>, <code class="contract-placeholder">social-ghost</code> captures every mapped game action in complete order at the clock, step, or turn cited at <code class="contract-placeholder">racing.physics-steps</code>. The test names both addresses and restates nothing from them.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>one <code class="contract-placeholder">social-ghost</code> recording with mapped game actions before and after the cited start</p></dd></div>
+<div><dt>When</dt><dd><ul><li>input capture runs from the start named at <code class="contract-placeholder">racing.social-ghost-recording</code> using the clock, step, or turn at <code class="contract-placeholder">racing.physics-steps</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>every mapped game action after capture begins enters one ordered input log in complete order at the cited clock, step, or turn</li><li>no action before capture begins enters the log</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-input-log-trace</li><li><code class="contract-placeholder">patched-racing-ghost</code>-recording-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>seed-only-record-captures-no-input</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> captures no input log</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: replay record is seed and input log, not seed only.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>claim-records-reference-or-recomputation-source · patched-car-path</code></p>
+      <h3><code class="contract-placeholder">patched-car-path</code> records its comparison reference source</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the patched-car-path row.</p>
+  <p class="contract-test-text">At every point cited at <code class="contract-placeholder">racing.social-ghost-samples</code>, recording captures the reference <code class="contract-placeholder">patched-car-path</code> needs or all sealed data the family row&#39;s cited method needs to recompute it. The record distinguishes those two sources. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>recording reaches each <code class="contract-placeholder">patched-car-path</code> comparison point cited at <code class="contract-placeholder">racing.social-ghost-samples</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the recorder handles the claim at that point</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the record captures the comparison reference required by <code class="contract-placeholder">patched-car-path</code>&#39;s matching standard or all sealed source data required by the family row&#39;s cited recomputation method</li><li>the record distinguishes a captured reference from sealed recomputation source data</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-reference-source</li><li><code class="contract-placeholder">patched-racing-ghost</code>-recording-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>record-seals-at-boundary · social-ghost</code></p>
+      <h3><code class="contract-placeholder">social-ghost</code> seals one immutable record at its boundary</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the social-ghost row.</p>
+  <p class="contract-test-text">At the boundary cited at <code class="contract-placeholder">racing.social-ghost-recording</code>, <code class="contract-placeholder">social-ghost</code> seals its instance identity and contents. Any later edit creates a different instance in the same replay family. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>one <code class="contract-placeholder">social-ghost</code> recording approaching the end boundary at <code class="contract-placeholder">racing.social-ghost-recording</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>capture reaches that boundary and a later edit is requested</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>capture ends at the cited boundary and seals the record&#39;s instance identity and contents</li><li>the later edit creates a different record instance in the same replay family and leaves the sealed record unchanged</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-record-manifest</li><li><code class="contract-placeholder">patched-racing-ghost</code>-recording-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>record-wide-identity-precedes-consumption · social-ghost</code></p>
+      <h3><code class="contract-placeholder">social-ghost</code> checks record-wide identity before consumption</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the social-ghost row.</p>
+  <p class="contract-test-text">Before consuming a seed, start, or input, <code class="contract-placeholder">social-ghost</code> reads the record identity at <code class="contract-placeholder">racing.social-ghost-recording</code> and the cited compatibility conditions. Each record-wide identity it carries rejects through <code class="contract-placeholder">racing.social-ghost-status</code> when it fails; neither an unchanged version id nor the update policy excuses a failed identity. The test names both addresses and restates nothing from them.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>sealed <code class="contract-placeholder">social-ghost</code> records in which each record-wide identity this adoption carries fails in turn — content-set identity, settings, mods, and the fixed start where present — including a content patch whose version id is unchanged</p></dd></div>
+<div><dt>When</dt><dd><ul><li>playback selection begins</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the version, platform, content-set identity, settings, and mod identity at <code class="contract-placeholder">racing.social-ghost-recording</code> and every cited compatibility condition are read before any seed, start, or input is consumed</li><li>each failed record-wide identity the adoption carries rejects the record and presents the incompatibility report through <code class="contract-placeholder">racing.social-ghost-status</code> before any seed, start, or input is consumed</li><li>the unchanged version id does not turn the failed content identity into a pass</li><li>the update policy is not used to excuse a failed identity</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-identity-check-trace</li><li><code class="contract-placeholder">patched-racing-ghost</code>-rejection-report</li><li><code class="contract-placeholder">patched-racing-ghost</code>-input-log-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>compatible-record-is-played · social-ghost</code></p>
+      <h3><code class="contract-placeholder">social-ghost</code> plays a compatible record</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the social-ghost row.</p>
+  <p class="contract-test-text">A sealed <code class="contract-placeholder">social-ghost</code> record whose complete replay identity matches the running game and whose cited compatibility conditions hold is played rather than rejected. Playback consumes the seed, start, or inputs it carries and reaches complete or diverged, never rejected.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a sealed <code class="contract-placeholder">social-ghost</code> record whose version, platform, content-set identity, settings, mods, and start all match the running game and whose cited compatibility conditions hold</p></dd></div>
+<div><dt>When</dt><dd><ul><li>playback selection checks the compatible record</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>playback is not rejected</li><li>playback consumes the seed, start, or inputs the record carries</li><li>playback reaches a terminal result that is complete or diverged, never rejected</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-identity-check-trace</li><li><code class="contract-placeholder">patched-racing-ghost</code>-playback-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>recorded-platform-only-excludes-other-platforms · patched-car-path</code></p>
+      <h3><code class="contract-placeholder">patched-car-path</code> compares only on the recording platform</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the patched-car-path row.</p>
+  <p class="contract-test-text">On another platform, recorded-platform-only claim <code class="contract-placeholder">patched-car-path</code> is excluded, is not compared, and cannot diverge. Other eligible claims continue where they exist. The comparison log distinguishes exclusion from a match.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a playback on a platform different from the recording platform with <code class="contract-placeholder">patched-car-path</code> and at least one other eligible claim where the adoption can construct one</p></dd></div>
+<div><dt>When</dt><dd><ul><li>claim platform reach is selected</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">patched-car-path</code> is not compared and cannot cause divergence</li><li>every other eligible claim continues; where no other eligible claim exists, this clause asserts nothing</li><li>the comparison log records platform exclusion rather than a match</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-comparison-log</li><li><code class="contract-placeholder">patched-racing-ghost</code>-playback-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>every-supported-platform-excludes-only-unsupported-platforms</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> compares on every supported platform</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: no row in reproduction-claims matches platform-reach every supported platform.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>same-version-only-rejects-version-mismatch</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> rejects a different running version</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: after an update is best effort with declared divergence, not same version only.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>migration-runs-once-before-playback</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> migrates once or rejects</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: after an update is best effort with declared divergence, not migrate then replay.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>best-effort-presents-known-differences · social-ghost</code></p>
+      <h3><code class="contract-placeholder">social-ghost</code> presents known cross-version differences before playback</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the social-ghost row.</p>
+  <p class="contract-test-text">For differing versions, best-effort presents the differences at <code class="contract-placeholder">racing.patch-ghost-notice</code> before consuming the unchanged source record; no clock mapping is performed and the input clock the record cites must still exist in the running version. A missing running-version clock rejects through <code class="contract-placeholder">racing.social-ghost-status</code> before input consumption. For equal version ids, the cross-version notice is not presented and playback proceeds on the source record. Every non-rejected mismatch follows the divergence response. The test names both addresses and restates nothing from them.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>sealed <code class="contract-placeholder">social-ghost</code> source records whose version ids are equal to and differ from the running version and, for each record with a cited input clock, running versions where that clock exists and no longer exists</p></dd></div>
+<div><dt>When</dt><dd><ul><li>best-effort selection applies the update policy at <code class="contract-placeholder">racing.patch-ghost-notice</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>when the version ids differ, the cited known differences are presented before playback consumes the source record, and the source record remains unchanged</li><li>when the version ids are equal, the cross-version notice is not presented and playback proceeds on the source record</li><li>for a differing version, no clock mapping is performed and the input clock the record cites must still exist in the running version</li><li>where the record carries a cited input clock and that clock no longer exists, playback rejects through <code class="contract-placeholder">racing.social-ghost-status</code> before consuming an input</li><li>where no rejection occurs, later actual mismatches follow the selected divergence response</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-cross-version-notice</li><li><code class="contract-placeholder">patched-racing-ghost</code>-record-manifest</li><li><code class="contract-placeholder">patched-racing-ghost</code>-rejection-report</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>seeded-playback-recreates-start · social-ghost</code></p>
+      <h3><code class="contract-placeholder">social-ghost</code> supplies the recorded seed or rejects</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the social-ghost row.</p>
+  <p class="contract-test-text">Seeded <code class="contract-placeholder">social-ghost</code> playback supplies the recorded seed before generating a claimed seeded result. If the seed cannot be established, playback rejects before input consumption.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a playable <code class="contract-placeholder">social-ghost</code> record, once with its recorded seed available and once with the required seed unavailable</p></dd></div>
+<div><dt>When</dt><dd><ul><li>playback recreates the start</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the available run supplies the recorded seed before generating a claimed seeded result</li><li>the unavailable run becomes rejected before consuming any input</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-start-trace</li><li><code class="contract-placeholder">patched-racing-ghost</code>-playback-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fixed-start-playback-verifies-or-restores</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> verifies or restores the fixed start</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: replay record is seed and input log, not input log from fixed start.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>input-log-playback-consumes-cited-order · social-ghost</code></p>
+      <h3><code class="contract-placeholder">social-ghost</code> consumes recorded inputs in cited order</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the social-ghost row.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">social-ghost</code> playback consumes the recorded input log once, in its recorded order, at the clock, step, or turn cited at <code class="contract-placeholder">racing.physics-steps</code>. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a playable <code class="contract-placeholder">social-ghost</code> record with distinct mapped actions in its input log</p></dd></div>
+<div><dt>When</dt><dd><ul><li>playback runs at the clock, step, or turn cited at <code class="contract-placeholder">racing.physics-steps</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>every recorded input is consumed once in recorded order at the clock, step, or turn cited at <code class="contract-placeholder">racing.physics-steps</code></li><li>no live input replaces or reorders a recorded action</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-input-log-trace</li><li><code class="contract-placeholder">patched-racing-ghost</code>-playback-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>seed-only-playback-accepts-live-input</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> accepts live input without a recorded log</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: replay record is seed and input log, not seed only.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>seed-fixed-claim-ignores-live-input-variation</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> cannot change when live inputs vary</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: no row in reproduction-claims matches shifts-with-live-input seed fixes this claim.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>live-input-shifted-claim-reads-only-cited-facts</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> reads only its cited live-input facts</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: no row in reproduction-claims matches shifts-with-live-input live input may shift this claim.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>claim-reference-comes-from-sealed-record · patched-car-path</code></p>
+      <h3><code class="contract-placeholder">patched-car-path</code> obtains its reference from the sealed record</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the patched-car-path row.</p>
+  <p class="contract-test-text">At <code class="contract-placeholder">racing.social-ghost-samples</code>, <code class="contract-placeholder">patched-car-path</code> reads a captured comparison reference or deterministically recomputes it from the sealed record through the family row&#39;s cited method. The reference-source record distinguishes the two and proves live play supplied neither. An unavailable form asserts nothing. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p><code class="contract-placeholder">patched-car-path</code> playbacks using a captured reference and, where the adoption can construct one, a deterministically recomputed reference</p></dd></div>
+<div><dt>When</dt><dd><ul><li>playback reaches the points at <code class="contract-placeholder">racing.social-ghost-samples</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the reference is read from the sealed record or deterministically recomputed from it using the family row&#39;s cited method and <code class="contract-placeholder">racing.social-ghost-samples</code></li><li>the reference-source record distinguishes capture from recomputation and proves no reference was read from live play</li><li>where the adoption cannot construct one of the two reference forms, that form asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-reference-source</li><li><code class="contract-placeholder">patched-racing-ghost</code>-comparison-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unmet-claim-condition-skips-comparison · patched-car-path</code></p>
+      <h3><code class="contract-placeholder">patched-car-path</code> reads conditions before comparison</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the patched-car-path row.</p>
+  <p class="contract-test-text">At each constructible point where <code class="contract-placeholder">racing.social-ghost-conditions</code> is not met, <code class="contract-placeholder">patched-car-path</code> is not compared, does not diverge, and does not reject or make playback terminal because of that condition alone. Every other eligible claim, where the adoption declares one, is still compared at its own points, and the logs distinguish the skip from a match. If no such point exists, the test asserts nothing. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each <code class="contract-placeholder">patched-car-path</code> comparison point this adoption can construct where the conditions at <code class="contract-placeholder">racing.social-ghost-conditions</code> are not met</p></dd></div>
+<div><dt>When</dt><dd><ul><li>playback reaches that point</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the conditions are read before a comparison is attempted</li><li>the claim is recorded as not compared and does not mark a divergence</li><li>the playback is not rejected and does not become terminal because of that claim&#39;s unmet condition alone</li><li>every other eligible claim is still compared at its own comparison points; where no other eligible claim exists, this clause asserts nothing</li><li>where no unmet-condition point can be constructed, this test asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-condition-trace</li><li><code class="contract-placeholder">patched-racing-ghost</code>-comparison-log</li><li><code class="contract-placeholder">patched-racing-ghost</code>-playback-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>bit-exact-claim-compares-declared-bytes</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> compares every included byte</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: no row in reproduction-claims matches matching-standard bit exact state.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>outcome-equivalent-claim-compares-declared-fields</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> compares every included outcome field</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: no row in reproduction-claims matches matching-standard outcome equivalent.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>position-claim-uses-adoption-gap · patched-car-path</code></p>
+      <h3><code class="contract-placeholder">patched-car-path</code> passes only within the declared allowed gap</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the patched-car-path row.</p>
+  <p class="contract-test-text">Position claim <code class="contract-placeholder">patched-car-path</code> measures distance in the space at <code class="contract-placeholder">racing.social-ghost-position</code>, subtracts <code class="contract-placeholder">racing.social-ghost-exclusions</code>, and passes exactly when the distance is no greater than the declared allowed gap at <code class="contract-placeholder">allowed-position-gap = tuning.social-ghost-gap</code>. Every position claim in this adoption uses that one value. The test names the addresses and restates neither the gap nor the cited rules.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>eligible <code class="contract-placeholder">patched-car-path</code> comparisons whose distance in the space cited at <code class="contract-placeholder">racing.social-ghost-position</code> is below, equal to, and above the value at <code class="contract-placeholder">allowed-position-gap = tuning.social-ghost-gap</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>playback applies the allowed-position-gap matching standard</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the measured distance uses the cited space and excludes the state at <code class="contract-placeholder">racing.social-ghost-exclusions</code></li><li>the comparison passes exactly when the distance is no greater than the declared allowed gap and fails when it is greater</li><li>every position claim in this adoption reads the same adoption-wide value at <code class="contract-placeholder">allowed-position-gap = tuning.social-ghost-gap</code></li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-comparison-log</li><li><code class="contract-placeholder">patched-racing-ghost</code>-allowed-gap-source</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>seed-fixed-claim-repeats-from-declared-record</code></p>
+      <h3>the <code class="contract-placeholder">Row.artifact</code> result repeats from the declared seed record</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: replay record is seed and input log, not seed only.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>live-input-shifted-claim-repeats-within-cited-rule</code></p>
+      <h3>the <code class="contract-placeholder">Row.artifact</code> result repeats within its cited live-input rule</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: replay record is seed and input log, not seed only.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>seed-and-input-claim-repeats-from-declared-record · patched-car-path</code></p>
+      <h3>the <code class="contract-placeholder">social ghost car path</code> result repeats from the declared seed and input record</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the patched-car-path row.</p>
+  <p class="contract-test-text">Across <code class="contract-placeholder">recorded runs where this claim is eligible</code>, the <code class="contract-placeholder">social ghost car path</code> result from the same sealed seed and ordered input log satisfies <code class="contract-placeholder">patched-car-path</code>&#39;s matching standard at <code class="contract-placeholder">racing.social-ghost-samples</code> whenever the claim is eligible. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Holds</dt><dd><p>for every eligible case for the <code class="contract-placeholder">social ghost car path</code> result in scope, playback using the same sealed seed and ordered input log satisfies <code class="contract-placeholder">patched-car-path</code>&#39;s selected matching standard at the points cited at <code class="contract-placeholder">racing.social-ghost-samples</code></p></dd></div>
+<div><dt>Seeds</dt><dd><p><code class="contract-placeholder">[&quot;audit-a&quot;,&quot;audit-b&quot;]</code></p></dd></div>
+<div><dt>Scope</dt><dd><p><code class="contract-placeholder">recorded runs where this claim is eligible</code></p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-record-manifest</li><li><code class="contract-placeholder">patched-racing-ghost</code>-input-log-trace</li><li><code class="contract-placeholder">patched-racing-ghost</code>-comparison-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fixed-start-input-claim-repeats-from-declared-record</code></p>
+      <h3>the <code class="contract-placeholder">Row.artifact</code> result repeats from the declared fixed start and input record</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: replay record is seed and input log, not input log from fixed start.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>outside-conditions-make-no-promise</code></p>
+      <h3>changes outside cited conditions do not fail this contract</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to patched-racing-ghost.</p>
+  <p class="contract-test-text">A change outside the cited conditions is never itself a reason to reject a record or to mark a divergence. A divergence arises only when a claimed result fails its comparison at an eligible comparison point. If the adoption can construct no such change, the test asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each change outside the cited conditions that the <code class="contract-placeholder">patched-racing-ghost</code> adoption can construct</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the change is observed during playback</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>no change outside the cited conditions is itself a ground for rejection or for a divergence mark; a divergence arises only from a failed comparison of a claimed result at an eligible comparison point</li><li>where no such change can be constructed, this test asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-condition-trace</li><li><code class="contract-placeholder">patched-racing-ghost</code>-comparison-log</li><li><code class="contract-placeholder">patched-racing-ghost</code>-playback-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>first-difference-retains-complete-record · social-ghost</code></p>
+      <h3><code class="contract-placeholder">social-ghost</code> retains the first failed eligible comparison</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the social-ghost row.</p>
+  <p class="contract-test-text">At the first failed eligible comparison, <code class="contract-placeholder">social-ghost</code> becomes diverged and retains the claim, point, expected and observed results, versions, platforms, and last consumed input when present. The records distinguish failure from a skipped comparison.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>one <code class="contract-placeholder">social-ghost</code> playback with a first failed eligible comparison, with a last consumed input where this record has one</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the comparison fails its claim&#39;s matching standard</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the playback result becomes diverged at that first difference</li><li>the retained divergence record holds the claim id, comparison point, expected result, observed result, recorded and running versions, recorded and running platforms, and last consumed input when present</li><li>the retained record distinguishes this failed comparison from a skipped comparison</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-divergence-record</li><li><code class="contract-placeholder">patched-racing-ghost</code>-playback-result</li><li><code class="contract-placeholder">patched-racing-ghost</code>-comparison-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>stop-and-report-ends-at-first-difference</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> reports and stops at the first difference</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: divergence response is continue and flag, not stop and report.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>continue-and-flag-keeps-visible-divergence · social-ghost</code></p>
+      <h3><code class="contract-placeholder">social-ghost</code> reports and continues from playback state</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the social-ghost row.</p>
+  <p class="contract-test-text">At the first difference, <code class="contract-placeholder">social-ghost</code> presents it through <code class="contract-placeholder">racing.social-ghost-status</code> before the next input, keeps a visible diverged mark, and continues from playback&#39;s own state. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>one <code class="contract-placeholder">social-ghost</code> playback at its first difference with later playback remaining</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the difference is retained</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the difference is presented through <code class="contract-placeholder">racing.social-ghost-status</code> before the next input is consumed</li><li>a visible diverged mark remains and playback continues from its own state</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-divergence-record</li><li><code class="contract-placeholder">patched-racing-ghost</code>-difference-report</li><li><code class="contract-placeholder">patched-racing-ghost</code>-playback-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>continue-silently-keeps-internal-divergence</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> continues with an internal diverged mark</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: divergence response is continue and flag, not continue silently.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>later-comparisons-never-resynchronise</code></p>
+      <h3>later comparisons are informational only</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to patched-racing-ghost.</p>
+  <p class="contract-test-text">For each constructible continuing run, later comparisons are informational: they do not replace the first difference or resynchronise playback to a reference. Playback advances from its own state. A continuing run with no later comparison point asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each continuing <code class="contract-placeholder">patched-racing-ghost</code> playback that can construct a first difference, with and without later comparison points</p></dd></div>
+<div><dt>When</dt><dd><ul><li>playback continues after the first difference</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>later comparisons are retained as informational and never replace the first difference</li><li>playback is never resynchronised to a comparison reference and advances only from its own state</li><li>where a continuing run has no later comparison point, this test asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-divergence-record</li><li><code class="contract-placeholder">patched-racing-ghost</code>-comparison-log</li><li><code class="contract-placeholder">patched-racing-ghost</code>-playback-state-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>complete-means-all-made-comparisons-matched · social-ghost</code></p>
+      <h3>complete means every comparison actually made matched</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per replay-record row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the social-ghost row.</p>
+  <p class="contract-test-text">When <code class="contract-placeholder">social-ghost</code> reaches its end at <code class="contract-placeholder">racing.social-ghost-recording</code> without an eligible failure, complete means every comparison actually made matched. It promises nothing about excluded claims, unmet conditions, or excluded state, which the log distinguishes from matches. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>one <code class="contract-placeholder">social-ghost</code> record reaching the end boundary at <code class="contract-placeholder">racing.social-ghost-recording</code> with no failed eligible comparison</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the terminal playback result is assigned</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the playback result becomes complete exactly when every comparison actually made matched</li><li>the comparison log separately records excluded claims, unmet conditions, and excluded state, and complete makes no promise about them</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-playback-result</li><li><code class="contract-placeholder">patched-racing-ghost</code>-comparison-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>same-moment-events-preserve-event-resolution-order</code></p>
+      <h3>same-moment events preserve Event resolution order</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to patched-racing-ghost.</p>
+  <p class="contract-test-text">Events at the same replay moment enter in the total order Event resolution supplies. The replay lifecycle introduces no reordering of its own between the supplied order and processing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>two or more events offered at the same <code class="contract-placeholder">patched-racing-ghost</code> replay moment in a known total order from Event resolution</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the events enter the replay lifecycle</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the lifecycle processes them in exactly the supplied total order</li><li>the replay lifecycle introduces no reordering of its own between the supplied order and processing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-event-order-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>adoption-declares-exactly-one-replay-record</code></p>
+      <h3>declaration check: the adoption declares exactly one replay-record row</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to patched-racing-ghost.</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. A legal adoption has exactly one replay-record row. Any other count is a defect this test fails by construction; the validator does not enforce the maximum.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">patched-racing-ghost</code> adoption document, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer counts replay-record rows</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the adoption has exactly one replay-record row; zero rows or more than one row is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>adoption-declares-at-least-one-reproduction-claim</code></p>
+      <h3>declaration check: the adoption declares at least one reproduction claim</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to patched-racing-ghost.</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. A legal adoption has at least one reproduction claim. An empty claim list is a defect this test fails by construction; the validator does not enforce the minimum.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">patched-racing-ghost</code> adoption document, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer counts reproduction-claims rows</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the adoption has at least one reproduction-claims row; an empty list is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>claim-standard-agrees-with-cited-prose · patched-car-path</code></p>
+      <h3>declaration check: <code class="contract-placeholder">patched-car-path</code>&#39;s matching standard agrees with its cited prose</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the patched-car-path row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">racing.social-ghost-position</code> with <code class="contract-placeholder">racing.social-ghost-exclusions</code>, not the running game. The cited prose must describe the kind of result selected by <code class="contract-placeholder">patched-car-path</code>&#39;s matching standard; any other pairing is a defect this test fails by construction. The test names both addresses and restates nothing from them.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">patched-racing-ghost</code> adoption and the prose at <code class="contract-placeholder">racing.social-ghost-position</code> and <code class="contract-placeholder">racing.social-ghost-exclusions</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer compares the selected matching-standard with the included and excluded result description</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the prose names bytes for bit-exact-state, outcome fields for outcome-equivalent, or positions and their space for allowed-position-gap, matching the row&#39;s selected standard</li><li>any disagreement is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>every-platform-claim-has-multiple-platform-evidence</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code> was tested on more than one platform</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: no row in reproduction-claims matches platform-reach every supported platform.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>claim-excludes-cites-separate-section · patched-car-path</code></p>
+      <h3>declaration check: <code class="contract-placeholder">patched-car-path</code> has a separate exclusions section</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the patched-car-path row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and cited prose, not the running game. <code class="contract-placeholder">racing.social-ghost-exclusions</code> must be a section separate from <code class="contract-placeholder">racing.social-ghost-position</code> and must name exclusions or explicitly say there are none. Any other shape is a defect this test fails by construction. The test names both addresses and restates nothing from them.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">patched-racing-ghost</code> adoption and the prose at <code class="contract-placeholder">racing.social-ghost-position</code> and <code class="contract-placeholder">racing.social-ghost-exclusions</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the two cited sections</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">racing.social-ghost-exclusions</code> names a section separate from <code class="contract-placeholder">racing.social-ghost-position</code> and that section names every exclusion or states explicitly that nothing is excluded</li><li>a shared section, an omitted exclusion, or silence when nothing is excluded is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>claim-citations-state-their-own-duties · patched-car-path</code></p>
+      <h3>declaration check: <code class="contract-placeholder">patched-car-path</code>&#39;s four required citations state their own duties</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the patched-car-path row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and cited prose, not the running game. <code class="contract-placeholder">racing.social-ghost-position</code>, <code class="contract-placeholder">racing.social-ghost-exclusions</code>, <code class="contract-placeholder">racing.social-ghost-conditions</code>, and <code class="contract-placeholder">racing.social-ghost-samples</code> must respectively state the included result, separate exclusions, conditions, and reference and comparison points. Any wrong meaning is a defect this test fails by construction. The test names every address and restates nothing from them.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">patched-racing-ghost</code> adoption and the prose at <code class="contract-placeholder">racing.social-ghost-position</code>, <code class="contract-placeholder">racing.social-ghost-exclusions</code>, <code class="contract-placeholder">racing.social-ghost-conditions</code>, and <code class="contract-placeholder">racing.social-ghost-samples</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the meaning of each required citation</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the four addresses respectively name the included result, the separate exclusions, the promise conditions, and the capture-or-recomputation and comparison points</li><li>a citation with another meaning is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>live-input-shifted-claim-cites-dependence-rule</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code> cites its live-input dependence rule</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to patched-racing-ghost: no row in reproduction-claims matches shifts-with-live-input live input may shift this claim.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>shared-conditions-section-covers-every-citing-claim · patched-car-path</code></p>
+      <h3>declaration check: <code class="contract-placeholder">patched-car-path</code>&#39;s shared conditions section covers every citing claim</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the patched-car-path row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and the cited prose at <code class="contract-placeholder">racing.social-ghost-conditions</code>, not the running game. A section cited by more than one claim states the conditions for every citing claim by name; a shared section covering only some citing claims is a defect this test fails by construction. Where no other claim cites the section, this check asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">patched-racing-ghost</code> adoption and the cited prose at <code class="contract-placeholder">racing.social-ghost-conditions</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks every reproduction claim that cites the same conditions section</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>where the section at <code class="contract-placeholder">racing.social-ghost-conditions</code> is also cited by another claim in this adoption, it states the conditions for each citing claim by name</li><li>where no other claim cites it, this check asserts nothing</li><li>any shared section that covers only some citing claims is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>position-gap-unit-matches-cited-space · patched-car-path</code></p>
+      <h3>declaration check: <code class="contract-placeholder">patched-car-path</code>&#39;s position gap unit matches its cited space</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per reproduction-claims row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the patched-car-path row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and the cited prose at <code class="contract-placeholder">racing.social-ghost-position</code> and <code class="contract-placeholder">allowed-position-gap = tuning.social-ghost-gap</code>, not the running game. The cited space names a position unit, and the adoption&#39;s gap value, whether a number or a cited rule, is one distance in that unit. Any other pairing is a defect this test fails by construction.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">patched-racing-ghost</code> adoption and the cited prose at <code class="contract-placeholder">racing.social-ghost-position</code> and <code class="contract-placeholder">allowed-position-gap = tuning.social-ghost-gap</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer compares the cited position space with the adoption&#39;s allowed gap value</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the space cited at <code class="contract-placeholder">racing.social-ghost-position</code> names a position unit, and the adoption&#39;s gap value at <code class="contract-placeholder">allowed-position-gap = tuning.social-ghost-gap</code>, whether a number or a cited rule, is one distance in that unit</li><li>any other pairing is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>replay-holds</code></p>
+      <h3>the replay mechanism holds for the whole run</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to patched-racing-ghost.</p>
+  <p class="contract-test-text">Across <code class="contract-placeholder">recorded runs across every claim, each platform reach the adoption declares, an update where the adoption allows one, and a first difference where one can be constructed</code>, every playback enters the mechanism&#39;s stages in order, leaves them only at a terminal result, and never revisits an earlier stage. References never come from live play; rejected or diverged playback consumes no forbidden input; each terminal result is exactly diverged, rejected, or complete. The pack&#39;s default audit seeds apply unless the adoption supplies its own.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Holds</dt><dd><p>every playback entered the mechanism&#39;s numbered stages in order, left them only at a terminal result, and never revisited an earlier stage; no comparison read a comparison reference from live play; no rejected or diverged playback consumed an input that its selected response or rejection forbade it to consume; every terminal playback result was exactly one of diverged, rejected, or complete</p></dd></div>
+<div><dt>Seeds</dt><dd><p><code class="contract-placeholder">[&quot;audit-a&quot;,&quot;audit-b&quot;]</code></p></dd></div>
+<div><dt>Scope</dt><dd><p><code class="contract-placeholder">recorded runs across every claim, each platform reach the adoption declares, an update where the adoption allows one, and a first difference where one can be constructed</code></p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">patched-racing-ghost</code>-recording-trace</li><li><code class="contract-placeholder">patched-racing-ghost</code>-identity-check-trace</li><li><code class="contract-placeholder">patched-racing-ghost</code>-reference-source</li><li><code class="contract-placeholder">patched-racing-ghost</code>-comparison-log</li><li><code class="contract-placeholder">patched-racing-ghost</code>-input-log-trace</li><li><code class="contract-placeholder">patched-racing-ghost</code>-playback-result</li><li><code class="contract-placeholder">patched-racing-ghost</code>-first-ordering-violation</li></ul></dd></div></dl></details>
+</article></div>
+</details>
+<details class="contract-form-section contract-fold" id="adoption-json">
+  <summary><span class="contract-fold-title">JSON</span><span class="contract-fold-note">the adoption as one file</span></summary>
+  <p>The adoption file as supplied. Answers you try on this page are not written into it; to change an adoption, open it in the authoring tool.</p>
+
+  <pre class="contract-json"><code>{
+  &quot;contract&quot;: &quot;replay-scope&quot;,
+  &quot;version&quot;: 1,
+  &quot;summary&quot;: &quot;Covers racing ghosts, daily seeds, observer replays, solution shares, and other recorded reruns. It decides what the record contains, whether an update can still play it, what must match, and what happens at the first difference. Input encoding, random-number methods, storage, cameras, and networking stay in the game&#39;s own rules.&quot;,
+  &quot;questions&quot;: {
+    &quot;replay-record&quot;: {
+      &quot;asks&quot;: &quot;What does this replay need to run again?&quot;,
+      &quot;rationale&quot;: &quot;A daily seed recreates a challenge. A racing ghost also needs the driver&#39;s recorded inputs.&quot;,
+      &quot;options&quot;: {
+        &quot;seed-only&quot;: {
+          &quot;meaning&quot;: &quot;The replay needs only the seed. A roguelike daily run rebuilds the day&#39;s dungeon before new play begins.&quot;,
+          &quot;semantics&quot;: &quot;The record carries the seed but no input log; each claim&#39;s comparison reference is carried or recomputed from the record. Playback consumes the seed, accepts live inputs, and applies each claim&#39;s live-input answer.&quot;
+        },
+        &quot;seed-and-input-log&quot;: {
+          &quot;meaning&quot;: &quot;The replay needs the seed and the recorded inputs. A racing ghost follows the recorded steering on the same generated track.&quot;,
+          &quot;semantics&quot;: &quot;The record carries the seed and one ordered input log; each claim&#39;s comparison reference is carried or recomputed from the record. Playback consumes the seed and log from the declared starting point; changing either creates a different record instance.&quot;
+        },
+        &quot;input-log-from-fixed-start&quot;: {
+          &quot;meaning&quot;: &quot;The replay needs recorded inputs and one fixed start. A puzzle solution begins from the shared board and repeats the saved moves.&quot;,
+          &quot;semantics&quot;: &quot;The record carries one fixed-start identity and one ordered input log; each claim&#39;s comparison reference is carried or recomputed from the record. Seed identity is not a separate requirement.&quot;
+        }
+      }
+    },
+    &quot;after-an-update&quot;: {
+      &quot;asks&quot;: &quot;What happens to a recorded replay after the game updates?&quot;,
+      &quot;rationale&quot;: &quot;A patch can change rules, content, or timing. The replay needs a clear version promise before playback starts.&quot;,
+      &quot;options&quot;: {
+        &quot;same-version-only&quot;: {
+          &quot;meaning&quot;: &quot;The replay works only in the version that recorded it. A patched racing game labels an older ghost as incompatible.&quot;,
+          &quot;semantics&quot;: &quot;When the recorded and running version ids differ, reject the replay before consuming its seed, start, or inputs. Equal version ids do not override failed content, mod, or settings checks.&quot;
+        },
+        &quot;migrate-then-replay&quot;: {
+          &quot;meaning&quot;: &quot;The game converts the replay before playing it. A puzzle update maps an old move list onto the revised board rules.&quot;,
+          &quot;semantics&quot;: &quot;When the version ids differ, a cited migration rule derives a new record for the running version while preserving the source record. Playback consumes only a successful migrated record and identifies both versions and the migration used.&quot;
+        },
+        &quot;best-effort-with-declared-divergence&quot;: {
+          &quot;meaning&quot;: &quot;The game tries the old replay and states what may differ. An RTS update names changed unit balance before the observer replay starts.&quot;,
+          &quot;semantics&quot;: &quot;When the version ids differ, the running version consumes the original record after presenting the cited known cross-version differences. Actual mismatches still follow the divergence-response answer.&quot;
+        }
+      }
+    },
+    &quot;divergence-response&quot;: {
+      &quot;asks&quot;: &quot;What happens at the first result that does not match?&quot;,
+      &quot;rationale&quot;: &quot;A replay can stop, continue with a warning, or continue without showing the difference.&quot;,
+      &quot;options&quot;: {
+        &quot;stop-and-report&quot;: {
+          &quot;meaning&quot;: &quot;Stop the replay and report the first difference. A puzzle solution stops on the first move that produces the wrong board.&quot;,
+          &quot;semantics&quot;: &quot;Do not consume the next recorded input. Report the failed claim, comparison point, expected result, observed result, versions, and platforms, then end playback as diverged.&quot;
+        },
+        &quot;continue-and-flag&quot;: {
+          &quot;meaning&quot;: &quot;Keep playing and mark the replay as diverged. An RTS observer can watch the rest after a unit first appears in the wrong place.&quot;,
+          &quot;semantics&quot;: &quot;Report the first difference, mark playback as diverged, and continue from playback&#39;s own state. Later comparisons are informational; they do not replace the first report or resynchronise playback to the reference.&quot;
+        },
+        &quot;continue-silently&quot;: {
+          &quot;meaning&quot;: &quot;Keep playing without showing the difference. A racing ghost can finish the lap after it drifts past the allowed gap.&quot;,
+          &quot;semantics&quot;: &quot;Mark the mismatch inside the replay controller, emit no player-facing, ordinary-log, or telemetry report, and continue from playback&#39;s own state. Later comparisons are informational and playback remains diverged.&quot;
+        }
+      }
+    }
+  },
+  &quot;declares&quot;: {
+    &quot;values&quot;: {
+      &quot;allowed-position-gap&quot;: {
+        &quot;description&quot;: &quot;The greatest allowed distance between recorded and replayed positions, in the position unit named by every position claim in this adoption.&quot;,
+        &quot;range&quot;: [
+          0,
+          1000000
+        ],
+        &quot;forms&quot;: [
+          &quot;number&quot;,
+          &quot;citation&quot;
+        ],
+        &quot;when&quot;: {
+          &quot;row-has&quot;: {
+            &quot;reproduction-claims&quot;: {
+              &quot;matching-standard&quot;: [
+                &quot;allowed-position-gap&quot;
+              ]
+            }
+          }
+        }
+      }
+    },
+    &quot;rows&quot;: {
+      &quot;replay-record&quot;: {
+        &quot;description&quot;: &quot;Give the rules that capture and read this replay family. One adoption has exactly one row.&quot;,
+        &quot;when-empty&quot;: &quot;An empty replay-record list is never a behavior choice: this adoption requires exactly one row, and a reviewer rejects a file without it.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name this replay family in the game&#39;s words, such as ghost-lap or observer-match. Each sealed record created from the family carries its own cited instance identity.&quot;
+          },
+          &quot;recording-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rule naming the start and end of recording. It fixes the recording version, platform, content-set identity, settings, mod identity, and the record&#39;s own instance identity. It names the seed or fixed start and the input log when used, and says whether each claim&#39;s comparison reference is captured at recording or recomputed from the record at playback.&quot;
+          },
+          &quot;input-clock-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;flag&quot;: {
+                &quot;replay-record&quot;: [
+                  &quot;seed-and-input-log&quot;,
+                  &quot;input-log-from-fixed-start&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The rule that orders recorded inputs and states the clock, step, or turn used to play them back.&quot;
+          },
+          &quot;fixed-start-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;flag&quot;: {
+                &quot;replay-record&quot;: [
+                  &quot;input-log-from-fixed-start&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The rule that identifies and verifies the fixed starting state before the first input.&quot;
+          },
+          &quot;migration-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;flag&quot;: {
+                &quot;after-an-update&quot;: [
+                  &quot;migrate-then-replay&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The deterministic rule that derives the running-version record while preserving the source record.&quot;
+          },
+          &quot;cross-version-divergence-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;flag&quot;: {
+                &quot;after-an-update&quot;: [
+                  &quot;best-effort-with-declared-divergence&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The player-facing statement of known changes that may alter this replay in the running version.&quot;
+          },
+          &quot;difference-report-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The incompatibility or difference report. It presents version, content, mod, settings, start, or migration rejection before playback and presents the first failed claim and comparison details when the selected response is visible.&quot;
+          }
+        }
+      },
+      &quot;reproduction-claims&quot;: {
+        &quot;description&quot;: &quot;List one row for each result this replay promises to compare. Rows may share one conditions section when the same conditions apply. Shared test material must cover every row that cites it.&quot;,
+        &quot;when-empty&quot;: &quot;This adoption makes no replay promise without at least one result to compare, and a reviewer rejects the empty list.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;Name this comparison claim in the game&#39;s words, such as car-path or match-state.&quot;
+          },
+          &quot;artifact&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The game&#39;s plain name for the result that playback compares.&quot;
+          },
+          &quot;platform-reach&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;recorded-platform-only&quot;,
+              &quot;every-supported-platform&quot;
+            ],
+            &quot;description&quot;: &quot;Whether this claim is compared only on the recording platform or on every supported platform.&quot;
+          },
+          &quot;shifts-with-live-input&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;when&quot;: {
+              &quot;flag&quot;: {
+                &quot;replay-record&quot;: [
+                  &quot;seed-only&quot;
+                ]
+              }
+            },
+            &quot;options&quot;: [
+              &quot;seed-fixes-this-claim&quot;,
+              &quot;live-input-may-shift-this-claim&quot;
+            ],
+            &quot;description&quot;: &quot;Can what the player does change a result this replay promises? Say whether the seed fixes this claim or whether live input may shift it.&quot;
+          },
+          &quot;live-input-dependence-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;shifts-with-live-input&quot;: [
+                  &quot;live-input-may-shift-this-claim&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;The fixed rule naming every live-input history fact allowed to change this claimed result. Unlisted live input does not change it.&quot;
+          },
+          &quot;matching-standard&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;bit-exact-state&quot;,
+              &quot;outcome-equivalent&quot;,
+              &quot;allowed-position-gap&quot;
+            ],
+            &quot;description&quot;: &quot;What this claim compares: every named state byte, every named outcome field, or position in the cited space using the adoption&#39;s allowed gap.&quot;
+          },
+          &quot;reproduces&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The fixed game prose naming every state byte, outcome field, or position that must match.&quot;
+          },
+          &quot;excludes&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;A separate fixed section naming what this claim subtracts from what it promises to match, including an explicit statement when nothing is excluded.&quot;
+          },
+          &quot;conditions&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The fixed game prose naming when the promise holds, including content-set identity, settings, mods, and any other compatibility or comparison conditions. Content identity is a condition, not a version.&quot;
+          },
+          &quot;comparison-points&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The rule naming when a reference is captured or recomputed and when playback compares it, such as every simulation checkpoint, the finish line, or the solved board.&quot;
+          }
+        }
+      }
+    }
+  },
+  &quot;rules&quot;: {
+    &quot;best-effort-must-be-visible&quot;: {
+      &quot;forbid&quot;: {
+        &quot;flag&quot;: {
+          &quot;after-an-update&quot;: [
+            &quot;best-effort-with-declared-divergence&quot;
+          ],
+          &quot;divergence-response&quot;: [
+            &quot;continue-silently&quot;
+          ]
+        }
+      },
+      &quot;message&quot;: &quot;Best-effort replay after an update needs a visible difference notice; show and flag differences, or keep the replay on its recorded version.&quot;
+    }
+  },
+  &quot;origin&quot;: &quot;https://opengdd.org/contracts/replay-scope-1&quot;,
+  &quot;mechanism&quot;: [
+    &quot;This is the single normative authority for what is recorded, when capture or recomputation happens, what playback consumes, and how differences are detected and handled. Questions and rows supply choices and references; they do not redefine this order.&quot;,
+    &quot;A `replay-record` row names a replay family. Each immutable replay record made from that family carries its own stable instance identity under `recording-declared-in`. It also carries the recording version, platform, content-set identity, settings and mod identity; the chosen seed or fixed start; the ordered input log when selected; and every claim&#39;s comparison reference. A reference is either captured at recording or deterministically recomputed from the sealed record at lifecycle step 11. A migrated record is a derived record with its own identity and a link to the unchanged source.&quot;,
+    &quot;A **comparison point** is a cited checkpoint at which playback reads a result and obtains the corresponding captured or recomputed reference. A **difference** is the first eligible comparison that fails that claim&#39;s matching standard. The terminal playback result is `diverged`, `rejected`, or `complete`; before a terminal result, playback is in progress.&quot;,
+    &quot;### Record&quot;,
+    &quot;1. Read the one replay-family row and every reproduction claim. From `recording-declared-in`, fix the recording version, platform, content-set identity, settings, and mod identity before the record begins. 2. Establish the start. A seed-only or seed-and-input record captures the seed before any claimed seeded result is generated. A fixed-start record captures an identity that the cited state rule can verify before playback. 3. Begin input capture at the cited start. A seed-only record captures no inputs. Either input-log record captures each mapped game action with its complete order and cited clock, step, or turn. 4. At every claim&#39;s comparison point, either capture the reference required by that claim&#39;s matching standard or capture all sealed source data that the cited rule requires to recompute the reference at step 11. 5. End capture at the cited boundary. Seal the record&#39;s own instance identity and contents. A later edit creates a different record instance in the same replay family.&quot;,
+    &quot;### Select a playable version and claims&quot;,
+    &quot;6. Before consuming the seed, start, or inputs, read the version, platform, content-set identity, settings, and mod identity carried under `recording-declared-in`, then read every cited compatibility condition. If a record-wide identity — content, settings, mods, or the fixed start — no longer holds, reject the record and use the incompatibility report. A failed condition cited by one claim alone exempts only that claim, per steps 7 and 12. Content identity is a condition, not a version; a level-content patch can therefore invalidate a record even when the version id is unchanged. 7. Determine platform reach claim by claim. A claim limited to the recording platform is not compared on another running platform. A claim covering every supported platform is not compared on an unsupported running platform. Either excluded claim does not diverge; other claims continue. 8. Only when the recorded version differs from the running version, apply the selected update policy. `same-version-only` rejects with the incompatibility report. `migrate-then-replay` runs the cited migration once; success creates a derived record naming source version, target version, and migration rule, while failure rejects. `best-effort-with-declared-divergence` presents the cited known differences and keeps the source record unchanged. Migration must map the recorded input clock to an existing running-version clock; best-effort playback rejects if the cited clock no longer exists.&quot;,
+    &quot;### Replay and compare&quot;,
+    &quot;9. Recreate the start. Supply the recorded seed when present. Verify or restore the fixed starting state when present. Reject the replay if either required item cannot be established. 10. For an input-log record, consume inputs in their recorded order at their cited clock, step, or turn. For a seed-only record, accept live inputs. A `seed-fixes-this-claim` result cannot change when those inputs vary. A `live-input-may-shift-this-claim` result may read only the live-input facts named by its gated citation. 11. Obtain each claim&#39;s comparison reference. Read a reference captured in the record, or deterministically recompute it from the sealed record using the method cited by `recording-declared-in` and that claim&#39;s `comparison-points`. This is the recomputation step used by a puzzle share whose solved-board reference is derived from its fixed board and move log. 12. At each comparison point, first read the claim&#39;s cited conditions. If they are not met, do not compare that claim and do not mark a divergence. A `live-input-may-shift-this-claim` result&#39;s gated citation works the same way: a result that differs only as that citation permits is not compared against the recorded reference and does not diverge; where the citation&#39;s method recomputes a reference for the actual inputs, step 11&#39;s recomputation applies. Otherwise compare with the reference using the row&#39;s matching standard. Bit-exact state compares every declared byte. Outcome matching compares every declared outcome field. Position matching measures distance in the cited space and passes when it is no greater than `allowed-position-gap`. `excludes` subtracts from `reproduces`; excluded state is never compared.&quot;,
+    &quot;Changes outside the cited conditions make no promise and do not fail this contract.&quot;,
+    &quot;### Handle the first difference&quot;,
+    &quot;13. On the first failed eligible comparison, set the playback result to `diverged` and retain the claim id, comparison point, expected result, observed result, versions, platforms, and last consumed input when present. 14. Under `stop-and-report`, present the difference, consume no later input, and end playback. Under `continue-and-flag`, present the difference, keep a visible diverged mark, and continue. Under `continue-silently`, emit no outward report and continue. Either continuing route advances from playback&#39;s own state. Later comparisons are informational and never resynchronise playback to the recorded reference. 15. If no eligible comparison fails and the record reaches its cited end, set the result to `complete`. Completion means every comparison actually made matched. It makes no promise about excluded claims, unmet conditions, or excluded state.&quot;,
+    &quot;Every event offered at the same replay moment enters this lifecycle in the total order supplied by **Event resolution**. This contract preserves that order but does not choose it.&quot;
+  ],
+  &quot;answers&quot;: {
+    &quot;replay-record&quot;: &quot;seed-and-input-log&quot;,
+    &quot;after-an-update&quot;: &quot;best-effort-with-declared-divergence&quot;,
+    &quot;divergence-response&quot;: &quot;continue-and-flag&quot;
+  },
+  &quot;values&quot;: {
+    &quot;allowed-position-gap&quot;: &quot;tuning.social-ghost-gap&quot;
+  },
+  &quot;rows&quot;: {
+    &quot;replay-record&quot;: [
+      {
+        &quot;id&quot;: &quot;social-ghost&quot;,
+        &quot;recording-declared-in&quot;: &quot;racing.social-ghost-recording&quot;,
+        &quot;input-clock-declared-in&quot;: &quot;racing.physics-steps&quot;,
+        &quot;cross-version-divergence-declared-in&quot;: &quot;racing.patch-ghost-notice&quot;,
+        &quot;difference-report-declared-in&quot;: &quot;racing.social-ghost-status&quot;
+      }
+    ],
+    &quot;reproduction-claims&quot;: [
+      {
+        &quot;id&quot;: &quot;patched-car-path&quot;,
+        &quot;artifact&quot;: &quot;social ghost car path&quot;,
+        &quot;platform-reach&quot;: &quot;recorded-platform-only&quot;,
+        &quot;matching-standard&quot;: &quot;allowed-position-gap&quot;,
+        &quot;reproduces&quot;: &quot;racing.social-ghost-position&quot;,
+        &quot;excludes&quot;: &quot;racing.social-ghost-exclusions&quot;,
+        &quot;conditions&quot;: &quot;racing.social-ghost-conditions&quot;,
+        &quot;comparison-points&quot;: &quot;racing.social-ghost-samples&quot;
+      }
+    ]
+  },
+  &quot;pack&quot;: &quot;sha256:dc3ee9f2383b70086aa53fad03e41f878befddd8b12eca9147598b6ea59505bc&quot;
+}
+</code></pre>
+</details>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

@@ -1,0 +1,1362 @@
+{
+  "contract": "input-forgiveness",
+  "version": 1,
+  "templates": [
+    {
+      "id": "forgiveness-vocabulary-and-openness",
+      "title": "input forgiveness uses game-facing input and cited openness",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "ready-together": [
+            "all-ready-actions",
+            "declared-priority",
+            "cannot-coincide"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a physical control mapped through Control options to an action input that reaches a declared forgiveness row",
+        "when": [
+          "the row reads ordinary permission, its input edge, and whether its window instance is open"
+        ],
+        "then": [
+          "the action input is the game-facing event after mapping, independent of physical device identity",
+          "ordinary permission is the action's legal state before forgiveness",
+          "the press arrives on the edge named by the cited action rule, including a release edge where that rule names one",
+          "openness comes from the agreeing Timed window adoption where one exists and otherwise from the row's cited Fixed timing rule",
+          "an accepted late or target input, or a saved press whose firing event has arrived, is one ready forgiven input",
+          "a family this adoption does not declare asserts nothing in the clause that names it"
+        ],
+        "diagnostics": [
+          "{{instance}}-input-receipt",
+          "{{instance}}-window-instances",
+          "{{instance}}-ready-set"
+        ]
+      },
+      "text": "For a declared row, an action input is the game-facing event after Control options maps a physical control; device identity does not change settlement. Ordinary permission is the action's legal state before forgiveness, and a press uses the edge named by the cited action rule. Openness comes from the agreeing Timed window adoption where one exists, otherwise from the cited Fixed timing rule. A family this adoption does not declare asserts nothing in the clause that names it."
+    },
+    {
+      "id": "unmatched-input-receives-no-forgiveness",
+      "title": "an unmatched action input receives no forgiveness",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an action input with no matching late-input-windows, input-buffers, or target-moment-windows row in the current situation",
+        "when": [
+          "the game receives that action input"
+        ],
+        "then": [
+          "ordinary permission alone decides whether the action is submitted",
+          "the adoption creates no ready forgiven input, saved press, or target grade for it"
+        ],
+        "diagnostics": [
+          "{{instance}}-input-receipt",
+          "{{instance}}-ready-set",
+          "{{instance}}-waiting-press-state"
+        ]
+      },
+      "text": "An action input with no matching row in the current situation receives no forgiveness. Ordinary permission alone decides whether the action is submitted."
+    },
+    {
+      "id": "empty-row-families-create-no-forgiveness",
+      "title": "empty row families create no forgiveness state",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document and its row sets",
+        "when": [
+          "each empty row set's declared consequence is read"
+        ],
+        "then": [
+          "where late-input-windows is empty, no action remains available through forgiveness after ordinary permission ends; where a row exists, this clause asserts nothing",
+          "where input-buffers is empty, no early press waits for an action to become ordinarily permitted; where a row exists, this clause asserts nothing",
+          "where target-moment-windows is empty, no input is forgiven because it falls near a target moment; where a row exists, this clause asserts nothing",
+          "where competition-rules is empty, no competition priority rule is declared; where a row exists, this clause asserts nothing",
+          "where all three forgiveness row families are empty, no forgiveness row can make an input due; where any family has a row, this clause asserts nothing",
+          "where all three forgiveness row families are empty, competition-rules has no rows and any row is a defect this test fails by construction; where any family has a row, this clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "An empty late-input-windows set keeps no action available after ordinary permission ends; an empty input-buffers set means no early press waits for an action to become ordinarily permitted; an empty target-moment-windows set forgives no input near a target moment; and an empty competition-rules set declares no priority. Where the named set has a row, that clause asserts nothing. If all three forgiveness families are empty, no forgiveness row can make an input due and the competition-rules description requires no competition rows; any row is a defect this test fails by construction. Where any forgiveness family has a row, that last clause asserts nothing."
+    },
+    {
+      "id": "late-window-arms-on-cited-event",
+      "title": "{{row.id}} arms one late window on its cited event",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "late-input-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two trials, one with the loss-of-permission transition cited at {{row.arms-when-declared-in}} and one with a similar transition that citation excludes",
+        "when": [
+          "each transition occurs before any action input"
+        ],
+        "then": [
+          "the cited arming event creates one {{row.id}} window instance for that loss of permission under {{row.window-declared-in}} before and independently of input",
+          "the excluded transition creates no {{row.id}} window instance"
+        ],
+        "diagnostics": [
+          "{{instance}}-arming-log",
+          "{{instance}}-window-instances"
+        ]
+      },
+      "text": "The loss-of-permission event at {{row.arms-when-declared-in}} creates one {{row.id}} window instance under {{row.window-declared-in}} before and independently of input. A similar transition excluded by the arming citation creates none."
+    },
+    {
+      "id": "target-instance-arms-on-cited-event",
+      "title": "{{row.id}} creates one instance for each cited target",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "target-moment-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two distinct target moments named by {{row.target-moment-declared-in}}",
+        "when": [
+          "the creating event at {{row.arms-when-declared-in}} occurs for each target before any associated action input"
+        ],
+        "then": [
+          "each target receives one separate {{row.id}} target instance under {{row.window-declared-in}}",
+          "each instance exists before and independently of its associated input"
+        ],
+        "diagnostics": [
+          "{{instance}}-arming-log",
+          "{{instance}}-window-instances"
+        ]
+      },
+      "text": "For every target moment at {{row.target-moment-declared-in}}, the event at {{row.arms-when-declared-in}} creates one separate {{row.id}} target instance under {{row.window-declared-in}} before and independently of input."
+    },
+    {
+      "id": "buffer-arms-on-qualifying-press",
+      "title": "{{row.id}} creates no instance before its qualifying press",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "input-buffers",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the early state and matching action input named by {{row.arms-when-declared-in}}",
+        "when": [
+          "the early state begins and then the qualifying press is stored"
+        ],
+        "then": [
+          "no {{row.id}} per-press window instance exists merely because the early state began",
+          "storing the qualifying press creates one {{row.id}} instance at that press's input moment under {{row.window-declared-in}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-arming-log",
+          "{{instance}}-waiting-press-state",
+          "{{instance}}-window-instances"
+        ]
+      },
+      "text": "{{row.id}} has no window instance before a qualifying press. When a qualifying press named by {{row.arms-when-declared-in}} is stored, it creates one per-press instance under {{row.window-declared-in}} at that input moment."
+    },
+    {
+      "id": "receipt-maps-before-settlement",
+      "title": "input receipt maps the control before reading forgiveness",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "ready-together": [
+            "all-ready-actions",
+            "declared-priority",
+            "cannot-coincide"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two physical devices mapped by Control options to the same action input, plus a control already held when a late or target row arms where the adoption can construct one",
+        "when": [
+          "the game receives each mapped input and observes the already-held control"
+        ],
+        "then": [
+          "both mapped action inputs read the same ordinary permission and matching rows regardless of device identity",
+          "the already-held control creates no action input at arming unless the cited action rule explicitly defines one",
+          "where the adoption has no late or target row, the already-held observation asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-input-receipt",
+          "{{instance}}-arming-log"
+        ]
+      },
+      "text": "Control options maps a physical control before forgiveness reads ordinary permission and matching rows. Device identity does not change settlement. A control already held when a late or target row arms creates no action input unless its cited action rule defines one; without either family, that observation asserts nothing."
+    },
+    {
+      "id": "receipt-family-order",
+      "title": "target, late, buffer, and ordinary receipt keep their fixed order",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "ready-together": [
+            "all-ready-actions",
+            "declared-priority",
+            "cannot-coincide"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "action-input receipts that exercise every forgiveness family the {{instance}} adoption declares",
+        "when": [
+          "ordinary permission is present in one receipt and absent in another"
+        ],
+        "then": [
+          "every matching target row is evaluated regardless of ordinary permission before any late or buffer row",
+          "ordinary permission prevents late and buffer evaluation but does not prevent target evaluation",
+          "if no target row accepts and ordinary permission exists, the ordinary attempt is submitted without forgiveness and the receipt ends",
+          "with no ordinary permission, late rows run before buffer rows, and a buffer captures only if neither immediate family accepts",
+          "a family absent from this adoption asserts nothing in the clauses that name it"
+        ],
+        "diagnostics": [
+          "{{instance}}-input-receipt",
+          "{{instance}}-submission-log",
+          "{{instance}}-waiting-press-state"
+        ]
+      },
+      "text": "A receipt evaluates target rows first whether ordinary permission exists or not. If none accepts and permission exists, it submits the ordinary attempt without forgiveness. Without permission, late rows run next and a buffer captures only if neither immediate family accepts. A family this adoption does not declare asserts nothing in the clause that names it."
+    },
+    {
+      "id": "target-input-accepts-and-grades",
+      "title": "{{row.id}} accepts and grades only an open, otherwise-legal attempt",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "target-moment-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "four associated {{row.action}} inputs for separate {{row.id}} target instances: an otherwise-legal input while {{row.window-declared-in}} records its own target instance open, including its cited early and late inclusive moments, an otherwise-illegal input while that target instance is open, an otherwise-legal input after that target instance closes, and an otherwise-legal input before the cited early bound",
+        "when": [
+          "each input is evaluated against its target instance"
+        ],
+        "then": [
+          "the open otherwise-legal input is accepted, becomes ready now, and receives the result at {{row.result-declared-in}}",
+          "the otherwise-illegal input while open is not accepted, becomes no ready forgiven input, and receives no result at {{row.result-declared-in}}; the row grants it no ordinary permission",
+          "the closed instance accepts and grades nothing",
+          "the input before the cited early bound is not accepted by {{row.id}}",
+          "the first accepted input settles its target instance unless {{row.result-declared-in}} declares a different settlement",
+          "acceptance ends that action-input receipt before late or buffer evaluation"
+        ],
+        "diagnostics": [
+          "{{instance}}-input-receipt",
+          "{{instance}}-ready-set",
+          "{{instance}}-target-grades",
+          "{{instance}}-window-instances"
+        ]
+      },
+      "text": "While {{row.window-declared-in}} records a {{row.id}} target instance open, including its cited early and late inclusive moments, an otherwise-legal {{row.action}} input is accepted, becomes ready now, and is graded by {{row.result-declared-in}}. An otherwise-illegal input while open is not accepted, becomes no ready forgiven input, receives no result, and gains no ordinary permission. An input before the cited early bound or after that target instance closes is not accepted. The first accepted input settles that target instance unless the cited result rule declares otherwise, and acceptance ends the receipt."
+    },
+    {
+      "id": "late-input-accepts-only-while-open",
+      "title": "{{row.id}} accepts through its cited last moment and not later",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "late-input-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two {{row.action}} input trials without ordinary permission, and for which no target row accepts, after the arming event at {{row.arms-when-declared-in}}",
+        "when": [
+          "one input arrives while {{row.window-declared-in}} records the instance open, including its cited inclusive last moment, and the other arrives at the first moment it records closed"
+        ],
+        "then": [
+          "the open-window input is accepted and becomes one ready forgiven input now",
+          "the closed-window input is not accepted by {{row.id}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-input-receipt",
+          "{{instance}}-window-instances",
+          "{{instance}}-ready-set"
+        ]
+      },
+      "text": "After the event at {{row.arms-when-declared-in}}, {{row.id}} accepts a {{row.action}} input without ordinary permission while {{row.window-declared-in}} records the instance open, including its cited last moment, and makes it ready now. The first input after that rule records the instance closed is not accepted."
+    },
+    {
+      "id": "buffer-captures-one-press",
+      "title": "{{row.id}} stores one press and follows {{row.waiting-press}}",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "input-buffers",
+      "bindings": {
+        "repeat-result": {
+          "row_field": "waiting-press",
+          "map": {
+            "first-press-stays": "the later matching press is ignored and the first press, its input moment, and its original window instance remain",
+            "latest-press-replaces": "the earlier press and its window instance are cleared, and the later press, its input moment, and one fresh window instance replace them"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "a press of an action this row covers ({{row.action}}) for which no target or late row accepts, plus a second matching press while one already waits and a separate press while {{row.arms-when-declared-in}} does not hold",
+        "when": [
+          "the first press arrives while {{row.arms-when-declared-in}} holds, the repeated press arrives, and the separate outside-state press is received"
+        ],
+        "then": [
+          "the first qualifying press stores its action, input moment, and one per-press instance under {{row.window-declared-in}}",
+          "{{bind:repeat-result}}",
+          "the row holds at most one saved press",
+          "the outside-state press is not saved by {{row.id}}",
+          "where this row's action is the reserved all-actions spelling, a press of any covered action is a matching press of this row and follows the repeated-press clause above; for a named action, a press of a different action asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-input-receipt",
+          "{{instance}}-waiting-press-state",
+          "{{instance}}-window-instances",
+          "{{instance}}-clearing-log"
+        ]
+      },
+      "text": "While {{row.arms-when-declared-in}} holds, {{row.id}} stores one qualifying press of an action this row covers ({{row.action}}), its input moment, and one instance under {{row.window-declared-in}}. If another matching press arrives, {{bind:repeat-result}}. The row holds at most one press; a press outside the cited early state is not saved. For a named action, a press of a different action asserts nothing; for the reserved all-actions spelling, the contract makes a press of any covered action a matching press, so it follows the repeated-press clause above."
+    },
+    {
+      "id": "late-window-clears-on-four-ends",
+      "title": "{{row.id}} ends on execution, permission, close, or early clearing",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "late-input-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "four otherwise identical live {{row.id}} instances",
+        "when": [
+          "{{row.action}} executes in one, ordinary permission returns in one, {{row.window-declared-in}} records one closed, and the early-clearing event at {{row.cancels-when-declared-in}} occurs in one"
+        ],
+        "then": [
+          "each affected {{row.id}} instance ends at its named event and accepts no later input",
+          "the action execution creates no replacement {{row.id}} instance"
+        ],
+        "diagnostics": [
+          "{{instance}}-clearing-log",
+          "{{instance}}-window-instances",
+          "{{instance}}-input-receipt"
+        ]
+      },
+      "text": "A live {{row.id}} instance ends when {{row.action}} executes, ordinary permission returns, {{row.window-declared-in}} closes it, or the event at {{row.cancels-when-declared-in}} occurs. It accepts nothing afterward, and execution does not arm a replacement."
+    },
+    {
+      "id": "buffer-fires-or-clears-at-first-boundary",
+      "title": "{{row.id}} fires once at its first cited event or clears without firing",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "input-buffers",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "three otherwise identical waiting {{row.id}} saved presses",
+        "when": [
+          "the first ordinary permission event at {{row.fires-when-declared-in}} arrives before clearing in one trial, {{row.window-declared-in}} closes before firing in another, and the event at {{row.cancels-when-declared-in}} occurs before firing in the third"
+        ],
+        "then": [
+          "the first trial makes the saved press ready exactly once at that firing event with no later input poll or extra delay",
+          "the window-close trial clears the saved press and submits nothing from it",
+          "the early-clearing trial clears the saved press and submits nothing from it",
+          "the firing, window-close, and early-clearing records distinguish the three results"
+        ],
+        "diagnostics": [
+          "{{instance}}-waiting-press-state",
+          "{{instance}}-ready-set",
+          "{{instance}}-clearing-log",
+          "{{instance}}-submission-log"
+        ]
+      },
+      "text": "If neither clearing path arrives first, {{row.id}} fires once at the first event named by {{row.fires-when-declared-in}}, with no later poll or extra delay. A prior close at {{row.window-declared-in}} or early event at {{row.cancels-when-declared-in}} clears it without firing. The records distinguish firing from each clearing path."
+    },
+    {
+      "id": "target-instance-stops-accepting",
+      "title": "{{row.id}} accepts nothing after close, settlement, or early clearing",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "target-moment-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "three {{row.id}} target instances, one closed by {{row.window-declared-in}}, one settled under {{row.result-declared-in}}, and one ended by {{row.cancels-when-declared-in}}",
+        "when": [
+          "an otherwise-legal associated {{row.action}} input reaches each instance afterward"
+        ],
+        "then": [
+          "none of the three instances accepts the later input or creates another target grade",
+          "the recorded input moment, not a later update, decides whether the cited window was open"
+        ],
+        "diagnostics": [
+          "{{instance}}-input-receipt",
+          "{{instance}}-window-instances",
+          "{{instance}}-target-grades"
+        ]
+      },
+      "text": "{{row.id}} accepts nothing for a target instance after {{row.window-declared-in}} closes it, {{row.result-declared-in}} settles it, or {{row.cancels-when-declared-in}} ends it early. Openness is read at the recorded input moment."
+    },
+    {
+      "id": "ready-input-exists-once",
+      "title": "each ready forgiven input exists once",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "ready-together": [
+            "all-ready-actions",
+            "declared-priority",
+            "cannot-coincide"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a stored press or accepted input that becomes ready, plus two adoptions producing ready inputs at one moment where the game can construct that case",
+        "when": [
+          "the game updates the ready state repeatedly and settles the moment"
+        ],
+        "then": [
+          "the same stored press or accepted input contributes exactly one ready forgiven input",
+          "a repeated update creates no copy",
+          "where two adoptions contribute, each settles independently and the inputs selected by both are submitted together",
+          "where no shared-adoption moment can occur, the shared-adoption clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-ready-set",
+          "{{instance}}-submission-log"
+        ]
+      },
+      "text": "A stored press or accepted input contributes one ready forgiven input, and repeated updates create no copy. If two adoptions produce ready inputs at one moment, each settles independently and both selected sets are submitted together; where that case cannot occur, the clause asserts nothing."
+    },
+    {
+      "id": "all-ready-actions-submit-every-input",
+      "title": "all-ready-actions submits every ready input once",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "ready-together": [
+            "all-ready-actions"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two or more ready forgiven inputs at one game moment",
+        "when": [
+          "the adoption settles their competition"
+        ],
+        "then": [
+          "every ready forgiven input is submitted exactly once as an action proposal at that moment",
+          "none is removed by an input-forgiveness priority"
+        ],
+        "diagnostics": [
+          "{{instance}}-ready-set",
+          "{{instance}}-submission-log"
+        ]
+      },
+      "text": "Under all-ready-actions, every ready forgiven input is submitted exactly once at the settlement moment. Input forgiveness removes none by priority."
+    },
+    {
+      "id": "declared-priority-submits-one-winner",
+      "title": "declared-priority submits one stable winner",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "ready-together": [
+            "declared-priority"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two or more ready forgiven inputs in a situation covered by its one matching competition-rules row",
+        "when": [
+          "the adoption settles their competition"
+        ],
+        "then": [
+          "the cited priority remains stable for the whole settlement moment",
+          "exactly the highest-priority input is submitted once",
+          "every lower-priority ready input is cleared without submission"
+        ],
+        "diagnostics": [
+          "{{instance}}-ready-set",
+          "{{instance}}-submission-log",
+          "{{instance}}-clearing-log"
+        ]
+      },
+      "text": "Under declared-priority, the one matching competition row supplies a priority that stays stable for the settlement moment. Exactly its highest-priority ready input is submitted once, and every lower-priority ready input is cleared without submission."
+    },
+    {
+      "id": "cannot-coincide-invalidates-two-ready-inputs",
+      "title": "cannot-coincide rejects a reachable pair of ready inputs",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "ready-together": [
+            "cannot-coincide"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the adoption's reachable-state claim for ready forgiven inputs",
+        "when": [
+          "the audit searches for a game moment with two ready forgiven inputs"
+        ],
+        "then": [
+          "no reachable game state contains that pair",
+          "one observed pair invalidates the design claim rather than selecting an implicit winner"
+        ],
+        "diagnostics": [
+          "{{instance}}-ready-set",
+          "{{instance}}-coincidence-violation"
+        ]
+      },
+      "text": "Under cannot-coincide, no reachable game state has two ready forgiven inputs at one moment. One observed pair invalidates the design claim; this contract does not choose a winner."
+    },
+    {
+      "id": "selected-inputs-stop-at-proposal-boundary",
+      "title": "selected inputs become proposals at this moment",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "ready-together": [
+            "all-ready-actions",
+            "declared-priority",
+            "cannot-coincide"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one or more inputs selected for submission",
+        "when": [
+          "input forgiveness submits them"
+        ],
+        "then": [
+          "each selected input enters Event resolution as an action proposal at the current game moment",
+          "the input-forgiveness trace performs no ordering of proposals that share the moment",
+          "cost, effect, conflict rejection, and proposal order are absent from input-forgiveness settlement and remain owned by the cited action rules and Event resolution"
+        ],
+        "diagnostics": [
+          "{{instance}}-submission-log",
+          "{{instance}}-ready-set"
+        ]
+      },
+      "text": "A selected input becomes an action proposal at the current game moment. Event resolution owns same-moment proposal order, and the action's Fixed rules own cost, effect, and rejection. This contract stops at submission and does not force a conflicting action to succeed."
+    },
+    {
+      "id": "buffer-clears-after-submission",
+      "title": "{{row.id}} clears after submission",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "input-buffers",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one ready {{row.id}} saved press selected for submission",
+        "when": [
+          "the selected press is submitted"
+        ],
+        "then": [
+          "the selected saved press clears immediately on submission"
+        ],
+        "diagnostics": [
+          "{{instance}}-submission-log",
+          "{{instance}}-waiting-press-state",
+          "{{instance}}-clearing-log"
+        ]
+      },
+      "text": "A selected {{row.id}} saved press clears immediately on submission."
+    },
+    {
+      "id": "buffer-clears-after-competition-loss",
+      "title": "{{row.id}} clears after competition loss",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "input-buffers",
+      "when": {
+        "flag": {
+          "ready-together": [
+            "declared-priority"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one ready {{row.id}} input at a settlement moment that also carries a ready forgiven input from a different row",
+        "when": [
+          "the other input is selected and the {{row.id}} input loses"
+        ],
+        "then": [
+          "the competition-losing saved press clears immediately without submission"
+        ],
+        "diagnostics": [
+          "{{instance}}-submission-log",
+          "{{instance}}-waiting-press-state",
+          "{{instance}}-clearing-log"
+        ]
+      },
+      "text": "When a ready {{row.id}} input loses to a ready forgiven input from a different row, its saved press clears immediately without submission."
+    },
+    {
+      "id": "late-window-clears-after-submission",
+      "title": "{{row.id}} clears on submission",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "late-input-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one ready input accepted by {{row.id}} and selected for submission",
+        "when": [
+          "the selected input is submitted"
+        ],
+        "then": [
+          "the submitted input's {{row.id}} window clears immediately"
+        ],
+        "diagnostics": [
+          "{{instance}}-submission-log",
+          "{{instance}}-window-instances",
+          "{{instance}}-clearing-log"
+        ]
+      },
+      "text": "Submission clears the accepting {{row.id}} window immediately."
+    },
+    {
+      "id": "late-window-survives-competition-loss",
+      "title": "{{row.id}} is not ended by a competition loss",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "late-input-windows",
+      "when": {
+        "flag": {
+          "ready-together": [
+            "declared-priority"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one ready {{row.id}} input at a settlement moment that also carries a ready forgiven input from a different row",
+        "when": [
+          "the other input is selected and the {{row.id}} input loses"
+        ],
+        "then": [
+          "the competition loss does not end the {{row.id}} window; it still ends only at its own four ends: execution, ordinary permission returning, {{row.window-declared-in}} closing, or the event at {{row.cancels-when-declared-in}}",
+          "while that window remains open, a new {{row.action}} input without ordinary permission is accepted by {{row.id}}",
+          "the cleared losing input is not restored"
+        ],
+        "diagnostics": [
+          "{{instance}}-input-receipt",
+          "{{instance}}-ready-set",
+          "{{instance}}-window-instances",
+          "{{instance}}-clearing-log"
+        ]
+      },
+      "text": "A competition loss does not end the {{row.id}} window; it still ends only at its own four ends: execution, ordinary permission returning, {{row.window-declared-in}} closing, or the event at {{row.cancels-when-declared-in}}. While the window remains open, a new {{row.action}} input without ordinary permission is accepted, and the cleared losing input is not restored."
+    },
+    {
+      "id": "target-input-after-submission",
+      "title": "{{row.id}} leaves no saved press after submission",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "target-moment-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one input accepted by {{row.id}} and selected for submission",
+        "when": [
+          "the selected target input is submitted"
+        ],
+        "then": [
+          "the target input leaves no saved press after submission"
+        ],
+        "diagnostics": [
+          "{{instance}}-submission-log",
+          "{{instance}}-waiting-press-state"
+        ]
+      },
+      "text": "A selected {{row.id}} target input leaves no saved press after submission."
+    },
+    {
+      "id": "target-instance-after-competition-loss",
+      "title": "{{row.id}} remains open after competition loss until settled or closed",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "target-moment-windows",
+      "when": {
+        "flag": {
+          "ready-together": [
+            "declared-priority"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one ready {{row.id}} input at a settlement moment that also carries a ready forgiven input from a different row",
+        "when": [
+          "the other input is selected and the {{row.id}} input loses"
+        ],
+        "then": [
+          "where {{row.result-declared-in}} leaves the accepted input unsettled, that target instance stays open until it is settled, {{row.window-declared-in}} closes it, or the event at {{row.cancels-when-declared-in}} clears it",
+          "under the default first-accepted rule, that target instance is already settled and accepts no new input"
+        ],
+        "diagnostics": [
+          "{{instance}}-input-receipt",
+          "{{instance}}-ready-set",
+          "{{instance}}-window-instances",
+          "{{instance}}-target-grades",
+          "{{instance}}-clearing-log"
+        ]
+      },
+      "text": "After a competition loss, an unsettled {{row.id}} target instance stays open until settlement, close at {{row.window-declared-in}}, or the event at {{row.cancels-when-declared-in}}. Under the default first-accepted rule it is already settled, so a new input is not accepted."
+    },
+    {
+      "id": "held-control-after-buffer-fire",
+      "title": "{{row.id}} follows {{row.held-after-fire}} after its action fires",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "input-buffers",
+      "bindings": {
+        "held-course": {
+          "row_field": "held-after-fire",
+          "map": {
+            "fresh-press-required": "the control remains held through a later accepted early state, is then released and freshly pressed while that state holds, and the firing event arrives",
+            "hold-can-repeat": "the control remains held as the arming condition next holds, the cited window later closes while both still hold, and the firing event arrives after renewal"
+          }
+        },
+        "held-result": {
+          "row_field": "held-after-fire",
+          "map": {
+            "fresh-press-required": "the uninterrupted held state creates no press; the fresh qualifying press creates one saved press, which becomes ready once at the firing event",
+            "hold-can-repeat": "the uninterrupted hold creates one new press when the arming condition next holds; window close clears it and creates one fresh waiting press immediately, which becomes ready once at the firing event"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} has submitted its saved press, the action fires, and the physical control remains held",
+        "when": [
+          "{{bind:held-course}}"
+        ],
+        "then": [
+          "held-input handling begins only after the action fires and the saved press has been cleared",
+          "{{bind:held-result}}",
+          "at most one press waits in {{row.id}}",
+          "the waiting-press state and submission log distinguish renewal from a fresh physical press"
+        ],
+        "diagnostics": [
+          "{{instance}}-waiting-press-state",
+          "{{instance}}-submission-log",
+          "{{instance}}-clearing-log"
+        ]
+      },
+      "text": "The contract starts held-input handling only after {{row.id}}'s action fires and its saved press has been cleared. Then {{bind:held-result}}. The course reads the arming condition at {{row.arms-when-declared-in}}, the window at {{row.window-declared-in}}, and the firing event at {{row.fires-when-declared-in}}. At most one press waits. The test reads both waiting state and submissions so renewal and a fresh physical press remain distinguishable."
+    },
+    {
+      "id": "rejected-proposal-restores-nothing",
+      "title": "a rejected proposal restores no forgiveness state",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "ready-together": [
+            "all-ready-actions",
+            "declared-priority",
+            "cannot-coincide"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a submitted forgiven action proposal after the submission-time clearing for its family",
+        "when": [
+          "the cited action rule or Event resolution rejects the proposal"
+        ],
+        "then": [
+          "the cleared forgiveness state remains absent",
+          "a new attempt appears only after a new qualifying arming event or press",
+          "the consequences of rejection assert nothing in this contract"
+        ],
+        "diagnostics": [
+          "{{instance}}-submission-log",
+          "{{instance}}-clearing-log",
+          "{{instance}}-window-instances",
+          "{{instance}}-waiting-press-state"
+        ]
+      },
+      "text": "Rejecting a submitted action proposal restores no cleared forgiveness state. A new attempt needs a new qualifying arming event or press. Rejection consequences belong to Event resolution and assert nothing here."
+    },
+    {
+      "id": "forgiveness-authority-order",
+      "title": "the forgiveness authority order never rewrites earlier moments",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "ready-together": [
+            "all-ready-actions",
+            "declared-priority",
+            "cannot-coincide"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a receipt and settlement trace with distinguishable arming, mapped input, ordinary permission, acceptance or capture, open state, firing, competition, submission, action result, clearing, and held-input records where those stages occur",
+        "when": [
+          "the trace is compared with the mechanism's authority order"
+        ],
+        "then": [
+          "each stage reads the result of every earlier applicable stage in the listed order",
+          "no later stage rewrites an earlier input moment or target moment",
+          "a stage absent from the constructed case asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-input-receipt",
+          "{{instance}}-arming-log",
+          "{{instance}}-ready-set",
+          "{{instance}}-submission-log",
+          "{{instance}}-clearing-log"
+        ]
+      },
+      "text": "Arming, input mapping, ordinary permission, target acceptance, late acceptance, buffer capture, repeated-press choice, open and early-clearing state, firing, competition, Event resolution order, action rules, clearing, and held-input renewal remain in that authority order. No later stage rewrites an earlier input moment or target moment. A stage absent from the case asserts nothing."
+    },
+    {
+      "id": "row-families-do-not-overlap",
+      "title": "declaration check: no family has two rows matching one input",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "ready-together": [
+            "all-ready-actions",
+            "declared-priority",
+            "cannot-coincide"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and its cited prose, not the running game",
+        "when": [
+          "a reviewer compares every pair of rows within late-input-windows, input-buffers, and target-moment-windows"
+        ],
+        "then": [
+          "no two rows in one family can match one action input in the same situation",
+          "an overlapping pair is a defect this test fails by construction; for a family with fewer than two rows, its pair comparison asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and its cited prose, not the running game. The contract makes two rows of one family matching one input in the same situation an invalid adoption rather than an implicit choice. An overlapping pair is a defect this test fails by construction. For a family with fewer than two rows, its pair comparison asserts nothing."
+    },
+    {
+      "id": "declared-priority-has-one-matching-rule",
+      "title": "declaration check: declared-priority has one matching competition row",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "ready-together": [
+            "declared-priority"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and its cited prose, not the running game",
+        "when": [
+          "a reviewer lists every situation where forgiven inputs can be ready together and compares the list with competition-rules"
+        ],
+        "then": [
+          "every listed situation has exactly one matching competition-rules row",
+          "a missing or multiply matching row is a defect this test fails by construction; where no situation can make inputs ready together, the situation comparison asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and its cited prose, not the running game. The contract requires exactly one matching competition-rules row for every situation where forgiven inputs can be ready together under declared-priority. A missing or duplicate match is a defect this test fails by construction. Where no such situation exists, the situation comparison asserts nothing."
+    },
+    {
+      "id": "non-priority-answers-have-no-competition-rows",
+      "title": "declaration check: non-priority answers declare no competition rows",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "ready-together": [
+            "all-ready-actions",
+            "cannot-coincide"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer counts competition-rules rows"
+        ],
+        "then": [
+          "competition-rules has no rows",
+          "any competition-rules row is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. The competition-rules description says rows exist only under declared-priority, so under all-ready-actions or cannot-coincide the set must be empty. Any row is a defect this test fails by construction."
+    },
+    {
+      "id": "no-external-rule-promises-forgiveness",
+      "title": "declaration check: unmatched actions have no external forgiveness promise",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and all prose it cites, not the running game",
+        "when": [
+          "a reviewer searches outside these rows for a promise that an unmatched action or input receives forgiveness"
+        ],
+        "then": [
+          "no cited game rule outside these rows promises forgiveness for an unmatched action or input",
+          "any such promise is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and its cited prose, not the running game. The contract says no cited game rule outside these rows promises forgiveness for an unmatched action or input. Any such promise is a defect this test fails by construction."
+    },
+    {
+      "id": "late-action-citation-duty",
+      "title": "declaration check: {{row.id}}'s action citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "late-input-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.action-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.action-declared-in}} identifies the row's action scope and names ordinary permission and the complete effect; for the reserved all-actions spelling, it names these for every action in the set, as the action-declared-in description requires",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.action-declared-in}}, not the running game. The action-declared-in description requires the citation to identify {{row.action}} as the row's action scope and name ordinary permission and the complete effect; for the reserved all-actions spelling, it names these for every action in the set. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "late-arming-citation-duty",
+      "title": "declaration check: {{row.id}}'s arming citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "late-input-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.arms-when-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.arms-when-declared-in}} names every transition that starts {{row.id}} and every similar transition that does not",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.arms-when-declared-in}}, not the running game. The citation must name every transition that starts {{row.id}} and every similar transition that does not. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "late-window-citation-duty",
+      "title": "declaration check: {{row.id}}'s window citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "late-input-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.window-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.window-declared-in}} states a positive duration, unit, inclusive last moment, clock, pause behaviour, and open-state test for {{row.id}}, as the window-declared-in description requires",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.window-declared-in}}, not the running game. The window-declared-in description requires the citation to state a positive duration, unit, inclusive last moment, clock, pause behaviour, and open-state test for {{row.id}}. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "late-cancellation-citation-duty",
+      "title": "declaration check: {{row.id}}'s cancellation citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "late-input-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.cancels-when-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.cancels-when-declared-in}} names every event that ends {{row.id}} before its cited window closes or states that no extra event does",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.cancels-when-declared-in}}, not the running game. The citation must name every event that ends {{row.id}} before its window closes or state that no extra event does. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "buffer-action-citation-duty",
+      "title": "declaration check: {{row.id}}'s action citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "input-buffers",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.action-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.action-declared-in}} identifies the row's action scope and names ordinary permission and the complete effect; for the reserved all-actions spelling, it names these for every action in the set, as the action-declared-in description requires",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.action-declared-in}}, not the running game. The action-declared-in description requires the citation to identify {{row.action}} as the row's action scope and name ordinary permission and the complete effect; for the reserved all-actions spelling, it names these for every action in the set. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "buffer-arming-citation-duty",
+      "title": "declaration check: {{row.id}}'s arming citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "input-buffers",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.arms-when-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.arms-when-declared-in}} names every accepted early state, the matching action input, and the excluded cases for {{row.id}}, as the arms-when-declared-in description requires",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.arms-when-declared-in}}, not the running game. The arms-when-declared-in description requires the citation to name every accepted early state, the matching action input, and the excluded cases for {{row.id}}. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "buffer-window-citation-duty",
+      "title": "declaration check: {{row.id}}'s window citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "input-buffers",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.window-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.window-declared-in}} states a positive duration, unit, inclusive last moment, clock, pause behaviour, and open-state test for {{row.id}}, as the window-declared-in description requires",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.window-declared-in}}, not the running game. The window-declared-in description requires the citation to state a positive duration, unit, inclusive last moment, clock, pause behaviour, and open-state test for {{row.id}}. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "buffer-firing-citation-duty",
+      "title": "declaration check: {{row.id}}'s firing citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "input-buffers",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.fires-when-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.fires-when-declared-in}} names the first ordinary permission event that releases {{row.id}} and adds no extra delay",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.fires-when-declared-in}}, not the running game. The citation must name the first ordinary permission event that releases {{row.id}} and add no extra delay. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "buffer-cancellation-citation-duty",
+      "title": "declaration check: {{row.id}}'s cancellation citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "input-buffers",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.cancels-when-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.cancels-when-declared-in}} names every event that discards {{row.id}} before firing or states that no extra event does",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.cancels-when-declared-in}}, not the running game. The citation must name every event that discards {{row.id}} before firing or state that no extra event does. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "target-action-citation-duty",
+      "title": "declaration check: {{row.id}}'s action citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "target-moment-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.action-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.action-declared-in}} identifies the row's action-input scope and names ordinary permission and the complete attempt; for the reserved all-actions spelling, it names these for every action in the set, as the action-declared-in description requires",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.action-declared-in}}, not the running game. The action-declared-in description requires the citation to identify {{row.action}} as the row's action-input scope and name ordinary permission and the complete attempt; for the reserved all-actions spelling, it names these for every action in the set. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "target-moment-citation-duty",
+      "title": "declaration check: {{row.id}}'s target citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "target-moment-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.target-moment-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.target-moment-declared-in}} names the target moment for {{row.id}}",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.target-moment-declared-in}}, not the running game. The citation must name the target moment for {{row.id}}. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "target-arming-citation-duty",
+      "title": "declaration check: {{row.id}}'s arming citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "target-moment-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.arms-when-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.arms-when-declared-in}} names the event that creates each {{row.id}} target instance and every associated input event",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.arms-when-declared-in}}, not the running game. The citation must name the event that creates each {{row.id}} target instance and every associated input event. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "target-window-citation-duty",
+      "title": "declaration check: {{row.id}}'s window citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "target-moment-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.window-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.window-declared-in}} states one outer window with early and late bounds of positive width, inclusive last moments, unit, clock, pause behaviour, and open-state test for {{row.id}}, as the window-declared-in description requires",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.window-declared-in}}, not the running game. The window-declared-in description requires the citation to state one outer window with early and late bounds of positive width, inclusive last moments, unit, clock, pause behaviour, and open-state test for {{row.id}}. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "target-result-citation-duty",
+      "title": "declaration check: {{row.id}}'s result citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "target-moment-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.result-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.result-declared-in}} states the result for an accepted {{row.id}} input, every grade boundary inside the outer window, and any departure from first-accepted settlement, as the result-declared-in description requires",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.result-declared-in}}, not the running game. The result-declared-in description requires the citation to state the result for an accepted {{row.id}} input, every grade boundary inside the outer window, and any departure from first-accepted settlement. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "target-cancellation-citation-duty",
+      "title": "declaration check: {{row.id}}'s cancellation citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "target-moment-windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.cancels-when-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.cancels-when-declared-in}} names every event that stops a {{row.id}} target instance before its cited window closes or states that no extra event does",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.cancels-when-declared-in}}, not the running game. The citation must name every event that stops a {{row.id}} target instance before its window closes or state that no extra event does. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "competition-citation-duty",
+      "title": "declaration check: {{row.id}}'s competition citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "competition-rules",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.declared-in}} identifies the matching situation and gives one total priority over every forgiven input that can be ready there",
+          "a missing input, tie, or other incomplete priority is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.declared-in}}, not the running game. The citation must identify the matching situation and give one total priority over every forgiven input that can be ready there. A missing input, tie, or other incomplete priority is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "forgiveness-holds",
+      "title": "input forgiveness holds for the whole run",
+      "type": "general",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "across every armed window, saved press, and target instance of the audited run, every forgiven input was accepted, stored, fired, submitted, or cleared exactly as its row and cited rules state; no unmatched input received forgiveness; no row held more than one press; no press was stored twice or fired twice; every competition selected as declared; no rejected proposal restored cleared forgiveness state; a case the adoption cannot construct asserts nothing",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-arming-log",
+          "{{instance}}-input-receipt",
+          "{{instance}}-waiting-press-state",
+          "{{instance}}-window-instances",
+          "{{instance}}-ready-set",
+          "{{instance}}-submission-log",
+          "{{instance}}-clearing-log",
+          "{{instance}}-target-grades"
+        ]
+      },
+      "text": "Across {{inputs:scope}}, every forgiven input follows its row and cited rules; unmatched inputs receive no forgiveness; no row holds more than one press; no press is stored or fired twice; every competition follows its declaration; and rejection restores no cleared state. A case this adoption cannot construct asserts nothing.",
+      "inputs": {
+        "scope": {
+          "default": "every armed window, saved press, and target instance of the audited run"
+        },
+        "seeds": {
+          "default": [
+            "audit-a",
+            "audit-b"
+          ]
+        }
+      }
+    }
+  ]
+}

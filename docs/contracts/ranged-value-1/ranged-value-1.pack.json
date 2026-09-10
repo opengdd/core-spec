@@ -1,0 +1,3364 @@
+{
+  "contract": "ranged-value",
+  "version": 1,
+  "templates": [
+    {
+      "id": "change-applies",
+      "title": "an in-range change applies exactly",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {
+        "resolution-phrase": {
+          "flag": "number-kind",
+          "map": {
+            "whole-number": ", resolved to whole units as this value's small-change answer directs",
+            "fractional": ", exactly as given"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding a stored value strictly between {{value-cite:min}} and {{value-cite:max}}, with enough room that the change below stays in range, and with no active band blocking the change's direction",
+        "when": [
+          "one imposed change with signed amount d is applied to {{instance}}"
+        ],
+        "then": [
+          "the stored {{instance}} value changes by d{{bind:resolution-phrase}}",
+          "the value and residue, when residue exists, commit together and no partly settled state is observable",
+          "no mark whose reached state did not change reports"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-before-after",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "An in-range change moves {{instance}} by its amount{{bind:resolution-phrase}}, in one commit with no partly settled state observable. A mark whose reached state did not change does not report. The edges are stated at {{value-cite:min}} and {{value-cite:max}}; this test restates neither number."
+    },
+    {
+      "id": "fractional-change-resolves",
+      "title": "a fractional change resolves as declared",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "small-change": [
+            "nearest",
+            "nearest-away-from-zero",
+            "drop-the-fraction",
+            "always-a-whole-unit"
+          ]
+        }
+      },
+      "bindings": {
+        "resolution-phrase": {
+          "flag": "small-change",
+          "map": {
+            "nearest": "the offered signed change rounded to the nearer whole number, with an exact half taken toward positive infinity",
+            "nearest-away-from-zero": "the offered signed change rounded to the nearer whole number, with an exact half taken away from zero",
+            "drop-the-fraction": "the offered signed change with its fraction dropped toward zero, so a change smaller than one whole unit moves {{instance}} not at all",
+            "always-a-whole-unit": "the offered non-integer signed change rounded away from zero, so every nonzero change moves {{instance}} by at least one whole unit"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding a whole stored value, with room in range for the change below, and a record naming the amount offered and the amount that reached the value",
+        "when": [
+          "positive and negative changes carrying fractions, including exact halves, are offered to {{instance}}"
+        ],
+        "then": [
+          "the amount that reaches {{instance}} is {{bind:resolution-phrase}}",
+          "the stored value is whole after every change",
+          "the resolved-away part is discarded and changes no later operation"
+        ],
+        "diagnostics": [
+          "{{instance}}-change-record",
+          "{{instance}}-value-before-after"
+        ]
+      },
+      "text": "{{instance}} holds whole numbers, so a change carrying a fraction resolves before it reaches the value: what moves is {{bind:resolution-phrase}}. The part resolved away is gone; no later change is larger or smaller for it."
+    },
+    {
+      "id": "fractional-change-saves-residue",
+      "title": "saved fractions release whole multiples toward zero",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "small-change": [
+            "save-the-fraction"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding a whole stored value with signed residue zero, enough room for the changes below, and a record naming each offered amount, movement, and residue afterwards, and with no active band blocking the change's direction",
+        "when": [
+          "a run of positive and negative fractional changes is applied, including a whole change and residue that reaches at least one complete multiple of {{value-cite:fraction-step}}"
+        ],
+        "then": [
+          "the whole part of each fractional change moves {{instance}} at once and only its signed fractional remainder enters residue",
+          "complete multiples of {{value-cite:fraction-step}} are removed from residue toward zero and move that many whole units in the matching direction",
+          "a whole change moves in full and leaves residue unchanged",
+          "the stored value remains whole",
+          "residue after each change equals the offered signed fractional remainders minus the complete multiples of {{value-cite:fraction-step}} already released, and each released multiple moved that many whole units"
+        ],
+        "diagnostics": [
+          "{{instance}}-change-record",
+          "{{instance}}-residue",
+          "{{instance}}-value-before-after"
+        ]
+      },
+      "text": "{{instance}} splits a fractional change: the whole part moves at once and the signed remainder waits as residue. Whenever that residue contains complete multiples of {{value-cite:fraction-step}}, those multiples leave toward zero as whole-unit movement and the remainder stays. A whole change leaves residue alone. The test restates neither the step nor any limit."
+    },
+    {
+      "id": "fractional-value-keeps-no-store",
+      "title": "a fractional value has no saved-fraction store",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "number-kind": [
+            "fractional"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding any fractional stored value with room for finite positive and negative changes",
+        "when": [
+          "finite changes with fractional amounts settle"
+        ],
+        "then": [
+          "every finite change lands at full precision",
+          "no saved-fraction store exists",
+          "no residue is ever observable"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-before-after",
+          "{{instance}}-state-record"
+        ]
+      },
+      "text": "A fractional {{instance}} keeps every finite change at full precision. It has no saved-fraction store, so residue is never observable."
+    },
+    {
+      "id": "comparisons-read-stored-value",
+      "title": "every comparison reads the stored value",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a moment when the number shown for {{instance}} differs from the stored value because the display is rounded, shortened, or abbreviated; a display that always matches storage has nothing to check here",
+        "when": [
+          "a line, band edge, limit, drift stop, or cost comparison is made"
+        ],
+        "then": [
+          "the comparison reads the stored {{instance}} value at full precision",
+          "every cited position is read fresh for that comparison",
+          "the displayed number decides nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-comparison-log",
+          "{{instance}}-value-before-after"
+        ]
+      },
+      "text": "Whatever {{instance}} shows the player, every comparison reads its stored value at full precision. Lines, bands, limits, drift stops, and costs never read a rounded display number, and each cited position is read fresh."
+    },
+    {
+      "id": "creation-is-silent",
+      "title": "creation stores mark state silently",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "creation of {{instance}} at {{value-cite:initial}}",
+        "when": [
+          "initial line and band state is stored"
+        ],
+        "then": [
+          "creation is not a movement and reports nothing",
+          "every line's reached state is stored silently",
+          "lines take their declared arm state, or armed when starts-armed is omitted",
+          "bands take their declared starts"
+        ],
+        "diagnostics": [
+          "{{instance}}-line-state",
+          "{{instance}}-line-allowance",
+          "{{instance}}-band-state",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "Creation is not a movement and reports nothing. {{instance}} silently stores every line's reached state, gives lines their declared arm state or the armed default, and gives bands their declared starts."
+    },
+    {
+      "id": "exact-landing-counts",
+      "title": "an exact landing counts as reached",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "exact-landing": [
+            "at-the-line-counts"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} on the unreached side of a declared line or consuming limit, at a line or band that declares no counts-at-line of its own",
+        "when": [
+          "one change lands exactly on that position"
+        ],
+        "then": [
+          "the position counts as reached in the direction of travel",
+          "an armed line at that position, matching the direction of travel and with allowance remaining, reports on that landing",
+          "a limit answered start-a-lap consumes the change"
+        ],
+        "diagnostics": [
+          "{{instance}}-mark-log",
+          "{{instance}}-operation-record"
+        ]
+      },
+      "text": "For {{instance}}, touching a line or consuming limit counts as reaching it. An armed line at that position, matching the direction of travel and with allowance remaining, reports on that landing, and a limit answered start-a-lap consumes the change. This value-wide answer is tested at a line or band that declares no counts-at-line of its own."
+    },
+    {
+      "id": "exact-landing-must-pass",
+      "title": "an exact landing does not count as reached",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "exact-landing": [
+            "must-pass-the-line"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} on the unreached side of a declared line or consuming limit, at a line or band that declares no counts-at-line of its own",
+        "when": [
+          "one change lands exactly on that position and a later change passes it"
+        ],
+        "then": [
+          "the exact landing does not count as reached",
+          "the later movement strictly past the position is the first movement that may report or consume"
+        ],
+        "diagnostics": [
+          "{{instance}}-mark-log",
+          "{{instance}}-operation-record"
+        ]
+      },
+      "text": "For {{instance}}, touching a line or consuming limit is not enough. It becomes reached only after the stored or tested path passes strictly beyond it."
+    },
+    {
+      "id": "ceiling-stops-change",
+      "title": "excess stops at the ceiling",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-the-ceiling": [
+            "stop-at-the-ceiling"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding any value at or below {{value-cite:max}}",
+        "when": [
+          "an imposed rising change would take {{instance}} above {{value-cite:max}}"
+        ],
+        "then": [
+          "the stored value is exactly {{value-cite:max}}",
+          "the excess is discarded and reported to no one",
+          "the change otherwise happened"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-after",
+          "{{instance}}-edge-record"
+        ]
+      },
+      "text": "A rising change that overshoots {{value-cite:max}} leaves {{instance}} exactly on that edge. The excess is lost and reported to no one. This test restates neither number."
+    },
+    {
+      "id": "floor-stops-change",
+      "title": "excess stops at the floor",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-the-floor": [
+            "stop-at-the-floor"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding any value at or above {{value-cite:min}}",
+        "when": [
+          "an imposed falling change would take {{instance}} below {{value-cite:min}}"
+        ],
+        "then": [
+          "the stored value is exactly {{value-cite:min}}",
+          "the shortfall is discarded and reported to no one"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-after",
+          "{{instance}}-edge-record"
+        ]
+      },
+      "text": "A falling change that undershoots {{value-cite:min}} leaves {{instance}} exactly on that edge. The shortfall is lost and reported to no one. This test restates neither number."
+    },
+    {
+      "id": "ceiling-refuses-change",
+      "title": "an overshooting change is refused whole at the ceiling",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-the-ceiling": [
+            "refuse-the-whole-change"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding stored value v and, when present, residue r",
+        "when": [
+          "an imposed rising change would take {{instance}} above {{value-cite:max}}"
+        ],
+        "then": [
+          "the change is refused and the stored value remains v",
+          "residue remains r",
+          "no mark reports",
+          "the refusal is reported to the caller"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-before-after",
+          "{{instance}}-residue-before-after",
+          "{{instance}}-refusal-record"
+        ]
+      },
+      "text": "A change that would carry {{instance}} above {{value-cite:max}} is refused whole and the refusal is reported to the caller. Value and residue stay as they were, and no mark reports, not even partway to the edge."
+    },
+    {
+      "id": "floor-refuses-change",
+      "title": "an undershooting change is refused whole at the floor",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-the-floor": [
+            "refuse-the-whole-change"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding stored value v and, when present, residue r",
+        "when": [
+          "an imposed falling change would take {{instance}} below {{value-cite:min}}"
+        ],
+        "then": [
+          "the change is refused and the stored value remains v",
+          "residue remains r",
+          "no mark reports",
+          "the refusal is reported to the caller"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-before-after",
+          "{{instance}}-residue-before-after",
+          "{{instance}}-refusal-record"
+        ]
+      },
+      "text": "A change that would carry {{instance}} below {{value-cite:min}} is refused whole and the refusal is reported to the caller. Value and residue stay as they were, and no mark reports, not even partway to the edge."
+    },
+    {
+      "id": "ceiling-returns-extra",
+      "title": "ceiling excess is handed back",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-the-ceiling": [
+            "hand-back-the-extra"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding v with positive room h below {{value-cite:max}}",
+        "when": [
+          "a caller applies rising change d greater than h, and the same change is also run with nobody acting"
+        ],
+        "then": [
+          "the stored value is exactly {{value-cite:max}}",
+          "the caller receives positive extra d minus h",
+          "the operation with nobody acting has no caller, so the same extra is dropped"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-after",
+          "{{instance}}-returned-extra"
+        ]
+      },
+      "text": "A caller's rising change fills {{instance}} to {{value-cite:max}} and receives the positive extra that did not fit. This contract does not route it. The same change with nobody acting has no caller, so its extra is dropped."
+    },
+    {
+      "id": "floor-returns-extra",
+      "title": "floor shortfall is handed back",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-the-floor": [
+            "hand-back-the-extra"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding v with positive room h above {{value-cite:min}}",
+        "when": [
+          "a caller applies falling change of magnitude d greater than h, and the same change is also run with nobody acting"
+        ],
+        "then": [
+          "the stored value is exactly {{value-cite:min}}",
+          "the caller receives positive shortfall d minus h",
+          "the operation with nobody acting has no caller, so the same shortfall is dropped"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-after",
+          "{{instance}}-returned-extra"
+        ]
+      },
+      "text": "A caller's falling change empties {{instance}} to {{value-cite:min}} and receives the positive shortfall that did not fit. This contract does not route it. The same change with nobody acting has no caller, so its shortfall is dropped."
+    },
+    {
+      "id": "ceiling-is-landmark",
+      "title": "the ceiling does not hold the value down",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-the-ceiling": [
+            "no-ceiling"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding v",
+        "when": [
+          "a rising change d makes v plus d exceed {{value-cite:max}}"
+        ],
+        "then": [
+          "the stored value is exactly v plus the change, resolved as this value's number-kind directs — through its small-change answer where that question is asked — with no limit applied",
+          "nothing is stopped, refused, returned, or lapped",
+          "{{value-cite:max}} remains a citable landmark and still defines shares"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-after",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "The value at {{value-cite:max}} does not hold {{instance}} down. A rising change passes it in full; the top remains a citable landmark and still defines shares."
+    },
+    {
+      "id": "floor-is-landmark",
+      "title": "the floor does not hold the value up",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-the-floor": [
+            "no-floor"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding v",
+        "when": [
+          "a falling change d makes v plus d fall below {{value-cite:min}}"
+        ],
+        "then": [
+          "the stored value is exactly v plus the change, resolved as this value's number-kind directs — through its small-change answer where that question is asked — with no limit applied",
+          "nothing is stopped, refused, returned, or lapped",
+          "{{value-cite:min}} remains a citable landmark"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-after",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "The value at {{value-cite:min}} does not hold {{instance}} up. A falling change passes it in full; the bottom remains a citable landmark."
+    },
+    {
+      "id": "ceiling-starts-lap",
+      "title": "reaching the ceiling starts a lap",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-the-ceiling": [
+            "start-a-lap"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} below {{value-cite:max}}, with the armed marks this adoption can place on the outward and lap legs and an operation record carrying before, after, direction, leg position, operation id, and lap count",
+        "when": [
+          "one rising change reaches {{value-cite:max}} as exact-landing directs"
+        ],
+        "then": [
+          "the outward leg ends at the consuming ceiling",
+          "outward marks report first, as this value's jumped-lines answer directs, then the lap",
+          "after the lap report, cited limits are read fresh",
+          "where either cited limit moved, any limit-moved band report occurs before the lap leg",
+          "a limit move never repositions the value during the lap loop",
+          "the lap leg stores {{value-cite:lap-lands-on}} and any marks on it report after the lap",
+          "all reports retain the originating operation id and distinguish leg position"
+        ],
+        "diagnostics": [
+          "{{instance}}-operation-record",
+          "{{instance}}-lap-log",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "When a rising change consumes {{value-cite:max}}, {{instance}} reports outward marks, then the lap, then any marks on the leg to {{value-cite:lap-lands-on}}. The reports keep one operation id and distinguish their legs. This test restates neither position."
+    },
+    {
+      "id": "floor-starts-lap",
+      "title": "reaching the floor starts a lap",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "at-the-floor": [
+            "start-a-lap"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} above {{value-cite:min}}, with the armed marks this adoption can place on the outward and lap legs and an operation record carrying before, after, direction, leg position, operation id, and lap count",
+        "when": [
+          "one falling change reaches {{value-cite:min}} as exact-landing directs"
+        ],
+        "then": [
+          "the outward leg ends at the consuming floor",
+          "outward marks report first, as this value's jumped-lines answer directs, then the lap",
+          "after the lap report, cited limits are read fresh",
+          "where either cited limit moved, any limit-moved band report occurs before the lap leg",
+          "a limit move never repositions the value during the lap loop",
+          "the lap leg stores {{value-cite:lap-lands-on}} and any marks on it report after the lap",
+          "all reports retain the originating operation id and distinguish leg position"
+        ],
+        "diagnostics": [
+          "{{instance}}-operation-record",
+          "{{instance}}-lap-log",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "When a falling change consumes {{value-cite:min}}, {{instance}} reports outward marks, then the lap, then any marks on the leg to {{value-cite:lap-lands-on}}. The reports keep one operation id and distinguish their legs. This test restates neither position."
+    },
+    {
+      "id": "lap-carries-extra",
+      "title": "extra continues after a lap",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "the-extra-after-a-lap": [
+            "carry-it-onto-the-new-value"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a change whose movement continues past a consuming limit",
+        "when": [
+          "{{instance}} reports its first lap"
+        ],
+        "then": [
+          "the leftover past the consuming limit is applied after the lap movement, in the original direction",
+          "that leg returns to settlement step 1, keeps the originating operation id, and tests its own marks"
+        ],
+        "diagnostics": [
+          "{{instance}}-operation-record",
+          "{{instance}}-lap-log"
+        ]
+      },
+      "text": "After a lap, {{instance}} carries the leftover onto the new value. It settles as another leg in the original direction, from step 1, under the originating operation id."
+    },
+    {
+      "id": "lap-drops-extra",
+      "title": "extra is dropped after a lap",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "the-extra-after-a-lap": [
+            "drop-it"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a change whose movement continues past a consuming limit",
+        "when": [
+          "{{instance}} reports its first lap"
+        ],
+        "then": [
+          "the leftover is discarded after that lap",
+          "it is reported to no one and causes no further leg or lap"
+        ],
+        "diagnostics": [
+          "{{instance}}-operation-record",
+          "{{instance}}-lap-log"
+        ]
+      },
+      "text": "After one lap, {{instance}} drops the leftover. It is reported to no one and produces no further leg."
+    },
+    {
+      "id": "lap-repeats-with-cap",
+      "title": "carried extra laps again up to the runtime cap",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "more-than-one-lap": [
+            "lap-again-while-it-fits"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "carried leftover large enough to reach the same consuming limit repeatedly, including a run that would require a thirty-third lap",
+        "when": [
+          "the originating change settles"
+        ],
+        "then": [
+          "{{instance}} reports another lap whenever the carried leftover reaches the limit",
+          "at most 32 laps settle for the originating operation",
+          "before lap 33 continuation is rejected, lap-cap-reached reports with the state committed by lap 32, and all remaining leftover is dropped"
+        ],
+        "diagnostics": [
+          "{{instance}}-lap-log",
+          "{{instance}}-lap-cap-reached",
+          "{{instance}}-value-after"
+        ]
+      },
+      "text": "Carried leftover may lap {{instance}} again while it fits, but one originating operation settles at most 32 laps. Before lap 33, continuation is rejected, lap-cap-reached records the state committed by lap 32, and the remaining leftover is dropped."
+    },
+    {
+      "id": "lap-stops-after-one",
+      "title": "one change causes at most one lap",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "more-than-one-lap": [
+            "one-lap-per-change"
+          ],
+          "the-extra-after-a-lap": [
+            "carry-it-onto-the-new-value"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a change with carried leftover large enough to reach the same consuming limit a second time",
+        "when": [
+          "the originating change settles"
+        ],
+        "then": [
+          "exactly one lap reports",
+          "the second reach is stored without consuming",
+          "further excess is dropped"
+        ],
+        "diagnostics": [
+          "{{instance}}-lap-log",
+          "{{instance}}-value-after"
+        ]
+      },
+      "text": "One originating change can report only one lap. A second reach of the same consuming limit is stored without consuming, and further excess is dropped."
+    },
+    {
+      "id": "lap-stops-after-one-and-drops",
+      "title": "one change drops leftover after its only lap",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "more-than-one-lap": [
+            "one-lap-per-change"
+          ],
+          "the-extra-after-a-lap": [
+            "drop-it"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a change with leftover beyond a consuming limit and enough amount to reach that limit again if the leftover were carried",
+        "when": [
+          "the originating change settles"
+        ],
+        "then": [
+          "exactly one lap reports",
+          "the leftover is dropped and reported to no one",
+          "no second consumption occurs"
+        ],
+        "diagnostics": [
+          "{{instance}}-lap-log",
+          "{{instance}}-operation-record",
+          "{{instance}}-value-after"
+        ]
+      },
+      "text": "One originating change reports exactly one lap. Because this adoption drops leftover, that leftover is reported to no one and cannot cause a second consumption."
+    },
+    {
+      "id": "lap-clears-residue",
+      "title": "a lap clears saved residue",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "a-lap-clears-saved-fraction": [
+            "clear-it"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding nonzero signed residue before a consuming movement",
+        "when": [
+          "the movement commits and reports a lap"
+        ],
+        "then": [
+          "residue is zero once the consuming movement commits, and where leftover is carried, before that leftover is resolved"
+        ],
+        "diagnostics": [
+          "{{instance}}-residue-trace",
+          "{{instance}}-lap-log"
+        ]
+      },
+      "text": "A lap clears {{instance}} residue once the consuming movement commits and, where leftover is carried, before that leftover is resolved."
+    },
+    {
+      "id": "lap-keeps-residue",
+      "title": "a lap keeps saved residue",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "a-lap-clears-saved-fraction": [
+            "keep-it"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding nonzero signed residue before a consuming movement",
+        "when": [
+          "the movement commits and reports a lap"
+        ],
+        "then": [
+          "residue is unchanged by the lap itself, measured immediately after the lap movement and before any carried leftover settles"
+        ],
+        "diagnostics": [
+          "{{instance}}-residue-before-after",
+          "{{instance}}-lap-log"
+        ]
+      },
+      "text": "Residue is unchanged by the {{instance}} lap itself, measured immediately after the lap movement and before any carried leftover settles."
+    },
+    {
+      "id": "line-crosses-fixed-position",
+      "title": "the {{row.id}} line fires on crossing",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "lines",
+      "when": {
+        "row": {
+          "value-kind": [
+            "number"
+          ]
+        }
+      },
+      "bindings": {
+        "position-phrase": {
+          "row_field": "value-kind",
+          "map": {
+            "number": "the position the row declares, read as its line-unit directs — the declared number itself unless the row declares share-of-the-ceiling, where it is that share of the fresh value at {{value-cite:max}}"
+          }
+        },
+        "movement-direction": {
+          "row_field": "direction",
+          "map": {
+            "rising": "rising movement",
+            "falling": "falling movement",
+            "both": "movement in either direction"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding a value on the unreached side of {{row.id}} at {{bind:position-phrase}}, with the line in its declared starting arm state; omission of starts-armed means armed",
+        "when": [
+          "one {{bind:movement-direction}} changes {{row.id}} from unreached to reached"
+        ],
+        "then": [
+          "{{row.id}} reports exactly once if it is armed and still has allowance",
+          "the report carries before, after, direction, leg position, operation id, and row id",
+          "reached state is recomputed from the stored endpoint in both directions"
+        ],
+        "diagnostics": [
+          "{{instance}}-mark-log",
+          "{{instance}}-line-state",
+          "{{instance}}-value-before-after"
+        ]
+      },
+      "text": "The {{row.id}} line uses {{bind:position-phrase}}. A {{bind:movement-direction}} reports when its reached state changes from false to true, provided the line is armed and has allowance. Its declared starting arm state applies; omission means armed."
+    },
+    {
+      "id": "line-crosses-cited-position",
+      "title": "the {{row.id}} line follows and fires at its cited position",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "lines",
+      "when": {
+        "row": {
+          "value-kind": [
+            "citation"
+          ]
+        }
+      },
+      "bindings": {
+        "position-phrase": {
+          "row_field": "value-kind",
+          "map": {
+            "citation": "the position read fresh from {{row.value-key}}, interpreted as its line-unit directs — the number at that address itself unless the row declares share-of-the-ceiling, where it is that share of the fresh value at {{value-cite:max}}"
+          }
+        },
+        "movement-direction": {
+          "row_field": "direction",
+          "map": {
+            "rising": "rising movement",
+            "falling": "falling movement",
+            "both": "movement in either direction"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding a value on the unreached side of {{row.id}} at {{bind:position-phrase}}, with the line in its declared starting arm state and the cited number recorded before comparison; omission of starts-armed means armed",
+        "when": [
+          "one {{bind:movement-direction}} changes {{row.id}} from unreached to reached"
+        ],
+        "then": [
+          "{{row.value-key}} is read fresh for the comparison and this test restates no number",
+          "{{row.id}} reports exactly once if it still has allowance",
+          "the report carries before, after, direction, leg position, operation id, and row id"
+        ],
+        "diagnostics": [
+          "{{instance}}-comparison-log",
+          "{{instance}}-mark-log",
+          "{{instance}}-line-state"
+        ]
+      },
+      "text": "The {{row.id}} line uses {{bind:position-phrase}}, with {{row.value-key}} read fresh whenever it is compared. A {{bind:movement-direction}} reports when reached state changes from false to true, provided the line is armed and has allowance. Its declared starting arm state applies; omission means armed. The test names the address and restates no number."
+    },
+    {
+      "id": "line-uses-ceiling-share",
+      "title": "the {{row.id}} line is a share of the ceiling",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "lines",
+      "when": {
+        "row": {
+          "line-unit": [
+            "share-of-the-ceiling"
+          ]
+        }
+      },
+      "bindings": {
+        "movement-direction": {
+          "row_field": "direction",
+          "map": {
+            "rising": "rising movement",
+            "falling": "falling movement",
+            "both": "movement in either direction"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the marked top at {{value-cite:max}} recorded before comparison and {{row.id}} armed",
+        "when": [
+          "a {{bind:movement-direction}} crosses the share declared by {{row.id}}"
+        ],
+        "then": [
+          "the line position is the row's declared share multiplied by the fresh value at {{value-cite:max}}",
+          "the position may be fractional; it is compared, never stored",
+          "the crossing reports once if allowance remains"
+        ],
+        "diagnostics": [
+          "{{instance}}-comparison-log",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "{{row.id}} states a share rather than an absolute position. Its line follows that share of {{value-cite:max}}, read fresh at comparison time; this test restates neither number."
+    },
+    {
+      "id": "line-exact-landing-override",
+      "title": "{{row.id}} uses its own exact-landing answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "lines",
+      "when": {
+        "row": {
+          "counts-at-line": [
+            "at-the-line-counts",
+            "must-pass-the-line"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} armed and unreached in its reporting direction",
+        "when": [
+          "one movement lands exactly on {{row.id}} and another strictly passes it"
+        ],
+        "then": [
+          "where this row declares at-the-line-counts, an exact landing counts as reaching the line",
+          "where this row declares must-pass-the-line, an exact landing does not reach the line and the movement must pass it",
+          "the row's declared answer overrides {{instance}}'s value-wide exact-landing answer"
+        ],
+        "diagnostics": [
+          "{{instance}}-mark-log",
+          "{{instance}}-line-state"
+        ]
+      },
+      "text": "The {{row.id}} row overrides the value-wide exact-landing choice. Its at-the-line-counts answer makes an exact landing reach the line; its must-pass-the-line answer requires movement strictly past it."
+    },
+    {
+      "id": "line-refires-every-crossing",
+      "title": "{{row.id}} fires again on each crossing",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "lines",
+      "when": {
+        "row": {
+          "refire": [
+            "every-crossing"
+          ]
+        }
+      },
+      "bindings": {
+        "sequence-result": {
+          "row_field": "direction",
+          "map": {
+            "rising": "the described cross, return, cross sequence therefore reports twice, and the return leg is silent",
+            "falling": "the described cross, return, cross sequence therefore reports twice, and the return leg is silent",
+            "both": "the described sequence reports three times, once per crossing, because a both line keeps one reached state per direction"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} armed and unreached",
+        "when": [
+          "{{instance}} crosses {{row.id}} in a reporting direction, returns to unreached, and crosses again"
+        ],
+        "then": [
+          "each leg whose reached state for a reported direction goes false to true fires exactly one report for that leg, and a leg whose transition is true to false reports nothing",
+          "{{bind:sequence-result}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-mark-log",
+          "{{instance}}-line-state"
+        ]
+      },
+      "text": "For {{row.id}}, each leg whose reached state for a reported direction goes false to true fires exactly one report, while a true-to-false leg reports nothing. {{bind:sequence-result}}."
+    },
+    {
+      "id": "line-both-directions-keep-state",
+      "title": "{{row.id}} keeps separate reached state for both directions",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "lines",
+      "when": {
+        "row": {
+          "direction": [
+            "both"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} armed with allowance and its rising and falling reached states recorded separately",
+        "when": [
+          "{{instance}} crosses {{row.id}} down, up, and down again"
+        ],
+        "then": [
+          "each direction keeps its own reached state",
+          "each qualifying false-to-true transition in either direction reports while the line's refire allowance remains",
+          "no shared single reached state is legal"
+        ],
+        "diagnostics": [
+          "{{instance}}-crossing-log",
+          "{{instance}}-mark-log",
+          "{{instance}}-line-state"
+        ]
+      },
+      "text": "A both-direction line keeps one reached state per direction. In a cross-down, cross-up, cross-down sequence, each qualifying false-to-true transition reports while refire allowance remains; one shared state is not legal."
+    },
+    {
+      "id": "line-fires-once-per-arm",
+      "title": "{{row.id}} fires once, then waits to re-arm",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "lines",
+      "when": {
+        "row": {
+          "refire": [
+            "once"
+          ],
+          "rearm": [
+            "on-reset",
+            "on-event",
+            "after-a-wait"
+          ]
+        }
+      },
+      "bindings": {
+        "rearm-phrase": {
+          "row_field": "rearm",
+          "map": {
+            "on-reset": "the reset cited at {{row.rearm-declared-in}} occurs",
+            "on-event": "the event cited at {{row.rearm-declared-in}} occurs",
+            "after-a-wait": "the wait cited at {{row.rearm-declared-in}} completes"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} armed with its full allowance",
+        "when": [
+          "{{instance}} makes two qualifying crossings without re-arming, then {{bind:rearm-phrase}}"
+        ],
+        "then": [
+          "only the first crossing reports before re-arming",
+          "after the declared re-arm, the next qualifying crossing reports once again"
+        ],
+        "diagnostics": [
+          "{{instance}}-mark-log",
+          "{{instance}}-line-allowance"
+        ]
+      },
+      "text": "{{row.id}} reports once per arm. Across two crossings without re-arming, only the first reports. Its re-arm rule is: {{bind:rearm-phrase}}."
+    },
+    {
+      "id": "line-fires-set-number",
+      "title": "{{row.id}} fires its declared number of times per arm",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "lines",
+      "when": {
+        "row": {
+          "refire": [
+            "a-set-number-of-times"
+          ],
+          "rearm": [
+            "on-reset",
+            "on-event",
+            "after-a-wait"
+          ]
+        }
+      },
+      "bindings": {
+        "rearm-phrase": {
+          "row_field": "rearm",
+          "map": {
+            "on-reset": "the reset at {{row.rearm-declared-in}}",
+            "on-event": "the event at {{row.rearm-declared-in}}",
+            "after-a-wait": "the wait at {{row.rearm-declared-in}}"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} armed with a fresh allowance of {{row.times}}",
+        "when": [
+          "{{instance}} makes more than {{row.times}} qualifying crossings without re-arming, then reaches {{bind:rearm-phrase}}"
+        ],
+        "then": [
+          "exactly {{row.times}} crossings report before the allowance is exhausted",
+          "the declared re-arm restores the full allowance of {{row.times}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-mark-log",
+          "{{instance}}-line-allowance"
+        ]
+      },
+      "text": "{{row.id}} may report {{row.times}} times per arm. Further qualifying crossings stay silent until {{bind:rearm-phrase}} restores the full allowance."
+    },
+    {
+      "id": "line-wait-rearm-repeat",
+      "title": "{{row.id}} handles another crossing during its re-arm wait",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "lines",
+      "when": {
+        "row": {
+          "rearm": [
+            "after-a-wait"
+          ]
+        }
+      },
+      "bindings": {
+        "repeat-phrase": {
+          "row_field": "repeat",
+          "map": {
+            "restart-the-wait": "restarts the wait from that crossing",
+            "keep-the-first-wait": "leaves the first wait's finish time unchanged",
+            "add-to-the-wait": "adds one full wait to the remaining time"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} waiting to re-arm under {{row.rearm-declared-in}}",
+        "when": [
+          "another qualifying crossing occurs before the wait finishes"
+        ],
+        "then": [
+          "the new crossing {{bind:repeat-phrase}}",
+          "the line remains unable to exceed its current allowance until the resulting wait completes"
+        ],
+        "diagnostics": [
+          "{{instance}}-line-wait",
+          "{{instance}}-line-allowance"
+        ]
+      },
+      "text": "While {{row.id}} waits to re-arm under {{row.rearm-declared-in}}, another crossing {{bind:repeat-phrase}}. The test names the wait address and restates no duration."
+    },
+    {
+      "id": "jumped-lines-reports",
+      "title": "a move crossing several marks reports as declared",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "jumped-lines": [
+            "all-in-order",
+            "only-the-nearest"
+          ]
+        }
+      },
+      "bindings": {
+        "report-phrase": {
+          "flag": "jumped-lines",
+          "map": {
+            "all-in-order": "every crossed armed mark reports in travel order, with row order breaking ties",
+            "only-the-nearest": "only the crossed mark nearest the landing value reports, with row order breaking ties"
+          }
+        },
+        "state-phrase": {
+          "flag": "jumped-lines",
+          "map": {
+            "all-in-order": "every crossed mark updates all its state",
+            "only-the-nearest": "every reached, arm, and band state updates along the full path"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "one leg that crosses at least two armed bare lines or band edges with allowance; an adoption with fewer than two marks has no multi-mark case and this scenario is vacuous",
+        "when": [
+          "the leg settles"
+        ],
+        "then": [
+          "{{bind:report-phrase}}",
+          "{{bind:state-phrase}}",
+          "a band edge crossed on the leg updates its band state under both answers, whether or not its report is the selected one"
+        ],
+        "diagnostics": [
+          "{{instance}}-mark-log",
+          "{{instance}}-mark-state"
+        ]
+      },
+      "text": "When one leg of {{instance}} crosses several marks, {{bind:report-phrase}}. {{bind:state-phrase}}. A crossed band edge updates its band state under both answers whether or not its report is selected. If this adoption has fewer than two marks, it has no multi-mark case to run."
+    },
+    {
+      "id": "marks-read-final-value",
+      "title": "marks read the final value at an edge",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "lines-read": [
+            "the-final-value"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a change whose raw candidate passes a limit and a mark at or past the limit the change reaches",
+        "when": [
+          "the change settles without refusal"
+        ],
+        "then": [
+          "outward marks test the stored endpoint or the consuming limit",
+          "no outward mark observes a number beyond the limit",
+          "every report from that leg carries the stored endpoint, or the consuming limit, as its after value — never the raw candidate"
+        ],
+        "diagnostics": [
+          "{{instance}}-operation-record",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "When a change passes a limit, {{instance}} marks read the final outward endpoint: the stored value, or the consuming limit on a lap. A mark at or past the reached limit never observes the raw candidate, and every report from that leg carries the stored endpoint or consuming limit as its after value."
+    },
+    {
+      "id": "marks-read-raw-result",
+      "title": "marks read the raw result at an edge",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "lines-read": [
+            "the-raw-result"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a change whose raw candidate passes a limit and a mark that only that candidate reaches",
+        "when": [
+          "the change settles without refusal"
+        ],
+        "then": [
+          "outward marks test the raw candidate before the edge handles it",
+          "their reports use that tested candidate as after",
+          "a refused change exposes no raw result, and lap and leftover legs test stored endpoints"
+        ],
+        "diagnostics": [
+          "{{instance}}-operation-record",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "When a change passes a limit, {{instance}} marks on the outward leg read the raw candidate and report it as after. Refusal exposes no raw result; lap and leftover legs read stored endpoints."
+    },
+    {
+      "id": "band-enters-at-fixed-line",
+      "title": "the {{row.id}} band enters at its fixed line",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "row": {
+          "enter-on": [
+            "line"
+          ],
+          "enter-value-kind": [
+            "number"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} out and {{instance}} on the non-entered side of the entering line at {{row.enter-value}}, read as its enter-unit directs — the declared number itself unless the row declares share-of-the-ceiling, where it is that share of the fresh value at {{value-cite:max}}",
+        "when": [
+          "one {{row.enter-direction}} leg changes the entering edge from unreached to reached"
+        ],
+        "then": [
+          "{{row.id}} enters and reports once, subject to jumped-lines",
+          "the report carries the row id and operation evidence"
+        ],
+        "diagnostics": [
+          "{{instance}}-band-state",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "{{row.id}} enters when a {{row.enter-direction}} leg reaches the entering line at {{row.enter-value}}, read as its enter-unit directs — the declared number itself unless the row declares share-of-the-ceiling, where it is that share of the fresh value at {{value-cite:max}}. It reports the state change subject to the value's jumped-lines answer."
+    },
+    {
+      "id": "band-enters-at-cited-line",
+      "title": "the {{row.id}} band enters at its cited line",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "row": {
+          "enter-on": [
+            "line"
+          ],
+          "enter-value-kind": [
+            "citation"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} out and {{instance}} on the non-entered side of the cited entering line {{row.enter-value-key}}",
+        "when": [
+          "one {{row.enter-direction}} leg changes the entering edge from unreached to reached"
+        ],
+        "then": [
+          "{{row.enter-value-key}} is read fresh and this test restates no number",
+          "{{row.id}} enters and reports once, subject to jumped-lines"
+        ],
+        "diagnostics": [
+          "{{instance}}-band-state",
+          "{{instance}}-comparison-log",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "{{row.id}} enters when a {{row.enter-direction}} leg reaches the cited entering line {{row.enter-value-key}}, read fresh. The test names the address and restates no number."
+    },
+    {
+      "id": "band-leaves-at-fixed-line",
+      "title": "the {{row.id}} band leaves at its fixed line",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "row": {
+          "leave-on": [
+            "line"
+          ],
+          "leave-value-kind": [
+            "number"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} in and {{instance}} on the non-leaving side of the leaving line at {{row.leave-value}}, read as its leave-unit directs — the declared number itself unless the row declares share-of-the-ceiling, where it is that share of the fresh value at {{value-cite:max}}",
+        "when": [
+          "one {{row.leave-direction}} leg changes the leaving edge from unreached to reached"
+        ],
+        "then": [
+          "{{row.id}} leaves and reports once, subject to jumped-lines"
+        ],
+        "diagnostics": [
+          "{{instance}}-band-state",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "{{row.id}} leaves when a {{row.leave-direction}} leg reaches the leaving line at {{row.leave-value}}, read as its leave-unit directs — the declared number itself unless the row declares share-of-the-ceiling, where it is that share of the fresh value at {{value-cite:max}}."
+    },
+    {
+      "id": "band-leaves-at-cited-line",
+      "title": "the {{row.id}} band leaves at its cited line",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "row": {
+          "leave-on": [
+            "line"
+          ],
+          "leave-value-kind": [
+            "citation"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} in and {{instance}} on the non-leaving side of the cited leaving line {{row.leave-value-key}}",
+        "when": [
+          "one {{row.leave-direction}} leg changes the leaving edge from unreached to reached"
+        ],
+        "then": [
+          "{{row.leave-value-key}} is read fresh and this test restates no number",
+          "{{row.id}} leaves and reports once, subject to jumped-lines"
+        ],
+        "diagnostics": [
+          "{{instance}}-band-state",
+          "{{instance}}-comparison-log",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "{{row.id}} leaves when a {{row.leave-direction}} leg reaches the cited leaving line {{row.leave-value-key}}, read fresh. The test names the address and restates no number."
+    },
+    {
+      "id": "band-event-enters",
+      "title": "the {{row.id}} band enters on its event",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "row": {
+          "enter-on": [
+            "event"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} out",
+        "when": [
+          "the event at {{row.enter-declared-in}} occurs"
+        ],
+        "then": [
+          "{{row.id}} enters and records that event as its cause"
+        ],
+        "diagnostics": [
+          "{{instance}}-band-state",
+          "{{instance}}-band-event-record"
+        ]
+      },
+      "text": "The event at {{row.enter-declared-in}} turns {{row.id}} on. This event edge is not inferred from the held number."
+    },
+    {
+      "id": "band-event-or-wait-leaves",
+      "title": "the {{row.id}} band leaves on its declared event or wait",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "row": {
+          "leave-on": [
+            "event",
+            "after-a-wait"
+          ]
+        }
+      },
+      "bindings": {
+        "leave-phrase": {
+          "row_field": "leave-on",
+          "map": {
+            "event": "the event at {{row.leave-declared-in}} occurs",
+            "after-a-wait": "the wait at {{row.leave-declared-in}} completes"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} in",
+        "when": [
+          "{{bind:leave-phrase}}"
+        ],
+        "then": [
+          "{{row.id}} leaves and records the declared cause"
+        ],
+        "diagnostics": [
+          "{{instance}}-band-state",
+          "{{instance}}-band-event-record"
+        ]
+      },
+      "text": "{{row.id}} leaves when {{bind:leave-phrase}}. Its state is controlled by that declared edge, not inferred from the held number."
+    },
+    {
+      "id": "band-wait-repeat",
+      "title": "the {{row.id}} band handles another entry during its wait",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "row": {
+          "leave-on": [
+            "after-a-wait"
+          ]
+        }
+      },
+      "bindings": {
+        "repeat-phrase": {
+          "row_field": "repeat",
+          "map": {
+            "restart-the-wait": "restarts the wait from that entry",
+            "keep-the-first-wait": "leaves the first wait's finish time unchanged",
+            "add-to-the-wait": "adds one full wait to the remaining time"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} in with the wait at {{row.leave-declared-in}} running",
+        "when": [
+          "its entering edge occurs again before the wait finishes"
+        ],
+        "then": [
+          "the new entry {{bind:repeat-phrase}}",
+          "{{row.id}} remains in until the resulting wait completes"
+        ],
+        "diagnostics": [
+          "{{instance}}-band-state",
+          "{{instance}}-band-wait"
+        ]
+      },
+      "text": "While {{row.id}} waits to leave, another entry {{bind:repeat-phrase}}. The wait address is {{row.leave-declared-in}}; this test restates no duration."
+    },
+    {
+      "id": "band-starts-as-declared",
+      "title": "the {{row.id}} band starts as declared",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "bindings": {
+        "start-phrase": {
+          "row_field": "starts",
+          "map": {
+            "in": "starts in",
+            "out": "starts out"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "creation of {{instance}} at {{value-cite:initial}}",
+        "when": [
+          "the initial band state is stored"
+        ],
+        "then": [
+          "{{row.id}} {{bind:start-phrase}}",
+          "creation reports no mark"
+        ],
+        "diagnostics": [
+          "{{instance}}-band-state",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "At creation, {{row.id}} {{bind:start-phrase}} and reports nothing. The starting value is cited at {{value-cite:initial}}; this test restates no number.",
+      "when": {
+        "row": {
+          "starts": [
+            "in",
+            "out"
+          ]
+        }
+      }
+    },
+    {
+      "id": "band-starts-from-initial",
+      "title": "the {{row.id}} band reads its starting state from the initial value",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "row": {
+          "starts": [
+            "read-from-initial"
+          ],
+          "enter-on": [
+            "line"
+          ],
+          "leave-on": [
+            "line"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "creation of {{instance}} at {{value-cite:initial}}, with the line geometry for {{row.id}} recorded",
+        "when": [
+          "the initial band state is stored"
+        ],
+        "then": [
+          "{{row.id}} starts in exactly when {{value-cite:initial}} sits on the reached side of its entering edge and not on the reached side of its leaving edge, each per that edge's declared direction",
+          "creation reports no mark"
+        ],
+        "diagnostics": [
+          "{{instance}}-band-state",
+          "{{instance}}-comparison-log",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "At creation, {{row.id}} reads {{value-cite:initial}} against both its line edges: in exactly when the entering side holds and the leaving side does not. Creation reports nothing. An event-edged band that answers read-from-initial starts out; the event-entered case is checked by its own template."
+    },
+    {
+      "id": "event-entered-band-starts-out",
+      "title": "the event-entered {{row.id}} band starts out",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "row": {
+          "starts": [
+            "read-from-initial"
+          ],
+          "enter-on": [
+            "event"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "creation of {{instance}} with the {{row.id}} entering event not yet observed",
+        "when": [
+          "the initial band state is stored"
+        ],
+        "then": [
+          "{{row.id}} starts out: an event-edged band that answers read-from-initial starts out",
+          "creation reports no mark"
+        ],
+        "diagnostics": [
+          "{{instance}}-band-state",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "An event-edged band that answers read-from-initial starts out; {{row.id}} enters by an event, so there is no line geometry to read against the starting value. Creation reports nothing."
+    },
+    {
+      "id": "event-left-band-starts-out",
+      "title": "the event-left {{row.id}} band starts out",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "row": {
+          "starts": [
+            "read-from-initial"
+          ],
+          "leave-on": [
+            "event",
+            "after-a-wait"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "creation of {{instance}} where {{row.id}} leaves by an event or a wait",
+        "when": [
+          "the initial band state is stored"
+        ],
+        "then": [
+          "{{row.id}} starts out: a band with any event or wait edge is event-edged, and an event-edged band that answers read-from-initial starts out",
+          "creation reports no mark"
+        ],
+        "diagnostics": [
+          "{{instance}}-band-state",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "{{row.id}} leaves by an event or a wait, so it is event-edged whatever its entering edge, and an event-edged band that answers read-from-initial starts out. Creation reports nothing. Together with the event-entered template this covers every event-edged shape."
+    },
+    {
+      "id": "band-blocks-selected-movement",
+      "title": "the {{row.id}} band blocks its selected movements",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "row": {
+          "blocks-change": [
+            "blocks-rises",
+            "blocks-falls",
+            "blocks-all"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} in",
+        "when": [
+          "of the movements this adoption can construct: where this row answers blocks-rises, a rising change, cost, and drift are each attempted; where it answers blocks-falls, a falling change, cost, and drift are each attempted; where it answers blocks-all, changes, costs, and drifts are attempted in both directions; a movement kind this adoption cannot construct asserts nothing here",
+          "each of a set, a reset, a limit move, and a lap movement that this adoption can construct settles; an adoption that can construct none of them asserts nothing here"
+        ],
+        "then": [
+          "each attempted selected imposed change, cost, and drift is discarded before fractional handling and records blocked",
+          "a blocked drift has no receiver and contributes nothing to a composed batch",
+          "each of a set, a reset, a limit move, and a lap movement that this adoption can construct settles unblocked; an adoption that can construct none of them asserts nothing here"
+        ],
+        "diagnostics": [
+          "{{instance}}-blocked-record",
+          "{{instance}}-operation-record"
+        ]
+      },
+      "text": "While {{row.id}} is in, blocks-rises blocks rising imposed changes, costs, and drifts; blocks-falls blocks falling ones; blocks-all blocks both directions — each as far as this adoption can construct the attempt. Blocking happens before settlement, and a blocked drift records the block but has no receiver. Each set, reset, limit move, and lap movement this adoption can construct settles unblocked; if it can construct none, that clause asserts nothing."
+    },
+    {
+      "id": "event-entered-band-survives-silent-recompute",
+      "title": "the event-entered {{row.id}} band keeps state through silent recomputes",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "row": {
+          "enter-on": [
+            "event"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} in after the event at {{row.enter-declared-in}}",
+        "when": [
+          "each silent recompute this adoption can perform — a set whose value answers does-a-set-fire-lines with silent, a reset row declaring recompute-from-target, a limit move on a cited limit — settles; where the adoption can perform none, this test asserts nothing"
+        ],
+        "then": [
+          "{{row.id}} remains in unless its own leaving edge occurs"
+        ],
+        "diagnostics": [
+          "{{instance}}-band-state",
+          "{{instance}}-operation-record"
+        ]
+      },
+      "text": "Because {{row.id}} has an event entering edge, each silent recompute this adoption can perform — a silent set, a reset declaring recompute-from-target, or a cited limit move — preserves its state. Where none can be performed, this test asserts nothing. The band stays in until its own leaving edge occurs."
+    },
+    {
+      "id": "event-left-band-survives-silent-recompute",
+      "title": "the event-edged {{row.id}} band keeps state through silent recomputes",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "row": {
+          "leave-on": [
+            "event",
+            "after-a-wait"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} in a known state before recomputation",
+        "when": [
+          "each silent recompute this adoption can perform — a set whose value answers does-a-set-fire-lines with silent, a reset row declaring recompute-from-target, a limit move on a cited limit — settles; where the adoption can perform none, this test asserts nothing"
+        ],
+        "then": [
+          "{{row.id}} keeps its prior state through every recompute"
+        ],
+        "diagnostics": [
+          "{{instance}}-band-state",
+          "{{instance}}-operation-record"
+        ]
+      },
+      "text": "Because {{row.id}} has an event or wait leaving edge, each silent recompute this adoption can perform — a silent set, a reset declaring recompute-from-target, or a cited limit move — preserves its state. Where none can be performed, this test asserts nothing. Only its declared edges change it."
+    },
+    {
+      "id": "line-once-never-rearms",
+      "title": "{{row.id}} fires once and never re-arms",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "lines",
+      "when": {
+        "row": {
+          "refire": [
+            "once"
+          ],
+          "rearm": [
+            "never"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} armed with its fresh allowance",
+        "when": [
+          "{{instance}} makes two or more qualifying crossings over the run"
+        ],
+        "then": [
+          "only the first crossing reports",
+          "no event or passage of time restores its allowance"
+        ],
+        "diagnostics": [
+          "{{instance}}-mark-log",
+          "{{instance}}-line-allowance"
+        ]
+      },
+      "text": "{{row.id}} reports on its first qualifying crossing and never re-arms. Later crossings still update reached state but do not report."
+    },
+    {
+      "id": "line-set-number-never-rearms",
+      "title": "{{row.id}} has one fixed lifetime allowance",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "lines",
+      "when": {
+        "row": {
+          "refire": [
+            "a-set-number-of-times"
+          ],
+          "rearm": [
+            "never"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} armed with lifetime allowance {{row.times}}",
+        "when": [
+          "{{instance}} makes more than {{row.times}} qualifying crossings over the run"
+        ],
+        "then": [
+          "exactly {{row.times}} crossings report",
+          "the exhausted allowance is never restored"
+        ],
+        "diagnostics": [
+          "{{instance}}-mark-log",
+          "{{instance}}-line-allowance"
+        ]
+      },
+      "text": "{{row.id}} has a lifetime allowance of {{row.times}} reports. It never re-arms after that allowance is exhausted."
+    },
+    {
+      "id": "line-starts-armed-as-declared",
+      "title": "{{row.id}} uses its explicit starting arm state",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "lines",
+      "when": {
+        "row": {
+          "starts-armed": [
+            "armed",
+            "disarmed"
+          ]
+        }
+      },
+      "bindings": {
+        "disarmed-phrase": {
+          "row_field": "refire",
+          "map": {
+            "every-crossing": "cannot report at all, since no re-arm is available to it",
+            "once": "cannot report until its declared re-arm restores allowance",
+            "a-set-number-of-times": "cannot report until its declared re-arm restores allowance"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "creation of {{instance}} with {{row.id}} declaring an explicit starting arm state",
+        "when": [
+          "the first qualifying crossing occurs"
+        ],
+        "then": [
+          "a row that explicitly starts armed can report its first qualifying crossing if it has allowance",
+          "a row that explicitly starts disarmed {{bind:disarmed-phrase}}",
+          "creation itself reports nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-line-allowance",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "A {{row.id}} row that explicitly starts armed can report its first qualifying crossing if it has allowance. A row that explicitly starts disarmed {{bind:disarmed-phrase}}. When starts-armed is omitted, line-crosses-fixed-position and line-crosses-cited-position check the default armed state."
+    },
+    {
+      "id": "band-enter-share-follows-ceiling",
+      "title": "the {{row.id}} entering line is a share of the ceiling",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "row": {
+          "enter-unit": [
+            "share-of-the-ceiling"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} out and the marked top at {{value-cite:max}} recorded before comparison",
+        "when": [
+          "a movement crosses the entering share declared by the row"
+        ],
+        "then": [
+          "the entering position is the row's share multiplied by the fresh value at {{value-cite:max}}",
+          "the entering position may be fractional; it is compared, never stored",
+          "{{row.id}} enters if the directional reached state changes"
+        ],
+        "diagnostics": [
+          "{{instance}}-comparison-log",
+          "{{instance}}-band-state"
+        ]
+      },
+      "text": "{{row.id}} places its entering line at a declared share of {{value-cite:max}}, read fresh for the comparison. This test restates neither number."
+    },
+    {
+      "id": "band-leave-share-follows-ceiling",
+      "title": "the {{row.id}} leaving line is a share of the ceiling",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "row": {
+          "leave-unit": [
+            "share-of-the-ceiling"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} in and the marked top at {{value-cite:max}} recorded before comparison",
+        "when": [
+          "a movement crosses the leaving share declared by the row"
+        ],
+        "then": [
+          "the leaving position is the row's share multiplied by the fresh value at {{value-cite:max}}",
+          "the leaving position may be fractional; it is compared, never stored",
+          "{{row.id}} leaves if the directional reached state changes"
+        ],
+        "diagnostics": [
+          "{{instance}}-comparison-log",
+          "{{instance}}-band-state"
+        ]
+      },
+      "text": "{{row.id}} places its leaving line at a declared share of {{value-cite:max}}, read fresh for the comparison. This test restates neither number."
+    },
+    {
+      "id": "band-exact-landing-override",
+      "title": "{{row.id}} uses its own exact-landing answer",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "row": {
+          "counts-at-line": [
+            "at-the-line-counts",
+            "must-pass-the-line"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} once approaching each line edge this row has (a band may have only one)",
+        "when": [
+          "one movement lands exactly on an edge and another strictly passes it"
+        ],
+        "then": [
+          "where this row declares at-the-line-counts, an exact landing counts as reaching each line edge this row has (a band may have only one)",
+          "where this row declares must-pass-the-line, an exact landing does not reach a line edge and the movement must pass it",
+          "the row's declared answer overrides {{instance}}'s value-wide exact-landing answer"
+        ],
+        "diagnostics": [
+          "{{instance}}-band-state",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "The {{row.id}} row overrides the value-wide exact-landing choice for each line edge this row has (a band may have only one). Its at-the-line-counts answer counts an exact landing; its must-pass-the-line answer requires movement strictly past the edge."
+    },
+    {
+      "id": "set-stores-target-without-raw-result",
+      "title": "the {{row.id}} set stores its target without a raw result",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "sets",
+      "bindings": {
+        "mode-phrase": {
+          "row_field": "mode",
+          "map": {
+            "set-to-target": "the target number",
+            "recompute": "the result computed by the cited rule"
+          }
+        },
+        "settlement-phrase": {
+          "row_field": "mode",
+          "map": {
+            "set-to-target": "the named target settles as one absolute repositioning",
+            "recompute": "a recompute's computed result settles exactly as a named target would"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} enabled, with target source {{row.target-key}} and trigger {{row.trigger-declared-in}}",
+        "when": [
+          "the trigger offers {{bind:mode-phrase}}"
+        ],
+        "then": [
+          "a set with a declared enabling condition is offered only while that condition holds",
+          "{{bind:settlement-phrase}}",
+          "the set has no raw result and marks can observe only its successful stored outcome",
+          "fractional small-change handling is not applied"
+        ],
+        "diagnostics": [
+          "{{instance}}-set-record",
+          "{{instance}}-value-before-after"
+        ]
+      },
+      "text": "{{row.id}} reads {{bind:mode-phrase}} at {{row.target-key}} when {{row.trigger-declared-in}} offers it. A set with a declared enabling condition is offered only while that condition holds. {{bind:settlement-phrase}}: it has no raw result and does not pass through small-change. This test names the addresses and restates no number."
+    },
+    {
+      "id": "outside-set-clamps",
+      "title": "an outside set stores the nearer limit",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "a-set-outside-the-range": [
+            "pull-it-to-the-nearer-limit"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "named sets targeting once above {{value-cite:max}} and once below {{value-cite:min}}, where this adoption's declared sets can construct such targets; an adoption whose sets can never target outside the range asserts nothing here",
+        "when": [
+          "each set settles"
+        ],
+        "then": [
+          "the high target stores exactly {{value-cite:max}} and the low target stores exactly {{value-cite:min}}",
+          "neither rejected target is a raw result",
+          "the set returns no extra and starts no lap"
+        ],
+        "diagnostics": [
+          "{{instance}}-set-record",
+          "{{instance}}-value-after"
+        ]
+      },
+      "text": "A set outside the range stores the nearer passed limit. It exposes no rejected target as a raw result, hands back no extra, and starts no lap. The limits are {{value-cite:min}} and {{value-cite:max}}; this test restates neither number. Where no declared set can target outside the range, it asserts nothing."
+    },
+    {
+      "id": "outside-set-refuses",
+      "title": "an outside set is refused whole",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "a-set-outside-the-range": [
+            "refuse-the-set"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding value v and, when present, residue r; a named set targets outside {{value-cite:min}} and {{value-cite:max}}",
+        "when": [
+          "the set is offered"
+        ],
+        "then": [
+          "the set is refused to its caller",
+          "the stored value remains v and residue remains r",
+          "no mark reports or changes state from movement"
+        ],
+        "diagnostics": [
+          "{{instance}}-set-record",
+          "{{instance}}-value-before-after",
+          "{{instance}}-residue-before-after"
+        ]
+      },
+      "text": "A set outside the range is refused whole. {{instance}} keeps its value and residue, and no mark fires. The test cites {{value-cite:min}} and {{value-cite:max}} and restates neither number."
+    },
+    {
+      "id": "outside-set-stores-as-sent",
+      "title": "an outside set stores its target as sent",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "a-set-outside-the-range": [
+            "store-it-as-sent"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a named set whose target is beyond a limit whose ordinary edge answer allows the value to pass",
+        "when": [
+          "the set settles"
+        ],
+        "then": [
+          "the exact target is stored",
+          "the set exposes no separate raw result"
+        ],
+        "diagnostics": [
+          "{{instance}}-set-record",
+          "{{instance}}-value-after"
+        ]
+      },
+      "text": "An outside set stores its target exactly as sent, but only beyond an ordinary edge that allows {{instance}} to pass. The target is the stored outcome, not a separate raw result."
+    },
+    {
+      "id": "set-fires-marks-as-change",
+      "title": "a successful set reports crossed marks",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "does-a-set-fire-lines": [
+            "treat-it-as-a-change"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a named set whose accepted stored target crosses at least one mark, plus a set whose target crosses no mark, with an operation record distinguishing reports from silent state updates",
+        "when": [
+          "each set settles"
+        ],
+        "then": [
+          "crossed marks test the successful stored movement and report as jumped-lines directs",
+          "the operation record identifies this answer even when the absence of a crossing makes the stored result indistinguishable from a silent recompute"
+        ],
+        "diagnostics": [
+          "{{instance}}-set-record",
+          "{{instance}}-mark-log",
+          "{{instance}}-mark-state"
+        ]
+      },
+      "text": "A successful set tests marks along its stored movement and reports them as jumped-lines directs. Because a set crossing no line can store the same value under either answer, this test also reads the operation record that distinguishes mark testing from silent recompute."
+    },
+    {
+      "id": "set-updates-marks-silently",
+      "title": "a successful set recomputes marks without reports",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "does-a-set-fire-lines": [
+            "silent"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a named set whose accepted stored target crosses marks, with an operation record naming silent recomputation",
+        "when": [
+          "the set settles"
+        ],
+        "then": [
+          "bare-line reached state and line-geometry band state recompute from the stored target",
+          "event-edged bands keep state and no mark reports",
+          "the operation record distinguishes silent recompute from treat-it-as-a-change even when no line was crossed"
+        ],
+        "diagnostics": [
+          "{{instance}}-set-record",
+          "{{instance}}-mark-log",
+          "{{instance}}-mark-state"
+        ]
+      },
+      "text": "A successful set silently recomputes bare lines and line-geometry bands from its stored target. Event-edged bands keep state and nothing reports. The operation record is required because a set crossing no line can leave the same stored value under either answer."
+    },
+    {
+      "id": "successful-set-clears-residue",
+      "title": "the {{row.id}} set clears residue when it succeeds",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "sets",
+      "when": {
+        "flag": {
+          "small-change": [
+            "save-the-fraction"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding nonzero signed residue with {{row.id}} enabled",
+        "when": [
+          "{{row.id}} successfully stores its target from {{row.target-key}}"
+        ],
+        "then": [
+          "residue becomes zero in the same commit as the stored target"
+        ],
+        "diagnostics": [
+          "{{instance}}-set-record",
+          "{{instance}}-residue-before-after"
+        ]
+      },
+      "text": "A successful {{row.id}} set clears {{instance}} residue in the same commit. The target comes from {{row.target-key}}; this test restates no number. A refused set leaves residue unchanged."
+    },
+    {
+      "id": "cost-pays-exactly",
+      "title": "the affordable {{row.id}} cost pays exactly",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "costs",
+      "bindings": {
+        "direction-phrase": {
+          "row_field": "direction",
+          "map": {
+            "rising": "toward {{value-cite:max}}",
+            "falling": "toward {{value-cite:min}}"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} with enough room {{bind:direction-phrase}} to pay the non-negative amount at {{row.amount-key}}, and with no active band blocking the change's direction",
+        "when": [
+          "the action at {{row.action-declared-in}} attempts {{row.id}}"
+        ],
+        "then": [
+          "the stored value moves {{bind:direction-phrase}} by the amount at {{row.amount-key}} after small-change resolves it, and residue updates accordingly",
+          "the report to the action carries no refusal and no shortage",
+          "marks test the paid movement normally"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-before-after",
+          "{{instance}}-residue-before-after",
+          "{{instance}}-cost-record",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "When affordable and unblocked, {{row.id}} moves {{instance}} {{bind:direction-phrase}} by the amount at {{row.amount-key}} after small-change resolves it, updating residue accordingly. The report to {{row.action-declared-in}} carries no refusal and no shortage. This test names the addresses and restates no number."
+    },
+    {
+      "id": "value-wide-cost-refuses",
+      "title": "the value-wide cost answer refuses an unaffordable action",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "not-enough-room": [
+            "refuse-the-action"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a cost row without an answer override, insufficient room for its full provisional movement, stored value v, residue r when present, and unchanged mark state m",
+        "when": [
+          "the cost is attempted"
+        ],
+        "then": [
+          "the action is refused with its positive shortage",
+          "movement and provisional residue are discarded together",
+          "stored value v, residue r, and all mark state m remain unchanged"
+        ],
+        "diagnostics": [
+          "{{instance}}-cost-record",
+          "{{instance}}-value-before-after",
+          "{{instance}}-residue-before-after",
+          "{{instance}}-mark-state"
+        ]
+      },
+      "text": "For a cost row without an override, an unaffordable cost is refused whole. Movement and provisional residue are discarded together; value, residue, and every mark stay unchanged, and the caller receives the shortage."
+    },
+    {
+      "id": "value-wide-cost-takes-what-fits",
+      "title": "the value-wide cost answer takes what fits",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "not-enough-room": [
+            "take-what-fits"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a cost row without an answer override and insufficient room for its full provisional movement",
+        "when": [
+          "the cost is attempted"
+        ],
+        "then": [
+          "the stored value moves to the limiting edge",
+          "movement and residue are recomputed from only the approved amount",
+          "the caller receives the positive amount paid and marks test that movement normally"
+        ],
+        "diagnostics": [
+          "{{instance}}-cost-record",
+          "{{instance}}-value-before-after",
+          "{{instance}}-residue-before-after",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "For a cost row without an override, an unaffordable cost takes only what fits. {{instance}} moves to the limiting edge, recomputes residue from the approved amount only, reports the positive amount paid, and tests marks normally."
+    },
+    {
+      "id": "cost-row-override-refuses",
+      "title": "the {{row.id}} override refuses an unaffordable action",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "costs",
+      "when": {
+        "row": {
+          "answer": [
+            "refuse-the-action"
+          ]
+        },
+        "flag": {
+          "not-enough-room": [
+            "take-what-fits"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "insufficient room to pay {{row.id}} in full, with stored value v and residue r when present",
+        "when": [
+          "the action at {{row.action-declared-in}} attempts the amount at {{row.amount-key}}"
+        ],
+        "then": [
+          "the row's refuse-the-action answer wins over the value-wide answer",
+          "the caller receives refusal and shortage",
+          "value, residue, and every mark remain unchanged"
+        ],
+        "diagnostics": [
+          "{{instance}}-cost-record",
+          "{{instance}}-value-before-after",
+          "{{instance}}-residue-before-after",
+          "{{instance}}-mark-state"
+        ]
+      },
+      "text": "{{row.id}} overrides the value-wide cost answer. When it cannot be paid in full, it refuses the action at {{row.action-declared-in}}, reports the shortage, and changes neither value nor residue."
+    },
+    {
+      "id": "cost-row-override-partial",
+      "title": "the {{row.id}} override takes what fits",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "costs",
+      "when": {
+        "row": {
+          "answer": [
+            "take-what-fits"
+          ]
+        },
+        "flag": {
+          "not-enough-room": [
+            "refuse-the-action"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "insufficient room to pay {{row.id}} in full",
+        "when": [
+          "the action at {{row.action-declared-in}} attempts the amount at {{row.amount-key}}"
+        ],
+        "then": [
+          "the row's take-what-fits answer wins over the value-wide answer",
+          "{{instance}} moves to the limiting edge and reports the positive amount paid",
+          "movement and residue are recomputed from only that approved amount",
+          "marks test that movement normally"
+        ],
+        "diagnostics": [
+          "{{instance}}-cost-record",
+          "{{instance}}-value-before-after",
+          "{{instance}}-residue-before-after",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "{{row.id}} overrides the value-wide cost answer. When full payment does not fit, {{instance}} moves to the limiting edge, recomputes residue from the approved part only, and reports the positive amount paid to {{row.action-declared-in}}."
+    },
+    {
+      "id": "drift-moves-value",
+      "title": "{{row.id}} moves the value on its own",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "drifts",
+      "bindings": {
+        "cadence-phrase": {
+          "row_field": "cadence",
+          "map": {
+            "per-game-step": "the game advances one step",
+            "per-real-second": "cited-clock time passes",
+            "per-turn": "one turn arrives",
+            "at-a-named-moment": "the row's named moment arrives"
+          }
+        },
+        "amount-phrase": {
+          "row_field": "amount-kind",
+          "map": {
+            "fixed": "the fixed positive amount at {{row.step-amount-key}}",
+            "depends-on-state": "the positive amount at {{row.step-amount-key}}, adjusted by the row's state rule",
+            "grows-while-it-runs": "the positive amount at {{row.step-amount-key}}, grown by the row's growth rule at {{row.amount-declared-in}}"
+          }
+        },
+        "direction-phrase": {
+          "row_field": "direction",
+          "map": {
+            "rises": "rises",
+            "falls": "falls",
+            "toward-the-anchor": "moves toward the anchor"
+          }
+        },
+        "resolution-phrase": {
+          "flag": "number-kind",
+          "map": {
+            "whole-number": "resolved through small-change into a provisional movement",
+            "fractional": "kept exactly as accrued as a provisional movement, since this value keeps fractions"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} away from {{row.stops-at-key}}, with {{row.id}} eligible, every interrupt row for it allowing it, and no other drift eligible",
+        "when": [
+          "{{bind:cadence-phrase}}, with nobody acting"
+        ],
+        "then": [
+          "the contribution is {{bind:resolution-phrase}}, then clipped to {{row.stops-at-key}}, so {{instance}} {{bind:direction-phrase}} by no more than {{bind:amount-phrase}}",
+          "the operation commits once with no partly settled state observable",
+          "marks test the movement once"
+        ],
+        "diagnostics": [
+          "{{instance}}-value-before-after",
+          "{{instance}}-drift-log",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "{{instance}} changes on its own under {{row.id}}. Each time {{bind:cadence-phrase}}, its contribution is {{bind:resolution-phrase}}, then clipped to {{row.stops-at-key}}, so it {{bind:direction-phrase}} by no more than {{bind:amount-phrase}}. The amount and stop are stated at their addresses; this test restates neither number."
+    },
+    {
+      "id": "continuous-drift-uses-elapsed-time",
+      "title": "{{row.id}} accrues continuously from elapsed clock time",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "drifts",
+      "when": {
+        "row": {
+          "cadence": [
+            "per-real-second"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} eligible over equal cited-clock durations rendered with different frame counts",
+        "when": [
+          "each duration settles"
+        ],
+        "then": [
+          "each contribution is the rate at {{row.step-amount-key}} multiplied by elapsed cited-clock time",
+          "equal elapsed time produces equal provisional movement regardless of frame count",
+          "fractional accrual passes through small-change"
+        ],
+        "diagnostics": [
+          "{{instance}}-clock-trace",
+          "{{instance}}-drift-log"
+        ]
+      },
+      "text": "{{row.id}} accrues continuously. It multiplies the rate at {{row.step-amount-key}} by elapsed cited-clock time, not frame count, and sends fractional accrual through small-change. This test restates no rate."
+    },
+    {
+      "id": "named-moment-drift-uses-citation",
+      "title": "{{row.id}} runs only at its named moment",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "drifts",
+      "when": {
+        "row": {
+          "cadence": [
+            "at-a-named-moment"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} eligible before the moment at {{row.moment-declared-in}}",
+        "when": [
+          "time passes without that moment, then the named moment occurs"
+        ],
+        "then": [
+          "{{row.id}} contributes nothing before the moment",
+          "it contributes once when the cited moment occurs"
+        ],
+        "diagnostics": [
+          "{{instance}}-drift-log",
+          "{{instance}}-event-log"
+        ]
+      },
+      "text": "{{row.id}} contributes only when the moment at {{row.moment-declared-in}} occurs. Passing time alone does not run it."
+    },
+    {
+      "id": "declared-drift-amount-rule",
+      "title": "{{row.id}} uses its declared changing amount rule",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "drifts",
+      "when": {
+        "row": {
+          "amount-kind": [
+            "depends-on-state",
+            "grows-while-it-runs"
+          ]
+        }
+      },
+      "bindings": {
+        "shape-phrase": {
+          "row_field": "amount-kind",
+          "map": {
+            "depends-on-state": "reads the current state mapping",
+            "grows-while-it-runs": "is grown by the row's growth rule at {{row.amount-declared-in}}"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} eligible at two states or two points in its run for which {{row.amount-declared-in}} gives different amounts",
+        "when": [
+          "one contribution settles in each case"
+        ],
+        "then": [
+          "each contribution {{bind:shape-phrase}}",
+          "{{row.step-amount-key}} supplies the declared base amount and this test restates neither the amount nor the rule"
+        ],
+        "diagnostics": [
+          "{{instance}}-drift-log",
+          "{{instance}}-value-trace"
+        ]
+      },
+      "text": "{{row.id}} does not use one fixed contribution. It {{bind:shape-phrase}}, with the base at {{row.step-amount-key}}. The test names both addresses and restates neither number nor rule."
+    },
+    {
+      "id": "drift-stops",
+      "title": "{{row.id}} stops where its row says it stops",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "drifts",
+      "bindings": {
+        "landing-phrase": {
+          "row_field": "at-stop",
+          "map": {
+            "lands-exactly": "the offered contribution is clipped so no value beyond {{row.stops-at-key}} exists in the step record",
+            "overshoots-then-returns": "the at-stop step record shows the offered amount passing {{row.stops-at-key}}, followed by a silent correction that stores the stop"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} less than one {{row.id}} contribution from {{row.stops-at-key}}, {{row.id}} eligible and alone, and an at-stop step record naming the offered amount, every intermediate value, the correction, and the stored value afterwards",
+        "when": [
+          "the next offered contribution would pass {{row.stops-at-key}}"
+        ],
+        "then": [
+          "the step record names the amount offered before clipping or correction",
+          "{{bind:landing-phrase}}",
+          "the stored value is exactly {{row.stops-at-key}} under either answer",
+          "after an overshoot, correction reports no mark and recomputes reached state from the stored stop",
+          "{{row.id}} is ineligible and offers nothing while the value rests at its stop"
+        ],
+        "diagnostics": [
+          "{{instance}}-at-stop-step-record",
+          "{{instance}}-offered-amount",
+          "{{instance}}-intermediate-value",
+          "{{instance}}-value-after"
+        ]
+      },
+      "text": "Both at-stop answers leave {{instance}} stored at {{row.stops-at-key}}, so the stored value cannot distinguish them. This probe reads the at-stop step record: {{bind:landing-phrase}}. Once stored at that address, {{row.id}} is ineligible and offers nothing. The test restates no stop or amount."
+    },
+    {
+      "id": "drift-clips-at-consuming-ceiling",
+      "title": "{{row.id}} clips at the consuming ceiling without lapping",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "drifts",
+      "when": {
+        "flag": {
+          "at-the-ceiling": [
+            "start-a-lap"
+          ]
+        },
+        "row": {
+          "direction": [
+            "rises"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} eligible below the consuming ceiling at {{value-cite:max}}, with its offered contribution large enough to pass it, with {{row.stops-at-key}} at or beyond {{value-cite:max}}, so the ceiling is the binding stop",
+        "when": [
+          "the drift settles alone"
+        ],
+        "then": [
+          "the drift clips at {{value-cite:max}}",
+          "no lap reports and no lap movement occurs",
+          "marks test the clipped drift leg normally"
+        ],
+        "diagnostics": [
+          "{{instance}}-drift-log",
+          "{{instance}}-lap-log",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "A {{row.id}} contribution that reaches the consuming ceiling at {{value-cite:max}} clips there without consuming it. It can report marks on that leg, but it never reports a lap. The test restates no limit."
+    },
+    {
+      "id": "drift-clips-at-consuming-floor",
+      "title": "{{row.id}} clips at the consuming floor without lapping",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "drifts",
+      "when": {
+        "flag": {
+          "at-the-floor": [
+            "start-a-lap"
+          ]
+        },
+        "row": {
+          "direction": [
+            "falls"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} eligible above the consuming floor at {{value-cite:min}}, with its offered contribution large enough to pass it, with {{row.stops-at-key}} at or below {{value-cite:min}}, so the floor is the binding stop",
+        "when": [
+          "the drift settles alone"
+        ],
+        "then": [
+          "the drift clips at {{value-cite:min}}",
+          "no lap reports and no lap movement occurs",
+          "marks test the clipped drift leg normally"
+        ],
+        "diagnostics": [
+          "{{instance}}-drift-log",
+          "{{instance}}-lap-log",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "A {{row.id}} contribution that reaches the consuming floor at {{value-cite:min}} clips there without consuming it. It can report marks on that leg, but it never reports a lap. The test restates no limit."
+    },
+    {
+      "id": "drift-approaches-anchor",
+      "title": "{{row.id}} approaches the anchor from either side",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "drifts",
+      "when": {
+        "row": {
+          "direction": [
+            "toward-the-anchor"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} once below and once above {{value-cite:anchor}}, with {{row.id}} eligible because the value is away from {{row.stops-at-key}}, every interrupt row allowing it, and no other drift eligible",
+        "when": [
+          "one contribution settles from each side"
+        ],
+        "then": [
+          "the lower value rises below the anchor and the higher value falls above it, so the anchor chooses the side's direction",
+          "each contribution clips at {{row.stops-at-key}} and never passes that stop",
+          "the row is ineligible while stored exactly at {{row.stops-at-key}}",
+          "where the stop sits on a consuming limit, the drift clips there without consuming it"
+        ],
+        "diagnostics": [
+          "{{instance}}-drift-log",
+          "{{instance}}-value-trace"
+        ]
+      },
+      "text": "{{row.id}} uses {{value-cite:anchor}} only to choose its side: it rises below the anchor and falls above it. Eligibility and clipping use {{row.stops-at-key}}; while stored at that stop the row is ineligible. Where the stop sits on a consuming limit, the drift clips there without consuming it."
+    },
+    {
+      "id": "drifts-add-together",
+      "title": "eligible drifts add before one settlement",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "drifts-together": [
+            "add-them-up"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "at least two eligible drifts at one step, after blocked rows are removed and each contribution is clipped to its own stop",
+        "when": [
+          "the step settles"
+        ],
+        "then": [
+          "the signed clipped contributions are summed",
+          "small-change resolves once and marks test once for the combined movement"
+        ],
+        "diagnostics": [
+          "{{instance}}-drift-batch-record",
+          "{{instance}}-value-before-after",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "When several {{instance}} drifts run together, each eligible contribution clips to its own stop, then the signed amounts add. The combined movement resolves small-change and tests marks once."
+    },
+    {
+      "id": "largest-drift-wins",
+      "title": "only the largest eligible drift settles",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "drifts-together": [
+            "only-the-largest"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "at least two eligible drifts at one step, including equal clipped absolute magnitudes and a growing row that can be skipped",
+        "when": [
+          "the step settles"
+        ],
+        "then": [
+          "only the greatest clipped absolute magnitude settles",
+          "row order selects an exact tie",
+          "a skipped growing row does not advance its ramp for that step"
+        ],
+        "diagnostics": [
+          "{{instance}}-drift-batch-record",
+          "{{instance}}-ramp-state"
+        ]
+      },
+      "text": "When several {{instance}} drifts run together, only the largest clipped absolute contribution settles. Row order breaks a tie, and a skipped growing drift does not advance its ramp."
+    },
+    {
+      "id": "drifts-settle-in-row-order",
+      "title": "eligible drifts settle separately in row order",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "drifts-together": [
+            "in-row-order"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "at least two eligible drifts at one step whose separate settlements produce observable intermediate value or mark differences",
+        "when": [
+          "the step settles"
+        ],
+        "then": [
+          "each eligible row settles from block through report in written row order",
+          "each row sees the state committed by the prior row and tests marks separately"
+        ],
+        "diagnostics": [
+          "{{instance}}-drift-batch-record",
+          "{{instance}}-value-trace",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "When several {{instance}} drifts run together, they settle separately in written row order. Each row sees the prior row's committed state and tests its own marks."
+    },
+    {
+      "id": "condition-interrupt-controls-drift",
+      "title": "{{row.id}} controls its drift through a condition",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "interrupts",
+      "when": {
+        "row": {
+          "kind": [
+            "off-while-condition",
+            "runs-only-while-condition"
+          ]
+        }
+      },
+      "bindings": {
+        "allow-phrase": {
+          "row_field": "kind",
+          "map": {
+            "off-while-condition": "allows {{row.drift}} only while the condition is false",
+            "runs-only-while-condition": "allows {{row.drift}} only while the condition is true"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the condition at {{row.condition-declared-in}} observed once false and once true, with every other interrupt row for {{row.drift}} allowing it",
+        "when": [
+          "{{row.drift}} reaches an occurrence in each condition state"
+        ],
+        "then": [
+          "{{row.id}} {{bind:allow-phrase}}",
+          "the drift runs only when this row and every other row naming {{row.drift}} allow it"
+        ],
+        "diagnostics": [
+          "{{instance}}-interrupt-state",
+          "{{instance}}-drift-log"
+        ]
+      },
+      "text": "{{row.id}} {{bind:allow-phrase}}, using the condition at {{row.condition-declared-in}}. Every interrupt row naming {{row.drift}} must allow it before that drift runs."
+    },
+    {
+      "id": "pause-interrupt-controls-drift",
+      "title": "{{row.id}} pauses its drift after an event",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "interrupts",
+      "when": {
+        "row": {
+          "kind": [
+            "paused-after-event"
+          ]
+        }
+      },
+      "bindings": {
+        "repeat-phrase": {
+          "row_field": "repeat-event",
+          "map": {
+            "restart-the-wait": "restarts the wait from the repeated event",
+            "keep-the-first-wait": "keeps the first wait's finish time",
+            "add-to-the-wait": "adds one full pause to the remaining wait"
+          }
+        },
+        "length-phrase": {
+          "row_field": "pause-length-kind",
+          "map": {
+            "fixed": "uses the fixed pause at {{row.pause-length-key}}",
+            "depends-on-state": "uses the state-dependent pause based at {{row.pause-length-key}}"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{row.drift}} otherwise allowed by every interrupt row",
+        "when": [
+          "the event at {{row.event-declared-in}} occurs twice before the pause completes"
+        ],
+        "then": [
+          "{{row.id}} {{bind:length-phrase}} and prevents {{row.drift}} from running during the wait",
+          "the second event {{bind:repeat-phrase}}",
+          "{{row.drift}} runs again only after this and every other row naming it allow it"
+        ],
+        "diagnostics": [
+          "{{instance}}-interrupt-state",
+          "{{instance}}-pause-record",
+          "{{instance}}-drift-log"
+        ]
+      },
+      "text": "After {{row.event-declared-in}}, {{row.id}} pauses {{row.drift}} and {{bind:length-phrase}}. A repeated event {{bind:repeat-phrase}}. Every row naming the drift must allow it before it resumes."
+    },
+    {
+      "id": "state-dependent-pause-length",
+      "title": "{{row.id}} reads its state-dependent pause rule",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "interrupts",
+      "when": {
+        "row": {
+          "pause-length-kind": [
+            "depends-on-state"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two states for which {{row.pause-length-declared-in}} gives different pause lengths",
+        "when": [
+          "the event at {{row.event-declared-in}} starts {{row.id}} in each state"
+        ],
+        "then": [
+          "each wait follows {{row.pause-length-declared-in}} using the base at {{row.pause-length-key}}",
+          "this test restates neither duration nor rule"
+        ],
+        "diagnostics": [
+          "{{instance}}-pause-record",
+          "{{instance}}-interrupt-state"
+        ]
+      },
+      "text": "{{row.id}} reads the state-dependent pause rule at {{row.pause-length-declared-in}}, using the base at {{row.pause-length-key}}. The test names both addresses and restates neither duration nor rule."
+    },
+    {
+      "id": "interrupt-conjunction-holds",
+      "title": "{{row.id}} combines with every interrupt on its drift",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "interrupts",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "another interrupt row naming {{row.drift}} and currently forbidding it while {{row.id}} allows it; where this adoption has no such pair, this test asserts nothing",
+        "when": [
+          "the drift reaches an occurrence while those row states hold"
+        ],
+        "then": [
+          "{{row.drift}} does not run",
+          "every interrupt row for one drift must allow it before it runs"
+        ],
+        "diagnostics": [
+          "{{instance}}-interrupt-state",
+          "{{instance}}-drift-log"
+        ]
+      },
+      "text": "Even while {{row.id}} allows {{row.drift}}, another row for that drift can forbid it. The drift runs only when every row naming it allows it; where this adoption has no such pair, this test asserts nothing."
+    },
+    {
+      "id": "reset-returns-silently",
+      "title": "the {{row.id}} reset returns the value silently",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "resets",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} away from the target used by {{row.id}}",
+        "when": [
+          "the moment at {{row.happens-at}} occurs"
+        ],
+        "then": [
+          "{{row.id}} stores its sets-value-to-key target when present, otherwise {{value-cite:initial}} (with a cited initial, the number read at creation)",
+          "where this adoption declares any line or band, the return path crossing one reports nothing",
+          "the reset reports no lap",
+          "the return is one absolute repositioning and does not pass through small-change"
+        ],
+        "diagnostics": [
+          "{{instance}}-reset-record",
+          "{{instance}}-value-after",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "At {{row.happens-at}}, {{row.id}} silently returns {{instance}} to its named target, or to {{value-cite:initial}} when sets-value-to-key is omitted (with a cited initial, the number read at creation). Where this adoption declares any line or band, crossing one on the return path reports nothing. The reset does not lap or pass through small-change."
+    },
+    {
+      "id": "reset-handles-residue",
+      "title": "the {{row.id}} reset handles residue as declared",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "resets",
+      "when": {
+        "flag": {
+          "small-change": [
+            "save-the-fraction"
+          ]
+        }
+      },
+      "bindings": {
+        "residue-phrase": {
+          "row_field": "clears-saved-fraction",
+          "map": {
+            "yes": "clears residue to zero",
+            "no": "keeps the signed residue unchanged"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding nonzero signed residue before {{row.id}}",
+        "when": [
+          "the reset at {{row.happens-at}} settles"
+        ],
+        "then": [
+          "{{row.id}} {{bind:residue-phrase}} in the same silent commit"
+        ],
+        "diagnostics": [
+          "{{instance}}-reset-record",
+          "{{instance}}-residue-before-after"
+        ]
+      },
+      "text": "When {{row.id}} settles, it {{bind:residue-phrase}}."
+    },
+    {
+      "id": "reset-handles-lines-and-bands",
+      "title": "the {{row.id}} reset restores mark state as declared",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "resets",
+      "bindings": {
+        "arm-phrase": {
+          "row_field": "re-arms-lines",
+          "map": {
+            "yes": "restores full allowance to every line whose rearm-declared-in cites this reset's moment; every other line keeps its current arm state and allowance",
+            "no": "keeps every line's current arm state and allowance"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "changed line allowances and band states before {{row.id}}",
+        "when": [
+          "the reset at {{row.happens-at}} settles"
+        ],
+        "then": [
+          "{{row.id}} {{bind:arm-phrase}}",
+          "band states respond as the row's resets-bands answer directs, and a row that omits resets-bands keeps every band's state — that omission is this definition's documented default",
+          "every line's reached state is recomputed and stored from the reset target",
+          "all state changes are silent"
+        ],
+        "diagnostics": [
+          "{{instance}}-reset-record",
+          "{{instance}}-line-allowance",
+          "{{instance}}-band-state",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "{{row.id}} {{bind:arm-phrase}}. Band states respond as the row's resets-bands answer directs; a row that omits resets-bands keeps every band's state, which is this definition's documented default. All state changes are silent."
+    },
+    {
+      "id": "reset-applies-explicit-band-choice",
+      "title": "the {{row.id}} reset applies its explicit band choice",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "resets",
+      "when": {
+        "row": {
+          "resets-bands": [
+            "return-to-starts",
+            "recompute-from-target",
+            "keep"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "for return-to-starts, band states different from their declared starts; for recompute-from-target, line-geometry band states different from what the reset target would produce; for keep, a prior band state that differs from what both return-to-starts and recompute-from-target would produce, where this adoption can construct one; where it cannot, keep is checked only as no band state changing",
+        "when": [
+          "the reset at {{row.happens-at}} settles"
+        ],
+        "then": [
+          "where this row declares return-to-starts, it restores every band to its declared starts state",
+          "where this row declares recompute-from-target, it recomputes every line-geometry band from the reset target and keeps every event-edged band",
+          "where this row declares keep, it preserves every band's prior state unchanged",
+          "the change is silent"
+        ],
+        "diagnostics": [
+          "{{instance}}-reset-record",
+          "{{instance}}-band-state",
+          "{{instance}}-mark-log"
+        ]
+      },
+      "text": "An explicit return-to-starts restores declared band starts; recompute-from-target recomputes line geometry and keeps event-edged bands; keep preserves every band's prior state unchanged. The presence gate prunes a row that omits resets-bands; the general reset template checks that omission's documented keep default."
+    },
+    {
+      "id": "limit-move-refills-ceiling",
+      "title": "a moving ceiling refills the value",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "when-a-limit-moves": [
+            "refill-to-the-new-ceiling"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding any value while each cited limit this adoption can move is exercised separately",
+        "when": [
+          "each cited limit this adoption can move settles in its own case"
+        ],
+        "then": [
+          "where {{value-cite:max}} is a cited limit that moves, the fresh max is stored as the value",
+          "where {{value-cite:min}} is cited and moves alone, the value is kept unless it falls below the fresh min",
+          "an adoption citing only one limit exercises only that clause",
+          "neither movement starts a lap and residue is unchanged"
+        ],
+        "diagnostics": [
+          "{{instance}}-limit-move-record",
+          "{{instance}}-value-before-after"
+        ]
+      },
+      "text": "Where {{value-cite:max}} is cited and moves, {{instance}} fills to the fresh max. Where {{value-cite:min}} is cited and moves alone, the held value stays unless it falls below the fresh min. An adoption citing only one limit exercises only that clause. A limit move never laps and never clears residue."
+    },
+    {
+      "id": "limit-move-keeps-number",
+      "title": "a moving limit keeps the held number when it fits",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "when-a-limit-moves": [
+            "keep-the-number"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding values once inside and once outside the range made by a cited limit move",
+        "when": [
+          "the limit move settles"
+        ],
+        "then": [
+          "an inside value remains unchanged",
+          "an outside value clamps to the fresh limit it passed even if an ordinary change could pass that limit",
+          "residue is unchanged and no lap starts"
+        ],
+        "diagnostics": [
+          "{{instance}}-limit-move-record",
+          "{{instance}}-value-before-after"
+        ]
+      },
+      "text": "A moving limit leaves {{instance}}'s number alone while it fits. If it no longer fits, the value clamps to the moved limit even where an ordinary change could pass it. Residue stays and no lap starts."
+    },
+    {
+      "id": "limit-move-keeps-share",
+      "title": "a moving limit preserves the value's share",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "when-a-limit-moves": [
+            "keep-the-share"
+          ]
+        }
+      },
+      "bindings": {
+        "number-phrase": {
+          "flag": "number-kind",
+          "map": {
+            "whole-number": "a whole-number target rounds to nearest with ties away from zero",
+            "fractional": "a fractional target keeps full precision"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} at a known normalized share immediately before a non-empty old range changes",
+        "when": [
+          "the cited limit move settles"
+        ],
+        "then": [
+          "one absolute repositioning stores the same normalized share in the new range",
+          "{{bind:number-phrase}}",
+          "an old range collapsed to nothing by cited limits uses the fresh min; the declaration rule range-nonempty makes this unreachable for declared numbers",
+          "residue is unchanged"
+        ],
+        "diagnostics": [
+          "{{instance}}-limit-move-record",
+          "{{instance}}-share-calculation",
+          "{{instance}}-value-before-after"
+        ]
+      },
+      "text": "A moving limit keeps {{instance}} at the same normalized share of {{value-cite:min}} to {{value-cite:max}}. {{bind:number-phrase}}. An old range collapsed to nothing by cited limits uses the fresh min, though range-nonempty makes that unreachable for declared numbers. Residue is unchanged."
+    },
+    {
+      "id": "limit-move-uses-declared-number",
+      "title": "an outside value moves to its declared safe number",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "when-a-limit-moves": [
+            "pull-it-to-a-declared-number"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} once inside and once outside the fresh range after a cited limit move",
+        "when": [
+          "each limit move settles"
+        ],
+        "then": [
+          "the inside value remains unchanged",
+          "the outside value stores {{value-cite:out-of-range-lands-on}}",
+          "the target is read fresh and lies inside the new range",
+          "residue is unchanged and no lap starts"
+        ],
+        "diagnostics": [
+          "{{instance}}-limit-move-record",
+          "{{instance}}-value-before-after"
+        ]
+      },
+      "text": "A limit move keeps {{instance}}'s number when it still fits. Otherwise it stores the fresh safe number at {{value-cite:out-of-range-lands-on}}. The test names the address and restates no number."
+    },
+    {
+      "id": "limit-move-leaves-number-alone",
+      "title": "a moving limit leaves the held number alone",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "when-a-limit-moves": [
+            "leave-the-number-alone"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} holding a number that a cited limit moves past, with the matching ordinary edge answer allowing the value beyond that limit",
+        "when": [
+          "the limit move settles"
+        ],
+        "then": [
+          "the stored number remains unchanged even outside the fresh landmark",
+          "residue is unchanged and no lap starts"
+        ],
+        "diagnostics": [
+          "{{instance}}-limit-move-record",
+          "{{instance}}-value-before-after"
+        ]
+      },
+      "text": "A moving limit does not reposition {{instance}}. A held number may remain beyond the moved landmark only where the matching ordinary edge answer permits it. Residue stays and no lap starts."
+    },
+    {
+      "id": "limit-move-never-fires-bare-line",
+      "title": "a limit move never fires the {{row.id}} bare line",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "lines",
+      "when": {
+        "flag": {
+          "when-a-limit-moves": [
+            "refill-to-the-new-ceiling",
+            "keep-the-number",
+            "keep-the-share",
+            "pull-it-to-a-declared-number",
+            "leave-the-number-alone"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a cited limit move that changes {{row.id}} reached state",
+        "when": [
+          "the limit and any resulting held-value change finish settling"
+        ],
+        "then": [
+          "{{row.id}} stores fresh reached state but reports nothing",
+          "where either limit answers start-a-lap, a limit move landing the value exactly on that edge does not consume it"
+        ],
+        "diagnostics": [
+          "{{instance}}-limit-move-record",
+          "{{instance}}-mark-log",
+          "{{instance}}-mark-state"
+        ]
+      },
+      "text": "After a limit move, {{instance}} refreshes the reached state of bare line {{row.id}} but never fires it. Where either limit answers start-a-lap, a limit move landing the value exactly on that edge does not consume it."
+    },
+    {
+      "id": "limit-move-recomputes-band",
+      "title": "a limit move recomputes the {{row.id}} band as its edge kind directs",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "bands",
+      "when": {
+        "flag": {
+          "when-a-limit-moves": [
+            "refill-to-the-new-ceiling",
+            "keep-the-number",
+            "keep-the-share",
+            "pull-it-to-a-declared-number",
+            "leave-the-number-alone"
+          ]
+        },
+        "row": {
+          "enter-on": [
+            "line"
+          ],
+          "leave-on": [
+            "line"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a cited limit move with the prior {{row.id}} state recorded",
+        "when": [
+          "the limit and any resulting held-value change finish settling"
+        ],
+        "then": [
+          "{{row.id}} recomputes and stores its fresh line-geometry state",
+          "where that fresh state differs from the prior recorded state, {{row.id}} reports the change with cause limit-moved; where it does not differ, {{row.id}} reports nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-limit-move-record",
+          "{{instance}}-mark-log",
+          "{{instance}}-mark-state"
+        ]
+      },
+      "text": "After a limit move, line-geometry band {{row.id}} recomputes and stores its fresh state. Where that state changed, it reports the change with cause limit-moved; an unchanged state reports nothing."
+    },
+    {
+      "id": "limits-hold",
+      "title": "the limits hold after every operation",
+      "type": "general",
+      "expand": "once",
+      "bindings": {
+        "min-clause": {
+          "flag": "at-the-floor",
+          "map": {
+            "stop-at-the-floor": "the {{instance}} value is greater than or equal to {{value-cite:min}}",
+            "refuse-the-whole-change": "the {{instance}} value is greater than or equal to {{value-cite:min}}",
+            "hand-back-the-extra": "the {{instance}} value is greater than or equal to {{value-cite:min}}",
+            "no-floor": "no floor is asserted: the {{instance}} value may lie below {{value-cite:min}}",
+            "start-a-lap": "the {{instance}} value is greater than or equal to {{value-cite:min}}"
+          }
+        },
+        "max-clause": {
+          "flag": "at-the-ceiling",
+          "map": {
+            "stop-at-the-ceiling": "the {{instance}} value is less than or equal to {{value-cite:max}}",
+            "refuse-the-whole-change": "the {{instance}} value is less than or equal to {{value-cite:max}}",
+            "hand-back-the-extra": "the {{instance}} value is less than or equal to {{value-cite:max}}",
+            "no-ceiling": "no ceiling is asserted: the {{instance}} value may lie above {{value-cite:max}}",
+            "start-a-lap": "the {{instance}} value is less than or equal to {{value-cite:max}}"
+          }
+        }
+      },
+      "test": {
+        "type": "general",
+        "holds": "after every operation, {{bind:min-clause}}, and {{bind:max-clause}}. A cited limit whose answer is no-floor or no-ceiling remains a landmark",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-value-trace",
+          "{{instance}}-first-violating-operation"
+        ]
+      },
+      "text": "For every operation in this adoption's verification scope — {{inputs:scope}} — {{bind:min-clause}}, and {{bind:max-clause}}. A cited limit whose answer is no-floor or no-ceiling remains a landmark. The adoption supplies scope and seeds through verification inputs; each half of the oracle is the one its own edge answer permits.",
+      "inputs": {
+        "scope": {
+          "default": "sequences of legal imposed changes, costs, sets, drift steps and batches, laps, resets, and limit moves over one run"
+        },
+        "seeds": {
+          "default": [
+            "audit-a",
+            "audit-b"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Embedded OpenGDD authoring tool</title>
+<link rel="stylesheet" href="/authoring-tool/authoring.css?v=9e90533a9ecc">
+<link rel="stylesheet" href="/authoring-tool/src/workbench/workbench.css?v=9e90533a9ecc">
+<style>html,body,#workbench{height:100%;margin:0} body{overflow:hidden}</style>
+<script type="importmap">
+{
+  "imports": {
+    "opengdd-analysis": "/authoring-tool/lib/lang/tools/src/analysis.mjs?v=9e90533a9ecc",
+    "opengdd-syntax": "/authoring-tool/lib/opengdd/conformance/package-syntax.mjs?v=9e90533a9ecc",
+    "opengdd-file-map-host": "/authoring-tool/lib/opengdd/conformance/file-map-host.mjs?v=9e90533a9ecc",
+    "opengdd-migrate": "/authoring-tool/lib/opengdd/conformance/migrate.mjs?v=9e90533a9ecc",
+    "opengdd-validation": "/authoring-tool/lib/opengdd/conformance/validate-core.mjs?v=9e90533a9ecc",
+    "opengdd-authoring-version": "/authoring-tool/src/version.mjs?v=9e90533a9ecc"
+  }
+}
+</script>
+</head>
+<body>
+<div id="workbench" class="opengdd-workbench opengdd-author-theme--light"></div>
+<script type="module">
+import { mountWorkbenchShell } from "/authoring-tool/src/workbench/shell.mjs?v=9e90533a9ecc";
+import { createScaffoldPackage } from "/authoring-tool/src/package.mjs?v=9e90533a9ecc";
+import panels from "/authoring-tool/panels/index.mjs?v=9e90533a9ecc";
+
+const schemaNames = [
+  "manifest.schema.json", "tuning.schema.json", "personalization.schema.json",
+  "collection.schema.json", "direction.schema.json", "opengdd-build.schema.json",
+  "clocks.schema.json"
+];
+const schemas = async () => Object.fromEntries(await Promise.all(schemaNames.map(async name => {
+  const response = await fetch("/schema/core/v0.8/" + name);
+  if (!response.ok) throw new Error("Could not load schema " + name);
+  return [name, await response.json()];
+})));
+const listed = { id: "harbour-lights", title: "Harbour Lights", revision: "embed-1" };
+
+mountWorkbenchShell(document.querySelector("#workbench"), {
+  panels,
+  schemas,
+  defaultPackageId: listed.id,
+  listPackages: () => [listed],
+  loadPackage(id) {
+    if (id !== listed.id) throw new Error("Unknown package: " + id);
+    return createScaffoldPackage(listed.id, listed.title);
+  },
+  readerUrl: null,
+  contractsCatalogueUrl: "/contracts/",
+  showTheme: false
+});
+</script>
+</body>
+</html>

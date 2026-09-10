@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Runtime values | OpenGDD handbook</title>
-<meta name="description" content="Some design rules need to name a value that changes during play, such as oxygen left, the current score, or progress toward an objective. A runtime value gives that …">
+<meta name="description" content="Some rules need to name a value that changes during play: oxygen left, the current score, progress toward an objective. A runtime value gives that changing value one …">
 <link rel="canonical" href="https://opengdd.org/handbook/runtime-values/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Runtime values | OpenGDD handbook">
-<meta property="og:description" content="Some design rules need to name a value that changes during play, such as oxygen left, the current score, or progress toward an objective. A runtime value gives that …">
+<meta property="og:description" content="Some rules need to name a value that changes during play: oxygen left, the current score, progress toward an objective. A runtime value gives that changing value one …">
 <meta property="og:url" content="https://opengdd.org/handbook/runtime-values/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Runtime values | OpenGDD handbook">
-<meta name="twitter:description" content="Some design rules need to name a value that changes during play, such as oxygen left, the current score, or progress toward an objective. A runtime value gives that …">
+<meta name="twitter:description" content="Some rules need to name a value that changes during play: oxygen left, the current score, progress toward an objective. A runtime value gives that changing value one …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -23,20 +23,21 @@
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/" aria-current="page">Learn</a>
-      <a href="/spec/">Spec</a>
-      <a href="/standard/">Standard</a>
+      <a href="/contracts/">Contracts</a>
+      <a href="/spec/">Specification</a>
       <a href="/authoring-tool/">Authoring tool</a>
       <a href="/about/">About</a>
       <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
     </nav>
   </div>
 </header>
-<main>
+<main id="main">
 <div class="doc-layout">
 <nav class="doc-toc" aria-label="Learn"><p class="toc-title">Learn</p>
 <ul class="learn-resources">
@@ -46,35 +47,35 @@
 <div class="toc-group">
 <p class="toc-group-title">Start and foundations</p>
 <ul>
-<li class="toc-h2"><a href="/handbook/an-afternoon-spec/">An afternoon spec</a></li>
-<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">The shape of a spec</a></li>
-<li class="toc-h2"><a href="/handbook/fantasy-block/">The fantasy block</a></li>
-<li class="toc-h2"><a href="/handbook/authority/">Authority</a></li>
-<li class="toc-h2"><a href="/handbook/identifiers/">Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
+<li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
+<li class="toc-h2"><a href="/handbook/player-fantasy/">The player fantasy</a></li>
+<li class="toc-h2"><a href="/handbook/who-decides/">Who decides</a></li>
+<li class="toc-h2"><a href="/handbook/naming-things/">Names and addresses</a></li>
 <li class="toc-h2"><a href="/handbook/tuning/">Tuning</a></li>
 <li class="toc-h2"><a href="/handbook/acceptance-tests/">Acceptance tests</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Content, links, and time</p>
+<p class="toc-group-title">Content, links and time</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/collections/">Collections</a></li>
 <li class="toc-h2"><a href="/handbook/links/">Links</a></li>
 <li class="toc-h2"><a href="/handbook/runtime-values/" class="here" aria-current="page">Runtime values</a></li>
-<li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes &amp; clocks</a></li>
-<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes and clocks</a></li>
+<li class="toc-h2"><a href="/handbook/seeds/">Seeds and repeatable randomness</a></li>
 </ul>
 </div>
 <div class="toc-group">
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette &amp; colour promises</a></li>
-<li class="toc-h2"><a href="/handbook/personalization/">Personalization</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanisms</p>
+<p class="toc-group-title">Reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -82,31 +83,31 @@
 <div class="toc-group">
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
-<li class="toc-h2"><a href="/handbook/promises-and-proof/">Promises and proof</a></li>
-<li class="toc-h2"><a href="/handbook/preflight-checklist/">Preflight checklist</a></li>
+<li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
 <h1>Runtime values</h1>
-<p><em>Opt-in: add this when your game needs it.</em></p>
-<p>Some design rules need to name a value that changes during play, such as oxygen left, the current score, or progress toward an objective. A <strong>runtime value</strong> gives that changing value one stable name. Its <strong>address</strong>, the complete dotted name used to point at it, always starts with <code>runtime.</code>.</p>
-<p><em><code>02-mechanics.md</code>, naming the diver's oxygen</em></p>
+<p class="chapter-scope"><span class="scope-badge">Optional</span></p>
+<p>Some rules need to name a value that changes during play: oxygen left, the current score, progress toward an objective. A <strong>runtime value</strong> gives that changing value one stable name. Its address always starts with <code>runtime.</code>.</p>
+<p><em><code>02-mechanics.md</code>, naming the oxygen of a diving game</em></p>
 <blockquote>
 <p>The oxygen left right now is <code>runtime.oxygen_seconds</code>. Read it after each full second spent diving and immediately after anything restores it.</p>
 </blockquote>
-<p>A numbered chapter is a file named <code>NN-name.md</code>. Writing the name is the whole declaration; there is no separate list. It then becomes usable in every chapter, in <code>clocks.json</code>, and in tests. The sentence around the name says what the value means and when it is read.</p>
-<p>An undeclared name produces <code>RUNTIME_UNDECLARED</code>; the validator tells you to declare it by writing it in a chapter with a sentence saying what it is, or by naming it in a clock's <code>advances</code>. A misspelling that was itself written in a chapter is not caught, because that writing declares a second value. Before handoff, read the chapters' runtime names once so near-duplicates do not survive review.</p>
-<p>The name does not create, store, or update the value. Your mechanics define how it changes. The builder, the person, team, or system that turns your package into a game, chooses the implementation.</p>
-<p>Acceptance tests can name the same address. A clock that names the value in <code>advances</code> also counts as declaring it. The <a href="/handbook/modes-and-clocks/">Modes &amp; clocks</a> chapter explains that optional timing table.</p>
-<p><em>Full rules: <a href="/spec/">OpenGDD specification</a>, §4b, Runtime values, time modes, and clocks.</em></p>
-<p class="note chapter-pager"><a href="/handbook/links/">← Links</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/modes-and-clocks/">Modes &amp; clocks →</a></p>
+<p>Writing the name in a numbered chapter is the whole declaration. There is no separate list. The sentence around the name says what the value means and when it is read. After that, the name can be used in every chapter, in <code>clocks.json</code>, and in acceptance tests.</p>
+<p>The name does not create, store or update the value. Your rules say how it changes. The builder, the person, team or AI that turns your package into a game, chooses how to implement it.</p>
+<p>If a test uses a runtime name that no chapter and no clock declares, the validator (the checking tool) reports <code>RUNTIME_UNDECLARED</code> and tells you to declare it. The code names the exact rule. The validator cannot catch a misspelling. A misspelled name looks like a new value. Before handoff, read your runtime names once and remove near-duplicates.</p>
+<p>A clock can also declare a runtime value by naming it in its <code>advances</code> list. The <a href="/handbook/modes-and-clocks/">Modes and clocks</a> chapter explains that optional file.</p>
+<p><em>Full rules: <a href="/spec/#4b-1-runtime-values">OpenGDD specification</a>, §4b.</em></p>
+<p class="note chapter-pager"><a href="/handbook/links/">← Links</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/modes-and-clocks/">Modes and clocks →</a></p>
 </article>
 </div>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
-    <span><a href="/about/">About the standard</a></span>
+    <span><a href="/about/">About OpenGDD</a></span>
     <span>Prose CC-BY 4.0 · code MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>

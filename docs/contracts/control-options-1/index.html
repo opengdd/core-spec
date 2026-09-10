@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Control options contract — OpenGDD</title>
+<meta name="description" content="Decides which button, key, or touch runs each action, how players can change it, and what happens when a press is hard.">
+<link rel="canonical" href="https://opengdd.org/contracts/control-options-1/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Control options contract — OpenGDD">
+<meta property="og:description" content="Decides which button, key, or touch runs each action, how players can change it, and what happens when a press is hard.">
+<meta property="og:url" content="https://opengdd.org/contracts/control-options-1/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Control options contract — OpenGDD">
+<meta name="twitter:description" content="Decides which button, key, or touch runs each action, how players can change it, and what happens when a press is hard.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=ff285f28dd16">
+<script type="module" src="/assets/contracts.mjs?v=ff285f28dd16"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout contract-catalogue contract-entry-page" data-contract-root data-core-id="control-options">
+<nav class="doc-toc contract-nav" aria-label="Contracts">
+<details class="contract-nav-disclosure">
+  <summary>Contracts</summary>
+  <div class="contract-nav-content">
+    <p class="toc-title">Contracts</p>
+    <ul class="contract-nav-home"><li><a href="/contracts/">Overview</a></li><li><a href="/contracts/catalogue/">Contract catalogue</a></li></ul>
+<div class="toc-group contract-page-nav">
+  <p class="toc-group-title">On this page</p>
+  <ul><li><a href="#use-this">Use in your game</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#numbers-rules">Numbers and rules</a></li>
+<li><a href="#rows">Lists</a></li>
+<li><a href="#for-builders">For builders</a></li></ul>
+</div>
+  </div>
+</details>
+</nav>
+<article class="doc-body contract-entry-body">
+<p class="label"><a href="/contracts/catalogue/#controls-camera">Controls &amp; camera</a></p>
+<div class="contract-entry-title-row">
+  <div><h1>Control options</h1><p class="contract-core-name"><code>control-options-1</code></p></div>
+  <div><span class="contract-badge ">Tests included</span></div>
+</div>
+<p class="contract-entry-hook">This contract defines the behaviour of control schemes: key bindings, presets, or remapping.</p>
+<p class="contract-entry-summary">It decides which button, key, or touch runs each action, how players can change it, and what happens when a press is hard.</p>
+<ul class="contract-facts">
+  <li><a href="#questions">2 questions</a></li>
+  <li><a href="#numbers-rules">no numbers</a></li>
+  <li><a href="#rows">4 lists</a></li>
+  <li><a href="#for-builders">64 tests</a></li>
+</ul>
+<aside class="contract-relief contract-adoption-start" id="adoptions" aria-labelledby="adoptions-title">
+  <p class="contract-relief-title" id="adoptions-title">Start from an adoption</p>
+  <p>An adoption is this contract with the answers already filled in for one kind of game. Open the one closest to yours, change what does not fit, and skip the questions below.</p>
+  <p class="contract-adoption-links"><a class="contract-adoption-chip" href="/contracts/control-options-1/fighting-inputs/">Fighting inputs</a><a class="contract-adoption-chip" href="/contracts/control-options-1/held-repair/">Held repair</a><a class="contract-adoption-chip" href="/contracts/control-options-1/mobile-touch/">Mobile touch</a><a class="contract-adoption-chip" href="/contracts/control-options-1/pc-console/">PC console</a><a class="contract-adoption-chip" href="/contracts/control-options-1/rts-pointer/">RTS pointer</a><a class="contract-adoption-chip" href="/contracts/control-options-1/shooter-layers/">Shooter layers</a></p>
+</aside>
+<section class="contract-handoff" aria-labelledby="use-this">
+  <h2 id="use-this">Use in your game</h2>
+  <p>Opens the authoring tool with this contract added and its questions unanswered. Or download the ZIP and add it later.</p>
+  <div class="contract-actions">
+    <a class="cta" href="/authoring-tool/?contract=control-options-1">Open in the authoring tool</a>
+    <a class="cta-quiet" href="/contracts/control-options-1/control-options-1.zip" download="control-options-1.zip">Download ZIP</a>
+  </div>
+  <details><summary>What is in the ZIP</summary><p>The ZIP holds the contract and its acceptance tests. In the authoring tool, choose <strong>Add contract</strong> and pick this ZIP. If you keep your design as files, put them in <code>contracts/</code> and fill in the answers there.</p><div class="contract-actions"><a href="/contracts/control-options-1/core.json" download="control-options-1.core.json">Download contract JSON</a> · <a href="/contracts/control-options-1/control-options-1.pack.json" download="control-options-1.pack.json">Download tests</a><button type="button" class="cta-quiet" data-copy-core data-core-url="/contracts/control-options-1/core.json" data-copy-kind="contract">Copy contract</button><span role="status" aria-live="polite" data-copy-status></span></div></details>
+</section>
+<section class="contract-decision-overview">
+  <h2 id="questions">Questions</h2>
+<p>Up to 2 questions. Some appear only after earlier answers.</p>
+<ol class="contract-decision-list"><li><a href="#question-remapping-default">How can players normally change the controls?</a></li>
+<li><a href="#question-demanding-input-default">What normally happens when an action needs a difficult press?</a></li></ol>
+</section>
+<section class="contract-form-section" id="try-answers">
+  <h2>Try the answers</h2>
+  <p class="contract-choice-note">Pick answers to see which rules and tests apply. Nothing is saved here: the ZIP and the authoring tool start unanswered.</p>
+  <div class="contract-actions contract-question-tools">
+    <button type="button" class="cta-quiet contract-reset" data-reset-choices>Clear choices</button>
+    <label class="contract-switch"><input type="checkbox" data-builder-wording> Show exact wording for builders</label>
+  </div>
+  <div class="contract-question-list">
+  <article class="contract-question" id="question-remapping-default" data-contract-question data-flag="remapping-default" data-when="{&quot;row-count&quot;:{&quot;platform-control-sets&quot;:&quot;non-empty&quot;}}">
+  <h3>How can players normally change the controls?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the platform control sets list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>With no platform control set, this adoption makes no game-wide remapping promise.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for How can players normally change the controls?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="control-options-remapping-default" value="fixed-bindings" data-contract-choice><span class="contract-option-label">Fixed bindings</span></label></th>
+  <td><span class="contract-option-meaning">The controls cannot be changed in the game. A puzzle game always keeps rotate on the space bar.</span><p class="contract-option-semantics">No player-facing setting changes an action&#39;s physical input or press style.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="control-options-remapping-default" value="swap-only" data-contract-choice><span class="contract-option-label">Swap only</span></label></th>
+  <td><span class="contract-option-meaning">Existing controls can only exchange actions. A platformer can swap jump and dash, but an unused button cannot receive either action.</span><p class="contract-option-semantics">A supported binding can exchange its current action with another supported binding; no action can move independently to an otherwise unused input.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="control-options-remapping-default" value="presets-only" data-contract-choice><span class="contract-option-label">Presets only</span></label></th>
+  <td><span class="contract-option-meaning">Players can choose only from named control sets. An action game offers Default and Alternate layouts without individual button changes.</span><p class="contract-option-semantics">The player may select a complete declared preset but cannot change one binding independently inside that preset. The platform offers at least two presets whose availability is starting-and-selectable or player-selectable.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="control-options-remapping-default" value="any-action-any-input" data-contract-choice><span class="contract-option-label">Any action any input</span></label></th>
+  <td><span class="contract-option-meaning">Any action can move to any supported input. A strategy game can move end turn from Enter to an unused mouse button.</span><p class="contract-option-semantics">Every covered action can be assigned independently to any supported remappable input, including an otherwise unassigned input; conflicts are resolved visibly before use.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="control-options-remapping-default" value="action-and-press-style" data-contract-choice><span class="contract-option-label">Action and press style</span></label></th>
+  <td><span class="contract-option-meaning">Both the input and the press style can change. An adventure game can move interact to another button and change a hold into one press.</span><p class="contract-option-semantics">Every covered action can change to a supported input and to any press style that its cited platform rule offers for that action.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>A platform may offer fixed controls, named layouts, or free changes. This answer supplies the ordinary choice before a platform states another one.</p></details>
+</article>
+<article class="contract-question" id="question-demanding-input-default" data-contract-question data-flag="demanding-input-default" data-when="{&quot;row-count&quot;:{&quot;platform-control-sets&quot;:&quot;non-empty&quot;}}">
+  <h3>What normally happens when an action needs a difficult press?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the platform control sets list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>With no platform control set, this adoption makes no game-wide demanding-input promise.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for What normally happens when an action needs a difficult press?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="control-options-demanding-input-default" value="no-demanding-presses" data-contract-choice><span class="contract-option-label">No demanding presses</span></label></th>
+  <td><span class="contract-option-meaning">No action needs a demanding press. A card game plays a selected card with one ordinary activation.</span><p class="contract-option-semantics">No covered binding requires timed, held, rapid, repeated, double, simultaneous, directional-sequence, or device-motion input as its only route to the action.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="control-options-demanding-input-default" value="simpler-alternative" data-contract-choice><span class="contract-option-label">Simpler alternative</span></label></th>
+  <td><span class="contract-option-meaning">Every demanding press has a distinct simpler route with no setting change. A repair game offers a separate tap button beside its hold-to-repair control.</span><p class="contract-option-semantics">Every covered demanding binding has a declared alternative that performs the same action without configuration.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="control-options-demanding-input-default" value="player-can-change-it" data-contract-choice><span class="contract-option-label">Player can change it</span></label></th>
+  <td><span class="contract-option-meaning">A setting can make the press easier. A racing game can change a held pit command into one ordinary press.</span><p class="contract-option-semantics">A player-facing setting replaces each covered demanding press with a declared easier press style before play uses the binding.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="control-options-demanding-input-default" value="required-as-written" data-contract-choice><span class="contract-option-label">Required as written</span></label></th>
+  <td><span class="contract-option-meaning">The demanding press remains required. A rhythm special still needs two buttons together and has no simpler route from this contract.</span><p class="contract-option-semantics">The covered demanding binding has no simpler alternative or press-style setting promised by this adoption.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Holds, rapid presses, double presses, and button combinations can block an otherwise known action. This answer supplies the ordinary choice.</p></details>
+</article>
+  </div>
+</section>
+<aside class="contract-relief" aria-labelledby="relief-title">
+  <p class="contract-relief-title" id="relief-title">That was the hard part.</p>
+  <p>The questions are the decisions. Everything below follows from them: the numbers and lists an adoption fills in, and the exact wording and tests for builders. The authoring tool handles the filling in. Read on only if you want to check.</p>
+</aside>
+<details class="contract-form-section contract-fold" id="numbers-rules">
+  <summary><span class="contract-fold-title">Numbers and rules</span><span class="contract-fold-note">no numbers, 1 rule</span></summary>
+  <p class="contract-subsection-title">Numbers</p>
+  <p>This contract has no numbers to set.</p>
+  <p class="contract-subsection-title">Rules</p>
+  <ul class="contract-rule-list"><li id="rule-press-style-change-needs-a-setting-answer"><p class="contract-rule-message">Controls that let players change a press style cannot also require every demanding press exactly as written.</p>
+  <p class="contract-condition">Forbidden when Remapping default is Action and press style, and Demanding input default is Required as written.</p></li></ul>
+</details>
+<details class="contract-form-section contract-fold" id="rows">
+  <summary><span class="contract-fold-title">Lists</span><span class="contract-fold-note">4 lists</span></summary>
+  <p>Some settings are lists of rows.</p><p class="contract-citation-help">A reference points to a number or a rule in your design. For a number, use its address in your tuning. For a rule, use its file and heading, such as <code>02-mechanics.md#recovery</code>. Each field's description says what it needs.</p><article class="contract-collection">
+<h3>Platform control sets</h3>
+<p class="contract-exact-name"><code>platform-control-sets</code></p>
+<p>Supported platforms or editions and their complete control policies. A separate row is required whenever mappings or options differ.</p>
+<p class="contract-condition contract-when-empty">An empty list means: No platform receives a physical-control promise from this adoption.</p>
+<p class="contract-row-shape">Each row is: <code>id</code>, <code>platform-declared-in</code>, <code>methods-declared-in</code>, <code>input-method-coverage</code>, <code>remapping</code>, <code>settings-rule-declared-in</code>.</p>
+<details class="contract-fields-detail"><summary>Every field</summary>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Field</th><th>Kind</th><th>When it appears</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr data-contract-dependent data-when="null">
+  <td><code>id</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>A stable platform or edition name, such as pc or console-gamepad.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>platform-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The Fixed rule naming one platform or edition and its supported devices. Different control behavior requires another row.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>methods-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The Fixed list of complete input methods and any required switch between them. A PC row may name keyboard and pointer as one mixed method.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>input-method-coverage</code></td>
+  <td>choice: one-method-covers-all, player-chooses-method, mixed-methods-needed</td>
+  <td>Required</td>
+  <td>Whether one named method covers every action bound on the platform, several named methods each do so, or the named methods must be mixed. A console may offer complete gamepad and accessibility-controller methods.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>remapping</code></td>
+  <td>choice: use-game-default, fixed-bindings, swap-only, presets-only, any-action-any-input, action-and-press-style</td>
+  <td>Required</td>
+  <td>The platform&#39;s remapping policy or the game&#39;s ordinary answer. A console edition may offer presets while the PC edition allows free assignment.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>settings-rule-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The Fixed rule for the platform&#39;s control menu and, as its effective remapping answer needs, preset selection, conflict handling, the press styles offered for each action, or the explicit absence of changes when bindings are fixed.</td>
+</tr>
+</tbody></table></div>
+</details>
+</article>
+<article class="contract-collection">
+<h3>Control presets</h3>
+<p class="contract-exact-name"><code>control-presets</code></p>
+<p>Named complete binding sets offered on a platform. A preset maps every action bound on its platform.</p>
+<p class="contract-condition contract-when-empty">An empty list means: No named control preset is offered.</p>
+<p class="contract-row-shape">Each row is: <code>id</code>, <code>platform-control-set</code>, <code>label</code>, <code>availability</code>, <code>selection-rule-declared-in</code>.</p>
+<details class="contract-fields-detail"><summary>Every field</summary>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Field</th><th>Kind</th><th>When it appears</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr data-contract-dependent data-when="null">
+  <td><code>id</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>A stable name for the preset, such as gamepad-default or gamepad-alternate.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>platform-control-set</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>The supported platform or edition that offers this preset.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>label</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>The player-facing preset name, such as Standard or Southpaw.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>availability</code></td>
+  <td>choice: starting-and-selectable, player-selectable, mode-selected</td>
+  <td>Required</td>
+  <td>Whether this preset is the starting set and remains selectable, is another selectable set, or follows a cited player mode. An assisted-play mode may select its own complete layout.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>selection-rule-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The Fixed route that selects this preset and makes its matching action-binding rows current.</td>
+</tr>
+</tbody></table></div>
+</details>
+</article>
+<article class="contract-collection">
+<h3>Action bindings</h3>
+<p class="contract-exact-name"><code>action-bindings</code></p>
+<p>Physical inputs that produce actions on a platform or inside one named preset.</p>
+<p class="contract-condition contract-when-empty">An empty list means: No physical input is promised to produce a game action.</p>
+<p class="contract-row-shape">Each row is: <code>id</code>, <code>platform-control-set</code>, <code>preset</code>, <code>context-declared-in</code>, <code>action-declared-in</code>, <code>physical-input-declared-in</code>, <code>action-input</code>, <code>press-style</code>, <code>motion-use</code>, <code>demanding-input</code>.</p>
+<details class="contract-fields-detail"><summary>Every field</summary>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Field</th><th>Kind</th><th>When it appears</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr data-contract-dependent data-when="null">
+  <td><code>id</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>A stable platform, action, and input name, such as pc-jump-space. A per-character control set names the character too.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>platform-control-set</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>The supported platform or edition where this binding exists.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>preset</code></td>
+  <td>string</td>
+  <td>Optional</td>
+  <td>The named complete control set containing this binding. Absence means the platform&#39;s current base or freely remappable set. On a platform whose effective remapping allows changes, the preset is the starting source set and accepted changes mutate the current copy.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>context-declared-in</code></td>
+  <td>reference</td>
+  <td>Optional</td>
+  <td>The Fixed context in which this binding exists, such as a vehicle layer, menu, training mode, or unlock gate. Absence means it exists throughout the selected control set.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>action-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The Fixed game-facing action this binding contributes as a candidate.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>physical-input-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The Fixed physical key, button, axis, touch region, gesture, directional sequence, or device-motion input and the device that supplies it.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>action-input</code></td>
+  <td>string</td>
+  <td>Optional</td>
+  <td>The one game-facing input emitted by this physical activation. Name it when several bindings answer the same physical activation.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>press-style</code></td>
+  <td>choice: press, release, timed-press, hold, rapid-presses, repeated-presses, double-press, simultaneous-inputs, continuous-axis, gesture, input-sequence</td>
+  <td>Required</td>
+  <td>The physical performance required by this binding. A timed press has a target moment, rapid presses have a rate, repeated presses have a count, and an input sequence is a directional sequence completed by a press.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>motion-use</code></td>
+  <td>choice: no-motion, optional-motion, required-motion</td>
+  <td>Required</td>
+  <td>Whether this binding uses no device motion, is an optional device-motion route beside another binding, or requires device motion. A handheld aim action may offer tilt as an alternative to the stick. A required-motion binding is demanding by its motion, and a press-style setting does not relieve it, so its easier route is a simpler alternative or another binding. An optional-motion binding has a no-motion binding for the same action on the same platform and preset.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>demanding-input</code></td>
+  <td>choice: use-game-default, no-demanding-presses, simpler-alternative, player-can-change-it, required-as-written</td>
+  <td>Required</td>
+  <td>The action binding&#39;s demanding-input answer or the game&#39;s ordinary answer. A repeated crafting input may allow a hold even when combat combinations remain fixed. No binding answers required-as-written on a platform whose effective remapping is action-and-press-style.</td>
+</tr>
+</tbody></table></div>
+</details>
+</article>
+<article class="contract-collection">
+<h3>Simpler inputs</h3>
+<p class="contract-exact-name"><code>simpler-inputs</code></p>
+<p>Distinct unconfigured alternatives for bindings whose effective demanding-input answer promises one.</p>
+<p class="contract-condition contract-when-empty">An empty list means: No demanding binding promises a separate simpler input without a setting change.</p>
+<p class="contract-row-shape">Each row is: <code>id</code>, <code>action-binding</code>, <code>alternative-declared-in</code>, <code>distinction-rule-declared-in</code>.</p>
+<details class="contract-fields-detail"><summary>Every field</summary>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Field</th><th>Kind</th><th>When it appears</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr data-contract-dependent data-when="null">
+  <td><code>id</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>A stable alternative name, such as repair-tap-alternative.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>action-binding</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>The demanding binding for which this route is the simpler alternative.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>alternative-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The Fixed physical input and ordinary press style that perform the same game action without a setting change.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>distinction-rule-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The Fixed rule proving that successful use of this alternative cannot be mistaken for failure to finish the demanding input.</td>
+</tr>
+</tbody></table></div>
+</details>
+</article>
+</details>
+<section class="contract-form-section" id="for-builders">
+  <h2>For builders</h2>
+  <details class="contract-builder-details">
+    <summary>Exact mechanism wording and 64 pack tests</summary>
+    <div class="contract-builder-block">
+      <h3>Exact mechanism wording</h3>
+      <div class="contract-mechanism"><p>This is the single normative authority for platform selection, preset choice, remapping, physical-input matching, press style, simpler alternatives, device-motion use, and creation of game-facing action inputs. Questions and rows supply defaults and cited game rules; they do not define another sequence.</p>
+<p>A <strong>control set</strong> is the complete current mapping for one platform and input method. A <strong>preset</strong> is a named immutable source set that can become current. A <strong>binding</strong> joins one physical input and press style to one candidate action. An <strong>action input</strong> is the one game-facing signal emitted by a physical activation; it carries every matched binding&#39;s action as a candidate. Bindings that can be current together and share one physical activation share its optional <code>action-input</code> name, while a lone binding&#39;s name may remain implicit. A <strong>demanding input</strong> is a timed, held, rapid, repeated, double, simultaneous, input-sequence, or required-device-motion input.</p>
+<p>1. Select exactly one matching platform-control-set from the running platform, edition, and supported device rules. 2. Resolve the platform&#39;s effective remapping answer. A row value other than <code>use-game-default</code> wins; otherwise <code>remapping-default</code> applies. 3. Establish the starting control set from the platform&#39;s cited rule. When a preset is selected, copy its complete matching action-binding rows into the current set. The preset itself remains unchanged. 4. Apply control changes only through the effective remapping answer. Fixed bindings reject all changes. Swap-only exchanges two existing assignments. Presets-only replaces the whole set with another declared preset. Free assignment moves one action independently and resolves conflicts before use. Action-and-press-style also permits a supported press-style change. 5. After an accepted change, the resulting complete set becomes current. Every later binding lookup reads that set, and each binding row&#39;s promises follow its action to the input the current set assigns. Presentation of the current binding is owned by Action legibility when adopted, otherwise by the game&#39;s UI rules. 6. On physical input, read every binding with a matching physical input and performance in the current platform, device, method, and preset-derived set. A press, release, hold, repeated activation, double activation, simultaneous group, axis, gesture, directional input sequence, or device-motion input matches only under its cited Fixed rule. An optional binding context makes the match provisional: whether that context holds is settled at the accepted moment, once step 11&#39;s timing help fixes it. Rows that can be current together and share one physical activation agree on one <code>action-input</code> value. A physical input cited by a <code>simpler-inputs</code> row matches as if it were its named binding: it emits that binding&#39;s action input and contributes the same action. 7. Resolve the binding&#39;s effective demanding-input answer. A row value other than <code>use-game-default</code> wins; otherwise <code>demanding-input-default</code> applies. 8. Under no-demanding-presses, the covered action has an ordinary route. Under player-can-change-it, the selected setting supplies the easier current press style. Under required-as-written, an incomplete demanding input produces no action input from this contract. 9. Under simpler-alternative, the demanding route and every matching simpler row remain available together without configuration. The alternative produces the same action only through its distinct cited input; failure to finish the demanding route never becomes the alternative by itself. 10. A <code>no-motion</code> binding reads no device motion. An <code>optional-motion</code> binding contributes the same action as its non-device-motion alternative when its gesture completes. A <code>required-motion</code> binding produces no action input from a non-device-motion attempt. 11. Physical input → this contract emits the action input → Input forgiveness (when adopted) may shift the accepted moment → Action legibility (when adopted) selects the offered candidate at the accepted moment → one action proposal. Thus an interact buffered during a cutscene evaluates candidates in the situation where the input is accepted, not the situation where it was pressed. The emitted action input carries every matched binding&#39;s action as a candidate; it is one input with N candidates, never N inputs. 12. When Action legibility is adopted, its shared-input case consumes that one action input and selects one candidate. Otherwise the game&#39;s cited Fixed selection rule resolves shared candidates, and the game&#39;s UI rules own their presentation. Event resolution begins only after the one action proposal exists.</p>
+<p>The authority order is therefore: platform, defaults, starting set, accepted control change, current set, physical match, demanding-input answer, simpler route, device-motion rule, one action-input creation, accepted-moment shared-action choice, and one action proposal.</p></div>
+    </div>
+    <section class="contract-builder-block">
+  <h3>Verification pack</h3>
+  <p><code>sha256:38a15db9590840c0b288298c204a1e2320ac8160bb99e0ff53997d3f65382cd6</code></p>
+
+  <p>The format calls an adoption with its matching pack <strong>Checked</strong>: the tests travel with it, but a game has not necessarily passed them. Without the pack the adoption is <strong>Promised</strong>: the builder still owes the chosen behavior.</p>
+  <h3>64 pack tests</h3>
+  <p>Placeholders are filled from the adoption's answers, values, rows, and verification inputs.</p>
+<div class="contract-test-list"><details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>control options uses control sets, presets, bindings, action inputs, and demanding inputs</summary>
+  <p class="contract-exact-name"><code>control-options-vocabulary</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">A control set is the complete current mapping for one platform and input method. A preset is an immutable named source set that can become current. A binding joins one physical input and press style to one candidate action. One physical activation emits one action input carrying every matched binding&#39;s action. A demanding input is a timed, held, rapid, repeated, double, simultaneous, input-sequence, or required-device-motion input.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and its cited control rules</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the control path is identified from platform selection through physical activation</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>a control set is the complete current mapping for one platform and input method</li><li>a preset is an immutable named source set that can become current</li><li>a binding joins one physical input and press style to one candidate action</li><li>one physical activation emits one action input carrying every matched binding&#39;s action</li><li>a demanding input is a timed, held, rapid, repeated, double, simultaneous, input-sequence, or required-device-motion input</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-current-set</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> is selected exactly for its cited platform and devices</summary>
+  <p class="contract-exact-name"><code>platform-row-selects-exactly-when-cited</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Platform row <code class="contract-placeholder">Row.id</code> is the one selected row exactly on the platform, edition, and supported devices at <code class="contract-placeholder">Row.platform declared in</code>. It is not selected where that citation excludes it. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>platform-control-set row <code class="contract-placeholder">Row.id</code> and the Fixed platform rule at <code class="contract-placeholder">Row.platform declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the game runs on each cited platform, edition, and supported device combination and on the nearest combination the citation excludes</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.id</code> is the one selected row for every combination the citation covers</li><li><code class="contract-placeholder">Row.id</code> is not selected for a combination the citation excludes</li><li>the test leaves the covered combinations to <code class="contract-placeholder">Row.platform declared in</code> and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-platform-selection</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> starts with the control set chosen by its cited rule</summary>
+  <p class="contract-exact-name"><code>starting-control-set-follows-platform-rule</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">On first play for <code class="contract-placeholder">Row.id</code>, the complete starting control set comes from <code class="contract-placeholder">Row.settings rule declared in</code>, and every first binding lookup reads it as current. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a first play on platform row <code class="contract-placeholder">Row.id</code> and the Fixed settings rule at <code class="contract-placeholder">Row.settings rule declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the current set is first established</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the complete starting control set is the one selected through <code class="contract-placeholder">Row.settings rule declared in</code></li><li>every first binding lookup reads that current set</li><li>the test restates nothing from the cited rule</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-current-set</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>preset <code class="contract-placeholder">Row.id</code> becomes current through its cited route</summary>
+  <p class="contract-exact-name"><code>preset-selection-copies-complete-set</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per control-presets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Preset <code class="contract-placeholder">Row.id</code>, labeled <code class="contract-placeholder">Row.label</code>, belongs to <code class="contract-placeholder">Row.platform control set</code>. Through <code class="contract-placeholder">Row.selection rule declared in</code>, it <code class="contract-placeholder">Bind availability result</code>. Selection copies every matching binding into one complete current set and leaves the source preset unchanged. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>preset <code class="contract-placeholder">Row.id</code> labeled <code class="contract-placeholder">Row.label</code> for platform row <code class="contract-placeholder">Row.platform control set</code> and the Fixed route at <code class="contract-placeholder">Row.selection rule declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the cited route is used and the current set is inspected before and after selection</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.id</code> <code class="contract-placeholder">Bind availability result</code></li><li>selection copies every matching action-binding row into one complete current set</li><li>the source preset remains unchanged</li><li>the test restates nothing from <code class="contract-placeholder">Row.selection rule declared in</code></li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-current-set</li><li><code class="contract-placeholder">Instance</code>-change-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> input methods cover its actions as promised</summary>
+  <p class="contract-exact-name"><code>input-method-coverage-holds</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this in each preset-derived current set <code class="contract-placeholder">Row.id</code> can make current. For every action bound on the platform, under the complete methods and any required switch at <code class="contract-placeholder">Row.methods declared in</code>: <code class="contract-placeholder">Bind coverage procedure</code>. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>platform row <code class="contract-placeholder">Row.id</code>, every action bound on that platform, and the complete methods and any required switch at <code class="contract-placeholder">Row.methods declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>in each preset-derived current set the platform can make current, an observer performs every action bound on the platform using the named method or methods</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Bind coverage procedure</code></li><li>an observer, not the running game, judges this</li><li>the test restates nothing from the cited rule</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;remapping&quot;:[&quot;fixed-bindings&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> keeps fixed bindings by its row answer</summary>
+  <p class="contract-exact-name"><code>remapping-fixed-override</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row remapping is Fixed bindings.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: every attempted change to an action&#39;s physical input or press style is refused, the current set stays unchanged, and the existing binding performs the action. Where this platform has a movable or resizable touch control, changing its layout while keeping its action is not a control change; where it has none, this comparison asserts nothing. The route is at <code class="contract-placeholder">Row.settings rule declared in</code>; the test restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the current set for <code class="contract-placeholder">Row.id</code> and its control setting route at <code class="contract-placeholder">Row.settings rule declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer attempts to change an action&#39;s physical input and press style, then performs the action</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>every control change is refused and the current set is unchanged</li><li>the existing binding still performs the action</li><li>where this platform has a movable or resizable touch control, changing its layout while keeping its action is not a control change; where it has none, this comparison asserts nothing</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-change-log</li><li><code class="contract-placeholder">Instance</code>-current-set</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;remapping-default&quot;:[&quot;fixed-bindings&quot;]},&quot;row&quot;:{&quot;remapping&quot;:[&quot;use-game-default&quot;]}}" data-dependencies="[&quot;remapping-default&quot;]">
+  <summary><code class="contract-placeholder">Row.id</code> keeps fixed bindings by the game default</summary>
+  <p class="contract-exact-name"><code>remapping-fixed-default</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Remapping default is Fixed bindings and row remapping is Use game default.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: every attempted change to an action&#39;s physical input or press style is refused, the current set stays unchanged, and the existing binding performs the action. Where this platform has a movable or resizable touch control, changing its layout while keeping its action is not a control change; where it has none, this comparison asserts nothing. The route is at <code class="contract-placeholder">Row.settings rule declared in</code>; the test restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the current set for <code class="contract-placeholder">Row.id</code> and its control setting route at <code class="contract-placeholder">Row.settings rule declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer attempts to change an action&#39;s physical input and press style, then performs the action</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>every control change is refused and the current set is unchanged</li><li>the existing binding still performs the action</li><li>where this platform has a movable or resizable touch control, changing its layout while keeping its action is not a control change; where it has none, this comparison asserts nothing</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-change-log</li><li><code class="contract-placeholder">Instance</code>-current-set</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;remapping&quot;:[&quot;swap-only&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> permits only exchanges by its row answer</summary>
+  <p class="contract-exact-name"><code>remapping-swap-override</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row remapping is Swap only.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: an exchange of two existing assignments is accepted, each new binding performs its exchanged action, and each old binding stops performing the action moved away from it. An independent move to an unused input is refused. The complete result becomes current for every later lookup. The route is at <code class="contract-placeholder">Row.settings rule declared in</code>; the test restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>two supported existing assignments and one otherwise unused supported input in <code class="contract-placeholder">Row.id</code>, changed through <code class="contract-placeholder">Row.settings rule declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer exchanges the two assignments, performs both actions, and then tries to move one action independently to the unused input</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the exchange is accepted as one swap and the resulting complete set becomes current</li><li>each new binding performs its exchanged action and each old binding no longer performs the action moved away from it</li><li>the independent move is refused and leaves the current set unchanged</li><li>every later binding lookup reads the new current set</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-change-log</li><li><code class="contract-placeholder">Instance</code>-current-set</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;remapping-default&quot;:[&quot;swap-only&quot;]},&quot;row&quot;:{&quot;remapping&quot;:[&quot;use-game-default&quot;]}}" data-dependencies="[&quot;remapping-default&quot;]">
+  <summary><code class="contract-placeholder">Row.id</code> permits only exchanges by the game default</summary>
+  <p class="contract-exact-name"><code>remapping-swap-default</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Remapping default is Swap only and row remapping is Use game default.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: an exchange of two existing assignments is accepted, each new binding performs its exchanged action, and each old binding stops performing the action moved away from it. An independent move to an unused input is refused. The complete result becomes current for every later lookup. The route is at <code class="contract-placeholder">Row.settings rule declared in</code>; the test restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>two supported existing assignments and one otherwise unused supported input in <code class="contract-placeholder">Row.id</code>, changed through <code class="contract-placeholder">Row.settings rule declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer exchanges the two assignments, performs both actions, and then tries to move one action independently to the unused input</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the exchange is accepted as one swap and the resulting complete set becomes current</li><li>each new binding performs its exchanged action and each old binding no longer performs the action moved away from it</li><li>the independent move is refused and leaves the current set unchanged</li><li>every later binding lookup reads the new current set</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-change-log</li><li><code class="contract-placeholder">Instance</code>-current-set</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;remapping&quot;:[&quot;presets-only&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> permits only preset selection by its row answer</summary>
+  <p class="contract-exact-name"><code>remapping-presets-override</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row remapping is Presets only.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: selecting another starting-and-selectable or player-selectable preset through <code class="contract-placeholder">Row.settings rule declared in</code> is accepted, its complete copy becomes current, its new binding performs the action, and the old binding does not. An individual binding change through that route is refused. Every later lookup reads the new current set. A mode-selected preset is entered through its cited mode and asserts nothing in this selection trial. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>two complete selectable declared presets for <code class="contract-placeholder">Row.id</code> and the settings route at <code class="contract-placeholder">Row.settings rule declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer selects another starting-and-selectable or player-selectable preset through the settings route, performs an action whose binding differs, and then tries to change one binding through that route</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>preset selection is accepted and its complete copy becomes current</li><li>the new binding performs the action and the old binding does not</li><li>the individual binding change is refused and leaves the current set unchanged</li><li>every later binding lookup reads the new current set</li><li>a mode-selected preset is entered through its cited mode and asserts nothing in this selection trial</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-change-log</li><li><code class="contract-placeholder">Instance</code>-current-set</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;remapping-default&quot;:[&quot;presets-only&quot;]},&quot;row&quot;:{&quot;remapping&quot;:[&quot;use-game-default&quot;]}}" data-dependencies="[&quot;remapping-default&quot;]">
+  <summary><code class="contract-placeholder">Row.id</code> permits only preset selection by the game default</summary>
+  <p class="contract-exact-name"><code>remapping-presets-default</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Remapping default is Presets only and row remapping is Use game default.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: selecting another starting-and-selectable or player-selectable preset through <code class="contract-placeholder">Row.settings rule declared in</code> is accepted, its complete copy becomes current, its new binding performs the action, and the old binding does not. An individual binding change through that route is refused. Every later lookup reads the new current set. A mode-selected preset is entered through its cited mode and asserts nothing in this selection trial. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>two complete selectable declared presets for <code class="contract-placeholder">Row.id</code> and the settings route at <code class="contract-placeholder">Row.settings rule declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer selects another starting-and-selectable or player-selectable preset through the settings route, performs an action whose binding differs, and then tries to change one binding through that route</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>preset selection is accepted and its complete copy becomes current</li><li>the new binding performs the action and the old binding does not</li><li>the individual binding change is refused and leaves the current set unchanged</li><li>every later binding lookup reads the new current set</li><li>a mode-selected preset is entered through its cited mode and asserts nothing in this selection trial</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-change-log</li><li><code class="contract-placeholder">Instance</code>-current-set</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;remapping&quot;:[&quot;any-action-any-input&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> permits free assignment by its row answer</summary>
+  <p class="contract-exact-name"><code>remapping-free-override</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row remapping is Any action any input.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: every covered action can move independently to every supported remappable input, including an unused one; conflicts resolve visibly before use; the new binding performs the action and the old one does not. After an accepted change, the contract makes each binding row&#39;s promises follow its action to the input the current set assigns. An unsupported assignment is refused. Each accepted complete result becomes current for every later lookup. The route is at <code class="contract-placeholder">Row.settings rule declared in</code>; the test restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each covered action, each supported remappable input including an unused one, and <code class="contract-placeholder">Row.settings rule declared in</code> for <code class="contract-placeholder">Row.id</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer independently assigns an action to each supported input, resolves a conflicting assignment, performs the action, and attempts one unsupported assignment</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>every supported independent assignment is accepted, including assignment to the unused input</li><li>a conflict is resolved visibly before use</li><li>the new binding performs the action and the old binding does not</li><li>after an accepted change, each binding row&#39;s promises follow its action to the input the current set assigns</li><li>the unsupported assignment is refused and leaves the current set unchanged</li><li>every accepted complete result becomes current for every later lookup</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-change-log</li><li><code class="contract-placeholder">Instance</code>-current-set</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;remapping-default&quot;:[&quot;any-action-any-input&quot;]},&quot;row&quot;:{&quot;remapping&quot;:[&quot;use-game-default&quot;]}}" data-dependencies="[&quot;remapping-default&quot;]">
+  <summary><code class="contract-placeholder">Row.id</code> permits free assignment by the game default</summary>
+  <p class="contract-exact-name"><code>remapping-free-default</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Remapping default is Any action any input and row remapping is Use game default.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: every covered action can move independently to every supported remappable input, including an unused one; conflicts resolve visibly before use; the new binding performs the action and the old one does not. After an accepted change, the contract makes each binding row&#39;s promises follow its action to the input the current set assigns. An unsupported assignment is refused. Each accepted complete result becomes current for every later lookup. The route is at <code class="contract-placeholder">Row.settings rule declared in</code>; the test restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each covered action, each supported remappable input including an unused one, and <code class="contract-placeholder">Row.settings rule declared in</code> for <code class="contract-placeholder">Row.id</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer independently assigns an action to each supported input, resolves a conflicting assignment, performs the action, and attempts one unsupported assignment</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>every supported independent assignment is accepted, including assignment to the unused input</li><li>a conflict is resolved visibly before use</li><li>the new binding performs the action and the old binding does not</li><li>after an accepted change, each binding row&#39;s promises follow its action to the input the current set assigns</li><li>the unsupported assignment is refused and leaves the current set unchanged</li><li>every accepted complete result becomes current for every later lookup</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-change-log</li><li><code class="contract-placeholder">Instance</code>-current-set</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;remapping&quot;:[&quot;action-and-press-style&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> permits input and press-style changes by its row answer</summary>
+  <p class="contract-exact-name"><code>remapping-press-style-override</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row remapping is Action and press style.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: every covered action can move to every supported remappable input and use every press style offered for it; the new combination performs the action and the old one does not. After an accepted change, the contract makes each binding row&#39;s promises follow its action to the input the current set assigns. An unsupported choice is refused. Each accepted complete result becomes current for every later lookup. Offered choices and the route stay at <code class="contract-placeholder">Row.settings rule declared in</code>; the test restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each covered action, each supported remappable input, each press style offered for that action by <code class="contract-placeholder">Row.settings rule declared in</code>, and one unsupported choice</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer changes the input and offered press style, performs the action with the new combination, then attempts the unsupported choice</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>every supported input change and every offered press-style change is accepted</li><li>the new binding and press style perform the action and the old combination does not</li><li>after an accepted change, each binding row&#39;s promises follow its action to the input the current set assigns</li><li>the unsupported choice is refused and leaves the current set unchanged</li><li>every accepted complete result becomes current for every later lookup</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-change-log</li><li><code class="contract-placeholder">Instance</code>-setting-state</li><li><code class="contract-placeholder">Instance</code>-current-set</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;remapping-default&quot;:[&quot;action-and-press-style&quot;]},&quot;row&quot;:{&quot;remapping&quot;:[&quot;use-game-default&quot;]}}" data-dependencies="[&quot;remapping-default&quot;]">
+  <summary><code class="contract-placeholder">Row.id</code> permits input and press-style changes by the game default</summary>
+  <p class="contract-exact-name"><code>remapping-press-style-default</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Remapping default is Action and press style and row remapping is Use game default.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: every covered action can move to every supported remappable input and use every press style offered for it; the new combination performs the action and the old one does not. After an accepted change, the contract makes each binding row&#39;s promises follow its action to the input the current set assigns. An unsupported choice is refused. Each accepted complete result becomes current for every later lookup. Offered choices and the route stay at <code class="contract-placeholder">Row.settings rule declared in</code>; the test restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each covered action, each supported remappable input, each press style offered for that action by <code class="contract-placeholder">Row.settings rule declared in</code>, and one unsupported choice</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer changes the input and offered press style, performs the action with the new combination, then attempts the unsupported choice</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>every supported input change and every offered press-style change is accepted</li><li>the new binding and press style perform the action and the old combination does not</li><li>after an accepted change, each binding row&#39;s promises follow its action to the input the current set assigns</li><li>the unsupported choice is refused and leaves the current set unchanged</li><li>every accepted complete result becomes current for every later lookup</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-change-log</li><li><code class="contract-placeholder">Instance</code>-setting-state</li><li><code class="contract-placeholder">Instance</code>-current-set</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> exists in its declared control-set scope</summary>
+  <p class="contract-exact-name"><code>binding-scope-follows-current-set</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Binding <code class="contract-placeholder">Row.id</code> belongs to its named preset while that preset is current, where the row names one; otherwise it belongs to <code class="contract-placeholder">Row.platform control set</code>&#39;s base or freely remappable set. It exists throughout the selected control set, or only in the cited context where the row names one. A preset or context the row does not name asserts nothing.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code> on platform row <code class="contract-placeholder">Row.platform control set</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the current set is inspected across its reachable control-set and play contexts</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the binding belongs to its named preset while that preset is current, where the row names one; otherwise it belongs to the platform&#39;s base or freely remappable set</li><li>the binding exists throughout the selected control set, or only in the cited context where the row names one</li><li>a preset or context the row does not name asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-current-set</li><li><code class="contract-placeholder">Instance</code>-match-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> matches only its cited <code class="contract-placeholder">Row.press style</code> performance</summary>
+  <p class="contract-exact-name"><code>binding-matches-cited-performance</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">For <code class="contract-placeholder">Row.id</code>, when <code class="contract-placeholder">Bind performance</code> under <code class="contract-placeholder">Row.physical input declared in</code>, one action input carries the action at <code class="contract-placeholder">Row.action declared in</code>. The nearest non-matching performance emits nothing from this binding. The test names both addresses and restates nothing from them.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code>, action <code class="contract-placeholder">Row.action declared in</code>, and the physical input, device, and performance at <code class="contract-placeholder">Row.physical input declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li><code class="contract-placeholder">Bind performance</code> in the current platform, device, method, and set, then the nearest non-matching performance is attempted</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the matching performance emits one action input carrying the action at <code class="contract-placeholder">Row.action declared in</code></li><li>the non-matching performance emits nothing from this binding</li><li>the test leaves the physical details to <code class="contract-placeholder">Row.physical input declared in</code> and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> settles its context at the accepted moment</summary>
+  <p class="contract-exact-name"><code>binding-context-settles-at-accepted-moment</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">For <code class="contract-placeholder">Row.id</code>, the physical match remains provisional until the accepted moment. Its action is a candidate only when the context at <code class="contract-placeholder">Bind context</code> holds then. The test names the address, restates nothing from it, and asserts nothing about how an accepted moment is shifted.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a physical performance matching <code class="contract-placeholder">Row.id</code> whose context is cited at <code class="contract-placeholder">Bind context</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the input is accepted once while the cited context holds and once while it does not</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the match remains provisional until the accepted moment</li><li>the action at <code class="contract-placeholder">Row.action declared in</code> is a candidate only when the cited context holds at that moment</li><li>the test restates nothing from <code class="contract-placeholder">Bind context</code> and asserts nothing about how an accepted moment is shifted</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> exists only while preset <code class="contract-placeholder">Bind preset</code> is current</summary>
+  <p class="contract-exact-name"><code>binding-preset-is-current</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Under the contract, preset <code class="contract-placeholder">Bind preset</code> is the starting source set for binding <code class="contract-placeholder">Row.id</code>. Its cited performance can match through a current set derived from that preset, and an accepted change on the current copy does not remove the binding. It cannot match through this row while a set derived from another preset is current.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code> assigned to preset <code class="contract-placeholder">Bind preset</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>its cited physical performance occurs while a set derived from <code class="contract-placeholder">Bind preset</code> is current, after an accepted change to that current copy, and while a set derived from another preset is current</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.id</code> can match while a set derived from <code class="contract-placeholder">Bind preset</code> is current</li><li>an accepted change on that current copy does not remove the binding</li><li><code class="contract-placeholder">Row.id</code> cannot match through this row while a set derived from another preset is current</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-current-set</li><li><code class="contract-placeholder">Instance</code>-match-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> shares action input <code class="contract-placeholder">Bind action input</code> consistently</summary>
+  <p class="contract-exact-name"><code>shared-physical-activation-stays-one-input</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Under the contract, rows form one shared-activation group only when they can be current together: they belong to the same platform row, either all omit a preset or all name the same preset, have no disjoint cited contexts, and share the physical activation at <code class="contract-placeholder">Row.physical input declared in</code>. Every row that can be current with <code class="contract-placeholder">Row.id</code> agrees on action input <code class="contract-placeholder">Bind action input</code>. Rows in another preset or a disjoint context assert nothing about this shared value. One such input is emitted with every matched binding&#39;s action as a candidate. The test asserts nothing about a paired Action legibility adoption.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the physical activation at <code class="contract-placeholder">Row.physical input declared in</code> shared by <code class="contract-placeholder">Row.id</code> and rows that can be current with it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>matching bindings on the same platform row are read from one current set</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>every row that can be current with <code class="contract-placeholder">Row.id</code>, on the same platform row, all omitting a preset or all naming the same preset, with no disjoint cited contexts, names action input <code class="contract-placeholder">Bind action input</code></li><li>rows in another preset or a disjoint cited context are not in this group and assert nothing about its shared value</li><li>one <code class="contract-placeholder">Bind action input</code> is emitted and carries every matched binding&#39;s action as a candidate</li><li>the test asserts nothing about a paired Action legibility adoption</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li><li><code class="contract-placeholder">Instance</code>-candidate-set</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> matches as binding <code class="contract-placeholder">Row.action binding</code></summary>
+  <p class="contract-exact-name"><code>simpler-input-matches-named-binding</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per simpler-inputs row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Simpler route <code class="contract-placeholder">Row.id</code> uses the input at <code class="contract-placeholder">Row.alternative declared in</code>. It matches as if it were binding <code class="contract-placeholder">Row.action binding</code>, emits that binding&#39;s action input, and contributes the same action. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>simpler route <code class="contract-placeholder">Row.id</code> at <code class="contract-placeholder">Row.alternative declared in</code> for binding <code class="contract-placeholder">Row.action binding</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the cited alternative input is performed and the current set contains the named binding</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the input matches as if it were <code class="contract-placeholder">Row.action binding</code></li><li>it emits that binding&#39;s action input</li><li>it contributes the same action as the named binding</li><li>the test restates nothing from the cited alternative rule</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;demanding-input&quot;:[&quot;no-demanding-presses&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> has an ordinary route by its row answer</summary>
+  <p class="contract-exact-name"><code>demanding-none-override</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row demanding input is No demanding presses.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: the action for <code class="contract-placeholder">Row.id</code> has an ordinary route without a setting change, and performing that route emits an action input carrying the action. A demanding input is not its only route.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code> and its cited action and physical-input rules</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer performs the covered action through its ordinary route without changing a setting</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the ordinary route produces an action input carrying the action at <code class="contract-placeholder">Row.action declared in</code></li><li>no demanding input is the action&#39;s only route</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;demanding-input-default&quot;:[&quot;no-demanding-presses&quot;]},&quot;row&quot;:{&quot;demanding-input&quot;:[&quot;use-game-default&quot;]}}" data-dependencies="[&quot;demanding-input-default&quot;]">
+  <summary><code class="contract-placeholder">Row.id</code> has an ordinary route by the game default</summary>
+  <p class="contract-exact-name"><code>demanding-none-default</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Demanding input default is No demanding presses and row demanding input is Use game default.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default: the action for <code class="contract-placeholder">Row.id</code> has an ordinary route without a setting change, and performing that route emits an action input carrying the action. A demanding input is not its only route.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code> and its cited action and physical-input rules</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer performs the covered action through its ordinary route without changing a setting</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the ordinary route produces an action input carrying the action at <code class="contract-placeholder">Row.action declared in</code></li><li>no demanding input is the action&#39;s only route</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;demanding-input&quot;:[&quot;simpler-alternative&quot;],&quot;press-style&quot;:[&quot;timed-press&quot;,&quot;hold&quot;,&quot;rapid-presses&quot;,&quot;repeated-presses&quot;,&quot;double-press&quot;,&quot;simultaneous-inputs&quot;,&quot;input-sequence&quot;],&quot;motion-use&quot;:[&quot;no-motion&quot;,&quot;optional-motion&quot;]}}" data-dependencies="[]">
+  <summary>the demanding press style of <code class="contract-placeholder">Row.id</code> follows simpler-alternative by its row answer</summary>
+  <p class="contract-exact-name"><code>demanding-simpler-press-style-override</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row demanding input is Simpler alternative and row press style is Timed press or Hold or Rapid presses or Repeated presses or Double press or Simultaneous inputs or Input sequence and row motion use is No motion or Optional motion.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default. The contract treats the press style of <code class="contract-placeholder">Row.id</code> as demanding. Its completed demanding route and every declared simpler route stay available together without configuration and emit the same action through distinct inputs; failing to finish the demanding route triggers neither route.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code>, its cited demanding press style, and every simpler-inputs row naming it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer completes the demanding press style, performs every simpler route without configuration, and separately stops before completion</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the completed demanding route emits the binding&#39;s action input</li><li>every simpler route remains available at the same time and emits the same action through its distinct input</li><li>failure to finish the demanding route emits neither the demanding action input nor a simpler alternative by itself</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;demanding-input&quot;:[&quot;simpler-alternative&quot;],&quot;motion-use&quot;:[&quot;required-motion&quot;]}}" data-dependencies="[]">
+  <summary>the required motion of <code class="contract-placeholder">Row.id</code> follows simpler-alternative by its row answer</summary>
+  <p class="contract-exact-name"><code>demanding-simpler-required-motion-override</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row demanding input is Simpler alternative and row motion use is Required motion.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default. The contract makes <code class="contract-placeholder">Row.id</code> demanding because it requires device motion. Its completed motion route and every declared simpler route stay available together without configuration and emit the same action through distinct inputs; a non-motion attempt triggers neither route.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code>, its cited required motion, and every simpler-inputs row naming it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer completes the required motion, performs every simpler route without configuration, and separately makes a non-motion attempt</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the completed required-motion route emits the binding&#39;s action input</li><li>every simpler route remains available at the same time and emits the same action through its distinct input</li><li>the non-motion attempt emits neither the demanding action input nor a simpler alternative by itself</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;demanding-input-default&quot;:[&quot;simpler-alternative&quot;]},&quot;row&quot;:{&quot;demanding-input&quot;:[&quot;use-game-default&quot;],&quot;press-style&quot;:[&quot;timed-press&quot;,&quot;hold&quot;,&quot;rapid-presses&quot;,&quot;repeated-presses&quot;,&quot;double-press&quot;,&quot;simultaneous-inputs&quot;,&quot;input-sequence&quot;],&quot;motion-use&quot;:[&quot;no-motion&quot;,&quot;optional-motion&quot;]}}" data-dependencies="[&quot;demanding-input-default&quot;]">
+  <summary>the demanding press style of <code class="contract-placeholder">Row.id</code> follows simpler-alternative by the game default</summary>
+  <p class="contract-exact-name"><code>demanding-simpler-press-style-default</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Demanding input default is Simpler alternative and row demanding input is Use game default and row press style is Timed press or Hold or Rapid presses or Repeated presses or Double press or Simultaneous inputs or Input sequence and row motion use is No motion or Optional motion.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default. The contract treats the press style of <code class="contract-placeholder">Row.id</code> as demanding. Its completed demanding route and every declared simpler route stay available together without configuration and emit the same action through distinct inputs; failing to finish the demanding route triggers neither route.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code>, its cited demanding press style, and every simpler-inputs row naming it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer completes the demanding press style, performs every simpler route without configuration, and separately stops before completion</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the completed demanding route emits the binding&#39;s action input</li><li>every simpler route remains available at the same time and emits the same action through its distinct input</li><li>failure to finish the demanding route emits neither the demanding action input nor a simpler alternative by itself</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;demanding-input-default&quot;:[&quot;simpler-alternative&quot;]},&quot;row&quot;:{&quot;demanding-input&quot;:[&quot;use-game-default&quot;],&quot;motion-use&quot;:[&quot;required-motion&quot;]}}" data-dependencies="[&quot;demanding-input-default&quot;]">
+  <summary>the required motion of <code class="contract-placeholder">Row.id</code> follows simpler-alternative by the game default</summary>
+  <p class="contract-exact-name"><code>demanding-simpler-required-motion-default</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Demanding input default is Simpler alternative and row demanding input is Use game default and row motion use is Required motion.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default. The contract makes <code class="contract-placeholder">Row.id</code> demanding because it requires device motion. Its completed motion route and every declared simpler route stay available together without configuration and emit the same action through distinct inputs; a non-motion attempt triggers neither route.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code>, its cited required motion, and every simpler-inputs row naming it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer completes the required motion, performs every simpler route without configuration, and separately makes a non-motion attempt</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the completed required-motion route emits the binding&#39;s action input</li><li>every simpler route remains available at the same time and emits the same action through its distinct input</li><li>the non-motion attempt emits neither the demanding action input nor a simpler alternative by itself</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;demanding-input&quot;:[&quot;player-can-change-it&quot;],&quot;press-style&quot;:[&quot;timed-press&quot;,&quot;hold&quot;,&quot;rapid-presses&quot;,&quot;repeated-presses&quot;,&quot;double-press&quot;,&quot;simultaneous-inputs&quot;,&quot;input-sequence&quot;],&quot;motion-use&quot;:[&quot;no-motion&quot;,&quot;optional-motion&quot;]}}" data-dependencies="[]">
+  <summary>the demanding press style of <code class="contract-placeholder">Row.id</code> follows player-can-change-it by its row answer</summary>
+  <p class="contract-exact-name"><code>demanding-setting-press-style-override</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row demanding input is Player can change it and row press style is Timed press or Hold or Rapid presses or Repeated presses or Double press or Simultaneous inputs or Input sequence and row motion use is No motion or Optional motion.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default. The contract treats the press style of <code class="contract-placeholder">Row.id</code> as demanding. The observer changes the player-facing demanding-input setting, which is not a control-remapping route, and performs the action with the declared easier current press style; that performance emits the action input. The easier press style does not remove any device motion the binding requires. A stored setting alone is not evidence.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code>, its cited demanding press style, and the player-facing demanding-input setting for its declared easier press style, which is not a control-remapping route</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer changes the setting and then performs the action with the easier current press style</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the setting replaces the demanding press style before the binding is used</li><li>the easier press style does not remove any device motion the binding requires</li><li>the observer&#39;s easier performance emits the action input carrying the action at <code class="contract-placeholder">Row.action declared in</code></li><li>the result is judged from performed play and not from a stored setting alone</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-setting-state</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;demanding-input&quot;:[&quot;player-can-change-it&quot;],&quot;motion-use&quot;:[&quot;required-motion&quot;]}}" data-dependencies="[]">
+  <summary>the required motion of <code class="contract-placeholder">Row.id</code> follows player-can-change-it by its row answer</summary>
+  <p class="contract-exact-name"><code>demanding-setting-required-motion-override</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row demanding input is Player can change it and row motion use is Required motion.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default. The contract makes <code class="contract-placeholder">Row.id</code> demanding because it requires device motion. The demanding-input setting, which is not a control-remapping route, supplies an easier press style and never relieves the motion requirement; performed play with the required motion emits the action input. A stored setting alone is not evidence.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code>, its cited required motion, and the player-facing demanding-input setting for its declared easier press style, which is not a control-remapping route</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer changes the setting and then completes the required motion with the easier current press style</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the setting supplies the easier press style before the binding is used, and the required motion stays required</li><li>the easier press style never relieves the device-motion requirement</li><li>the observer&#39;s easier performance with the required motion emits the action input carrying the action at <code class="contract-placeholder">Row.action declared in</code></li><li>the result is judged from performed play and not from a stored setting alone</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-setting-state</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;demanding-input-default&quot;:[&quot;player-can-change-it&quot;]},&quot;row&quot;:{&quot;demanding-input&quot;:[&quot;use-game-default&quot;],&quot;press-style&quot;:[&quot;timed-press&quot;,&quot;hold&quot;,&quot;rapid-presses&quot;,&quot;repeated-presses&quot;,&quot;double-press&quot;,&quot;simultaneous-inputs&quot;,&quot;input-sequence&quot;],&quot;motion-use&quot;:[&quot;no-motion&quot;,&quot;optional-motion&quot;]}}" data-dependencies="[&quot;demanding-input-default&quot;]">
+  <summary>the demanding press style of <code class="contract-placeholder">Row.id</code> follows player-can-change-it by the game default</summary>
+  <p class="contract-exact-name"><code>demanding-setting-press-style-default</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Demanding input default is Player can change it and row demanding input is Use game default and row press style is Timed press or Hold or Rapid presses or Repeated presses or Double press or Simultaneous inputs or Input sequence and row motion use is No motion or Optional motion.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default. The contract treats the press style of <code class="contract-placeholder">Row.id</code> as demanding. The observer changes the player-facing demanding-input setting, which is not a control-remapping route, and performs the action with the declared easier current press style; that performance emits the action input. The easier press style does not remove any device motion the binding requires. A stored setting alone is not evidence.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code>, its cited demanding press style, and the player-facing demanding-input setting for its declared easier press style, which is not a control-remapping route</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer changes the setting and then performs the action with the easier current press style</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the setting replaces the demanding press style before the binding is used</li><li>the easier press style does not remove any device motion the binding requires</li><li>the observer&#39;s easier performance emits the action input carrying the action at <code class="contract-placeholder">Row.action declared in</code></li><li>the result is judged from performed play and not from a stored setting alone</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-setting-state</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;demanding-input-default&quot;:[&quot;player-can-change-it&quot;]},&quot;row&quot;:{&quot;demanding-input&quot;:[&quot;use-game-default&quot;],&quot;motion-use&quot;:[&quot;required-motion&quot;]}}" data-dependencies="[&quot;demanding-input-default&quot;]">
+  <summary>the required motion of <code class="contract-placeholder">Row.id</code> follows player-can-change-it by the game default</summary>
+  <p class="contract-exact-name"><code>demanding-setting-required-motion-default</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Demanding input default is Player can change it and row demanding input is Use game default and row motion use is Required motion.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default. The contract makes <code class="contract-placeholder">Row.id</code> demanding because it requires device motion. The demanding-input setting, which is not a control-remapping route, supplies an easier press style and never relieves the motion requirement; performed play with the required motion emits the action input. A stored setting alone is not evidence.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code>, its cited required motion, and the player-facing demanding-input setting for its declared easier press style, which is not a control-remapping route</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer changes the setting and then completes the required motion with the easier current press style</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the setting supplies the easier press style before the binding is used, and the required motion stays required</li><li>the easier press style never relieves the device-motion requirement</li><li>the observer&#39;s easier performance with the required motion emits the action input carrying the action at <code class="contract-placeholder">Row.action declared in</code></li><li>the result is judged from performed play and not from a stored setting alone</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-setting-state</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;demanding-input&quot;:[&quot;required-as-written&quot;],&quot;press-style&quot;:[&quot;timed-press&quot;,&quot;hold&quot;,&quot;rapid-presses&quot;,&quot;repeated-presses&quot;,&quot;double-press&quot;,&quot;simultaneous-inputs&quot;,&quot;input-sequence&quot;],&quot;motion-use&quot;:[&quot;no-motion&quot;,&quot;optional-motion&quot;]}}" data-dependencies="[]">
+  <summary>the demanding press style of <code class="contract-placeholder">Row.id</code> follows required-as-written by its row answer</summary>
+  <p class="contract-exact-name"><code>demanding-required-press-style-override</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row demanding input is Required as written and row press style is Timed press or Hold or Rapid presses or Repeated presses or Double press or Simultaneous inputs or Input sequence and row motion use is No motion or Optional motion.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default. The contract treats the press style of <code class="contract-placeholder">Row.id</code> as demanding: completing it emits the action input and stopping before completion emits none from this contract.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code> and its cited demanding press style</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer completes the demanding press style and separately stops before completion</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the complete demanding input emits the action input carrying the action at <code class="contract-placeholder">Row.action declared in</code></li><li>the incomplete demanding input emits no action input from this contract</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;demanding-input&quot;:[&quot;required-as-written&quot;],&quot;motion-use&quot;:[&quot;required-motion&quot;]}}" data-dependencies="[]">
+  <summary>the required motion of <code class="contract-placeholder">Row.id</code> follows required-as-written by its row answer</summary>
+  <p class="contract-exact-name"><code>demanding-required-required-motion-override</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row demanding input is Required as written and row motion use is Required motion.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default. The contract makes <code class="contract-placeholder">Row.id</code> demanding because it requires device motion: completing the motion emits the action input and a non-motion attempt emits none from this contract.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code> and its cited required motion</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer completes the required motion and separately makes a non-motion attempt</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the complete required-motion input emits the action input carrying the action at <code class="contract-placeholder">Row.action declared in</code></li><li>the non-motion attempt emits no action input from this contract</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;demanding-input-default&quot;:[&quot;required-as-written&quot;]},&quot;row&quot;:{&quot;demanding-input&quot;:[&quot;use-game-default&quot;],&quot;press-style&quot;:[&quot;timed-press&quot;,&quot;hold&quot;,&quot;rapid-presses&quot;,&quot;repeated-presses&quot;,&quot;double-press&quot;,&quot;simultaneous-inputs&quot;,&quot;input-sequence&quot;],&quot;motion-use&quot;:[&quot;no-motion&quot;,&quot;optional-motion&quot;]}}" data-dependencies="[&quot;demanding-input-default&quot;]">
+  <summary>the demanding press style of <code class="contract-placeholder">Row.id</code> follows required-as-written by the game default</summary>
+  <p class="contract-exact-name"><code>demanding-required-press-style-default</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Demanding input default is Required as written and row demanding input is Use game default and row press style is Timed press or Hold or Rapid presses or Repeated presses or Double press or Simultaneous inputs or Input sequence and row motion use is No motion or Optional motion.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default. The contract treats the press style of <code class="contract-placeholder">Row.id</code> as demanding: completing it emits the action input and stopping before completion emits none from this contract.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code> and its cited demanding press style</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer completes the demanding press style and separately stops before completion</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the complete demanding input emits the action input carrying the action at <code class="contract-placeholder">Row.action declared in</code></li><li>the incomplete demanding input emits no action input from this contract</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;demanding-input-default&quot;:[&quot;required-as-written&quot;]},&quot;row&quot;:{&quot;demanding-input&quot;:[&quot;use-game-default&quot;],&quot;motion-use&quot;:[&quot;required-motion&quot;]}}" data-dependencies="[&quot;demanding-input-default&quot;]">
+  <summary>the required motion of <code class="contract-placeholder">Row.id</code> follows required-as-written by the game default</summary>
+  <p class="contract-exact-name"><code>demanding-required-required-motion-default</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Demanding input default is Required as written and row demanding input is Use game default and row motion use is Required motion.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row uses the game default. The contract makes <code class="contract-placeholder">Row.id</code> demanding because it requires device motion: completing the motion emits the action input and a non-motion attempt emits none from this contract.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code> and its cited required motion</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer completes the required motion and separately makes a non-motion attempt</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the complete required-motion input emits the action input carrying the action at <code class="contract-placeholder">Row.action declared in</code></li><li>the non-motion attempt emits no action input from this contract</li><li>an observer, not the running game, judges this</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> performs the same action without resembling a failed demanding input</summary>
+  <p class="contract-exact-name"><code>simpler-route-is-distinct</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per simpler-inputs row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. Performing <code class="contract-placeholder">Row.id</code> through <code class="contract-placeholder">Row.alternative declared in</code> emits binding <code class="contract-placeholder">Row.action binding</code>&#39;s action input and contributes the same action. Failing to finish the demanding route does not trigger the alternative, and <code class="contract-placeholder">Row.distinction rule declared in</code> keeps the records distinguishable. The test names both addresses and restates nothing from them.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>simpler route <code class="contract-placeholder">Row.id</code>, its ordinary input at <code class="contract-placeholder">Row.alternative declared in</code>, and its distinction rule at <code class="contract-placeholder">Row.distinction rule declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer successfully performs the simpler route and separately fails to finish binding <code class="contract-placeholder">Row.action binding</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the successful simpler route emits the named binding&#39;s action input and contributes the same action</li><li>the failed demanding route emits no alternative action input by itself</li><li>the two records remain distinguishable under <code class="contract-placeholder">Row.distinction rule declared in</code></li><li>an observer, not the running game, judges this</li><li>the test restates nothing from either cited rule</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-<code class="contract-placeholder">Row.id</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> follows its <code class="contract-placeholder">Row.motion use</code> device-motion rule</summary>
+  <p class="contract-exact-name"><code>device-motion-rule-holds</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">For <code class="contract-placeholder">Row.id</code> under <code class="contract-placeholder">Row.physical input declared in</code>: <code class="contract-placeholder">Bind motion procedure</code>. The test names the address, restates nothing from it, and asserts nothing about device-motion quality.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>binding <code class="contract-placeholder">Row.id</code> and its physical input and device at <code class="contract-placeholder">Row.physical input declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the cited performance and the corresponding motion or non-motion comparison are each attempted</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Bind motion procedure</code></li><li>the test asserts nothing about device-motion quality</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>one physical activation emits one action input with all matched candidates</summary>
+  <p class="contract-exact-name"><code>one-physical-activation-emits-one-action-input</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Each reachable physical activation emits one action input carrying every matched binding&#39;s action as a candidate. N matched actions remain one input with N candidates, never N inputs. Where no activation matches several bindings, that comparison asserts nothing.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each reachable physical activation in the <code class="contract-placeholder">Instance</code> adoption, including one that matches several bindings where the adoption declares one</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the current set is matched and the contract emits its game-facing result</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the activation emits one action input</li><li>that one input carries every matched binding&#39;s action as a candidate</li><li>N matched actions remain one input with N candidates and never become N inputs</li><li>where no activation matches several bindings, the multi-candidate comparison asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li><li><code class="contract-placeholder">Instance</code>-candidate-set</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>the action input stops at the contract boundary</summary>
+  <p class="contract-exact-name"><code>action-input-stops-at-handoff</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">The contract emits one action input with all matched candidates and stops there. Input forgiveness can supply the accepted moment; Action legibility, when adopted, selects a candidate before one action proposal. Otherwise the game&#39;s cited Fixed selection rule owns shared-candidate selection. This test asserts nothing about forgiveness windows, offered-action presentation, candidate ordering, proposal rejection, or action effects.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>one action input emitted by the <code class="contract-placeholder">Instance</code> adoption with all matched candidates</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the input crosses the contract boundary</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the emitted input is handed to Input forgiveness when adopted, which can supply the accepted moment, and then to Action legibility when adopted for candidate selection before one action proposal</li><li>without Action legibility, the game&#39;s cited Fixed selection rule owns shared-candidate selection</li><li>this test stops at emission and asserts nothing about forgiveness windows, offered-action presentation, candidate ordering, proposal rejection, or action effects</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>control options keeps its authority order</summary>
+  <p class="contract-exact-name"><code>control-options-authority-order</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">The authority order is platform, defaults, starting set, accepted control change, current set, physical match, demanding-input answer, simpler route, device-motion rule, one action-input creation, accepted-moment shared-action choice, and one action proposal. A later stage does not rewrite an earlier decision.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a run that reaches platform selection, control setup, a physical activation, and the action-input boundary</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the decision trace is read in order</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the trace orders platform, defaults, starting set, accepted control change, current set, physical match, demanding-input answer, simpler route, device-motion rule, one action-input creation, accepted-moment shared-action choice, and one action proposal</li><li>a later stage does not rewrite an earlier decision</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-platform-selection</li><li><code class="contract-placeholder">Instance</code>-change-log</li><li><code class="contract-placeholder">Instance</code>-current-set</li><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>the adoption makes no promise beyond control options</summary>
+  <p class="contract-exact-name"><code>control-options-boundaries</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">The contract asserts nothing about system-level remapping, virtual-control layout editing, chord member lists, device-motion quality, or saved profiles. Moving or resizing a touch control while keeping its action is not a control change. Presentation of the current binding is owned by Action legibility when adopted, otherwise by the game&#39;s UI rules. Beyond its stated hand-off order, the contract asserts nothing about an action input after emission.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and features adjacent to its control rules</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the adoption&#39;s promise boundary is reviewed</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the contract asserts nothing about system-level remapping, virtual-control layout editing, chord member lists, device-motion quality, or saved profiles</li><li>moving or resizing a touch control while keeping its action is not a control change</li><li>presentation of the current binding is owned by Action legibility when adopted, otherwise by the game&#39;s UI rules</li><li>the contract asserts nothing about action-input behavior after emission except the stated hand-off order</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>empty row sets and unanswered defaults make no promise</summary>
+  <p class="contract-exact-name"><code>empty-row-sets-make-no-promise</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. Where no platform row exists, no platform receives a physical-control promise, and the adoption makes no game-wide remapping or demanding-input promise; where a platform row exists, each clause asserts nothing. Where no preset, binding, or simpler-input row exists, its row set makes its stated empty-set promise; where a row exists, that clause asserts nothing.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks each row set and the two defaults that depend on a platform row</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>where no platform-control-sets row exists, no platform receives a physical-control promise from this adoption; where a row exists, this clause asserts nothing</li><li>where no control-presets row exists, no named control preset is offered; where a row exists, this clause asserts nothing</li><li>where no action-bindings row exists, no physical input is promised to produce a game action; where a row exists, this clause asserts nothing</li><li>where no simpler-inputs row exists, no demanding binding promises a separate simpler input without a setting change; where a row exists, this clause asserts nothing</li><li>where no platform-control-sets row exists, this adoption makes no game-wide remapping promise; where a platform row exists, this clause asserts nothing</li><li>where no platform-control-sets row exists, this adoption makes no game-wide demanding-input promise; where a platform row exists, this clause asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: preset <code class="contract-placeholder">Row.id</code> names a platform row in this adoption</summary>
+  <p class="contract-exact-name"><code>preset-platform-join</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per control-presets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. Preset <code class="contract-placeholder">Row.id</code> must name an existing platform-control-sets row in this adoption: <code class="contract-placeholder">Row.platform control set</code>. A missing or misspelled join is a defect this test fails by construction.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and preset <code class="contract-placeholder">Row.id</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks its platform-control-set join</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>a platform-control-sets row with id <code class="contract-placeholder">Row.platform control set</code> exists in this adoption</li><li>a missing or misspelled platform row is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: binding <code class="contract-placeholder">Row.id</code> names a platform row in this adoption</summary>
+  <p class="contract-exact-name"><code>binding-platform-join</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. Binding <code class="contract-placeholder">Row.id</code> must name an existing platform-control-sets row in this adoption: <code class="contract-placeholder">Row.platform control set</code>. A missing or misspelled join is a defect this test fails by construction.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and binding <code class="contract-placeholder">Row.id</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks its platform-control-set join</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>a platform-control-sets row with id <code class="contract-placeholder">Row.platform control set</code> exists in this adoption</li><li>a missing or misspelled platform row is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: binding <code class="contract-placeholder">Row.id</code> names a preset on the same platform</summary>
+  <p class="contract-exact-name"><code>binding-preset-join</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. Binding <code class="contract-placeholder">Row.id</code> must name an existing preset, <code class="contract-placeholder">Bind preset</code>, and that preset must name the binding&#39;s platform row, <code class="contract-placeholder">Row.platform control set</code>. A missing preset or cross-platform join is a defect this test fails by construction.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and binding <code class="contract-placeholder">Row.id</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks preset <code class="contract-placeholder">Bind preset</code> and both platform names</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>a control-presets row with id <code class="contract-placeholder">Bind preset</code> exists in this adoption</li><li>that preset names platform row <code class="contract-placeholder">Row.platform control set</code></li><li>a missing preset or cross-platform join is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;motion-use&quot;:[&quot;optional-motion&quot;]}}" data-dependencies="[]">
+  <summary>declaration check: optional-motion binding <code class="contract-placeholder">Row.id</code> has a no-motion sibling</summary>
+  <p class="contract-exact-name"><code>optional-motion-has-no-motion-sibling</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row motion use is Optional motion.</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. The contract requires optional-motion binding <code class="contract-placeholder">Row.id</code> to have another binding for the same action on platform row <code class="contract-placeholder">Row.platform control set</code> and the same preset with motion-use no-motion. Any other shape is a defect this test fails by construction.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and optional-motion binding <code class="contract-placeholder">Row.id</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer compares its action, platform row, preset, and motion use with the other action-bindings rows</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>another binding for the same action on platform row <code class="contract-placeholder">Row.platform control set</code> and the same preset has motion-use no-motion</li><li>any other shape is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: simpler route <code class="contract-placeholder">Row.id</code> names a binding in this adoption</summary>
+  <p class="contract-exact-name"><code>simpler-binding-join</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per simpler-inputs row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. The contract limits simpler-inputs rows to bindings whose effective demanding-input answer promises an alternative. Simpler route <code class="contract-placeholder">Row.id</code> must name an existing action-bindings row in this adoption, <code class="contract-placeholder">Row.action binding</code>, and that binding&#39;s effective answer must be simpler-alternative. A missing, misspelled, or wrongly answered join is a defect this test fails by construction.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and simpler route <code class="contract-placeholder">Row.id</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks its action-binding join</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>an action-bindings row with id <code class="contract-placeholder">Row.action binding</code> exists in this adoption</li><li>that binding&#39;s effective demanding-input answer is simpler-alternative</li><li>a missing, misspelled, or wrongly answered binding is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: every presets-only platform has two selectable complete presets</summary>
+  <p class="contract-exact-name"><code>presets-only-has-complete-choice</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. Under the contract, every platform whose effective answer is presets-only must have at least two presets whose availability is starting-and-selectable or player-selectable, and every preset maps every action bound on that platform. Another effective answer asserts nothing in this comparison. A missing choice or incomplete preset is a defect this test fails by construction.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer resolves each platform row&#39;s effective remapping answer and compares its preset and binding rows</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>each platform whose effective answer is presets-only has at least two control-presets rows whose availability is starting-and-selectable or player-selectable</li><li>every preset for that platform maps every action bound on the platform with a matching action-bindings row</li><li>a platform with another effective answer asserts nothing in this comparison</li><li>a missing choice or incomplete preset is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: every demanding simpler-alternative binding has a simpler row</summary>
+  <p class="contract-exact-name"><code>simpler-answer-has-row</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. If <code class="contract-placeholder">Row.id</code> has a demanding press style or requires device motion, and its effective answer is simpler-alternative, at least one simpler-inputs row must name it. Otherwise the requirement asserts nothing. A missing simpler row is a defect this test fails by construction.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and binding <code class="contract-placeholder">Row.id</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer resolves the binding&#39;s effective demanding-input answer and classifies its cited performance</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>if <code class="contract-placeholder">Row.id</code> has a demanding press style or requires device motion, and its effective answer is simpler-alternative, at least one simpler-inputs row names it</li><li>otherwise this requirement asserts nothing</li><li>a missing simpler row is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: every no-demanding binding has an ordinary route</summary>
+  <p class="contract-exact-name"><code>no-demanding-answer-has-ordinary-route</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and its cited prose, not the running game. Under an effective no-demanding-presses answer, <code class="contract-placeholder">Row.id</code> must have a non-demanding press style and not require device motion, or have a cited ordinary route to the same action. Another answer asserts nothing here. A demanding-only route is a defect this test fails by construction.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption, binding <code class="contract-placeholder">Row.id</code>, and its cited prose, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer resolves the binding&#39;s effective demanding-input answer</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>if the effective answer is no-demanding-presses, <code class="contract-placeholder">Row.id</code> has a non-demanding press style and does not require device motion, or its cited prose states an ordinary route to the same action</li><li>otherwise this requirement asserts nothing</li><li>a demanding-only route is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: no platform or binding recreates the forbidden effective pair</summary>
+  <p class="contract-exact-name"><code>forbidden-effective-pair-does-not-reappear</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. The contract&#39;s demanding-input field forbids a binding from having effective required-as-written on a platform with effective action-and-press-style. A row override that recreates this forbidden pair is a defect this test fails by construction.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer resolves every platform&#39;s effective remapping answer and every binding&#39;s effective demanding-input answer</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>no binding has effective required-as-written on a platform with effective action-and-press-style</li><li>any platform-row or binding-row override that recreates that pair is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s settings citation covers its effective policy</summary>
+  <p class="contract-exact-name"><code>settings-citation-covers-effective-change-policy</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.settings rule declared in</code>, not the running game. Under any-action-any-input or action-and-press-style, that citation must state visible conflict handling before use; action-and-press-style must also state the press styles offered for each action. Under swap-only, it must state that a swap exchanges two existing assignments. Under presets-only, it must state that selection replaces the whole set and an individual binding change is refused. Under fixed-bindings, it must state the absence of changes. A missing duty is a defect this test fails by construction, and the test asserts nothing about reachability beyond what the citation states.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption, platform row <code class="contract-placeholder">Row.id</code>, and <code class="contract-placeholder">Row.settings rule declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer resolves the row&#39;s effective remapping answer and checks the cited rule</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>under any-action-any-input or action-and-press-style, the citation states visible conflict handling before use</li><li>under action-and-press-style, the citation states the press styles offered for each action</li><li>under swap-only, the citation states that a swap exchanges two existing assignments</li><li>under presets-only, the citation states that selection replaces the whole set and an individual binding change is refused</li><li>under fixed-bindings, the citation states the absence of changes</li><li>a missing duty is a defect this test fails by construction</li><li>the test asserts nothing about reachability beyond what the citation states</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: rows sharing an activation agree on one action input</summary>
+  <p class="contract-exact-name"><code>shared-action-input-declaration-agrees</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and its cited physical activations and contexts, not the running game. Under the contract, one group contains only rows that can be current together: they use the same platform row, either all omit a preset or all name the same preset, have no disjoint cited contexts, and share one physical activation. Rows in mutually exclusive presets or disjoint contexts are not one group and assert nothing about each other&#39;s action-input value. Every row in a multi-binding group supplies and agrees on one value, and the emitted input carries every matched action as a candidate. A lone binding&#39;s name can remain implicit and asserts nothing in the shared-value comparison. A missing, different, or split value is a defect this test fails by construction. The check asserts nothing about a paired Action legibility adoption.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and the physical activations, platforms, presets, and contexts described by its binding rows and citations, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer groups rows that can be current together and share one physical activation</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>one group contains only rows on the same platform row that either all omit a preset or all name the same preset, have no disjoint cited contexts, and share one physical activation</li><li>rows in mutually exclusive presets or disjoint cited contexts are not one group and assert nothing about each other&#39;s action-input value</li><li>every group with several bindings supplies one action-input value shared by every row in that group</li><li>the emitted input carries every matched binding&#39;s action as a candidate</li><li>a lone binding&#39;s action-input name can remain implicit and asserts nothing in the shared-value comparison</li><li>a missing, different, or split shared value is a defect this test fails by construction</li><li>the test asserts nothing about a paired Action legibility adoption</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li><li><code class="contract-placeholder">Instance</code>-candidate-set</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: no two rows mean the same platform, preset, or binding</summary>
+  <p class="contract-exact-name"><code>rows-do-not-duplicate-meaning</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and its cited prose, not the running game. No two rows can mean the same platform, preset, binding, or simpler alternative for one binding. The contract sets no maximum row count. A duplicate meaning is a defect this test fails by construction.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and its cited prose, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer compares every pair of rows in each row set</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>no two platform-control-sets rows mean the same platform, edition, devices, and policy scope</li><li>no two control-presets rows mean the same preset</li><li>no two action-bindings rows mean the same binding</li><li>no two simpler-inputs rows mean the same alternative for one binding</li><li>the contract imposes no maximum row count</li><li>a duplicate meaning is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s platform citation states its duty</summary>
+  <p class="contract-exact-name"><code>platform-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.platform declared in</code>, not the running game. The citation must name one platform or edition and its supported devices; different control behavior belongs in another row. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and <code class="contract-placeholder">Row.platform declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.platform declared in</code> names one platform or edition and its supported devices, with different control behavior in another row</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s methods citation states its duty</summary>
+  <p class="contract-exact-name"><code>methods-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.methods declared in</code>, not the running game. The citation must list every complete input method for <code class="contract-placeholder">Row.id</code> and any required switch. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and <code class="contract-placeholder">Row.methods declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.methods declared in</code> lists every complete input method for <code class="contract-placeholder">Row.id</code> and any required switch between methods</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s settings citation states its duty</summary>
+  <p class="contract-exact-name"><code>settings-rule-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per platform-control-sets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.settings rule declared in</code>, not the running game. The citation must always state <code class="contract-placeholder">Row.id</code>&#39;s control menu. Where the platform declares a preset, it must state preset selection. Under effective any-action-any-input or action-and-press-style, it must state conflict handling; action-and-press-style must also state the press styles offered for each action. Under effective fixed-bindings, it must state the explicit absence of changes. A duty outside its stated condition asserts nothing. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and <code class="contract-placeholder">Row.settings rule declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer resolves <code class="contract-placeholder">Row.id</code>&#39;s effective remapping answer and checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.settings rule declared in</code> states <code class="contract-placeholder">Row.id</code>&#39;s control menu</li><li>where the platform has a control-presets row, the citation states preset selection; where it has none, this clause asserts nothing</li><li>under effective any-action-any-input or action-and-press-style, the citation states conflict handling; under another effective answer, this clause asserts nothing</li><li>under effective action-and-press-style, the citation states the press styles offered for each action; under another effective answer, this clause asserts nothing</li><li>under effective fixed-bindings, the citation states the explicit absence of changes; under another effective answer, this clause asserts nothing</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: preset <code class="contract-placeholder">Row.id</code>&#39;s selection citation states its duty</summary>
+  <p class="contract-exact-name"><code>preset-selection-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per control-presets row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.selection rule declared in</code>, not the running game. The citation must state the route that selects preset <code class="contract-placeholder">Row.id</code> and makes its matching bindings current. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and <code class="contract-placeholder">Row.selection rule declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.selection rule declared in</code> states the route that selects preset <code class="contract-placeholder">Row.id</code> and makes its matching action-binding rows current</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s action citation states its duty</summary>
+  <p class="contract-exact-name"><code>binding-action-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.action declared in</code>, not the running game. The citation must name the game-facing action that <code class="contract-placeholder">Row.id</code> contributes as a candidate. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and <code class="contract-placeholder">Row.action declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.action declared in</code> names the game-facing action that <code class="contract-placeholder">Row.id</code> contributes as a candidate</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s physical-input citation states its duty</summary>
+  <p class="contract-exact-name"><code>binding-physical-input-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.physical input declared in</code>, not the running game. The citation must name <code class="contract-placeholder">Row.id</code>&#39;s physical input, supplying device, and <code class="contract-placeholder">Bind performance duty</code>. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and <code class="contract-placeholder">Row.physical input declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.physical input declared in</code> names the physical input, its supplying device, and <code class="contract-placeholder">Bind performance duty</code> for <code class="contract-placeholder">Row.id</code></li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s context citation states its duty</summary>
+  <p class="contract-exact-name"><code>binding-context-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-bindings row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Bind context</code>, not the running game. The citation must state the context in which binding <code class="contract-placeholder">Row.id</code> exists. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and <code class="contract-placeholder">Bind context</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Bind context</code> states the context in which binding <code class="contract-placeholder">Row.id</code> exists</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s alternative citation states its duty</summary>
+  <p class="contract-exact-name"><code>simpler-alternative-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per simpler-inputs row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.alternative declared in</code>, not the running game. The citation must state the physical input and ordinary press style that perform the same action as binding <code class="contract-placeholder">Row.action binding</code> without a setting change. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and <code class="contract-placeholder">Row.alternative declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.alternative declared in</code> states the physical input and ordinary press style that perform the same action as binding <code class="contract-placeholder">Row.action binding</code> without a setting change</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s distinction citation states its duty</summary>
+  <p class="contract-exact-name"><code>simpler-distinction-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per simpler-inputs row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.distinction rule declared in</code>, not the running game. The citation must prove that success on <code class="contract-placeholder">Row.id</code> cannot be mistaken for failure to finish binding <code class="contract-placeholder">Row.action binding</code>. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and <code class="contract-placeholder">Row.distinction rule declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.distinction rule declared in</code> proves that success on <code class="contract-placeholder">Row.id</code> cannot be mistaken for failure to finish binding <code class="contract-placeholder">Row.action binding</code></li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>control options holds for the whole run</summary>
+  <p class="contract-exact-name"><code>control-options-hold</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Across <code class="contract-placeholder">Inputs scope</code>, every accepted control change follows the platform&#39;s effective remapping answer and every refused change is refused; every binding matches only under its cited performance and emits one action input; every demanding binding meets its effective answer; every simpler route produces the same action distinguishably; every device-motion rule holds; and no physical activation produces more than one action input.</p>
+  <dl class="contract-test-steps"><div><dt>Holds</dt><dd><p>every accepted control change followed the platform&#39;s effective remapping answer and every refused change was refused; every binding matched only under its cited performance and emitted one action input; every demanding binding met its effective answer; every simpler route produced the same action distinguishably; every device-motion rule held; no physical activation produced more than one action input</p></dd></div>
+<div><dt>Seeds</dt><dd><p><code class="contract-placeholder">Inputs seeds</code></p></dd></div>
+<div><dt>Scope</dt><dd><p><code class="contract-placeholder">Inputs scope</code></p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-platform-selection</li><li><code class="contract-placeholder">Instance</code>-change-log</li><li><code class="contract-placeholder">Instance</code>-current-set</li><li><code class="contract-placeholder">Instance</code>-match-trace</li><li><code class="contract-placeholder">Instance</code>-action-input-log</li><li><code class="contract-placeholder">Instance</code>-observer-result</li><li><code class="contract-placeholder">Instance</code>-setting-state</li></ul></dd></div></dl>
+</details></div>
+</section>
+  </details>
+</section>
+<p class="contract-related"><strong>Related groups:</strong> <a href="/contracts/catalogue/#legibility">Legibility</a></p>
+<p><a href="#use-this">Use this contract in your game ↑</a></p>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

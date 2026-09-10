@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Contracts | OpenGDD handbook</title>
-<meta name="description" content="A contract brings a proven game mechanic into your design: a health bar, a backpack, a crafting recipe. It is a ready-made list of the decisions behind that mechanic — …">
+<meta name="description" content="A contract is a short list of questions about one game mechanic, such as what a backpack does with a pile of items that will not fit. Answer the questions and the …">
 <link rel="canonical" href="https://opengdd.org/handbook/contracts/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Contracts | OpenGDD handbook">
-<meta property="og:description" content="A contract brings a proven game mechanic into your design: a health bar, a backpack, a crafting recipe. It is a ready-made list of the decisions behind that mechanic — …">
+<meta property="og:description" content="A contract is a short list of questions about one game mechanic, such as what a backpack does with a pile of items that will not fit. Answer the questions and the …">
 <meta property="og:url" content="https://opengdd.org/handbook/contracts/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Contracts | OpenGDD handbook">
-<meta name="twitter:description" content="A contract brings a proven game mechanic into your design: a health bar, a backpack, a crafting recipe. It is a ready-made list of the decisions behind that mechanic — …">
+<meta name="twitter:description" content="A contract is a short list of questions about one game mechanic, such as what a backpack does with a pile of items that will not fit. Answer the questions and the …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -23,20 +23,21 @@
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/" aria-current="page">Learn</a>
-      <a href="/spec/">Spec</a>
-      <a href="/standard/">Standard</a>
+      <a href="/contracts/">Contracts</a>
+      <a href="/spec/">Specification</a>
       <a href="/authoring-tool/">Authoring tool</a>
       <a href="/about/">About</a>
       <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
     </nav>
   </div>
 </header>
-<main>
+<main id="main">
 <div class="doc-layout">
 <nav class="doc-toc" aria-label="Learn"><p class="toc-title">Learn</p>
 <ul class="learn-resources">
@@ -46,35 +47,35 @@
 <div class="toc-group">
 <p class="toc-group-title">Start and foundations</p>
 <ul>
-<li class="toc-h2"><a href="/handbook/an-afternoon-spec/">An afternoon spec</a></li>
-<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">The shape of a spec</a></li>
-<li class="toc-h2"><a href="/handbook/fantasy-block/">The fantasy block</a></li>
-<li class="toc-h2"><a href="/handbook/authority/">Authority</a></li>
-<li class="toc-h2"><a href="/handbook/identifiers/">Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
+<li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
+<li class="toc-h2"><a href="/handbook/player-fantasy/">The player fantasy</a></li>
+<li class="toc-h2"><a href="/handbook/who-decides/">Who decides</a></li>
+<li class="toc-h2"><a href="/handbook/naming-things/">Names and addresses</a></li>
 <li class="toc-h2"><a href="/handbook/tuning/">Tuning</a></li>
 <li class="toc-h2"><a href="/handbook/acceptance-tests/">Acceptance tests</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Content, links, and time</p>
+<p class="toc-group-title">Content, links and time</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/collections/">Collections</a></li>
 <li class="toc-h2"><a href="/handbook/links/">Links</a></li>
 <li class="toc-h2"><a href="/handbook/runtime-values/">Runtime values</a></li>
-<li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes &amp; clocks</a></li>
-<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes and clocks</a></li>
+<li class="toc-h2"><a href="/handbook/seeds/">Seeds and repeatable randomness</a></li>
 </ul>
 </div>
 <div class="toc-group">
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette &amp; colour promises</a></li>
-<li class="toc-h2"><a href="/handbook/personalization/">Personalization</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanisms</p>
+<p class="toc-group-title">Reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/" class="here" aria-current="page">Contracts</a></li>
 </ul>
@@ -82,115 +83,55 @@
 <div class="toc-group">
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
-<li class="toc-h2"><a href="/handbook/promises-and-proof/">Promises and proof</a></li>
-<li class="toc-h2"><a href="/handbook/preflight-checklist/">Preflight checklist</a></li>
+<li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
 <h1>Contracts</h1>
-<p><em>Opt-in: add this when your game needs it.</em></p>
-<p>A <strong>contract</strong> brings a proven game mechanic into your design: a health bar, a backpack, a crafting recipe. It is a ready-made list of the decisions behind that mechanic — decisions thousands of games have made before yours, each in its own way. You answer them once, on purpose, instead of finding them later as bugs.</p>
-<p>Pick a contract definition and copy it into your package. Answer its questions, then write the values, rows, and verification inputs it asks for. A public catalogue of ready contracts opens with a later release; a contract file from any source works the same way today.</p>
-<p>You can also use a contract as a checklist, without copying any file: read each question, settle the answer in your design prose, and stop there. This gives you the decisions without the structured form and its named tests.</p>
-<p>Your copy of a contract, with your answers, is an <strong>adoption</strong>. One contract serves many adoptions, and every adoption answers the same set of questions. Health and stamina are both Ranged value adoptions; they answer some questions differently, so they behave differently. The same holds for every contract: a backpack and a store are both Container adoptions, each with its own answers and numbers.</p>
-<p><em><code>contracts/stamina.json</code>, an excerpt from one filled adoption</em></p>
+<p class="chapter-scope"><span class="scope-badge">Optional</span></p>
+<p>A <strong>contract</strong> is a short list of questions about one game mechanic, such as what a backpack does with a pile of items that will not fit. Answer the questions and the mechanic is defined well enough to build and test. A contract with the answers filled in is an <strong>adoption</strong>. To use one, start from the <a href="/contracts/">Contracts pages</a>. The files below are what they produce.</p>
+<h2 id="the-adoption-file">The adoption file<a class="heading-anchor" href="#the-adoption-file" aria-label="Link to this section">#</a></h2>
+<p><em><code>contracts/backpack.json</code>, part of a filled-in Container adoption</em></p>
 <pre><code class="lang-json">{
-  &quot;contract&quot;: &quot;ranged-value&quot;,
+  &quot;contract&quot;: &quot;container&quot;,
   &quot;version&quot;: 1,
   …
-  &quot;questions&quot;: {
-    &quot;at-min-effect&quot;: {
-      &quot;asks&quot;: &quot;When a loss would drag the value below min, what happens?&quot;,
-      …
-      &quot;options&quot;: {
-        &quot;clamp&quot;: {
-          &quot;meaning&quot;: &quot;The value stops at min. The overkill is thrown away. Nothing is told about it, and nothing else happens.&quot;,
-          &quot;semantics&quot;: &quot;The value saturates at min. The excess is discarded, reported to no one, and carries no further consequence from this contract; the event otherwise applies in full.&quot;
-        },
-        …
-        &quot;unbounded&quot;: {
-          &quot;meaning&quot;: &quot;No floor. The value keeps falling below min, and your rules may read how far it went.&quot;,
-          &quot;semantics&quot;: &quot;min does not constrain the value downward: the delta applies in full and the result is stored, even below min, where game rules may read it. min stays declared and citable, and thresholds at or above it are tested normally.&quot;
-        }
-      }
-    },
-    …
-    &quot;insufficient-cost&quot;: {
-      &quot;asks&quot;: &quot;When something tries to spend more than the pool has left above min, what happens?&quot;,
-      …
-      &quot;options&quot;: {
-        &quot;reject-action&quot;: {
-          &quot;meaning&quot;: &quot;Can't afford it, can't do it. The action is refused and nothing is deducted.&quot;,
-          &quot;semantics&quot;: &quot;The spend is rejected and the action it would have paid for does not occur. The value is unchanged and no threshold fires.&quot;
-        },
-        &quot;partial-spend&quot;: {
-          &quot;meaning&quot;: &quot;The pool empties to min and reports how much it actually got. What a partly-paid action does is your call.&quot;,
-          &quot;semantics&quot;: &quot;The value is set to min and the spend reports the amount actually spent: the headroom above min before the spend. What the action does with a partial spend is game prose; the contract fixes only the end state and the reported amount.&quot;
-        },
-        …
-      }
-    }
-  },
-  &quot;declares&quot;: {
-    &quot;values&quot;: {
-      &quot;min&quot;: { &quot;description&quot;: &quot;The pool's floor. Moving the floor changes the mechanism, not just its balance. Declared even when at-min-effect is unbounded, where it is a landmark.&quot; },
-      &quot;max&quot;: { &quot;description&quot;: &quot;The pool's ceiling. Pool size is a common number to change during a balance pass. Declared even when at-max-effect is unbounded, where it is a landmark.&quot; },
-      &quot;initial&quot;: { &quot;description&quot;: &quot;The value the pool holds at the start of a run.&quot; }
-    }
-  },
-  …
   &quot;answers&quot;: {
-    &quot;at-min-effect&quot;: &quot;clamp&quot;,
-    &quot;insufficient-cost&quot;: &quot;reject-action&quot;
+    &quot;capacity-limit&quot;: &quot;slot-count&quot;,
+    &quot;partial-acceptance&quot;: &quot;fill-what-fits&quot;,
+    &quot;leftover-destination&quot;: &quot;left-where-it-is&quot;,
+    …
   },
   &quot;values&quot;: {
-    &quot;min&quot;: 0,
-    &quot;max&quot;: 100,
-    &quot;initial&quot;: 100
+    &quot;slot-count&quot;: 12,
+    …
   },
-  &quot;rows&quot;: {
-    &quot;thresholds&quot;: [
-      {
-        &quot;id&quot;: &quot;exhausted&quot;,
-        &quot;value&quot;: 0,
-        &quot;direction&quot;: &quot;falling&quot;,
-        &quot;refire&quot;: &quot;once&quot;,
-        &quot;rearm&quot;: &quot;run-reset&quot;
-      }
-    ]
-  }
-}</code></pre>
-<p>Every option has a <code>meaning</code> sentence: the promise you make as the designer. Some options add <code>semantics</code>, a more precise sentence that binds the builder and the acceptance tests.</p>
-<p>The copied part above <code>answers</code> is the <strong>definition</strong>, the blank form. The two <code>…</code> lines hide the rest of the definition: more questions, value names, numeric rules, and the pack hash. The visible <code>declares.values</code> block shows the three number names this adoption must fill.</p>
-<p>When two adoptions use one definition, the validator compares their copied definitions after parsing the JSON. Reformatting is safe; reordering members is not, so preserve the definition's member order.</p>
-<p>In your filled adoption, you write <code>answers</code>, <code>values</code>, any rows, and any requested verification inputs below the definition. Some questions only apply after another answer; the file says which, and the validator does not ask for the rest.</p>
-<p>The filename is the address that prose cites. <code>contracts.stamina</code> names this adoption and <code>contracts.stamina.max</code> names its <code>max</code> value. Renaming the file renames those addresses, and the validator reports every citation left dangling.</p>
-<p>The validator checks that every asked question has an answer, each value is inside its declared range, every row has the declared fields, and all numeric rules hold. In the example, <code>exhausted</code> fires once and re-arms at run reset. The common bug this prevents: a warning that fires again on every crossing while the pool sits at zero.</p>
-<p>Without its pack file, the adoption is <strong>promised</strong>: it binds the builder the same way Fixed chapter prose does. An audit — a review of the finished game — judges whether the build kept it. To make the adoption <strong>checked</strong>, put <code>ranged-value-1.pack.json</code> next to it and copy the hash from the contract's catalogue page into the adoption's <code>pack</code> field. The catalogue page prints this SHA-256 fingerprint beside the pack download.</p>
-<p>Some tests in a pack ask you where they apply. A general-test template names that designer-supplied scope through <code>inputs:scope</code>:</p>
-<pre><code class="lang-json">{
   …
-  &quot;inputs&quot;: { &quot;scope&quot;: {} },
-  &quot;test&quot;: {
-    &quot;type&quot;: &quot;general&quot;,
-    &quot;scope&quot;: &quot;{{inputs:scope}}&quot;,
-    &quot;holds&quot;: &quot;the threshold behavior matches the answered contract&quot;
-  }
 }</code></pre>
-<p>Checked answers become named acceptance tests the build must pass. If the build behaves differently, it fails the test by name. Run <code>npx opengdd render-contract-tests &lt;package-dir&gt;</code> to print the named tests again after an answer changes. The command prints a read-only view; do not paste it into <code>05-build-plan.md</code>. For this row, the rendered test includes:</p>
-<pre><code class="lang-text">### AT stamina/threshold-fires-once/exhausted — exhausted fires once, then waits to re-arm
-&quot;then&quot;: [&quot;the exhausted crossing is reported exactly once over the whole sequence, on the first qualifying crossing&quot;]</code></pre>
-<p>A contract records decisions and tests. It does not choose how the builder implements the mechanism, and package validation does not run the finished game.</p>
-<p>A public catalogue of ready contract definitions opens with a later release. Until then, any contract definition file you hold works the same way: copy it into your package and answer it.</p>
-<p><em>Full rules: <a href="/spec/">OpenGDD specification</a>, §10.</em></p>
-<p class="note chapter-pager"><a href="/handbook/personalization/">← Personalization</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/promises-and-proof/">Promises and proof →</a></p>
+<p>This backpack has twelve slots. It takes the part of a delivery that fits and leaves the rest where it came from. The adoption file also carries a copy of the contract's <strong>definition</strong>, left out above: the questions, their options and the rules. In this excerpt, <code>…</code> marks fields left out. Each option has a <code>meaning</code>: the promise you choose, in plain words. An option can also carry <code>semantics</code>: exact wording for the builder and the tests. The definition's <code>mechanism</code> text says what every game that uses this contract must do.</p>
+<h2 id="put-it-in-your-game">Put it in your game<a class="heading-anchor" href="#put-it-in-your-game" aria-label="Link to this section">#</a></h2>
+<p>The adoption lives in <code>contracts/</code> with the copied definition, the answers, the values, any content rows, and any inputs the tests need. Some questions and settings apply only after a particular answer. Two adoptions can use the same contract with different answers.</p>
+<p>The example writes its slot count directly. A contract can also let a setting cite a value from your ordinary tuning, so existing names stay connected. The contract says which forms it allows. Content rows can list things such as the item types a container accepts.</p>
+<p>The filename gives the adoption its address: <code>contracts.backpack</code>. <code>contracts.backpack.slot-count</code> names its slot count. The authoring tool can update references when you rename an adoption, and validation reports references that no longer resolve.</p>
+<p>Adding a contract does not supply the rest of a game's rules. The chapters still say how the mechanic is used in play.</p>
+<h2 id="check-the-promise">Check the promise<a class="heading-anchor" href="#check-the-promise" aria-label="Link to this section">#</a></h2>
+<p>Package validation checks the adoption's form, required answers, declared values and rows, citations and numeric rules. It does not run your finished game.</p>
+<p>The contract's acceptance tests travel in a separate file, the <strong>verification pack</strong>. With the matching pack beside it, an adoption is <strong>checked</strong>: the tests ship with your design. Without it, the adoption is <strong>promised</strong>: you have stated the behaviour and the builder still owes it. Checked never means a game has passed the tests.</p>
+<p>Keep the exact matching pack beside the adoption. The copied definition names the pack's SHA-256 fingerprint, and validation compares it with the file. A pack from another version does not work. Rendering the pack shows the named tests for your answers. It does not run them or add them to your build plan.</p>
+<h2 id="change-or-remove-it">Change or remove it<a class="heading-anchor" href="#change-or-remove-it" aria-label="Link to this section">#</a></h2>
+<p>Changing an answer changes what the builder must implement. Review the resulting tests and your ordinary game rules together. Updating to a newer version of a contract can keep your answers while changing what they mean. It does not migrate your game rules or saved games.</p>
+<p>Removing an adoption leaves its tuning and prose to review. Update references that used its address, and remove its pack only when no other adoption needs it. You can also use a contract as a checklist without adopting it, by recording your decisions in ordinary prose.</p>
+<p>A contract records design promises. The builder chooses how to implement them. Only evidence from running the game shows that the promises are kept.</p>
+<p><em>Full rules: <a href="/spec/#10-contracts">OpenGDD specification</a>, §10.</em></p>
+<p class="note chapter-pager"><a href="/handbook/personalization/">← Personalization questions</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/how-checking-works/">What validation proves →</a></p>
 </article>
 </div>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
-    <span><a href="/about/">About the standard</a></span>
+    <span><a href="/about/">About OpenGDD</a></span>
     <span>Prose CC-BY 4.0 · code MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>

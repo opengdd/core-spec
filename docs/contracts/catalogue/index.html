@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contract catalogue — OpenGDD</title>
+<meta name="description" content="15 contracts and their adoptions, grouped by what they cover.">
+<link rel="canonical" href="https://opengdd.org/contracts/catalogue/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Contract catalogue — OpenGDD">
+<meta property="og:description" content="15 contracts and their adoptions, grouped by what they cover.">
+<meta property="og:url" content="https://opengdd.org/contracts/catalogue/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Contract catalogue — OpenGDD">
+<meta name="twitter:description" content="15 contracts and their adoptions, grouped by what they cover.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=ff285f28dd16">
+<script type="module" src="/assets/contracts.mjs?v=ff285f28dd16"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout contract-catalogue" data-contract-index>
+<nav class="doc-toc contract-nav" aria-label="Contracts">
+<details class="contract-nav-disclosure">
+  <summary>Contracts</summary>
+  <div class="contract-nav-content">
+    <p class="toc-title">Contracts</p>
+    <ul class="contract-nav-home"><li><a href="/contracts/">Overview</a></li><li><a href="/contracts/catalogue/" aria-current="page">Contract catalogue</a></li></ul>
+<div class="toc-group contract-page-nav">
+  <p class="toc-group-title">On this page</p>
+  <ul><li><a href="#pools-meters">Pools &amp; meters</a></li>
+<li><a href="#inventories-holdings">Inventories &amp; holdings</a></li>
+<li><a href="#crafting-exchange">Crafting &amp; exchange</a></li>
+<li><a href="#ordering-resolution">Ordering &amp; resolution</a></li>
+<li><a href="#world-space-grids">World space &amp; grids</a></li>
+<li><a href="#controls-camera">Controls &amp; camera</a></li>
+<li><a href="#determinism-replay">Determinism &amp; replay</a></li>
+<li><a href="#legibility">Legibility</a></li></ul>
+</div>
+  </div>
+</details>
+</nav>
+<article class="doc-body contract-index-body"><div class="contract-index-intro">
+  <h1>Contract catalogue</h1>
+  <p>15 contracts in 8 groups. Each contract lists its adoptions: copies with the answers filled in for a common case. Open one to read the questions, try the answers and add it to your game.</p>
+</div>
+<label class="contract-search-label" for="contract-search">Search contracts</label>
+<div class="contract-search-row">
+  <input id="contract-search" type="search" autocomplete="off" data-contract-search>
+  <span class="contract-search-count" aria-live="polite" data-contract-search-count>15 contracts</span>
+</div>
+<p class="contract-search-help">Try stamina, backpack, jump or autosave.</p>
+<noscript><p class="contract-search-help">Search needs JavaScript. All contracts are listed below.</p></noscript>
+<section class="contract-shelf" data-contract-shelf>
+<h2 id="pools-meters">Pools &amp; meters</h2>
+<p class="contract-shelf-description">Health, stamina, fuel, and other numbers with a top and a bottom.</p>
+<div class="contract-entry-grid"><article class="contract-entry-card" data-contract-entry data-search="ranged value decides what your health bar or xp bar does when it overfills, hits zero, or fills into the next level. health health bar stamina mana fuel durability heat currency regeneration decay score xp xp bar level up overheat oxygen air poise stagger karma combo meter boss-stagger experience health karma oxygen stamina">
+  <div class="contract-entry-head"><h3><a href="/contracts/ranged-value-1/">Ranged value</a></h3><span class="contract-question-count">15 questions</span></div>
+  <p class="contract-entry-benefit">Decides what your health bar or XP bar does when it overfills, hits zero, or fills into the next level.</p>
+  <p class="contract-entry-aliases">Also: health, health bar, stamina, mana</p>
+  <dl class="contract-entry-meta"><div><dt>Adoptions</dt><dd><a class="contract-adoption-chip" href="/contracts/ranged-value-1/boss-stagger/">Boss stagger</a><a class="contract-adoption-chip" href="/contracts/ranged-value-1/experience/">Experience</a><a class="contract-adoption-chip" href="/contracts/ranged-value-1/health/">Health</a><a class="contract-adoption-chip" href="/contracts/ranged-value-1/karma/">Karma</a><a class="contract-adoption-chip" href="/contracts/ranged-value-1/oxygen/">Oxygen</a><a class="contract-adoption-chip" href="/contracts/ranged-value-1/stamina/">Stamina</a></dd></div></dl>
+</article></div>
+</section>
+<section class="contract-shelf" data-contract-shelf>
+<h2 id="inventories-holdings">Inventories &amp; holdings</h2>
+<p class="contract-shelf-description">Bags, chests, and the items a player carries.</p>
+<div class="contract-entry-grid"><article class="contract-entry-card" data-contract-entry data-search="container decides when a container is full, what happens to items that do not fit, and where items go in and come out. inventory backpack bag chest storage slots stack limit carry weight encumbrance capacity backpack hunters-satchel workshop-stockpile">
+  <div class="contract-entry-head"><h3><a href="/contracts/container-1/">Container</a></h3><span class="contract-question-count">6 questions</span></div>
+  <p class="contract-entry-benefit">Decides when a container is full, what happens to items that do not fit, and where items go in and come out.</p>
+  <p class="contract-entry-aliases">Also: inventory, backpack, bag, chest</p>
+  <dl class="contract-entry-meta"><div><dt>Adoptions</dt><dd><a class="contract-adoption-chip" href="/contracts/container-1/backpack/">Backpack</a><a class="contract-adoption-chip" href="/contracts/container-1/hunters-satchel/">Hunters satchel</a><a class="contract-adoption-chip" href="/contracts/container-1/workshop-stockpile/">Workshop stockpile</a></dd></div></dl>
+</article></div>
+</section>
+<section class="contract-shelf" data-contract-shelf>
+<h2 id="crafting-exchange">Crafting &amp; exchange</h2>
+<p class="contract-shelf-description">Crafting, trades, and what happens when a job cannot finish.</p>
+<div class="contract-entry-grid"><article class="contract-entry-card" data-contract-entry data-search="job resolution decides what your crafting bench or build queue does when it is stopped, fails, or has nowhere to put the result. recipe resolution crafting recipe crafting bench workbench smelting cooking brewing research tech tree unit training build queue production queue construction repair craft queue job queue standing orders craft failure cancel craft craft output work in progress assembler barracks construction-site hand-bench kitchen point-research research-lab salvage">
+  <div class="contract-entry-head"><h3><a href="/contracts/job-resolution-1/">Job resolution</a></h3><span class="contract-question-count">9 questions</span></div>
+  <p class="contract-entry-benefit">Decides what your crafting bench or build queue does when it is stopped, fails, or has nowhere to put the result.</p>
+  <p class="contract-entry-aliases">Also: recipe resolution, crafting, recipe, crafting bench</p>
+  <dl class="contract-entry-meta"><div><dt>Adoptions</dt><dd><a class="contract-adoption-chip" href="/contracts/job-resolution-1/assembler/">Assembler</a><a class="contract-adoption-chip" href="/contracts/job-resolution-1/barracks/">Barracks</a><a class="contract-adoption-chip" href="/contracts/job-resolution-1/construction-site/">Construction site</a><a class="contract-adoption-chip" href="/contracts/job-resolution-1/hand-bench/">Hand bench</a><a class="contract-adoption-chip" href="/contracts/job-resolution-1/kitchen/">Kitchen</a><a class="contract-adoption-chip" href="/contracts/job-resolution-1/point-research/">Point research</a><a class="contract-adoption-chip" href="/contracts/job-resolution-1/research-lab/">Research lab</a><a class="contract-adoption-chip" href="/contracts/job-resolution-1/salvage/">Salvage</a></dd></div></dl>
+</article></div>
+</section>
+<section class="contract-shelf" data-contract-shelf>
+<h2 id="ordering-resolution">Ordering &amp; resolution</h2>
+<p class="contract-shelf-description">Which effect happens first when two things happen at once.</p>
+<div class="contract-entry-grid"><article class="contract-entry-card" data-contract-entry data-search="event resolution decides what your turn order does when two things land at once: which goes first and how a tie breaks. turn order initiative initiative tie resolution order simultaneous actions event order action priority tie-break speed tie invalid action rejected action blocked move win and loss at once double knockout chain reaction trigger order stack interrupt counterspell parry overkill animation delay arena-wave card-duel solo-puzzle tactics-tie">
+  <div class="contract-entry-head"><h3><a href="/contracts/event-resolution-1/">Event resolution</a></h3><span class="contract-question-count">8 questions</span></div>
+  <p class="contract-entry-benefit">Decides what your turn order does when two things land at once: which goes first and how a tie breaks.</p>
+  <p class="contract-entry-aliases">Also: turn order, initiative, initiative tie, resolution order</p>
+  <dl class="contract-entry-meta"><div><dt>Adoptions</dt><dd><a class="contract-adoption-chip" href="/contracts/event-resolution-1/arena-wave/">Arena wave</a><a class="contract-adoption-chip" href="/contracts/event-resolution-1/card-duel/">Card duel</a><a class="contract-adoption-chip" href="/contracts/event-resolution-1/solo-puzzle/">Solo puzzle</a><a class="contract-adoption-chip" href="/contracts/event-resolution-1/tactics-tie/">Tactics tie</a></dd></div></dl>
+</article>
+<article class="contract-entry-card" data-contract-entry data-search="timed window decides how i-frames, cooldowns, and status effects repeat, keep or lose time while play is suspended, end early, or expire. invulnerability frames i-frames restart lock cooldown window status duration cooldown immunity frames grace period buff duration debuff duration dodge-roll-invulnerability poison-window">
+  <div class="contract-entry-head"><h3><a href="/contracts/timed-window-1/">Timed window</a></h3><span class="contract-question-count">4 questions per window</span></div>
+  <p class="contract-entry-benefit">Decides how i-frames, cooldowns, and status effects repeat, keep or lose time while play is suspended, end early, or expire.</p>
+  <p class="contract-entry-aliases">Also: invulnerability frames, i-frames, restart lock, cooldown window</p>
+  <dl class="contract-entry-meta"><div><dt>Adoptions</dt><dd><a class="contract-adoption-chip" href="/contracts/timed-window-1/dodge-roll-invulnerability/">Dodge roll invulnerability</a><a class="contract-adoption-chip" href="/contracts/timed-window-1/poison-window/">Poison window</a></dd></div></dl>
+</article></div>
+</section>
+<section class="contract-shelf" data-contract-shelf>
+<h2 id="world-space-grids">World space &amp; grids</h2>
+<p class="contract-shelf-description">Grids and tiles: where cells start, which cells touch, and how distance works.</p>
+<div class="contract-entry-grid"><article class="contract-entry-card" data-contract-entry data-search="grid and direction decides how your grid is numbered, which cells are neighbours, how distance works, and how a rule breaks a tie. grid tile map coordinates origin axes adjacency neighbours distance facing compass directions chess board dungeon map racing track chess-board dungeon-map racing-track-grid">
+  <div class="contract-entry-head"><h3><a href="/contracts/grid-and-direction-1/">Grid and direction</a></h3><span class="contract-question-count">10 questions</span></div>
+  <p class="contract-entry-benefit">Decides how your grid is numbered, which cells are neighbours, how distance works, and how a rule breaks a tie.</p>
+  <p class="contract-entry-aliases">Also: grid, tile map, coordinates, origin</p>
+  <dl class="contract-entry-meta"><div><dt>Adoptions</dt><dd><a class="contract-adoption-chip" href="/contracts/grid-and-direction-1/chess-board/">Chess board</a><a class="contract-adoption-chip" href="/contracts/grid-and-direction-1/dungeon-map/">Dungeon map</a><a class="contract-adoption-chip" href="/contracts/grid-and-direction-1/racing-track-grid/">Racing track grid</a></dd></div></dl>
+</article></div>
+</section>
+<section class="contract-shelf" data-contract-shelf>
+<h2 id="controls-camera">Controls &amp; camera</h2>
+<p class="contract-shelf-description">Input, selection, movement, cameras, and the feedback that makes them clear.</p>
+<div class="contract-entry-grid"><article class="contract-entry-card" data-contract-entry data-search="camera framing decides what each camera must keep on screen, what may push it off screen, such as zoom, and what happens then. camera camera bounds camera follow camera framing camera limits camera shake camera switch camera zoom content visibility cutscene camera drag to pan edge scrolling fixed camera follow camera free camera keep on screen look-ahead player zoom safe area screen shake screen visibility tactical camera zoom to fit couch-coop-camera endless-runner-camera party-rpg-with-a-tactical-view platformer-follow-camera puzzle-board-camera top-down-objective-camera">
+  <div class="contract-entry-head"><h3><a href="/contracts/camera-framing-1/">Camera framing</a></h3><span class="contract-question-count">1 question</span></div>
+  <p class="contract-entry-benefit">Decides what each camera must keep on screen, what may push it off screen, such as zoom, and what happens then.</p>
+  <p class="contract-entry-aliases">Also: camera, camera bounds, camera follow, camera framing</p>
+  <dl class="contract-entry-meta"><div><dt>Adoptions</dt><dd><a class="contract-adoption-chip" href="/contracts/camera-framing-1/couch-coop-camera/">Couch coop camera</a><a class="contract-adoption-chip" href="/contracts/camera-framing-1/endless-runner-camera/">Endless runner camera</a><a class="contract-adoption-chip" href="/contracts/camera-framing-1/party-rpg-with-a-tactical-view/">Party RPG with a tactical view</a><a class="contract-adoption-chip" href="/contracts/camera-framing-1/platformer-follow-camera/">Platformer follow camera</a><a class="contract-adoption-chip" href="/contracts/camera-framing-1/puzzle-board-camera/">Puzzle board camera</a><a class="contract-adoption-chip" href="/contracts/camera-framing-1/top-down-objective-camera/">Top down objective camera</a></dd></div></dl>
+</article>
+<article class="contract-entry-card" data-contract-entry data-search="control options decides which button, key, or touch runs each action, how players can change it, and what happens when a press is hard. controls control scheme control layout key bindings keybinds rebinding remapping button mapping control presets southpaw gamepad controls keyboard controls mouse controls touch controls hold to interact tap or hold button combos button mashing double tap motion controls accessible controls fighting-inputs held-repair mobile-touch pc-console rts-pointer shooter-layers">
+  <div class="contract-entry-head"><h3><a href="/contracts/control-options-1/">Control options</a></h3><span class="contract-question-count">2 questions</span></div>
+  <p class="contract-entry-benefit">Decides which button, key, or touch runs each action, how players can change it, and what happens when a press is hard.</p>
+  <p class="contract-entry-aliases">Also: controls, control scheme, control layout, key bindings</p>
+  <dl class="contract-entry-meta"><div><dt>Adoptions</dt><dd><a class="contract-adoption-chip" href="/contracts/control-options-1/fighting-inputs/">Fighting inputs</a><a class="contract-adoption-chip" href="/contracts/control-options-1/held-repair/">Held repair</a><a class="contract-adoption-chip" href="/contracts/control-options-1/mobile-touch/">Mobile touch</a><a class="contract-adoption-chip" href="/contracts/control-options-1/pc-console/">PC console</a><a class="contract-adoption-chip" href="/contracts/control-options-1/rts-pointer/">RTS pointer</a><a class="contract-adoption-chip" href="/contracts/control-options-1/shooter-layers/">Shooter layers</a></dd></div></dl>
+</article>
+<article class="contract-entry-card" data-contract-entry data-search="input forgiveness decides what your jump or dodge does when it lands early or late, and which action wins when several come due. coyote time input buffer jump buffer input buffering buffered input buffer window grace period edge tolerance ledge forgiveness late jump input queue spell queue queued action wake-up buffer reversal window parry window hit window timing window beat window note timing input leniency fighting-game-action-classes platformer-jump-and-dash race-start-throttle rhythm-lane-hit single-action-turn-puzzle soulslike-action-buffer">
+  <div class="contract-entry-head"><h3><a href="/contracts/input-forgiveness-1/">Input forgiveness</a></h3><span class="contract-question-count">1 question</span></div>
+  <p class="contract-entry-benefit">Decides what your jump or dodge does when it lands early or late, and which action wins when several come due.</p>
+  <p class="contract-entry-aliases">Also: coyote time, input buffer, jump buffer, input buffering</p>
+  <dl class="contract-entry-meta"><div><dt>Adoptions</dt><dd><a class="contract-adoption-chip" href="/contracts/input-forgiveness-1/fighting-game-action-classes/">Fighting game action classes</a><a class="contract-adoption-chip" href="/contracts/input-forgiveness-1/platformer-jump-and-dash/">Platformer jump and dash</a><a class="contract-adoption-chip" href="/contracts/input-forgiveness-1/race-start-throttle/">Race start throttle</a><a class="contract-adoption-chip" href="/contracts/input-forgiveness-1/rhythm-lane-hit/">Rhythm lane hit</a><a class="contract-adoption-chip" href="/contracts/input-forgiveness-1/single-action-turn-puzzle/">Single action turn puzzle</a><a class="contract-adoption-chip" href="/contracts/input-forgiveness-1/soulslike-action-buffer/">Soulslike action buffer</a></dd></div></dl>
+</article>
+<article class="contract-entry-card" data-contract-entry data-search="pointer command decides what a mouse click or screen tap does: what it selects, what it orders, and what a cancel ends. click to move tap to move unit selection box select drag select deselect right click command context command queued orders shift queue smart cast ability targeting target selection cancel order arpg controls point and click verb coin building placement work designation arpg-held-click-to-move-and-attack colony-work-designation moba-selection-and-smart-cast point-and-click-adventure-verb-coin rts-select-order-and-cast tower-defense-placement">
+  <div class="contract-entry-head"><h3><a href="/contracts/pointer-command-1/">Pointer command</a></h3><span class="contract-question-count">6 questions</span></div>
+  <p class="contract-entry-benefit">Decides what a mouse click or screen tap does: what it selects, what it orders, and what a cancel ends.</p>
+  <p class="contract-entry-aliases">Also: click to move, tap to move, unit selection, box select</p>
+  <dl class="contract-entry-meta"><div><dt>Adoptions</dt><dd><a class="contract-adoption-chip" href="/contracts/pointer-command-1/arpg-held-click-to-move-and-attack/">ARPG held click to move and attack</a><a class="contract-adoption-chip" href="/contracts/pointer-command-1/colony-work-designation/">Colony work designation</a><a class="contract-adoption-chip" href="/contracts/pointer-command-1/moba-selection-and-smart-cast/">MOBA selection and smart cast</a><a class="contract-adoption-chip" href="/contracts/pointer-command-1/point-and-click-adventure-verb-coin/">Point and click adventure verb coin</a><a class="contract-adoption-chip" href="/contracts/pointer-command-1/rts-select-order-and-cast/">RTS select order and cast</a><a class="contract-adoption-chip" href="/contracts/pointer-command-1/tower-defense-placement/">Tower defense placement</a></dd></div></dl>
+</article></div>
+</section>
+<section class="contract-shelf" data-contract-shelf>
+<h2 id="determinism-replay">Determinism &amp; replay</h2>
+<p class="contract-shelf-description">Saves, replays, offline progress, and getting the same result twice.</p>
+<div class="contract-entry-grid"><article class="contract-entry-card" data-contract-entry data-search="replay scope decides what your racing ghost has to match, whether an update can still play it, and what happens at the first difference. replay replay file rerun determinism reproducibility seed seeded run daily run daily seed ghost ghost car ghost lap input recording input log demo file observer replay spectator replay solution share speedrun tas desync divergence replay compatibility patched-racing-ghost puzzle-solution-share racing-ghost-lap roguelike-daily-run rts-observer-replay">
+  <div class="contract-entry-head"><h3><a href="/contracts/replay-scope-1/">Replay scope</a></h3><span class="contract-question-count">3 questions</span></div>
+  <p class="contract-entry-benefit">Decides what your racing ghost has to match, whether an update can still play it, and what happens at the first difference.</p>
+  <p class="contract-entry-aliases">Also: replay, replay file, rerun, determinism</p>
+  <dl class="contract-entry-meta"><div><dt>Adoptions</dt><dd><a class="contract-adoption-chip" href="/contracts/replay-scope-1/patched-racing-ghost/">Patched racing ghost</a><a class="contract-adoption-chip" href="/contracts/replay-scope-1/puzzle-solution-share/">Puzzle solution share</a><a class="contract-adoption-chip" href="/contracts/replay-scope-1/racing-ghost-lap/">Racing ghost lap</a><a class="contract-adoption-chip" href="/contracts/replay-scope-1/roguelike-daily-run/">Roguelike daily run</a><a class="contract-adoption-chip" href="/contracts/replay-scope-1/rts-observer-replay/">RTS observer replay</a></dd></div></dl>
+</article>
+<article class="contract-entry-card" data-contract-entry data-search="state persistence scope decides what your campaign progress and settings survive, from a crash to a new device, and what a damaged save shows. save state save data persistence reload save compatibility profile progress corrupted save backup checkpoint autosave quicksave save slots cloud save cross-save sync conflict permadeath ironman save scumming unlocks saved settings progress loss crash recovery account-settings arcade-score cloud-campaign continuous-world roguelike-run story-campaign">
+  <div class="contract-entry-head"><h3><a href="/contracts/state-persistence-scope-1/">State persistence scope</a></h3><span class="contract-question-count">3 questions</span></div>
+  <p class="contract-entry-benefit">Decides what your campaign progress and settings survive, from a crash to a new device, and what a damaged save shows.</p>
+  <p class="contract-entry-aliases">Also: save state, save data, persistence, reload</p>
+  <dl class="contract-entry-meta"><div><dt>Adoptions</dt><dd><a class="contract-adoption-chip" href="/contracts/state-persistence-scope-1/account-settings/">Account settings</a><a class="contract-adoption-chip" href="/contracts/state-persistence-scope-1/arcade-score/">Arcade score</a><a class="contract-adoption-chip" href="/contracts/state-persistence-scope-1/cloud-campaign/">Cloud campaign</a><a class="contract-adoption-chip" href="/contracts/state-persistence-scope-1/continuous-world/">Continuous world</a><a class="contract-adoption-chip" href="/contracts/state-persistence-scope-1/roguelike-run/">Roguelike run</a><a class="contract-adoption-chip" href="/contracts/state-persistence-scope-1/story-campaign/">Story campaign</a></dd></div></dl>
+</article>
+<article class="contract-entry-card" data-contract-entry data-search="suspension and catch-up decides what your energy refill or crop timer does while the game is closed, and what the player sees on return. offline progress away progress catch-up background progress welcome back idle progress offline earnings offline cap sleep mode server queue energy refill lives refill crop timer daily reward daily login login streak daily reset weekly reset gift box claim rewards clock change time cheating daily-reward energy-refill-while-away lives-refill-while-away pumpkin-growth-window puzzle-position">
+  <div class="contract-entry-head"><h3><a href="/contracts/suspension-and-catch-up-1/">Suspension and catch-up</a></h3><span class="contract-question-count">6 questions</span></div>
+  <p class="contract-entry-benefit">Decides what your energy refill or crop timer does while the game is closed, and what the player sees on return.</p>
+  <p class="contract-entry-aliases">Also: offline progress, away progress, catch-up, background progress</p>
+  <dl class="contract-entry-meta"><div><dt>Adoptions</dt><dd><a class="contract-adoption-chip" href="/contracts/suspension-and-catch-up-1/daily-reward/">Daily reward</a><a class="contract-adoption-chip" href="/contracts/suspension-and-catch-up-1/energy-refill-while-away/">Energy refill while away</a><a class="contract-adoption-chip" href="/contracts/suspension-and-catch-up-1/lives-refill-while-away/">Lives refill while away</a><a class="contract-adoption-chip" href="/contracts/suspension-and-catch-up-1/pumpkin-growth-window/">Pumpkin growth window</a><a class="contract-adoption-chip" href="/contracts/suspension-and-catch-up-1/puzzle-position/">Puzzle position</a></dd></div></dl>
+</article></div>
+</section>
+<section class="contract-shelf" data-contract-shelf>
+<h2 id="legibility">Legibility</h2>
+<p class="contract-shelf-description">What the player can always see, hear, or feel, and which actions they can find.</p>
+<div class="contract-entry-grid"><article class="contract-entry-card" data-contract-entry data-search="action legibility decides which actions players can find, what they see when an action is greyed out, and which action a shared button runs. action prompts interact prompt context-sensitive interact shared interact button action priority button prompts controller glyphs keybind prompts greyed out disabled action unavailable action locked ability affordance action discoverability highlighted interactables climbable ledges screen reader labels hidden action secret move cozy-scene door-interact secret-finisher traversal-affordances">
+  <div class="contract-entry-head"><h3><a href="/contracts/action-legibility-1/">Action legibility</a></h3><span class="contract-question-count">2 questions</span></div>
+  <p class="contract-entry-benefit">Decides which actions players can find, what they see when an action is greyed out, and which action a shared button runs.</p>
+  <p class="contract-entry-aliases">Also: action prompts, interact prompt, context-sensitive interact, shared interact button</p>
+  <dl class="contract-entry-meta"><div><dt>Adoptions</dt><dd><a class="contract-adoption-chip" href="/contracts/action-legibility-1/cozy-scene/">Cozy scene</a><a class="contract-adoption-chip" href="/contracts/action-legibility-1/door-interact/">Door interact</a><a class="contract-adoption-chip" href="/contracts/action-legibility-1/secret-finisher/">Secret finisher</a><a class="contract-adoption-chip" href="/contracts/action-legibility-1/traversal-affordances/">Traversal affordances</a></dd></div></dl>
+</article>
+<article class="contract-entry-card" data-contract-entry data-search="fact list decides which game facts players can always read, and how each one reaches them without relying on colour alone. readable facts accessibility cues information channels colour alternatives audio alternatives state legibility directional warnings card keyword states card-keyword-state squad-tactics-readouts">
+  <div class="contract-entry-head"><h3><a href="/contracts/fact-list-1/">Fact list</a></h3><span class="contract-question-count">3 questions</span></div>
+  <p class="contract-entry-benefit">Decides which game facts players can always read, and how each one reaches them without relying on colour alone.</p>
+  <p class="contract-entry-aliases">Also: readable facts, accessibility cues, information channels, colour alternatives</p>
+  <dl class="contract-entry-meta"><div><dt>Adoptions</dt><dd><a class="contract-adoption-chip" href="/contracts/fact-list-1/card-keyword-state/">Card keyword state</a><a class="contract-adoption-chip" href="/contracts/fact-list-1/squad-tactics-readouts/">Squad tactics readouts</a></dd></div></dl>
+</article></div>
+</section></article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

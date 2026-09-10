@@ -224,7 +224,7 @@ function parsedDocument(documents, relative) {
   catch { return undefined; }
 }
 
-// Decision 32: collections declare by presence. Each collections/<drawer>/
+// Collections declare by presence. Each collections/<drawer>/
 // subdirectory is one collection, each record is one JSON file, and the
 // filename minus .json is the record's id — so a record name's definition
 // site is its own file, at the top, and no manifest is consulted.

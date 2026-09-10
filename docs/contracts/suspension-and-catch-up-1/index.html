@@ -1,0 +1,1444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suspension and catch-up contract — OpenGDD</title>
+<meta name="description" content="Decides what your energy refill or crop timer does while the game is closed, and what the player sees on return.">
+<link rel="canonical" href="https://opengdd.org/contracts/suspension-and-catch-up-1/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Suspension and catch-up contract — OpenGDD">
+<meta property="og:description" content="Decides what your energy refill or crop timer does while the game is closed, and what the player sees on return.">
+<meta property="og:url" content="https://opengdd.org/contracts/suspension-and-catch-up-1/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Suspension and catch-up contract — OpenGDD">
+<meta name="twitter:description" content="Decides what your energy refill or crop timer does while the game is closed, and what the player sees on return.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=ff285f28dd16">
+<script type="module" src="/assets/contracts.mjs?v=ff285f28dd16"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout contract-catalogue contract-entry-page" data-contract-root data-core-id="suspension-and-catch-up">
+<nav class="doc-toc contract-nav" aria-label="Contracts">
+<details class="contract-nav-disclosure">
+  <summary>Contracts</summary>
+  <div class="contract-nav-content">
+    <p class="toc-title">Contracts</p>
+    <ul class="contract-nav-home"><li><a href="/contracts/">Overview</a></li><li><a href="/contracts/catalogue/">Contract catalogue</a></li></ul>
+<div class="toc-group contract-page-nav">
+  <p class="toc-group-title">On this page</p>
+  <ul><li><a href="#use-this">Use in your game</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#rows">Lists</a></li>
+<li><a href="#for-builders">For builders</a></li></ul>
+</div>
+  </div>
+</details>
+</nav>
+<article class="doc-body contract-entry-body">
+<p class="label"><a href="/contracts/catalogue/#determinism-replay">Determinism &amp; replay</a></p>
+<div class="contract-entry-title-row">
+  <div><h1>Suspension and catch-up</h1><p class="contract-core-name"><code>suspension-and-catch-up-1</code></p></div>
+  <div><span class="contract-badge ">Tests included</span></div>
+</div>
+<p class="contract-entry-hook">This contract defines the behaviour of progress while the game is closed: an energy refill, a crop timer, or a daily reward.</p>
+<p class="contract-entry-summary">It decides what your energy refill or crop timer does while the game is closed, and what the player sees on return.</p>
+<ul class="contract-facts">
+  <li><a href="#questions">6 questions</a></li>
+  <li>no numbers</li>
+  <li><a href="#rows">8 lists</a></li>
+  <li><a href="#for-builders">80 tests</a></li>
+</ul>
+<aside class="contract-relief contract-adoption-start" id="adoptions" aria-labelledby="adoptions-title">
+  <p class="contract-relief-title" id="adoptions-title">Start from an adoption</p>
+  <p>An adoption is this contract with the answers already filled in for one kind of game. Open the one closest to yours, change what does not fit, and skip the questions below.</p>
+  <p class="contract-adoption-links"><a class="contract-adoption-chip" href="/contracts/suspension-and-catch-up-1/daily-reward/">Daily reward</a><a class="contract-adoption-chip" href="/contracts/suspension-and-catch-up-1/energy-refill-while-away/">Energy refill while away</a><a class="contract-adoption-chip" href="/contracts/suspension-and-catch-up-1/lives-refill-while-away/">Lives refill while away</a><a class="contract-adoption-chip" href="/contracts/suspension-and-catch-up-1/pumpkin-growth-window/">Pumpkin growth window</a><a class="contract-adoption-chip" href="/contracts/suspension-and-catch-up-1/puzzle-position/">Puzzle position</a></p>
+</aside>
+<section class="contract-handoff" aria-labelledby="use-this">
+  <h2 id="use-this">Use in your game</h2>
+  <p>Opens the authoring tool with this contract added and its questions unanswered. Or download the ZIP and add it later.</p>
+  <div class="contract-actions">
+    <a class="cta" href="/authoring-tool/?contract=suspension-and-catch-up-1">Open in the authoring tool</a>
+    <a class="cta-quiet" href="/contracts/suspension-and-catch-up-1/suspension-and-catch-up-1.zip" download="suspension-and-catch-up-1.zip">Download ZIP</a>
+  </div>
+  <details><summary>What is in the ZIP</summary><p>The ZIP holds the contract and its acceptance tests. In the authoring tool, choose <strong>Add contract</strong> and pick this ZIP. If you keep your design as files, put them in <code>contracts/</code> and fill in the answers there.</p><div class="contract-actions"><a href="/contracts/suspension-and-catch-up-1/core.json" download="suspension-and-catch-up-1.core.json">Download contract JSON</a> · <a href="/contracts/suspension-and-catch-up-1/suspension-and-catch-up-1.pack.json" download="suspension-and-catch-up-1.pack.json">Download tests</a><button type="button" class="cta-quiet" data-copy-core data-core-url="/contracts/suspension-and-catch-up-1/core.json" data-copy-kind="contract">Copy contract</button><span role="status" aria-live="polite" data-copy-status></span></div></details>
+</section>
+<section class="contract-decision-overview">
+  <h2 id="questions">Questions</h2>
+<p>Up to 6 questions. Some appear only after earlier answers.</p>
+<ol class="contract-decision-list"><li><a href="#question-while-in-the-background">What happens while the game stays open in the background?</a></li>
+<li><a href="#question-return-display">What appears before ordinary play resumes?</a></li>
+<li><a href="#question-clock-source">Can the player change the clock that measures time away?</a></li>
+<li><a href="#question-backward-clock-anchor">If the player moves the device clock backward, which state does the game keep?</a></li>
+<li><a href="#question-backward-clock-notice">Does the game explain the backward clock result?</a></li>
+<li><a href="#question-crossed-calendar-boundaries">Several calendar boundaries passed while the game was away. Which ones count on return?</a></li></ol>
+</section>
+<section class="contract-form-section" id="try-answers">
+  <h2>Try the answers</h2>
+  <p class="contract-choice-note">Pick answers to see which rules and tests apply. Nothing is saved here: the ZIP and the authoring tool start unanswered.</p>
+  <div class="contract-actions contract-question-tools">
+    <button type="button" class="cta-quiet contract-reset" data-reset-choices>Clear choices</button>
+    <label class="contract-switch"><input type="checkbox" data-builder-wording> Show exact wording for builders</label>
+  </div>
+  <div class="contract-question-list">
+  <article class="contract-question" id="question-while-in-the-background" data-contract-question data-flag="while-in-the-background" data-when="null">
+  <h3>What happens while the game stays open in the background?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for What happens while the game stays open in the background?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-while-in-the-background" value="counts-as-away" data-contract-choice><span class="contract-option-label">Counts as away</span></label></th>
+  <td><span class="contract-option-meaning">Background time uses the same suspension rules as closed time. Ten minutes in another tab refills energy like ten minutes with the game closed.</span><p class="contract-option-semantics">The lifecycle treats the background interval as a suspension interval. Ordinary updates do not also apply that interval.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-while-in-the-background" value="keeps-playing" data-contract-choice><span class="contract-option-label">Keeps playing</span></label></th>
+  <td><span class="contract-option-meaning">Ordinary play continues in the background. A browser farm keeps growing crops while the player uses another tab.</span><p class="contract-option-semantics">The ordinary update path continues, including platform throttling. Foregrounding adds no catch-up for the same interval.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-while-in-the-background" value="waits-until-closed" data-contract-choice><span class="contract-option-label">Waits until closed</span></label></th>
+  <td><span class="contract-option-meaning">The open game stays still, and away progress starts only after closing. A crop timer pauses in the app switcher but advances after the app closes.</span><p class="contract-option-semantics">The open-background interval receives neither ordinary updates nor catch-up.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>An open game may use away handling, keep playing, or stay still until it closes. The same time must never count twice.</p></details>
+</article>
+<article class="contract-question" id="question-return-display" data-contract-question data-flag="return-display" data-when="null">
+  <h3>What appears before ordinary play resumes?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for What appears before ordinary play resumes?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-return-display" value="state-only" data-contract-choice><span class="contract-option-label">State only</span></label></th>
+  <td><span class="contract-option-meaning">No separate return surface appears. A match-3 game simply shows that three lives are ready.</span><p class="contract-option-semantics">The lifecycle adds no player-facing return surface. Existing game displays may show the settled state after ordinary play resumes. Developer or diagnostic instrumentation that is not player-facing is out of scope.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-return-display" value="visible-before-resume" data-contract-choice><span class="contract-option-label">Visible before resume</span></label></th>
+  <td><span class="contract-option-meaning">Existing displays show the change before play resumes. A life counter ticks from two lives to five on the map screen.</span><p class="contract-option-semantics">At least one existing player-facing display presents the affected state during return settlement.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-return-display" value="return-summary" data-contract-choice><span class="contract-option-label">Return summary</span></label></th>
+  <td><span class="contract-option-meaning">A return surface names each result. An idle game shows energy gained and coins waiting for collection.</span><p class="contract-option-semantics">A player-facing return surface identifies each affected row and its settled result.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-return-display" value="detailed-return-summary" data-contract-choice><span class="contract-option-label">Detailed return summary</span></label></th>
+  <td><span class="contract-option-meaning">A return surface also explains the calculation. A factory screen shows six hours away, its energy ceiling, and the final gain.</span><p class="contract-option-semantics">The return surface reports elapsed time, applicable limits, amount rules, fidelity, and settled results.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Changed state may speak for itself, animate before play, or appear in a return summary.</p></details>
+</article>
+<article class="contract-question" id="question-clock-source" data-contract-question data-flag="clock-source" data-when="{&quot;row-count&quot;:{&quot;clock&quot;:&quot;non-empty&quot;}}">
+  <h3>Can the player change the clock that measures time away?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the clock list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>No clock row exists, so this adoption measures no elapsed suspension time.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Can the player change the clock that measures time away?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-clock-source" value="device-clock" data-contract-choice><span class="contract-option-label">Device clock</span></label></th>
+  <td><span class="contract-option-meaning">The game reads a clock from the device. Moving a phone clock forward by two hours gives an idle mine two more measured hours.</span><p class="contract-option-semantics">The elapsed interval comes from a clock the player can change through device settings. Both backward-clock questions are asked.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-clock-source" value="protected-clock" data-contract-choice><span class="contract-option-label">Protected clock</span></label></th>
+  <td><span class="contract-option-meaning">The game reads a clock outside device settings. Changing a phone clock does not refill a match-3 life sooner.</span><p class="contract-option-semantics">The elapsed interval comes from a clock the player cannot change through device settings. The backward-clock questions are not asked.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>The player can move a device clock through settings. A protected clock stays outside those settings, though the service behind it can correct it.</p></details>
+</article>
+<article class="contract-question" id="question-backward-clock-anchor" data-contract-question data-flag="backward-clock-anchor" data-when="{&quot;flag&quot;:{&quot;clock-source&quot;:[&quot;device-clock&quot;]}}">
+  <h3>If the player moves the device clock backward, which state does the game keep?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>Clock source is Device clock.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>No device clock is read, either because no clock row exists or because the clock is protected, so no rollback anchor is selected. A protected-clock resync may still move its reading backward; the lifecycle then keeps the loaded state.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for If the player moves the device clock backward, which state does the game keep?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-backward-clock-anchor" value="suspension-snapshot" data-contract-choice><span class="contract-option-label">Suspension snapshot</span></label></th>
+  <td><span class="contract-option-meaning">The game returns to the state captured when suspension began. An idle mine returns to the ore count recorded when the app closed.</span><p class="contract-option-semantics">Every in-scope local item is restored from the suspension snapshot. Elapsed time for this interval is zero.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-backward-clock-anchor" value="last-trusted-checkpoint" data-contract-choice><span class="contract-option-label">Last trusted checkpoint</span></label></th>
+  <td><span class="contract-option-meaning">The game returns to the latest state accepted by a trusted rule. An online workshop returns to its last server-confirmed stock count.</span><p class="contract-option-semantics">The one rollback rule supplies a trusted state and matching clock reading. The current suspension interval contributes zero elapsed time.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-backward-clock-anchor" value="keep-return-state" data-contract-choice><span class="contract-option-label">Keep return state</span></label></th>
+  <td><span class="contract-option-meaning">The game keeps the state loaded at return but adds no away change. A newer cloud save from another device keeps its crops.</span><p class="contract-option-semantics">No state is restored by this contract. The loaded return state remains, and elapsed time for this interval is zero. That state may be newer than the suspension snapshot because of a cloud save, a second device, or a mid-session autosave.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Zero elapsed time does not say which saved state survives a backward clock. The anchor prevents duplicate or reversed gains.</p></details>
+</article>
+<article class="contract-question" id="question-backward-clock-notice" data-contract-question data-flag="backward-clock-notice" data-when="{&quot;flag&quot;:{&quot;clock-source&quot;:[&quot;device-clock&quot;]}}">
+  <h3>Does the game explain the backward clock result?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>Clock source is Device clock.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>No device clock is read, either because no clock row exists or because the clock is protected, so no player-caused clock-change notice is selected. A protected-clock resync may still produce zero elapsed time.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Does the game explain the backward clock result?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-backward-clock-notice" value="silent" data-contract-choice><span class="contract-option-label">Silent</span></label></th>
+  <td><span class="contract-option-meaning">The game adds no clock-change notice. A life refill stays unchanged without a pop-up.</span><p class="contract-option-semantics">The lifecycle adds no player-facing explanation for the backward-clock branch.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-backward-clock-notice" value="explain" data-contract-choice><span class="contract-option-label">Explain</span></label></th>
+  <td><span class="contract-option-meaning">The game explains that the clock change blocked away time. An idle game shows a short clock-change message beside unchanged energy.</span><p class="contract-option-semantics">The lifecycle presents a player-facing clock-change explanation after the anchor is applied and before ordinary play resumes.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>The same backward-clock outcome can be silent or visible to the player.</p></details>
+</article>
+<article class="contract-question" id="question-crossed-calendar-boundaries" data-contract-question data-flag="crossed-calendar-boundaries" data-when="{&quot;row-count&quot;:{&quot;calendar-boundaries&quot;:&quot;non-empty&quot;}}">
+  <h3>Several calendar boundaries passed while the game was away. Which ones count on return?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the calendar boundaries list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>No calendar boundary is tracked, so return settlement creates no calendar crossing.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Several calendar boundaries passed while the game was away. Which ones count on return?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-crossed-calendar-boundaries" value="every-crossing-in-order" data-contract-choice><span class="contract-option-label">Every crossing in order</span></label></th>
+  <td><span class="contract-option-meaning">Every crossed boundary settles in time order. A farm processes Friday, Saturday, and Sunday crop resets separately.</span><p class="contract-option-semantics">The lifecycle inserts every crossed boundary into the return timeline in ascending time order.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-crossed-calendar-boundaries" value="latest-crossing-only" data-contract-choice><span class="contract-option-label">Latest crossing only</span></label></th>
+  <td><span class="contract-option-meaning">Only the latest crossed boundary settles. A daily reward calendar opens on today&#39;s entry without granting missed days.</span><p class="contract-option-semantics">The lifecycle inserts only the latest crossed boundary for each calendar row and omits earlier crossings.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="suspension-and-catch-up-crossed-calendar-boundaries" value="one-combined-crossing" data-contract-choice><span class="contract-option-label">One combined crossing</span></label></th>
+  <td><span class="contract-option-meaning">All crossings become one return event. A weekly shop refreshes once and receives the number of missed weeks.</span><p class="contract-option-semantics">The lifecycle inserts one return-time event per calendar row, carrying that row&#39;s number and span of crossed boundaries.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>A daily or weekly rule may run for every crossing, only the latest one, or one combined return event.</p></details>
+</article>
+  </div>
+</section>
+<aside class="contract-relief" aria-labelledby="relief-title">
+  <p class="contract-relief-title" id="relief-title">That was the hard part.</p>
+  <p>The questions are the decisions. Everything below follows from them: the numbers and lists an adoption fills in, and the exact wording and tests for builders. The authoring tool handles the filling in. Read on only if you want to check.</p>
+</aside>
+
+<details class="contract-form-section contract-fold" id="rows">
+  <summary><span class="contract-fold-title">Lists</span><span class="contract-fold-note">8 lists</span></summary>
+  <p>Some settings are lists of rows.</p><p class="contract-citation-help">A reference points to a number or a rule in your design. For a number, use its address in your tuning. For a rule, use its file and heading, such as <code>02-mechanics.md#recovery</code>. Each field's description says what it needs.</p><article class="contract-collection">
+<h3>Clock</h3>
+<p class="contract-exact-name"><code>clock</code></p>
+<p>The elapsed-time rule for this behaviour family. At most one row is valid.</p>
+<p class="contract-condition contract-when-empty">An empty list means: No elapsed suspension time is measured by this adoption.</p>
+<p class="contract-row-shape">Each row is: <code>id</code>, <code>clock-declared-in</code>.</p>
+<details class="contract-fields-detail"><summary>Every field</summary>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Field</th><th>Kind</th><th>When it appears</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr data-contract-dependent data-when="null">
+  <td><code>id</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>A stable name for the elapsed clock, such as away-clock.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>clock-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The game rule naming the reading, its unit, and when it is sampled.</td>
+</tr>
+</tbody></table></div>
+</details>
+</article>
+<article class="contract-collection">
+<h3>Fixed items</h3>
+<p class="contract-exact-name"><code>fixed-items</code></p>
+<p>State that remains at its suspension anchor until ordinary play resumes.</p>
+<p class="contract-condition contract-when-empty">An empty list means: No covered state is fixed by suspension.</p>
+<p class="contract-row-shape">Each row is: <code>id</code>, <code>state-declared-in</code>.</p>
+<details class="contract-fields-detail"><summary>Every field</summary>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Field</th><th>Kind</th><th>When it appears</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr data-contract-dependent data-when="null">
+  <td><code>id</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>The state item in game language, such as round-score or player-position.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>state-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The game rule that identifies the complete state held fixed.</td>
+</tr>
+</tbody></table></div>
+</details>
+</article>
+<article class="contract-collection">
+<h3>Catch up items</h3>
+<p class="contract-exact-name"><code>catch-up-items</code></p>
+<p>State calculated from elapsed time when the suspension interval returns.</p>
+<p class="contract-condition contract-when-empty">An empty list means: No covered state is calculated from missed time on return.</p>
+<p class="contract-row-shape">Each row is: <code>id</code>, <code>state-declared-in</code>, <code>away-amount</code>, <code>amount-rule-declared-in</code>, <code>catch-up-fidelity</code>, <code>fidelity-rule-declared-in</code>, <code>away-limit</code>, <code>limit-rule-declared-in</code>.</p>
+<details class="contract-fields-detail"><summary>Every field</summary>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Field</th><th>Kind</th><th>When it appears</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr data-contract-dependent data-when="null">
+  <td><code>id</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>The state item in game language, such as energy, crops, or lives.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>state-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The game rule identifying the state, its ordinary changes, and its unit.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>away-amount</code></td>
+  <td>choice: same-as-playing, reduced, away-rule</td>
+  <td>Required</td>
+  <td>The amount earned from equal elapsed time: the ordinary amount, a lower amount, or an amount from a separate away rule. An energy refill may keep its normal one point per minute.</td>
+</tr>
+<tr data-contract-dependent data-when="{&quot;row&quot;:{&quot;away-amount&quot;:[&quot;reduced&quot;,&quot;away-rule&quot;]}}">
+  <td><code>amount-rule-declared-in</code></td>
+  <td>reference</td>
+  <td>Present when row away amount is Reduced or Away rule.</td>
+  <td>The rule for the lower or separate away amount. It states the complete amount calculation and its unit. Only the cited rule binds this row; uncited game prose does not.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>catch-up-fidelity</code></td>
+  <td>choice: every-missed-update, larger-steps, one-derived-change</td>
+  <td>Required</td>
+  <td>How missed play changes this state between calendar events: every missed update, larger catch-up steps, or one derived change. A crop may replay every growth tick while a life refill may derive one total.</td>
+</tr>
+<tr data-contract-dependent data-when="{&quot;row&quot;:{&quot;catch-up-fidelity&quot;:[&quot;larger-steps&quot;,&quot;one-derived-change&quot;]}}">
+  <td><code>fidelity-rule-declared-in</code></td>
+  <td>reference</td>
+  <td>Present when row catch up fidelity is Larger steps or One derived change.</td>
+  <td>The rule naming step size and order, or the rule deriving the single return change. It distributes the promised amount and does not change it. Only the cited rule binds this row; uncited game prose does not.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>away-limit</code></td>
+  <td>choice: whole-interval, time-limit, less-after-a-point, state-ceiling</td>
+  <td>Required</td>
+  <td>How much time or gain is allowed away: all time, a hard time stop, a lower amount past a point, or a state ceiling. A normal full-energy maximum is a valid state ceiling. A maximum that limits away gain is declared here as a state ceiling, not left under whole-interval.</td>
+</tr>
+<tr data-contract-dependent data-when="{&quot;row&quot;:{&quot;away-limit&quot;:[&quot;time-limit&quot;,&quot;less-after-a-point&quot;,&quot;state-ceiling&quot;]}}">
+  <td><code>limit-rule-declared-in</code></td>
+  <td>reference</td>
+  <td>Present when row away limit is Time limit or Less after a point or State ceiling.</td>
+  <td>The time point, later amount rule, or state ceiling. A state ceiling may be the same maximum that applies during ordinary play. Only the cited rule binds this row; uncited game prose does not.</td>
+</tr>
+</tbody></table></div>
+</details>
+</article>
+<article class="contract-collection">
+<h3>Continuous items</h3>
+<p class="contract-exact-name"><code>continuous-items</code></p>
+<p>State that continued under another authority while the local game was suspended.</p>
+<p class="contract-condition contract-when-empty">An empty list means: No covered state continued elsewhere during suspension.</p>
+<p class="contract-row-shape">Each row is: <code>id</code>, <code>state-declared-in</code>.</p>
+<details class="contract-fields-detail"><summary>Every field</summary>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Field</th><th>Kind</th><th>When it appears</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr data-contract-dependent data-when="null">
+  <td><code>id</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>The state item in game language, such as skill-training or life-service.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>state-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The external or protected rule that continued the state and supplies its return reading.</td>
+</tr>
+</tbody></table></div>
+</details>
+</article>
+<article class="contract-collection">
+<h3>Choice items</h3>
+<p class="contract-exact-name"><code>choice-items</code></p>
+<p>State whose away behaviour is selected by a setting, platform, unlock, or other game rule.</p>
+<p class="contract-condition contract-when-empty">An empty list means: No covered state selects between away behaviours at runtime.</p>
+<p class="contract-row-shape">Each row is: <code>id</code>, <code>choice-declared-in</code>.</p>
+<details class="contract-fields-detail"><summary>Every field</summary>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Field</th><th>Kind</th><th>When it appears</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr data-contract-dependent data-when="null">
+  <td><code>id</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>The state item in game language, such as harvest-mode.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>choice-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The game rule naming both possible behaviours, their complete data, the condition selecting one, and the time at which the selection is made.</td>
+</tr>
+</tbody></table></div>
+</details>
+</article>
+<article class="contract-collection">
+<h3>Return rewards</h3>
+<p class="contract-exact-name"><code>return-rewards</code></p>
+<p>Rewards created by catch-up or a crossed calendar boundary, then delivered or left for the player to claim.</p>
+<p class="contract-condition contract-when-empty">An empty list means: Return settlement creates no separately delivered reward.</p>
+<p class="contract-row-shape">Each row is: <code>id</code>, <code>reward-declared-in</code>, <code>destination-declared-in</code>, <code>delivery</code>, <code>claim-declared-in</code>, <code>expires-declared-in</code>.</p>
+<details class="contract-fields-detail"><summary>Every field</summary>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Field</th><th>Kind</th><th>When it appears</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr data-contract-dependent data-when="null">
+  <td><code>id</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>The reward in game language, such as offline-coins or daily-gift.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>reward-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The game rule deriving the reward and identifying its source settlement.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>destination-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The destination rule that accepts the complete reward or leaves it pending.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>delivery</code></td>
+  <td>choice: automatic, player-claims</td>
+  <td>Required</td>
+  <td>Whether this reward enters its destination automatically or waits on a return surface for the player to claim it. A player-claims reward requires a return-display answer that supplies a return surface: return-summary or detailed-return-summary.</td>
+</tr>
+<tr data-contract-dependent data-when="{&quot;row&quot;:{&quot;delivery&quot;:[&quot;player-claims&quot;]}}">
+  <td><code>claim-declared-in</code></td>
+  <td>reference</td>
+  <td>Present when row delivery is Player claims.</td>
+  <td>The player event that claims this pending reward from the return surface.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>expires-declared-in</code></td>
+  <td>reference</td>
+  <td>Optional</td>
+  <td>The optional rule naming when an unclaimed reward expires and is removed. Omission means an unclaimed reward never expires.</td>
+</tr>
+</tbody></table></div>
+</details>
+</article>
+<article class="contract-collection">
+<h3>Calendar boundaries</h3>
+<p class="contract-exact-name"><code>calendar-boundaries</code></p>
+<p>Daily, weekly, seasonal, or other calendar boundaries that may pass during suspension.</p>
+<p class="contract-condition contract-when-empty">An empty list means: Return settlement creates no calendar crossing.</p>
+<p class="contract-row-shape">Each row is: <code>id</code>, <code>boundary-declared-in</code>, <code>settlement-declared-in</code>.</p>
+<details class="contract-fields-detail"><summary>Every field</summary>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Field</th><th>Kind</th><th>When it appears</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr data-contract-dependent data-when="null">
+  <td><code>id</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>The boundary in game language, such as daily-reset or new-week.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>boundary-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The rule naming the calendar, time zone, boundary test, exact crossing time, and what happens when local civil time skips or repeats a boundary.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>settlement-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The game rule that receives each selected crossing and states its immediate effects.</td>
+</tr>
+</tbody></table></div>
+</details>
+</article>
+<article class="contract-collection">
+<h3>Rollback rules</h3>
+<p class="contract-exact-name"><code>rollback-rules</code></p>
+<p>The trusted checkpoint rule used by the backward-clock checkpoint answer. Exactly one row under last-trusted-checkpoint; no row under any other anchor, a protected clock, or no clock.</p>
+<p class="contract-condition contract-when-empty">An empty list means: No trusted checkpoint is used as a backward-clock anchor.</p>
+<p class="contract-row-shape">Each row is: <code>id</code>, <code>trusted-state-declared-in</code>.</p>
+<details class="contract-fields-detail"><summary>Every field</summary>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Field</th><th>Kind</th><th>When it appears</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr data-contract-dependent data-when="null">
+  <td><code>id</code></td>
+  <td>string</td>
+  <td>Required</td>
+  <td>A stable name for the trusted checkpoint rule.</td>
+</tr>
+<tr data-contract-dependent data-when="null">
+  <td><code>trusted-state-declared-in</code></td>
+  <td>reference</td>
+  <td>Required</td>
+  <td>The rule that supplies one coherent state snapshot and its matching trusted clock reading.</td>
+</tr>
+</tbody></table></div>
+</details>
+</article>
+</details>
+<section class="contract-form-section" id="for-builders">
+  <h2>For builders</h2>
+  <details class="contract-builder-details">
+    <summary>Exact mechanism wording and 80 pack tests</summary>
+    <div class="contract-builder-block">
+      <h3>Exact mechanism wording</h3>
+      <div class="contract-mechanism"><p>This is the one normative authority for suspension state, elapsed time, catch-up, calendar crossings, return rewards, and report order. Questions and rows supply choices and game rules to this lifecycle; they do not define a second sequence.</p>
+<p>A <strong>suspension interval</strong> begins at game closure, or at the earlier open-background transition selected by <code>counts-as-away</code>, and ends at return processing, at the return clock reading when a clock row exists. A <strong>suspension snapshot</strong> contains every in-scope local item and the starting clock reading. A <strong>return timeline</strong> is the ordered elapsed span, split at the calendar crossings selected by the calendar answer. A <strong>pending reward</strong> has been created but not accepted by its destination.</p>
+<p>An unclaimed reward with an expiry rule is removed at its cited deadline. The lifecycle checks that deadline at return and immediately before a claim.</p>
+<p>### Suspend</p>
+<p>1. <strong>Closing the game always begins a suspension interval.</strong> Route an earlier open-background transition through <code>while-in-the-background</code>. <code>counts-as-away</code> begins the interval at that transition. <code>keeps-playing</code> continues ordinary play and creates no return catch-up for background time. <code>waits-until-closed</code> holds state unchanged until closure begins the interval. 2. When an interval begins, capture one coherent suspension snapshot before any covered state can change. If a clock row exists, read its starting value in the same batch; the interval&#39;s starting value is the higher of that reading and the committed anchor from the previous return, so time below the anchor is never replayed. A protected authority may keep changing a <code>continuous-items</code> row after the snapshot. 3. Hold every fixed and catch-up item at its snapshot state. A choice row resolves its cited selection at the time named by that rule. A selected continuous branch stays under its cited authority; other selected branches follow their matching lifecycle paths.</p>
+<p>### While away</p>
+<p>4. Local catch-up items do not advance visibly while ordinary updates are stopped. The interval records clock reach only; settlement waits for return. 5. Continuous items keep changing under their cited authority. This lifecycle neither predicts those changes nor duplicates them locally. 6. Calendar crossings are discovered from the cited calendar and clock. They are not settled yet. Return processing selects and orders them.</p>
+<p>### Return</p>
+<p>7. If a clock row exists, read the return clock once. A non-negative interval uses the suspension snapshot and the elapsed difference. Any negative protected-clock interval counts as zero elapsed with the loaded state retained, because a service resync can move even a protected clock back; skip steps 9–11 and continue at step 12. That skipped interval creates no return reward. Without a clock row, local catch-up and calendar crossings are absent; continue with the unchanged fixed state at step 12. 8. If a device clock reads earlier, apply <code>backward-clock-anchor</code> before any catch-up. Restore the suspension snapshot, restore the cited trusted checkpoint, or keep the loaded return state. The current interval then has zero elapsed time. A skipped interval creates no return reward. Apply the selected clock notice, skip steps 9–11, and continue at step 12. 9. Build one calendar return timeline and one pass timeline for each catch-up row. A calendar row admits the full non-negative measured interval because it declares no away limit. For a catch-up row, this lifecycle derives the admitted span from the row&#39;s declared limit for crossing selection only; that derivation is not the limit application step 10 assigns, and a state-dependent ceiling discovers its endpoint during the chronological pass. Crossings inside that admitted span settle against the row, and crossings beyond it do not. A state-dependent ceiling discovers its endpoint during the chronological pass, so no later crossing enters that row&#39;s pass. A catch-up row&#39;s limit does not cancel an independent calendar event: the row shape declares no such link, and the event settles once on the calendar timeline. <code>every-crossing-in-order</code> keeps all remaining crossings in ascending time order. <code>latest-crossing-only</code> keeps the last remaining crossing for each calendar row. <code>one-combined-crossing</code> creates one return-time event per calendar row with its count and span. Row order breaks a tie between equal timestamps before <strong>Event resolution</strong> receives them. 10. Compute each catch-up row&#39;s segments as step 11 hands them over, keeping amount separate from fidelity; step 11 owns the ordering. <code>same-as-playing</code> defines the ordinary amount for equal elapsed time; <code>reduced</code> and <code>away-rule</code> use only their cited amount rule. Under <code>every-missed-update</code>, this lifecycle applies the away limit as a per-segment clip and then feeds only the remaining missed updates to the game rules. Under <code>larger-steps</code>, the cited fidelity rule receives the amount and limit, owns both the larger-step distribution and the limit, and returns the ordered changes. Under <code>one-derived-change</code>, the cited fidelity rule receives the amount and limit, owns the limit, and returns one change. The lifecycle does not re-apply a limit owned by a cited fidelity rule. When <code>away-rule</code> and <code>one-derived-change</code> compose, the amount rule defines the total and the fidelity rule distributes it. 11. Settle each selected calendar event once through <code>settlement-declared-in</code>. For every catch-up row containing that crossing, settle the preceding segment first, then the event&#39;s immediate effect, then the following segment. The row&#39;s clip already excluded later crossings, so this order cannot re-admit time or events beyond its limit. Reports keep the same segment-then-event-then-segment order. 12. Check every existing pending reward&#39;s cited deadline at return. An expired unclaimed reward is removed at that deadline. A pending reward is in-scope local state and survives this and later suspensions until the player claims it or its cited deadline expires. 13. Read every continuous item once. Apply each selected choice branch once. Create each return reward from its cited source settlement; a reward row with no settled source produces nothing. A skipped interval therefore creates no return reward. Check a new reward&#39;s cited deadline at return. Offer an <code>automatic</code> reward to its destination in reward-row order. A <code>player-claims</code> reward remains pending until its cited claim event. Destination refusal keeps the same pending reward, and a refused <code>automatic</code> reward is offered again at each later return until its destination accepts it or its cited deadline removes it. 14. Present <code>return-display</code> after settled state and pending rewards are known. A clock explanation precedes the general return surface. Existing displays used by <code>visible-before-resume</code> update before ordinary play. A claim event checks the cited deadline before offering its reward. An expired unclaimed reward is removed; each accepted reward is reported once. 15. Commit the final local state and the next suspension anchor together. On every return the committed anchor is never lower than the previous one. After any backward-clock return, commit the highest of the suspension reading, the return reading, and any trusted-checkpoint reading as the next suspension anchor, retaining the trusted state under that anchor, so repeated clock rollback cannot replay time below the prior anchor. Resume ordinary updates only after all automatic return changes and every required pre-resume display have settled. A later player claim is a new event and never repeats catch-up.</p>
+<p>Every catch-up report carries the interval start and end readings, elapsed time admitted, row id, amount branch, fidelity branch, limit reached, before state, after state, and calendar crossing that split the segment when present. A backward-clock report also carries the selected anchor when one was selected, and whether a notice appeared when the notice question applies. A return-reward report carries its source, destination, delivery, pending, accepted, or expired status, deadline when present, and claim event when present.</p></div>
+    </div>
+    <section class="contract-builder-block">
+  <h3>Verification pack</h3>
+  <p><code>sha256:d1ec8edb7c86cda9f923cacba4a1d4a0c6c4af5ee4302842865d39636cd8a81d</code></p>
+
+  <p>The format calls an adoption with its matching pack <strong>Checked</strong>: the tests travel with it, but a game has not necessarily passed them. Without the pack the adoption is <strong>Promised</strong>: the builder still owes the chosen behavior.</p>
+  <h3>80 pack tests</h3>
+  <p>Placeholders are filled from the adoption's answers, values, rows, and verification inputs.</p>
+<div class="contract-test-list"><details class="contract-test" data-contract-test data-when="null" data-dependencies="[&quot;while-in-the-background&quot;]">
+  <summary>a suspension interval has one beginning and one return</summary>
+  <p class="contract-exact-name"><code>suspension-interval-boundaries</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">A suspension interval begins once, <code class="contract-placeholder">Bind interval start</code>, and ends once at return processing, at the return clock reading where a clock row exists. The interval contains no time outside those boundaries.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a covered close-and-return cycle after the selected background handling</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the lifecycle records the interval boundaries</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the suspension interval begins once, <code class="contract-placeholder">Bind interval start</code>, and ends once at return processing, at the return clock reading where a clock row exists</li><li>no time before its beginning or after its end enters that interval</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-suspension-interval</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>the suspension snapshot is one coherent starting state</summary>
+  <p class="contract-exact-name"><code>suspension-snapshot-vocabulary</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">The suspension snapshot is one coherent starting state for every in-scope local item. Where this adoption has a clock row, the starting reading is captured in the same batch; without one, that clause asserts nothing.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>distinguishable values for every in-scope local item when a suspension interval begins</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the suspension snapshot is captured</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the snapshot contains the same-instant starting value of every in-scope local item</li><li>where a clock row exists, its starting reading belongs to the same snapshot batch; without a clock row, the reading clause asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-suspension-snapshot</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> stays pending until acceptance or expiry</summary>
+  <p class="contract-exact-name"><code>pending-reward-vocabulary-and-expiry</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">A created <code class="contract-placeholder">Row.id</code> reward is pending until its destination accepts it. Without an expiry rule, an unclaimed reward never expires.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a created <code class="contract-placeholder">Row.id</code> reward that its destination has not accepted</p></dd></div>
+<div><dt>When</dt><dd><ul><li><code class="contract-placeholder">Bind returns</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the reward is pending while it has been created but not accepted</li><li>without an expiry rule, an unclaimed reward never expires</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-reward-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> is removed when its cited deadline expires</summary>
+  <p class="contract-exact-name"><code>expiry-deadline-enforced</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">An unclaimed <code class="contract-placeholder">Row.id</code> reward is removed at the deadline named at <code class="contract-placeholder">Bind expiry address</code>, checked at return and immediately before its claim event. The expired reward is reported once as expired, and a claim after the deadline delivers nothing.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>an unclaimed <code class="contract-placeholder">Row.id</code> reward before, at, and after the deadline named at <code class="contract-placeholder">Bind expiry address</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the deadline is checked at return and immediately before its claim event</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the unclaimed reward is removed at that deadline</li><li>the expired reward is reported once as expired</li><li>a claim after the deadline delivers nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-reward-report</li><li><code class="contract-placeholder">Instance</code>-return-display-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;while-in-the-background&quot;:[&quot;counts-as-away&quot;]}}" data-dependencies="[&quot;while-in-the-background&quot;]">
+  <summary>background time begins the suspension interval</summary>
+  <p class="contract-exact-name"><code>background-counts-as-away</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies when While in the background is Counts as away.</p>
+  <p class="contract-test-text">The background transition begins the suspension interval. Ordinary updates do not also apply that interval, so the same time is counted once.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the game open with distinguishable covered state before it enters the background</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the background transition occurs and the game later returns</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the suspension interval begins at the background transition</li><li>ordinary updates do not also apply any time in that interval</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-suspension-interval</li><li><code class="contract-placeholder">Instance</code>-return-timeline</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;while-in-the-background&quot;:[&quot;keeps-playing&quot;]}}" data-dependencies="[&quot;while-in-the-background&quot;]">
+  <summary>background time stays on the ordinary update path</summary>
+  <p class="contract-exact-name"><code>background-keeps-playing</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies when While in the background is Keeps playing.</p>
+  <p class="contract-test-text">Ordinary updates continue in the background, including platform throttling. Foregrounding adds no catch-up for that same interval.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the game open in the background with observable ordinary updates</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a background interval passes under the platform&#39;s actual update schedule and the game returns to the foreground</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>ordinary updates continue, including any platform throttling</li><li>foregrounding adds no catch-up for the same interval</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-background-update-trace</li><li><code class="contract-placeholder">Instance</code>-return-timeline</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;while-in-the-background&quot;:[&quot;waits-until-closed&quot;]}}" data-dependencies="[&quot;while-in-the-background&quot;]">
+  <summary>background state waits until closure</summary>
+  <p class="contract-exact-name"><code>background-waits-until-closed</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies when While in the background is Waits until closed.</p>
+  <p class="contract-test-text">The open-background interval receives neither ordinary updates nor catch-up. Covered state stays unchanged until closure begins the suspension interval.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the game open in the background with distinguishable covered state</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a background interval passes, the game returns to the foreground, and a later closure occurs</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the open-background interval receives neither ordinary updates nor catch-up</li><li>the covered state stays unchanged until closure begins the suspension interval</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-background-update-trace</li><li><code class="contract-placeholder">Instance</code>-suspension-snapshot</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>closure begins an interval and captures one snapshot</summary>
+  <p class="contract-exact-name"><code>closure-captures-one-snapshot</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Closing always begins a suspension interval. One coherent suspension snapshot is captured before covered local state can change, and the same time never follows two paths.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a game closure with distinguishable covered state</p></dd></div>
+<div><dt>When</dt><dd><ul><li>closure begins a suspension interval</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>one coherent suspension snapshot is captured before any covered local state can change</li><li>the same time is never applied by two lifecycle paths</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-suspension-snapshot</li><li><code class="contract-placeholder">Instance</code>-suspension-interval</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> starts at the higher available reading</summary>
+  <p class="contract-exact-name"><code>clock-starting-reading</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per clock row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> is read in the suspension snapshot batch from <code class="contract-placeholder">Row.clock declared in</code>. The interval starts at the higher of that reading and the committed anchor, so time below the anchor is never replayed.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a committed anchor and a starting reading supplied by <code class="contract-placeholder">Row.clock declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the suspension snapshot and starting reading are captured in one batch</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the interval starts from the higher of the sampled reading and the committed anchor</li><li>time below the committed anchor is never replayed</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-clock-readings</li><li><code class="contract-placeholder">Instance</code>-suspension-snapshot</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> stays at its suspension snapshot state</summary>
+  <p class="contract-exact-name"><code>fixed-item-held-at-snapshot</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per fixed-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> remains at the complete state named by <code class="contract-placeholder">Row.state declared in</code> from the suspension snapshot until ordinary play resumes.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p><code class="contract-placeholder">Row.id</code> at a distinguishable state when suspension begins</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the game is away and then completes return processing</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.id</code> remains at its suspension snapshot state until ordinary play resumes</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-suspension-snapshot</li><li><code class="contract-placeholder">Instance</code>-fixed-state-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> waits at its suspension snapshot state</summary>
+  <p class="contract-exact-name"><code>catch-up-item-held-at-snapshot</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> remains at its suspension snapshot state while away. Local catch-up does not appear before return settlement.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p><code class="contract-placeholder">Row.id</code> at a distinguishable state when suspension begins</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the suspension interval is still away</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.id</code> remains at its suspension snapshot state and shows no local catch-up advance</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-suspension-snapshot</li><li><code class="contract-placeholder">Instance</code>-catch-up-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> resolves its cited selection</summary>
+  <p class="contract-exact-name"><code>choice-item-resolves-selection</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per choice-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> resolves the selection at the time named by <code class="contract-placeholder">Row.choice declared in</code>, and the selected branch follows its matching lifecycle path. This test asserts nothing about branch data beyond what the citation is required to name.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each selection condition named at <code class="contract-placeholder">Row.choice declared in</code> in otherwise matching runs</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the cited rule reaches its named selection time</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the selected branch follows its matching lifecycle path</li><li>the test asserts nothing about the branch&#39;s data beyond what <code class="contract-placeholder">Row.choice declared in</code> is required to name</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-choice-trace</li><li><code class="contract-placeholder">Instance</code>-return-timeline</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> stays under its cited authority</summary>
+  <p class="contract-exact-name"><code>continuous-item-stays-with-authority</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per continuous-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> remains under the authority at <code class="contract-placeholder">Row.state declared in</code> after the snapshot. Its return reading comes from that authority, not from a local prediction.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p><code class="contract-placeholder">Row.id</code> with distinguishable local snapshot and authority readings</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the cited authority changes the item after suspension begins</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the return reading comes from the authority named at <code class="contract-placeholder">Row.state declared in</code> rather than a local prediction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-continuous-state-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> records reach and settles only on return</summary>
+  <p class="contract-exact-name"><code>catch-up-waits-for-return</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">While ordinary updates are stopped, <code class="contract-placeholder">Row.id</code> shows no visible local advance. The interval records reach only, and settlement waits for return.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>ordinary updates stopped with <code class="contract-placeholder">Row.id</code> at its suspension snapshot state</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the suspension interval advances and then return processing begins</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the away interval records clock reach only and shows no visible local advance</li><li><code class="contract-placeholder">Row.id</code> begins settlement only during return processing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-clock-readings</li><li><code class="contract-placeholder">Instance</code>-catch-up-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> is neither predicted nor duplicated locally</summary>
+  <p class="contract-exact-name"><code>continuous-item-is-not-predicted</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per continuous-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">The cited authority continues <code class="contract-placeholder">Row.id</code>. This lifecycle neither predicts that change nor duplicates it locally.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>an authority-side change to <code class="contract-placeholder">Row.id</code> during suspension</p></dd></div>
+<div><dt>When</dt><dd><ul><li>local processing observes the away interval and later returns</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>local processing neither predicts the authority&#39;s change nor applies a duplicate change</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-continuous-state-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> crossings are discovered before settlement</summary>
+  <p class="contract-exact-name"><code>calendar-crossings-wait-for-return</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per calendar-boundaries row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Crossings for <code class="contract-placeholder">Row.id</code> are discovered from <code class="contract-placeholder">Row.boundary declared in</code> and the clock. They do not settle until return processing selects and orders them.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a non-negative suspension interval that crosses <code class="contract-placeholder">Row.id</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the clock reaches each crossing named by <code class="contract-placeholder">Row.boundary declared in</code> and return has not begun</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the crossings are discovered from the cited calendar and clock</li><li>none settles before return processing selects and orders it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-calendar-report</li><li><code class="contract-placeholder">Instance</code>-return-timeline</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>the no-clock return path continues from fixed state</summary>
+  <p class="contract-exact-name"><code>no-clock-return-path</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Without a clock row, this adoption measures no elapsed time, performs no local catch-up, creates no calendar crossing, and continues from unchanged fixed state at step 12. Where a clock row exists, this test asserts nothing.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption document and a return from suspension</p></dd></div>
+<div><dt>When</dt><dd><ul><li>return processing checks whether a clock row exists</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>without a clock row, this adoption measures no elapsed time, performs no local catch-up, creates no calendar crossing, and continues from unchanged fixed state at step 12</li><li>where a clock row exists, this test asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-fixed-state-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>the no-calendar path creates no crossing</summary>
+  <p class="contract-exact-name"><code>no-calendar-row-creates-no-crossing</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Without a calendar-boundaries row, return settlement creates no calendar crossing. Where a row exists, this test asserts nothing.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption document and a return from suspension</p></dd></div>
+<div><dt>When</dt><dd><ul><li>return processing checks whether a calendar-boundaries row exists</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>without a calendar-boundaries row, return settlement creates no calendar crossing</li><li>where a calendar-boundaries row exists, this test asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-calendar-report</li><li><code class="contract-placeholder">Instance</code>-return-timeline</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;clock-source&quot;:[&quot;protected-clock&quot;]}}" data-dependencies="[&quot;clock-source&quot;]">
+  <summary><code class="contract-placeholder">Row.id</code> accepts forward time and skips negative time</summary>
+  <p class="contract-exact-name"><code>protected-clock-return-paths</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per clock row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Clock source is Protected clock.</p>
+  <p class="contract-test-text">A non-negative <code class="contract-placeholder">Row.id</code> interval uses the suspension snapshot and elapsed difference. A negative protected-clock interval keeps the loaded state, records zero elapsed time, skips steps 9 to 11, and creates no return reward. Device settings do not control this reading, so no rollback anchor or player-caused clock-change notice is selected.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>two returns using <code class="contract-placeholder">Row.id</code>, one with a non-negative difference and one after a protected-clock resync produces a negative difference</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the return reading is sampled once in each run</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the non-negative run uses the suspension snapshot and the elapsed difference and proceeds through steps 9 to 11</li><li>the negative run keeps the loaded state, records zero elapsed time, skips steps 9 to 11, and creates no return reward</li><li>changing device settings does not change the reading supplied by this protected clock</li><li>no rollback anchor or player-caused clock-change notice is selected; the protected-clock resync branch keeps the loaded state</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-clock-readings</li><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-reward-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;clock-source&quot;:[&quot;device-clock&quot;]}}" data-dependencies="[&quot;clock-source&quot;]">
+  <summary><code class="contract-placeholder">Row.id</code> uses the device-clock difference on an ordinary return</summary>
+  <p class="contract-exact-name"><code>device-clock-non-negative-return</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per clock row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Clock source is Device clock.</p>
+  <p class="contract-test-text">On a non-negative return, <code class="contract-placeholder">Row.id</code> uses the elapsed difference from the device clock. Moving that clock forward changes the measured interval before row limits are applied.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>two otherwise matching returns using <code class="contract-placeholder">Row.id</code>, with one device clock moved forward by a known amount and both return readings non-negative</p></dd></div>
+<div><dt>When</dt><dd><ul><li>each return reading is sampled once</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>each run uses its suspension snapshot and its device-clock elapsed difference</li><li>the moved-clock run&#39;s admitted measured interval differs by the known device-clock amount before row limits are applied</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-clock-readings</li><li><code class="contract-placeholder">Instance</code>-return-timeline</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;clock-source&quot;:[&quot;device-clock&quot;],&quot;backward-clock-anchor&quot;:[&quot;suspension-snapshot&quot;]}}" data-dependencies="[&quot;clock-source&quot;,&quot;backward-clock-anchor&quot;]">
+  <summary><code class="contract-placeholder">Row.id</code> restores the suspension snapshot after a backward reading</summary>
+  <p class="contract-exact-name"><code>device-clock-restores-suspension-snapshot</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per clock row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Clock source is Device clock and Backward clock anchor is Suspension snapshot.</p>
+  <p class="contract-test-text">A backward <code class="contract-placeholder">Row.id</code> reading restores every in-scope local item from the suspension snapshot before catch-up. The interval records zero elapsed time, skips steps 9 to 11, and creates no return reward.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a loaded return state distinguishable from the suspension snapshot and a return reading from <code class="contract-placeholder">Row.id</code> earlier than its start</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the backward-clock anchor is applied before catch-up</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>every in-scope local item is restored from the suspension snapshot</li><li>the interval records zero elapsed time, skips steps 9 to 11, and creates no return reward</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-clock-readings</li><li><code class="contract-placeholder">Instance</code>-suspension-snapshot</li><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-reward-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;clock-source&quot;:[&quot;device-clock&quot;],&quot;backward-clock-anchor&quot;:[&quot;last-trusted-checkpoint&quot;]}}" data-dependencies="[&quot;clock-source&quot;,&quot;backward-clock-anchor&quot;]">
+  <summary><code class="contract-placeholder">Row.id</code> restores the trusted checkpoint after a backward reading</summary>
+  <p class="contract-exact-name"><code>device-clock-restores-trusted-checkpoint</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per clock row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Clock source is Device clock and Backward clock anchor is Last trusted checkpoint.</p>
+  <p class="contract-test-text">A backward <code class="contract-placeholder">Row.id</code> reading restores the coherent trusted checkpoint supplied by the adoption&#39;s one rollback-rules row before catch-up. The interval records zero elapsed time, skips steps 9 to 11, and creates no return reward.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a loaded return state distinguishable from the one coherent state and matching reading supplied by the adoption&#39;s one rollback-rules row, and a <code class="contract-placeholder">Row.id</code> return reading earlier than its start</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the backward-clock anchor is applied before catch-up</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the cited trusted checkpoint state is restored</li><li>the interval records zero elapsed time, skips steps 9 to 11, and creates no return reward</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-clock-readings</li><li><code class="contract-placeholder">Instance</code>-rollback-trace</li><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-reward-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;clock-source&quot;:[&quot;device-clock&quot;],&quot;backward-clock-anchor&quot;:[&quot;keep-return-state&quot;]}}" data-dependencies="[&quot;clock-source&quot;,&quot;backward-clock-anchor&quot;]">
+  <summary><code class="contract-placeholder">Row.id</code> keeps the loaded return state after a backward reading</summary>
+  <p class="contract-exact-name"><code>device-clock-keeps-return-state</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per clock row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Clock source is Device clock and Backward clock anchor is Keep return state.</p>
+  <p class="contract-test-text">A backward <code class="contract-placeholder">Row.id</code> reading keeps the loaded return state and restores nothing through this contract. The interval records zero elapsed time, skips steps 9 to 11, and creates no return reward.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a loaded return state distinguishable from the suspension snapshot and a <code class="contract-placeholder">Row.id</code> return reading earlier than its start</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the backward-clock anchor is applied before catch-up</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>this contract restores no state and keeps the loaded return state</li><li>the interval records zero elapsed time, skips steps 9 to 11, and creates no return reward</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-clock-readings</li><li><code class="contract-placeholder">Instance</code>-return-state-trace</li><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-reward-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;backward-clock-notice&quot;:[&quot;silent&quot;]}}" data-dependencies="[&quot;backward-clock-notice&quot;]">
+  <summary>a backward device clock adds no explanation</summary>
+  <p class="contract-exact-name"><code>backward-clock-notice-silent</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Backward clock notice is Silent.</p>
+  <p class="contract-test-text">After the selected anchor is applied, the lifecycle adds no player-facing clock-change explanation.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a backward device-clock return</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the selected anchor has been applied and return processing continues</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the lifecycle adds no player-facing clock-change explanation</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-display-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;backward-clock-notice&quot;:[&quot;explain&quot;]}}" data-dependencies="[&quot;backward-clock-notice&quot;]">
+  <summary>a backward device clock is explained before the return surface</summary>
+  <p class="contract-exact-name"><code>backward-clock-notice-explain</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Backward clock notice is Explain.</p>
+  <p class="contract-test-text">After the selected anchor is applied, one player-facing clock-change explanation appears before ordinary play and before any general return surface.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a backward device-clock return</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the selected anchor has been applied and return processing continues</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>one player-facing clock-change explanation appears after the anchor and before ordinary play</li><li>the explanation precedes any general return surface</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-display-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> supplies one state and matching trusted reading</summary>
+  <p class="contract-exact-name"><code>rollback-reading-protects-next-anchor</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per rollback-rules row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> supplies one coherent snapshot and matching reading from <code class="contract-placeholder">Row.trusted state declared in</code>. After rollback, that trusted reading is offered to the anchor commit beside the suspension and return readings.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the coherent state snapshot and matching reading supplied at <code class="contract-placeholder">Row.trusted state declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>a backward-clock return restores that checkpoint and commits the next anchor</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the restored state and trusted reading remain paired</li><li>that trusted reading is the one offered to the anchor commit beside the suspension and return readings</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-rollback-trace</li><li><code class="contract-placeholder">Instance</code>-anchor-commit</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;clock-source&quot;:[&quot;device-clock&quot;]}}" data-dependencies="[&quot;clock-source&quot;]">
+  <summary>a backward return commits an anchor that cannot replay earlier time</summary>
+  <p class="contract-exact-name"><code>backward-return-anchor-is-monotonic</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Clock source is Device clock.</p>
+  <p class="contract-test-text">After a backward-clock return under any anchor, step 15 commits the highest of the suspension reading, the return reading, and any trusted-checkpoint reading. A second rollback replays no time below it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a backward-clock return under the selected anchor followed by a second rollback</p></dd></div>
+<div><dt>When</dt><dd><ul><li>return processing commits the next suspension anchor</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>after the first return the committed anchor is the highest of the suspension reading, the return reading, and any trusted-checkpoint reading</li><li>the second rollback replays no time below that committed anchor</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-clock-readings</li><li><code class="contract-placeholder">Instance</code>-anchor-commit</li><li><code class="contract-placeholder">Instance</code>-rollback-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> settles an ordinary non-negative interval</summary>
+  <p class="contract-exact-name"><code>non-negative-catch-up-settles</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">A non-negative interval settles <code class="contract-placeholder">Row.id</code> from the suspension snapshot and elapsed difference. The trace distinguishes this accepted interval from a skipped or zero-length one.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p><code class="contract-placeholder">Row.id</code> at a distinguishable suspension snapshot state and a non-negative elapsed difference</p></dd></div>
+<div><dt>When</dt><dd><ul><li>return processing builds this row&#39;s pass timeline</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.id</code> settles from the suspension snapshot and elapsed difference</li><li>the return trace distinguishes this accepted interval from a skipped or zero-length interval</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-catch-up-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;away-limit&quot;:[&quot;whole-interval&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> admits the whole measured interval</summary>
+  <p class="contract-exact-name"><code>whole-interval-limit</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row away limit is Whole interval.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> admits the full measured interval before amount and fidelity are applied; <code class="contract-placeholder">Bind limit owner</code>.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>two non-negative measured intervals for <code class="contract-placeholder">Row.id</code>, one twice the length of the other</p></dd></div>
+<div><dt>When</dt><dd><ul><li>return processing derives each admitted span</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>each full measured interval is admitted before amount and fidelity are applied</li><li><code class="contract-placeholder">Bind limit owner</code></li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-catch-up-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;away-limit&quot;:[&quot;time-limit&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> admits no time past its cited point</summary>
+  <p class="contract-exact-name"><code>time-limit</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row away limit is Time limit.</p>
+  <p class="contract-test-text">For <code class="contract-placeholder">Row.id</code>, the derived admitted span ends at <code class="contract-placeholder">Row.limit rule declared in</code> and admits no later crossing; <code class="contract-placeholder">Bind limit owner</code>. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>two returns for <code class="contract-placeholder">Row.id</code>, one ending at the point named by <code class="contract-placeholder">Row.limit rule declared in</code> and one continuing past it</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the declared limit is applied and the admitted span is derived</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the derived admitted span ends at the cited point and admits no later crossing for this row</li><li><code class="contract-placeholder">Bind limit owner</code></li><li>the test names <code class="contract-placeholder">Row.limit rule declared in</code> and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-catch-up-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;away-limit&quot;:[&quot;less-after-a-point&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> uses its later amount rule past the cited point</summary>
+  <p class="contract-exact-name"><code>less-after-a-point-limit</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row away limit is Less after a point.</p>
+  <p class="contract-test-text">Time past <code class="contract-placeholder">Row.limit rule declared in</code> remains admitted for <code class="contract-placeholder">Row.id</code>; <code class="contract-placeholder">Bind limit owner</code>. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>an interval for <code class="contract-placeholder">Row.id</code> with distinguishable gain before and after the point at <code class="contract-placeholder">Row.limit rule declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the declared limit is applied and the admitted span is derived</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>time past the point remains admitted</li><li><code class="contract-placeholder">Bind limit owner</code></li><li>the test names <code class="contract-placeholder">Row.limit rule declared in</code> and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-catch-up-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;away-limit&quot;:[&quot;state-ceiling&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> stops at its cited state ceiling</summary>
+  <p class="contract-exact-name"><code>state-ceiling-limit</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row away limit is State ceiling.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> stops at the ceiling at <code class="contract-placeholder">Row.limit rule declared in</code>; <code class="contract-placeholder">Bind limit owner</code>. Where the citation says the ordinary-play maximum applies, that is the ceiling used here. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a settlement for <code class="contract-placeholder">Row.id</code> whose amount would move the state below, to, and past the ceiling at <code class="contract-placeholder">Row.limit rule declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the declared limit is applied and the admitted span is derived</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the row reaches but never passes that ceiling</li><li><code class="contract-placeholder">Bind limit owner</code></li><li>where the citation says the same ceiling applies during ordinary play, that ordinary maximum is the one used here</li><li>the test names <code class="contract-placeholder">Row.limit rule declared in</code> and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-catch-up-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;away-amount&quot;:[&quot;same-as-playing&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> uses the ordinary amount for equal time</summary>
+  <p class="contract-exact-name"><code>same-as-playing-amount</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row away amount is Same as playing.</p>
+  <p class="contract-test-text">For equal elapsed time, <code class="contract-placeholder">Row.id</code> uses the ordinary-play amount. Fidelity and limits remain separate decisions in the report.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>matching ordinary-play and admitted-away segments for <code class="contract-placeholder">Row.id</code> with equal elapsed time and the same starting state</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the amount for each segment is computed before fidelity is applied</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>both segments define the same ordinary amount</li><li>fidelity and limits remain separate recorded decisions</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-catch-up-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;away-amount&quot;:[&quot;reduced&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> uses only its cited reduced amount rule</summary>
+  <p class="contract-exact-name"><code>reduced-amount</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row away amount is Reduced.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> uses only the reduced amount from <code class="contract-placeholder">Row.amount rule declared in</code> before fidelity is applied. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>an admitted segment for <code class="contract-placeholder">Row.id</code> and the complete amount calculation at <code class="contract-placeholder">Row.amount rule declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the amount is computed before fidelity is applied</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the row receives only the reduced amount produced by that citation</li><li>the test names <code class="contract-placeholder">Row.amount rule declared in</code> and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-catch-up-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;away-amount&quot;:[&quot;away-rule&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> uses only its cited away amount rule</summary>
+  <p class="contract-exact-name"><code>away-rule-amount</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row away amount is Away rule.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> receives only the total produced by the away rule at <code class="contract-placeholder">Row.amount rule declared in</code>; the row&#39;s declared limit then applies to that total as its owner decides. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>an admitted segment for <code class="contract-placeholder">Row.id</code> and the complete amount calculation at <code class="contract-placeholder">Row.amount rule declared in</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the amount is computed before fidelity is applied</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the row receives only the total produced by the away rule at <code class="contract-placeholder">Row.amount rule declared in</code>; the row&#39;s declared limit then applies to that total as its owner decides</li><li>the test names <code class="contract-placeholder">Row.amount rule declared in</code> and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-catch-up-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;catch-up-fidelity&quot;:[&quot;every-missed-update&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> clips each segment by its limit, where one applies</summary>
+  <p class="contract-exact-name"><code>every-missed-update-fidelity</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row catch up fidelity is Every missed update.</p>
+  <p class="contract-test-text">For <code class="contract-placeholder">Row.id</code>, where the row&#39;s limit bites, the lifecycle clips each segment by it and then feeds only the remaining missed updates to the game rules. Where the limit is whole-interval, nothing is clipped and every missed update is fed to the game rules.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a pass for <code class="contract-placeholder">Row.id</code> with distinguishable segment edges</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the lifecycle hands each segment to settlement</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>where the row&#39;s limit bites, the lifecycle clips the segment by it before feeding only the remaining missed updates to the game rules</li><li>where the limit is whole-interval, nothing is clipped and every missed update is fed to the game rules</li><li>the trace contains no update beyond the admitted segment</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-catch-up-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;catch-up-fidelity&quot;:[&quot;larger-steps&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> gives amount and limit to its larger-step rule</summary>
+  <p class="contract-exact-name"><code>larger-steps-fidelity</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row catch up fidelity is Larger steps.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.fidelity rule declared in</code> receives the separately computed amount and declared limit for <code class="contract-placeholder">Row.id</code>, owns their larger-step distribution and limit, and returns the ordered changes. The lifecycle does not re-apply the limit. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the separately computed amount and declared limit for <code class="contract-placeholder">Row.id</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>both are handed to <code class="contract-placeholder">Row.fidelity rule declared in</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the cited rule owns the larger-step distribution and the limit and returns the ordered changes</li><li>the lifecycle does not re-apply that limit</li><li>the test names <code class="contract-placeholder">Row.fidelity rule declared in</code> and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-catch-up-trace</li><li><code class="contract-placeholder">Instance</code>-catch-up-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;catch-up-fidelity&quot;:[&quot;one-derived-change&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> gives amount and limit to its one-change rule</summary>
+  <p class="contract-exact-name"><code>one-derived-change-fidelity</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row catch up fidelity is One derived change.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.fidelity rule declared in</code> receives the separately computed amount and declared limit for <code class="contract-placeholder">Row.id</code>, owns the limit, and returns one change. The lifecycle applies it once and does not re-apply the limit. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the separately computed amount and declared limit for <code class="contract-placeholder">Row.id</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>both are handed to <code class="contract-placeholder">Row.fidelity rule declared in</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the cited rule owns the limit and returns one change</li><li>the lifecycle applies that change once and does not re-apply the limit</li><li>the test names <code class="contract-placeholder">Row.fidelity rule declared in</code> and restates nothing from it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-catch-up-trace</li><li><code class="contract-placeholder">Instance</code>-catch-up-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;away-amount&quot;:[&quot;away-rule&quot;],&quot;catch-up-fidelity&quot;:[&quot;one-derived-change&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> keeps amount and one-change distribution separate</summary>
+  <p class="contract-exact-name"><code>away-rule-one-change-composition</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row away amount is Away rule and row catch up fidelity is One derived change.</p>
+  <p class="contract-test-text">For <code class="contract-placeholder">Row.id</code>, <code class="contract-placeholder">Row.amount rule declared in</code> defines the total and <code class="contract-placeholder">Row.fidelity rule declared in</code> distributes it as one change. The test names both addresses and restates nothing from them.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>an admitted span for <code class="contract-placeholder">Row.id</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li><code class="contract-placeholder">Row.amount rule declared in</code> computes the total and <code class="contract-placeholder">Row.fidelity rule declared in</code> distributes it</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the amount rule defines the total and the fidelity rule returns its one distributed change</li><li>neither rule silently takes the other&#39;s duty</li><li>the test names both addresses and restates nothing from them</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-catch-up-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;crossed-calendar-boundaries&quot;:[&quot;every-crossing-in-order&quot;]}}" data-dependencies="[&quot;crossed-calendar-boundaries&quot;]">
+  <summary><code class="contract-placeholder">Row.id</code> settles every crossing in ascending order</summary>
+  <p class="contract-exact-name"><code>calendar-every-crossing-in-order</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per calendar-boundaries row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Crossed calendar boundaries is Every crossing in order.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> admits the full non-negative interval, keeps every crossing in ascending time order, and settles each once through <code class="contract-placeholder">Row.settlement declared in</code>.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a non-negative interval with at least two distinguishable <code class="contract-placeholder">Row.id</code> crossings</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the calendar return timeline is built and settled</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the calendar row admits the full measured interval and keeps every crossing in ascending time order</li><li>each crossing settles once through <code class="contract-placeholder">Row.settlement declared in</code></li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-calendar-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;crossed-calendar-boundaries&quot;:[&quot;latest-crossing-only&quot;]}}" data-dependencies="[&quot;crossed-calendar-boundaries&quot;]">
+  <summary><code class="contract-placeholder">Row.id</code> settles only its latest crossing</summary>
+  <p class="contract-exact-name"><code>calendar-latest-crossing-only</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per calendar-boundaries row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Crossed calendar boundaries is Latest crossing only.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> admits the full non-negative interval, keeps only its latest crossing, omits earlier ones, and settles the selected crossing once through <code class="contract-placeholder">Row.settlement declared in</code>.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a non-negative interval with at least two distinguishable <code class="contract-placeholder">Row.id</code> crossings</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the calendar return timeline is built and settled</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the calendar row admits the full measured interval, keeps its latest crossing, and omits its earlier crossings</li><li>the selected crossing settles once through <code class="contract-placeholder">Row.settlement declared in</code></li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-calendar-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;crossed-calendar-boundaries&quot;:[&quot;one-combined-crossing&quot;]}}" data-dependencies="[&quot;crossed-calendar-boundaries&quot;]">
+  <summary><code class="contract-placeholder">Row.id</code> combines its crossings into one return event</summary>
+  <p class="contract-exact-name"><code>calendar-one-combined-crossing</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per calendar-boundaries row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Crossed calendar boundaries is One combined crossing.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> admits the full non-negative interval and becomes one return-time event carrying the crossing count and span. That event settles once through <code class="contract-placeholder">Row.settlement declared in</code>.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a non-negative interval with at least two distinguishable <code class="contract-placeholder">Row.id</code> crossings</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the calendar return timeline is built and settled</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the calendar row admits the full measured interval and creates one return-time event carrying the crossing count and span</li><li>that event settles once through <code class="contract-placeholder">Row.settlement declared in</code></li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-calendar-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>row order breaks equal-timestamp ties</summary>
+  <p class="contract-exact-name"><code>segments-events-and-ties-stay-ordered</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Row order breaks equal-timestamp ties before Event resolution receives them. Where no equal-timestamp tie is constructible, this test asserts nothing.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>equal-timestamp calendar events where the adoption can construct them</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the return timeline orders the events before settlement</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>row order breaks an equal-timestamp tie before Event resolution receives the events</li><li>where no equal-timestamp tie is constructible, this test asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-calendar-report</li><li><code class="contract-placeholder">Instance</code>-catch-up-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;crossed-calendar-boundaries&quot;:[&quot;every-crossing-in-order&quot;,&quot;latest-crossing-only&quot;,&quot;one-combined-crossing&quot;]}}" data-dependencies="[&quot;crossed-calendar-boundaries&quot;]">
+  <summary>a crossing inside the admitted span for <code class="contract-placeholder">Row.id</code> settles in order</summary>
+  <p class="contract-exact-name"><code>crossing-inside-admitted-span-settles-in-order</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Crossed calendar boundaries is Every crossing in order or Latest crossing only or One combined crossing.</p>
+  <p class="contract-test-text">For <code class="contract-placeholder">Row.id</code>: <code class="contract-placeholder">Bind order</code>; <code class="contract-placeholder">Bind beyond</code>. The row&#39;s limit does not cancel the independent calendar event, which settles once on the calendar timeline.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>selected calendar crossings and the admitted span for <code class="contract-placeholder">Row.id</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the return timeline is settled and reported</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Bind order</code></li><li><code class="contract-placeholder">Bind beyond</code></li><li>the limit for <code class="contract-placeholder">Row.id</code> does not cancel the independent calendar event, which settles once on the calendar timeline</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-calendar-report</li><li><code class="contract-placeholder">Instance</code>-catch-up-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> is created only from its cited source settlement</summary>
+  <p class="contract-exact-name"><code>return-reward-created-from-source</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> is created once only when the source settlement at <code class="contract-placeholder">Row.reward declared in</code> settles. No source means no reward, including on a skipped interval. A pending reward survives later suspensions.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>two returns for <code class="contract-placeholder">Row.id</code>, one where its cited source settles and one where it does not, plus a later suspension while a created reward remains pending</p></dd></div>
+<div><dt>When</dt><dd><ul><li>step 13 creates return rewards and the later suspension completes</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the settled-source run creates <code class="contract-placeholder">Row.id</code> once from <code class="contract-placeholder">Row.reward declared in</code></li><li>the run with no settled source creates nothing, so a skipped interval creates no reward</li><li>a pending <code class="contract-placeholder">Row.id</code> survives later suspensions until accepted or expired</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-reward-report</li><li><code class="contract-placeholder">Instance</code>-return-timeline</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;delivery&quot;:[&quot;automatic&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> is offered automatically in reward-row order</summary>
+  <p class="contract-exact-name"><code>automatic-reward-delivery</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row delivery is Automatic.</p>
+  <p class="contract-test-text">A created <code class="contract-placeholder">Row.id</code> reward is offered once to <code class="contract-placeholder">Row.destination declared in</code> in reward-row order. Acceptance reaches that destination and is reported once. Under step 13, destination refusal keeps the same pending reward, and it is offered again at each later return until its destination accepts it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>two returns where the cited source creates <code class="contract-placeholder">Row.id</code>, with its destination accepting in one run and refusing in the other</p></dd></div>
+<div><dt>When</dt><dd><ul><li>automatic rewards are offered in reward-row order</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.id</code> is offered once to <code class="contract-placeholder">Row.destination declared in</code> in its row position</li><li>acceptance reaches that destination once and is reported once</li><li>destination refusal keeps the same pending reward, and it is offered again at each later return until its destination accepts it</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-reward-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;delivery&quot;:[&quot;player-claims&quot;]}}" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> stays pending until its cited claim event</summary>
+  <p class="contract-exact-name"><code>player-claims-reward-delivery</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row delivery is Player claims.</p>
+  <p class="contract-test-text"><code class="contract-placeholder">Row.id</code> remains pending until the event at <code class="contract-placeholder">Row.claim declared in</code> offers it to <code class="contract-placeholder">Row.destination declared in</code> after checking any cited deadline. Acceptance delivers it once; refusal keeps the same pending reward. A later claim never repeats catch-up.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a created <code class="contract-placeholder">Row.id</code>, one accepted claim and one destination refusal in distinguishable runs</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the event at <code class="contract-placeholder">Row.claim declared in</code> checks any cited deadline and offers the reward to <code class="contract-placeholder">Row.destination declared in</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>before that event the reward remains pending</li><li>the accepted claim delivers it once and reports acceptance once</li><li>destination refusal keeps the same pending reward</li><li>a later claim is a new event and never repeats catch-up</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-reward-report</li><li><code class="contract-placeholder">Instance</code>-return-display-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> applies its authority reading once</summary>
+  <p class="contract-exact-name"><code>continuous-item-read-once-at-return</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per continuous-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">At return, <code class="contract-placeholder">Row.id</code> is read once from its cited authority and applied once. Ordinary play resumes without a second local jump.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a distinguishable authority reading for <code class="contract-placeholder">Row.id</code> at return</p></dd></div>
+<div><dt>When</dt><dd><ul><li>step 13 reads continuous items</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the authority reading is taken once and applied once</li><li>ordinary play resumes without a second local jump</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-continuous-state-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary><code class="contract-placeholder">Row.id</code> applies its selected branch once</summary>
+  <p class="contract-exact-name"><code>choice-item-applied-once-at-return</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per choice-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">At return, <code class="contract-placeholder">Row.id</code> applies its selected branch once. This test asserts nothing about branch data beyond what <code class="contract-placeholder">Row.choice declared in</code> is required to name.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a resolved selection for <code class="contract-placeholder">Row.id</code> at return</p></dd></div>
+<div><dt>When</dt><dd><ul><li>step 13 applies the selected branch</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the selected branch is applied once</li><li>the test asserts nothing about branch data beyond what <code class="contract-placeholder">Row.choice declared in</code> is required to name</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-choice-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;return-display&quot;:[&quot;state-only&quot;]}}" data-dependencies="[&quot;return-display&quot;]">
+  <summary>return adds no player-facing surface</summary>
+  <p class="contract-exact-name"><code>state-only-return-display</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Return display is State only.</p>
+  <p class="contract-test-text">The lifecycle adds no player-facing return surface. Existing game displays can show settled state after ordinary play resumes; developer and diagnostic instrumentation is out of scope.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a completed return settlement</p></dd></div>
+<div><dt>When</dt><dd><ul><li>ordinary play resumes</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the lifecycle adds no player-facing return surface</li><li>developer or diagnostic instrumentation is out of scope</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-display-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;return-display&quot;:[&quot;visible-before-resume&quot;]}}" data-dependencies="[&quot;return-display&quot;]">
+  <summary>settled state is visible before ordinary play</summary>
+  <p class="contract-exact-name"><code>visible-before-resume-return-display</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Return display is Visible before resume.</p>
+  <p class="contract-test-text">After settled state and pending rewards are known, at least one existing player-facing display presents the affected state before ordinary play resumes. Any clock explanation comes first.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a return that affects at least one covered row</p></dd></div>
+<div><dt>When</dt><dd><ul><li>settled state and pending rewards are known</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>at least one existing player-facing display presents the affected state before ordinary play resumes</li><li>where a clock explanation applies, it precedes this display update</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-display-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;return-display&quot;:[&quot;return-summary&quot;]}}" data-dependencies="[&quot;return-display&quot;]">
+  <summary>the return surface names each affected row and result</summary>
+  <p class="contract-exact-name"><code>return-summary-display</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Return display is Return summary.</p>
+  <p class="contract-test-text">After settled state and pending rewards are known, the return surface identifies each affected row and its settled result. Any clock explanation comes first.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a return with distinguishable affected rows</p></dd></div>
+<div><dt>When</dt><dd><ul><li>settled state and pending rewards are known</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the player-facing return surface identifies each affected row and its settled result</li><li>where a clock explanation applies, it precedes the return surface</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-display-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;return-display&quot;:[&quot;detailed-return-summary&quot;]}}" data-dependencies="[&quot;return-display&quot;]">
+  <summary>the return surface explains each affected result</summary>
+  <p class="contract-exact-name"><code>detailed-return-summary-display</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Return display is Detailed return summary.</p>
+  <p class="contract-test-text">After settled state and pending rewards are known, the return surface identifies each affected row and reports elapsed time, applicable limits, amount rules, fidelity, and settled results. Any clock explanation comes first.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a return with distinguishable affected rows</p></dd></div>
+<div><dt>When</dt><dd><ul><li>settled state and pending rewards are known</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the player-facing return surface identifies each affected row and reports elapsed time, applicable limits, amount rules, fidelity, and settled results</li><li>where a clock explanation applies, it precedes the return surface</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-return-display-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>final state and the next anchor commit together</summary>
+  <p class="contract-exact-name"><code>final-state-and-anchor-commit-together</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Final local state and the next suspension anchor commit together where an anchor exists; without one, that clause asserts nothing. Where an anchor exists, step 15 requires it never to be lower than the previous one on any return. Ordinary updates resume only after automatic return changes and required pre-resume displays settle.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a completed return with final local state and, where they exist, distinguishable automatic changes and required pre-resume displays</p></dd></div>
+<div><dt>When</dt><dd><ul><li>return processing reaches step 15</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>final local state and the next suspension anchor commit together where an anchor exists; without one, the anchor clause asserts nothing</li><li>where an anchor exists, the committed anchor is never lower than the previous one on any return, as step 15 requires</li><li>ordinary updates resume only after every automatic return change and required pre-resume display has settled</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-anchor-commit</li><li><code class="contract-placeholder">Instance</code>-return-display-trace</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>empty row sets create no suspension work</summary>
+  <p class="contract-exact-name"><code>empty-row-sets-create-nothing</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">An empty fixed-items set fixes no covered state; an empty catch-up-items set calculates no covered state from missed time on return; an empty continuous-items set means no covered state continued elsewhere; an empty choice-items set selects no away behaviour at runtime; an empty return-rewards set creates no separately delivered reward; and an empty rollback-rules set uses no trusted checkpoint as a backward-clock anchor. Where a row exists, that clause asserts nothing.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption document and its optionally empty row sets</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the lifecycle follows each row set&#39;s declared empty consequence</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>where fixed-items is empty, no covered state is fixed by suspension; where a row exists, this clause asserts nothing</li><li>where catch-up-items is empty, no covered state is calculated from missed time on return; where a row exists, this clause asserts nothing</li><li>where continuous-items is empty, no covered state continued elsewhere during suspension; where a row exists, this clause asserts nothing</li><li>where choice-items is empty, no covered state selects between away behaviours at runtime; where a row exists, this clause asserts nothing</li><li>where return-rewards is empty, return settlement creates no separately delivered reward; where a row exists, this clause asserts nothing</li><li>where rollback-rules is empty, no trusted checkpoint is used as a backward-clock anchor; where a row exists, this clause asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li><li><code class="contract-placeholder">Instance</code>-return-timeline</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>the catch-up report for <code class="contract-placeholder">Row.id</code> carries the lifecycle fields</summary>
+  <p class="contract-exact-name"><code>catch-up-report-fields</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Each catch-up report for <code class="contract-placeholder">Row.id</code> records the interval readings, admitted elapsed time, row, amount, fidelity, limit, before and after state, and any crossing that split the segment.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each catch-up report produced for <code class="contract-placeholder">Row.id</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer reads the report</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>each report records interval start and end readings, elapsed time admitted, row id, amount branch, fidelity branch, limit reached, before state, after state, and the calendar crossing that split the segment when present</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-catch-up-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;clock-source&quot;:[&quot;device-clock&quot;,&quot;protected-clock&quot;]}}" data-dependencies="[&quot;clock-source&quot;]">
+  <summary>each backward-clock report records its selected response</summary>
+  <p class="contract-exact-name"><code>backward-clock-report-fields</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Clock source is Device clock or Protected clock.</p>
+  <p class="contract-test-text">A backward-clock report records its selected anchor when one was selected and whether a notice appeared when that question applies. Where no such report exists, this test asserts nothing.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each backward-clock report produced by <code class="contract-placeholder">Instance</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer reads the report</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the report records the selected anchor when one was selected and whether a notice appeared when the notice question applies</li><li>where this adoption produces no backward-clock report, this test asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-clock-readings</li><li><code class="contract-placeholder">Instance</code>-anchor-commit</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>the return-reward report for <code class="contract-placeholder">Row.id</code> carries its delivery fields</summary>
+  <p class="contract-exact-name"><code>return-reward-report-fields</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">A return-reward report for <code class="contract-placeholder">Row.id</code> records source, destination, delivery, status, any deadline, and any claim event.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>each return-reward report produced for <code class="contract-placeholder">Row.id</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer reads the report</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the report records source, destination, delivery, pending, accepted, or expired status, deadline when present, and claim event when present</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-reward-report</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;flag&quot;:{&quot;backward-clock-anchor&quot;:[&quot;last-trusted-checkpoint&quot;]}}" data-dependencies="[&quot;backward-clock-anchor&quot;]">
+  <summary>declaration check: last-trusted-checkpoint has exactly one rollback row</summary>
+  <p class="contract-exact-name"><code>trusted-checkpoint-row-shape</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies when Backward clock anchor is Last trusted checkpoint.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and cites the rollback-rules description, not the running game. Under last-trusted-checkpoint, exactly one rollback-rules row must exist. Any other shape is a defect this test fails by construction.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption document and the rollback-rules description, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer counts rollback-rules rows</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>exactly one rollback-rules row exists</li><li>any other shape is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: rollback rows exist only for last-trusted-checkpoint</summary>
+  <p class="contract-exact-name"><code>rollback-row-only-for-trusted-checkpoint</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and cites the rollback-rules description, not the running game. A rollback-rules row is legal only under the last-trusted-checkpoint anchor; that anchor&#39;s exactly-one duty is checked separately. A protected clock, another anchor, or an adoption with no clock row must have none, and an adoption with no clock row answers no anchor. Any other shape is a defect this test fails by construction.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption document and the rollback-rules description, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer compares its clock source, backward-clock anchor when answered, and rollback-rules rows</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>a protected clock and each device-clock anchor other than last-trusted-checkpoint have no rollback-rules row</li><li>an adoption with no clock row answers no anchor and has no rollback-rules row</li><li>under last-trusted-checkpoint this check asserts nothing because the exactly-one check owns that shape</li><li>any other shape is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: clock has at most one row</summary>
+  <p class="contract-exact-name"><code>at-most-one-clock-row</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. Clock has at most one row. More than one is a defect this test fails by construction. With no row, the check asserts nothing about elapsed time.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption document, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer counts clock rows</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the clock collection has zero or one row</li><li>more than one row is a defect this test fails by construction; with no clock row, the count duty still passes and this check asserts nothing about elapsed time</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: rollback-rules has at most one row</summary>
+  <p class="contract-exact-name"><code>at-most-one-rollback-row</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. Rollback-rules has at most one row. More than one is a defect this test fails by construction. With no row, the check asserts nothing about a trusted checkpoint.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption document, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer counts rollback-rules rows</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the rollback-rules collection has zero or one row</li><li>more than one row is a defect this test fails by construction; with no rollback row, this check asserts nothing about a trusted checkpoint</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;delivery&quot;:[&quot;player-claims&quot;]}}" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code> has a claim-capable return surface</summary>
+  <p class="contract-exact-name"><code>player-claim-needs-return-surface</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row delivery is Player claims.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and cites the return-rewards delivery description, not the running game. A player-claims row such as <code class="contract-placeholder">Row.id</code> requires return-summary or detailed-return-summary. State-only and visible-before-resume provide no return surface to claim from. Any other shape is a defect this test fails by construction.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption document and the return-rewards delivery description, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer compares <code class="contract-placeholder">Row.id</code> delivery with return-display</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>return-display is return-summary or detailed-return-summary</li><li>state-only and visible-before-resume are defects for this player-claims row because they provide no return surface to claim from</li><li>any other shape is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s clock citation states its duty</summary>
+  <p class="contract-exact-name"><code>clock-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per clock row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.clock declared in</code>, not the running game. The citation must name <code class="contract-placeholder">Row.id</code>&#39;s reading, unit, and sampling. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and the prose at <code class="contract-placeholder">Row.clock declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.clock declared in</code> names the reading, its unit, and when it is sampled</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s state citation names complete fixed state</summary>
+  <p class="contract-exact-name"><code>fixed-state-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per fixed-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.state declared in</code>, not the running game. The citation must identify the complete state held fixed for <code class="contract-placeholder">Row.id</code>. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and the prose at <code class="contract-placeholder">Row.state declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.state declared in</code> identifies the complete state held fixed for <code class="contract-placeholder">Row.id</code></li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s state citation names ordinary changes and unit</summary>
+  <p class="contract-exact-name"><code>catch-up-state-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.state declared in</code>, not the running game. The citation must identify <code class="contract-placeholder">Row.id</code>, its ordinary changes, and its unit. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and the prose at <code class="contract-placeholder">Row.state declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.state declared in</code> identifies <code class="contract-placeholder">Row.id</code>, its ordinary changes, and its unit</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;away-amount&quot;:[&quot;reduced&quot;,&quot;away-rule&quot;]}}" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s amount citation states the complete amount and its unit</summary>
+  <p class="contract-exact-name"><code>amount-rule-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row away amount is Reduced or Away rule.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.amount rule declared in</code>, not the running game. The citation must state <code class="contract-placeholder">Bind amount duty</code> for <code class="contract-placeholder">Row.id</code>. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and the prose at <code class="contract-placeholder">Row.amount rule declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.amount rule declared in</code> states <code class="contract-placeholder">Bind amount duty</code> for <code class="contract-placeholder">Row.id</code></li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;catch-up-fidelity&quot;:[&quot;larger-steps&quot;,&quot;one-derived-change&quot;]}}" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s fidelity citation states its distribution</summary>
+  <p class="contract-exact-name"><code>fidelity-rule-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row catch up fidelity is Larger steps or One derived change.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.fidelity rule declared in</code>, not the running game. The citation must state <code class="contract-placeholder">Bind fidelity duty</code> for <code class="contract-placeholder">Row.id</code>. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and the prose at <code class="contract-placeholder">Row.fidelity rule declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.fidelity rule declared in</code> states <code class="contract-placeholder">Bind fidelity duty</code> for <code class="contract-placeholder">Row.id</code></li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;away-limit&quot;:[&quot;time-limit&quot;,&quot;less-after-a-point&quot;,&quot;state-ceiling&quot;]}}" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s limit citation states its complete boundary</summary>
+  <p class="contract-exact-name"><code>limit-rule-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row away limit is Time limit or Less after a point or State ceiling.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.limit rule declared in</code>, not the running game. The citation must state <code class="contract-placeholder">Bind limit duty</code> for <code class="contract-placeholder">Row.id</code>. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and the prose at <code class="contract-placeholder">Row.limit rule declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.limit rule declared in</code> states <code class="contract-placeholder">Bind limit duty</code> for <code class="contract-placeholder">Row.id</code></li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s state citation supplies its return reading</summary>
+  <p class="contract-exact-name"><code>continuous-state-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per continuous-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.state declared in</code>, not the running game. The citation must name the authority that continues <code class="contract-placeholder">Row.id</code> and supplies its return reading. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and the prose at <code class="contract-placeholder">Row.state declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.state declared in</code> names the external or protected rule that continues <code class="contract-placeholder">Row.id</code> and supplies its return reading</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s choice citation states both paths and selection</summary>
+  <p class="contract-exact-name"><code>choice-rule-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per choice-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.choice declared in</code>, not the running game. The citation must name both behaviours, their complete data, the selector, and the selection time. It asserts nothing further about branch data. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and the prose at <code class="contract-placeholder">Row.choice declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.choice declared in</code> names both possible behaviours, their complete data, the condition selecting one, and the selection time</li><li>the check asserts nothing about either branch&#39;s data beyond that declaration duty</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s reward citation states source and derivation</summary>
+  <p class="contract-exact-name"><code>reward-rule-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.reward declared in</code>, not the running game. The citation must identify <code class="contract-placeholder">Row.id</code>&#39;s source settlement and complete derivation. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and the prose at <code class="contract-placeholder">Row.reward declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.reward declared in</code> identifies the source settlement and complete derivation for <code class="contract-placeholder">Row.id</code></li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s destination citation states acceptance</summary>
+  <p class="contract-exact-name"><code>destination-rule-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.destination declared in</code>, not the running game. The citation must state how the complete <code class="contract-placeholder">Row.id</code> reward is accepted or left pending. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and the prose at <code class="contract-placeholder">Row.destination declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.destination declared in</code> states how the complete <code class="contract-placeholder">Row.id</code> reward is accepted or left pending</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;delivery&quot;:[&quot;player-claims&quot;]}}" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s claim citation names one event</summary>
+  <p class="contract-exact-name"><code>claim-rule-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row delivery is Player claims.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.claim declared in</code>, not the running game. The citation must name the player event that claims pending <code class="contract-placeholder">Row.id</code> from the return surface. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and the prose at <code class="contract-placeholder">Row.claim declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.claim declared in</code> names the player event that claims this pending <code class="contract-placeholder">Row.id</code> from the return surface</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s expiry citation states one deadline</summary>
+  <p class="contract-exact-name"><code>expiry-rule-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per return-rewards row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Bind expiry address</code>, not the running game. The citation must state the deadline when an unclaimed reward is removed for <code class="contract-placeholder">Row.id</code>. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and the prose at <code class="contract-placeholder">Bind expiry address</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Bind expiry address</code> states the deadline when an unclaimed reward is removed</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s boundary citation states the calendar test</summary>
+  <p class="contract-exact-name"><code>calendar-boundary-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per calendar-boundaries row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.boundary declared in</code>, not the running game. The citation must state <code class="contract-placeholder">Row.id</code>&#39;s calendar, time zone, boundary test, exact crossing time, and skipped or repeated civil-time behaviour. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and the prose at <code class="contract-placeholder">Row.boundary declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.boundary declared in</code> names the calendar, time zone, boundary inclusion test, exact crossing time, and behaviour when local civil time skips or repeats a boundary</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s settlement citation states immediate effects</summary>
+  <p class="contract-exact-name"><code>calendar-settlement-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per calendar-boundaries row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.settlement declared in</code>, not the running game. The citation must state the immediate effects produced from each selected <code class="contract-placeholder">Row.id</code> crossing. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and the prose at <code class="contract-placeholder">Row.settlement declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.settlement declared in</code> states the immediate effects produced from each selected crossing</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s trusted-state citation supplies a matched pair</summary>
+  <p class="contract-exact-name"><code>trusted-state-citation-duty</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per rollback-rules row</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">Row.trusted state declared in</code>, not the running game. The citation must supply one coherent state snapshot and matching trusted clock reading. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption and the prose at <code class="contract-placeholder">Row.trusted state declared in</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">Row.trusted state declared in</code> supplies one coherent state snapshot and its matching trusted clock reading</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="{&quot;row&quot;:{&quot;away-limit&quot;:[&quot;whole-interval&quot;]}}" data-dependencies="[]">
+  <summary>declaration check: <code class="contract-placeholder">Row.id</code> declares a state ceiling when one governs away gain</summary>
+  <p class="contract-exact-name"><code>away-limit-declaration-is-visible</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per catch-up-items row</span></div>
+  <p class="contract-test-status" data-test-status>Applies when row away limit is Whole interval.</p>
+  <p class="contract-test-text">This declaration check reads the adoption, cites the away-limit description, and considers an ordinary-play maximum declared elsewhere, not the running game. If that maximum also governs <code class="contract-placeholder">Row.id</code> away gain, this row must declare state-ceiling and cite it. Otherwise the clause asserts nothing. A hidden governing ceiling is a defect this test fails by construction.</p>
+  <dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">Instance</code> adoption, the away-limit description, and an ordinary-play maximum declared elsewhere, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks whether an ordinary-play clamp is intended to stop <code class="contract-placeholder">Row.id</code> away gain</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>where that clamp governs away gain, this row declares state-ceiling and cites it; where no such clamp governs away gain, this clause asserts nothing</li><li>leaving a governing ceiling hidden behind whole-interval is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-declaration-record</li></ul></dd></div></dl>
+</details>
+<details class="contract-test" data-contract-test data-when="null" data-dependencies="[]">
+  <summary>suspension and catch-up hold for the whole run</summary>
+  <p class="contract-exact-name"><code>suspension-holds</code></p>
+  <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  <p class="contract-test-status" data-test-status>Applies for every adoption</p>
+  <p class="contract-test-text">Across <code class="contract-placeholder">Inputs scope</code>, no elapsed time is counted twice; each catch-up row follows its amount, fidelity, and limit; each selected crossing settles once in order; each reward reaches its destination or stays pending; skipped intervals create no reward; and the next anchor never falls below the prior one. A case this adoption cannot construct asserts nothing.</p>
+  <dl class="contract-test-steps"><div><dt>Holds</dt><dd><p>across every covered cycle, no elapsed time was counted twice; every catch-up row followed its amount, fidelity, and limit; every selected crossing settled once in its selected order; every created reward reached its destination or stayed pending as declared; every skipped interval created no reward; and each next anchor never fell below its prior anchor; a case the adoption cannot construct asserts nothing</p></dd></div>
+<div><dt>Seeds</dt><dd><p><code class="contract-placeholder">Inputs seeds</code></p></dd></div>
+<div><dt>Scope</dt><dd><p><code class="contract-placeholder">Inputs scope</code></p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">Instance</code>-suspension-interval</li><li><code class="contract-placeholder">Instance</code>-return-timeline</li><li><code class="contract-placeholder">Instance</code>-catch-up-report</li><li><code class="contract-placeholder">Instance</code>-calendar-report</li><li><code class="contract-placeholder">Instance</code>-reward-report</li><li><code class="contract-placeholder">Instance</code>-anchor-commit</li><li><code class="contract-placeholder">Instance</code>-first-ordering-violation</li></ul></dd></div></dl>
+</details></div>
+</section>
+  </details>
+</section>
+<p class="contract-related"><strong>Related groups:</strong> <a href="/contracts/catalogue/#ordering-resolution">Ordering &amp; resolution</a>, <a href="/contracts/catalogue/#pools-meters">Pools &amp; meters</a></p>
+<p><a href="#use-this">Use this contract in your game ↑</a></p>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

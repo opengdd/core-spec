@@ -1,0 +1,1358 @@
+{
+  "contract": "ranged-value",
+  "version": 1,
+  "summary": "Covers health, stamina, oxygen, XP and other values with a marked bottom and top. It decides how changes meet those limits, how named lines fire, how costs are paid, and how the value can move on its own. Sources, rates, display and effects belong to the game's own rules.",
+  "questions": {
+    "number-kind": {
+      "asks": "Can this value hold a fraction, or is it always a whole number?",
+      "rationale": "Whole and fractional values handle small changes differently. A health bar may show only whole points while oxygen keeps decimals.",
+      "options": {
+        "whole-number": {
+          "meaning": "The stored value is always whole. A health bar can show 7 or 8, never 7.5.",
+          "semantics": "A change with a fractional part passes through small-change before any limit or mark reads it. Every absolute stored target and mark must resolve to a whole number."
+        },
+        "fractional": {
+          "meaning": "Fractions stay exactly as sent. An oxygen meter can rest at 7.5.",
+          "semantics": "Every finite change lands at full precision. No saved-fraction store exists."
+        }
+      }
+    },
+    "small-change": {
+      "asks": "A change contains part of a point. What happens to that part?",
+      "when": {
+        "flag": {
+          "number-kind": [
+            "whole-number"
+          ]
+        }
+      },
+      "otherwise": "This value keeps fractional changes exactly as sent.",
+      "options": {
+        "nearest": {
+          "meaning": "Use the nearer whole change, with an exact half going up the scale. A health gain of 2.5 becomes 3.",
+          "semantics": "Round the signed change to the nearest integer; ties go toward positive infinity. Discard the difference."
+        },
+        "nearest-away-from-zero": {
+          "meaning": "Use the nearer whole change, with an exact half going away from zero. A karma loss of 2.5 becomes −3.",
+          "semantics": "Round to the nearest integer; ties choose the integer with the greater absolute magnitude. Discard the difference."
+        },
+        "drop-the-fraction": {
+          "meaning": "Drop the fractional part toward zero. A poison drain of 0.7 health does nothing that step.",
+          "semantics": "Remove the signed fractional part toward zero and discard it."
+        },
+        "always-a-whole-unit": {
+          "meaning": "Every nonzero change moves at least one whole point. Chip damage of 0.1 removes 1 health.",
+          "semantics": "Round every non-integer signed change away from zero and discard the difference."
+        },
+        "save-the-fraction": {
+          "meaning": "Save leftover fractions until they make a whole point. Two hits worth 0.5 poise each add 1 poise together.",
+          "semantics": "Move the whole part now. Add only the signed fractional remainder to one saved-fraction store. Remove complete multiples of fraction-step toward zero, move by that many whole units, and keep the remainder. Sets always clear the store; named resets and starting over at a limit use their own clearing choices."
+        }
+      }
+    },
+    "exact-landing": {
+      "asks": "Landing exactly on a line or limit: does that count as reached?",
+      "options": {
+        "at-the-line-counts": {
+          "meaning": "Yes, touching it counts. Health falling to exactly 25 fires a warning set at 25.",
+          "semantics": "A rising mark at t is reached at value greater than or equal to t; a falling mark is reached at value less than or equal to t. An exact landing may consume a limit."
+        },
+        "must-pass-the-line": {
+          "meaning": "No, the value must pass it. Health must fall below 25 before a warning set at 25 fires.",
+          "semantics": "A rising mark at t is reached only above t; a falling mark is reached only below t. An exact landing does not consume a limit."
+        }
+      }
+    },
+    "at-the-ceiling": {
+      "asks": "Starting again at a limit is a lap. What happens when a change would push this value above its marked top?",
+      "options": {
+        "stop-at-the-ceiling": {
+          "meaning": "Stop at the top and lose the extra. A large health pickup fills the bar and wastes the surplus.",
+          "semantics": "Store max, discard the excess, and report it to no one. The change otherwise happened."
+        },
+        "refuse-the-whole-change": {
+          "meaning": "Refuse the whole gain. A health pickup that would overfill the bar adds no health.",
+          "semantics": "Leave the value and saved fraction unchanged and report the refusal. Fire no mark."
+        },
+        "hand-back-the-extra": {
+          "meaning": "Fill to the top and return the extra. A healing rule can pass unused healing to a shield.",
+          "semantics": "Store max and report the positive excess to the caller. This contract does not route it. A change with nobody acting has no caller, so its extra is dropped."
+        },
+        "no-ceiling": {
+          "meaning": "The marked top is only a landmark. A score can keep rising after it passes its goal.",
+          "semantics": "Store the complete result above max. The declared top remains citable and still defines shares."
+        },
+        "start-a-lap": {
+          "meaning": "Start a lap at the top. Filling an XP bar reports a level and returns the bar to its lap target.",
+          "semantics": "Reaching is decided by exact-landing. Report a lap and move to lap-lands-on. Section 3 alone defines leftover handling and report order."
+        }
+      }
+    },
+    "at-the-floor": {
+      "asks": "A change would pull this value below its marked bottom. What happens?",
+      "options": {
+        "stop-at-the-floor": {
+          "meaning": "Stop at the bottom and lose the extra. A lethal hit leaves health at zero.",
+          "semantics": "Store min, discard the excess, and report it to no one."
+        },
+        "refuse-the-whole-change": {
+          "meaning": "Refuse the whole loss. A hit that would cross the bottom deals no damage.",
+          "semantics": "Leave the value and saved fraction unchanged and report the refusal. Fire no mark."
+        },
+        "hand-back-the-extra": {
+          "meaning": "Empty to the bottom and return the shortfall. A shield can report how much damage still needs another rule.",
+          "semantics": "Store min and report the positive shortfall to the caller. This contract does not route it. A change with nobody acting has no caller, so the shortfall is dropped."
+        },
+        "no-floor": {
+          "meaning": "The marked bottom is only a landmark. A debt meter can keep falling below zero.",
+          "semantics": "Store the complete result below min. The declared bottom remains citable."
+        },
+        "start-a-lap": {
+          "meaning": "Start a lap at the bottom. Losing the last combo point can report a break and refill the meter.",
+          "semantics": "Reaching is decided by exact-landing. Report a lap and move to lap-lands-on. Section 3 alone defines leftover handling and report order."
+        }
+      }
+    },
+    "jumped-lines": {
+      "asks": "One move passes more than one mark (a line or a band edge). Which marks report?",
+      "when": {
+        "any": [
+          {
+            "row-count": {
+              "lines": "non-empty"
+            }
+          },
+          {
+            "row-count": {
+              "bands": "non-empty"
+            }
+          }
+        ]
+      },
+      "otherwise": "No mark exists, so no move can pass one.",
+      "options": {
+        "all-in-order": {
+          "meaning": "Report every crossed mark in travel order. One large hit can report wounded, critical, then empty health.",
+          "semantics": "Report every armed line and band edge whose reached state changes in its direction. Order by position along the path; row order breaks ties. Update all mark state."
+        },
+        "only-the-nearest": {
+          "meaning": "Report only the crossed mark nearest the landing value. One large hit can report empty health and suppress earlier warnings.",
+          "semantics": "Bare lines and band edges compete by distance to the landing value; row order breaks ties. Report only the winner, but update every reached, arm, and band state along the full path."
+        }
+      }
+    },
+    "when-a-limit-moves": {
+      "asks": "The bottom or top moves while this value holds a number. What happens to the value?",
+      "when": {
+        "any": [
+          {
+            "value-form": {
+              "min": [
+                "citation"
+              ]
+            }
+          },
+          {
+            "value-form": {
+              "max": [
+                "citation"
+              ]
+            }
+          }
+        ]
+      },
+      "otherwise": "The bottom and top are fixed numbers, so neither limit moves.",
+      "options": {
+        "refill-to-the-new-ceiling": {
+          "meaning": "Follow a moving top by filling to it. Raising maximum health from 100 to 120 also raises current health to 120.",
+          "semantics": "A max change stores the new max. A min-only change keeps the value unless it falls below the new min, then stores that min."
+        },
+        "keep-the-number": {
+          "meaning": "Keep the current number while it still fits. Raising maximum health from 100 to 120 leaves current health at 70.",
+          "semantics": "Preserve the value inside the new range; otherwise clamp it to the limit it is outside, even if an ordinary change may pass that limit."
+        },
+        "keep-the-share": {
+          "meaning": "Keep the same share of the range. Raising a half-full health bar from 100 to 200 moves its health from 50 to 100.",
+          "semantics": "Compute the old normalized share immediately before the limit move and store the same share of the new range. An empty old range uses the new min. Whole-number targets round to nearest with ties away from zero. Saved fraction is unchanged."
+        },
+        "pull-it-to-a-declared-number": {
+          "meaning": "Keep the number if it fits; otherwise move to a named safe number. A lowered stamina cap can move an outside value to 80.",
+          "semantics": "Preserve the value inside the new range. Otherwise store out-of-range-lands-on, which must resolve inside the new range."
+        },
+        "leave-the-number-alone": {
+          "meaning": "Do not move the held number now. Lowering a score's marked top to 100 can leave a held score of 120 unchanged.",
+          "semantics": "A held number outside a moved limit is legal only where the matching ordinary edge answer lets the value pass that limit."
+        }
+      }
+    },
+    "a-set-outside-the-range": {
+      "asks": "Something sets this value to a number outside its range. What happens?",
+      "when": {
+        "row-count": {
+          "sets": "non-empty"
+        }
+      },
+      "otherwise": "No named set puts this value directly at a target number.",
+      "options": {
+        "pull-it-to-the-nearer-limit": {
+          "meaning": "Move to the limit the target passed. A refill aimed at 120 leaves a 100-point health bar at 100.",
+          "semantics": "Above max store max; below min store min. The rejected target is not a raw result. A set does not hand back extra or start a lap."
+        },
+        "refuse-the-set": {
+          "meaning": "Refuse the set and keep the old number. An invalid checkpoint refill leaves health unchanged.",
+          "semantics": "Leave the value and saved fraction unchanged, fire no mark, and report refusal to the caller."
+        },
+        "store-it-as-sent": {
+          "meaning": "Store the target even outside the range. A score set to 120 can stay above its marked top of 100.",
+          "semantics": "Store the target exactly. It is legal beyond a limit only where the matching ordinary edge answer lets the value pass that limit."
+        }
+      }
+    },
+    "does-a-set-fire-lines": {
+      "asks": "A set jumps across one or more marks. Do they report?",
+      "when": {
+        "row-count": {
+          "sets": "non-empty"
+        }
+      },
+      "otherwise": "No named set crosses a line or changes a band.",
+      "options": {
+        "treat-it-as-a-change": {
+          "meaning": "Report crossed marks after a successful set. Refilling oxygen to full can clear the low-air warnings on the way up.",
+          "semantics": "After storing the accepted target, test lines and band edges along the movement. jumped-lines selects reports. A rejected or clamped target is never a raw result."
+        },
+        "silent": {
+          "meaning": "Update mark state without reports. Respawning at full health does not replay every health warning.",
+          "semantics": "Recompute line reached state and line-geometry band state from the stored target. Event-edged bands keep their state. Report nothing."
+        }
+      }
+    },
+    "the-extra-after-a-lap": {
+      "asks": "Starting over at a limit is a lap. After a lap, what happens to the extra?",
+      "when": {
+        "any": [
+          {
+            "flag": {
+              "at-the-ceiling": [
+                "start-a-lap"
+              ]
+            }
+          },
+          {
+            "flag": {
+              "at-the-floor": [
+                "start-a-lap"
+              ]
+            }
+          }
+        ]
+      },
+      "otherwise": "Neither limit starts this value over, so no lap leaves extra.",
+      "options": {
+        "carry-it-onto-the-new-value": {
+          "meaning": "Keep using the extra after the lap. An XP award of 120 can fill a 100-point bar and put 20 into the next level.",
+          "semantics": "Keep the amount past the consuming limit and apply it in the same direction after the lap movement. Section 3 defines the sequence."
+        },
+        "drop-it": {
+          "meaning": "Throw the extra away after the lap. A 120-point stagger hit fills one 100-point meter and loses the remaining 20.",
+          "semantics": "Discard the leftover after one lap and report it to no one (see the settlement order)."
+        }
+      }
+    },
+    "more-than-one-lap": {
+      "asks": "After a lap, the extra can reach the same limit again. Can one change cause more than one lap?",
+      "when": {
+        "any": [
+          {
+            "flag": {
+              "at-the-ceiling": [
+                "start-a-lap"
+              ]
+            }
+          },
+          {
+            "flag": {
+              "at-the-floor": [
+                "start-a-lap"
+              ]
+            }
+          }
+        ]
+      },
+      "otherwise": "Neither limit starts this value over, so one change cannot lap it.",
+      "options": {
+        "lap-again-while-it-fits": {
+          "meaning": "Start over again while enough extra remains. A 250-point XP award can report two levels on a 100-point bar.",
+          "semantics": "Repeat while carried leftover reaches the limit, subject to the 32-lap cap in section 3. This requires carrying the extra."
+        },
+        "one-lap-per-change": {
+          "meaning": "Allow at most one lap from each change. A 250-point combo gain reports one lap even if more would fit.",
+          "semantics": "The originating change causes at most one lap (see the settlement order)."
+        }
+      }
+    },
+    "a-lap-clears-saved-fraction": {
+      "asks": "Does a lap clear any saved fraction?",
+      "when": {
+        "any": [
+          {
+            "flag": {
+              "small-change": [
+                "save-the-fraction"
+              ],
+              "at-the-ceiling": [
+                "start-a-lap"
+              ]
+            }
+          },
+          {
+            "flag": {
+              "small-change": [
+                "save-the-fraction"
+              ],
+              "at-the-floor": [
+                "start-a-lap"
+              ]
+            }
+          }
+        ]
+      },
+      "otherwise": "No lap can clear saved fractions; either this value does not lap or it does not save fractions.",
+      "options": {
+        "clear-it": {
+          "meaning": "Clear the saved fraction after every lap. Breaking a stagger meter removes the 0.4 poise still waiting.",
+          "semantics": "A lap clears the saved fraction."
+        },
+        "keep-it": {
+          "meaning": "Keep the saved fraction across a lap. Leveling up keeps the 0.4 XP still waiting.",
+          "semantics": "A lap leaves the signed saved-fraction store unchanged."
+        }
+      }
+    },
+    "not-enough-room": {
+      "asks": "This value cannot pay the full cost of an action. What happens?",
+      "when": {
+        "row-count": {
+          "costs": "non-empty"
+        }
+      },
+      "otherwise": "No cost checks this value before changing it; every change simply happens, and bands and limits still apply.",
+      "options": {
+        "refuse-the-action": {
+          "meaning": "Refuse the action and spend nothing. A tired player cannot dodge without the full stamina cost.",
+          "semantics": "Report refusal and shortage to the caller. Leave the value, saved fraction, and every mark unchanged."
+        },
+        "take-what-fits": {
+          "meaning": "Spend what remains and report the amount paid. A tired player can use the last stamina for a weaker dodge.",
+          "semantics": "Move to the limiting edge, test marks normally, and report the approved positive magnitude. The game's rule decides the partial action."
+        }
+      }
+    },
+    "drifts-together": {
+      "asks": "A drift is a change that happens with nobody acting. Two or more drifts can run in the same step. How do they combine?",
+      "when": {
+        "row-count": {
+          "drifts": "at-least-two"
+        }
+      },
+      "otherwise": "Fewer than two drifts can run together, so no combination choice applies.",
+      "options": {
+        "add-them-up": {
+          "meaning": "Add the drifts' signed amounts and move once. Oxygen drain of 3 and recovery of 1 produce one loss of 2.",
+          "semantics": "Clip each eligible contribution to its own stop, sum the clipped amounts, resolve small-change once, and test marks once."
+        },
+        "only-the-largest": {
+          "meaning": "Run only the largest drift. Health regeneration of 4 beats poison damage of 2 for that step.",
+          "semantics": "Compare clipped absolute magnitudes; row order breaks a tie. A skipped ramp does not advance for that step."
+        },
+        "in-row-order": {
+          "meaning": "Run each drift in written order. Poison can damage health before regeneration heals it in the same step.",
+          "semantics": "Settle every eligible row separately in row order. Each row follows section 3 from start to finish."
+        }
+      }
+    },
+    "lines-read": {
+      "asks": "A change would pass a limit. Do marks read the result before or after the limit handles it?",
+      "when": {
+        "any": [
+          {
+            "row-count": {
+              "lines": "non-empty"
+            }
+          },
+          {
+            "row-count": {
+              "bands": "non-empty"
+            }
+          }
+        ]
+      },
+      "otherwise": "No line or band exists, so nothing reads a result beyond a limit.",
+      "options": {
+        "the-final-value": {
+          "meaning": "Marks read the number the value keeps. A hit aimed at −20 leaves health at 0, so warnings read 0.",
+          "semantics": "The outward part of the move tests its stored endpoint, or the consuming limit on a lap. It never tests beyond a limit."
+        },
+        "the-raw-result": {
+          "meaning": "Marks read the result before the limit fixes it. A hit aimed at −20 lets health warnings read −20 before health returns to 0.",
+          "semantics": "The outward part of the move tests the raw candidate. It may observe a number the value never stores. A refused change has no observable raw result."
+        }
+      }
+    }
+  },
+  "declares": {
+    "values": {
+      "min": {
+        "description": "This value's marked bottom. Keep it even when the value may fall lower.",
+        "forms": [
+          "number",
+          "citation"
+        ]
+      },
+      "max": {
+        "description": "This value's marked top. Keep it even when the value may rise higher.",
+        "forms": [
+          "number",
+          "citation"
+        ]
+      },
+      "initial": {
+        "description": "The number held when this value is created, or a citation read at creation. Later resets are listed separately.",
+        "forms": [
+          "number",
+          "citation"
+        ]
+      },
+      "fraction-step": {
+        "description": "How much saved fraction releases one whole point.",
+        "when": {
+          "flag": {
+            "small-change": [
+              "save-the-fraction"
+            ]
+          }
+        }
+      },
+      "anchor": {
+        "description": "The resting point a drift approaches from either side.",
+        "forms": [
+          "number",
+          "citation"
+        ],
+        "when": {
+          "row-has": {
+            "drifts": {
+              "direction": [
+                "toward-the-anchor"
+              ]
+            }
+          }
+        }
+      },
+      "lap-lands-on": {
+        "description": "Where the value lands during a lap.",
+        "forms": [
+          "number",
+          "citation"
+        ],
+        "when": {
+          "any": [
+            {
+              "flag": {
+                "at-the-ceiling": [
+                  "start-a-lap"
+                ]
+              }
+            },
+            {
+              "flag": {
+                "at-the-floor": [
+                  "start-a-lap"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "out-of-range-lands-on": {
+        "description": "Where the value lands when a moved limit leaves it outside the new range.",
+        "forms": [
+          "number",
+          "citation"
+        ],
+        "when": {
+          "flag": {
+            "when-a-limit-moves": [
+              "pull-it-to-a-declared-number"
+            ]
+          }
+        }
+      }
+    },
+    "rows": {
+      "reading-notes": {
+        "description": "List the game prose a reader needs before trusting this adoption. Use at most one row.",
+        "when-empty": "No advance reading is required.",
+        "record": {
+          "read-first": {
+            "type": "citation",
+            "required": true,
+            "description": "Point to the game prose a reader needs first, such as which of a soft and hard ceiling the game calls full."
+          }
+        }
+      },
+      "quantity-unit": {
+        "description": "Name the game-owned unit used by absolute values. Use at most one row.",
+        "when-empty": "This contract gives the quantity no named unit.",
+        "record": {
+          "unit": {
+            "type": "string",
+            "required": true,
+            "description": "The unit for every absolute number and citation, such as kg or XP. This contract neither interprets nor converts it."
+          }
+        }
+      },
+      "lines": {
+        "description": "List the named marks this value reports crossing.",
+        "when-empty": "No crossing is reported.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this mark in the game's words, such as low-health or full."
+          },
+          "value-kind": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "number",
+              "citation"
+            ],
+            "description": "Whether this mark uses a fixed number or points to a number the mark follows wherever it goes."
+          },
+          "value": {
+            "type": "number",
+            "when": {
+              "row": {
+                "value-kind": [
+                  "number"
+                ]
+              }
+            },
+            "description": "The fixed number where this mark sits."
+          },
+          "value-key": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "value-kind": [
+                  "citation"
+                ]
+              }
+            },
+            "description": "Point to the number where this mark sits. Read it fresh at each comparison."
+          },
+          "line-unit": {
+            "type": "string",
+            "options": [
+              "number",
+              "share-of-the-ceiling"
+            ],
+            "description": "Use a fixed number or a share of the marked top. A share sits at that share of the fresh top; it can fall between whole points and is only compared, never stored. Omitting this field means number."
+          },
+          "direction": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "rising",
+              "falling",
+              "both"
+            ],
+            "description": "Which direction may report this crossing."
+          },
+          "refire": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "every-crossing",
+              "once",
+              "a-set-number-of-times"
+            ],
+            "description": "Report every crossing, once per arm, or a fixed number of times per arm."
+          },
+          "times": {
+            "type": "integer",
+            "within": [
+              1,
+              2147483647
+            ],
+            "when": {
+              "row": {
+                "refire": [
+                  "a-set-number-of-times"
+                ]
+              }
+            },
+            "description": "The positive whole number of reports allowed per arm."
+          },
+          "rearm": {
+            "type": "string",
+            "when": {
+              "row": {
+                "refire": [
+                  "once",
+                  "a-set-number-of-times"
+                ]
+              }
+            },
+            "options": [
+              "on-reset",
+              "on-event",
+              "after-a-wait",
+              "never"
+            ],
+            "description": "What restores this line's full allowance."
+          },
+          "rearm-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "rearm": [
+                  "on-reset",
+                  "on-event",
+                  "after-a-wait"
+                ]
+              }
+            },
+            "description": "Point to the reset, event, or wait that restores the line."
+          },
+          "repeat": {
+            "type": "string",
+            "when": {
+              "row": {
+                "rearm": [
+                  "after-a-wait"
+                ]
+              }
+            },
+            "options": [
+              "restart-the-wait",
+              "keep-the-first-wait",
+              "add-to-the-wait"
+            ],
+            "description": "Choose what another crossing does while the wait is running."
+          },
+          "counts-at-line": {
+            "type": "string",
+            "options": [
+              "at-the-line-counts",
+              "must-pass-the-line"
+            ],
+            "description": "Override the value-wide exact-landing answer for this line."
+          },
+          "starts-armed": {
+            "type": "string",
+            "options": [
+              "armed",
+              "disarmed"
+            ],
+            "description": "Whether this line starts able to report. Omission means armed."
+          }
+        }
+      },
+      "sets": {
+        "description": "List each refill, direct assignment, or recomputed total. Use a set when the movement should be audible to lines and bands.",
+        "when-empty": "Nothing sets the value outright; laps, resets and limit moves remain their own movements.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name the set, such as surface-refill or inventory-total."
+          },
+          "mode": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "set-to-target",
+              "recompute"
+            ],
+            "description": "Use a named target or a rule's computed result."
+          },
+          "target-key": {
+            "type": "citation",
+            "required": true,
+            "description": "Point to the target number or the rule that computes it."
+          },
+          "trigger-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "Point to the event or rule that offers this set."
+          },
+          "enabled-while": {
+            "type": "citation",
+            "description": "Point to an optional condition that allows this set."
+          }
+        }
+      },
+      "bands": {
+        "description": "List named on-or-off states between marks, such as overheated or low-warning.",
+        "when-empty": "This value keeps no named state.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this state in the game's words."
+          },
+          "enter-on": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "line",
+              "event"
+            ],
+            "description": "Whether a line or named event turns the state on."
+          },
+          "enter-value-kind": {
+            "type": "string",
+            "when": {
+              "row": {
+                "enter-on": [
+                  "line"
+                ]
+              }
+            },
+            "options": [
+              "number",
+              "citation"
+            ],
+            "description": "Whether the entering line uses a fixed number or points to a number the mark follows wherever it goes."
+          },
+          "enter-value": {
+            "type": "number",
+            "when": {
+              "row": {
+                "enter-value-kind": [
+                  "number"
+                ]
+              }
+            },
+            "description": "The fixed entering line."
+          },
+          "enter-value-key": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "enter-value-kind": [
+                  "citation"
+                ]
+              }
+            },
+            "description": "Point to the entering line. Read it fresh at each comparison."
+          },
+          "enter-unit": {
+            "type": "string",
+            "when": {
+              "row": {
+                "enter-on": [
+                  "line"
+                ]
+              }
+            },
+            "options": [
+              "number",
+              "share-of-the-ceiling"
+            ],
+            "description": "Use a fixed number or a share of the marked top. A share sits at that share of the fresh top; it can fall between whole points and is only compared, never stored."
+          },
+          "enter-direction": {
+            "type": "string",
+            "when": {
+              "row": {
+                "enter-on": [
+                  "line"
+                ]
+              }
+            },
+            "options": [
+              "rising",
+              "falling"
+            ],
+            "description": "The direction that turns the state on."
+          },
+          "enter-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "enter-on": [
+                  "event"
+                ]
+              }
+            },
+            "description": "Point to the event that turns the state on."
+          },
+          "leave-on": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "line",
+              "event",
+              "after-a-wait"
+            ],
+            "description": "Whether a line, event, or wait turns the state off."
+          },
+          "leave-value-kind": {
+            "type": "string",
+            "when": {
+              "row": {
+                "leave-on": [
+                  "line"
+                ]
+              }
+            },
+            "options": [
+              "number",
+              "citation"
+            ],
+            "description": "Whether the leaving line uses a fixed number or points to a number the mark follows wherever it goes."
+          },
+          "leave-value": {
+            "type": "number",
+            "when": {
+              "row": {
+                "leave-value-kind": [
+                  "number"
+                ]
+              }
+            },
+            "description": "The fixed leaving line."
+          },
+          "leave-value-key": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "leave-value-kind": [
+                  "citation"
+                ]
+              }
+            },
+            "description": "Point to the leaving line. Read it fresh at each comparison."
+          },
+          "leave-unit": {
+            "type": "string",
+            "when": {
+              "row": {
+                "leave-on": [
+                  "line"
+                ]
+              }
+            },
+            "options": [
+              "number",
+              "share-of-the-ceiling"
+            ],
+            "description": "Use a fixed number or a share of the marked top. A share sits at that share of the fresh top; it can fall between whole points and is only compared, never stored."
+          },
+          "leave-direction": {
+            "type": "string",
+            "when": {
+              "row": {
+                "leave-on": [
+                  "line"
+                ]
+              }
+            },
+            "options": [
+              "rising",
+              "falling"
+            ],
+            "description": "The direction that turns the state off."
+          },
+          "leave-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "leave-on": [
+                  "event",
+                  "after-a-wait"
+                ]
+              }
+            },
+            "description": "Point to the leaving event or wait length."
+          },
+          "repeat": {
+            "type": "string",
+            "when": {
+              "row": {
+                "leave-on": [
+                  "after-a-wait"
+                ]
+              }
+            },
+            "options": [
+              "restart-the-wait",
+              "keep-the-first-wait",
+              "add-to-the-wait"
+            ],
+            "description": "Choose what another entry does while the wait is running."
+          },
+          "starts": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "in",
+              "out",
+              "read-from-initial"
+            ],
+            "description": "Whether this state starts on, off, or follows the starting value."
+          },
+          "blocks-change": {
+            "type": "string",
+            "options": [
+              "none",
+              "blocks-rises",
+              "blocks-falls",
+              "blocks-all"
+            ],
+            "description": "Which incoming plain changes, costs, or drifts are blocked while this state is on. Omission means none."
+          },
+          "counts-at-line": {
+            "type": "string",
+            "options": [
+              "at-the-line-counts",
+              "must-pass-the-line"
+            ],
+            "description": "Override exact-landing for both line edges."
+          }
+        }
+      },
+      "costs": {
+        "description": "List each action that checks whether this value can pay before it changes.",
+        "when-empty": "No action checks this value before it changes; every change simply happens, and bands and limits still apply.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this cost in the game's words, such as dodge or cast-spell."
+          },
+          "direction": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "rising",
+              "falling"
+            ],
+            "description": "Whether paying moves toward the top or bottom."
+          },
+          "amount-key": {
+            "type": "citation",
+            "required": true,
+            "description": "Point to the non-negative cost."
+          },
+          "action-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "Point to the action that receives refusal, shortage, or paid-amount reports."
+          },
+          "answer": {
+            "type": "string",
+            "options": [
+              "refuse-the-action",
+              "take-what-fits"
+            ],
+            "description": "Override the value-wide cost answer for this action."
+          }
+        }
+      },
+      "drifts": {
+        "description": "List each drift, such as draining, recovery, or cooling.",
+        "when-empty": "This value never changes on its own.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this drift in the game's words."
+          },
+          "direction": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "rises",
+              "falls",
+              "toward-the-anchor"
+            ],
+            "description": "Move upward, downward, or toward the shared resting point."
+          },
+          "cadence": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "per-game-step",
+              "per-real-second",
+              "per-turn",
+              "at-a-named-moment"
+            ],
+            "description": "Choose when one contribution is made."
+          },
+          "moment-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "cadence": [
+                  "at-a-named-moment"
+                ]
+              }
+            },
+            "description": "Point to the named moment."
+          },
+          "step-amount-key": {
+            "type": "citation",
+            "required": true,
+            "description": "Point to the positive amount per occurrence."
+          },
+          "amount-kind": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "fixed",
+              "depends-on-state",
+              "grows-while-it-runs"
+            ],
+            "description": "Whether the amount stays fixed, reads state, or grows while running."
+          },
+          "amount-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "amount-kind": [
+                  "depends-on-state",
+                  "grows-while-it-runs"
+                ]
+              }
+            },
+            "description": "Point to the state mapping or growth rule."
+          },
+          "stops-at-key": {
+            "type": "citation",
+            "required": true,
+            "description": "Point to the number where this drift stops."
+          },
+          "at-stop": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "lands-exactly",
+              "overshoots-then-returns"
+            ],
+            "description": "Land exactly, or briefly pass the stop before returning when the row runs alone."
+          }
+        }
+      },
+      "interrupts": {
+        "description": "List the conditions and pauses that control a drift. Every row for one drift must allow it before it runs.",
+        "when-empty": "No listed condition or pause controls a drift.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this interruption."
+          },
+          "drift": {
+            "type": "string",
+            "required": true,
+            "description": "Name the drift this row controls."
+          },
+          "kind": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "off-while-condition",
+              "runs-only-while-condition",
+              "paused-after-event"
+            ],
+            "description": "Stay off during a condition, run only during it, or pause after an event."
+          },
+          "condition-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "kind": [
+                  "off-while-condition",
+                  "runs-only-while-condition"
+                ]
+              }
+            },
+            "description": "Point to the condition or to a band on this value."
+          },
+          "event-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "kind": [
+                  "paused-after-event"
+                ]
+              }
+            },
+            "description": "Point to the event that starts the pause."
+          },
+          "pause-length-key": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "kind": [
+                  "paused-after-event"
+                ]
+              }
+            },
+            "description": "Point to the pause length."
+          },
+          "pause-length-kind": {
+            "type": "string",
+            "when": {
+              "row": {
+                "kind": [
+                  "paused-after-event"
+                ]
+              }
+            },
+            "options": [
+              "fixed",
+              "depends-on-state"
+            ],
+            "description": "Whether the pause stays fixed or reads state."
+          },
+          "pause-length-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "pause-length-kind": [
+                  "depends-on-state"
+                ]
+              }
+            },
+            "description": "Point to the rule for the changing pause."
+          },
+          "repeat-event": {
+            "type": "string",
+            "when": {
+              "row": {
+                "kind": [
+                  "paused-after-event"
+                ]
+              }
+            },
+            "options": [
+              "restart-the-wait",
+              "keep-the-first-wait",
+              "add-to-the-wait"
+            ],
+            "description": "Choose what another event does while the pause is running."
+          }
+        }
+      },
+      "resets": {
+        "description": "List named moments that put this value back, such as respawn, a new day, or turn start. Use a reset when this return must always stay silent.",
+        "when-empty": "Only creation applies the starting value.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this reset moment in the game's words."
+          },
+          "happens-at": {
+            "type": "citation",
+            "required": true,
+            "description": "Point to the rule naming the moment."
+          },
+          "sets-value-to-key": {
+            "type": "citation",
+            "description": "Point to the stored target. Omission uses the starting value — with a cited initial, the number read at creation."
+          },
+          "clears-saved-fraction": {
+            "type": "string",
+            "when": {
+              "flag": {
+                "small-change": [
+                  "save-the-fraction"
+                ]
+              }
+            },
+            "options": [
+              "yes",
+              "no"
+            ],
+            "description": "Whether this reset clears the saved fraction."
+          },
+          "re-arms-lines": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "yes",
+              "no"
+            ],
+            "description": "Whether cited lines regain their full allowance."
+          },
+          "resets-bands": {
+            "type": "string",
+            "options": [
+              "return-to-starts",
+              "recompute-from-target",
+              "keep"
+            ],
+            "description": "Choose how named states respond. return-to-starts silently restores every band's declared start; recompute-from-target silently recomputes every line-geometry band against the reset target; keep preserves every band's state. Event-edged bands keep their state under both recompute-from-target and keep. Omission means keep; that is this definition's chosen default, not a forced choice."
+          }
+        }
+      }
+    }
+  },
+  "rules": {
+    "range-nonempty": "max > min",
+    "initial-not-below-min": "initial >= min",
+    "initial-not-above-max": "initial <= max",
+    "fraction-step-positive": "fraction-step > 0",
+    "anchor-not-below-min": "anchor >= min",
+    "anchor-not-above-max": "anchor <= max",
+    "lap-lands-not-below-min": "lap-lands-on >= min",
+    "lap-lands-not-above-max": "lap-lands-on <= max",
+    "out-of-range-lands-not-below-min": "out-of-range-lands-on >= min",
+    "out-of-range-lands-not-above-max": "out-of-range-lands-on <= max",
+    "share-needs-two-walls": {
+      "forbid": {
+        "any": [
+          {
+            "flag": {
+              "when-a-limit-moves": [
+                "keep-the-share"
+              ],
+              "at-the-ceiling": [
+                "no-ceiling"
+              ]
+            }
+          },
+          {
+            "flag": {
+              "when-a-limit-moves": [
+                "keep-the-share"
+              ],
+              "at-the-floor": [
+                "no-floor"
+              ]
+            }
+          }
+        ]
+      },
+      "message": "Keeping the same share needs a real floor and ceiling; close both limits or choose another response to a moving limit."
+    },
+    "moving-refill-cannot-lap": {
+      "forbid": {
+        "any": [
+          {
+            "flag": {
+              "when-a-limit-moves": [
+                "refill-to-the-new-ceiling"
+              ],
+              "at-the-ceiling": [
+                "start-a-lap"
+              ]
+            }
+          },
+          {
+            "flag": {
+              "when-a-limit-moves": [
+                "refill-to-the-new-ceiling"
+              ],
+              "at-the-floor": [
+                "start-a-lap"
+              ]
+            }
+          }
+        ]
+      },
+      "message": "This moving-limit answer can place the value directly on either consuming edge, but a limit move never starts a lap; change the moving-limit or lap answer."
+    },
+    "another-lap-needs-extra": {
+      "forbid": {
+        "flag": {
+          "more-than-one-lap": [
+            "lap-again-while-it-fits"
+          ],
+          "the-extra-after-a-lap": [
+            "drop-it"
+          ]
+        }
+      },
+      "message": "Another lap needs leftover from the first; carry it forward or allow only one lap."
+    }
+  },
+  "origin": "https://opengdd.org/contracts/ranged-value-1",
+  "mechanism": [
+    "This is the one normative authority for event order. Questions describe choices; they do not redefine this sequence.",
+    "An **operation** is one change the machine settles from start to finish: a plain change, cost, set, drift step or composed drift batch, lap movement, limit move, or reset. An **imposed change** is a plain change that happens without checking whether the value can pay it. **Residue** is the signed fraction saved for later. A **mark** is a line or one edge of a band. A **leg** is one visible stretch of movement with its own start and end. Each operation has an id supplied by its row or cited game rule and settles fully before the next begins. A lap sequence's outward, reset, and leftover legs retain their originating operation id; leg position and lap count distinguish their reports.",
+    "A band is **line-geometry** only when both its edges are lines. A band with any event or wait edge is **event-edged**. An event-edged band keeps its state under every silent recompute (a set, a reset, or a limit move). A reset's explicit `return-to-starts` is a restore, not a recompute, and applies to every band.",
+    "1. **Block.** If an active band blocks the operation's direction and the operation is an imposed change, cost, or drift, discard it. Report `blocked` to its source; a drift records the block but has no receiver. Stop this operation. Remove a blocked drift before several drifts combine. Blocks never stop sets, resets, limit moves, or lap movements. 2. **Resolve provisionally.** Fractional handling computes a provisional movement and new residue without committing either. A whole change leaves residue untouched. An absolute repositioning computes its destination and applies its own clearing rule; it does not pass through `small-change`. 3. **Check capacity for a cost.** Compare provisional movement with the room toward the named limit. Refusal discards movement and residue together. `take-what-fits` recomputes both from the approved amount and never keeps a fraction from the refused part. 4. **Find the raw candidate.** A change adds provisional movement to the held value. A set uses its accepted or clamped stored target. A lap movement, limit move, or reset uses its own absolute destination. 5. **Apply the edge.** A raw candidate strictly past a limit uses that limit's answer. Exact landing is ordinary unless `start-a-lap` applies, in which case `exact-landing` decides whether it consumes. Refusing the whole change discards provisional movement and residue, leaves the store untouched, reports refusal, and stops. Sets, resets, and limit moves use their own target rules. Drifts use the clipping exception below. 6. **Commit.** Store the final value and new residue together. No partly settled state is visible. 7. **Test marks for each leg.** The outward leg ends at the final value or consuming limit. A lap then has a lap leg, followed by each carried leftover as a new lap operation returning to step 1. Test lines and band edges on every leg. Recompute reached state from each stored endpoint in both directions; only a false-to-true transition in the row's direction reports. A `both` line keeps one reached state per direction. With raw reading, only the outward leg tests the raw candidate; reset and leftover legs test stored values. At a consuming limit, report outward marks, including a line on the limit, then the lap, then lap-leg marks. Apply `jumped-lines` separately to every leg. 8. **Report.** Every report carries before, after, direction, leg position, and operation id. A crossing or band transition also carries its row id. A lap carries its count. `lap-cap-reached` carries committed state. Returned extra carries its amount. A cost or block carries refusal, shortage, approved amount, or `blocked` as applicable. Raw-reading reports use the tested raw candidate as `after`; other reports use the stored endpoint. Direction is `rising`, `falling`, or `unchanged`.",
+    "Every comparison reads the stored value at full precision, never a rounded display number. Every cited limit, mark and stop is read fresh at each comparison. Creation is not a movement or report. At creation, line and band-edge reached state is stored without reporting; lines use their declared arm state, and bands use their declared starting state. A share mark sits at the declared share multiplied by the fresh value at `max`; that position may be fractional and is compared, never stored. A line-geometry band that answers `read-from-initial` starts in exactly when the initial value sits on the reached side of its entering edge and not on the reached side of its leaving edge, each side read per that edge's declared direction, with an exact landing counted as this value's `exact-landing` answer or the row's `counts-at-line` override directs. An event-edged band that answers `read-from-initial` starts out. A silent recompute of a line-geometry band's state (a set, a limit move, or `recompute-from-target`) applies the same two-sided test against the value it recomputes from.",
+    "**Lap loop.** A single originating operation may settle at most 32 laps. Before lap 33, reject the continuation, report `lap-cap-reached`, drop the remaining leftover, and keep the state committed by lap 32. A statically provable repeated lap state is a package error, but the runtime cap remains the termination guard. After each lap report, re-read either cited limit and check the lap target against the fresh range. If a limit moved, apply the limit-move ruling below; any `limit-moved` band report occurs before the lap leg. A limit move never repositions the value during this loop. Under `clear-it`, a lap clears the saved fraction after the consuming movement and before carried leftover is applied. Under `one-lap-per-change`, a second reach of the same consuming limit is stored without consuming and further excess is dropped.",
+    "**Drift clipping.** A rising drift is eligible only below its stop; a falling drift only above it; a drift toward the anchor uses the matching test for its current direction. Clip each contribution to its stop before combining drifts. `overshoots-then-returns` is observable only when that row settles alone: its raw path may expose the overshoot, then a silent correction stores the stop, reports no mark, and recomputes reached state from the stored stop. A drift reaching a consuming limit clips there without consuming it.",
+    "**Sets.** A set has no raw result. Marks see only a successful stored outcome. Clamping a target stores the nearer limit; raw reading never sees the rejected target. A successful set clears residue. A refused set does not.",
+    "**Resets.** A reset stores its target, recomputes and stores every line's reached state from that target, and applies its arm, band, and fraction choices silently. Band state follows the row's `resets-bands` answer, not an automatic recompute. For a band that answers `read-from-initial`, `return-to-starts` restores the state stored at creation. It reports no crossing.",
+    "**Limit moves.** A moving limit never fires a bare line. After the limit and any resulting current-value change settle, recompute and store every line's reached state and every line-geometry band's state against the new positions. Event-edged bands keep their state. A line-geometry band that enters or leaves this way reports the state change with cause `limit-moved`; a bare line reports nothing. The saved fraction is not cleared. A limit move that lands the value exactly on a consuming edge does not consume.",
+    "**Continuous drift.** A `per-real-second` drift accrues continuously. Each settlement contributes its rate multiplied by elapsed cited-clock time, and fractional accrual passes through `small-change`.",
+    "Sets, resets, and limit moves at one moment settle in the order the citing game rules fire them. A game rule that fires several at once must state their order.",
+    "**Share-preserving limit moves.** `keep-the-share` is one absolute repositioning. A whole-number target rounds to nearest, with ties away from zero. Residue is unchanged.",
+    "A band id may be cited anywhere this adoption's own game asks for a condition (`contracts.<adoption>.bands.<id>`). Other adoptions still may not cite it."
+  ],
+  "answers": {
+    "number-kind": "whole-number",
+    "small-change": "nearest",
+    "exact-landing": "at-the-line-counts",
+    "at-the-ceiling": "stop-at-the-ceiling",
+    "at-the-floor": "stop-at-the-floor",
+    "jumped-lines": "all-in-order",
+    "lines-read": "the-final-value"
+  },
+  "values": {
+    "min": 0,
+    "max": 100,
+    "initial": 100
+  },
+  "rows": {
+    "lines": [
+      {
+        "id": "low-health",
+        "value-kind": "number",
+        "value": 25,
+        "direction": "falling",
+        "refire": "every-crossing"
+      },
+      {
+        "id": "dead",
+        "value-kind": "number",
+        "value": 0,
+        "direction": "falling",
+        "refire": "every-crossing"
+      }
+    ],
+    "reading-notes": [],
+    "quantity-unit": [],
+    "sets": [],
+    "bands": [],
+    "costs": [],
+    "drifts": [],
+    "interrupts": [],
+    "resets": []
+  },
+  "pack": "sha256:995be0ad12bc80c0f420ab42cf566f79a8543cc212533df2168fa0c3381b9fe3"
+}

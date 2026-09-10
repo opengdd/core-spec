@@ -1,0 +1,207 @@
+{
+  "contract": "timed-window",
+  "version": 1,
+  "templates": [
+    {
+      "id": "declared-window-set",
+      "title": "the declared window list matches the game",
+      "type": "general",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "scope": "{{inputs:scope}}",
+        "holds": "every timed window in scope has exactly one row in {{instance}}, and every row in {{instance}} names a timed window in scope"
+      },
+      "text": "The window list in {{instance}} is complete for {{inputs:scope}}: every window in scope has one row, no window has two rows, and no row names something outside the scope.",
+      "inputs": {
+        "scope": {}
+      }
+    },
+    {
+      "id": "opens-and-expires",
+      "title": "{{row.id}} opens and expires on its declared clock",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "windows",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{row.id}} window closed, with its opening defined at {{row.opens-at}}, its duration at {{row.duration}} in {{row.duration-unit}}, and its clock at {{row.clock}}",
+        "when": [
+          "the opening defined at {{row.opens-at}} occurs once, with no repeat trigger and no declared early ending"
+        ],
+        "then": [
+          "{{row.id}} becomes open when that occurrence happens",
+          "a change to the value or calculation at {{row.duration}} after that moment does not move this copy's endpoint; the copy still closes after the duration read at opening",
+          "it is still open when the clock at {{row.clock}} has advanced by exactly that duration",
+          "it is closed at the first observable step after the clock has advanced beyond that duration"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-open-close-trace",
+          "{{instance}}-{{row.id}}-clock-trace"
+        ]
+      },
+      "text": "{{row.id}} opens on the occurrence defined at {{row.opens-at}}, reads its {{row.duration-unit}} duration from {{row.duration}}, and closes after that much progress on the clock defined at {{row.clock}}."
+    },
+    {
+      "id": "retrigger-behavior",
+      "title": "{{row.id}} handles a repeat trigger in the declared way",
+      "type": "general",
+      "expand": "per-row",
+      "collection": "windows",
+      "when": {
+        "row": {
+          "on-retrigger": [
+            "ignore",
+            "new-duration",
+            "keep-longer",
+            "stack"
+          ]
+        }
+      },
+      "bindings": {
+        "retrigger-claim": {
+          "row_field": "on-retrigger",
+          "map": {
+            "ignore": "a repeat trigger leaves the open copy and its remaining time unchanged and opens no new copy; in a worked trace with four units left, four remain",
+            "new-duration": "a repeat trigger replaces the remaining time with the newly granted duration; in a worked trace with four units left, a new ten-unit grant leaves ten, and a new two-unit grant leaves two, not four",
+            "keep-longer": "a repeat trigger keeps the longer of the remaining time and the newly granted duration; with four units left, a new ten-unit grant leaves ten, while a new two-unit grant leaves four",
+            "stack": "a repeat trigger opens a second independent copy and leaves the first unchanged; in a ten-unit worked trace triggered again with four units left, the first copy closes after four more units and the second after ten"
+          }
+        }
+      },
+      "test": {
+        "type": "general",
+        "scope": "repeat triggers of {{row.id}} while at least one copy is open",
+        "holds": "{{bind:retrigger-claim}}",
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-trigger-trace",
+          "{{instance}}-{{row.id}}-remaining-time-trace",
+          "{{instance}}-{{row.id}}-open-copy-count"
+        ]
+      },
+      "text": "Repeat triggers of {{row.id}} follow one rule: {{bind:retrigger-claim}}. The worked arithmetic fixes the meaning even when the game's own duration uses another number or unit."
+    },
+    {
+      "id": "retrigger-extends-to-cap",
+      "title": "{{row.id}} extends on a repeat trigger without passing its cap",
+      "type": "general",
+      "expand": "per-row",
+      "collection": "windows",
+      "when": {
+        "row": {
+          "on-retrigger": [
+            "extend-to-cap"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "scope": "repeat triggers of {{row.id}} while one copy is open",
+        "holds": "a repeat trigger adds the newly granted duration to the remaining time without passing the cap at {{row.retrigger-cap}}; the arithmetic gives twelve units when four remain, ten are added, and the cap is twelve, and gives nine units when four remain, five are added, and the cap is twelve",
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-trigger-trace",
+          "{{instance}}-{{row.id}}-remaining-time-trace"
+        ]
+      },
+      "text": "Repeat triggers extend {{row.id}} without passing the cap at {{row.retrigger-cap}}. The worked cases leave twelve units when four remain and ten are added under a cap of twelve, and nine when four remain and five are added, fixing both the addition and the cap."
+    },
+    {
+      "id": "expiry-is-the-only-ending",
+      "title": "{{row.id}} cannot end early",
+      "type": "general",
+      "expand": "per-row",
+      "collection": "windows",
+      "when": {
+        "row": {
+          "ends-early": [
+            "expiry-only"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "scope": "the finite list of events and world changes that the game's Fixed prose associates with {{row.id}}, plus its game-local acceptance-test sample of ordinary play while a copy is open with time remaining",
+        "holds": "no event or world change in scope closes any open {{row.id}} copy before its duration ends; a copy's remaining time changes only through ordinary progress on the clock at {{row.clock}} or through this row's declared repeat-trigger behavior; a retrigger's own rewrite of remaining time is not an early closure",
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-open-close-trace"
+        ]
+      },
+      "text": "{{row.id}} has no early ending: using it, removing related state, or changing the world does not close it. A retrigger's own rewrite of remaining time is not an early closure. Only its duration ending closes the copy."
+    },
+    {
+      "id": "declared-ending-closes",
+      "title": "{{row.id}} closes at its declared early ending",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "windows",
+      "when": {
+        "row": {
+          "ends-early": [
+            "declared-ending"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one or more {{row.id}} copies open with time remaining, with their early ending defined at {{row.early-end}}",
+        "when": [
+          "one early-ending event or condition defined at {{row.early-end}} occurs"
+        ],
+        "then": [
+          "every open {{row.id}} copy on the entity the ending happens to closes at that occurrence, unless the prose at {{row.early-end}} names more",
+          "no remaining duration keeps any affected copy open"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-early-ending-trace"
+        ]
+      },
+      "text": "Every open {{row.id}} copy on the entity the ending happens to closes when the event or condition defined at {{row.early-end}} occurs, unless the cited prose names more. Remaining duration does not delay an affected copy's ending."
+    },
+    {
+      "id": "suspension-behavior",
+      "title": "{{row.id}} treats suspended play in the declared way",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "windows",
+      "when": {
+        "row": {
+          "duration-unit": [
+            "seconds",
+            "frames",
+            "ticks"
+          ]
+        }
+      },
+      "bindings": {
+        "suspension-result": {
+          "row_field": "while-suspended",
+          "map": {
+            "stops": "every open copy keeps its remaining time; the observed copy is still open with four units left when play resumes and closes only after four more units advance on its cited clock",
+            "keeps-running": "every open copy loses time as its cited clock advances; the observed copy is still open exactly when four units have passed on that clock, closes at the first progress beyond four, and is already closed by the end of the six-unit interval"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "one or more {{row.id}} copies open, with an observed copy having four {{row.duration-unit}} left and a remaining-time trace for every copy",
+        "when": [
+          "ordinary play is suspended for an interval that would advance the clock at {{row.clock}} by six {{row.duration-unit}} during ordinary play, while that clock and every open copy are observed"
+        ],
+        "then": [
+          "{{bind:suspension-result}}",
+          "the remaining-time trace shows whether time advanced during the suspension, even if the stored open state after play resumes could look the same"
+        ],
+        "diagnostics": [
+          "{{instance}}-{{row.id}}-remaining-time-trace",
+          "{{instance}}-{{row.id}}-suspension-trace"
+        ]
+      },
+      "text": "Suspended play leaves an observable answer for every {{row.id}} copy: {{bind:suspension-result}}. Each remaining-time trace is read during the suspension so the two answers cannot pass on the same later state."
+    }
+  ]
+}

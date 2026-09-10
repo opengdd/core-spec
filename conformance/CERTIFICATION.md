@@ -1,18 +1,25 @@
 # OpenGDD build-certification protocol
 
-Package conformance and build certification are separate protocols. The
-package validator establishes that a game specification has a mechanically
-valid OpenGDD envelope. Certification evaluates whether one particular build
-implements that specification. Between the two sits build-record conformance
-(SPEC §2d, §7): the machine-checked validity of `opengdd-build.json` itself
-and its consistency with the source package.
+This protocol describes how to audit one finished game against its design
+package. The auditor receives the package, the build, the builder's report
+and supporting evidence. The audit examines whether the game follows the
+design and whether the evidence supports the report. It produces a reasoned
+verdict with findings and the limits of the review.
 
-This is a public draft protocol. Under SPEC §2d it is experimental in v0.7:
-its verdicts are the draft's own, no v0.7 conformance outcome turns on them,
-and the specification defines no normative certification verdict. The
-protocol does not add requirements to package conformance and does not grant
-or imply authorization to use a certification mark. No OpenGDD
-certification-mark program operates today.
+Three checks serve different purposes:
+
+- **Package checks** examine the design files. OpenGDD's validator performs
+  automated checks; people review requirements expressed in ordinary writing.
+- **Build-record checks** examine `opengdd-build.json`, the builder's report,
+  and its agreement with the source package (OpenGDD specification §2d, §7).
+- **The audit** examines the game and evidence to assess whether those claims
+  are true.
+
+This protocol remains experimental under the OpenGDD specification §2d.
+Its verdicts apply within this protocol; they do not decide package or
+build-record conformance. The protocol adds no package requirements and
+does not authorize a certification mark. No official OpenGDD certification
+program operates today.
 
 ## Certification gate
 
@@ -45,14 +52,14 @@ true:
    corresponding resolved value. Source-file equality alone is insufficient.
    The [Audit profile](#audit-profile) owns this selection and comparison.
 4. **`opengdd-build.json` is complete.** The build record identifies the
-   format revision, spec and build, designer and builder, personalization
+   format revision, package and build, designer and builder, personalization
    answers, full resolved tuning snapshot, the `evidence` record's counts,
    result hash, and conditional runner identity. The runner identity resolves
    to the [Runner profile](#runner-profile).
 5. **The result hash is reproducible.** The evidence defines exactly which
    payload is hashed and uses the canonical serialization below.
-6. **A separate audit supports the verdict.** The builder's own green result
-   is evidence, not the final judgment. Apply the [Audit profile](#audit-profile).
+6. **A separate audit supports the verdict.** A passing result from the
+   builder is evidence, not the final judgment. Apply the [Audit profile](#audit-profile).
 
 ## Canonical hash serialization
 
@@ -85,8 +92,8 @@ canonical representation. A file that parses to the same JSON but different
 bytes has no defined digest under this protocol.
 
 The hashed payload must include enough identity to prevent evidence for one
-spec or build from being replayed as another. At minimum it identifies the
-spec, build, canonical acceptance-test records, and declared checkpoint
+package or build from being replayed as another. At minimum it identifies the
+package, build, canonical acceptance-test records, and declared checkpoint
 records. Any replay, capture, or layout digest separately states what its own
 payload `covers`.
 
@@ -229,4 +236,4 @@ status must not be folded into the acceptance-test result.
 Certification evidence belongs to the build: validator output, test records,
 hash payload definition, `opengdd-build.json`, the separate audit, and any
 ambiguity reports. It must not be rewritten as a claim that every future build
-of the same specification is certified.
+of the same package is certified.

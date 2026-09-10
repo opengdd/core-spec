@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The handbook | OpenGDD</title>
+<title>The handbook — OpenGDD</title>
 <meta name="description" content="The OpenGDD handbook: what each part of the format is for and how the parts fit together, one short chapter per mechanism.">
 <link rel="canonical" href="https://opengdd.org/handbook/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="The handbook | OpenGDD">
+<meta property="og:title" content="The handbook — OpenGDD">
 <meta property="og:description" content="The OpenGDD handbook: what each part of the format is for and how the parts fit together, one short chapter per mechanism.">
 <meta property="og:url" content="https://opengdd.org/handbook/">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="The handbook | OpenGDD">
+<meta name="twitter:title" content="The handbook — OpenGDD">
 <meta name="twitter:description" content="The OpenGDD handbook: what each part of the format is for and how the parts fit together, one short chapter per mechanism.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
@@ -23,20 +23,21 @@
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/" aria-current="page">Learn</a>
-      <a href="/spec/">Spec</a>
-      <a href="/standard/">Standard</a>
+      <a href="/contracts/">Contracts</a>
+      <a href="/spec/">Specification</a>
       <a href="/authoring-tool/">Authoring tool</a>
       <a href="/about/">About</a>
       <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
     </nav>
   </div>
 </header>
-<main>
+<main id="main">
 <div class="doc-layout">
 <nav class="doc-toc" aria-label="Learn"><p class="toc-title">Learn</p>
 <ul class="learn-resources">
@@ -46,35 +47,35 @@
 <div class="toc-group">
 <p class="toc-group-title">Start and foundations</p>
 <ul>
-<li class="toc-h2"><a href="/handbook/an-afternoon-spec/">An afternoon spec</a></li>
-<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">The shape of a spec</a></li>
-<li class="toc-h2"><a href="/handbook/fantasy-block/">The fantasy block</a></li>
-<li class="toc-h2"><a href="/handbook/authority/">Authority</a></li>
-<li class="toc-h2"><a href="/handbook/identifiers/">Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
+<li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
+<li class="toc-h2"><a href="/handbook/player-fantasy/">The player fantasy</a></li>
+<li class="toc-h2"><a href="/handbook/who-decides/">Who decides</a></li>
+<li class="toc-h2"><a href="/handbook/naming-things/">Names and addresses</a></li>
 <li class="toc-h2"><a href="/handbook/tuning/">Tuning</a></li>
 <li class="toc-h2"><a href="/handbook/acceptance-tests/">Acceptance tests</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Content, links, and time</p>
+<p class="toc-group-title">Content, links and time</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/collections/">Collections</a></li>
 <li class="toc-h2"><a href="/handbook/links/">Links</a></li>
 <li class="toc-h2"><a href="/handbook/runtime-values/">Runtime values</a></li>
-<li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes &amp; clocks</a></li>
-<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes and clocks</a></li>
+<li class="toc-h2"><a href="/handbook/seeds/">Seeds and repeatable randomness</a></li>
 </ul>
 </div>
 <div class="toc-group">
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette &amp; colour promises</a></li>
-<li class="toc-h2"><a href="/handbook/personalization/">Personalization</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanisms</p>
+<p class="toc-group-title">Reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -82,8 +83,8 @@
 <div class="toc-group">
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
-<li class="toc-h2"><a href="/handbook/promises-and-proof/">Promises and proof</a></li>
-<li class="toc-h2"><a href="/handbook/preflight-checklist/">Preflight checklist</a></li>
+<li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
 </ul>
 </div>
 </nav>
@@ -91,69 +92,74 @@
 <h1>The handbook</h1>
 
 <p>Come here with a design question. Each short chapter shows what one
-part of OpenGDD gives you, where it lives, and how to use it. Start with
-the <a href="/get-started/">get-started guide</a> when you want to make a
-first package, or open the group that matches the work in front of you.
-The <a href="/spec/">specification</a> remains the exact rulebook.</p>
+part of OpenGDD gives you, where it lives, and how to use it. If you are
+new to the format, read the first group below in order, or follow the
+<a href="/get-started/">Get started</a> guide. The
+<a href="/spec/">specification</a> has the exact rules.</p>
+
+<p>A chapter marked <span class="scope-badge">Required</span> describes
+something every package has. <span class="scope-badge">Optional</span>
+chapters describe things you add when your game needs them. Chapters
+without a badge are guides.</p>
 
 <div class="handbook-groups">
 <section class="handbook-group" aria-labelledby="group-foundations">
 <h2 id="group-foundations">Start and foundations</h2>
-<p class="handbook-group-intro">See a finished package, then find the core ideas behind its prose, values, and tests.</p>
+<p class="handbook-group-intro">See a finished package, then the core ideas behind its prose, numbers and tests.</p>
 <div class="card-grid">
-  <a class="card" href="/handbook/an-afternoon-spec/">
-    <h3>An afternoon spec</h3>
-    <p>You already know Snake. This chapter shows excerpts from a complete five-file spec. You know every rule already, so you can watch where the format puts each one. When …</p>
+  <a class="card" href="/handbook/complete-example/">
+    <h3>A complete example: Garden Snake</h3>
+    <p>You already know Snake. Here is a complete OpenGDD package for it, in five small files. It is a different game from the platformer in Get started, chosen because you …</p>
   </a>
-  <a class="card" href="/handbook/shape-of-a-spec/">
-    <h3>The shape of a spec</h3>
-    <p>A spec is one folder containing the complete design. You can give that folder directly to a builder.</p>
+  <a class="card" href="/handbook/what-a-package-contains/">
+    <h3>What a package contains</h3>
+    <p>A package is one folder with the complete design of one game. You give that folder to the builder: the person, team or AI that turns your package into a game.</p>
   </a>
-  <a class="card" href="/handbook/fantasy-block/">
-    <h3>The fantasy block</h3>
-    <p>Every game idea starts with the experience it should create. The fantasy block states that experience before the rules. It must be the first substantive content in the …</p>
+  <a class="card" href="/handbook/player-fantasy/">
+    <h3>The player fantasy</h3>
+    <p>Every game starts with what the player gets to be and feel. OpenGDD asks for that first, in a short fantasy block at the top of 01-overview.md. The block comes before …</p>
   </a>
-  <a class="card" href="/handbook/authority/">
-    <h3>Authority</h3>
-    <p>Authority states who decides each part of the game: you, the builder, or a question answered for each build.</p>
+  <a class="card" href="/handbook/who-decides/">
+    <h3>Who decides</h3>
+    <p>Every sentence in your design has an owner. OpenGDD calls this authority, and there are three levels:</p>
   </a>
-  <a class="card" href="/handbook/identifiers/">
-    <h3>Identifiers</h3>
-    <p>An identifier is a stable name for a value in your design. Define the value once, then write its name in backticks wherever the prose refers to it. An address is the …</p>
+  <a class="card" href="/handbook/naming-things/">
+    <h3>Names and addresses</h3>
+    <p>Write each number once, give it a name, and use the name everywhere else. A name like stamina.dash_cost is an identifier. The whole name with its dots is its address: …</p>
   </a>
   <a class="card" href="/handbook/tuning/">
     <h3>Tuning</h3>
-    <p>One file holds the shared numbers a build reads. A range says how far a number may move, with both ends included. A rule is a line of arithmetic about those numbers that …</p>
+    <p>tuning.json holds the shared numbers of your game: costs, speeds, sizes, timings. The builder reads them from here, and your prose points at them by name. The file has …</p>
   </a>
   <a class="card" href="/handbook/acceptance-tests/">
     <h3>Acceptance tests</h3>
-    <p>An acceptance test turns an important design promise into something the builder, the person, team, studio, AI system, or combination that turns your package into a game, …</p>
+    <p>An acceptance test turns one important promise of your design into a check the finished game must pass. The builder has to show that the check passes. The builder is the …</p>
   </a>
 </div>
 </section>
 <section class="handbook-group" aria-labelledby="group-systems">
-<h2 id="group-systems">Content, links, and time</h2>
-<p class="handbook-group-intro">Organize repeated content, connect records, name changing values, and describe how time passes.</p>
+<h2 id="group-systems">Content, links and time</h2>
+<p class="handbook-group-intro">Organise repeated content, connect records, name changing values, and say how time passes.</p>
 <div class="card-grid">
   <a class="card" href="/handbook/collections/">
     <h3>Collections</h3>
-    <p>Games are full of lists: technologies, recipes, cards, levels. A collection keeps one kind of content in one folder, with one JSON file per item.</p>
+    <p>Games are full of lists: technologies, recipes, cards, levels. A collection keeps one kind of content in one folder, with one JSON file per item. The example is the …</p>
   </a>
   <a class="card" href="/handbook/links/">
     <h3>Links</h3>
-    <p>A link is a field holding another record's id. It connects items in your collections and lets validation report a missing target where the link is defined.</p>
+    <p>A link is a field that holds another record's id. It connects items in your collections, and validation reports a missing target where the link is defined. The examples …</p>
   </a>
   <a class="card" href="/handbook/runtime-values/">
     <h3>Runtime values</h3>
-    <p>Some design rules need to name a value that changes during play, such as oxygen left, the current score, or progress toward an objective. A runtime value gives that …</p>
+    <p>Some rules need to name a value that changes during play: oxygen left, the current score, progress toward an objective. A runtime value gives that changing value one …</p>
   </a>
   <a class="card" href="/handbook/modes-and-clocks/">
-    <h3>Modes &amp; clocks</h3>
-    <p>When real time meets a pause or a turn structure, time modes and clocks say which clocks run in each situation. A time mode is one timing situation, such as diving or …</p>
+    <h3>Modes and clocks</h3>
+    <p>When real time meets a pause or a turn structure, clocks.json says which clocks run in which situation. A time mode is one situation, such as diving or reading the map. …</p>
   </a>
-  <a class="card" href="/handbook/seeds-and-determinism/">
-    <h3>Seeds &amp; determinism</h3>
-    <p>A seed is a text value used to reproduce random results. A seed address is an address for a repeatable random sequence. It includes locations and a stream name so …</p>
+  <a class="card" href="/handbook/seeds/">
+    <h3>Seeds and repeatable randomness</h3>
+    <p>A seed is a text value that makes random results repeatable. The same seed gives the same world, as long as the procedure that uses it is Fixed. A draw is one request …</p>
   </a>
 </div>
 </section>
@@ -163,39 +169,39 @@ The <a href="/spec/">specification</a> remains the exact rulebook.</p>
 <div class="card-grid">
   <a class="card" href="/handbook/direction/">
     <h3>Art direction</h3>
-    <p>Art direction says what the game should look and feel like in a way the builder can be held to, while leaving the craft of making it to them. The builder is the person, …</p>
+    <p>Art direction says what the game must look and feel like, without saying how to make it. The builder keeps the craft, and you keep the intent. The builder is the person, …</p>
   </a>
   <a class="card" href="/handbook/palette-and-colour-promises/">
-    <h3>Palette &amp; colour promises</h3>
-    <p>A palette keeps the colours that define a game's look in one named place. You can point to the whole set or to one named colour without copying its hex value into prose.</p>
+    <h3>Palette and colour promises</h3>
+    <p>A palette keeps the colours that define a game's look in one named place. Prose points at the whole set or at one named colour, and never copies a hex value. The example …</p>
   </a>
   <a class="card" href="/handbook/personalization/">
-    <h3>Personalization</h3>
-    <p>Personalization lets you ask the builder, the person, team, studio, AI system, or combination that turns your package into a game, a question for one particular build. …</p>
+    <h3>Personalization questions</h3>
+    <p>Personalization lets you ask the builder a question that each build answers for itself. The builder is the person, team or AI that turns your package into a game. An …</p>
   </a>
 </div>
 </section>
 <section class="handbook-group" aria-labelledby="group-contracts">
-<h2 id="group-contracts">Reusable mechanisms</h2>
-<p class="handbook-group-intro">Adopt a familiar game mechanism through one filled form and its named tests.</p>
+<h2 id="group-contracts">Reusable mechanics</h2>
+<p class="handbook-group-intro">Adopt a familiar game mechanic by answering its questions, with tests included.</p>
 <div class="card-grid">
   <a class="card" href="/handbook/contracts/">
     <h3>Contracts</h3>
-    <p>A contract brings a proven game mechanic into your design: a health bar, a backpack, a crafting recipe. It is a ready-made list of the decisions behind that mechanic — …</p>
+    <p>A contract is a short list of questions about one game mechanic, such as what a backpack does with a pile of items that will not fit. Answer the questions and the …</p>
   </a>
 </div>
 </section>
 <section class="handbook-group" aria-labelledby="group-checking">
 <h2 id="group-checking">Checking and handoff</h2>
-<p class="handbook-group-intro">Understand what validation proves and give the package one final human review.</p>
+<p class="handbook-group-intro">Understand what validation proves, then give the package one last human read.</p>
 <div class="card-grid">
-  <a class="card" href="/handbook/promises-and-proof/">
-    <h3>Promises and proof</h3>
-    <p>Package checking checks the paper: its names, links, rules, and prose. Record checking compares the builder's report with the package. Audit checking judges whether the …</p>
+  <a class="card" href="/handbook/how-checking-works/">
+    <h3>What validation proves</h3>
+    <p>Three different checks happen between a design and a finished game. Each one proves something different, so a pass means something different each time.</p>
   </a>
-  <a class="card" href="/handbook/preflight-checklist/">
-    <h3>Preflight checklist</h3>
-    <p>The validator checks what it can prove from files. A final human read checks the part only a designer can see: whether the package says one clear, coherent thing. Use …</p>
+  <a class="card" href="/handbook/before-handoff/">
+    <h3>Before you hand it over</h3>
+    <p>The validator (the checking tool) checks what it can prove from the files. A last human read checks the part only a designer can see: whether the package says one clear …</p>
   </a>
 </div>
 </section>
@@ -205,7 +211,7 @@ The <a href="/spec/">specification</a> remains the exact rulebook.</p>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
-    <span><a href="/about/">About the standard</a></span>
+    <span><a href="/about/">About OpenGDD</a></span>
     <span>Prose CC-BY 4.0 · code MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>

@@ -1,0 +1,322 @@
+{
+  "contract": "grid-and-direction",
+  "version": 1,
+  "origin": "https://opengdd.org/contracts/grid-and-direction-1",
+  "summary": "Covers square grids and the direction words your game uses. It says where numbering starts, which cells touch, and how a position belongs to a cell. It says how rules measure distance, choose between equal cells, list cells in order, and turn. Grid edges, pathfinding, non-square cells, and a third axis stay with your game.",
+  "mechanism": [
+    "The mechanism is one grid of equal square cells. A row runs across it, and a column runs down it. When a game names a cell with two whole numbers, coordinate-order says which one comes first; a layout may name cells by their contents instead. The grid may be a bounded rectangle with a first cell in one corner, or run on in every direction with signed numbers and no first cell; the first question says which.",
+    "The grid's own frame. Every answer below is read against the grid as this package declares it: the layout your content writes out, or your own chapter's sentence about which way the numbers grow. Up, down, left and right mean those directions on the declared grid. On a bounded grid where content writes the grid out row by row, the first written row is nearest the declared origin corner: the top row for top-left, and the bottom row for bottom-left. These directions never follow the finished picture, which a build may draw any way its presentation chapter allows. A Delegated view can never change a Fixed answer.",
+    "Where a game also has positions — things resting between cells rather than on them — zero is the same place for cells and for positions, and where a cell-ownership option makes the cell at zero a different width, that option says so. Two neighbouring cells share a line, and cell-ownership says which cell the line belongs to. Every conversion below divides by the cell size and, where the grid counts from 1, adds 1. Each cell-ownership option that uses positions states how position zero and shared lines are treated.",
+    "Several nearby decisions are deliberately not here — the grid's edge, sharing a cell, corner-cutting, pathfinding, a third axis, cells that are not squares, whether a sweep sees its own changes. The note at the end says where each lives."
+  ],
+  "questions": {
+    "origin-and-axes": {
+      "asks": "Where is this grid's first cell, and which way do its row and column numbers grow?",
+      "rationale": "Every later rule needs one shared reading of row and column numbers. This contract only carries columns that grow right; state a left-growing grid in your own prose.",
+      "options": {
+        "top-left": {
+          "meaning": "The first cell is the top-left corner. Column numbers grow right, and row numbers grow down."
+        },
+        "bottom-left": {
+          "meaning": "The first cell is the bottom-left corner. Column numbers grow right, and row numbers grow up."
+        },
+        "unbounded-right-and-down": {
+          "meaning": "There is no first cell or corner. The grid continues through negative and positive numbers. Columns grow right, and rows grow down from the cell your game calls zero."
+        },
+        "unbounded-right-and-up": {
+          "meaning": "There is no first cell or corner. The grid continues through negative and positive numbers. Columns grow right, and rows grow up from the cell your game calls zero."
+        }
+      }
+    },
+    "coordinate-order": {
+      "asks": "When you write a cell with two numbers, does the row or column come first?",
+      "rationale": "Swapping the two numbers turns rows into columns. A square grid can hide that mistake, so the order must be clear.",
+      "options": {
+        "column-first": {
+          "meaning": "The column comes first. The pair (3, 5) means column 3, row 5."
+        },
+        "row-first": {
+          "meaning": "The row comes first. The pair (3, 5) means row 3, column 5."
+        },
+        "not-applicable": {
+          "meaning": "The game never names a cell with a pair of numbers. It uses a layout, cell contents, or another name instead."
+        }
+      }
+    },
+    "counting-starts-at": {
+      "asks": "Do the first row and column use zero or one?",
+      "rationale": "Starting at zero or one changes every written cell address. Naming it prevents an off-by-one shift between the design and the build.",
+      "when": {
+        "flag": {
+          "origin-and-axes": [
+            "top-left",
+            "bottom-left"
+          ]
+        }
+      },
+      "options": {
+        "zero": {
+          "meaning": "The first row and column are numbered zero. A ten-cell row runs from zero through nine."
+        },
+        "one": {
+          "meaning": "The first row and column are numbered one. A ten-cell row runs from one through ten."
+        }
+      }
+    },
+    "cell-ownership": {
+      "asks": "A point lies exactly on the line between two cells. Which cell owns it?",
+      "rationale": "A boundary point needs one owner. Different rounding rules can place the same point in different cells, especially beside zero.",
+      "options": {
+        "next-cell-along": {
+          "meaning": "The cell with the larger number owns the line. The line where cell five ends and cell six begins belongs to cell six, on either side of zero.",
+          "semantics": "Divide the position by cell-size and round down, then add one when counting-starts-at is one. A boundary position belongs to the cell with the larger coordinate."
+        },
+        "truncate-toward-zero": {
+          "meaning": "The cell farther from zero owns the line. The zero cell reaches one cell-size to each side, so it is twice as wide as the others.",
+          "semantics": "Divide the position by cell-size and truncate toward zero, then add one when counting-starts-at is one. Coordinate zero spans one cell-size on each side."
+        },
+        "cell-centres-are-whole-numbers": {
+          "meaning": "Whole numbers mark cell centres. A point halfway between two centres belongs to the cell with the larger number.",
+          "semantics": "Cell coordinates name centres. Divide the position by cell-size and round to the nearest whole coordinate, taking an exact half toward the larger coordinate, then add one when counting-starts-at is one."
+        },
+        "not-applicable": {
+          "meaning": "Your rules only use whole cells, never positions between them. No boundary choice is needed."
+        }
+      }
+    },
+    "distance-metric": {
+      "asks": "When your rules say nearest or within some distance, how do they measure between cells?",
+      "rationale": "Games often use several distance rules. This answer only controls what your written rules mean by nearest or within a distance.",
+      "options": {
+        "no-diagonals": {
+          "meaning": "Add the steps across and down the grid (Manhattan). A cell two across and one up is three steps away."
+        },
+        "diagonals-count-the-same": {
+          "meaning": "Count the larger of the across and down steps (Chebyshev). A cell two across and one up is two steps away."
+        },
+        "octile": {
+          "meaning": "Straight steps cost one, and diagonal steps cost the square root of two (octile). The distance is the cheapest mix of those steps. Your game's comparison rule decides when two distances count as equal.",
+          "semantics": "For absolute coordinate differences dx and dy, multiply the smaller difference by the square root of two minus one (about 0.414), then add the result to the larger difference. Equal means equal at whatever precision this game compares its distances with. For straight-line and octile distance, the adoption must state that comparison rule in the distance test's verification scope."
+        },
+        "straight-line": {
+          "meaning": "Measure a straight line between the cell centres (Euclidean). Use position units when positions exist; otherwise use cells. Your game's comparison rule decides when two distances count as equal.",
+          "semantics": "Equal means equal at whatever precision this game compares its distances with. For straight-line and octile distance, the adoption must state that comparison rule in the distance test's verification scope."
+        },
+        "not-applicable": {
+          "meaning": "No rule measures distance between cells. Rules may still use neighbours, named shapes, or links."
+        }
+      },
+      "_note_not_a_metric": "Three shapes can look like answers here but are not. Measuring from a cell to a line or region is a point-to-region test, not a distance between two cells. A rule that reaches across a row, down a column, on one diagonal, or through a rectangle or box describes a target pattern. Distance over a passable route depends on what blocks the route, so state that rule in your game's prose and answer here with the measure those route lengths use."
+    },
+    "adjacency-for-movement": {
+      "asks": "From one cell, which other cells can a thing reach in one step?",
+      "rationale": "Movement neighbours do not follow automatically from distance or effect range. A game can use different cells for each.",
+      "options": {
+        "four-neighbours": {
+          "meaning": "Only the four cells sharing an edge are one step away. A diagonal cell cannot be reached in one step."
+        },
+        "eight-neighbours": {
+          "meaning": "All eight surrounding cells are one step away. A thing may move across an edge or diagonally across a corner."
+        },
+        "not-applicable": {
+          "meaning": "Nothing moves one cell at a time. Things are placed directly or move freely while the grid only reads their final cell."
+        }
+      }
+    },
+    "adjacency-for-effects": {
+      "asks": "When a rule says two cells are next to each other, do corners count?",
+      "rationale": "Movement and effects can count neighbours differently. This answer keeps words such as next to from changing meaning between rules.",
+      "options": {
+        "four-neighbours": {
+          "meaning": "Only cells sharing an edge count as neighbours. Two cells touching only at a corner are not next to each other."
+        },
+        "eight-neighbours": {
+          "meaning": "All eight surrounding cells count as neighbours. Cells touching only at a corner are still next to each other."
+        },
+        "not-applicable": {
+          "meaning": "No rule uses next to by itself. Each rule names the cells it means, or no rule asks whether cells are neighbours."
+        }
+      },
+      "_note_ranged": "Next to means one cell away. A rule that reaches everything within two or three cells is asking a different question, and this contract does not carry it: say the reach in your own prose, using this game's distance answer. A reach parameter is the likeliest addition to a version 2."
+    },
+    "enumeration-order": {
+      "asks": "In what order does an authored layout list its cells?",
+      "rationale": "Drawing, updates, and save files may use different orders. This answer covers only layouts designers write and read.",
+      "options": {
+        "rows-then-columns": {
+          "meaning": "List every cell in one row before starting the next row. Start with the smallest row and column numbers. A text map with one line per row already uses this order."
+        },
+        "columns-then-rows": {
+          "meaning": "List every cell in one column before starting the next column. Start with the smallest row and column numbers."
+        },
+        "block-tiled": {
+          "meaning": "List cells inside blocks such as chunks, regions, or screens. Your game's prose states block size, block order, and the order inside each block."
+        },
+        "not-applicable": {
+          "meaning": "No authored layout lists the grid's cells. No order is needed for the material designers write and read."
+        }
+      }
+    },
+    "tie-break-between-cells": {
+      "asks": "A rule rates two cells equally and must pick one. How does it decide?",
+      "rationale": "Equal choices are common and rarely written down. A fixed answer stops two builds from choosing different cells.",
+      "options": {
+        "lower-column-wins": {
+          "meaning": "The cell with the smaller column number wins. Between a cell in column 2 and a cell in column 4, the column-2 cell wins and the column-4 cell loses. If columns match, the smaller row number wins."
+        },
+        "lower-row-wins": {
+          "meaning": "The cell with the smaller row number wins. Between a cell in row 2 and a cell in row 4, the row-2 cell wins and the row-4 cell loses. If rows match, the smaller column number wins."
+        },
+        "direction-order": {
+          "meaning": "Walk the grid-fixed direction words in their chosen order. The first direction that points to a tied neighbour wins. Use another answer when tied cells are not neighbours."
+        },
+        "arrival-order": {
+          "meaning": "The candidate that arrived first wins. Your game names whether arrival means creation, placement, storage, or entering play. The same run repeats the choice, but save and reload follow your persistence rules. The validator cannot check this; a reviewer does."
+        },
+        "named-priority-list": {
+          "meaning": "The candidate kind listed first in your game's priority order wins. Cell position never decides."
+        },
+        "deliberately-arbitrary": {
+          "meaning": "Either candidate may win, and players must not depend on which one. Replaying the same run repeats the choice, but loading a save may not."
+        },
+        "random-from-a-declared-seed": {
+          "meaning": "Draw one candidate from a random stream declared by your game. The same run and replay draw the same candidate. The validator cannot check this; a reviewer does."
+        },
+        "player-chooses": {
+          "meaning": "The player chooses the candidate. If the game cannot ask, the rule does nothing instead of guessing. The validator cannot check this; a reviewer does."
+        },
+        "not-applicable": {
+          "meaning": "No rule ever chooses one of two equal candidates. The situation cannot happen, or the rule affects every tied candidate."
+        }
+      },
+      "_note_worked_case": "A machine-checkable tie-break must include one worked case in the adoption's verification scope."
+    },
+    "turn-direction": {
+      "asks": "When your rules turn a facing by an amount, which way does the amount go on the grid?",
+      "rationale": "Axis direction does not decide turn direction. Naming clockwise or counter-clockwise prevents equivalent formulas from reading as opposite rules.",
+      "options": {
+        "clockwise": {
+          "meaning": "A positive turn goes clockwise on the grid. A rotated view may show it differently, but the grid rule stays the same."
+        },
+        "counter-clockwise": {
+          "meaning": "A positive turn goes counter-clockwise on the grid. A rotated view may show it differently, but the grid rule stays the same."
+        },
+        "not-applicable": {
+          "meaning": "No rule turns a facing by an amount. A piece may still snap directly toward movement or a target."
+        }
+      }
+    }
+  },
+  "declares": {
+    "values": {
+      "cell-size": {
+        "description": "The length of one cell in your position units. For centre-based cells, measure from one centre to the next. Use a positive size when rules read positions. Use zero when they only read whole cells. Changing this number changes which cell holds a position."
+      }
+    },
+    "rows": {
+      "directions": {
+        "description": "List every direction word your game uses. Each row says whether it follows the grid or a piece. A grid direction also says where it points. An empty list means the game names no directions. If ties use this order, list every grid-fixed neighbour that can tie. The validator cannot check this; a reviewer does.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "The direction word your game uses, such as north, forward, or starboard. Write it in lowercase with hyphens between words."
+          },
+          "frame": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "grid",
+              "piece"
+            ],
+            "description": "Whether the direction follows the grid or a piece. A grid direction always points the same way: north stays north. A piece direction changes when that piece turns: forward, left, and behind turn with it."
+          },
+          "points": {
+            "type": "string",
+            "when": {
+              "row": {
+                "frame": [
+                  "grid"
+                ]
+              }
+            },
+            "options": [
+              "up",
+              "down",
+              "left",
+              "right",
+              "up-left",
+              "up-right",
+              "down-left",
+              "down-right"
+            ],
+            "description": "Where this grid-fixed direction points on the grid. Omit it for a direction that follows a piece. This does not decide whether movement is allowed that way."
+          },
+          "order": {
+            "type": "integer",
+            "when": {
+              "flag": {
+                "tie-break-between-cells": [
+                  "direction-order"
+                ]
+              },
+              "row": {
+                "frame": [
+                  "grid"
+                ]
+              }
+            },
+            "unique": true,
+            "description": "This direction's place in the tie-breaking walk. One is tried first. Give each grid-fixed direction a different number. Use it only when ties follow direction order."
+          }
+        }
+      }
+    }
+  },
+  "rules": {
+    "cell-size-not-negative": "cell-size >= 0"
+  },
+  "pack": "sha256:b17529b6bce460ee83f7c460f2e73c39d5c32051637613867e42ef85b6e0996a",
+  "_note_authoring": "Drafted 2026-08-19 as pipeline stage 2, then redrafted the same day against three reviews at once: an adversarial red-team (verdict: redraft), a cold designer read (adopt-blocked), and the external tally in forge/findings/grid-tally-2026-08.md (verdict: hold publication, widen, then publish). The scope is the one the steward approved in forge/contracts/ROSTER.md entry 3. Three changes to that scope, each called out for the steward in DISCOVERIES.md: the approved direction-count value is dropped (the direction rows are the count, and no check can hold a number against a row count); one small question is added (counting-starts-at) because both reviews called the numbering base a real divergence that the first draft neither asked nor excluded; and unbounded grids are now in scope, because the tally found six of thirteen external artifacts have no first cell and the first draft could not record any of them.",
+  "_note_not_in_this_contract": "Each of these was considered and left out, with where it lives. (1) What happens when a move leaves the grid — four corpus packages answer it by four different systems (remove the piece, bounce, reset the room, do nothing), so it is independent structural deviation and belongs to the packages. (2) What may share one cell, and what happens when two things enter one cell at the same moment — the second is unaddressed in all thirteen corpus packages and is an arbitration question, so both wait on event-resolution-1. (3) Whether a full-board sweep sees the changes it is making — a real hole a cold reader found, and one corpus package answers it both ways in different rules (a snapshot for a line push, immediately for a cell-by-cell sweep), which makes it a property of the rule rather than of the grid; it is the top question for the next revision and belongs with event-resolution-1's simultaneity machinery if it recurs. (4) Corner-cutting: dungeon-map now includes diagonal movement beside walls and doors. Whether a diagonal move may pass between blocked straight neighbours stays in the game's own movement prose because it depends on obstacle rules, not grid adjacency alone. (5) Pathfinding, and a route planner's own distance estimate: craft. (6) A third axis: four of thirteen external sources have one, and this definition is two-dimensional throughout — a game with height keeps its own prose, and a sibling definition is the honest route if it recurs. (7) Hexagonal cells and isometric cell shapes change what the decisions here mean and need a sibling definition. An isometric camera over square cells is fully supported; racing-track-grid.json demonstrates one. (8) Where the grid sits in the world: this contract has zero in the same place for cells and for positions. A grid offset from that, or one that moves, is out of scope. (9) A reach of more than one cell — see the adjacency-for-effects note. (10) Numbering that grows leftward, observed nowhere in twenty-six surveyed artifacts. (11) Multi-cell footprints, such as the anchor rule for a 2x2 building, belong in the game's placement rules. (12) Wraparound edges belong in the game's edge rules because they change both adjacency and distance.",
+  "_note_review_fixes": "Two things a reviser must keep in step. First, the cell-ownership options: the first draft's options each contradicted their own headline, because the line between cells 5 and 6 is cell 6's nearer-origin edge, so owning your nearer edge hands the line to the LARGER cell. The options are now stated as rules with no headline noun-phrase, the ids are derived from the rules, and the boundary test states the winning rule as a worked case with real cell numbers on both sides of zero. Second, the phrase smaller number rather than nearer the origin corner: an unbounded grid has no corner, so any option text that counts from one is false for two of the four answers to the first question.",
+  "_note_knob_bounds": "Under v0.6 cell-size was a constant value with an old metadata pin and a separate rule. Under v0.7 it is a plain number, the non-negative rule is checked over that number, and contract values are Fixed rather than personalization targets.",
+  "_note_named_rows": "The directions id field carries a name the game coins rather than a value chosen from a list, which the steward ruled legal on 2026-08-19. The discipline line: the row NAMES a thing and the other fields ANSWER the questions about it — the word is the game's, where it points is the contract's closed choice. The external tally vindicates the shape twice: one format ships eight named compass directions with no statement of where any of them points, and one engine ships sixteen named directions with a fixed integer order.",
+  "answers": {
+    "origin-and-axes": "bottom-left",
+    "coordinate-order": "column-first",
+    "counting-starts-at": "one",
+    "cell-ownership": "not-applicable",
+    "distance-metric": "not-applicable",
+    "adjacency-for-movement": "eight-neighbours",
+    "adjacency-for-effects": "not-applicable",
+    "enumeration-order": "rows-then-columns",
+    "tie-break-between-cells": "player-chooses",
+    "turn-direction": "not-applicable"
+  },
+  "values": {
+    "cell-size": 0
+  },
+  "rows": {
+    "directions": [
+      {
+        "id": "forward",
+        "frame": "piece"
+      }
+    ]
+  },
+  "verification": {
+    "one-step-moves": {
+      "seeds": [
+        "chess-king-centre",
+        "chess-king-centre-b"
+      ],
+      "scope": "the king's one-cell moves from every central square c3 through f6 on an otherwise empty 8x8 board, before checks and occupied squares remove illegal destinations"
+    }
+  },
+  "_note_this_file": "A worked adoption of grid-and-direction-1 for a familiar 8x8 chess board. The copied definition comes first as v0.7 requires. The answers use pieces, files, and ranks so each convention can be checked against the board a reader already knows.",
+  "_note_answers": "The first cell is a1 at the bottom-left. Algebraic notation writes the file before the rank; this contract reads file a as column one and rank 1 as row one. Pieces occupy whole squares, so positions between squares and cell size are not used. Chess has no general rule that measures nearest or within between squares. Its legal movement patterns stay with each piece: a knight's jump is not grid adjacency. For one-cell movement, a king can use all eight surrounding squares before checks and occupied squares remove illegal moves. No chess rule uses next to on its own; the squares a king guards come from its own one-cell move pattern. The authored layout lists rank 1 first and reads each rank from file a through file h. When equal legal choices remain, the player chooses the piece and destination. Pieces do not turn a facing by an amount. Pawns use the piece-relative word forward.",
+  "_note_provenance": "Based on the standard 8x8 chess board and algebraic notation: files a through h run across the board from White's left, ranks 1 through 8 run upward, and a square is named file then rank. For the contract's numeric grid, file a maps to column one. The adoption's authored layout is rank 1 through rank 8, with files a through h inside each rank."
+}

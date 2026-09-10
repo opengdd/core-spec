@@ -21,134 +21,136 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
 <link rel="stylesheet" href="/assets/site.css">
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
-<link rel="stylesheet" href="/authoring-tool/authoring.css?v=de258b84a459">
+<link rel="stylesheet" href="/authoring-tool/authoring.css?v=9e90533a9ecc">
+<link rel="stylesheet" href="/authoring-tool/src/workbench/workbench.css?v=9e90533a9ecc">
 <style>
 .opengdd-authoring,
 .opengdd-author-file-meta a { font-family: var(--font-body); }
-/* The tool page is the one wide page: four panels need the room. */
-.wrap-tool { max-width: 112rem; margin: 0 auto; padding: 0 1.4rem; }
-.site-tool { margin-top: 1.2rem; }
-.site-tool-grid {
+html, body { height: 100%; }
+body {
   display: grid;
-  grid-template-columns: minmax(13rem, 0.22fr) minmax(20rem, 1fr) minmax(19rem, 0.33fr) minmax(18rem, 0.31fr);
-  gap: 0.6rem;
-  height: min(78vh, 60rem); min-height: 32rem;
-  margin-top: 0.6rem;
+  height: 100vh;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
 }
-/* Teal frames: the panels, the toolbar, and the status strip share one
-   frame so they read as one instrument on both the light and dark site. */
-.site-tool-header, .site-tool-status.opengdd-author-region {
-  border: 1px solid var(--accent); border-radius: var(--r-md); overflow: hidden;
+.authoring-tool-page {
+  display: grid;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr);
+  padding: 0.7rem 0 0;
+  overflow: hidden;
 }
-.site-tool-header.opengdd-authoring { min-height: 0; }
-.site-tool-panel {
-  display: flex; flex-direction: column;
-  min-width: 0; min-height: 0; overflow: hidden;
-  border: 1px solid var(--accent); border-radius: var(--r-md);
-  background: var(--panel);
+.authoring-tool-title {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
-.site-tool-panel > h2 {
-  margin: 0; padding: 0.45rem 0.75rem;
-  font: 600 0.72rem/1.4 var(--font-head); letter-spacing: 0.06em; text-transform: uppercase;
-  color: var(--canvas); background: var(--deep-teal);
+#workbench { width: 100%; height: 100%; min-height: 0; }
+.site-footer { display: none; }
+/* Teal frames: the toolbar, each
+   panel and the status strip share one frame so they read as one instrument
+   on both site themes. These gaps and compact header dimensions are the
+   frame geometry; panel overflow clips content to the rounded corners while
+   the shell's inner regions remain its scroll containers. Column tracks,
+   resizers, drawers, the band and sheet stay the shell's layout. */
+.opengdd-workbench-supported {
+  box-sizing: border-box;
+  padding: 0 0.6rem 0.6rem;
+  row-gap: 0.6rem;
+  background: var(--opengdd-author-surface-muted);
 }
-.site-tool-region { position: relative; flex: 1; min-height: 0; overflow: auto; }
-.site-tool-context:empty { display: none; }
-/* Fill rules, mirroring the workbench shell's own stylesheet: the editor
-   takes the prose panel with validation docked under it; the file tree
-   and the extension inspector take their panels' full height. */
-.site-tool-panel-prose .site-tool-region { display: grid; grid-template-rows: minmax(0, 1fr) auto; overflow: hidden; }
-.site-tool-panel-prose .opengdd-author-editor-panel { min-height: 0; }
-.site-tool-panel-prose .opengdd-author-inspector { max-height: 12rem; border: 0; border-top: 1px solid var(--line); }
-.site-tool-panel-explorer .site-tool-region { overflow: hidden; }
-.site-tool-panel-explorer .opengdd-author-tree-panel { display: flex; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; border: 0; }
-.site-tool-panel-explorer .opengdd-author-tree { flex: 1; min-height: 0; overflow: auto; }
-.site-tool-panel-outline .opengdd-author-outline { height: 100%; overflow: auto; }
-.site-tool-panel-inspector .site-tool-region { display: grid; }
-.site-tool-panel-inspector .opengdd-author-panel-inspector { box-sizing: border-box; min-height: 100%; overflow: auto; padding: 1rem; }
-.site-tool-status.opengdd-author-region { height: auto; min-height: 0; }
-/* Extension panels render plain headings and paragraphs; keep the site's
-   page-level heading scale out of them. */
-.site-tool-panel-inspector .opengdd-author-panel-inspector h2 { margin: 0 0 0.5rem; font: 600 0.92rem/1.4 var(--font-body); }
-.site-tool-panel-inspector .opengdd-author-panel-inspector h2 code { font-size: 0.88rem; }
-.site-tool-panel-inspector .opengdd-author-panel-inspector p { margin: 0.35rem 0; font-size: 0.82rem; }
-.site-tool-status { margin-top: 0.6rem; }
-@media (max-width: 1100px) {
-  .site-tool-grid {
-    grid-template-columns: minmax(13rem, 0.32fr) minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) minmax(0, 0.7fr);
-  }
+.opengdd-workbench-header,
+.opengdd-workbench-status,
+.opengdd-workbench-panel {
+  border: 1px solid var(--accent);
+  border-radius: var(--r-md);
 }
-@media (max-width: 760px) {
-  .site-tool-grid { grid-template-columns: 1fr; grid-template-rows: none; height: auto; }
-  .site-tool-panel { height: 24rem; }
+.opengdd-workbench-header { min-height: 0; padding: 0.5rem 0.8rem; background: var(--opengdd-author-surface); }
+.opengdd-workbench-status { border-top: 1px solid var(--accent); background: var(--opengdd-author-surface); }
+.opengdd-workbench-grid { column-gap: 0.25rem; }
+.opengdd-workbench-panel { overflow: hidden; }
+.opengdd-workbench-resizer { background: transparent; border-radius: 999px; }
+.opengdd-workbench-resizer:hover,
+.opengdd-workbench-resizer:focus-visible { background: var(--accent); }
+.opengdd-workbench-panel-header,
+.opengdd-workbench-inspector-band-header,
+.opengdd-workbench-inspector-sheet > header {
+  border-bottom: 0;
+  background: var(--deep-teal);
+  color: var(--canvas);
 }
+.opengdd-workbench-panel-header h2,
+.opengdd-workbench-inspector-band-header h2,
+.opengdd-workbench-inspector-sheet > header h2 {
+  font: 600 0.72rem/1.4 var(--font-head);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--canvas);
+}
+.opengdd-workbench-panel-header a,
+.opengdd-workbench-panel-header code,
+.opengdd-workbench-panel-header span,
+.opengdd-workbench-inspector-band-header a,
+.opengdd-workbench-inspector-band-header span { color: inherit; }
+.opengdd-workbench-panel-header .opengdd-author-file-heading,
+.opengdd-workbench-panel-header .opengdd-author-file-heading * { color: var(--canvas); }
+.opengdd-workbench-panel-header button,
+.opengdd-workbench-inspector-band-header button,
+.opengdd-workbench-inspector-sheet > header button {
+  border-color: color-mix(in srgb, var(--canvas) 35%, transparent);
+  background: transparent;
+  color: var(--canvas);
+}
+.opengdd-workbench-panel-header button:hover,
+.opengdd-workbench-inspector-band-header button:hover {
+  background: color-mix(in srgb, var(--canvas) 15%, transparent);
+}
+.opengdd-workbench-inspector-band { box-shadow: none; border-top: 1px solid var(--accent); }
+/* The validation band's summary row is its header strip. */
+.opengdd-workbench-validation-band { border-top: 1px solid var(--accent); }
+.opengdd-workbench-validation-band .opengdd-author-diagnostics summary {
+  background: var(--deep-teal);
+  color: var(--canvas);
+  letter-spacing: 0.06em;
+}
+.opengdd-workbench-validation-band .opengdd-author-diagnostics summary span:last-child { color: var(--canvas); opacity: 0.85; }
 </style>
 <script type="importmap">
-{ "imports": {
-  "opengdd-analysis": "/authoring-tool/lib/lang/tools/src/analysis.mjs?v=de258b84a459",
-  "opengdd-syntax": "/authoring-tool/lib/opengdd/conformance/package-syntax.mjs?v=de258b84a459",
-  "opengdd-file-map-host": "/authoring-tool/lib/opengdd/conformance/file-map-host.mjs?v=de258b84a459",
-  "opengdd-migrate": "/authoring-tool/lib/opengdd/conformance/migrate.mjs?v=de258b84a459",
-  "opengdd-validation": "/authoring-tool/lib/opengdd/conformance/validate-core.mjs?v=de258b84a459",
-  "opengdd-authoring-version": "/authoring-tool/src/version.mjs?v=de258b84a459"
-} }
+{
+  "imports": {
+    "opengdd-analysis": "/authoring-tool/lib/lang/tools/src/analysis.mjs?v=9e90533a9ecc",
+    "opengdd-syntax": "/authoring-tool/lib/opengdd/conformance/package-syntax.mjs?v=9e90533a9ecc",
+    "opengdd-file-map-host": "/authoring-tool/lib/opengdd/conformance/file-map-host.mjs?v=9e90533a9ecc",
+    "opengdd-migrate": "/authoring-tool/lib/opengdd/conformance/migrate.mjs?v=9e90533a9ecc",
+    "opengdd-validation": "/authoring-tool/lib/opengdd/conformance/validate-core.mjs?v=9e90533a9ecc",
+    "opengdd-authoring-version": "/authoring-tool/src/version.mjs?v=9e90533a9ecc"
+  }
+}
 </script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/">Learn</a>
-      <a href="/spec/">Spec</a>
-      <a href="/standard/">Standard</a>
+      <a href="/contracts/">Contracts</a>
+      <a href="/spec/">Specification</a>
       <a href="/authoring-tool/" aria-current="page">Authoring tool</a>
       <a href="/about/">About</a>
       <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
     </nav>
   </div>
 </header>
-<main>
-<div class="wrap-tool">
-<h1>The authoring tool</h1>
-<p class="note"><strong>Preview v0.2 · for OpenGDD 0.7 · local-first.</strong> Everything on this page
-runs in your browser: your files never leave it. Drafts save in this
-browser, the tool checks conformance as you write, and "Export ZIP"
-downloads a portable copy. Tic-tac-toe opens as a safe example to
-explore; create or import packages and switch among them with the
-package selector.</p>
-</div>
-<div class="wrap-tool site-tool">
-<div class="site-tool-header" id="authoring-tool"></div>
-<div class="site-tool-grid">
-  <section class="site-tool-panel site-tool-panel-explorer" aria-label="Package files">
-    <h2>Files</h2>
-    <div class="site-tool-region" data-tool-region="explorer"></div>
-    <div class="site-tool-context" data-tool-region="context"></div>
-  </section>
-  <section class="site-tool-panel site-tool-panel-prose" aria-label="Prose">
-    <h2>Prose</h2>
-    <div class="site-tool-region" data-tool-region="prose"></div>
-  </section>
-  <section class="site-tool-panel site-tool-panel-outline" aria-label="Outline">
-    <h2>Outline</h2>
-    <div class="site-tool-region" data-tool-region="outline"></div>
-  </section>
-  <section class="site-tool-panel site-tool-panel-inspector" aria-label="Inspector">
-    <h2>Inspector</h2>
-    <div class="site-tool-region" data-tool-region="inspector"></div>
-  </section>
-</div>
-<footer class="site-tool-status" data-tool-region="status" aria-label="Package status"></footer>
+<main id="main" class="authoring-tool-page">
+<h1 class="authoring-tool-title">The authoring tool</h1>
+<div id="workbench" class="opengdd-workbench">
+  <p class="opengdd-workbench-loading">Write and check a package in your browser. Files stay in this browser; nothing is uploaded. The <a href="/get-started/">Get started</a> guide writes a first package. The tool needs a browser with JavaScript modules and import-map support.</p>
 </div>
 <script type="module">
-import { mountAuthoringTool } from "/authoring-tool/src/tool.mjs?v=de258b84a459";
-import contractPanel from "/authoring-tool/panels/opengdd.contract/panel.mjs?v=de258b84a459";
-import collectionPanel from "/authoring-tool/panels/opengdd.collection/panel.mjs?v=de258b84a459";
-import recordFormPanel from "/authoring-tool/panels/opengdd.record-form/panel.mjs?v=de258b84a459";
-import inContextPanel from "/authoring-tool/panels/opengdd.in-context/panel.mjs?v=de258b84a459";
-import notesPanel from "/authoring-tool/panels/example.notes/notes.mjs?v=de258b84a459";
+import { mountWorkbenchShell } from "/authoring-tool/src/workbench/shell.mjs?v=9e90533a9ecc";
+import panels from "/authoring-tool/panels/index.mjs?v=9e90533a9ecc";
 
 const fetchJson = async (url) => {
   const response = await fetch(url);
@@ -161,7 +163,7 @@ const fetchText = async (url) => {
   return response.text();
 };
 
-const SCHEMA_BASE = "/schema/core/v0.7/";
+const SCHEMA_BASE = "/schema/core/v0.8/";
 const requiredSchemaNames = [
   "manifest.schema.json", "tuning.schema.json", "personalization.schema.json",
   "collection.schema.json", "direction.schema.json", "opengdd-build.schema.json",
@@ -178,14 +180,12 @@ const loadSchemas = () => schemaRequest ??= Promise.all(
   return Object.fromEntries(entries);
 }).catch((error) => { schemaRequest = undefined; throw error; });
 
-const EXAMPLE_BASE = "/authoring-tool/example/";
-const exampleFiles = ["manifest.json","tuning.json","01-overview.md","02-mechanics.md","04-presentation.md","direction.json","05-build-plan.md"];
-
-const region = (name) => document.querySelector('[data-tool-region="' + name + '"]');
+const exampleSources = [{"id":"tic-tac-toe","title":"Tic-Tac-Toe","base":"/authoring-tool/example/","files":["manifest.json","tuning.json","01-overview.md","02-mechanics.md","04-presentation.md","direction.json","05-build-plan.md"],"revision":"3d122da9a127"}];
+const exampleList = exampleSources.map(({ id, title, revision }) => ({ id, title, revision }));
 
 // The tool follows the site's theme toggle, not the operating system: the
 // widget honors an ancestor's opengdd-author-theme--light/--dark class.
-const shellElement = document.querySelector(".site-tool");
+const shellElement = document.querySelector("#workbench");
 const syncTheme = () => {
   const dark = document.documentElement.dataset.theme === "dark";
   shellElement.classList.toggle("opengdd-author-theme--dark", dark);
@@ -194,57 +194,56 @@ const syncTheme = () => {
 syncTheme();
 new MutationObserver(syncTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-// A catalogue "Open in the authoring tool" link arrives as ?contract=<slug>.
-// The definition and its pack live on this same site; the tool opens its
+// A catalogue link supplies a contract and, optionally, a filled adoption.
+// The source and its pack live on this same site; the tool opens its
 // Add-a-contract dialog with them once the package is ready.
 const contractSlug = new URLSearchParams(location.search).get("contract") || "";
-const initialContract = /^[a-z0-9][a-z0-9-]{0,63}$/.test(contractSlug) ? async () => {
-  const definitionText = await fetchText("/contracts/" + contractSlug + "/core.json");
+const adoptionSlug = new URLSearchParams(location.search).get("adoption") || "";
+const validContractName = value => /^[a-z0-9][a-z0-9-]{0,63}$/.test(value);
+const initialContract = validContractName(contractSlug) && (!adoptionSlug || validContractName(adoptionSlug)) ? async () => {
+  const sourceFilename = (adoptionSlug || "core") + ".json";
+  const definitionText = await fetchText("/contracts/" + contractSlug + "/" + sourceFilename);
   let packText;
   try {
     const definition = JSON.parse(definitionText);
     const packResponse = await fetch("/contracts/" + contractSlug + "/" + definition.contract + "-" + definition.version + ".pack.json");
     if (packResponse.ok) packText = new Uint8Array(await packResponse.arrayBuffer());
   } catch {}
-  return { definitionText, packText };
+  return { definitionText, packText, sourceFilename };
 } : undefined;
 
-mountAuthoringTool(document.querySelector("#authoring-tool"), {
+mountWorkbenchShell(shellElement, {
   initialContract,
-  headingLevel: 2,
-  regions: {
-    explorer: region("explorer"),
-    context: region("context"),
-    prose: region("prose"),
-    outline: region("outline"),
-    inspector: region("inspector"),
-    status: region("status"),
-  },
-  // Policy stated explicitly: the site host keeps the widget's simple
-  // package flow (tic-tac-toe opens; no cold-start chooser, no host undo).
-  capabilities: { protectedFiles: true, workbenchLabels: true, hostUndo: false, delete: true, coldStart: false },
-  panels: [contractPanel, collectionPanel, recordFormPanel, inContextPanel, notesPanel],
+  contractsCatalogueUrl: "/contracts/",
+  panels,
   schemas: loadSchemas,
-  defaultPackageId: "tic-tac-toe",
-  async listPackages() {
-    return [{ id: "tic-tac-toe", title: "Tic-Tac-Toe", revision: "13a2faecafb7" }];
-  },
+  packages: exampleList,
   async loadPackage(id) {
-    if (id !== "tic-tac-toe") throw new Error("Unknown package: " + id);
-    const files = await Promise.all(exampleFiles.map(async (path) => ({
-      path, text: await fetchText(EXAMPLE_BASE + path + "?v=de258b84a459"),
+    const example = exampleSources.find(item => item.id === id);
+    if (!example) throw new Error("Unknown package: " + id);
+    const files = await Promise.all(example.files.map(async (path) => ({
+      path, text: await fetchText(example.base + path + "?v=9e90533a9ecc"),
     })));
-    return { id, title: "Tic-Tac-Toe", path: EXAMPLE_BASE, files };
+    return { id, title: example.title, path: example.base, files };
   },
-  readerUrl(_packagePath, file) {
-    return EXAMPLE_BASE + file + "?v=de258b84a459";
-  },
+  // No reading view exists on the site, so the prose header shows no
+  // "Open in reader" link here (the dev server has one at /read/).
+  readerUrl: null,
+  links: [
+    { href: "https://github.com/opengdd/core-spec/tree/main/authoring", label: "Source (MIT)" },
+    { href: "/get-started/", label: "Get started" },
+    // A new Discussion with the tool version in the title. Nothing from the
+    // package travels with the link; the person writes the report.
+    { href: "https://github.com/opengdd/core-spec/discussions/new?category=authoring-tool&title=Authoring%20tool%200.5%3A%20", label: "Report a problem" }
+  ],
+  // The site toggle is the only theme control on the published page.
+  showTheme: false,
 });
 </script>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
-    <span><a href="/about/">About the standard</a></span>
+    <span><a href="/about/">About OpenGDD</a></span>
     <span>Prose CC-BY 4.0 · code MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>

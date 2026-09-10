@@ -1,0 +1,2311 @@
+{
+  "contract": "suspension-and-catch-up",
+  "version": 1,
+  "templates": [
+    {
+      "id": "suspension-interval-boundaries",
+      "title": "a suspension interval has one beginning and one return",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {
+        "interval-start": {
+          "flag": "while-in-the-background",
+          "map": {
+            "counts-as-away": "at the earlier background transition",
+            "keeps-playing": "at closure only, since background time stays on the ordinary update path",
+            "waits-until-closed": "at closure only, since the open-background interval is held"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "a covered close-and-return cycle after the selected background handling",
+        "when": [
+          "the lifecycle records the interval boundaries"
+        ],
+        "then": [
+          "the suspension interval begins once, {{bind:interval-start}}, and ends once at return processing, at the return clock reading where a clock row exists",
+          "no time before its beginning or after its end enters that interval"
+        ],
+        "diagnostics": [
+          "{{instance}}-suspension-interval"
+        ]
+      },
+      "text": "A suspension interval begins once, {{bind:interval-start}}, and ends once at return processing, at the return clock reading where a clock row exists. The interval contains no time outside those boundaries."
+    },
+    {
+      "id": "suspension-snapshot-vocabulary",
+      "title": "the suspension snapshot is one coherent starting state",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "distinguishable values for every in-scope local item when a suspension interval begins",
+        "when": [
+          "the suspension snapshot is captured"
+        ],
+        "then": [
+          "the snapshot contains the same-instant starting value of every in-scope local item",
+          "where a clock row exists, its starting reading belongs to the same snapshot batch; without a clock row, the reading clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-suspension-snapshot"
+        ]
+      },
+      "text": "The suspension snapshot is one coherent starting state for every in-scope local item. Where this adoption has a clock row, the starting reading is captured in the same batch; without one, that clause asserts nothing."
+    },
+    {
+      "id": "pending-reward-vocabulary-and-expiry",
+      "title": "{{row.id}} stays pending until acceptance or expiry",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "return-rewards",
+      "bindings": {
+        "returns": {
+          "row_field": "delivery",
+          "map": {
+            "automatic": "the game returns",
+            "player-claims": "the game returns and a later claim is attempted"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "a created {{row.id}} reward that its destination has not accepted",
+        "when": [
+          "{{bind:returns}}"
+        ],
+        "then": [
+          "the reward is pending while it has been created but not accepted",
+          "without an expiry rule, an unclaimed reward never expires"
+        ],
+        "diagnostics": [
+          "{{instance}}-reward-report"
+        ]
+      },
+      "text": "A created {{row.id}} reward is pending until its destination accepts it. Without an expiry rule, an unclaimed reward never expires."
+    },
+    {
+      "id": "expiry-deadline-enforced",
+      "title": "{{row.id}} is removed when its cited deadline expires",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "return-rewards",
+      "bindings": {
+        "expiry-address": {
+          "row_field": "delivery",
+          "map": {
+            "automatic": "{{row.expires-declared-in}}",
+            "player-claims": "{{row.expires-declared-in}}"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "an unclaimed {{row.id}} reward before, at, and after the deadline named at {{bind:expiry-address}}",
+        "when": [
+          "the deadline is checked at return and immediately before its claim event"
+        ],
+        "then": [
+          "the unclaimed reward is removed at that deadline",
+          "the expired reward is reported once as expired",
+          "a claim after the deadline delivers nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-reward-report",
+          "{{instance}}-return-display-trace"
+        ]
+      },
+      "text": "An unclaimed {{row.id}} reward is removed at the deadline named at {{bind:expiry-address}}, checked at return and immediately before its claim event. The expired reward is reported once as expired, and a claim after the deadline delivers nothing."
+    },
+    {
+      "id": "background-counts-as-away",
+      "title": "background time begins the suspension interval",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "while-in-the-background": [
+            "counts-as-away"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the game open with distinguishable covered state before it enters the background",
+        "when": [
+          "the background transition occurs and the game later returns"
+        ],
+        "then": [
+          "the suspension interval begins at the background transition",
+          "ordinary updates do not also apply any time in that interval"
+        ],
+        "diagnostics": [
+          "{{instance}}-suspension-interval",
+          "{{instance}}-return-timeline"
+        ]
+      },
+      "text": "The background transition begins the suspension interval. Ordinary updates do not also apply that interval, so the same time is counted once."
+    },
+    {
+      "id": "background-keeps-playing",
+      "title": "background time stays on the ordinary update path",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "while-in-the-background": [
+            "keeps-playing"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the game open in the background with observable ordinary updates",
+        "when": [
+          "a background interval passes under the platform's actual update schedule and the game returns to the foreground"
+        ],
+        "then": [
+          "ordinary updates continue, including any platform throttling",
+          "foregrounding adds no catch-up for the same interval"
+        ],
+        "diagnostics": [
+          "{{instance}}-background-update-trace",
+          "{{instance}}-return-timeline"
+        ]
+      },
+      "text": "Ordinary updates continue in the background, including platform throttling. Foregrounding adds no catch-up for that same interval."
+    },
+    {
+      "id": "background-waits-until-closed",
+      "title": "background state waits until closure",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "while-in-the-background": [
+            "waits-until-closed"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the game open in the background with distinguishable covered state",
+        "when": [
+          "a background interval passes, the game returns to the foreground, and a later closure occurs"
+        ],
+        "then": [
+          "the open-background interval receives neither ordinary updates nor catch-up",
+          "the covered state stays unchanged until closure begins the suspension interval"
+        ],
+        "diagnostics": [
+          "{{instance}}-background-update-trace",
+          "{{instance}}-suspension-snapshot"
+        ]
+      },
+      "text": "The open-background interval receives neither ordinary updates nor catch-up. Covered state stays unchanged until closure begins the suspension interval."
+    },
+    {
+      "id": "closure-captures-one-snapshot",
+      "title": "closure begins an interval and captures one snapshot",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a game closure with distinguishable covered state",
+        "when": [
+          "closure begins a suspension interval"
+        ],
+        "then": [
+          "one coherent suspension snapshot is captured before any covered local state can change",
+          "the same time is never applied by two lifecycle paths"
+        ],
+        "diagnostics": [
+          "{{instance}}-suspension-snapshot",
+          "{{instance}}-suspension-interval"
+        ]
+      },
+      "text": "Closing always begins a suspension interval. One coherent suspension snapshot is captured before covered local state can change, and the same time never follows two paths."
+    },
+    {
+      "id": "clock-starting-reading",
+      "title": "{{row.id}} starts at the higher available reading",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "clock",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a committed anchor and a starting reading supplied by {{row.clock-declared-in}}",
+        "when": [
+          "the suspension snapshot and starting reading are captured in one batch"
+        ],
+        "then": [
+          "the interval starts from the higher of the sampled reading and the committed anchor",
+          "time below the committed anchor is never replayed"
+        ],
+        "diagnostics": [
+          "{{instance}}-clock-readings",
+          "{{instance}}-suspension-snapshot"
+        ]
+      },
+      "text": "{{row.id}} is read in the suspension snapshot batch from {{row.clock-declared-in}}. The interval starts at the higher of that reading and the committed anchor, so time below the anchor is never replayed."
+    },
+    {
+      "id": "fixed-item-held-at-snapshot",
+      "title": "{{row.id}} stays at its suspension snapshot state",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "fixed-items",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} at a distinguishable state when suspension begins",
+        "when": [
+          "the game is away and then completes return processing"
+        ],
+        "then": [
+          "{{row.id}} remains at its suspension snapshot state until ordinary play resumes"
+        ],
+        "diagnostics": [
+          "{{instance}}-suspension-snapshot",
+          "{{instance}}-fixed-state-trace"
+        ]
+      },
+      "text": "{{row.id}} remains at the complete state named by {{row.state-declared-in}} from the suspension snapshot until ordinary play resumes."
+    },
+    {
+      "id": "catch-up-item-held-at-snapshot",
+      "title": "{{row.id}} waits at its suspension snapshot state",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} at a distinguishable state when suspension begins",
+        "when": [
+          "the suspension interval is still away"
+        ],
+        "then": [
+          "{{row.id}} remains at its suspension snapshot state and shows no local catch-up advance"
+        ],
+        "diagnostics": [
+          "{{instance}}-suspension-snapshot",
+          "{{instance}}-catch-up-trace"
+        ]
+      },
+      "text": "{{row.id}} remains at its suspension snapshot state while away. Local catch-up does not appear before return settlement."
+    },
+    {
+      "id": "choice-item-resolves-selection",
+      "title": "{{row.id}} resolves its cited selection",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "choice-items",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each selection condition named at {{row.choice-declared-in}} in otherwise matching runs",
+        "when": [
+          "the cited rule reaches its named selection time"
+        ],
+        "then": [
+          "the selected branch follows its matching lifecycle path",
+          "the test asserts nothing about the branch's data beyond what {{row.choice-declared-in}} is required to name"
+        ],
+        "diagnostics": [
+          "{{instance}}-choice-trace",
+          "{{instance}}-return-timeline"
+        ]
+      },
+      "text": "{{row.id}} resolves the selection at the time named by {{row.choice-declared-in}}, and the selected branch follows its matching lifecycle path. This test asserts nothing about branch data beyond what the citation is required to name."
+    },
+    {
+      "id": "continuous-item-stays-with-authority",
+      "title": "{{row.id}} stays under its cited authority",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "continuous-items",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} with distinguishable local snapshot and authority readings",
+        "when": [
+          "the cited authority changes the item after suspension begins"
+        ],
+        "then": [
+          "the return reading comes from the authority named at {{row.state-declared-in}} rather than a local prediction"
+        ],
+        "diagnostics": [
+          "{{instance}}-continuous-state-trace"
+        ]
+      },
+      "text": "{{row.id}} remains under the authority at {{row.state-declared-in}} after the snapshot. Its return reading comes from that authority, not from a local prediction."
+    },
+    {
+      "id": "catch-up-waits-for-return",
+      "title": "{{row.id}} records reach and settles only on return",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "ordinary updates stopped with {{row.id}} at its suspension snapshot state",
+        "when": [
+          "the suspension interval advances and then return processing begins"
+        ],
+        "then": [
+          "the away interval records clock reach only and shows no visible local advance",
+          "{{row.id}} begins settlement only during return processing"
+        ],
+        "diagnostics": [
+          "{{instance}}-clock-readings",
+          "{{instance}}-catch-up-trace"
+        ]
+      },
+      "text": "While ordinary updates are stopped, {{row.id}} shows no visible local advance. The interval records reach only, and settlement waits for return."
+    },
+    {
+      "id": "continuous-item-is-not-predicted",
+      "title": "{{row.id}} is neither predicted nor duplicated locally",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "continuous-items",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an authority-side change to {{row.id}} during suspension",
+        "when": [
+          "local processing observes the away interval and later returns"
+        ],
+        "then": [
+          "local processing neither predicts the authority's change nor applies a duplicate change"
+        ],
+        "diagnostics": [
+          "{{instance}}-continuous-state-trace"
+        ]
+      },
+      "text": "The cited authority continues {{row.id}}. This lifecycle neither predicts that change nor duplicates it locally."
+    },
+    {
+      "id": "calendar-crossings-wait-for-return",
+      "title": "{{row.id}} crossings are discovered before settlement",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "calendar-boundaries",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a non-negative suspension interval that crosses {{row.id}}",
+        "when": [
+          "the clock reaches each crossing named by {{row.boundary-declared-in}} and return has not begun"
+        ],
+        "then": [
+          "the crossings are discovered from the cited calendar and clock",
+          "none settles before return processing selects and orders it"
+        ],
+        "diagnostics": [
+          "{{instance}}-calendar-report",
+          "{{instance}}-return-timeline"
+        ]
+      },
+      "text": "Crossings for {{row.id}} are discovered from {{row.boundary-declared-in}} and the clock. They do not settle until return processing selects and orders them."
+    },
+    {
+      "id": "no-clock-return-path",
+      "title": "the no-clock return path continues from fixed state",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document and a return from suspension",
+        "when": [
+          "return processing checks whether a clock row exists"
+        ],
+        "then": [
+          "without a clock row, this adoption measures no elapsed time, performs no local catch-up, creates no calendar crossing, and continues from unchanged fixed state at step 12",
+          "where a clock row exists, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-timeline",
+          "{{instance}}-fixed-state-trace"
+        ]
+      },
+      "text": "Without a clock row, this adoption measures no elapsed time, performs no local catch-up, creates no calendar crossing, and continues from unchanged fixed state at step 12. Where a clock row exists, this test asserts nothing."
+    },
+    {
+      "id": "no-calendar-row-creates-no-crossing",
+      "title": "the no-calendar path creates no crossing",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document and a return from suspension",
+        "when": [
+          "return processing checks whether a calendar-boundaries row exists"
+        ],
+        "then": [
+          "without a calendar-boundaries row, return settlement creates no calendar crossing",
+          "where a calendar-boundaries row exists, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-calendar-report",
+          "{{instance}}-return-timeline"
+        ]
+      },
+      "text": "Without a calendar-boundaries row, return settlement creates no calendar crossing. Where a row exists, this test asserts nothing."
+    },
+    {
+      "id": "protected-clock-return-paths",
+      "title": "{{row.id}} accepts forward time and skips negative time",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "clock",
+      "when": {
+        "flag": {
+          "clock-source": [
+            "protected-clock"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two returns using {{row.id}}, one with a non-negative difference and one after a protected-clock resync produces a negative difference",
+        "when": [
+          "the return reading is sampled once in each run"
+        ],
+        "then": [
+          "the non-negative run uses the suspension snapshot and the elapsed difference and proceeds through steps 9 to 11",
+          "the negative run keeps the loaded state, records zero elapsed time, skips steps 9 to 11, and creates no return reward",
+          "changing device settings does not change the reading supplied by this protected clock",
+          "no rollback anchor or player-caused clock-change notice is selected; the protected-clock resync branch keeps the loaded state"
+        ],
+        "diagnostics": [
+          "{{instance}}-clock-readings",
+          "{{instance}}-return-timeline",
+          "{{instance}}-reward-report"
+        ]
+      },
+      "text": "A non-negative {{row.id}} interval uses the suspension snapshot and elapsed difference. A negative protected-clock interval keeps the loaded state, records zero elapsed time, skips steps 9 to 11, and creates no return reward. Device settings do not control this reading, so no rollback anchor or player-caused clock-change notice is selected."
+    },
+    {
+      "id": "device-clock-non-negative-return",
+      "title": "{{row.id}} uses the device-clock difference on an ordinary return",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "clock",
+      "when": {
+        "flag": {
+          "clock-source": [
+            "device-clock"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two otherwise matching returns using {{row.id}}, with one device clock moved forward by a known amount and both return readings non-negative",
+        "when": [
+          "each return reading is sampled once"
+        ],
+        "then": [
+          "each run uses its suspension snapshot and its device-clock elapsed difference",
+          "the moved-clock run's admitted measured interval differs by the known device-clock amount before row limits are applied"
+        ],
+        "diagnostics": [
+          "{{instance}}-clock-readings",
+          "{{instance}}-return-timeline"
+        ]
+      },
+      "text": "On a non-negative return, {{row.id}} uses the elapsed difference from the device clock. Moving that clock forward changes the measured interval before row limits are applied."
+    },
+    {
+      "id": "device-clock-restores-suspension-snapshot",
+      "title": "{{row.id}} restores the suspension snapshot after a backward reading",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "clock",
+      "when": {
+        "flag": {
+          "clock-source": [
+            "device-clock"
+          ],
+          "backward-clock-anchor": [
+            "suspension-snapshot"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a loaded return state distinguishable from the suspension snapshot and a return reading from {{row.id}} earlier than its start",
+        "when": [
+          "the backward-clock anchor is applied before catch-up"
+        ],
+        "then": [
+          "every in-scope local item is restored from the suspension snapshot",
+          "the interval records zero elapsed time, skips steps 9 to 11, and creates no return reward"
+        ],
+        "diagnostics": [
+          "{{instance}}-clock-readings",
+          "{{instance}}-suspension-snapshot",
+          "{{instance}}-return-timeline",
+          "{{instance}}-reward-report"
+        ]
+      },
+      "text": "A backward {{row.id}} reading restores every in-scope local item from the suspension snapshot before catch-up. The interval records zero elapsed time, skips steps 9 to 11, and creates no return reward."
+    },
+    {
+      "id": "device-clock-restores-trusted-checkpoint",
+      "title": "{{row.id}} restores the trusted checkpoint after a backward reading",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "clock",
+      "when": {
+        "flag": {
+          "clock-source": [
+            "device-clock"
+          ],
+          "backward-clock-anchor": [
+            "last-trusted-checkpoint"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a loaded return state distinguishable from the one coherent state and matching reading supplied by the adoption's one rollback-rules row, and a {{row.id}} return reading earlier than its start",
+        "when": [
+          "the backward-clock anchor is applied before catch-up"
+        ],
+        "then": [
+          "the cited trusted checkpoint state is restored",
+          "the interval records zero elapsed time, skips steps 9 to 11, and creates no return reward"
+        ],
+        "diagnostics": [
+          "{{instance}}-clock-readings",
+          "{{instance}}-rollback-trace",
+          "{{instance}}-return-timeline",
+          "{{instance}}-reward-report"
+        ]
+      },
+      "text": "A backward {{row.id}} reading restores the coherent trusted checkpoint supplied by the adoption's one rollback-rules row before catch-up. The interval records zero elapsed time, skips steps 9 to 11, and creates no return reward."
+    },
+    {
+      "id": "device-clock-keeps-return-state",
+      "title": "{{row.id}} keeps the loaded return state after a backward reading",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "clock",
+      "when": {
+        "flag": {
+          "clock-source": [
+            "device-clock"
+          ],
+          "backward-clock-anchor": [
+            "keep-return-state"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a loaded return state distinguishable from the suspension snapshot and a {{row.id}} return reading earlier than its start",
+        "when": [
+          "the backward-clock anchor is applied before catch-up"
+        ],
+        "then": [
+          "this contract restores no state and keeps the loaded return state",
+          "the interval records zero elapsed time, skips steps 9 to 11, and creates no return reward"
+        ],
+        "diagnostics": [
+          "{{instance}}-clock-readings",
+          "{{instance}}-return-state-trace",
+          "{{instance}}-return-timeline",
+          "{{instance}}-reward-report"
+        ]
+      },
+      "text": "A backward {{row.id}} reading keeps the loaded return state and restores nothing through this contract. The interval records zero elapsed time, skips steps 9 to 11, and creates no return reward."
+    },
+    {
+      "id": "backward-clock-notice-silent",
+      "title": "a backward device clock adds no explanation",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "backward-clock-notice": [
+            "silent"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a backward device-clock return",
+        "when": [
+          "the selected anchor has been applied and return processing continues"
+        ],
+        "then": [
+          "the lifecycle adds no player-facing clock-change explanation"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-display-trace"
+        ]
+      },
+      "text": "After the selected anchor is applied, the lifecycle adds no player-facing clock-change explanation."
+    },
+    {
+      "id": "backward-clock-notice-explain",
+      "title": "a backward device clock is explained before the return surface",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "backward-clock-notice": [
+            "explain"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a backward device-clock return",
+        "when": [
+          "the selected anchor has been applied and return processing continues"
+        ],
+        "then": [
+          "one player-facing clock-change explanation appears after the anchor and before ordinary play",
+          "the explanation precedes any general return surface"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-display-trace"
+        ]
+      },
+      "text": "After the selected anchor is applied, one player-facing clock-change explanation appears before ordinary play and before any general return surface."
+    },
+    {
+      "id": "rollback-reading-protects-next-anchor",
+      "title": "{{row.id}} supplies one state and matching trusted reading",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rollback-rules",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the coherent state snapshot and matching reading supplied at {{row.trusted-state-declared-in}}",
+        "when": [
+          "a backward-clock return restores that checkpoint and commits the next anchor"
+        ],
+        "then": [
+          "the restored state and trusted reading remain paired",
+          "that trusted reading is the one offered to the anchor commit beside the suspension and return readings"
+        ],
+        "diagnostics": [
+          "{{instance}}-rollback-trace",
+          "{{instance}}-anchor-commit"
+        ]
+      },
+      "text": "{{row.id}} supplies one coherent snapshot and matching reading from {{row.trusted-state-declared-in}}. After rollback, that trusted reading is offered to the anchor commit beside the suspension and return readings."
+    },
+    {
+      "id": "backward-return-anchor-is-monotonic",
+      "title": "a backward return commits an anchor that cannot replay earlier time",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "clock-source": [
+            "device-clock"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a backward-clock return under the selected anchor followed by a second rollback",
+        "when": [
+          "return processing commits the next suspension anchor"
+        ],
+        "then": [
+          "after the first return the committed anchor is the highest of the suspension reading, the return reading, and any trusted-checkpoint reading",
+          "the second rollback replays no time below that committed anchor"
+        ],
+        "diagnostics": [
+          "{{instance}}-clock-readings",
+          "{{instance}}-anchor-commit",
+          "{{instance}}-rollback-trace"
+        ]
+      },
+      "text": "After a backward-clock return under any anchor, step 15 commits the highest of the suspension reading, the return reading, and any trusted-checkpoint reading. A second rollback replays no time below it."
+    },
+    {
+      "id": "non-negative-catch-up-settles",
+      "title": "{{row.id}} settles an ordinary non-negative interval",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} at a distinguishable suspension snapshot state and a non-negative elapsed difference",
+        "when": [
+          "return processing builds this row's pass timeline"
+        ],
+        "then": [
+          "{{row.id}} settles from the suspension snapshot and elapsed difference",
+          "the return trace distinguishes this accepted interval from a skipped or zero-length interval"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-timeline",
+          "{{instance}}-catch-up-trace"
+        ]
+      },
+      "text": "A non-negative interval settles {{row.id}} from the suspension snapshot and elapsed difference. The trace distinguishes this accepted interval from a skipped or zero-length one."
+    },
+    {
+      "id": "whole-interval-limit",
+      "title": "{{row.id}} admits the whole measured interval",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "when": {
+        "row": {
+          "away-limit": [
+            "whole-interval"
+          ]
+        }
+      },
+      "bindings": {
+        "limit-owner": {
+          "row_field": "catch-up-fidelity",
+          "map": {
+            "every-missed-update": "return processing owns this limit itself; nothing is clipped and every missed update remains admitted",
+            "larger-steps": "the fidelity rule this row cites owns whole-interval; return processing derives the admitted span from it for crossing selection only, and the lifecycle does not re-apply it",
+            "one-derived-change": "the fidelity rule this row cites owns whole-interval; return processing derives the admitted span from it for crossing selection only, and the lifecycle does not re-apply it"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "two non-negative measured intervals for {{row.id}}, one twice the length of the other",
+        "when": [
+          "return processing derives each admitted span"
+        ],
+        "then": [
+          "each full measured interval is admitted before amount and fidelity are applied",
+          "{{bind:limit-owner}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-timeline",
+          "{{instance}}-catch-up-report"
+        ]
+      },
+      "text": "{{row.id}} admits the full measured interval before amount and fidelity are applied; {{bind:limit-owner}}."
+    },
+    {
+      "id": "time-limit",
+      "title": "{{row.id}} admits no time past its cited point",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "when": {
+        "row": {
+          "away-limit": [
+            "time-limit"
+          ]
+        }
+      },
+      "bindings": {
+        "limit-owner": {
+          "row_field": "catch-up-fidelity",
+          "map": {
+            "every-missed-update": "return processing applies this time limit itself as a per-segment clip during the chronological pass, so no gain is produced after the cited point",
+            "larger-steps": "the fidelity rule this row cites owns this time limit and admits no gain after the cited point; return processing derives the admitted span from it for crossing selection only, and the lifecycle does not re-apply it",
+            "one-derived-change": "the fidelity rule this row cites owns this time limit and admits no gain after the cited point; return processing derives the admitted span from it for crossing selection only, and the lifecycle does not re-apply it"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "two returns for {{row.id}}, one ending at the point named by {{row.limit-rule-declared-in}} and one continuing past it",
+        "when": [
+          "the declared limit is applied and the admitted span is derived"
+        ],
+        "then": [
+          "the derived admitted span ends at the cited point and admits no later crossing for this row",
+          "{{bind:limit-owner}}",
+          "the test names {{row.limit-rule-declared-in}} and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-timeline",
+          "{{instance}}-catch-up-report"
+        ]
+      },
+      "text": "For {{row.id}}, the derived admitted span ends at {{row.limit-rule-declared-in}} and admits no later crossing; {{bind:limit-owner}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "less-after-a-point-limit",
+      "title": "{{row.id}} uses its later amount rule past the cited point",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "when": {
+        "row": {
+          "away-limit": [
+            "less-after-a-point"
+          ]
+        }
+      },
+      "bindings": {
+        "limit-owner": {
+          "row_field": "catch-up-fidelity",
+          "map": {
+            "every-missed-update": "return processing applies the lower amount past the point itself as a per-segment clip during the chronological pass, and the report distinguishes gain before the point from gain after it",
+            "larger-steps": "the fidelity rule this row cites owns the lower amount past the point and distinguishes gain before it from gain after it in the returned changes; return processing derives the admitted span from that limit for crossing selection only, and the lifecycle does not re-apply it",
+            "one-derived-change": "the fidelity rule this row cites owns the lower amount past the point and distinguishes gain before it from gain after it in its returned change; return processing derives the admitted span from that limit for crossing selection only, and the lifecycle does not re-apply it"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "an interval for {{row.id}} with distinguishable gain before and after the point at {{row.limit-rule-declared-in}}",
+        "when": [
+          "the declared limit is applied and the admitted span is derived"
+        ],
+        "then": [
+          "time past the point remains admitted",
+          "{{bind:limit-owner}}",
+          "the test names {{row.limit-rule-declared-in}} and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-timeline",
+          "{{instance}}-catch-up-report"
+        ]
+      },
+      "text": "Time past {{row.limit-rule-declared-in}} remains admitted for {{row.id}}; {{bind:limit-owner}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "state-ceiling-limit",
+      "title": "{{row.id}} stops at its cited state ceiling",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "when": {
+        "row": {
+          "away-limit": [
+            "state-ceiling"
+          ]
+        }
+      },
+      "bindings": {
+        "limit-owner": {
+          "row_field": "catch-up-fidelity",
+          "map": {
+            "every-missed-update": "return processing applies this ceiling itself as a per-segment clip during the chronological pass; the endpoint is discovered during that pass, and no later crossing enters the row's pass",
+            "larger-steps": "the fidelity rule this row cites owns this ceiling; return processing derives the admitted span from it for crossing selection only, and the lifecycle does not re-apply it",
+            "one-derived-change": "the fidelity rule this row cites owns this ceiling; return processing derives the admitted span from it for crossing selection only, and the lifecycle does not re-apply it"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "a settlement for {{row.id}} whose amount would move the state below, to, and past the ceiling at {{row.limit-rule-declared-in}}",
+        "when": [
+          "the declared limit is applied and the admitted span is derived"
+        ],
+        "then": [
+          "the row reaches but never passes that ceiling",
+          "{{bind:limit-owner}}",
+          "where the citation says the same ceiling applies during ordinary play, that ordinary maximum is the one used here",
+          "the test names {{row.limit-rule-declared-in}} and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-timeline",
+          "{{instance}}-catch-up-report"
+        ]
+      },
+      "text": "{{row.id}} stops at the ceiling at {{row.limit-rule-declared-in}}; {{bind:limit-owner}}. Where the citation says the ordinary-play maximum applies, that is the ceiling used here. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "same-as-playing-amount",
+      "title": "{{row.id}} uses the ordinary amount for equal time",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "when": {
+        "row": {
+          "away-amount": [
+            "same-as-playing"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "matching ordinary-play and admitted-away segments for {{row.id}} with equal elapsed time and the same starting state",
+        "when": [
+          "the amount for each segment is computed before fidelity is applied"
+        ],
+        "then": [
+          "both segments define the same ordinary amount",
+          "fidelity and limits remain separate recorded decisions"
+        ],
+        "diagnostics": [
+          "{{instance}}-catch-up-report"
+        ]
+      },
+      "text": "For equal elapsed time, {{row.id}} uses the ordinary-play amount. Fidelity and limits remain separate decisions in the report."
+    },
+    {
+      "id": "reduced-amount",
+      "title": "{{row.id}} uses only its cited reduced amount rule",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "when": {
+        "row": {
+          "away-amount": [
+            "reduced"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an admitted segment for {{row.id}} and the complete amount calculation at {{row.amount-rule-declared-in}}",
+        "when": [
+          "the amount is computed before fidelity is applied"
+        ],
+        "then": [
+          "the row receives only the reduced amount produced by that citation",
+          "the test names {{row.amount-rule-declared-in}} and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-catch-up-report"
+        ]
+      },
+      "text": "{{row.id}} uses only the reduced amount from {{row.amount-rule-declared-in}} before fidelity is applied. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "away-rule-amount",
+      "title": "{{row.id}} uses only its cited away amount rule",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "when": {
+        "row": {
+          "away-amount": [
+            "away-rule"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an admitted segment for {{row.id}} and the complete amount calculation at {{row.amount-rule-declared-in}}",
+        "when": [
+          "the amount is computed before fidelity is applied"
+        ],
+        "then": [
+          "the row receives only the total produced by the away rule at {{row.amount-rule-declared-in}}; the row's declared limit then applies to that total as its owner decides",
+          "the test names {{row.amount-rule-declared-in}} and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-catch-up-report"
+        ]
+      },
+      "text": "{{row.id}} receives only the total produced by the away rule at {{row.amount-rule-declared-in}}; the row's declared limit then applies to that total as its owner decides. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "every-missed-update-fidelity",
+      "title": "{{row.id}} clips each segment by its limit, where one applies",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "when": {
+        "row": {
+          "catch-up-fidelity": [
+            "every-missed-update"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a pass for {{row.id}} with distinguishable segment edges",
+        "when": [
+          "the lifecycle hands each segment to settlement"
+        ],
+        "then": [
+          "where the row's limit bites, the lifecycle clips the segment by it before feeding only the remaining missed updates to the game rules",
+          "where the limit is whole-interval, nothing is clipped and every missed update is fed to the game rules",
+          "the trace contains no update beyond the admitted segment"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-timeline",
+          "{{instance}}-catch-up-trace"
+        ]
+      },
+      "text": "For {{row.id}}, where the row's limit bites, the lifecycle clips each segment by it and then feeds only the remaining missed updates to the game rules. Where the limit is whole-interval, nothing is clipped and every missed update is fed to the game rules."
+    },
+    {
+      "id": "larger-steps-fidelity",
+      "title": "{{row.id}} gives amount and limit to its larger-step rule",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "when": {
+        "row": {
+          "catch-up-fidelity": [
+            "larger-steps"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the separately computed amount and declared limit for {{row.id}}",
+        "when": [
+          "both are handed to {{row.fidelity-rule-declared-in}}"
+        ],
+        "then": [
+          "the cited rule owns the larger-step distribution and the limit and returns the ordered changes",
+          "the lifecycle does not re-apply that limit",
+          "the test names {{row.fidelity-rule-declared-in}} and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-catch-up-trace",
+          "{{instance}}-catch-up-report"
+        ]
+      },
+      "text": "{{row.fidelity-rule-declared-in}} receives the separately computed amount and declared limit for {{row.id}}, owns their larger-step distribution and limit, and returns the ordered changes. The lifecycle does not re-apply the limit. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "one-derived-change-fidelity",
+      "title": "{{row.id}} gives amount and limit to its one-change rule",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "when": {
+        "row": {
+          "catch-up-fidelity": [
+            "one-derived-change"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the separately computed amount and declared limit for {{row.id}}",
+        "when": [
+          "both are handed to {{row.fidelity-rule-declared-in}}"
+        ],
+        "then": [
+          "the cited rule owns the limit and returns one change",
+          "the lifecycle applies that change once and does not re-apply the limit",
+          "the test names {{row.fidelity-rule-declared-in}} and restates nothing from it"
+        ],
+        "diagnostics": [
+          "{{instance}}-catch-up-trace",
+          "{{instance}}-catch-up-report"
+        ]
+      },
+      "text": "{{row.fidelity-rule-declared-in}} receives the separately computed amount and declared limit for {{row.id}}, owns the limit, and returns one change. The lifecycle applies it once and does not re-apply the limit. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "away-rule-one-change-composition",
+      "title": "{{row.id}} keeps amount and one-change distribution separate",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "when": {
+        "row": {
+          "away-amount": [
+            "away-rule"
+          ],
+          "catch-up-fidelity": [
+            "one-derived-change"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an admitted span for {{row.id}}",
+        "when": [
+          "{{row.amount-rule-declared-in}} computes the total and {{row.fidelity-rule-declared-in}} distributes it"
+        ],
+        "then": [
+          "the amount rule defines the total and the fidelity rule returns its one distributed change",
+          "neither rule silently takes the other's duty",
+          "the test names both addresses and restates nothing from them"
+        ],
+        "diagnostics": [
+          "{{instance}}-catch-up-report"
+        ]
+      },
+      "text": "For {{row.id}}, {{row.amount-rule-declared-in}} defines the total and {{row.fidelity-rule-declared-in}} distributes it as one change. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "calendar-every-crossing-in-order",
+      "title": "{{row.id}} settles every crossing in ascending order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "calendar-boundaries",
+      "when": {
+        "flag": {
+          "crossed-calendar-boundaries": [
+            "every-crossing-in-order"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a non-negative interval with at least two distinguishable {{row.id}} crossings",
+        "when": [
+          "the calendar return timeline is built and settled"
+        ],
+        "then": [
+          "the calendar row admits the full measured interval and keeps every crossing in ascending time order",
+          "each crossing settles once through {{row.settlement-declared-in}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-timeline",
+          "{{instance}}-calendar-report"
+        ]
+      },
+      "text": "{{row.id}} admits the full non-negative interval, keeps every crossing in ascending time order, and settles each once through {{row.settlement-declared-in}}."
+    },
+    {
+      "id": "calendar-latest-crossing-only",
+      "title": "{{row.id}} settles only its latest crossing",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "calendar-boundaries",
+      "when": {
+        "flag": {
+          "crossed-calendar-boundaries": [
+            "latest-crossing-only"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a non-negative interval with at least two distinguishable {{row.id}} crossings",
+        "when": [
+          "the calendar return timeline is built and settled"
+        ],
+        "then": [
+          "the calendar row admits the full measured interval, keeps its latest crossing, and omits its earlier crossings",
+          "the selected crossing settles once through {{row.settlement-declared-in}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-timeline",
+          "{{instance}}-calendar-report"
+        ]
+      },
+      "text": "{{row.id}} admits the full non-negative interval, keeps only its latest crossing, omits earlier ones, and settles the selected crossing once through {{row.settlement-declared-in}}."
+    },
+    {
+      "id": "calendar-one-combined-crossing",
+      "title": "{{row.id}} combines its crossings into one return event",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "calendar-boundaries",
+      "when": {
+        "flag": {
+          "crossed-calendar-boundaries": [
+            "one-combined-crossing"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a non-negative interval with at least two distinguishable {{row.id}} crossings",
+        "when": [
+          "the calendar return timeline is built and settled"
+        ],
+        "then": [
+          "the calendar row admits the full measured interval and creates one return-time event carrying the crossing count and span",
+          "that event settles once through {{row.settlement-declared-in}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-timeline",
+          "{{instance}}-calendar-report"
+        ]
+      },
+      "text": "{{row.id}} admits the full non-negative interval and becomes one return-time event carrying the crossing count and span. That event settles once through {{row.settlement-declared-in}}."
+    },
+    {
+      "id": "segments-events-and-ties-stay-ordered",
+      "title": "row order breaks equal-timestamp ties",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "equal-timestamp calendar events where the adoption can construct them",
+        "when": [
+          "the return timeline orders the events before settlement"
+        ],
+        "then": [
+          "row order breaks an equal-timestamp tie before Event resolution receives the events",
+          "where no equal-timestamp tie is constructible, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-timeline",
+          "{{instance}}-calendar-report",
+          "{{instance}}-catch-up-report"
+        ]
+      },
+      "text": "Row order breaks equal-timestamp ties before Event resolution receives them. Where no equal-timestamp tie is constructible, this test asserts nothing."
+    },
+    {
+      "id": "crossing-inside-admitted-span-settles-in-order",
+      "title": "a crossing inside the admitted span for {{row.id}} settles in order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "bindings": {
+        "order": {
+          "flag": "crossed-calendar-boundaries",
+          "map": {
+            "every-crossing-in-order": "a selected crossing inside the admitted span for this row settles the preceding segment, then the crossing's immediate effect, then the following segment, and the report keeps that order",
+            "latest-crossing-only": "the selected latest crossing inside the admitted span for this row settles the preceding segment, then the crossing's immediate effect, then the following segment, and the report keeps that order",
+            "one-combined-crossing": "the single return-time event settles after this row's last segment, and the report keeps that order"
+          }
+        },
+        "beyond": {
+          "row_field": "away-limit",
+          "map": {
+            "whole-interval": "the admitted span is the whole measured interval, so no selected crossing falls beyond it",
+            "time-limit": "a crossing beyond the admitted span does not settle against this row",
+            "less-after-a-point": "a crossing beyond the admitted span does not settle against this row",
+            "state-ceiling": "a crossing beyond the admitted span does not settle against this row"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "selected calendar crossings and the admitted span for {{row.id}}",
+        "when": [
+          "the return timeline is settled and reported"
+        ],
+        "then": [
+          "{{bind:order}}",
+          "{{bind:beyond}}",
+          "the limit for {{row.id}} does not cancel the independent calendar event, which settles once on the calendar timeline"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-timeline",
+          "{{instance}}-calendar-report",
+          "{{instance}}-catch-up-report"
+        ]
+      },
+      "text": "For {{row.id}}: {{bind:order}}; {{bind:beyond}}. The row's limit does not cancel the independent calendar event, which settles once on the calendar timeline.",
+      "when": {
+        "flag": {
+          "crossed-calendar-boundaries": [
+            "every-crossing-in-order",
+            "latest-crossing-only",
+            "one-combined-crossing"
+          ]
+        }
+      }
+    },
+    {
+      "id": "return-reward-created-from-source",
+      "title": "{{row.id}} is created only from its cited source settlement",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "return-rewards",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two returns for {{row.id}}, one where its cited source settles and one where it does not, plus a later suspension while a created reward remains pending",
+        "when": [
+          "step 13 creates return rewards and the later suspension completes"
+        ],
+        "then": [
+          "the settled-source run creates {{row.id}} once from {{row.reward-declared-in}}",
+          "the run with no settled source creates nothing, so a skipped interval creates no reward",
+          "a pending {{row.id}} survives later suspensions until accepted or expired"
+        ],
+        "diagnostics": [
+          "{{instance}}-reward-report",
+          "{{instance}}-return-timeline"
+        ]
+      },
+      "text": "{{row.id}} is created once only when the source settlement at {{row.reward-declared-in}} settles. No source means no reward, including on a skipped interval. A pending reward survives later suspensions."
+    },
+    {
+      "id": "automatic-reward-delivery",
+      "title": "{{row.id}} is offered automatically in reward-row order",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "return-rewards",
+      "when": {
+        "row": {
+          "delivery": [
+            "automatic"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two returns where the cited source creates {{row.id}}, with its destination accepting in one run and refusing in the other",
+        "when": [
+          "automatic rewards are offered in reward-row order"
+        ],
+        "then": [
+          "{{row.id}} is offered once to {{row.destination-declared-in}} in its row position",
+          "acceptance reaches that destination once and is reported once",
+          "destination refusal keeps the same pending reward, and it is offered again at each later return until its destination accepts it"
+        ],
+        "diagnostics": [
+          "{{instance}}-reward-report"
+        ]
+      },
+      "text": "A created {{row.id}} reward is offered once to {{row.destination-declared-in}} in reward-row order. Acceptance reaches that destination and is reported once. Under step 13, destination refusal keeps the same pending reward, and it is offered again at each later return until its destination accepts it."
+    },
+    {
+      "id": "player-claims-reward-delivery",
+      "title": "{{row.id}} stays pending until its cited claim event",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "return-rewards",
+      "when": {
+        "row": {
+          "delivery": [
+            "player-claims"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a created {{row.id}}, one accepted claim and one destination refusal in distinguishable runs",
+        "when": [
+          "the event at {{row.claim-declared-in}} checks any cited deadline and offers the reward to {{row.destination-declared-in}}"
+        ],
+        "then": [
+          "before that event the reward remains pending",
+          "the accepted claim delivers it once and reports acceptance once",
+          "destination refusal keeps the same pending reward",
+          "a later claim is a new event and never repeats catch-up"
+        ],
+        "diagnostics": [
+          "{{instance}}-reward-report",
+          "{{instance}}-return-display-trace"
+        ]
+      },
+      "text": "{{row.id}} remains pending until the event at {{row.claim-declared-in}} offers it to {{row.destination-declared-in}} after checking any cited deadline. Acceptance delivers it once; refusal keeps the same pending reward. A later claim never repeats catch-up."
+    },
+    {
+      "id": "continuous-item-read-once-at-return",
+      "title": "{{row.id}} applies its authority reading once",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "continuous-items",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a distinguishable authority reading for {{row.id}} at return",
+        "when": [
+          "step 13 reads continuous items"
+        ],
+        "then": [
+          "the authority reading is taken once and applied once",
+          "ordinary play resumes without a second local jump"
+        ],
+        "diagnostics": [
+          "{{instance}}-continuous-state-trace"
+        ]
+      },
+      "text": "At return, {{row.id}} is read once from its cited authority and applied once. Ordinary play resumes without a second local jump."
+    },
+    {
+      "id": "choice-item-applied-once-at-return",
+      "title": "{{row.id}} applies its selected branch once",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "choice-items",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a resolved selection for {{row.id}} at return",
+        "when": [
+          "step 13 applies the selected branch"
+        ],
+        "then": [
+          "the selected branch is applied once",
+          "the test asserts nothing about branch data beyond what {{row.choice-declared-in}} is required to name"
+        ],
+        "diagnostics": [
+          "{{instance}}-choice-trace"
+        ]
+      },
+      "text": "At return, {{row.id}} applies its selected branch once. This test asserts nothing about branch data beyond what {{row.choice-declared-in}} is required to name."
+    },
+    {
+      "id": "state-only-return-display",
+      "title": "return adds no player-facing surface",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "return-display": [
+            "state-only"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a completed return settlement",
+        "when": [
+          "ordinary play resumes"
+        ],
+        "then": [
+          "the lifecycle adds no player-facing return surface",
+          "developer or diagnostic instrumentation is out of scope"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-display-trace"
+        ]
+      },
+      "text": "The lifecycle adds no player-facing return surface. Existing game displays can show settled state after ordinary play resumes; developer and diagnostic instrumentation is out of scope."
+    },
+    {
+      "id": "visible-before-resume-return-display",
+      "title": "settled state is visible before ordinary play",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "return-display": [
+            "visible-before-resume"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a return that affects at least one covered row",
+        "when": [
+          "settled state and pending rewards are known"
+        ],
+        "then": [
+          "at least one existing player-facing display presents the affected state before ordinary play resumes",
+          "where a clock explanation applies, it precedes this display update"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-display-trace"
+        ]
+      },
+      "text": "After settled state and pending rewards are known, at least one existing player-facing display presents the affected state before ordinary play resumes. Any clock explanation comes first."
+    },
+    {
+      "id": "return-summary-display",
+      "title": "the return surface names each affected row and result",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "return-display": [
+            "return-summary"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a return with distinguishable affected rows",
+        "when": [
+          "settled state and pending rewards are known"
+        ],
+        "then": [
+          "the player-facing return surface identifies each affected row and its settled result",
+          "where a clock explanation applies, it precedes the return surface"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-display-trace"
+        ]
+      },
+      "text": "After settled state and pending rewards are known, the return surface identifies each affected row and its settled result. Any clock explanation comes first."
+    },
+    {
+      "id": "detailed-return-summary-display",
+      "title": "the return surface explains each affected result",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "return-display": [
+            "detailed-return-summary"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a return with distinguishable affected rows",
+        "when": [
+          "settled state and pending rewards are known"
+        ],
+        "then": [
+          "the player-facing return surface identifies each affected row and reports elapsed time, applicable limits, amount rules, fidelity, and settled results",
+          "where a clock explanation applies, it precedes the return surface"
+        ],
+        "diagnostics": [
+          "{{instance}}-return-display-trace"
+        ]
+      },
+      "text": "After settled state and pending rewards are known, the return surface identifies each affected row and reports elapsed time, applicable limits, amount rules, fidelity, and settled results. Any clock explanation comes first."
+    },
+    {
+      "id": "final-state-and-anchor-commit-together",
+      "title": "final state and the next anchor commit together",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a completed return with final local state and, where they exist, distinguishable automatic changes and required pre-resume displays",
+        "when": [
+          "return processing reaches step 15"
+        ],
+        "then": [
+          "final local state and the next suspension anchor commit together where an anchor exists; without one, the anchor clause asserts nothing",
+          "where an anchor exists, the committed anchor is never lower than the previous one on any return, as step 15 requires",
+          "ordinary updates resume only after every automatic return change and required pre-resume display has settled"
+        ],
+        "diagnostics": [
+          "{{instance}}-anchor-commit",
+          "{{instance}}-return-display-trace"
+        ]
+      },
+      "text": "Final local state and the next suspension anchor commit together where an anchor exists; without one, that clause asserts nothing. Where an anchor exists, step 15 requires it never to be lower than the previous one on any return. Ordinary updates resume only after automatic return changes and required pre-resume displays settle."
+    },
+    {
+      "id": "empty-row-sets-create-nothing",
+      "title": "empty row sets create no suspension work",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document and its optionally empty row sets",
+        "when": [
+          "the lifecycle follows each row set's declared empty consequence"
+        ],
+        "then": [
+          "where fixed-items is empty, no covered state is fixed by suspension; where a row exists, this clause asserts nothing",
+          "where catch-up-items is empty, no covered state is calculated from missed time on return; where a row exists, this clause asserts nothing",
+          "where continuous-items is empty, no covered state continued elsewhere during suspension; where a row exists, this clause asserts nothing",
+          "where choice-items is empty, no covered state selects between away behaviours at runtime; where a row exists, this clause asserts nothing",
+          "where return-rewards is empty, return settlement creates no separately delivered reward; where a row exists, this clause asserts nothing",
+          "where rollback-rules is empty, no trusted checkpoint is used as a backward-clock anchor; where a row exists, this clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record",
+          "{{instance}}-return-timeline"
+        ]
+      },
+      "text": "An empty fixed-items set fixes no covered state; an empty catch-up-items set calculates no covered state from missed time on return; an empty continuous-items set means no covered state continued elsewhere; an empty choice-items set selects no away behaviour at runtime; an empty return-rewards set creates no separately delivered reward; and an empty rollback-rules set uses no trusted checkpoint as a backward-clock anchor. Where a row exists, that clause asserts nothing."
+    },
+    {
+      "id": "catch-up-report-fields",
+      "title": "the catch-up report for {{row.id}} carries the lifecycle fields",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each catch-up report produced for {{row.id}}",
+        "when": [
+          "a reviewer reads the report"
+        ],
+        "then": [
+          "each report records interval start and end readings, elapsed time admitted, row id, amount branch, fidelity branch, limit reached, before state, after state, and the calendar crossing that split the segment when present"
+        ],
+        "diagnostics": [
+          "{{instance}}-catch-up-report"
+        ]
+      },
+      "text": "Each catch-up report for {{row.id}} records the interval readings, admitted elapsed time, row, amount, fidelity, limit, before and after state, and any crossing that split the segment."
+    },
+    {
+      "id": "backward-clock-report-fields",
+      "title": "each backward-clock report records its selected response",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "clock-source": [
+            "device-clock",
+            "protected-clock"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each backward-clock report produced by {{instance}}",
+        "when": [
+          "a reviewer reads the report"
+        ],
+        "then": [
+          "the report records the selected anchor when one was selected and whether a notice appeared when the notice question applies",
+          "where this adoption produces no backward-clock report, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-clock-readings",
+          "{{instance}}-anchor-commit"
+        ]
+      },
+      "text": "A backward-clock report records its selected anchor when one was selected and whether a notice appeared when that question applies. Where no such report exists, this test asserts nothing."
+    },
+    {
+      "id": "return-reward-report-fields",
+      "title": "the return-reward report for {{row.id}} carries its delivery fields",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "return-rewards",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each return-reward report produced for {{row.id}}",
+        "when": [
+          "a reviewer reads the report"
+        ],
+        "then": [
+          "the report records source, destination, delivery, pending, accepted, or expired status, deadline when present, and claim event when present"
+        ],
+        "diagnostics": [
+          "{{instance}}-reward-report"
+        ]
+      },
+      "text": "A return-reward report for {{row.id}} records source, destination, delivery, status, any deadline, and any claim event."
+    },
+    {
+      "id": "trusted-checkpoint-row-shape",
+      "title": "declaration check: last-trusted-checkpoint has exactly one rollback row",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "backward-clock-anchor": [
+            "last-trusted-checkpoint"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document and the rollback-rules description, not the running game",
+        "when": [
+          "a reviewer counts rollback-rules rows"
+        ],
+        "then": [
+          "exactly one rollback-rules row exists",
+          "any other shape is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and cites the rollback-rules description, not the running game. Under last-trusted-checkpoint, exactly one rollback-rules row must exist. Any other shape is a defect this test fails by construction."
+    },
+    {
+      "id": "rollback-row-only-for-trusted-checkpoint",
+      "title": "declaration check: rollback rows exist only for last-trusted-checkpoint",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document and the rollback-rules description, not the running game",
+        "when": [
+          "a reviewer compares its clock source, backward-clock anchor when answered, and rollback-rules rows"
+        ],
+        "then": [
+          "a protected clock and each device-clock anchor other than last-trusted-checkpoint have no rollback-rules row",
+          "an adoption with no clock row answers no anchor and has no rollback-rules row",
+          "under last-trusted-checkpoint this check asserts nothing because the exactly-one check owns that shape",
+          "any other shape is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and cites the rollback-rules description, not the running game. A rollback-rules row is legal only under the last-trusted-checkpoint anchor; that anchor's exactly-one duty is checked separately. A protected clock, another anchor, or an adoption with no clock row must have none, and an adoption with no clock row answers no anchor. Any other shape is a defect this test fails by construction."
+    },
+    {
+      "id": "at-most-one-clock-row",
+      "title": "declaration check: clock has at most one row",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer counts clock rows"
+        ],
+        "then": [
+          "the clock collection has zero or one row",
+          "more than one row is a defect this test fails by construction; with no clock row, the count duty still passes and this check asserts nothing about elapsed time"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. Clock has at most one row. More than one is a defect this test fails by construction. With no row, the check asserts nothing about elapsed time."
+    },
+    {
+      "id": "at-most-one-rollback-row",
+      "title": "declaration check: rollback-rules has at most one row",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer counts rollback-rules rows"
+        ],
+        "then": [
+          "the rollback-rules collection has zero or one row",
+          "more than one row is a defect this test fails by construction; with no rollback row, this check asserts nothing about a trusted checkpoint"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. Rollback-rules has at most one row. More than one is a defect this test fails by construction. With no row, the check asserts nothing about a trusted checkpoint."
+    },
+    {
+      "id": "player-claim-needs-return-surface",
+      "title": "declaration check: {{row.id}} has a claim-capable return surface",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "return-rewards",
+      "when": {
+        "row": {
+          "delivery": [
+            "player-claims"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document and the return-rewards delivery description, not the running game",
+        "when": [
+          "a reviewer compares {{row.id}} delivery with return-display"
+        ],
+        "then": [
+          "return-display is return-summary or detailed-return-summary",
+          "state-only and visible-before-resume are defects for this player-claims row because they provide no return surface to claim from",
+          "any other shape is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and cites the return-rewards delivery description, not the running game. A player-claims row such as {{row.id}} requires return-summary or detailed-return-summary. State-only and visible-before-resume provide no return surface to claim from. Any other shape is a defect this test fails by construction."
+    },
+    {
+      "id": "clock-citation-duty",
+      "title": "declaration check: {{row.id}}'s clock citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "clock",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.clock-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.clock-declared-in}} names the reading, its unit, and when it is sampled",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.clock-declared-in}}, not the running game. The citation must name {{row.id}}'s reading, unit, and sampling. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "fixed-state-citation-duty",
+      "title": "declaration check: {{row.id}}'s state citation names complete fixed state",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "fixed-items",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.state-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.state-declared-in}} identifies the complete state held fixed for {{row.id}}",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.state-declared-in}}, not the running game. The citation must identify the complete state held fixed for {{row.id}}. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "catch-up-state-citation-duty",
+      "title": "declaration check: {{row.id}}'s state citation names ordinary changes and unit",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.state-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.state-declared-in}} identifies {{row.id}}, its ordinary changes, and its unit",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.state-declared-in}}, not the running game. The citation must identify {{row.id}}, its ordinary changes, and its unit. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "amount-rule-citation-duty",
+      "title": "declaration check: {{row.id}}'s amount citation states the complete amount and its unit",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "when": {
+        "row": {
+          "away-amount": [
+            "reduced",
+            "away-rule"
+          ]
+        }
+      },
+      "bindings": {
+        "amount-duty": {
+          "row_field": "away-amount",
+          "map": {
+            "reduced": "the complete lower away amount calculation and its unit",
+            "away-rule": "the complete separate away amount calculation and its unit"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.amount-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.amount-rule-declared-in}} states {{bind:amount-duty}} for {{row.id}}",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.amount-rule-declared-in}}, not the running game. The citation must state {{bind:amount-duty}} for {{row.id}}. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "fidelity-rule-citation-duty",
+      "title": "declaration check: {{row.id}}'s fidelity citation states its distribution",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "when": {
+        "row": {
+          "catch-up-fidelity": [
+            "larger-steps",
+            "one-derived-change"
+          ]
+        }
+      },
+      "bindings": {
+        "fidelity-duty": {
+          "row_field": "catch-up-fidelity",
+          "map": {
+            "larger-steps": "the larger step size and order without changing the promised amount",
+            "one-derived-change": "the derivation of the single return change without changing the promised amount"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.fidelity-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.fidelity-rule-declared-in}} states {{bind:fidelity-duty}} for {{row.id}}",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.fidelity-rule-declared-in}}, not the running game. The citation must state {{bind:fidelity-duty}} for {{row.id}}. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "limit-rule-citation-duty",
+      "title": "declaration check: {{row.id}}'s limit citation states its complete boundary",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "when": {
+        "row": {
+          "away-limit": [
+            "time-limit",
+            "less-after-a-point",
+            "state-ceiling"
+          ]
+        }
+      },
+      "bindings": {
+        "limit-duty": {
+          "row_field": "away-limit",
+          "map": {
+            "time-limit": "the hard time point after which no time is admitted",
+            "less-after-a-point": "the change point and complete later amount rule",
+            "state-ceiling": "the state ceiling that stops away gain"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.limit-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.limit-rule-declared-in}} states {{bind:limit-duty}} for {{row.id}}",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.limit-rule-declared-in}}, not the running game. The citation must state {{bind:limit-duty}} for {{row.id}}. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "continuous-state-citation-duty",
+      "title": "declaration check: {{row.id}}'s state citation supplies its return reading",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "continuous-items",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.state-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.state-declared-in}} names the external or protected rule that continues {{row.id}} and supplies its return reading",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.state-declared-in}}, not the running game. The citation must name the authority that continues {{row.id}} and supplies its return reading. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "choice-rule-citation-duty",
+      "title": "declaration check: {{row.id}}'s choice citation states both paths and selection",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "choice-items",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.choice-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.choice-declared-in}} names both possible behaviours, their complete data, the condition selecting one, and the selection time",
+          "the check asserts nothing about either branch's data beyond that declaration duty",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.choice-declared-in}}, not the running game. The citation must name both behaviours, their complete data, the selector, and the selection time. It asserts nothing further about branch data. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "reward-rule-citation-duty",
+      "title": "declaration check: {{row.id}}'s reward citation states source and derivation",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "return-rewards",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.reward-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.reward-declared-in}} identifies the source settlement and complete derivation for {{row.id}}",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.reward-declared-in}}, not the running game. The citation must identify {{row.id}}'s source settlement and complete derivation. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "destination-rule-citation-duty",
+      "title": "declaration check: {{row.id}}'s destination citation states acceptance",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "return-rewards",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.destination-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.destination-declared-in}} states how the complete {{row.id}} reward is accepted or left pending",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.destination-declared-in}}, not the running game. The citation must state how the complete {{row.id}} reward is accepted or left pending. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "claim-rule-citation-duty",
+      "title": "declaration check: {{row.id}}'s claim citation names one event",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "return-rewards",
+      "when": {
+        "row": {
+          "delivery": [
+            "player-claims"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.claim-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.claim-declared-in}} names the player event that claims this pending {{row.id}} from the return surface",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.claim-declared-in}}, not the running game. The citation must name the player event that claims pending {{row.id}} from the return surface. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "expiry-rule-citation-duty",
+      "title": "declaration check: {{row.id}}'s expiry citation states one deadline",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "return-rewards",
+      "bindings": {
+        "expiry-address": {
+          "row_field": "delivery",
+          "map": {
+            "automatic": "{{row.expires-declared-in}}",
+            "player-claims": "{{row.expires-declared-in}}"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{bind:expiry-address}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{bind:expiry-address}} states the deadline when an unclaimed reward is removed",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{bind:expiry-address}}, not the running game. The citation must state the deadline when an unclaimed reward is removed for {{row.id}}. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "calendar-boundary-citation-duty",
+      "title": "declaration check: {{row.id}}'s boundary citation states the calendar test",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "calendar-boundaries",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.boundary-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.boundary-declared-in}} names the calendar, time zone, boundary inclusion test, exact crossing time, and behaviour when local civil time skips or repeats a boundary",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.boundary-declared-in}}, not the running game. The citation must state {{row.id}}'s calendar, time zone, boundary test, exact crossing time, and skipped or repeated civil-time behaviour. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "calendar-settlement-citation-duty",
+      "title": "declaration check: {{row.id}}'s settlement citation states immediate effects",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "calendar-boundaries",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.settlement-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.settlement-declared-in}} states the immediate effects produced from each selected crossing",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.settlement-declared-in}}, not the running game. The citation must state the immediate effects produced from each selected {{row.id}} crossing. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "trusted-state-citation-duty",
+      "title": "declaration check: {{row.id}}'s trusted-state citation supplies a matched pair",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "rollback-rules",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.trusted-state-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.trusted-state-declared-in}} supplies one coherent state snapshot and its matching trusted clock reading",
+          "a missing duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and {{row.trusted-state-declared-in}}, not the running game. The citation must supply one coherent state snapshot and matching trusted clock reading. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "away-limit-declaration-is-visible",
+      "title": "declaration check: {{row.id}} declares a state ceiling when one governs away gain",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "catch-up-items",
+      "when": {
+        "row": {
+          "away-limit": [
+            "whole-interval"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption, the away-limit description, and an ordinary-play maximum declared elsewhere, not the running game",
+        "when": [
+          "a reviewer checks whether an ordinary-play clamp is intended to stop {{row.id}} away gain"
+        ],
+        "then": [
+          "where that clamp governs away gain, this row declares state-ceiling and cites it; where no such clamp governs away gain, this clause asserts nothing",
+          "leaving a governing ceiling hidden behind whole-interval is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, cites the away-limit description, and considers an ordinary-play maximum declared elsewhere, not the running game. If that maximum also governs {{row.id}} away gain, this row must declare state-ceiling and cite it. Otherwise the clause asserts nothing. A hidden governing ceiling is a defect this test fails by construction."
+    },
+    {
+      "id": "suspension-holds",
+      "title": "suspension and catch-up hold for the whole run",
+      "type": "general",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "across every covered cycle, no elapsed time was counted twice; every catch-up row followed its amount, fidelity, and limit; every selected crossing settled once in its selected order; every created reward reached its destination or stayed pending as declared; every skipped interval created no reward; and each next anchor never fell below its prior anchor; a case the adoption cannot construct asserts nothing",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-suspension-interval",
+          "{{instance}}-return-timeline",
+          "{{instance}}-catch-up-report",
+          "{{instance}}-calendar-report",
+          "{{instance}}-reward-report",
+          "{{instance}}-anchor-commit",
+          "{{instance}}-first-ordering-violation"
+        ]
+      },
+      "text": "Across {{inputs:scope}}, no elapsed time is counted twice; each catch-up row follows its amount, fidelity, and limit; each selected crossing settles once in order; each reward reaches its destination or stays pending; skipped intervals create no reward; and the next anchor never falls below the prior one. A case this adoption cannot construct asserts nothing.",
+      "inputs": {
+        "scope": {
+          "default": "every suspend-and-return cycle of the audited run, including a background transition, a backward device clock where the adoption has one, and a crossed calendar boundary where it has one"
+        },
+        "seeds": {
+          "default": [
+            "audit-a",
+            "audit-b"
+          ]
+        }
+      }
+    }
+  ]
+}

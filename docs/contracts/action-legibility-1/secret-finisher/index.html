@@ -1,0 +1,1146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Secret finisher — Action legibility adoption — OpenGDD</title>
+<meta name="description" content="Secret finisher is a Action legibility adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="canonical" href="https://opengdd.org/contracts/action-legibility-1/secret-finisher/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Secret finisher — Action legibility adoption — OpenGDD">
+<meta property="og:description" content="Secret finisher is a Action legibility adoption with supplied answers, settings and matching acceptance tests.">
+<meta property="og:url" content="https://opengdd.org/contracts/action-legibility-1/secret-finisher/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Secret finisher — Action legibility adoption — OpenGDD">
+<meta name="twitter:description" content="Secret finisher is a Action legibility adoption with supplied answers, settings and matching acceptance tests.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=ff285f28dd16">
+<script type="module" src="/assets/contracts.mjs?v=ff285f28dd16"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout contract-catalogue contract-entry-page contract-instance-page" data-contract-root data-core-id="action-legibility" data-contract-preset="{&quot;action-discovery-default&quot;:&quot;looks-usable&quot;,&quot;unavailable-action-default&quot;:&quot;hidden&quot;}" data-contract-facts="{&quot;rowCounts&quot;:{&quot;action-cases&quot;:1,&quot;availability-presentations&quot;:0,&quot;shared-input-cases&quot;:0},&quot;valueForms&quot;:{},&quot;rows&quot;:{&quot;action-cases&quot;:[{&quot;id&quot;:&quot;secret-finisher&quot;,&quot;action-declared-in&quot;:&quot;combat.secret-finisher&quot;,&quot;situation-declared-in&quot;:&quot;combat.final-round-range&quot;,&quot;discoverability&quot;:&quot;none&quot;,&quot;when-unavailable&quot;:&quot;unchanged&quot;,&quot;presentation-rule-declared-in&quot;:&quot;combat.secret-finisher-has-no-discovery-route&quot;}],&quot;availability-presentations&quot;:[],&quot;shared-input-cases&quot;:[]}}">
+<nav class="doc-toc contract-nav" aria-label="Contracts">
+<details class="contract-nav-disclosure">
+  <summary>Contracts</summary>
+  <div class="contract-nav-content">
+    <p class="toc-title">Contracts</p>
+    <ul class="contract-nav-home"><li><a href="/contracts/">Overview</a></li><li><a href="/contracts/catalogue/">Contract catalogue</a></li></ul>
+<div class="toc-group contract-page-nav">
+  <p class="toc-group-title">On this page</p>
+  <ul><li><a href="#use-this">Use in your game</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#values">Numbers</a></li>
+<li><a href="#lists">Lists</a></li>
+<li><a href="#tests">Acceptance tests</a></li>
+<li><a href="#adoption-json">JSON</a></li></ul>
+</div>
+  </div>
+</details>
+</nav>
+<article class="doc-body contract-entry-body">
+<p class="label"><a href="/contracts/catalogue/#legibility">Legibility</a></p>
+<div class="contract-entry-title-row">
+  <div><h1>Secret finisher</h1><p class="contract-core-name"><code>secret-finisher</code> · an adoption of <a href="/contracts/action-legibility-1/">Action legibility</a>, version 1</p></div>
+  <div><span class="contract-badge ">Tests included</span></div>
+</div>
+
+<section class="contract-handoff" aria-labelledby="use-this">
+  <h2 id="use-this">Use in your game</h2>
+  <p>Opens the authoring tool with these answers and settings already filled in. You still add your game's own rules and tuning.</p>
+  <div class="contract-actions">
+    <a class="cta" href="/authoring-tool/?contract=action-legibility-1&amp;adoption=secret-finisher">Open in the authoring tool</a>
+    <a class="cta-quiet" href="/contracts/action-legibility-1/secret-finisher.zip" download="secret-finisher.zip">Download ZIP</a>
+  </div>
+  <details><summary>What is in the ZIP</summary><p>The ZIP holds the adoption and its acceptance tests. In the authoring tool, choose <strong>Add contract</strong> and pick this ZIP. If you keep your design as files, put them in <code>contracts/</code>.</p><div class="contract-actions"><a href="/contracts/action-legibility-1/secret-finisher.json" download="secret-finisher.json">Download adoption JSON</a> · <a href="/contracts/action-legibility-1/action-legibility-1.pack.json" download="action-legibility-1.pack.json">Download tests</a><button type="button" class="cta-quiet" data-copy-core data-core-url="/contracts/action-legibility-1/secret-finisher.json" data-copy-kind="adoption">Copy adoption</button><span role="status" aria-live="polite" data-copy-status></span></div></details>
+</section>
+<section class="contract-overview">
+  <h2>The contract behind it</h2>
+  <p>Covers which actions players can discover in each situation, how availability is presented, and what an unavailable action shows. It also covers which action is offered when one control signal has several candidate actions. Physical controls, input timing help, displayed game facts, and event order stay elsewhere.</p>
+  <p><a href="/contracts/action-legibility-1/">Read the full Action legibility contract →</a></p>
+</section>
+<section class="contract-form-section" id="questions">
+  <h2>Questions</h2>
+  <p>The supplied answer is marked on each question. Pick other answers to see what changes. Nothing is saved here: the ZIP and the authoring tool use the supplied answers.</p>
+  <div class="contract-actions contract-question-tools">
+    <button type="button" class="cta-quiet contract-reset" data-reset-choices>Restore supplied answers</button>
+    <label class="contract-switch"><input type="checkbox" data-builder-wording> Show exact wording for builders</label>
+  </div>
+  <div class="contract-question-list">
+  <article class="contract-question" id="question-action-discovery-default" data-contract-question data-flag="action-discovery-default" data-when="{&quot;row-count&quot;:{&quot;action-cases&quot;:&quot;non-empty&quot;}}">
+  <h3>How can players normally discover an action while it matters?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the action cases list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>With no action case, this adoption makes no game-wide discovery promise.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for How can players normally discover an action while it matters?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="action-legibility-action-discovery-default" value="looks-usable" data-contract-choice><span class="contract-option-label">Looks usable</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The action looks possible before it is tried. A platformer marks a climbable ledge with a clear edge shape.</span><p class="contract-option-semantics">At least one player-facing presentation identifies that the action can be attempted in the current situation before the attempt.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="action-legibility-action-discovery-default" value="explanation-on-demand" data-contract-choice><span class="contract-option-label">Explanation on demand</span></label></th>
+  <td><span class="contract-option-meaning">An explanation is available while the action matters. An adventure game can name the key needed beside a sealed door.</span><p class="contract-option-semantics">A player-facing route available in the current situation names the action and explains how to attempt it.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="action-legibility-action-discovery-default" value="current-binding-is-shown" data-contract-choice><span class="contract-option-label">Current binding is shown</span></label></th>
+  <td><span class="contract-option-meaning">The action prompt shows its current control. A racing game updates the pit-stop prompt after confirm moves to another button.</span><p class="contract-option-semantics">Every prompt for the action names the current device&#39;s actual control under the applicable control rule. A wrong-device glyph, an old binding, or a hardware glyph in place of the actual touch region or gesture fails this promise.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="action-legibility-action-discovery-default" value="assistive-tech-can-name-it" data-contract-choice><span class="contract-option-label">Assistive tech can name it</span></label></th>
+  <td><span class="contract-option-meaning">Assistive technology can name the action and its purpose. A strategy game&#39;s screen reader identifies the end-turn control.</span><p class="contract-option-semantics">A player-facing interface element exposes a determinable action name and role to supported assistive technology.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="action-legibility-action-discovery-default" value="none" data-contract-choice><span class="contract-option-label">None</span></label></th>
+  <td><span class="contract-option-meaning">The game gives no discovery route for the action. A fighting game leaves a secret finisher for players to uncover outside ordinary prompts.</span><p class="contract-option-semantics">No player-facing presentation promises the action&#39;s identity or availability before it is attempted; accidental discovery and memorable authored content do not violate this answer.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Different actions may need different help. This answer supplies the ordinary choice before a particular action states another one.</p></details>
+</article>
+<article class="contract-question" id="question-unavailable-action-default" data-contract-question data-flag="unavailable-action-default" data-when="{&quot;row-count&quot;:{&quot;action-cases&quot;:&quot;non-empty&quot;}}">
+  <h3>What normally appears when an action cannot be used?</h3>
+  <dl class="contract-conditions">
+    <div><dt>Asked when</dt><dd>the action cases list has at least one row.</dd></div>
+    <div class="contract-otherwise"><dt>If not asked</dt><dd>With no action case, this adoption makes no game-wide unavailable-action promise.</dd></div>
+  </dl>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for What normally appears when an action cannot be used?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="action-legibility-unavailable-action-default" value="hidden" data-contract-choice><span class="contract-option-label">Hidden</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">The action disappears while unavailable. A racing boost prompt vanishes while the boost meter is empty.</span><p class="contract-option-semantics">The action&#39;s availability presentation is absent while the action cannot be attempted.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="action-legibility-unavailable-action-default" value="shown-unavailable" data-contract-choice><span class="contract-option-label">Shown unavailable</span></label></th>
+  <td><span class="contract-option-meaning">The action stays visible but clearly unavailable. A card game dims a card that cannot be played this turn.</span><p class="contract-option-semantics">The presentation keeps the action identifiable and carries a distinct unavailable state without promising a reason.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="action-legibility-unavailable-action-default" value="reason-is-shown" data-contract-choice><span class="contract-option-label">Reason is shown</span></label></th>
+  <td><span class="contract-option-meaning">The action stays visible and states why it is unavailable. A survival recipe says that two pieces of wood are missing.</span><p class="contract-option-semantics">The presentation identifies the action, marks it unavailable, and states the current blocking reason.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="action-legibility-unavailable-action-default" value="unchanged" data-contract-choice><span class="contract-option-label">Unchanged</span></label></th>
+  <td><span class="contract-option-meaning">Nothing changes when the action is unavailable. A mystery game&#39;s bookcase gives no hint that its hidden passage is locked.</span><p class="contract-option-semantics">The action&#39;s player-facing presentation is identical across its available and unavailable states.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="action-legibility-unavailable-action-default" value="never-unavailable" data-contract-choice><span class="contract-option-label">Never unavailable</span></label></th>
+  <td><span class="contract-option-meaning">Nothing unavailable ever appears, because covered actions stay usable. A rhythm game&#39;s pause action works throughout every playable song moment.</span><p class="contract-option-semantics">No reachable state in a covered situation makes the action unavailable.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>A missing prompt, a dimmed control, and an explanation create different expectations. This answer supplies the ordinary choice.</p></details>
+</article>
+  </div>
+</section>
+<aside class="contract-relief" aria-labelledby="relief-title">
+  <p class="contract-relief-title" id="relief-title">That was the hard part.</p>
+  <p>The questions are the decisions. Everything below follows from them: the numbers, lists and test inputs this adoption supplies, and the tests that come with it. The authoring tool edits all of it in place. Read on only if you want to check.</p>
+</aside>
+<details class="contract-form-section contract-fold" id="values">
+  <summary><span class="contract-fold-title">Numbers</span><span class="contract-fold-note">no numbers</span></summary>
+  <p>This contract has no numbers to set.</p>
+</details>
+<details class="contract-form-section contract-fold" id="rules">
+  <summary><span class="contract-fold-title">Rules</span><span class="contract-fold-note">1 rule</span></summary>
+  <p>A rule is a check between the numbers. Validation reports a rule that fails.</p>
+  <ul class="contract-rule-list"><li id="rule-secret-default-cannot-explain-a-block"><p class="contract-rule-message">A secret action cannot use a game-wide default that names it and explains why it is blocked.</p>
+  <p class="contract-condition">Forbidden when Action discovery default is None, and Unavailable action default is Reason is shown.</p></li></ul>
+</details>
+<details class="contract-form-section contract-fold" id="lists">
+  <summary><span class="contract-fold-title">Lists</span><span class="contract-fold-note">3 lists</span></summary>
+  <p>Each list holds the rows this adoption supplies. A list can be empty.</p>
+  <article class="contract-collection">
+<h3>Action cases</h3>
+<p class="contract-exact-name"><code>action-cases</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Action declared in</th><th>Situation declared in</th><th>Discoverability</th><th>When unavailable</th><th>Presentation rule declared in</th></tr></thead>
+<tbody>
+<tr><td><code>secret-finisher</code></td><td><code>combat.secret-finisher</code></td><td><code>combat.final-round-range</code></td><td><code>none</code></td><td><code>unchanged</code></td><td><code>combat.secret-finisher-has-no-discovery-route</code></td></tr>
+</tbody></table></div>
+</article>
+<article class="contract-collection">
+<h3>Availability presentations</h3>
+<p class="contract-exact-name"><code>availability-presentations</code></p>
+<p>This adoption declares no availability presentations.</p>
+</article>
+<article class="contract-collection">
+<h3>Shared input cases</h3>
+<p class="contract-exact-name"><code>shared-input-cases</code></p>
+<p>This adoption declares no shared input cases.</p>
+</article>
+</details>
+<details class="contract-form-section contract-fold" id="verification">
+  <summary><span class="contract-fold-title">Test inputs</span><span class="contract-fold-note">scope and seeds</span></summary>
+  <p>Some tests need a scope or seeds from the adoption before they can run.</p>
+  <p>This adoption supplies none; every test uses its defaults.</p>
+</details>
+<details class="contract-form-section contract-fold" id="tests">
+  <summary><span class="contract-fold-title">Acceptance tests</span><span class="contract-fold-note">18 tests apply</span></summary>
+  <p>The contract comes with 52 tests. A test that runs once per row is counted once for each row. Tests that do not apply to these answers are still listed, with the reason.</p>
+  <div class="contract-test-list"><article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>action-legibility-vocabulary</code></p>
+      <h3>action legibility uses one action input, action cases, candidates, and offered actions</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to secret-finisher.</p>
+  <p class="contract-test-text">An action input is one game-facing signal from Control options when that contract is adopted, otherwise from the game&#39;s Fixed control rule. An action case is one action in one cited situation. A candidate is an action the input carries whose permission or forgiveness acceptance holds at the accepted moment. An action is offered when selection identifies it to the player.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>where the adoption or its cited control rules name an action input; where none is named, this trial asserts nothing; the <code class="contract-placeholder">secret-finisher</code> adoption and a player-facing physical control</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the control path, matching action cases, candidate actions, and offered result are identified</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the action input is one game-facing signal from Control options when adopted and otherwise from the game&#39;s Fixed control rule</li><li>each action case is one action in one cited situation</li><li>a candidate is an action the input carries whose binding context, when one exists, holds and whose ordinary permission or Input forgiveness acceptance holds at the accepted moment</li><li>an action is offered only when it is identified to the player as the result of selection</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-candidate-set</li><li><code class="contract-placeholder">secret-finisher</code>-offered-action</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>no-action-case-makes-no-promise</code></p>
+      <h3>no matching action case makes no action-legibility promise</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to secret-finisher.</p>
+  <p class="contract-test-text">Where no matching action case exists because the adoption has no action-cases row, the adoption makes no discovery, unavailable-presentation, or availability promise and both game-wide answers are absent. Where an action case exists, this test asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">secret-finisher</code> adoption, its action-cases rows, and its game-wide answers</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the adoption&#39;s action-legibility promises are read</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>where no matching action case exists because the adoption has no action-cases row, the adoption makes no discovery, unavailable-presentation, or availability promise and the game-wide discovery and unavailable-action answers are both absent; where an action case exists, this test asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>action-case-matches-cited-situation · secret-finisher</code></p>
+      <h3><code class="contract-placeholder">secret-finisher</code> applies exactly in its cited situations</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the secret-finisher row.</p>
+  <p class="contract-test-text">Action case <code class="contract-placeholder">secret-finisher</code> applies in every situation named at <code class="contract-placeholder">combat.final-round-range</code> and does not apply in any situation excluded there. It applies on every platform the adoption covers; platform variation lives only in availability-presentations rows. The test leaves the rule&#39;s content to that citation. A situation the citation does not classify asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the action case <code class="contract-placeholder">secret-finisher</code> and the Fixed situation rule at <code class="contract-placeholder">combat.final-round-range</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>the cited covered situations and the nearest similar excluded situations are each reached</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code> applies in every situation the citation covers</li><li><code class="contract-placeholder">secret-finisher</code> does not apply in any situation the citation excludes</li><li><code class="contract-placeholder">secret-finisher</code> applies on every platform the adoption covers; platform variation lives only in availability-presentations rows</li><li>a situation the citation neither covers nor excludes asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-situation-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>discovery-looks-usable-override</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> looks usable by its row answer</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: no row in action-cases matches discoverability looks usable.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>discovery-looks-usable-default</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> looks usable by the game default</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: no row in action-cases matches discoverability use game default.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>discovery-explanation-on-demand-override</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> has an explanation route by its row answer</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: no row in action-cases matches discoverability explanation on demand.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>discovery-explanation-on-demand-default</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> has an explanation route by the game default</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: action discovery default is looks usable, not explanation on demand.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>discovery-current-binding-override</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> shows the current device control by its row answer</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: no row in action-cases matches discoverability current binding is shown.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>discovery-current-binding-default</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> shows the current device control by the game default</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: action discovery default is looks usable, not current binding is shown.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>discovery-assistive-name-override</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> exposes its name and role by its row answer</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: no row in action-cases matches discoverability assistive tech can name it.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>discovery-assistive-name-default</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> exposes its name and role by the game default</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: action discovery default is looks usable, not assistive tech can name it.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>discovery-none-override · secret-finisher</code></p>
+      <h3><code class="contract-placeholder">secret-finisher</code> promises no discovery route by its row answer</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the secret-finisher row.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: <code class="contract-placeholder">secret-finisher</code> promises no identity or availability before the attempt. Accidental discovery and memorable content do not violate this answer; secrecy beyond that promise is outside the contract.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p><code class="contract-placeholder">secret-finisher</code> before an attempt in every situation at <code class="contract-placeholder">combat.final-round-range</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer examines every player-facing presentation before the attempt</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>no presentation promises the action&#39;s identity or availability before the attempt</li><li>accidental discovery and memorable authored content do not fail this answer</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-<code class="contract-placeholder">secret-finisher</code>-observer-result</li><li><code class="contract-placeholder">secret-finisher</code>-presentation-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>discovery-none-default</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> promises no discovery route by the game default</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: action discovery default is looks usable, not none.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>action-permission-remains-cited · secret-finisher</code></p>
+      <h3><code class="contract-placeholder">secret-finisher</code> uses its cited ordinary permission</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the secret-finisher row.</p>
+  <p class="contract-test-text">Ordinary permission for <code class="contract-placeholder">secret-finisher</code> stays at <code class="contract-placeholder">combat.secret-finisher</code>. This contract grants none and does not make an unavailable action succeed. Where the cited rule admits no unavailable state, that comparison asserts nothing. The test restates nothing from the cited action rule.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the action at <code class="contract-placeholder">combat.secret-finisher</code> in an ordinarily permitted state and, where the cited action rule admits one, an ordinarily unavailable state in a covered situation</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the player attempts the action in each state</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>ordinary permission is read from <code class="contract-placeholder">combat.secret-finisher</code></li><li>this contract grants no permission</li><li>where an unavailable state exists, the unavailable attempt does not succeed because of any discovery route, availability presentation, or shared-input selection; where none exists, this clause asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-permission-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>presentation-applies-on-covered-platforms</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> applies on its covered platform scope</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per availability-presentations row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: availability-presentations has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>listed-action-presentations-agree</code></p>
+      <h3>action presentations agree with the cited action cases</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to secret-finisher.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. Every player-facing presentation of a covered action agrees with that action case&#39;s Fixed action citation and never presents it as another covered action. A presentation outside the stated scope asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Scope</dt><dd><p>every player-facing prompt, explanation, control reminder, and availability presentation</p></dd></div>
+<div><dt>Holds</dt><dd><p>each presentation of an action case agrees with its Fixed action citation and never presents one covered action as another; a player-facing presentation outside this scope asserts nothing</p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-observer-result</li><li><code class="contract-placeholder">secret-finisher</code>-presentation-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>remapped-prompt-updates-override</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> prompts update after a binding change by its row answer</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: no row in action-cases matches discoverability current binding is shown.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>remapped-prompt-updates-default</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> prompts update after a binding change by the game default</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: action discovery default is looks usable, not current binding is shown.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unavailable-hidden-override</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> is hidden while unavailable by its row answer</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: no row in action-cases matches when-unavailable hidden.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unavailable-hidden-default</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> is hidden while unavailable by the game default</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: no row in action-cases matches when-unavailable use game default.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unavailable-shown-override</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> stays identifiable and distinctly unavailable by its row answer</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: no row in action-cases matches when-unavailable shown unavailable.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unavailable-shown-default</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> stays identifiable and distinctly unavailable by the game default</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: unavailable action default is hidden, not shown unavailable.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unavailable-reason-override</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> names its current block by its row answer</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: no row in action-cases matches when-unavailable reason is shown.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unavailable-reason-default</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> names its current block by the game default</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: unavailable action default is hidden, not reason is shown.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unavailable-unchanged-override · secret-finisher</code></p>
+      <h3><code class="contract-placeholder">secret-finisher</code> looks identical across availability states by its row answer</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the secret-finisher row.</p>
+  <p class="contract-test-text">Audit class: observer-judged. An observer, not the running game, judges this. The row overrides the game default: any player-facing presentation of <code class="contract-placeholder">secret-finisher</code> that exists is identical while available and unavailable. If none exists, the comparison asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>any player-facing presentation of <code class="contract-placeholder">secret-finisher</code> that exists once the action is available and once it is unavailable in the same covered situation</p></dd></div>
+<div><dt>When</dt><dd><ul><li>an observer compares the two states</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>where a player-facing presentation exists, it is identical across the available and unavailable states; where none exists, this comparison asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-<code class="contract-placeholder">secret-finisher</code>-observer-result</li><li><code class="contract-placeholder">secret-finisher</code>-presentation-trace</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unavailable-unchanged-default</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> looks identical across availability states by the game default</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: unavailable action default is hidden, not unchanged.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unavailable-never-override</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> has no reachable unavailable state by its row answer</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: no row in action-cases matches when-unavailable never unavailable.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>unavailable-never-default</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> has no reachable unavailable state by the game default</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: unavailable action default is hidden, not never unavailable.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>action-channel-announces</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> presents its channel form through <code class="contract-placeholder">Bind channel phrase</code> alone</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per availability-presentations row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: availability-presentations has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>shared-input-stays-one</code></p>
+      <h3>one action input stays one signal with its candidates</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to secret-finisher.</p>
+  <p class="contract-test-text">Where the adoption or its cited control rules name an action input, one action input is consumed once with all its candidates; where none is named, this trial asserts nothing. With exactly one candidate at the accepted moment, that candidate is offered and no shared-input-cases row is needed, as the contract says. With no candidate or several candidates, that offering clause asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>where the adoption or its cited control rules name an action input; where none is named, this trial asserts nothing; one action input carrying its candidate actions at an accepted moment</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the candidate set is read</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the action input is consumed once with all its candidates and is never split into several inputs</li><li>when exactly one candidate remains, that candidate is offered and no shared-input-cases row is needed, as the contract says</li><li>when no candidate or several candidates remain, the at-most-one clause asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-candidate-set</li><li><code class="contract-placeholder">secret-finisher</code>-offered-action</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>shared-input-rule-selects-one</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> offers one rule-selected candidate</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per shared-input-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: shared-input-cases has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>shared-input-player-selects-one</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> offers one player-selected candidate</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per shared-input-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: shared-input-cases has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>buffered-shared-input-reads-accepted-situation</code></p>
+      <h3><code class="contract-placeholder">Row.id</code> reads a buffered shared input in its accepted situation</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per shared-input-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: shared-input-cases has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>presentation-refreshes-after-change</code></p>
+      <h3>availability and offered-action presentations refresh after relevant changes</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to secret-finisher.</p>
+  <p class="contract-test-text">Where an availability or offered-action presentation exists, a change in availability, situation, platform, binding, or candidate eligibility recomputes it from the fresh situation and declarations. A previous prompt or selection stays current only when the cited rules still select it. Without a presentation, or for a change the adoption cannot construct, the corresponding clause asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>where the adoption has a live availability or offered-action presentation, that presentation followed separately by a change in availability, situation, platform, binding, or candidate eligibility; where it has none, this trial asserts nothing</p></dd></div>
+<div><dt>When</dt><dd><ul><li>each change settles</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the presentation is recomputed from the fresh situation and matching declarations</li><li>the previous prompt or selection remains current only when the cited rules still select it</li><li>a kind of change the adoption cannot construct asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-refresh-log</li><li><code class="contract-placeholder">secret-finisher</code>-prompt-bindings</li><li><code class="contract-placeholder">secret-finisher</code>-offered-action</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>action-legibility-authority-order</code></p>
+      <h3>action legibility keeps its authority order</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to secret-finisher.</p>
+  <p class="contract-test-text">The contract reads situation, row defaults, ordinary permission, discovery, unavailable presentation, candidate set, shared-input selection at the accepted moment with its offered-action presentation, one action proposal, current-device binding, and refresh in that order. A part this adoption does not exercise asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>a covered action input and situation that exercise every applicable part of the <code class="contract-placeholder">secret-finisher</code> adoption</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the action input is settled</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the game reads situation, row defaults, ordinary permission, discovery, unavailable presentation, candidate set, shared-input selection at the accepted moment with its offered-action presentation, one action proposal, current-device binding, and refresh in that order</li><li>a part the adoption does not exercise asserts nothing</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-presentation-trace</li><li><code class="contract-placeholder">secret-finisher</code>-candidate-set</li><li><code class="contract-placeholder">secret-finisher</code>-offered-action</li><li><code class="contract-placeholder">secret-finisher</code>-refresh-log</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>legibility-boundaries</code></p>
+      <h3>the adoption makes no promise beyond action legibility</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to secret-finisher.</p>
+  <p class="contract-test-text">Physical controls, input timing help, displayed game facts, and event order each assert nothing here. A route that highlights without naming an action or explaining how to attempt it is not a discovery answer. A control layout the game&#39;s Fixed rules do not make a cited situation is not a situation of this contract.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">secret-finisher</code> adoption and features outside its declared answers and rows</p></dd></div>
+<div><dt>When</dt><dd><ul><li>the adoption&#39;s promise boundary is reviewed</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>physical controls assert nothing</li><li>input timing help asserts nothing</li><li>displayed game facts assert nothing</li><li>event order asserts nothing</li><li>a route that highlights without naming an action or explaining how to attempt it is not a discovery answer</li><li>a control layout the game&#39;s Fixed rules do not make a cited situation is not a situation of this contract</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>effective-answers-have-legal-presentation-shape · secret-finisher</code></p>
+      <h3>declaration check: <code class="contract-placeholder">secret-finisher</code> has the presentation shape its effective answers require</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the secret-finisher row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption, not the running game. The action-cases description supplies all three duties. Resolve <code class="contract-placeholder">secret-finisher</code>&#39;s effective answers from its row and the game defaults. For every platform the case covers, every effective discovery answer except none requires an applicable presentation row; none requires no presentation row; and none cannot pair with reason-is-shown. The inapplicable branch asserts nothing. Any other shape is a defect this test fails by construction.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">secret-finisher</code> adoption, its two answers, and action case <code class="contract-placeholder">secret-finisher</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer resolves the row&#39;s effective discovery and unavailable answers</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>when the effective discovery answer is not none, then for each platform the case covers, at least one availability-presentations row that applies on that platform names <code class="contract-placeholder">secret-finisher</code>, as the action-cases description requires; under none, this clause asserts nothing</li><li>when the effective discovery answer is none, no availability-presentations row names <code class="contract-placeholder">secret-finisher</code>, as the action-cases description requires; under another answer, this clause asserts nothing</li><li>the effective answers are never none together with reason-is-shown, as the action-cases description requires</li><li>a missing row, forbidden row, or forbidden effective pair is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>presentation-action-case-join</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code> names an action case in this adoption</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per availability-presentations row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: availability-presentations has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>shared-input-completeness</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code> lists every candidate and always selects one</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per shared-input-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: shared-input-cases has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>multi-candidate-input-has-one-row</code></p>
+      <h3>declaration check: every multi-candidate input has exactly one matching row</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to secret-finisher.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and its cited prose, not the running game. Every situation where one action input has several candidates must have exactly one matching shared-input-cases row. An input with at most one candidate asserts nothing in that comparison. A missing or duplicate match is a defect this test fails by construction.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">secret-finisher</code> adoption and every cited situation where one action input can have several candidates, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer matches shared-input-cases rows to those situations and inputs</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>each action input with several candidates has exactly one matching shared-input-cases row</li><li>an input with at most one candidate needs no row and asserts nothing in the multi-candidate comparison</li><li>a missing or duplicate match is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>rows-do-not-repeat-or-overlap</code></p>
+      <h3>declaration check: presentation pairs do not repeat and action cases do not overlap</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to secret-finisher.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and its cited prose, not the running game. The availability-presentations description forbids a repeated action-case and channel pair, and the action-cases description forbids two cases for the same action in overlapping situations. The contract sets no maximum row count. A repetition or overlap is a defect this test fails by construction.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">secret-finisher</code> adoption and its cited prose, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer compares every presentation-row pair and every pair of action cases</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>no two availability-presentations rows repeat one action-case and channel pair</li><li>no two action-cases rows cover the same action in overlapping situations</li><li>the contract imposes no maximum row count</li><li>a repeated pair or overlapping action case is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>action-citation-duty · secret-finisher</code></p>
+      <h3>declaration check: <code class="contract-placeholder">secret-finisher</code>&#39;s action citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the secret-finisher row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">combat.secret-finisher</code>, not the running game. The citation must name <code class="contract-placeholder">secret-finisher</code>&#39;s action, ordinary permission, and complete effect. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">secret-finisher</code> adoption and <code class="contract-placeholder">combat.secret-finisher</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">combat.secret-finisher</code> names the action, its ordinary permission, and its complete effect</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>action-situation-citation-duty · secret-finisher</code></p>
+      <h3>declaration check: <code class="contract-placeholder">secret-finisher</code>&#39;s situation citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the secret-finisher row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">combat.final-round-range</code>, not the running game. The citation must name every covered play situation and the nearest similar excluded situations for <code class="contract-placeholder">secret-finisher</code>. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">secret-finisher</code> adoption and <code class="contract-placeholder">combat.final-round-range</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">combat.final-round-range</code> names every play situation covered by <code class="contract-placeholder">secret-finisher</code> and the nearest similar situations excluded from it</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>action-presentation-citation-duty · secret-finisher</code></p>
+      <h3>declaration check: <code class="contract-placeholder">secret-finisher</code>&#39;s presentation citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per action-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the secret-finisher row.</p>
+  <p class="contract-test-text">This declaration check reads the adoption and <code class="contract-placeholder">combat.secret-finisher-has-no-discovery-route</code>, not the running game. The citation must state every discovery route and unavailable state for <code class="contract-placeholder">secret-finisher</code>, including an explicit no-route statement where applicable. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the <code class="contract-placeholder">secret-finisher</code> adoption and <code class="contract-placeholder">combat.secret-finisher-has-no-discovery-route</code>, not the running game</p></dd></div>
+<div><dt>When</dt><dd><ul><li>a reviewer checks the citation&#39;s meaning</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li><code class="contract-placeholder">combat.secret-finisher-has-no-discovery-route</code> states every discovery route and unavailable state for <code class="contract-placeholder">secret-finisher</code>, including an explicit statement when no route exists</li><li>a missing duty is a defect this test fails by construction</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-declaration-record</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>presentation-platform-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s platform citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per availability-presentations row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: availability-presentations has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>channel-rule-citation-duty</code></p>
+      <h3>declaration check: <code class="contract-placeholder">Row.id</code>&#39;s channel citation states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per availability-presentations row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: availability-presentations has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>shared-situation-citation-duty</code></p>
+      <h3>declaration check: the situation citation of <code class="contract-placeholder">Row.id</code> states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per shared-input-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: shared-input-cases has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>shared-actions-citation-duty</code></p>
+      <h3>declaration check: the candidate citation of <code class="contract-placeholder">Row.id</code> states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per shared-input-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: shared-input-cases has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>shared-action-input-citation-duty</code></p>
+      <h3>declaration check: the action-input citation of <code class="contract-placeholder">Row.id</code> states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per shared-input-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: shared-input-cases has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>shared-selection-citation-duty</code></p>
+      <h3>declaration check: the selection citation of <code class="contract-placeholder">Row.id</code> states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per shared-input-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: shared-input-cases has no rows.</p>
+  
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>shared-presentation-citation-duty</code></p>
+      <h3>declaration check: the presentation citation of <code class="contract-placeholder">Row.id</code> states its duty</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per shared-input-cases row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to secret-finisher: shared-input-cases has no rows.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>legibility-holds</code></p>
+      <h3>action legibility holds for the whole run</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to secret-finisher.</p>
+  <p class="contract-test-text">Across <code class="contract-placeholder">every covered situation of the audited run on every covered platform</code>, every available covered action meets its effective discovery promise; every unavailable covered action meets its effective unavailable answer; every channel distinguishes the states it promises; every shared input offers exactly one action before the attempt; and no prompt names a stale binding. A case the adoption cannot construct asserts nothing.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Holds</dt><dd><p>every available covered action met its effective discovery promise; every unavailable covered action met its effective unavailable answer; every availability-presentation channel distinguished the states it promises; every shared input offered exactly one action before the attempt; no prompt named a stale binding; a case the adoption cannot construct asserts nothing</p></dd></div>
+<div><dt>Seeds</dt><dd><p><code class="contract-placeholder">[&quot;audit-a&quot;,&quot;audit-b&quot;]</code></p></dd></div>
+<div><dt>Scope</dt><dd><p><code class="contract-placeholder">every covered situation of the audited run on every covered platform</code></p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">secret-finisher</code>-observer-result</li><li><code class="contract-placeholder">secret-finisher</code>-presentation-trace</li><li><code class="contract-placeholder">secret-finisher</code>-prompt-bindings</li><li><code class="contract-placeholder">secret-finisher</code>-candidate-set</li><li><code class="contract-placeholder">secret-finisher</code>-offered-action</li><li><code class="contract-placeholder">secret-finisher</code>-refresh-log</li></ul></dd></div></dl></details>
+</article></div>
+</details>
+<details class="contract-form-section contract-fold" id="adoption-json">
+  <summary><span class="contract-fold-title">JSON</span><span class="contract-fold-note">the adoption as one file</span></summary>
+  <p>The adoption file as supplied. Answers you try on this page are not written into it; to change an adoption, open it in the authoring tool.</p>
+
+  <pre class="contract-json"><code>{
+  &quot;contract&quot;: &quot;action-legibility&quot;,
+  &quot;version&quot;: 1,
+  &quot;summary&quot;: &quot;Covers which actions players can discover in each situation, how availability is presented, and what an unavailable action shows. It also covers which action is offered when one control signal has several candidate actions. Physical controls, input timing help, displayed game facts, and event order stay elsewhere.&quot;,
+  &quot;questions&quot;: {
+    &quot;action-discovery-default&quot;: {
+      &quot;asks&quot;: &quot;How can players normally discover an action while it matters?&quot;,
+      &quot;rationale&quot;: &quot;Different actions may need different help. This answer supplies the ordinary choice before a particular action states another one.&quot;,
+      &quot;when&quot;: {
+        &quot;row-count&quot;: {
+          &quot;action-cases&quot;: &quot;non-empty&quot;
+        }
+      },
+      &quot;otherwise&quot;: &quot;With no action case, this adoption makes no game-wide discovery promise.&quot;,
+      &quot;options&quot;: {
+        &quot;looks-usable&quot;: {
+          &quot;meaning&quot;: &quot;The action looks possible before it is tried. A platformer marks a climbable ledge with a clear edge shape.&quot;,
+          &quot;semantics&quot;: &quot;At least one player-facing presentation identifies that the action can be attempted in the current situation before the attempt.&quot;
+        },
+        &quot;explanation-on-demand&quot;: {
+          &quot;meaning&quot;: &quot;An explanation is available while the action matters. An adventure game can name the key needed beside a sealed door.&quot;,
+          &quot;semantics&quot;: &quot;A player-facing route available in the current situation names the action and explains how to attempt it.&quot;
+        },
+        &quot;current-binding-is-shown&quot;: {
+          &quot;meaning&quot;: &quot;The action prompt shows its current control. A racing game updates the pit-stop prompt after confirm moves to another button.&quot;,
+          &quot;semantics&quot;: &quot;Every prompt for the action names the current device&#39;s actual control under the applicable control rule. A wrong-device glyph, an old binding, or a hardware glyph in place of the actual touch region or gesture fails this promise.&quot;
+        },
+        &quot;assistive-tech-can-name-it&quot;: {
+          &quot;meaning&quot;: &quot;Assistive technology can name the action and its purpose. A strategy game&#39;s screen reader identifies the end-turn control.&quot;,
+          &quot;semantics&quot;: &quot;A player-facing interface element exposes a determinable action name and role to supported assistive technology.&quot;
+        },
+        &quot;none&quot;: {
+          &quot;meaning&quot;: &quot;The game gives no discovery route for the action. A fighting game leaves a secret finisher for players to uncover outside ordinary prompts.&quot;,
+          &quot;semantics&quot;: &quot;No player-facing presentation promises the action&#39;s identity or availability before it is attempted; accidental discovery and memorable authored content do not violate this answer.&quot;
+        }
+      }
+    },
+    &quot;unavailable-action-default&quot;: {
+      &quot;asks&quot;: &quot;What normally appears when an action cannot be used?&quot;,
+      &quot;rationale&quot;: &quot;A missing prompt, a dimmed control, and an explanation create different expectations. This answer supplies the ordinary choice.&quot;,
+      &quot;when&quot;: {
+        &quot;row-count&quot;: {
+          &quot;action-cases&quot;: &quot;non-empty&quot;
+        }
+      },
+      &quot;otherwise&quot;: &quot;With no action case, this adoption makes no game-wide unavailable-action promise.&quot;,
+      &quot;options&quot;: {
+        &quot;hidden&quot;: {
+          &quot;meaning&quot;: &quot;The action disappears while unavailable. A racing boost prompt vanishes while the boost meter is empty.&quot;,
+          &quot;semantics&quot;: &quot;The action&#39;s availability presentation is absent while the action cannot be attempted.&quot;
+        },
+        &quot;shown-unavailable&quot;: {
+          &quot;meaning&quot;: &quot;The action stays visible but clearly unavailable. A card game dims a card that cannot be played this turn.&quot;,
+          &quot;semantics&quot;: &quot;The presentation keeps the action identifiable and carries a distinct unavailable state without promising a reason.&quot;
+        },
+        &quot;reason-is-shown&quot;: {
+          &quot;meaning&quot;: &quot;The action stays visible and states why it is unavailable. A survival recipe says that two pieces of wood are missing.&quot;,
+          &quot;semantics&quot;: &quot;The presentation identifies the action, marks it unavailable, and states the current blocking reason.&quot;
+        },
+        &quot;unchanged&quot;: {
+          &quot;meaning&quot;: &quot;Nothing changes when the action is unavailable. A mystery game&#39;s bookcase gives no hint that its hidden passage is locked.&quot;,
+          &quot;semantics&quot;: &quot;The action&#39;s player-facing presentation is identical across its available and unavailable states.&quot;
+        },
+        &quot;never-unavailable&quot;: {
+          &quot;meaning&quot;: &quot;Nothing unavailable ever appears, because covered actions stay usable. A rhythm game&#39;s pause action works throughout every playable song moment.&quot;,
+          &quot;semantics&quot;: &quot;No reachable state in a covered situation makes the action unavailable.&quot;
+        }
+      }
+    }
+  },
+  &quot;declares&quot;: {
+    &quot;values&quot;: {},
+    &quot;rows&quot;: {
+      &quot;action-cases&quot;: {
+        &quot;description&quot;: &quot;Actions in the situations where their discovery and unavailable presentation are promised. A case whose effective discovery answer is not none has, on each platform it covers, at least one availability-presentations row; a case whose effective answer is none has no presentation row; and no case pairs an effective none with an effective reason-is-shown. No two cases cover the same action in overlapping situations.&quot;,
+        &quot;when-empty&quot;: &quot;No action receives a legibility promise from this adoption.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable game-facing case name, such as open-door-nearby or jump-at-gap.&quot;
+          },
+          &quot;action-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming the action, its ordinary permission, and its complete effect.&quot;
+          },
+          &quot;situation-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming every play situation covered by this case and the nearest similar situations excluded from it.&quot;
+          },
+          &quot;discoverability&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;use-game-default&quot;,
+              &quot;looks-usable&quot;,
+              &quot;explanation-on-demand&quot;,
+              &quot;current-binding-is-shown&quot;,
+              &quot;assistive-tech-can-name-it&quot;,
+              &quot;none&quot;
+            ],
+            &quot;description&quot;: &quot;The minimum discovery promise for this action case, or the game&#39;s ordinary answer. A secret arcade command may state that no discovery route exists.&quot;
+          },
+          &quot;when-unavailable&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;use-game-default&quot;,
+              &quot;hidden&quot;,
+              &quot;shown-unavailable&quot;,
+              &quot;reason-is-shown&quot;,
+              &quot;unchanged&quot;,
+              &quot;never-unavailable&quot;
+            ],
+            &quot;description&quot;: &quot;What the player-facing presentation does while the action cannot be used, or the game&#39;s ordinary answer. A crafting action may remain visible with its missing material named.&quot;
+          },
+          &quot;presentation-rule-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule for every player-facing discovery route and unavailable state in this case, including an explicit statement when no route exists.&quot;
+          }
+        }
+      },
+      &quot;availability-presentations&quot;: {
+        &quot;description&quot;: &quot;Independent channels that present one action case&#39;s availability. No two rows repeat one action case and channel pair.&quot;,
+        &quot;when-empty&quot;: &quot;No action case promises a player-facing availability channel.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable name for one action case and one channel, such as jump-at-gap-shape.&quot;
+          },
+          &quot;action-case&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;description&quot;: &quot;The id of the action-cases row of this adoption presented through this channel.&quot;
+          },
+          &quot;channel&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;text&quot;,
+              &quot;icon&quot;,
+              &quot;shape&quot;,
+              &quot;outline-or-contrast&quot;,
+              &quot;audio-cue&quot;,
+              &quot;spatial-audio&quot;,
+              &quot;narration&quot;,
+              &quot;audio-description&quot;,
+              &quot;haptic&quot;
+            ],
+            &quot;description&quot;: &quot;The independent presentation channel. Text and icons can name or depict an action; shape, contrast, sound, position, speech, description, and touch can distinguish availability under their cited rules.&quot;
+          },
+          &quot;platform-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;description&quot;: &quot;The Fixed platform rule on which this presentation applies. Absence means the presentation applies on every platform covered by the action case.&quot;
+          },
+          &quot;channel-rule-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule for this channel in available and unavailable states; for a case whose effective unavailable answer is never-unavailable or unchanged, the available form alone. It states whether the channel also identifies the action. A channel is judged by an observer who meets that channel alone.&quot;
+          }
+        }
+      },
+      &quot;shared-input-cases&quot;: {
+        &quot;description&quot;: &quot;Situations where one game-facing action input can offer several actions and one choice must be made visible.&quot;,
+        &quot;when-empty&quot;: &quot;No action input offers several actions in one situation.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A stable situation name, such as porch-interactions.&quot;
+          },
+          &quot;situation-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule naming the situation in which several actions share one action input.&quot;
+          },
+          &quot;actions-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed list of candidate actions and the conditions that make each candidate eligible.&quot;
+          },
+          &quot;action-input&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;description&quot;: &quot;The name of the one game-facing action input carrying these candidates, such as porch-interact.&quot;
+          },
+          &quot;action-input-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The game&#39;s Fixed control rule naming this shared input and the physical activation that produces it.&quot;
+          },
+          &quot;selection&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;rule-selects-one&quot;,
+              &quot;player-selects-one&quot;
+            ],
+            &quot;description&quot;: &quot;Whether the cited rule selects one candidate by ordering or a situation test, or the player chooses before the attempt. A village interact may prefer talking over picking up an item.&quot;
+          },
+          &quot;selection-rule-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule that selects exactly one offered action and breaks every reachable tie.&quot;
+          },
+          &quot;presentation-rule-declared-in&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;The Fixed rule that identifies the selected action before the shared input becomes an action attempt.&quot;
+          }
+        }
+      }
+    }
+  },
+  &quot;rules&quot;: {
+    &quot;secret-default-cannot-explain-a-block&quot;: {
+      &quot;forbid&quot;: {
+        &quot;all&quot;: [
+          {
+            &quot;flag&quot;: {
+              &quot;action-discovery-default&quot;: [
+                &quot;none&quot;
+              ]
+            }
+          },
+          {
+            &quot;flag&quot;: {
+              &quot;unavailable-action-default&quot;: [
+                &quot;reason-is-shown&quot;
+              ]
+            }
+          }
+        ]
+      },
+      &quot;message&quot;: &quot;A secret action cannot use a game-wide default that names it and explains why it is blocked.&quot;
+    }
+  },
+  &quot;origin&quot;: &quot;https://opengdd.org/contracts/action-legibility-1&quot;,
+  &quot;mechanism&quot;: [
+    &quot;This is the single normative authority for action discovery, availability presentation, and shared-input selection. Questions and rows describe choices and cite game rules; they do not define another sequence.&quot;,
+    &quot;An **action input** is one game-facing signal declared by Control options when that contract is adopted; otherwise it comes from the game&#39;s Fixed control rule. Control options owns how bindings emit it; this contract consumes one action input and the candidate actions it carries. The current binding comes from the same optional source. An **action case** is one action in one cited situation. A **candidate** is an action carried by the input whose optional binding context holds and whose Fixed permission rule — or a forgiveness acceptance from Input forgiveness — accepts it in the situation at the accepted moment. Forgiveness applies per candidate: each candidate action&#39;s forgiveness rows read the shared input as that action&#39;s input, and an acceptance shifted for one candidate shifts the accepted moment this settlement reads. An action is **offered** when it is identified to the player as the result of selection.&quot;,
+    &quot;1. Read the current situation and every matching action case — action cases are platform-neutral — then every presentation row whose optional platform citation applies on the current platform. No matching action case creates no legibility promise from this adoption. 2. Resolve each row&#39;s effective discovery and unavailable answers. A row value other than `use-game-default` wins; otherwise the matching question answer applies. 3. Read ordinary action permission from the cited Fixed action rule. This contract does not grant permission and does not make an unavailable action succeed. 4. While an action is available, apply its effective discovery promise through the matching presentation rows. Under `none`, no discovery route is promised. 5. While an action is unavailable, apply its effective unavailable answer. Hidden removes its presentation. Shown-unavailable keeps identity and marks the state. Reason-is-shown also names the current block. Unchanged exposes no availability difference. Never-unavailable admits no unavailable state in the cited situation. 6. Read the one action input and all of its candidate actions. This settlement consumes one input carrying its candidates; it never splits one input into several. 7. When the action input has at most one candidate at the accepted moment, that candidate is offered and no shared-input-cases row is needed. A physical input may differ by platform without changing this step. 8. When the action input has several candidates, exactly one matching `shared-input-cases` row applies. Under `rule-selects-one`, its cited rule uses its declared ordering or situation test. Under `player-selects-one`, an explicit choice is required. The row consumes one input with N candidates and offers exactly one. Present that offered action under the row&#39;s cited presentation rule before the accepted input becomes an action attempt. Other candidates may remain visible, but none is presented as what will happen now. While an input waits in a buffer, this presentation makes no winner promise; the promise binds at the accepted moment. 9. Physical input → Control options (when adopted) emits the action input → Input forgiveness (when adopted) may shift the accepted moment → this contract selects the offered candidate at the accepted moment → one action proposal. Thus an interact buffered during a cutscene evaluates candidates in the situation where the input is accepted, not the situation where it was pressed. Event resolution owns ordering, rejection, and effects after the proposal. 10. Whenever a presentation shows the current binding, it shows the actual current device control, including the touch region or gesture on a touch platform. 11. When availability, situation, platform, binding, or candidate eligibility changes, recompute the presentation from step 1. A previous prompt or selection does not remain current unless the cited rules still select it.&quot;,
+    &quot;The authority order is therefore: situation, row defaults, ordinary permission, discovery, unavailable presentation, candidate set, shared-input selection at the accepted moment with its offered-action presentation, one action proposal, current-device binding, and refresh.&quot;
+  ],
+  &quot;answers&quot;: {
+    &quot;action-discovery-default&quot;: &quot;looks-usable&quot;,
+    &quot;unavailable-action-default&quot;: &quot;hidden&quot;
+  },
+  &quot;values&quot;: {},
+  &quot;rows&quot;: {
+    &quot;action-cases&quot;: [
+      {
+        &quot;id&quot;: &quot;secret-finisher&quot;,
+        &quot;action-declared-in&quot;: &quot;combat.secret-finisher&quot;,
+        &quot;situation-declared-in&quot;: &quot;combat.final-round-range&quot;,
+        &quot;discoverability&quot;: &quot;none&quot;,
+        &quot;when-unavailable&quot;: &quot;unchanged&quot;,
+        &quot;presentation-rule-declared-in&quot;: &quot;combat.secret-finisher-has-no-discovery-route&quot;
+      }
+    ],
+    &quot;availability-presentations&quot;: [],
+    &quot;shared-input-cases&quot;: []
+  },
+  &quot;pack&quot;: &quot;sha256:3db629b447d4abfb21e3d23f2610dfa503b36a9da22e671d416145ce62dd1f12&quot;
+}
+</code></pre>
+</details>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Collections | OpenGDD handbook</title>
-<meta name="description" content="Games are full of lists: technologies, recipes, cards, levels. A collection keeps one kind of content in one folder, with one JSON file per item.">
+<meta name="description" content="Games are full of lists: technologies, recipes, cards, levels. A collection keeps one kind of content in one folder, with one JSON file per item. The example is the …">
 <link rel="canonical" href="https://opengdd.org/handbook/collections/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Collections | OpenGDD handbook">
-<meta property="og:description" content="Games are full of lists: technologies, recipes, cards, levels. A collection keeps one kind of content in one folder, with one JSON file per item.">
+<meta property="og:description" content="Games are full of lists: technologies, recipes, cards, levels. A collection keeps one kind of content in one folder, with one JSON file per item. The example is the …">
 <meta property="og:url" content="https://opengdd.org/handbook/collections/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Collections | OpenGDD handbook">
-<meta name="twitter:description" content="Games are full of lists: technologies, recipes, cards, levels. A collection keeps one kind of content in one folder, with one JSON file per item.">
+<meta name="twitter:description" content="Games are full of lists: technologies, recipes, cards, levels. A collection keeps one kind of content in one folder, with one JSON file per item. The example is the …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -23,20 +23,21 @@
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/" aria-current="page">Learn</a>
-      <a href="/spec/">Spec</a>
-      <a href="/standard/">Standard</a>
+      <a href="/contracts/">Contracts</a>
+      <a href="/spec/">Specification</a>
       <a href="/authoring-tool/">Authoring tool</a>
       <a href="/about/">About</a>
       <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
     </nav>
   </div>
 </header>
-<main>
+<main id="main">
 <div class="doc-layout">
 <nav class="doc-toc" aria-label="Learn"><p class="toc-title">Learn</p>
 <ul class="learn-resources">
@@ -46,35 +47,35 @@
 <div class="toc-group">
 <p class="toc-group-title">Start and foundations</p>
 <ul>
-<li class="toc-h2"><a href="/handbook/an-afternoon-spec/">An afternoon spec</a></li>
-<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">The shape of a spec</a></li>
-<li class="toc-h2"><a href="/handbook/fantasy-block/">The fantasy block</a></li>
-<li class="toc-h2"><a href="/handbook/authority/">Authority</a></li>
-<li class="toc-h2"><a href="/handbook/identifiers/">Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
+<li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
+<li class="toc-h2"><a href="/handbook/player-fantasy/">The player fantasy</a></li>
+<li class="toc-h2"><a href="/handbook/who-decides/">Who decides</a></li>
+<li class="toc-h2"><a href="/handbook/naming-things/">Names and addresses</a></li>
 <li class="toc-h2"><a href="/handbook/tuning/">Tuning</a></li>
 <li class="toc-h2"><a href="/handbook/acceptance-tests/">Acceptance tests</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Content, links, and time</p>
+<p class="toc-group-title">Content, links and time</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/collections/" class="here" aria-current="page">Collections</a></li>
 <li class="toc-h2"><a href="/handbook/links/">Links</a></li>
 <li class="toc-h2"><a href="/handbook/runtime-values/">Runtime values</a></li>
-<li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes &amp; clocks</a></li>
-<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes and clocks</a></li>
+<li class="toc-h2"><a href="/handbook/seeds/">Seeds and repeatable randomness</a></li>
 </ul>
 </div>
 <div class="toc-group">
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette &amp; colour promises</a></li>
-<li class="toc-h2"><a href="/handbook/personalization/">Personalization</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanisms</p>
+<p class="toc-group-title">Reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -82,15 +83,15 @@
 <div class="toc-group">
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
-<li class="toc-h2"><a href="/handbook/promises-and-proof/">Promises and proof</a></li>
-<li class="toc-h2"><a href="/handbook/preflight-checklist/">Preflight checklist</a></li>
+<li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
 <h1>Collections</h1>
-<p><em>Opt-in: add this when your game needs it.</em></p>
-<p>Games are full of lists: technologies, recipes, cards, levels. A <strong>collection</strong> keeps one kind of content in one folder, with one JSON file per item.</p>
+<p class="chapter-scope"><span class="scope-badge">Optional</span></p>
+<p>Games are full of lists: technologies, recipes, cards, levels. A <strong>collection</strong> keeps one kind of content in one folder, with one JSON file per item. The example is the technology tree of a survival crafting game.</p>
 <p><em><code>collections/</code>, at the package root</em></p>
 <pre><code class="lang-text">collections/
   technologies/
@@ -101,47 +102,47 @@
     recipe-charcoal.json
   items/
     charcoal.json</code></pre>
-<p>Each folder under <code>collections/</code> is one collection. The folder name is its id, and each filename is a record id. The folders are the declaration, so there is no collection list to maintain in <code>manifest.json</code>.</p>
+<p>Each folder under <code>collections/</code> is one collection. The folder name is its id, and each other file is one <strong>record</strong>, named by its filename. Making the folder is enough: there is no index file to update.</p>
 <p><em><code>collections/technologies/kiln-building.json</code>, one record</em></p>
 <pre><code class="lang-json">{
   &quot;title&quot;: &quot;Kiln Building&quot;,
   &quot;era_order&quot;: 2,
   &quot;note&quot;: &quot;Fire held in a shape, instead of loose on the ground.&quot;
 }</code></pre>
-<p>The fields are yours. <code>title</code> is what the game displays; <code>kiln-building</code> is the record id the package refers to. In prose:</p>
+<p>The fields are yours. <code>title</code> is what the game shows; <code>kiln-building</code> is the id the package refers to. In prose:</p>
 <ul>
 <li><code>collections.technologies</code> means the whole collection;</li>
 <li><code>collections.technologies.kiln-building</code> means this record.</li>
 </ul>
-<p>If you rename a record, the validator points to every reference that still uses the old id.</p>
-<p>Records may use whatever fields they need. When every record should use the same fields, add the optional schema file.</p>
-<p><em><code>collections/levels/_collection.json</code></em></p>
+<p>If you rename a record, the validator (the checking tool) points at every reference that still uses the old id.</p>
+<p>Records may use whatever fields they need. When every record should use the same fields, add the optional schema file to the folder.</p>
+<p><em><code>collections/technologies/_collection.json</code></em></p>
 <pre><code class="lang-json">{
   &quot;record&quot;: {
     &quot;title&quot;: {
       &quot;type&quot;: &quot;string&quot;,
       &quot;required&quot;: true,
-      &quot;description&quot;: &quot;the level name shown in the level list&quot;
+      &quot;description&quot;: &quot;the name shown in the technology tree&quot;
     },
-    &quot;campaign-order&quot;: {
+    &quot;era_order&quot;: {
       &quot;type&quot;: &quot;integer&quot;,
       &quot;required&quot;: true,
       &quot;unique&quot;: true,
-      &quot;description&quot;: &quot;the level's place in the campaign, counting from 1&quot;
+      &quot;description&quot;: &quot;the technology's place in the era, counting from 1&quot;
     }
   }
 }</code></pre>
-<p>Each description explains how to use the field. The schema reports missing fields, wrong value types, unexpected fields, and duplicate values marked <code>unique</code>.</p>
+<p>Each description says how to use the field. With a schema, the validator reports missing fields, wrong value types, unexpected fields, and repeated values in a field marked <code>unique</code>.</p>
 <p>A field can point at another record. The <a href="/handbook/links/">Links</a> chapter shows the <code>link</code> field type and its checks.</p>
-<p>Leave <code>_collection.json</code> out when the records do not need the same required fields. Both forms are complete collections.</p>
-<p><em>Full rules: <a href="/spec/">OpenGDD specification</a>, §1b.</em></p>
+<p>Leave <code>_collection.json</code> out when the records do not need the same fields. Both forms are complete collections.</p>
+<p><em>Full rules: <a href="/spec/#1b-structured-content-collections">OpenGDD specification</a>, §1b.</em></p>
 <p class="note chapter-pager"><a href="/handbook/acceptance-tests/">← Acceptance tests</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/links/">Links →</a></p>
 </article>
 </div>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
-    <span><a href="/about/">About the standard</a></span>
+    <span><a href="/about/">About OpenGDD</a></span>
     <span>Prose CC-BY 4.0 · code MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>

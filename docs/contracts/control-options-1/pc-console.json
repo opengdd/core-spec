@@ -1,0 +1,416 @@
+{
+  "contract": "control-options",
+  "version": 1,
+  "summary": "Covers which physical inputs produce each action on every platform. It also covers complete input methods, named control presets, remapping, press styles, simpler alternatives, and device-motion inputs. Action prompts, input timing help, shared-action choice, and event order stay elsewhere.",
+  "questions": {
+    "remapping-default": {
+      "asks": "How can players normally change the controls?",
+      "rationale": "A platform may offer fixed controls, named layouts, or free changes. This answer supplies the ordinary choice before a platform states another one.",
+      "when": {
+        "row-count": {
+          "platform-control-sets": "non-empty"
+        }
+      },
+      "otherwise": "With no platform control set, this adoption makes no game-wide remapping promise.",
+      "options": {
+        "fixed-bindings": {
+          "meaning": "The controls cannot be changed in the game. A puzzle game always keeps rotate on the space bar.",
+          "semantics": "No player-facing setting changes an action's physical input or press style."
+        },
+        "swap-only": {
+          "meaning": "Existing controls can only exchange actions. A platformer can swap jump and dash, but an unused button cannot receive either action.",
+          "semantics": "A supported binding can exchange its current action with another supported binding; no action can move independently to an otherwise unused input."
+        },
+        "presets-only": {
+          "meaning": "Players can choose only from named control sets. An action game offers Default and Alternate layouts without individual button changes.",
+          "semantics": "The player may select a complete declared preset but cannot change one binding independently inside that preset. The platform offers at least two presets whose availability is starting-and-selectable or player-selectable."
+        },
+        "any-action-any-input": {
+          "meaning": "Any action can move to any supported input. A strategy game can move end turn from Enter to an unused mouse button.",
+          "semantics": "Every covered action can be assigned independently to any supported remappable input, including an otherwise unassigned input; conflicts are resolved visibly before use."
+        },
+        "action-and-press-style": {
+          "meaning": "Both the input and the press style can change. An adventure game can move interact to another button and change a hold into one press.",
+          "semantics": "Every covered action can change to a supported input and to any press style that its cited platform rule offers for that action."
+        }
+      }
+    },
+    "demanding-input-default": {
+      "asks": "What normally happens when an action needs a difficult press?",
+      "rationale": "Holds, rapid presses, double presses, and button combinations can block an otherwise known action. This answer supplies the ordinary choice.",
+      "when": {
+        "row-count": {
+          "platform-control-sets": "non-empty"
+        }
+      },
+      "otherwise": "With no platform control set, this adoption makes no game-wide demanding-input promise.",
+      "options": {
+        "no-demanding-presses": {
+          "meaning": "No action needs a demanding press. A card game plays a selected card with one ordinary activation.",
+          "semantics": "No covered binding requires timed, held, rapid, repeated, double, simultaneous, directional-sequence, or device-motion input as its only route to the action."
+        },
+        "simpler-alternative": {
+          "meaning": "Every demanding press has a distinct simpler route with no setting change. A repair game offers a separate tap button beside its hold-to-repair control.",
+          "semantics": "Every covered demanding binding has a declared alternative that performs the same action without configuration."
+        },
+        "player-can-change-it": {
+          "meaning": "A setting can make the press easier. A racing game can change a held pit command into one ordinary press.",
+          "semantics": "A player-facing setting replaces each covered demanding press with a declared easier press style before play uses the binding."
+        },
+        "required-as-written": {
+          "meaning": "The demanding press remains required. A rhythm special still needs two buttons together and has no simpler route from this contract.",
+          "semantics": "The covered demanding binding has no simpler alternative or press-style setting promised by this adoption."
+        }
+      }
+    }
+  },
+  "declares": {
+    "values": {},
+    "rows": {
+      "platform-control-sets": {
+        "description": "Supported platforms or editions and their complete control policies. A separate row is required whenever mappings or options differ.",
+        "when-empty": "No platform receives a physical-control promise from this adoption.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable platform or edition name, such as pc or console-gamepad."
+          },
+          "platform-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule naming one platform or edition and its supported devices. Different control behavior requires another row."
+          },
+          "methods-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed list of complete input methods and any required switch between them. A PC row may name keyboard and pointer as one mixed method."
+          },
+          "input-method-coverage": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "one-method-covers-all",
+              "player-chooses-method",
+              "mixed-methods-needed"
+            ],
+            "description": "Whether one named method covers every action bound on the platform, several named methods each do so, or the named methods must be mixed. A console may offer complete gamepad and accessibility-controller methods."
+          },
+          "remapping": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "use-game-default",
+              "fixed-bindings",
+              "swap-only",
+              "presets-only",
+              "any-action-any-input",
+              "action-and-press-style"
+            ],
+            "description": "The platform's remapping policy or the game's ordinary answer. A console edition may offer presets while the PC edition allows free assignment."
+          },
+          "settings-rule-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule for the platform's control menu and, as its effective remapping answer needs, preset selection, conflict handling, the press styles offered for each action, or the explicit absence of changes when bindings are fixed."
+          }
+        }
+      },
+      "control-presets": {
+        "description": "Named complete binding sets offered on a platform. A preset maps every action bound on its platform.",
+        "when-empty": "No named control preset is offered.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable name for the preset, such as gamepad-default or gamepad-alternate."
+          },
+          "platform-control-set": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The supported platform or edition that offers this preset."
+          },
+          "label": {
+            "type": "string",
+            "required": true,
+            "description": "The player-facing preset name, such as Standard or Southpaw."
+          },
+          "availability": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "starting-and-selectable",
+              "player-selectable",
+              "mode-selected"
+            ],
+            "description": "Whether this preset is the starting set and remains selectable, is another selectable set, or follows a cited player mode. An assisted-play mode may select its own complete layout."
+          },
+          "selection-rule-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed route that selects this preset and makes its matching action-binding rows current."
+          }
+        }
+      },
+      "action-bindings": {
+        "description": "Physical inputs that produce actions on a platform or inside one named preset.",
+        "when-empty": "No physical input is promised to produce a game action.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable platform, action, and input name, such as pc-jump-space. A per-character control set names the character too."
+          },
+          "platform-control-set": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The supported platform or edition where this binding exists."
+          },
+          "preset": {
+            "type": "string",
+            "pattern": "kebab-case",
+            "description": "The named complete control set containing this binding. Absence means the platform's current base or freely remappable set. On a platform whose effective remapping allows changes, the preset is the starting source set and accepted changes mutate the current copy."
+          },
+          "context-declared-in": {
+            "type": "citation",
+            "description": "The Fixed context in which this binding exists, such as a vehicle layer, menu, training mode, or unlock gate. Absence means it exists throughout the selected control set."
+          },
+          "action-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed game-facing action this binding contributes as a candidate."
+          },
+          "physical-input-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed physical key, button, axis, touch region, gesture, directional sequence, or device-motion input and the device that supplies it."
+          },
+          "action-input": {
+            "type": "string",
+            "pattern": "kebab-case",
+            "description": "The one game-facing input emitted by this physical activation. Name it when several bindings answer the same physical activation."
+          },
+          "press-style": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "press",
+              "release",
+              "timed-press",
+              "hold",
+              "rapid-presses",
+              "repeated-presses",
+              "double-press",
+              "simultaneous-inputs",
+              "continuous-axis",
+              "gesture",
+              "input-sequence"
+            ],
+            "description": "The physical performance required by this binding. A timed press has a target moment, rapid presses have a rate, repeated presses have a count, and an input sequence is a directional sequence completed by a press."
+          },
+          "motion-use": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "no-motion",
+              "optional-motion",
+              "required-motion"
+            ],
+            "description": "Whether this binding uses no device motion, is an optional device-motion route beside another binding, or requires device motion. A handheld aim action may offer tilt as an alternative to the stick. A required-motion binding is demanding by its motion, and a press-style setting does not relieve it, so its easier route is a simpler alternative or another binding. An optional-motion binding has a no-motion binding for the same action on the same platform and preset."
+          },
+          "demanding-input": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "use-game-default",
+              "no-demanding-presses",
+              "simpler-alternative",
+              "player-can-change-it",
+              "required-as-written"
+            ],
+            "description": "The action binding's demanding-input answer or the game's ordinary answer. A repeated crafting input may allow a hold even when combat combinations remain fixed. No binding answers required-as-written on a platform whose effective remapping is action-and-press-style."
+          }
+        }
+      },
+      "simpler-inputs": {
+        "description": "Distinct unconfigured alternatives for bindings whose effective demanding-input answer promises one.",
+        "when-empty": "No demanding binding promises a separate simpler input without a setting change.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable alternative name, such as repair-tap-alternative."
+          },
+          "action-binding": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The demanding binding for which this route is the simpler alternative."
+          },
+          "alternative-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed physical input and ordinary press style that perform the same game action without a setting change."
+          },
+          "distinction-rule-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed rule proving that successful use of this alternative cannot be mistaken for failure to finish the demanding input."
+          }
+        }
+      }
+    }
+  },
+  "rules": {
+    "press-style-change-needs-a-setting-answer": {
+      "forbid": {
+        "all": [
+          {
+            "flag": {
+              "remapping-default": [
+                "action-and-press-style"
+              ]
+            }
+          },
+          {
+            "flag": {
+              "demanding-input-default": [
+                "required-as-written"
+              ]
+            }
+          }
+        ]
+      },
+      "message": "Controls that let players change a press style cannot also require every demanding press exactly as written."
+    }
+  },
+  "origin": "https://opengdd.org/contracts/control-options-1",
+  "mechanism": [
+    "This is the single normative authority for platform selection, preset choice, remapping, physical-input matching, press style, simpler alternatives, device-motion use, and creation of game-facing action inputs. Questions and rows supply defaults and cited game rules; they do not define another sequence.",
+    "A **control set** is the complete current mapping for one platform and input method. A **preset** is a named immutable source set that can become current. A **binding** joins one physical input and press style to one candidate action. An **action input** is the one game-facing signal emitted by a physical activation; it carries every matched binding's action as a candidate. Bindings that can be current together and share one physical activation share its optional `action-input` name, while a lone binding's name may remain implicit. A **demanding input** is a timed, held, rapid, repeated, double, simultaneous, input-sequence, or required-device-motion input.",
+    "1. Select exactly one matching platform-control-set from the running platform, edition, and supported device rules. 2. Resolve the platform's effective remapping answer. A row value other than `use-game-default` wins; otherwise `remapping-default` applies. 3. Establish the starting control set from the platform's cited rule. When a preset is selected, copy its complete matching action-binding rows into the current set. The preset itself remains unchanged. 4. Apply control changes only through the effective remapping answer. Fixed bindings reject all changes. Swap-only exchanges two existing assignments. Presets-only replaces the whole set with another declared preset. Free assignment moves one action independently and resolves conflicts before use. Action-and-press-style also permits a supported press-style change. 5. After an accepted change, the resulting complete set becomes current. Every later binding lookup reads that set, and each binding row's promises follow its action to the input the current set assigns. Presentation of the current binding is owned by Action legibility when adopted, otherwise by the game's UI rules. 6. On physical input, read every binding with a matching physical input and performance in the current platform, device, method, and preset-derived set. A press, release, hold, repeated activation, double activation, simultaneous group, axis, gesture, directional input sequence, or device-motion input matches only under its cited Fixed rule. An optional binding context makes the match provisional: whether that context holds is settled at the accepted moment, once step 11's timing help fixes it. Rows that can be current together and share one physical activation agree on one `action-input` value. A physical input cited by a `simpler-inputs` row matches as if it were its named binding: it emits that binding's action input and contributes the same action. 7. Resolve the binding's effective demanding-input answer. A row value other than `use-game-default` wins; otherwise `demanding-input-default` applies. 8. Under no-demanding-presses, the covered action has an ordinary route. Under player-can-change-it, the selected setting supplies the easier current press style. Under required-as-written, an incomplete demanding input produces no action input from this contract. 9. Under simpler-alternative, the demanding route and every matching simpler row remain available together without configuration. The alternative produces the same action only through its distinct cited input; failure to finish the demanding route never becomes the alternative by itself. 10. A `no-motion` binding reads no device motion. An `optional-motion` binding contributes the same action as its non-device-motion alternative when its gesture completes. A `required-motion` binding produces no action input from a non-device-motion attempt. 11. Physical input → this contract emits the action input → Input forgiveness (when adopted) may shift the accepted moment → Action legibility (when adopted) selects the offered candidate at the accepted moment → one action proposal. Thus an interact buffered during a cutscene evaluates candidates in the situation where the input is accepted, not the situation where it was pressed. The emitted action input carries every matched binding's action as a candidate; it is one input with N candidates, never N inputs. 12. When Action legibility is adopted, its shared-input case consumes that one action input and selects one candidate. Otherwise the game's cited Fixed selection rule resolves shared candidates, and the game's UI rules own their presentation. Event resolution begins only after the one action proposal exists.",
+    "The authority order is therefore: platform, defaults, starting set, accepted control change, current set, physical match, demanding-input answer, simpler route, device-motion rule, one action-input creation, accepted-moment shared-action choice, and one action proposal."
+  ],
+  "answers": {
+    "remapping-default": "any-action-any-input",
+    "demanding-input-default": "no-demanding-presses"
+  },
+  "values": {},
+  "rows": {
+    "platform-control-sets": [
+      {
+        "id": "pc",
+        "platform-declared-in": "platforms.pc",
+        "methods-declared-in": "controls.keyboard",
+        "input-method-coverage": "one-method-covers-all",
+        "remapping": "use-game-default",
+        "settings-rule-declared-in": "controls.pc-remap-menu"
+      },
+      {
+        "id": "console-gamepad",
+        "platform-declared-in": "platforms.console",
+        "methods-declared-in": "controls.gamepad",
+        "input-method-coverage": "one-method-covers-all",
+        "remapping": "presets-only",
+        "settings-rule-declared-in": "controls.console-preset-menu"
+      }
+    ],
+    "control-presets": [
+      {
+        "id": "keyboard-start",
+        "platform-control-set": "pc",
+        "label": "Keyboard Start",
+        "availability": "starting-and-selectable",
+        "selection-rule-declared-in": "controls.keyboard-start"
+      },
+      {
+        "id": "gamepad-default",
+        "platform-control-set": "console-gamepad",
+        "label": "Default Layout",
+        "availability": "starting-and-selectable",
+        "selection-rule-declared-in": "controls.gamepad-default"
+      },
+      {
+        "id": "gamepad-alternate",
+        "platform-control-set": "console-gamepad",
+        "label": "Alternate Layout",
+        "availability": "player-selectable",
+        "selection-rule-declared-in": "controls.gamepad-alternate"
+      }
+    ],
+    "action-bindings": [
+      {
+        "id": "pc-jump-space",
+        "platform-control-set": "pc",
+        "preset": "keyboard-start",
+        "action-declared-in": "movement.jump",
+        "physical-input-declared-in": "controls.space",
+        "press-style": "press",
+        "motion-use": "no-motion",
+        "demanding-input": "use-game-default"
+      },
+      {
+        "id": "pc-interact-e",
+        "platform-control-set": "pc",
+        "preset": "keyboard-start",
+        "action-declared-in": "world.interact",
+        "physical-input-declared-in": "controls.e-key",
+        "press-style": "press",
+        "motion-use": "no-motion",
+        "demanding-input": "use-game-default"
+      },
+      {
+        "id": "default-jump-south",
+        "platform-control-set": "console-gamepad",
+        "preset": "gamepad-default",
+        "action-declared-in": "movement.jump",
+        "physical-input-declared-in": "controls.south-button",
+        "press-style": "press",
+        "motion-use": "no-motion",
+        "demanding-input": "use-game-default"
+      },
+      {
+        "id": "default-interact-west",
+        "platform-control-set": "console-gamepad",
+        "preset": "gamepad-default",
+        "action-declared-in": "world.interact",
+        "physical-input-declared-in": "controls.west-button",
+        "press-style": "press",
+        "motion-use": "no-motion",
+        "demanding-input": "use-game-default"
+      },
+      {
+        "id": "alternate-jump-west",
+        "platform-control-set": "console-gamepad",
+        "preset": "gamepad-alternate",
+        "action-declared-in": "movement.jump",
+        "physical-input-declared-in": "controls.west-button",
+        "press-style": "press",
+        "motion-use": "no-motion",
+        "demanding-input": "use-game-default"
+      },
+      {
+        "id": "alternate-interact-south",
+        "platform-control-set": "console-gamepad",
+        "preset": "gamepad-alternate",
+        "action-declared-in": "world.interact",
+        "physical-input-declared-in": "controls.south-button",
+        "press-style": "press",
+        "motion-use": "no-motion",
+        "demanding-input": "use-game-default"
+      }
+    ],
+    "simpler-inputs": []
+  },
+  "pack": "sha256:38a15db9590840c0b288298c204a1e2320ac8160bb99e0ff53997d3f65382cd6"
+}

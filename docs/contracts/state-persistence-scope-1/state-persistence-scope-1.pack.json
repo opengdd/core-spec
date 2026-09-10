@@ -1,0 +1,2766 @@
+{
+  "contract": "state-persistence-scope",
+  "version": 1,
+  "templates": [
+    {
+      "id": "run-scope-uses-cited-events",
+      "title": "{{row.id}} begins and ends its run only at the cited events",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "lifetime": [
+            "run"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a distinguishable {{row.id}} value before, during, and after its run",
+        "when": [
+          "play crosses the attempt start at {{row.scope-starts-in}}, the run ending at {{row.scope-ends-in}}, and each save, automatic write, timer tick, load, process close, and relaunch to the same context that the adoption can construct"
+        ],
+        "then": [
+          "the run identity begins only at {{row.scope-starts-in}} and ends only at {{row.scope-ends-in}}",
+          "each constructed save, automatic write, timer tick, load, close, and relaunch does not by itself begin or end the run; an event the adoption cannot construct asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-run-identity"
+        ]
+      },
+      "text": "The run for {{row.id}} begins at {{row.scope-starts-in}} and ends at {{row.scope-ends-in}}. Each save, automatic write, timer tick, load, close, or relaunch the adoption can construct does not create either boundary; an unavailable event asserts nothing. The test names the addresses and restates nothing from them."
+    },
+    {
+      "id": "session-scope-uses-cited-events",
+      "title": "{{row.id}} keeps one session through returns to the same context",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "lifetime": [
+            "session"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a distinguishable {{row.id}} value in the session that starts at {{row.scope-starts-in}}",
+        "when": [
+          "play pauses, enters the background, crosses each constructed save, automatic write, timer tick, and load, closes, relaunches to the same context, and finally crosses {{row.scope-ends-in}}",
+          "where the adoption declares a run family, play also crosses that family's run boundary"
+        ],
+        "then": [
+          "pause, background, closure, and relaunch to the same context retain one session identity",
+          "each constructed save, automatic write, timer tick, load, close, and relaunch does not by itself begin or end the session; an event the adoption cannot construct asserts nothing",
+          "crossing a run boundary declared by another family does not by itself end this session; where the adoption declares no run family, this clause asserts nothing",
+          "the session ends only at {{row.scope-ends-in}}; whether its earlier value returns still follows its commit and boundary results"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-session-identity"
+        ]
+      },
+      "text": "The session for {{row.id}} begins at {{row.scope-starts-in}}, survives each constructible save, automatic write, timer tick, load, pause, background interval, closure, relaunch to the same context, and another family's run boundary, and ends at {{row.scope-ends-in}}. An unavailable event or run boundary asserts nothing. Its value still needs the declared commit and boundary result to return. The test names the addresses and restates nothing from them."
+    },
+    {
+      "id": "copy-carries-complete-identity",
+      "title": "{{row.id}} copies carry complete identity and family membership",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "one accepted commit of the copy kind named {{row.id}}",
+        "when": [
+          "the copy is recorded and later considered as a candidate"
+        ],
+        "then": [
+          "the copy record carries save-kind id, copy identity, any slot identity, build identity, commit identity, and the complete state-family set named at {{row.contains-declared-in}}",
+          "the commit record identifies one coherent accepted write rather than a collection of separately accepted fields"
+        ],
+        "diagnostics": [
+          "{{instance}}-commit-log",
+          "{{instance}}-candidate-set"
+        ]
+      },
+      "text": "A copy of kind {{row.id}} is one coherent accepted commit with save-kind, copy, slot when present, build, and commit identities and the complete family set at {{row.contains-declared-in}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "conflict-has-two-unreplaced-accepted-copies",
+      "title": "{{row.id}} is a conflict only for two accepted unreplaced copies",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-conflicts",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "candidate pairs inside and outside the conflict scope governed by {{row.resolution-declared-in}}",
+        "when": [
+          "the game classifies each pair before reading gameplay state"
+        ],
+        "then": [
+          "a conflict is recorded only when two accepted shared copies in one declared scope disagree and neither has replaced the other",
+          "an unaccepted, agreeing, out-of-scope, or already replaced pair is not recorded as a conflict"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-set",
+          "{{instance}}-conflict-report"
+        ]
+      },
+      "text": "{{row.id}} is a conflict only for two accepted shared copies in one declared scope that disagree and have not replaced one another. {{row.resolution-declared-in}} decides the cited facts; this test names the address and restates nothing from it."
+    },
+    {
+      "id": "state-family-follows-maximum-lifetime",
+      "title": "{{row.id}} follows its declared maximum lifetime",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "lifetime": [
+            "run",
+            "session",
+            "slot",
+            "profile",
+            "device",
+            "account",
+            "until-event",
+            "not-kept"
+          ]
+        }
+      },
+      "bindings": {
+        "maximum-scope": {
+          "row_field": "lifetime",
+          "map": {
+            "run": "one run",
+            "session": "one session",
+            "slot": "one player-selected slot",
+            "profile": "one local player profile",
+            "device": "one device installation",
+            "account": "one account",
+            "until-event": "the interval before its named event",
+            "not-kept": "the interval before its first named interruption"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} changes from an earlier value to a distinguishable value",
+        "when": [
+          "the value is read immediately before and after every declared persistence boundary that {{instance}} can construct"
+        ],
+        "then": [
+          "the earlier value affects play for no longer than {{bind:maximum-scope}}",
+          "a shorter boundary clears it exactly when {{row.id}}'s selected boundary result says so",
+          "the trace identifies restoration of the earlier value separately from a later derivation of an equal value"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "{{row.id}} has a maximum lifetime of {{bind:maximum-scope}}. Each shorter boundary follows the row's result, and the trace distinguishes a restored value from an equal value derived later. The family definition is at {{row.state-declared-in}}; the test names the address and restates nothing from it."
+    },
+    {
+      "id": "until-event-value-ends-at-cited-event",
+      "title": "{{row.id}} ends at its cited event",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "lifetime": [
+            "until-event"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a distinguishable {{row.id}} value before the event at {{row.lifetime-event-declared-in}}",
+        "when": [
+          "play crosses each of quit, crash, death, slot deletion, local-profile deletion, and device change that the adoption can construct, then the cited event; run and session crossing are out of reach because an event-bounded value declares no run or session scope"
+        ],
+        "then": [
+          "each constructed boundary follows {{row.id}}'s own row result; a boundary the adoption cannot construct asserts nothing",
+          "the earlier value ends at {{row.lifetime-event-declared-in}} and does not affect later play"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "{{row.id}} follows its quit, crash, death, slot-deletion, local-profile-deletion, and device-change results at each boundary the adoption can construct and ends at {{row.lifetime-event-declared-in}}. This test asserts nothing about run or session crossing because an event-bounded value declares no run or session scope. It names the address and restates nothing from it."
+    },
+    {
+      "id": "not-kept-value-never-returns",
+      "title": "{{row.id}} never returns after its named interruption",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "lifetime": [
+            "not-kept"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a distinguishable {{row.id}} value before {{row.scope-ends-in}}",
+        "when": [
+          "play crosses {{row.scope-ends-in}} and later reaches a point where an equal value can be derived"
+        ],
+        "then": [
+          "the earlier value never returns after the boundary",
+          "the source record distinguishes a later derived equal value as new state"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "The earlier {{row.id}} value never returns after {{row.scope-ends-in}}. An equal value derived later is recorded as new state. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "slot-and-profile-end-at-cited-event",
+      "title": "{{row.id}} ends at its cited {{row.lifetime}} boundary",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "lifetime": [
+            "slot",
+            "profile"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a distinguishable {{row.id}} value before {{row.scope-ends-in}}",
+        "when": [
+          "play crosses the cited lifetime ending"
+        ],
+        "then": [
+          "the earlier value reaches the end of its maximum lifetime at {{row.scope-ends-in}} and cannot affect later play",
+          "the source record distinguishes an equal value derived later as new state"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "The maximum lifetime of {{row.id}} ends at {{row.scope-ends-in}}. An equal value derived later is new state. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "commit-starts-only-at-selected-trigger",
+      "title": "{{row.id}} starts a commit only at its selected trigger",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "write-trigger": [
+            "player-save",
+            "checkpoint",
+            "continuous",
+            "timer",
+            "service-owned"
+          ]
+        }
+      },
+      "bindings": {
+        "trigger": {
+          "row_field": "write-trigger",
+          "map": {
+            "player-save": "the cited player save action",
+            "checkpoint": "the cited checkpoint event",
+            "continuous": "each cited accepted change",
+            "timer": "the cited timer interval",
+            "service-owned": "the service authority's cited acceptance event"
+          }
+        },
+        "negative": {
+          "row_field": "write-trigger",
+          "map": {
+            "player-save": "no commit starts at a neighboring event",
+            "checkpoint": "no commit starts at a neighboring event",
+            "continuous": "no commit starts at an event the cited rule does not name as an accepted change",
+            "timer": "no commit starts at a neighboring event",
+            "service-owned": "no commit starts at a neighboring event"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "events around the write rule at {{row.write-rule-declared-in}}",
+        "when": [
+          "the events occur before, at, and after {{bind:trigger}}"
+        ],
+        "then": [
+          "one {{row.id}} commit starts at {{bind:trigger}} and {{bind:negative}}",
+          "the commit log records which cited event started it"
+        ],
+        "diagnostics": [
+          "{{instance}}-commit-log"
+        ]
+      },
+      "text": "A commit for {{row.id}} begins only at {{bind:trigger}} under {{row.write-rule-declared-in}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "commit-loadable-only-after-complete-success",
+      "title": "{{row.id}} replaces its last commit only after complete success",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a last successful {{row.id}} commit and later complete-success, failed, and partial write attempts under {{row.write-rule-declared-in}}",
+        "when": [
+          "each attempt is followed by a return that requests {{row.id}}"
+        ],
+        "then": [
+          "only the attempt reported successful for the complete set at {{row.contains-declared-in}} becomes loadable",
+          "a failed or partial attempt never replaces the last successful commit",
+          "the commit and load records distinguish the retained last commit from the rejected attempts"
+        ],
+        "diagnostics": [
+          "{{instance}}-commit-log",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "{{row.id}} becomes loadable only when {{row.write-rule-declared-in}} reports success for the complete family set at {{row.contains-declared-in}}. A failed or partial write leaves the last successful commit in place. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "normal-quit-final-commit-follows-write-rule",
+      "title": "{{row.id}} makes a final quit commit only when its rule calls for one",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each ordinary-quit case the adoption can construct for changed {{row.id}} state under {{row.write-rule-declared-in}}",
+        "when": [
+          "each ordinary quit completes"
+        ],
+        "then": [
+          "where {{row.write-rule-declared-in}} calls for a final commit, exactly one starts",
+          "where the rule does not call for one, no final commit starts and the previous last successful commit remains; an unavailable branch asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-commit-log"
+        ]
+      },
+      "text": "On ordinary quit, {{row.id}} makes a final commit only when {{row.write-rule-declared-in}} calls for one. Otherwise the prior successful commit remains last. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "normal-quit-returns-last-commit",
+      "title": "{{row.id}} returns its last commit after a normal quit",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "after-normal-quit": [
+            "returns-last-commit"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a committed {{row.id}} value followed by a distinguishable uncommitted change",
+        "when": [
+          "the game quits normally and returns through the same context"
+        ],
+        "then": [
+          "where this family names a copy kind at saved-in, the latest successful commit of that kind restores {{row.id}} and the uncommitted change does not return",
+          "where this family has no saved-in, the restoration clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-commit-log",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "After a normal quit, {{row.id}} returns from the latest successful commit of the copy kind named by saved-in; its uncommitted change does not return. If the row has no saved-in, the restoration clause asserts nothing."
+    },
+    {
+      "id": "normal-quit-does-not-return",
+      "title": "{{row.id}} does not return after a normal quit",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "after-normal-quit": [
+            "does-not-return"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a distinguishable {{row.id}} value before a normal quit",
+        "when": [
+          "the game quits normally and returns through its normal flow"
+        ],
+        "then": [
+          "the earlier value does not become active",
+          "{{row.id}} starts from the post-quit value governed at {{row.state-declared-in}}",
+          "the source record distinguishes that value from restoration of the earlier value"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "After a normal quit, the earlier {{row.id}} value does not return. Its post-quit value follows {{row.state-declared-in}}, and the record distinguishes that result from restoration. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "crash-returns-last-commit",
+      "title": "{{row.id}} returns its last completed commit after a crash",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "after-crash": [
+            "returns-last-commit"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a committed {{row.id}} value, then a distinguishable change and an unfinished commit",
+        "when": [
+          "the game crashes and returns through the same context"
+        ],
+        "then": [
+          "the unfinished commit does not succeed",
+          "where this family names a copy kind at saved-in, the last commit completed before the crash restores {{row.id}} and the later change does not return",
+          "where this family has no saved-in, the restoration clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-commit-log",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "After a crash, no unfinished commit succeeds. {{row.id}} returns from the last successful commit of the copy kind named by saved-in, without later changes. If the row has no saved-in, the restoration clause asserts nothing."
+    },
+    {
+      "id": "crash-does-not-return",
+      "title": "{{row.id}} does not return after a crash",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "after-crash": [
+            "does-not-return"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a distinguishable {{row.id}} value and, where the adoption can construct one, an unfinished commit before a crash",
+        "when": [
+          "the game crashes and returns through its normal flow"
+        ],
+        "then": [
+          "the earlier value does not become active; where an unfinished commit exists, it does not succeed, and where none can exist that clause asserts nothing",
+          "{{row.id}} starts from the post-crash value governed at {{row.state-declared-in}}",
+          "the source record distinguishes that value from restoration"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "After a crash, the earlier {{row.id}} value does not return. Any unfinished commit fails; if none can exist, that clause asserts nothing. Its post-crash value follows {{row.state-declared-in}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "timer-and-checkpoint-have-crash-loss-window",
+      "title": "{{row.id}} exposes its possible crash loss window",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "write-trigger": [
+            "timer",
+            "checkpoint"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a successful {{row.id}} commit, later changes inside the possible loss window at {{row.write-rule-declared-in}}, and a commit interrupted by a crash",
+        "when": [
+          "the game returns after the crash"
+        ],
+        "then": [
+          "the interrupted commit does not succeed",
+          "the settlement report identifies the last successful commit and the changes in the cited possible loss window that did not return"
+        ],
+        "diagnostics": [
+          "{{instance}}-commit-log",
+          "{{instance}}-settlement-report"
+        ]
+      },
+      "text": "{{row.id}} has an explicit possible crash loss window under {{row.write-rule-declared-in}}. The interrupted commit fails, and the report identifies the last successful commit and lost interval. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "layout-selects-requested-copy",
+      "title": "{{row.id}} selects its requested copy before activation",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "layout": [
+            "one-current",
+            "manual-slots"
+          ]
+        }
+      },
+      "bindings": {
+        "selection": {
+          "row_field": "layout",
+          "map": {
+            "one-current": "selects its current copy and presents no player-selected slot",
+            "manual-slots": "selects the player's named slot with its stable slot identity"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the player requests {{row.id}} through the selection route at {{row.storage-rule-declared-in}} and, where the adoption retains one, an earlier commit is also available",
+        "when": [
+          "selection completes before any state activation"
+        ],
+        "then": [
+          "{{row.id}} {{bind:selection}}",
+          "where an earlier commit is retained, it is not treated as another layout choice and remains available only through its matching backup and damage routes; where none is retained, this clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-set",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "Before activation, {{row.id}} {{bind:selection}} under {{row.storage-rule-declared-in}}. Where an earlier commit is retained, it is not another layout; otherwise that clause asserts nothing. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "residence-controls-authoritative-candidates",
+      "title": "{{row.id}} obtains candidates from its declared residence",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "residence": [
+            "local-device",
+            "cloud-synced",
+            "server-authoritative"
+          ]
+        }
+      },
+      "bindings": {
+        "candidates": {
+          "row_field": "residence",
+          "map": {
+            "local-device": "is available only on that device unless a transfer cited outside this adoption supplies it",
+            "cloud-synced": "obtains every accepted device and cloud candidate before conflict handling",
+            "server-authoritative": "obtains the service's accepted copy and never treats an unaccepted local cache as equal authority"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the candidate sources the adoption can construct for {{row.id}} as governed at {{row.storage-rule-declared-in}}",
+        "when": [
+          "the game builds the candidate set before conflict handling"
+        ],
+        "then": [
+          "{{row.id}} {{bind:candidates}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-set",
+          "{{instance}}-authority-trace"
+        ]
+      },
+      "text": "{{row.id}} {{bind:candidates}} under {{row.storage-rule-declared-in}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "candidate-identity-precedes-settlement",
+      "title": "{{row.id}} reads candidate identity before settlement",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{row.id}} candidates with readable identity, unreadable identity, and a readable header with an unreadable gameplay body",
+        "when": [
+          "the game reads candidate identity before conflict, build, or damage settlement"
+        ],
+        "then": [
+          "save-kind, slot when present, build, and commit identity are read before gameplay state",
+          "an unreadable identity is not a conflict candidate; if no candidate survives, the effective damage response runs immediately without conflict or build comparison",
+          "a readable header with an unreadable body remains a candidate through conflict and build comparison before reaching damage settlement"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-set",
+          "{{instance}}-settlement-trace",
+          "{{instance}}-damage-report"
+        ]
+      },
+      "text": "{{row.id}} reads candidate identity first. An unreadable identity cannot enter conflict handling; no survivor goes directly to the effective damage response; a readable header with an unreadable body reaches damage only after conflict and build comparison."
+    },
+    {
+      "id": "missing-conflict-row-runs-no-conflict-response",
+      "title": "{{row.id}} has no conflict response without a matching row",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a candidate set for {{row.id}}",
+        "when": [
+          "the game looks for a matching copy-conflicts row before build comparison"
+        ],
+        "then": [
+          "where no matching conflict row exists, no candidate is selected, refused, or replaced by a conflict response from this contract",
+          "where a matching row exists, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-set",
+          "{{instance}}-settlement-trace"
+        ]
+      },
+      "text": "If {{row.id}} has no matching conflict row, this contract performs no conflict response for it. If it has one, this test asserts nothing."
+    },
+    {
+      "id": "one-kind-conflict-settles-only-named-kind",
+      "title": "{{row.id}} settles only {{row.copy-kind}}",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-conflicts",
+      "when": {
+        "row": {
+          "scope": [
+            "this-copy-kind"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a conflict under {{row.id}} plus non-conflicting active state from another copy kind",
+        "when": [
+          "the response at {{row.resolution-declared-in}} runs before gameplay state is read"
+        ],
+        "then": [
+          "only {{row.copy-kind}} candidates enter this conflict settlement",
+          "the response chooses or refuses complete copies and never merges fields",
+          "the other copy kind keeps its active value"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-set",
+          "{{instance}}-conflict-report",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "{{row.id}} settles only {{row.copy-kind}} before gameplay state is read. It never merges fields, and state from other copy kinds remains active. {{row.resolution-declared-in}} governs the conflict; the test names the address and restates nothing from it."
+    },
+    {
+      "id": "all-synced-conflict-settles-whole-set",
+      "title": "{{row.id}} settles every synced kind together",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-conflicts",
+      "when": {
+        "row": {
+          "scope": [
+            "all-synced-kinds"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "accepted disagreeing candidates across the synced copy kinds in {{row.id}}'s scope",
+        "when": [
+          "the response at {{row.resolution-declared-in}} runs before gameplay state is read"
+        ],
+        "then": [
+          "every synced kind in the declared scope enters one settlement",
+          "the response chooses or refuses complete copies and never merges fields"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-set",
+          "{{instance}}-conflict-report"
+        ]
+      },
+      "text": "{{row.id}} settles every synced copy kind in its declared scope together, before gameplay state is read, and never merges fields. {{row.resolution-declared-in}} governs the conflict; the test names the address and restates nothing from it."
+    },
+    {
+      "id": "conflict-select-by-rule",
+      "title": "{{row.id}} applies select-by-rule",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-conflicts",
+      "when": {
+        "row": {
+          "response": [
+            "select-by-rule"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two accepted complete shared copies that conflict under {{row.resolution-declared-in}}",
+        "when": [
+          "the cited selection rule resolves the conflict"
+        ],
+        "then": [
+          "the rule at {{row.resolution-declared-in}} selects one complete copy before activation",
+          "only the selected copy's complete state can proceed; fields from candidates are never merged"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-set",
+          "{{instance}}-conflict-report",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "For {{row.id}}, select-by-rule runs before gameplay state is read. The rule at {{row.resolution-declared-in}} selects one complete copy before activation; only that copy proceeds, and fields are never merged. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "conflict-player-chooses-copy",
+      "title": "{{row.id}} applies player-chooses-copy",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-conflicts",
+      "when": {
+        "row": {
+          "response": [
+            "player-chooses-copy"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two accepted complete shared copies that conflict under {{row.resolution-declared-in}}",
+        "when": [
+          "the player first waits without choosing and then chooses one candidate"
+        ],
+        "then": [
+          "no candidate state activates before the player chooses one complete copy",
+          "the chosen complete copy proceeds and fields from candidates are never merged"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-set",
+          "{{instance}}-conflict-report",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "For {{row.id}}, player-chooses-copy runs before gameplay state is read. No candidate state activates before the player chooses one complete copy; the chosen copy proceeds, and fields are never merged. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "conflict-refuse-until-resolved",
+      "title": "{{row.id}} applies refuse-until-resolved",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-conflicts",
+      "when": {
+        "row": {
+          "response": [
+            "refuse-until-resolved"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "two accepted complete shared copies that conflict under {{row.resolution-declared-in}}",
+        "when": [
+          "a load is attempted before and after the cited conflict-clearing event"
+        ],
+        "then": [
+          "no candidate activates while the conflict remains",
+          "after the cited clearing event at {{row.resolution-declared-in}}, a load of the resulting accepted copy is no longer refused by this conflict",
+          "fields are never merged"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-set",
+          "{{instance}}-conflict-report",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "For {{row.id}}, refuse-until-resolved runs before gameplay state is read. No candidate activates while the conflict remains. After the cited clearing event at {{row.resolution-declared-in}}, a load of the resulting accepted copy is no longer refused by this conflict. Fields are never merged. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "older-build-override-refuse-load",
+      "title": "{{row.id}} applies its older-build refuse-load override",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "older-build-copy": [
+            "refuse-load"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected readable copy of kind {{row.id}} written by an older build, with no unresolved conflict",
+        "when": [
+          "the player requests the copy"
+        ],
+        "then": [
+          "loading stops before any state from the mismatched-build copy activates",
+          "the refusal record distinguishes refusal by build mismatch from an absent or unreadable copy"
+        ],
+        "diagnostics": [
+          "{{instance}}-writer-and-reader-builds",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "{{row.id}} overrides the older-build default and refuses before any mismatched-build state activates. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "older-build-default-refuse-load",
+      "title": "{{row.id}} applies the older-build refuse-load default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "flag": {
+          "older-build-default": [
+            "refuse-load"
+          ]
+        },
+        "row": {
+          "older-build-copy": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected readable copy of kind {{row.id}} written by an older build, with no unresolved conflict",
+        "when": [
+          "the player requests the copy"
+        ],
+        "then": [
+          "loading stops before any state from the mismatched-build copy activates",
+          "the refusal record distinguishes refusal by build mismatch from an absent or unreadable copy"
+        ],
+        "diagnostics": [
+          "{{instance}}-writer-and-reader-builds",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "{{row.id}} uses the older-build default and refuses before any mismatched-build state activates. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "older-build-override-convert-and-load",
+      "title": "{{row.id}} applies its older-build convert-and-load override",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "older-build-copy": [
+            "convert-and-load"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected readable copy of kind {{row.id}} written by an older build, with no unresolved conflict",
+        "when": [
+          "one conversion succeeds and a second constructed conversion fails"
+        ],
+        "then": [
+          "the successful conversion produces one coherent current-build copy before all of its carried families activate together",
+          "the failed conversion refuses activation and leaves the source copy unchanged unless its cited rule records another disposition",
+          "the conversion record distinguishes success, refusal, and source-copy disposition"
+        ],
+        "diagnostics": [
+          "{{instance}}-writer-and-reader-builds",
+          "{{instance}}-conversion-result",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "{{row.id}} overrides the older-build default and converts to one coherent current-build copy before successful activation; a failed conversion refuses and preserves the source unless its cited rule records otherwise. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "older-build-default-convert-and-load",
+      "title": "{{row.id}} applies the older-build convert-and-load default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "flag": {
+          "older-build-default": [
+            "convert-and-load"
+          ]
+        },
+        "row": {
+          "older-build-copy": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected readable copy of kind {{row.id}} written by an older build, with no unresolved conflict",
+        "when": [
+          "one conversion succeeds and a second constructed conversion fails"
+        ],
+        "then": [
+          "the successful conversion produces one coherent current-build copy before all of its carried families activate together",
+          "the failed conversion refuses activation and leaves the source copy unchanged unless its cited rule records another disposition",
+          "the conversion record distinguishes success, refusal, and source-copy disposition"
+        ],
+        "diagnostics": [
+          "{{instance}}-writer-and-reader-builds",
+          "{{instance}}-conversion-result",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "{{row.id}} uses the older-build default and converts to one coherent current-build copy before successful activation; a failed conversion refuses and preserves the source unless its cited rule records otherwise. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "older-build-override-warn-and-load",
+      "title": "{{row.id}} applies its older-build warn-and-load override",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "older-build-copy": [
+            "warn-and-load"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected readable copy of kind {{row.id}} written by an older build, with no unresolved conflict",
+        "when": [
+          "the player first cancels the warning, then accepts a successful attempt, and finally accepts a constructed failed attempt"
+        ],
+        "then": [
+          "cancelling activates no state",
+          "the warning precedes both accepted attempts; the successful attempt activates every carried family together and the failed attempt activates none",
+          "warning acceptance is recorded separately from load success"
+        ],
+        "diagnostics": [
+          "{{instance}}-writer-and-reader-builds",
+          "{{instance}}-warning-choice",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "{{row.id}} overrides the older-build default and warns before the attempt; cancellation activates nothing, and acceptance is recorded separately from success. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "older-build-default-warn-and-load",
+      "title": "{{row.id}} applies the older-build warn-and-load default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "flag": {
+          "older-build-default": [
+            "warn-and-load"
+          ]
+        },
+        "row": {
+          "older-build-copy": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected readable copy of kind {{row.id}} written by an older build, with no unresolved conflict",
+        "when": [
+          "the player first cancels the warning, then accepts a successful attempt, and finally accepts a constructed failed attempt"
+        ],
+        "then": [
+          "cancelling activates no state",
+          "the warning precedes both accepted attempts; the successful attempt activates every carried family together and the failed attempt activates none",
+          "warning acceptance is recorded separately from load success"
+        ],
+        "diagnostics": [
+          "{{instance}}-writer-and-reader-builds",
+          "{{instance}}-warning-choice",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "{{row.id}} uses the older-build default and warns before the attempt; cancellation activates nothing, and acceptance is recorded separately from success. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "newer-build-override-refuse-load",
+      "title": "{{row.id}} applies its newer-build refuse-load override",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "newer-build-copy": [
+            "refuse-load"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected readable copy of kind {{row.id}} written by a newer build, with no unresolved conflict",
+        "when": [
+          "the player requests the copy"
+        ],
+        "then": [
+          "loading stops before any state from the mismatched-build copy activates",
+          "the refusal record distinguishes refusal from an absent or unreadable copy"
+        ],
+        "diagnostics": [
+          "{{instance}}-writer-and-reader-builds",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "{{row.id}} overrides the newer-build default and refuses before any mismatched-build state activates. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "newer-build-default-refuse-load",
+      "title": "{{row.id}} applies the newer-build refuse-load default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "flag": {
+          "newer-build-default": [
+            "refuse-load"
+          ]
+        },
+        "row": {
+          "newer-build-copy": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected readable copy of kind {{row.id}} written by a newer build, with no unresolved conflict",
+        "when": [
+          "the player requests the copy"
+        ],
+        "then": [
+          "loading stops before any state from the mismatched-build copy activates",
+          "the refusal record distinguishes refusal from an absent or unreadable copy"
+        ],
+        "diagnostics": [
+          "{{instance}}-writer-and-reader-builds",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "{{row.id}} uses the newer-build default and refuses before any mismatched-build state activates. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "newer-build-override-warn-and-load",
+      "title": "{{row.id}} applies its newer-build warn-and-load override",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "newer-build-copy": [
+            "warn-and-load"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected readable copy of kind {{row.id}} written by a newer build, with no unresolved conflict",
+        "when": [
+          "the player first cancels the warning, then accepts a successful attempt, and finally accepts a constructed failed attempt"
+        ],
+        "then": [
+          "cancelling activates no state",
+          "the warning precedes both accepted attempts; the successful attempt activates every carried family together and the failed attempt activates none",
+          "warning acceptance is recorded separately from load success, and the failed attempt is distinguished from an absent or unreadable copy"
+        ],
+        "diagnostics": [
+          "{{instance}}-writer-and-reader-builds",
+          "{{instance}}-warning-choice",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "{{row.id}} overrides the newer-build default and warns before the attempt; cancellation activates nothing, and acceptance is recorded separately from success. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "newer-build-default-warn-and-load",
+      "title": "{{row.id}} applies the newer-build warn-and-load default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "flag": {
+          "newer-build-default": [
+            "warn-and-load"
+          ]
+        },
+        "row": {
+          "newer-build-copy": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected readable copy of kind {{row.id}} written by a newer build, with no unresolved conflict",
+        "when": [
+          "the player first cancels the warning, then accepts a successful attempt, and finally accepts a constructed failed attempt"
+        ],
+        "then": [
+          "cancelling activates no state",
+          "the warning precedes both accepted attempts; the successful attempt activates every carried family together and the failed attempt activates none",
+          "warning acceptance is recorded separately from load success, and the failed attempt is distinguished from an absent or unreadable copy"
+        ],
+        "diagnostics": [
+          "{{instance}}-writer-and-reader-builds",
+          "{{instance}}-warning-choice",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "{{row.id}} uses the newer-build default and warns before the attempt; cancellation activates nothing, and acceptance is recorded separately from success. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "unreadable-copy-override-refuse-load",
+      "title": "{{row.id}} applies its unreadable-copy refuse-load override",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "unreadable-copy": [
+            "refuse-load"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected copy of kind {{row.id}} whose gameplay body is unreadable after conflict and build settlement",
+        "when": [
+          "the player requests the unreadable copy"
+        ],
+        "then": [
+          "no state from the unreadable copy becomes active",
+          "the unreadable copy is neither replaced nor repaired by this response",
+          "the load result distinguishes refusal from an absent copy"
+        ],
+        "diagnostics": [
+          "{{instance}}-damage-report",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source",
+          "{{instance}}-removal-log"
+        ]
+      },
+      "text": "{{row.id}} overrides the unreadable-copy default and refuses the load without activating, replacing, or repairing unreadable state. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "unreadable-copy-default-refuse-load",
+      "title": "{{row.id}} applies the unreadable-copy refuse-load default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "flag": {
+          "unreadable-copy-default": [
+            "refuse-load"
+          ]
+        },
+        "row": {
+          "unreadable-copy": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected copy of kind {{row.id}} whose gameplay body is unreadable after conflict and build settlement",
+        "when": [
+          "the player requests the unreadable copy"
+        ],
+        "then": [
+          "no state from the unreadable copy becomes active",
+          "the unreadable copy is neither replaced nor repaired by this response",
+          "the load result distinguishes refusal from an absent copy"
+        ],
+        "diagnostics": [
+          "{{instance}}-damage-report",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source",
+          "{{instance}}-removal-log"
+        ]
+      },
+      "text": "{{row.id}} uses the unreadable-copy default and refuses the load without activating, replacing, or repairing unreadable state. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "unreadable-copy-override-start-fresh",
+      "title": "{{row.id}} applies its unreadable-copy start-fresh override",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "unreadable-copy": [
+            "start-fresh"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected copy of kind {{row.id}} whose gameplay body is unreadable after conflict and build settlement",
+        "when": [
+          "the player requests the unreadable copy"
+        ],
+        "then": [
+          "the fresh state fixed by the adoption becomes active instead of state from the unreadable copy",
+          "the unreadable copy is not silently deleted or overwritten",
+          "the source and removal records distinguish a fresh start from deletion"
+        ],
+        "diagnostics": [
+          "{{instance}}-damage-report",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source",
+          "{{instance}}-removal-log"
+        ]
+      },
+      "text": "{{row.id}} overrides the unreadable-copy default and activates the adoption's fresh state without silently deleting or overwriting the unreadable copy. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "unreadable-copy-default-start-fresh",
+      "title": "{{row.id}} applies the unreadable-copy start-fresh default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "flag": {
+          "unreadable-copy-default": [
+            "start-fresh"
+          ]
+        },
+        "row": {
+          "unreadable-copy": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected copy of kind {{row.id}} whose gameplay body is unreadable after conflict and build settlement",
+        "when": [
+          "the player requests the unreadable copy"
+        ],
+        "then": [
+          "the fresh state fixed by the adoption becomes active instead of state from the unreadable copy",
+          "the unreadable copy is not silently deleted or overwritten",
+          "the source and removal records distinguish a fresh start from deletion"
+        ],
+        "diagnostics": [
+          "{{instance}}-damage-report",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source",
+          "{{instance}}-removal-log"
+        ]
+      },
+      "text": "{{row.id}} uses the unreadable-copy default and activates the adoption's fresh state without silently deleting or overwriting the unreadable copy. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "unreadable-copy-override-restore-earlier-copy",
+      "title": "{{row.id}} applies its unreadable-copy restore-earlier-copy override",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "unreadable-copy": [
+            "restore-earlier-copy"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected copy of kind {{row.id}} whose gameplay body is unreadable after conflict and build settlement",
+        "when": [
+          "the supported recovery route selects the newest usable earlier copy under the matching backup row"
+        ],
+        "then": [
+          "the selected earlier copy becomes active as one complete copy",
+          "the damage report identifies the selected earlier commit and the lost interval",
+          "where no usable earlier copy can be produced, the result follows the cited recovery rule and activates no state from the unreadable copy"
+        ],
+        "diagnostics": [
+          "{{instance}}-damage-report",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source",
+          "{{instance}}-removal-log"
+        ]
+      },
+      "text": "{{row.id}} overrides the unreadable-copy default and uses the matching backup row to activate the newest usable earlier copy and report the lost interval. Where none can be produced, the result follows the cited recovery rule and activates no state from the unreadable copy. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "unreadable-copy-default-restore-earlier-copy",
+      "title": "{{row.id}} applies the unreadable-copy restore-earlier-copy default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "flag": {
+          "unreadable-copy-default": [
+            "restore-earlier-copy"
+          ]
+        },
+        "row": {
+          "unreadable-copy": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected copy of kind {{row.id}} whose gameplay body is unreadable after conflict and build settlement",
+        "when": [
+          "the supported recovery route selects the newest usable earlier copy under the matching backup row"
+        ],
+        "then": [
+          "the selected earlier copy becomes active as one complete copy",
+          "the damage report identifies the selected earlier commit and the lost interval",
+          "where no usable earlier copy can be produced, the result follows the cited recovery rule and activates no state from the unreadable copy"
+        ],
+        "diagnostics": [
+          "{{instance}}-damage-report",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source",
+          "{{instance}}-removal-log"
+        ]
+      },
+      "text": "{{row.id}} uses the unreadable-copy default and uses the matching backup row to activate the newest usable earlier copy and report the lost interval. Where none can be produced, the result follows the cited recovery rule and activates no state from the unreadable copy. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "unreadable-copy-override-repair-readable-state",
+      "title": "{{row.id}} applies its unreadable-copy repair-readable-state override",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "unreadable-copy": [
+            "repair-readable-state"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected copy of kind {{row.id}} whose gameplay body is unreadable after conflict and build settlement",
+        "when": [
+          "one repair produces a coherent result and a second constructed repair cannot do so"
+        ],
+        "then": [
+          "the successful repair activates one coherent result containing every readable part and the fresh value for every unreadable part under the cited repair rule",
+          "the failed repair refuses and activates no state",
+          "the repair record distinguishes retained readable parts, reset parts, and failure"
+        ],
+        "diagnostics": [
+          "{{instance}}-damage-report",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source",
+          "{{instance}}-removal-log"
+        ]
+      },
+      "text": "{{row.id}} overrides the unreadable-copy default and activates one coherent repaired result with every unreadable part reset under the cited rule; failure refuses. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "unreadable-copy-default-repair-readable-state",
+      "title": "{{row.id}} applies the unreadable-copy repair-readable-state default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "flag": {
+          "unreadable-copy-default": [
+            "repair-readable-state"
+          ]
+        },
+        "row": {
+          "unreadable-copy": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected copy of kind {{row.id}} whose gameplay body is unreadable after conflict and build settlement",
+        "when": [
+          "one repair produces a coherent result and a second constructed repair cannot do so"
+        ],
+        "then": [
+          "the successful repair activates one coherent result containing every readable part and the fresh value for every unreadable part under the cited repair rule",
+          "the failed repair refuses and activates no state",
+          "the repair record distinguishes retained readable parts, reset parts, and failure"
+        ],
+        "diagnostics": [
+          "{{instance}}-damage-report",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source",
+          "{{instance}}-removal-log"
+        ]
+      },
+      "text": "{{row.id}} uses the unreadable-copy default and activates one coherent repaired result with every unreadable part reset under the cited rule; failure refuses. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "unreadable-copy-override-warn-and-try",
+      "title": "{{row.id}} applies its unreadable-copy warn-and-try override",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "unreadable-copy": [
+            "warn-and-try"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected copy of kind {{row.id}} whose gameplay body is unreadable after conflict and build settlement",
+        "when": [
+          "the player first cancels the warning, then accepts a successful attempt, and finally accepts a constructed failed attempt"
+        ],
+        "then": [
+          "no copy state activates before the explicit choice and cancellation activates nothing",
+          "the successful accepted attempt activates one coherent copy and the failed accepted attempt activates none",
+          "warning acceptance is recorded separately from load success"
+        ],
+        "diagnostics": [
+          "{{instance}}-damage-report",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source",
+          "{{instance}}-removal-log"
+        ]
+      },
+      "text": "{{row.id}} overrides the unreadable-copy default and waits for an explicit choice; cancellation activates nothing, and acceptance is recorded separately from success. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "unreadable-copy-default-warn-and-try",
+      "title": "{{row.id}} applies the unreadable-copy warn-and-try default",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "flag": {
+          "unreadable-copy-default": [
+            "warn-and-try"
+          ]
+        },
+        "row": {
+          "unreadable-copy": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected copy of kind {{row.id}} whose gameplay body is unreadable after conflict and build settlement",
+        "when": [
+          "the player first cancels the warning, then accepts a successful attempt, and finally accepts a constructed failed attempt"
+        ],
+        "then": [
+          "no copy state activates before the explicit choice and cancellation activates nothing",
+          "the successful accepted attempt activates one coherent copy and the failed accepted attempt activates none",
+          "warning acceptance is recorded separately from load success"
+        ],
+        "diagnostics": [
+          "{{instance}}-damage-report",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source",
+          "{{instance}}-removal-log"
+        ]
+      },
+      "text": "{{row.id}} uses the unreadable-copy default and waits for an explicit choice; cancellation activates nothing, and acceptance is recorded separately from success. The observable consequence is fixed here; the test restates nothing from the adoption's cited rule."
+    },
+    {
+      "id": "backup-retains-orders-and-restores-earlier-copies",
+      "title": "{{row.id}} retains and restores earlier copies",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "backup-copies",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "several earlier commits for the copy kind named by {{row.copy-kind}}, including usable and unusable candidates",
+        "when": [
+          "the game applies {{row.backup-rule-declared-in}} and the player directly uses {{row.restore-rule-declared-in}}"
+        ],
+        "then": [
+          "earlier commits are retained and ordered only as {{row.backup-rule-declared-in}} and the storage rule of the copy kind named at copy-kind provide",
+          "the newest usable earlier copy becomes active as one complete copy and the lost interval is reported",
+          "the direct route at {{row.restore-rule-declared-in}} remains available independently of any damage response"
+        ],
+        "diagnostics": [
+          "{{instance}}-backup-inventory",
+          "{{instance}}-load-result",
+          "{{instance}}-damage-report"
+        ]
+      },
+      "text": "{{row.id}} retains and orders earlier copies under {{row.backup-rule-declared-in}}. Its direct player route at {{row.restore-rule-declared-in}} opens the newest usable one and reports the lost interval, independently of damage settlement. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "readable-compatible-copy-activates-together",
+      "title": "{{row.id}} loads a readable compatible conflict-free copy",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a selected readable copy of kind {{row.id}} from the running build with no conflict, carrying distinguishable values for every family at {{row.contains-declared-in}}",
+        "when": [
+          "the game loads the copy"
+        ],
+        "then": [
+          "the load is accepted rather than refused",
+          "every carried state family activates together from one commit",
+          "no partial copy is visible at any point"
+        ],
+        "diagnostics": [
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source",
+          "{{instance}}-activation-trace"
+        ]
+      },
+      "text": "A readable, same-build, conflict-free copy of kind {{row.id}} loads successfully and activates every family at {{row.contains-declared-in}} together from one commit. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "load-preserves-families-from-other-kinds",
+      "title": "loading {{row.id}} preserves state from other copy kinds",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "active distinguishable state from {{row.id}} and, where the adoption declares one, another copy kind",
+        "when": [
+          "a readable compatible conflict-free copy of kind {{row.id}} loads successfully"
+        ],
+        "then": [
+          "families carried by {{row.id}} activate together from its selected commit",
+          "families saved in another copy kind keep that kind's already active value",
+          "where no other copy kind exists, the second clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-activation-trace",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "Loading {{row.id}} activates its carried families together and preserves the active value of every family saved in another kind. If no other kind exists, that clause asserts nothing."
+    },
+    {
+      "id": "family-without-saved-in-is-never-restored",
+      "title": "{{row.id}} is never restored when it names no save kind",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a distinguishable earlier {{row.id}} value and every return path the adoption can construct",
+        "when": [
+          "the return paths complete"
+        ],
+        "then": [
+          "where {{row.id}} has no saved-in, none of the return paths restores its earlier value",
+          "where {{row.id}} names saved-in, its earlier value is restored only by an accepted load of that copy kind and by no other return path"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "For {{row.id}}, when it has no saved-in, no return path restores its earlier value. For {{row.id}}, when it names saved-in, only an accepted load of that copy kind restores its earlier value; no other return path does."
+    },
+    {
+      "id": "earlier-point-follows-after-load",
+      "title": "{{row.id}} follows its after-load result",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "earlier-point-returns",
+      "when": {
+        "row": {
+          "after-load": [
+            "resume-stays",
+            "resume-is-used-once",
+            "player-mode-decides"
+          ]
+        }
+      },
+      "bindings": {
+        "reuse": {
+          "row_field": "after-load",
+          "map": {
+            "resume-stays": "both successful returns go to the same earlier point, which remains available after the first return",
+            "resume-is-used-once": "only the first return goes to the earlier point, and it makes that same return unavailable for a second attempt",
+            "player-mode-decides": "each return the mode fixed before the load permits goes to the earlier point; each named mode follows its cited result"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "an accepted copy of the copy kind {{row.copy-kind}} and an earlier point at {{row.return-rule-declared-in}}",
+        "when": [
+          "activation succeeds and the player attempts the return twice"
+        ],
+        "then": [
+          "continuous play returns to the cited earlier point only after successful activation",
+          "each return the row's after-load result permits retains the same run identity when the point is inside a run",
+          "{{bind:reuse}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-load-result",
+          "{{instance}}-return-point",
+          "{{instance}}-run-identity",
+          "{{instance}}-save-availability-after-load"
+        ]
+      },
+      "text": "After successful activation, {{row.id}} returns play to {{row.return-rule-declared-in}} and keeps the run identity when the point is inside a run. Then {{bind:reuse}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "missing-earlier-point-row-returns-nowhere",
+      "title": "{{row.id}} returns nowhere without an earlier-point row",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a successful {{row.id}} load",
+        "when": [
+          "the game checks for an earlier-point-returns row after activation"
+        ],
+        "then": [
+          "where no row names {{row.id}}, this contract returns continuous play to no earlier point",
+          "where a row names {{row.id}}, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-load-result",
+          "{{instance}}-return-point"
+        ]
+      },
+      "text": "A successful {{row.id}} load returns continuous play nowhere under this contract when no earlier-point row names it. When one does, this test asserts nothing."
+    },
+    {
+      "id": "earlier-point-mode-gate-controls-existence",
+      "title": "{{row.id}} exists only in its named modes",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "earlier-point-returns",
+      "when": {
+        "row": {
+          "mode-gated": [
+            "only-in-named-modes"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "modes allowed and excluded by {{row.mode-rule-declared-in}}",
+        "when": [
+          "the player looks for {{row.id}} in each mode before loading"
+        ],
+        "then": [
+          "{{row.id}} exists in every allowed mode and is absent in every excluded mode",
+          "a mode change during an existing profile is outside this declaration and this test asserts nothing about that transition"
+        ],
+        "diagnostics": [
+          "{{instance}}-mode-trace",
+          "{{instance}}-return-point"
+        ]
+      },
+      "text": "{{row.id}} exists only while {{row.mode-rule-declared-in}} permits it. The test asserts nothing about changing the mode mid-profile. It names the address and restates nothing from it."
+    },
+    {
+      "id": "death-follows-family-result",
+      "title": "{{row.id}} follows its death result",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "after-death": [
+            "keeps-value",
+            "clears-value"
+          ]
+        }
+      },
+      "bindings": {
+        "result": {
+          "row_field": "after-death",
+          "map": {
+            "keeps-value": "the earlier value remains available to later play",
+            "clears-value": "the earlier value is removed before later play and an equal later value is recorded only as new state"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "a distinguishable {{row.id}} value immediately before death",
+        "when": [
+          "death settles before any death-triggered copy removal the adoption declares"
+        ],
+        "then": [
+          "{{bind:result}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "On death, {{row.id}} follows its selected result: {{bind:result}}."
+    },
+    {
+      "id": "death-at-run-end-clears-run-family",
+      "title": "{{row.id}} clears when death is its run end",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "lifetime": [
+            "run"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a distinguishable {{row.id}} value before a death, where the run ending at {{row.scope-ends-in}} is death",
+        "when": [
+          "death occurs without another save action"
+        ],
+        "then": [
+          "if the cited end at {{row.scope-ends-in}} is death, the earlier run-lifetime value clears before later play even without a save action; if the cited end is not death, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-run-identity"
+        ]
+      },
+      "text": "If death is the run end at {{row.scope-ends-in}}, {{row.id}} clears even without a save action. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "death-at-until-event-clears-family",
+      "title": "{{row.id}} clears when death is its cited event",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "lifetime": [
+            "until-event"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a distinguishable {{row.id}} value before death",
+        "when": [
+          "death occurs, where death is the event cited at {{row.lifetime-event-declared-in}}"
+        ],
+        "then": [
+          "if the cited event at {{row.lifetime-event-declared-in}} is death, the earlier value clears before later play; if the cited event is not death, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "If death is the event at {{row.lifetime-event-declared-in}}, {{row.id}} clears before later play. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "slot-deletion-follows-family-result",
+      "title": "{{row.id}} follows its slot-deletion result",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "after-slot-delete": [
+            "keeps-value",
+            "clears-value",
+            "no-slot"
+          ]
+        }
+      },
+      "bindings": {
+        "case": {
+          "row_field": "after-slot-delete",
+          "map": {
+            "keeps-value": "a distinguishable family value before deletion of its related player-selected slot",
+            "clears-value": "a distinguishable family value before deletion of its related player-selected slot",
+            "no-slot": "a distinguishable family value when it has no related player-selected slot"
+          }
+        },
+        "action": {
+          "row_field": "after-slot-delete",
+          "map": {
+            "keeps-value": "the related slot is deleted",
+            "clears-value": "the related slot is deleted",
+            "no-slot": "a slot-deletion boundary is considered"
+          }
+        },
+        "result": {
+          "row_field": "after-slot-delete",
+          "map": {
+            "keeps-value": "the earlier value remains available after the related slot is deleted",
+            "clears-value": "the earlier value tied to that slot clears before later play",
+            "no-slot": "the settlement records that this family has no related player-selected slot"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{bind:case}}",
+        "when": [
+          "{{bind:action}}"
+        ],
+        "then": [
+          "{{bind:result}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-settlement-report"
+        ]
+      },
+      "text": "On slot deletion, {{row.id}} follows its selected result: {{bind:result}}."
+    },
+    {
+      "id": "local-profile-deletion-follows-family-result",
+      "title": "{{row.id}} follows its local-profile-deletion result",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "after-local-profile-delete": [
+            "keeps-value",
+            "clears-value",
+            "no-profile"
+          ]
+        }
+      },
+      "bindings": {
+        "case": {
+          "row_field": "after-local-profile-delete",
+          "map": {
+            "keeps-value": "a distinguishable family value before deletion of its related local profile",
+            "clears-value": "a distinguishable family value before deletion of its related local profile",
+            "no-profile": "a distinguishable family value when it has no related local player profile"
+          }
+        },
+        "action": {
+          "row_field": "after-local-profile-delete",
+          "map": {
+            "keeps-value": "the related local profile is deleted with every child slot named by the adoption's cited rule",
+            "clears-value": "the related local profile is deleted with every child slot named by the adoption's cited rule",
+            "no-profile": "a local-profile-deletion boundary is considered"
+          }
+        },
+        "result": {
+          "row_field": "after-local-profile-delete",
+          "map": {
+            "keeps-value": "the earlier value remains available after the related local profile is deleted",
+            "clears-value": "the earlier value tied to that local profile clears before later play",
+            "no-profile": "the settlement records that this family has no related local player profile"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{bind:case}}",
+        "when": [
+          "{{bind:action}}"
+        ],
+        "then": [
+          "{{bind:result}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-settlement-report",
+          "{{instance}}-removal-log"
+        ]
+      },
+      "text": "On local-profile deletion, {{row.id}} follows its selected result: {{bind:result}}. Where a related profile exists, child slots are included only as the adoption's cited rule provides; otherwise that clause asserts nothing. The test restates nothing from the cited rule."
+    },
+    {
+      "id": "device-lifetime-ends-at-device-data-deletion",
+      "title": "{{row.id}} ends when device data is deleted",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "lifetime": [
+            "device"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a distinguishable {{row.id}} value before device-data deletion",
+        "when": [
+          "the event at {{row.scope-ends-in}} deletes device data"
+        ],
+        "then": [
+          "the earlier device-lifetime value ends and cannot affect later play"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "Device-data deletion ends {{row.id}} through {{row.scope-ends-in}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "account-lifetime-ends-at-account-deletion",
+      "title": "{{row.id}} ends when its account is deleted or reset",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "lifetime": [
+            "account"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a distinguishable {{row.id}} value before account deletion or reset",
+        "when": [
+          "the event at {{row.scope-ends-in}} deletes or resets the account"
+        ],
+        "then": [
+          "the earlier account-lifetime value ends and cannot affect later play"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "Account deletion or reset ends {{row.id}} through {{row.scope-ends-in}}. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "another-device-returns-family",
+      "title": "{{row.id}} returns on another eligible device",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "on-another-device": [
+            "returns"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a distinguishable {{row.id}} value on one device before the same eligible player continues on another",
+        "when": [
+          "the new device settles available state"
+        ],
+        "then": [
+          "the family is obtained from its synced or authoritative copy before activation and conflict handling still runs, applying the response of the conflict row that matches that copy kind; where no conflict row matches it, that clause asserts nothing",
+          "any source-device copy is not deleted by the device change; where none exists, this clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-candidate-set",
+          "{{instance}}-conflict-report",
+          "{{instance}}-active-state-source",
+          "{{instance}}-removal-log"
+        ]
+      },
+      "text": "On another eligible device, {{row.id}} is obtained from its synced or authoritative copy before activation. Conflict handling still runs and applies the response of the conflict row that matches that copy kind; where no row matches, that clause asserts nothing. The device change does not delete any source-device copy; if none exists, that clause asserts nothing."
+    },
+    {
+      "id": "another-device-does-not-return-family",
+      "title": "{{row.id}} does not return on another device",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "on-another-device": [
+            "does-not-return"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a distinguishable {{row.id}} value on one device before the same eligible player continues on another",
+        "when": [
+          "the new device settles available state"
+        ],
+        "then": [
+          "the earlier value does not activate and the family starts from the new-device value governed at {{row.state-declared-in}}",
+          "any source-device copy is not deleted by the device change; where none exists, this clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-active-state-source",
+          "{{instance}}-removal-log"
+        ]
+      },
+      "text": "On another eligible device, the earlier {{row.id}} value does not return. Its new-device value follows {{row.state-declared-in}}. The device change does not delete any source-device copy; if none exists, that clause asserts nothing. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "removed-copy-disappears-at-selected-event",
+      "title": "{{row.id}} disappears at its removal event",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "removed-at": [
+            "normal-quit",
+            "crash",
+            "death",
+            "slot-delete",
+            "local-profile-delete",
+            "device-data-delete",
+            "account-delete"
+          ]
+        }
+      },
+      "bindings": {
+        "event": {
+          "row_field": "removed-at",
+          "map": {
+            "normal-quit": "normal quit",
+            "crash": "a crash",
+            "death": "death",
+            "slot-delete": "deletion of the related slot",
+            "local-profile-delete": "deletion of the related local profile",
+            "device-data-delete": "device-data deletion",
+            "account-delete": "account deletion"
+          }
+        },
+        "order": {
+          "row_field": "removed-at",
+          "map": {
+            "normal-quit": "",
+            "crash": "",
+            "death": " after every state-family death result has settled",
+            "slot-delete": "",
+            "local-profile-delete": "",
+            "device-data-delete": "",
+            "account-delete": ""
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "a visible {{row.id}} load choice before {{bind:event}}",
+        "when": [
+          "{{bind:event}} occurs under {{row.removal-rule-declared-in}}"
+        ],
+        "then": [
+          "the affected copy disappears from later load choices{{bind:order}}",
+          "the removal log records the event and distinguishes removal from a refused or failed load"
+        ],
+        "diagnostics": [
+          "{{instance}}-removal-log",
+          "{{instance}}-load-result"
+        ]
+      },
+      "text": "At {{bind:event}}, {{row.id}} disappears from later load choices{{bind:order}} under {{row.removal-rule-declared-in}}. The record distinguishes removal from refusal or failure. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "copy-kind-mode-gate-controls-existence",
+      "title": "{{row.id}} exists only in its named modes",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "mode-gated": [
+            "only-in-named-modes"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "modes allowed and excluded by {{row.mode-rule-declared-in}}",
+        "when": [
+          "the player looks for {{row.id}} in each mode"
+        ],
+        "then": [
+          "{{row.id}} exists in every allowed mode and is absent in every excluded mode",
+          "a mode change during an existing profile is outside this declaration and this test asserts nothing about that transition"
+        ],
+        "diagnostics": [
+          "{{instance}}-mode-trace",
+          "{{instance}}-candidate-set"
+        ]
+      },
+      "text": "{{row.id}} exists only while {{row.mode-rule-declared-in}} permits it. The test asserts nothing about changing the mode mid-profile. It names the address and restates nothing from it."
+    },
+    {
+      "id": "cleared-or-ended-value-never-affects-later-play",
+      "title": "ended and cleared values stay absent",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "every event the {{instance}} adoption can construct where a lifetime ends or a boundary result clears an earlier value",
+        "when": [
+          "later play reaches points where an equal value can be derived"
+        ],
+        "then": [
+          "the earlier value never affects later play after the end or clearing event",
+          "any equal value derived later is recorded as new state rather than restoration",
+          "where the adoption can construct no such event, this test asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-active-state-source"
+        ]
+      },
+      "text": "After a lifetime ends or a boundary result clears a value, that earlier value never affects later play. An equal value derived later is new state. If no such case can be constructed, the test asserts nothing."
+    },
+    {
+      "id": "settlement-report-is-complete",
+      "title": "every settlement report records its complete result",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "each persistence settlement the {{instance}} adoption can construct",
+        "when": [
+          "the settlement completes or refuses"
+        ],
+        "then": [
+          "the report identifies state-family id, copy-kind id or its absence, event, scope before and after, last successful commit when read, selected copy and build when loaded, override or default used, state result, and any lost interval",
+          "a conflict report also identifies both candidate commits and the selected response",
+          "a damage report identifies refusal, fresh state, earlier-copy recovery, repaired parts, or warning choice and never claims an unattempted load succeeded",
+          "where a conflict, damage case, load, or answered question does not arise, its corresponding clause asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-settlement-report",
+          "{{instance}}-conflict-report",
+          "{{instance}}-damage-report"
+        ]
+      },
+      "text": "Every settlement report carries the mechanism's full identity, boundary, commit, selection, response, result, and loss fields. Conflict and damage reports add their required facts and never claim an unattempted success. A clause for a case the adoption cannot construct asserts nothing."
+    },
+    {
+      "id": "state-family-citation-states-its-duty",
+      "title": "declaration check: {{row.id}}'s state citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.state-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.state-declared-in}} names every field in this state family and every point where it can affect later play",
+          "where the row answers does-not-return after a quit, a crash, or on another device, {{row.state-declared-in}} also names the value the family starts from; where it never gives that answer for those cases, this clause asserts nothing",
+          "another meaning is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and cited prose, not the running game. {{row.state-declared-in}} must name every field in {{row.id}} and every point where it can affect later play. For a family that answers does-not-return after a quit, a crash, or on another device, it must also name the value the family starts from; otherwise that clause asserts nothing. Another meaning is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "saved-in-joins-a-copy-kind",
+      "title": "declaration check: {{row.id}} names an existing copy kind when saved",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer reads {{row.id}}'s saved-in field"
+        ],
+        "then": [
+          "where saved-in is present, it names exactly one copy-kinds row in this adoption; another name is a defect this test fails by construction",
+          "where saved-in is absent, this join check asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. When {{row.id}} has saved-in, it must name exactly one copy kind in this adoption; any other name is a defect this test fails by construction. With no saved-in, this check asserts nothing. It says nothing about a family held in two places at once; one family names one restoring save kind."
+    },
+    {
+      "id": "backup-copy-kind-joins",
+      "title": "declaration check: {{row.id}} names an existing copy kind",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "backup-copies",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer compares {{row.copy-kind}} with copy-kinds ids"
+        ],
+        "then": [
+          "{{row.copy-kind}} names exactly one copy-kinds row in this adoption; another name is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. {{row.copy-kind}} must name exactly one copy kind in this adoption. Any other name is a defect this test fails by construction."
+    },
+    {
+      "id": "conflict-copy-kind-joins",
+      "title": "declaration check: {{row.id}} names an existing shared copy kind",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-conflicts",
+      "when": {
+        "row": {
+          "scope": [
+            "this-copy-kind"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer compares {{row.copy-kind}} with copy-kinds ids and residences"
+        ],
+        "then": [
+          "{{row.copy-kind}} names exactly one cloud-synced or server-authoritative copy-kinds row in this adoption; another shape is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. {{row.copy-kind}} must name exactly one shared copy kind in this adoption. Any other shape is a defect this test fails by construction."
+    },
+    {
+      "id": "earlier-point-copy-kind-joins",
+      "title": "declaration check: {{row.id}} names an existing copy kind",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "earlier-point-returns",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer compares {{row.copy-kind}} with copy-kinds ids"
+        ],
+        "then": [
+          "{{row.copy-kind}} names exactly one copy-kinds row in this adoption; another name is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. {{row.copy-kind}} must name exactly one copy kind in this adoption. Any other name is a defect this test fails by construction."
+    },
+    {
+      "id": "account-family-names-account-ending",
+      "title": "declaration check: {{row.id}} names account deletion or reset as its end",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "lifetime": [
+            "account"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.scope-ends-in}}, not the running game",
+        "when": [
+          "a reviewer checks the meaning of the cited ending"
+        ],
+        "then": [
+          "{{row.scope-ends-in}} names account deletion or reset; another meaning is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and cited prose, not the running game. {{row.scope-ends-in}} must name account deletion or reset. Another meaning is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "restore-earlier-override-has-backup",
+      "title": "declaration check: {{row.id}}'s restore-earlier-copy override has a backup row",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "unreadable-copy": [
+            "restore-earlier-copy"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer compares {{row.id}} with backup-copies copy-kind fields"
+        ],
+        "then": [
+          "at least one backup-copies row names {{row.id}}; absence is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. The {{row.id}} override that restores an earlier copy requires a matching backup row. Absence is a defect this test fails by construction."
+    },
+    {
+      "id": "restore-earlier-default-has-backup",
+      "title": "declaration check: {{row.id}}'s restore-earlier-copy default has a backup row",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "flag": {
+          "unreadable-copy-default": [
+            "restore-earlier-copy"
+          ]
+        },
+        "row": {
+          "unreadable-copy": [
+            "use-game-default"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer compares {{row.id}} with backup-copies copy-kind fields"
+        ],
+        "then": [
+          "at least one backup-copies row names {{row.id}}; absence is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. The {{row.id}} default that restores an earlier copy requires a matching backup row. Absence is a defect this test fails by construction."
+    },
+    {
+      "id": "returning-family-uses-shared-authority",
+      "title": "declaration check: {{row.id}} returns from a shared authority",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "state-families",
+      "when": {
+        "row": {
+          "on-another-device": [
+            "returns"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer follows {{row.id}}'s saved-in name to a copy-kinds row"
+        ],
+        "then": [
+          "saved-in is present and names exactly one cloud-synced or server-authoritative copy kind; another shape is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. A returning {{row.id}} family must name exactly one cloud-synced or server-authoritative restoring kind. Any other shape is a defect this test fails by construction."
+    },
+    {
+      "id": "one-conflict-row-per-scope",
+      "title": "declaration check: each conflict scope has at most one row",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer groups copy-conflicts rows by a this-copy-kind name or the all-synced-kinds scope"
+        ],
+        "then": [
+          "no declared scope has more than one conflict row; a duplicate scope is a defect this test fails by construction; with no conflict rows, this check asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. Each represented conflict scope has at most one row. A duplicate is a defect this test fails by construction. With no conflict rows, the check asserts nothing."
+    },
+    {
+      "id": "one-earlier-point-row-per-copy-kind",
+      "title": "declaration check: each copy kind has at most one earlier-point row",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer groups earlier-point-returns rows by copy-kind"
+        ],
+        "then": [
+          "no copy kind is named by more than one earlier-point-returns row; a duplicate is a defect this test fails by construction; with no such rows, this check asserts nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. Each copy kind has at most one earlier-point row. A duplicate is a defect this test fails by construction. With no such rows, the check asserts nothing."
+    },
+    {
+      "id": "copy-citations-state-their-duties",
+      "title": "declaration check: {{row.id}}'s required citations state their duties",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.contains-declared-in}}, {{row.write-rule-declared-in}}, and {{row.storage-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks each citation's meaning"
+        ],
+        "then": [
+          "{{row.contains-declared-in}} names the complete family set written and restored together",
+          "{{row.write-rule-declared-in}} names the trigger, success condition, final-write behavior, and quit or crash loss window",
+          "{{row.storage-rule-declared-in}} names residence, applicable sync or service acceptance and authority, layout, identities, and player selection",
+          "a citation missing its duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and cited prose, not the running game. {{row.contains-declared-in}}, {{row.write-rule-declared-in}}, and {{row.storage-rule-declared-in}} must state their family-set, write-success and loss-window, and applicable residence, authority, identity, and selection duties. A missing duty is a defect this test fails by construction. The test names the addresses and restates nothing from them."
+    },
+    {
+      "id": "backup-citations-state-their-duties",
+      "title": "declaration check: {{row.id}}'s backup citations state their duties",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "backup-copies",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.backup-rule-declared-in}} and {{row.restore-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks each citation's meaning"
+        ],
+        "then": [
+          "{{row.backup-rule-declared-in}} names retention, ordering, usable selection, and the possible lost interval",
+          "{{row.restore-rule-declared-in}} names the supported direct restore route",
+          "a citation missing its duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and cited prose, not the running game. {{row.backup-rule-declared-in}} must state retention, ordering, usable selection, and loss duties; {{row.restore-rule-declared-in}} must state the direct restore route. A missing duty is a defect this test fails by construction. The test names both addresses and restates nothing from them."
+    },
+    {
+      "id": "conflict-citation-states-its-duties",
+      "title": "declaration check: {{row.id}}'s resolution citation states its duties",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-conflicts",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.resolution-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.resolution-declared-in}} names disagreement detection, identity comparison, complete-copy selection or preservation, and the conflict-clearing event",
+          "a citation missing a duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and cited prose, not the running game. {{row.resolution-declared-in}} must state disagreement, identity, complete-copy handling, and clearing duties. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "earlier-return-citation-states-its-duties",
+      "title": "declaration check: {{row.id}}'s return citation states its duties",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "earlier-point-returns",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.return-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.return-rule-declared-in}} names the earlier point, successful activation, run identity when applicable, and whether another load remains possible",
+          "a citation missing a duty is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and cited prose, not the running game. {{row.return-rule-declared-in}} must state the point, activation, run-identity, and reuse duties. A missing duty is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "copy-removal-citation-states-its-duty",
+      "title": "declaration check: {{row.id}}'s removal citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "removed-at": [
+            "normal-quit",
+            "crash",
+            "death",
+            "slot-delete",
+            "local-profile-delete",
+            "device-data-delete",
+            "account-delete"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.removal-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.removal-rule-declared-in}} names the exact removal event and what the player sees afterward",
+          "another meaning is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and cited prose, not the running game. {{row.removal-rule-declared-in}} must state the exact removal event and visible result. Another meaning is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "copy-mode-citation-states-its-duty",
+      "title": "declaration check: {{row.id}}'s mode citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "copy-kinds",
+      "when": {
+        "row": {
+          "mode-gated": [
+            "only-in-named-modes"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.mode-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.mode-rule-declared-in}} names every mode where the copy kind exists and confirms absence elsewhere",
+          "another meaning is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and cited prose, not the running game. {{row.mode-rule-declared-in}} must name all allowed modes and confirm absence elsewhere. Another meaning is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "player-mode-return-is-mode-gated",
+      "title": "declaration check: {{row.id}}'s player-mode return is mode-gated",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "earlier-point-returns",
+      "when": {
+        "row": {
+          "after-load": [
+            "player-mode-decides"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption document, not the running game",
+        "when": [
+          "a reviewer checks the player-mode return's mode gate and mode-rule citation"
+        ],
+        "then": [
+          "{{row.id}} is mode-gated: only-in-named-modes and cites its mode rule; a player-mode-decides row with no mode gate is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption, not the running game. {{row.id}} must be mode-gated: only-in-named-modes and cite its mode rule. A player-mode-decides row with no mode gate is a defect this test fails by construction."
+    },
+    {
+      "id": "earlier-point-mode-citation-states-its-duty",
+      "title": "declaration check: {{row.id}}'s mode citation states its duty",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "earlier-point-returns",
+      "when": {
+        "row": {
+          "mode-gated": [
+            "only-in-named-modes"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} adoption and the prose at {{row.mode-rule-declared-in}}, not the running game",
+        "when": [
+          "a reviewer checks the citation's meaning"
+        ],
+        "then": [
+          "{{row.mode-rule-declared-in}} names every mode where the earlier point exists and confirms absence elsewhere",
+          "another meaning is a defect this test fails by construction"
+        ],
+        "diagnostics": [
+          "{{instance}}-declaration-record"
+        ]
+      },
+      "text": "This declaration check reads the adoption and cited prose, not the running game. {{row.mode-rule-declared-in}} must name all allowed modes and confirm absence elsewhere. Another meaning is a defect this test fails by construction. The test names the address and restates nothing from it."
+    },
+    {
+      "id": "persistence-holds",
+      "title": "the persistence mechanism holds for the whole run",
+      "type": "general",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "holds": "every state family's distinguishable value on both sides of every constructed boundary matched its row; every commit, candidate, conflict, build comparison, damage response, activation, earlier return, deletion, device return, and settlement report that the adoption constructed followed the mechanism's numbered order; every constructed load that was partial or refused activated no state; every accepted load activated all carried families together; where the adoption can construct no load, conflict, damage, build mismatch, or earlier return, that clause asserts nothing",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}",
+        "diagnostics": [
+          "{{instance}}-state-boundary-trace",
+          "{{instance}}-commit-log",
+          "{{instance}}-candidate-set",
+          "{{instance}}-settlement-trace",
+          "{{instance}}-load-result",
+          "{{instance}}-active-state-source",
+          "{{instance}}-settlement-report",
+          "{{instance}}-first-ordering-violation"
+        ]
+      },
+      "text": "Across {{inputs:scope}}, each family's value on both sides of every constructed boundary matches its row and the numbered settlement order holds. Every load the adoption can construct refuses partial state and activates all carried families together only when accepted. A case the adoption cannot construct asserts nothing. The pack's default audit seeds apply unless the adoption supplies its own.",
+      "inputs": {
+        "scope": {
+          "default": "each of quit, crash, death, slot deletion, profile deletion, and device change that the adoption can construct, plus each constructible damage and build-mismatch case"
+        },
+        "seeds": {
+          "default": [
+            "audit-a",
+            "audit-b"
+          ]
+        }
+      }
+    }
+  ]
+}

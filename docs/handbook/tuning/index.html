@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Tuning | OpenGDD handbook</title>
-<meta name="description" content="One file holds the shared numbers a build reads. A range says how far a number may move, with both ends included. A rule is a line of arithmetic about those numbers that …">
+<meta name="description" content="tuning.json holds the shared numbers of your game: costs, speeds, sizes, timings. The builder reads them from here, and your prose points at them by name. The file has …">
 <link rel="canonical" href="https://opengdd.org/handbook/tuning/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Tuning | OpenGDD handbook">
-<meta property="og:description" content="One file holds the shared numbers a build reads. A range says how far a number may move, with both ends included. A rule is a line of arithmetic about those numbers that …">
+<meta property="og:description" content="tuning.json holds the shared numbers of your game: costs, speeds, sizes, timings. The builder reads them from here, and your prose points at them by name. The file has …">
 <meta property="og:url" content="https://opengdd.org/handbook/tuning/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Tuning | OpenGDD handbook">
-<meta name="twitter:description" content="One file holds the shared numbers a build reads. A range says how far a number may move, with both ends included. A rule is a line of arithmetic about those numbers that …">
+<meta name="twitter:description" content="tuning.json holds the shared numbers of your game: costs, speeds, sizes, timings. The builder reads them from here, and your prose points at them by name. The file has …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -23,20 +23,21 @@
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/" aria-current="page">Learn</a>
-      <a href="/spec/">Spec</a>
-      <a href="/standard/">Standard</a>
+      <a href="/contracts/">Contracts</a>
+      <a href="/spec/">Specification</a>
       <a href="/authoring-tool/">Authoring tool</a>
       <a href="/about/">About</a>
       <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
     </nav>
   </div>
 </header>
-<main>
+<main id="main">
 <div class="doc-layout">
 <nav class="doc-toc" aria-label="Learn"><p class="toc-title">Learn</p>
 <ul class="learn-resources">
@@ -46,35 +47,35 @@
 <div class="toc-group">
 <p class="toc-group-title">Start and foundations</p>
 <ul>
-<li class="toc-h2"><a href="/handbook/an-afternoon-spec/">An afternoon spec</a></li>
-<li class="toc-h2"><a href="/handbook/shape-of-a-spec/">The shape of a spec</a></li>
-<li class="toc-h2"><a href="/handbook/fantasy-block/">The fantasy block</a></li>
-<li class="toc-h2"><a href="/handbook/authority/">Authority</a></li>
-<li class="toc-h2"><a href="/handbook/identifiers/">Identifiers</a></li>
+<li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
+<li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
+<li class="toc-h2"><a href="/handbook/player-fantasy/">The player fantasy</a></li>
+<li class="toc-h2"><a href="/handbook/who-decides/">Who decides</a></li>
+<li class="toc-h2"><a href="/handbook/naming-things/">Names and addresses</a></li>
 <li class="toc-h2"><a href="/handbook/tuning/" class="here" aria-current="page">Tuning</a></li>
 <li class="toc-h2"><a href="/handbook/acceptance-tests/">Acceptance tests</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Content, links, and time</p>
+<p class="toc-group-title">Content, links and time</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/collections/">Collections</a></li>
 <li class="toc-h2"><a href="/handbook/links/">Links</a></li>
 <li class="toc-h2"><a href="/handbook/runtime-values/">Runtime values</a></li>
-<li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes &amp; clocks</a></li>
-<li class="toc-h2"><a href="/handbook/seeds-and-determinism/">Seeds &amp; determinism</a></li>
+<li class="toc-h2"><a href="/handbook/modes-and-clocks/">Modes and clocks</a></li>
+<li class="toc-h2"><a href="/handbook/seeds/">Seeds and repeatable randomness</a></li>
 </ul>
 </div>
 <div class="toc-group">
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette &amp; colour promises</a></li>
-<li class="toc-h2"><a href="/handbook/personalization/">Personalization</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanisms</p>
+<p class="toc-group-title">Reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -82,15 +83,15 @@
 <div class="toc-group">
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
-<li class="toc-h2"><a href="/handbook/promises-and-proof/">Promises and proof</a></li>
-<li class="toc-h2"><a href="/handbook/preflight-checklist/">Preflight checklist</a></li>
+<li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
 <h1>Tuning</h1>
-<p><em>Required: every spec has this file. <code>ranges</code> and <code>rules</code> are optional inside it.</em></p>
-<p>One file holds the shared numbers a build reads. A range says how far a number may move, with both ends included. A rule is a line of arithmetic about those numbers that must stay true whenever they change. The validator checks each rule and reports when it is false. A rule never changes a number.</p>
+<p class="chapter-scope"><span class="scope-badge">Required</span></p>
+<p><code>tuning.json</code> holds the shared numbers of your game: costs, speeds, sizes, timings. The builder reads them from here, and your prose points at them by name. The file has three parts. <code>values</code> is required; <code>ranges</code> and <code>rules</code> are optional.</p>
 <p><em><code>tuning.json</code>, the numbers file</em></p>
 <pre><code class="lang-json">{
   &quot;values&quot;: {
@@ -111,31 +112,31 @@
     &quot;dash-covers-the-gap&quot;: &quot;dash.speed_tiles_per_second * dash.duration_seconds &gt;= gap.width_tiles&quot;
   }
 }</code></pre>
-<p><code>values</code> gives each shared gameplay number one name and one current value. Each key has two or more segments joined by dots. Both underscores and hyphens are legal inside a segment; underscores are the usual spelling.</p>
-<p>Seventeen first words belong to other parts of OpenGDD and cannot begin a tuning key: <code>pillars</code>, <code>mood</code>, <code>anti</code>, <code>must_keep</code>, <code>colors</code>, <code>contrast</code>, <code>timing</code>, <code>values</code>, <code>ranges</code>, <code>rules</code>, <code>runtime</code>, <code>clocks</code>, <code>manifest</code>, <code>build</code>, <code>contracts</code>, <code>palette</code>, and <code>collections</code>. Start your keys with anything else. No segment anywhere in a key may be <code>json</code> or <code>md</code>.</p>
-<p><code>ranges</code> says how far a value may be moved later: by you when balancing, or by the builder when the design allows it. A value without a range stays fixed as written.</p>
-<p><code>rules</code> holds the relationships between values. Each rule has a name, made of lowercase words joined by hyphens, and one line. <code>no-dash-while-dashing</code> keeps the cooldown at least as long as the dash, so one dash ends before the next can start. <code>dash-covers-the-gap</code> makes sure a dash always crosses the gap.</p>
-<p>A rule is one comparison between two sums. Use one of <code>== != &lt; &lt;= &gt; &gt;=</code>, with plain numbers and keys from <code>values</code> combined by <code>+ - * /</code>. A rule reads keys from <code>values</code> only; a <a href="/handbook/collections/">collection record</a>'s number or a <a href="/handbook/runtime-values/">runtime value</a> cannot appear in one. The functions are <code>min</code>, <code>max</code>, and <code>floor</code>. <code>floor</code> rounds down, which is useful for a whole-number count:</p>
+<p><code>values</code> gives each number one name and one current value. A name has two or more parts joined by dots. A part uses letters, digits, underscores or hyphens, and may not begin or end with a hyphen; lowercase with underscores is the usual choice.</p>
+<p><code>ranges</code> says how far a value may move: by you when balancing, or by the builder while balancing the build. Both end numbers are allowed values. A value without a range stays as written.</p>
+<p><code>rules</code> are one-line checks between values that must stay true. Each rule has a name, in lowercase words joined by hyphens, and one comparison. <code>no-dash-while-dashing</code> keeps the cooldown at least as long as the dash, so one dash ends before the next can start. <code>dash-covers-the-gap</code> makes sure a dash always crosses the gap. The validator (the checking tool) checks every rule and reports the ones that are false. A rule never changes a number.</p>
+<p>Suppose a balance pass sets the speed to 8 and the duration to 0.1. Both are inside their ranges, but <code>dash-covers-the-gap</code> is now false:</p>
+<pre><code class="lang-text">rule &quot;dash-covers-the-gap&quot; does not hold
+  dash.speed_tiles_per_second * dash.duration_seconds &gt;= gap.width_tiles
+  8 * 0.1 = 0.8, which is not &gt;= gap.width_tiles = 1</code></pre>
+<p>The report names the rule, shows it as you wrote it, and shows the numbers that broke it. A false rule is an error: the package does not validate until the rule holds.</p>
+<p>A rule is one comparison, using <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code> or <code>&gt;=</code>, between two calculations. A calculation uses plain numbers and keys from <code>values</code>, joined by <code>+</code>, <code>-</code>, <code>*</code> and <code>/</code>, with parentheses and the functions <code>min</code>, <code>max</code> and <code>floor</code>. <code>floor</code> rounds down, which is useful for a whole-number count:</p>
 <p><em><code>tuning.json</code>, a whole-number rule using values declared above</em></p>
 <pre><code class="lang-json">{
   &quot;two-rooms-fit-across&quot;: &quot;floor((level.width_tiles - 2) / room.width_tiles) &gt;= 2&quot;
 }</code></pre>
-<p>Multiplication and division happen before addition and subtraction; the parentheses above subtract the two wall tiles first. Use parentheses when unsure.</p>
-<p>Suppose a balance pass sets the speed to 8 and the duration to 0.1. Both are inside their ranges, and <code>dash-covers-the-gap</code> still fails:</p>
-<pre><code class="lang-text">rule &quot;dash-covers-the-gap&quot; does not hold
-  dash.speed_tiles_per_second * dash.duration_seconds &gt;= gap.width_tiles
-  8 * 0.1 = 0.8, which is not &gt;= gap.width_tiles = 1</code></pre>
-<p>The validator names the rule, shows the rule as you wrote it, and shows the numbers that made it false. A false rule is an error: the package does not validate until the rule holds.</p>
+<p>Multiplication and division happen before addition and subtraction. The parentheses above subtract the two wall tiles first. Use parentheses when unsure. A rule reads keys from <code>values</code> only. A number that belongs to one item in a <a href="/handbook/collections/">collection</a>, or a <a href="/handbook/runtime-values/">runtime value</a> that changes during play, cannot appear in a rule.</p>
 <p>Rules are about the numbers written in the design. &quot;The player never has more than three dashes stored&quot; is about what happens during play, so it is an acceptance test, not a rule.</p>
-<p>A number that belongs to one collection item stays in that item's record. A number used only by a test stays with the test.</p>
-<p><em>Full rules: <a href="/spec/">OpenGDD specification</a>, §4.</em></p>
-<p class="note chapter-pager"><a href="/handbook/identifiers/">← Identifiers</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/acceptance-tests/">Acceptance tests →</a></p>
+<p>A shared gameplay number belongs here. A number that belongs to one item in a list stays with that item. A number used only by one test stays with the test.</p>
+<p>Do not start a key with a word OpenGDD already uses, such as <code>runtime</code>, <code>clocks</code>, <code>palette</code> or <code>collections</code>, and do not name any part of a key <code>json</code> or <code>md</code>. The validator reports a reserved word if you use one. The specification lists them all.</p>
+<p><em>Full rules: <a href="/spec/#4-tuning-json">OpenGDD specification</a>, §4.</em></p>
+<p class="note chapter-pager"><a href="/handbook/naming-things/">← Names and addresses</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/acceptance-tests/">Acceptance tests →</a></p>
 </article>
 </div>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
-    <span><a href="/about/">About the standard</a></span>
+    <span><a href="/about/">About OpenGDD</a></span>
     <span>Prose CC-BY 4.0 · code MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>

@@ -1,0 +1,784 @@
+{
+  "questions": {
+    "job-inputs": {
+      "asks": "Does this job need inputs that can be claimed and spent?",
+      "options": {
+        "required-inputs": {
+          "meaning": "The job needs one or more inputs. Brewing one potion may need two herbs and one bottle.",
+          "semantics": "The request checks the required share at the request gate. The lifecycle claims and spends that share at the selected times."
+        },
+        "no-inputs": {
+          "meaning": "The job claims and spends no input. Researching Pottery may need an unlocked lab but no material.",
+          "semantics": "Input checks, claims, returns, and spending are empty. Eligibility conditions may still prevent the game from offering the request."
+        }
+      }
+    },
+    "partial-work": {
+      "asks": "What happens to recorded work when this job stops?",
+      "when": {
+        "row-count": {
+          "work-phases": "non-empty"
+        }
+      },
+      "otherwise": "The job has no work span before finish; start and finish settle in one batch, unless an allowed delivery answer leaves the result visibly finished. No partial work is recorded, and no interruption can stop the job before its finish gate. A recoverable failure while waiting still lands it in stopped, with the start gate as its resume point.",
+      "options": {
+        "keep-with-job": {
+          "meaning": "Recorded work stays with the same job. A half-built wall remains halfway built after rain stops the work.",
+          "semantics": "A normal stop preserves all recorded work. Only this job can resume from it."
+        },
+        "reverse-while-stopped": {
+          "meaning": "Recorded work falls while the job is stopped. A cooling forge loses heat while no smith works.",
+          "semantics": "Recorded work decreases under reversal-declared-in and never passes below no work. Claim changes caused by the decrease settle through lifecycle step 12."
+        },
+        "reset-at-stop": {
+          "meaning": "Recorded work returns to none when the job stops. An interrupted lockpick attempt starts again from the beginning.",
+          "semantics": "The first ordinary stop records no work. Cancellation records no terminal work after its input snapshot is taken."
+        }
+      }
+    },
+    "failure-result": {
+      "asks": "What does a listed failure do unless that failure says otherwise?",
+      "when": {
+        "row-count": {
+          "failures": "non-empty"
+        }
+      },
+      "otherwise": "No accepted or finished job fails; refusal, stopping, cancellation, and blocked delivery are different outcomes.",
+      "options": {
+        "partial-inputs-or-work": {
+          "meaning": "Failure may lose part of the current inputs, recorded work, or both, whichever exist. A spill may lose one cup of broth while the same soup remains unfinished.",
+          "semantics": "The cited failure rule may lose a strict subset of claimed inputs, reduce recorded work without passing below no work, or do both. It creates no successful output and leaves the same job stopped."
+        },
+        "job-ruined": {
+          "meaning": "Failure ends this job for good. An overcooked meal is ruined and cannot finish as the same meal.",
+          "semantics": "The job enters terminal failed and creates no successful output. A finished but undelivered new output is destroyed."
+        }
+      }
+    },
+    "cancel-return": {
+      "asks": "What happens to inputs this job still claims when it is cancelled?",
+      "when": {
+        "row-count": {
+          "cancellations": "non-empty"
+        }
+      },
+      "otherwise": "An accepted job cannot be cancelled. A reviewer confirms this before the adoption relies on it.",
+      "options": {
+        "return-claimed": {
+          "meaning": "Every surviving claimed input returns to its source. Cancelling a queued soldier returns the 50 gold already set aside.",
+          "semantics": "Release every unit still claimed by the job. Do not add units that were never claimed or were already lost."
+        },
+        "return-nothing": {
+          "meaning": "No claimed input returns. Cancelling a fired clay pot spends the clay already placed in the kiln.",
+          "semantics": "Spend every unit still claimed by the job and release none. Inputs not yet claimed remain at their sources."
+        },
+        "return-by-rule": {
+          "meaning": "A game rule chooses the returned share. Cancelling a half-built wall may return unused bricks but not dried mortar.",
+          "semantics": "Release the subset named by cancel-return-declared-in, never more than the current claim, and spend the rest."
+        }
+      }
+    },
+    "cancel-dependents": {
+      "asks": "What happens to later waiting jobs that needed a cancelled job's output?",
+      "when": {
+        "row-count": {
+          "dependent-cancellations": "non-empty"
+        }
+      },
+      "otherwise": "Cancelling a job leaves later waiting jobs in place, even when they needed its output.",
+      "options": {
+        "end-dependents": {
+          "meaning": "Later jobs that can no longer get the needed output are cancelled too. Cancelling an iron ingot also cancels the waiting sword that needed it.",
+          "semantics": "Cancel every transitively dependent later waiting job whose requirement can no longer be met. Settle them in waiting order."
+        },
+        "leave-dependents": {
+          "meaning": "Later jobs remain waiting. A sword order may wait for another iron ingot after its first ingot job is cancelled.",
+          "semantics": "Leave every later dependent job waiting. The wait ends only when the requirement is met again or the job is cancelled."
+        }
+      }
+    },
+    "input-claim-timing": {
+      "asks": "When do required inputs become unavailable to other rules?",
+      "when": {
+        "flag": {
+          "job-inputs": [
+            "required-inputs"
+          ]
+        }
+      },
+      "otherwise": "This job claims no input, so there is no claim time to choose.",
+      "options": {
+        "taken-at-request": {
+          "meaning": "All inputs are claimed when the request is accepted. A queued soldier reserves its full gold cost before training starts.",
+          "semantics": "Atomically claim the full requirement at admission, whether the job waits or starts."
+        },
+        "taken-at-start": {
+          "meaning": "All inputs are claimed when work starts. A workbench leaves wood available until the bench begins the chair.",
+          "semantics": "Atomically claim the full requirement at start. No other rule can use claimed units."
+        },
+        "taken-at-finish": {
+          "meaning": "Inputs stay available until successful finish. A ritual checks for three crystals only when the casting completes.",
+          "semantics": "Claim and spend the full requirement at the finish gate. No pre-finish input claim exists."
+        },
+        "with-progress": {
+          "meaning": "Inputs are claimed as work advances. A wall claims half its bricks when it reaches half of its recorded work.",
+          "semantics": "Before each observable advance, claim the rounded share required at the proposed work point. Release the matching share when work reverses."
+        }
+      }
+    },
+    "stopped-claims": {
+      "asks": "Does a stopped job keep the inputs it has already claimed?",
+      "when": {
+        "flag": {
+          "partial-work": [
+            "keep-with-job",
+            "reverse-while-stopped",
+            "reset-at-stop"
+          ],
+          "input-claim-timing": [
+            "taken-at-request",
+            "taken-at-start",
+            "with-progress"
+          ]
+        }
+      },
+      "otherwise": "When no pre-finish claim exists there is nothing to hold; otherwise the stopped job keeps its claim.",
+      "options": {
+        "hold": {
+          "meaning": "The job keeps the claim while stopped. A paused wall keeps its reserved bricks at the site.",
+          "semantics": "Retain the current claim while stopped. Work changes may first reduce a progress-based claim."
+        },
+        "release-and-reclaim": {
+          "meaning": "The claim returns while stopped and must be claimed again before resuming. A paused research topic releases its points for another topic.",
+          "semantics": "Release the current claim while stopped. Reclaim the required share before resuming; remain stopped if that share is unavailable."
+        }
+      }
+    },
+    "delivery-trigger": {
+      "asks": "When is the completed result delivered?",
+      "when": {
+        "any": [
+          {
+            "row-count": {
+              "delivery-cases": "non-empty"
+            }
+          },
+          {
+            "row-count": {
+              "output-destinations": "non-empty"
+            }
+          },
+          {
+            "row-count": {
+              "collection-events": "non-empty"
+            }
+          },
+          {
+            "row-count": {
+              "readmission-events": "non-empty"
+            }
+          },
+          {
+            "row-count": {
+              "redelivery-events": "non-empty"
+            }
+          }
+        ]
+      },
+      "otherwise": "A finished output is delivered automatically as soon as its normal destination accepts it.",
+      "options": {
+        "automatic": {
+          "meaning": "Delivery happens as soon as a destination accepts the output. A trained unit leaves the barracks for its rally point at once.",
+          "semantics": "Move from finished to delivered immediately after the capacity policy accepts one destination."
+        },
+        "on-collection": {
+          "meaning": "The output waits for collection at its accepted place. A cooked meal stays on the stove until a player picks it up.",
+          "semantics": "Keep the accessible output in finished until collection-declared-in occurs, then report delivery once."
+        }
+      }
+    },
+    "output-full": {
+      "asks": "What happens when the whole output does not fit at its normal destination?",
+      "options": {
+        "never-full": {
+          "meaning": "The normal destination always accepts the output. Completed research always fits in the research ledger.",
+          "semantics": "No job reaches a capacity-blocked state. A reviewer confirms the capacity promise before the adoption relies on it. An in-place output always answers this way. If the capacity promise is false, the adoption is broken; there is no fallback lifecycle branch."
+        },
+        "wait-before-start": {
+          "meaning": "The job waits before starting until room is reserved. A bakery starts a loaf only after one shelf space is held for it.",
+          "semantics": "Keep admission pending until the whole output has reserved room. Hold that reservation through delivery."
+        },
+        "wait-until-space": {
+          "meaning": "Completed work stops at the finish gate until the output fits. An assembler holds a finished engine while its output slot is full.",
+          "semantics": "The job moves to stopped at its finish gate, work phase or not, and retains completed work until capacity clears."
+        },
+        "hold-undelivered": {
+          "meaning": "The job finishes and owns one inaccessible output until delivery can retry. A forge holds one finished sword while the rack is full.",
+          "semantics": "Spend inputs and keep one owned output in finished. Only redelivery-declared-in retries the normal destination; work is not repeated."
+        },
+        "try-destinations": {
+          "meaning": "The job tries named places in order. A mined gem tries the backpack, then the cart, then waits if both refuse it.",
+          "semantics": "Try the normal destination, then output-destinations in written order. Keep the same output in finished if all refuse; only redelivery-declared-in retries the route."
+        }
+      }
+    }
+  },
+  "declares": {
+    "values": {},
+    "rows": {
+      "job": {
+        "description": "Give the job rule and the normal output destination. One adoption has exactly one row.",
+        "when-empty": "An empty job list is never a behavior choice: this adoption requires exactly one job row, and a reviewer rejects a file without it.",
+        "record": {
+          "job-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule naming required inputs, one successful output unit, any in-place target, and game-owned choices or quality rules."
+          },
+          "normal-destination-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule naming the output's ordinary destination."
+          },
+          "output-kind": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "new-thing",
+              "in-place"
+            ],
+            "description": "Whether success creates a new thing or transforms the cited target in place."
+          }
+        }
+      },
+      "read-first": {
+        "description": "Optionally point a reviewer to prose that must be read before trusting the adoption.",
+        "when-empty": "No advance reading is required.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this reviewer note."
+          },
+          "read-first": {
+            "type": "citation",
+            "required": true,
+            "description": "The prose a reviewer should read first."
+          }
+        }
+      },
+      "work-phases": {
+        "description": "List the work span before finish. One adoption has at most one row.",
+        "when-empty": "Start and finish settle in one batch.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name the work span in the game's words."
+          },
+          "duration-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The duration and clock rule, or the event rule that completes the work."
+          }
+        }
+      },
+      "interruptions": {
+        "description": "List the game rules allowed to instruct a working job to stop.",
+        "when-empty": "Stops arise only from lifecycle inability.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this interruption."
+          },
+          "interruptions-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rules allowed to instruct the stop."
+          }
+        }
+      },
+      "reversal-rules": {
+        "description": "Give the work-decrease rule exactly when stopped work reverses.",
+        "when-empty": "Stopped work does not reverse.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this reversal rule."
+          },
+          "reversal-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule that determines how recorded work decreases while stopped."
+          }
+        }
+      },
+      "progress-rounding-rules": {
+        "description": "Give the proportional rounding rule exactly when inputs are claimed with progress.",
+        "when-empty": "Inputs are not claimed with progress.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this rounding rule."
+          },
+          "progress-rounding-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule that rounds each divisible input's proportional claim."
+          }
+        }
+      },
+      "cancel-return-rules": {
+        "description": "Give the return rule exactly when cancellation returns a rule-sized share.",
+        "when-empty": "Cancellation does not return a rule-sized share.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this cancellation return rule."
+          },
+          "cancel-return-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule naming the part of the current claim returned on cancellation."
+          }
+        }
+      },
+      "collection-events": {
+        "description": "Give the collection event exactly when a finished output waits for collection.",
+        "when-empty": "A finished output does not wait for collection.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this collection event."
+          },
+          "collection-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The event that accepts the finished output and delivers it."
+          }
+        }
+      },
+      "readmission-events": {
+        "description": "Give the readmission event exactly when output room is reserved before start.",
+        "when-empty": "Output room is not reserved before start.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this readmission event."
+          },
+          "readmission-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule or event that tries admission again without polling."
+          }
+        }
+      },
+      "redelivery-events": {
+        "description": "Give the retry event when a held output or a route that can be refused may actually try delivery again.",
+        "when-empty": "A held output or a route that can be refused does not retry delivery.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this redelivery event."
+          },
+          "redelivery-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule or event that tries delivery again without polling."
+          }
+        }
+      },
+      "work-limits": {
+        "description": "List each working and waiting pool.",
+        "when-empty": "Jobs share no work limit and every otherwise-ready job starts.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this pool in the game's words."
+          },
+          "covers-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule identifying exactly which requests use this pool."
+          },
+          "scope": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "each-place",
+              "shared"
+            ],
+            "description": "Whether each cited place has separate counts or all covered jobs share one set."
+          },
+          "places-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "scope": [
+                  "each-place"
+                ]
+              }
+            },
+            "description": "For separate place counts, the rule identifying those places."
+          },
+          "place-assignment-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "scope": [
+                  "each-place"
+                ]
+              }
+            },
+            "description": "For separate place counts, the rule assigning each request to one place."
+          },
+          "working-limit-key": {
+            "type": "citation",
+            "required": true,
+            "description": "The positive whole number of jobs that may occupy the working count."
+          },
+          "waiting-limit-key": {
+            "type": "citation",
+            "required": false,
+            "description": "The non-negative whole number that may remain waiting. Omission means no finite waiting limit."
+          },
+          "waiting-order": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "request-order",
+              "game-rule-order"
+            ],
+            "description": "Whether room goes by request order or a cited total ordering rule."
+          },
+          "order-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "waiting-order": [
+                  "game-rule-order"
+                ]
+              }
+            },
+            "description": "The total ordering rule when game-rule order applies."
+          },
+          "releases-working-at": {
+            "type": "string",
+            "required": false,
+            "options": [
+              "finished",
+              "delivered"
+            ],
+            "description": "The successful transition after whose report the working count is released. Omission means finished."
+          }
+        }
+      },
+      "standing-orders": {
+        "description": "List retained repeat orders.",
+        "when-empty": "No request repeats automatically.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this repeating order."
+          },
+          "work-limit": {
+            "type": "string",
+            "required": true,
+            "description": "The work-limit row whose free room may create the job."
+          },
+          "requests-job-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The job kind this row requests."
+          },
+          "eligible-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule deciding whether another request may be created."
+          }
+        }
+      },
+      "failures": {
+        "description": "List failures that may happen after acceptance.",
+        "when-empty": "Accepted and finished jobs do not fail.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this failure, such as overcooked or storm-damage."
+          },
+          "from-state": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "waiting",
+              "working",
+              "stopped",
+              "finished"
+            ],
+            "description": "The state from which this failure may happen."
+          },
+          "trigger-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule giving the chance, condition, or event and any permitted loss."
+          },
+          "result": {
+            "type": "string",
+            "required": false,
+            "options": [
+              "partial-inputs-or-work",
+              "job-ruined"
+            ],
+            "description": "A result for this failure. Omission uses the shared answer."
+          }
+        }
+      },
+      "cancellations": {
+        "description": "List controls or events that may cancel an unfinished job.",
+        "when-empty": "An accepted job cannot be cancelled; a reviewer confirms this before the adoption relies on it.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name the cancellation in the game's words."
+          },
+          "trigger-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The control or event that cancels the unfinished job."
+          }
+        }
+      },
+      "dependent-cancellations": {
+        "description": "List static links through which a later waiting job needs an earlier job's output.",
+        "when-empty": "No later waiting job has a static dependency on an earlier job's output.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this dependency case."
+          },
+          "cancellation": {
+            "type": "string",
+            "required": true,
+            "description": "The matching cancellation row."
+          },
+          "link-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The static link from the later requirement to the earlier output."
+          }
+        }
+      },
+      "delivery-cases": {
+        "description": "List a real capacity or delivery condition not already carried by a collection, readmission, redelivery, or fallback row.",
+        "when-empty": "When every other delivery row set is also empty, delivery is automatic and the normal destination always accepts the output. A reviewer confirms both promises before the adoption relies on them.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this delivery situation."
+          },
+          "condition-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The capacity or collection rule that makes the situation relevant."
+          }
+        }
+      },
+      "output-destinations": {
+        "description": "List fallback destinations after the normal destination, in the order tried.",
+        "when-empty": "No fallback destination follows the normal destination.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "Name this fallback destination."
+          },
+          "destination-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule naming the destination and how it accepts the whole output."
+          }
+        }
+      }
+    }
+  },
+  "rules": {
+    "progress-does-not-reset-on-stop": {
+      "forbid": {
+        "flag": {
+          "input-claim-timing": [
+            "with-progress"
+          ],
+          "partial-work": [
+            "reset-at-stop"
+          ]
+        }
+      },
+      "message": "Progress-based input claims cannot reset all work when inputs run out; keep or reverse the work, or claim inputs at another time."
+    },
+    "progress-reversal-warning": {
+      "forbid": {
+        "flag": {
+          "input-claim-timing": [
+            "with-progress"
+          ],
+          "partial-work": [
+            "reverse-while-stopped"
+          ]
+        }
+      },
+      "severity": "warning",
+      "message": "Reversing work while inputs are claimed with progress can make the same materials leave and return repeatedly."
+    },
+    "collection-needs-a-placed-output": {
+      "forbid": {
+        "any": [
+          {
+            "flag": {
+              "delivery-trigger": [
+                "on-collection"
+              ],
+              "output-full": [
+                "hold-undelivered"
+              ]
+            }
+          },
+          {
+            "flag": {
+              "delivery-trigger": [
+                "on-collection"
+              ],
+              "output-full": [
+                "try-destinations"
+              ]
+            }
+          }
+        ]
+      },
+      "message": "A collected result must already be at an accepted destination; choose a destination rule that puts it there first."
+    }
+  },
+  "contract": "job-resolution",
+  "version": 1,
+  "summary": "Covers crafting benches, build queues, research, and cooking: one job rule decides inputs, claims, work, interruption, limits, delivery, and failure, written down once. What a recipe makes and what it is worth stay with the game's own rules.",
+  "origin": "https://opengdd.org/contracts/job-resolution-1",
+  "mechanism": [
+    "This is the single normative authority for states, event order, input claims, and reports. Questions describe choices used here; they do not redefine these steps.",
+    "A **job run** begins with one request and ends at rejection, cancellation, terminal failure, or delivery. Every report carries the same job id and run id. It also carries old and new lifecycle state, cause, recorded work before and after, input units newly claimed, released, spent, or lost, and the output destination when chosen. Amounts use units and numbers from the cited game rules. `job-requested` has no old state and sits outside the ordered instant batch. `job-rejected` ends the run but is not a lifecycle state. `destination-refused` is stateless: old and new state are both `finished`.",
+    "A claim makes inputs unavailable to every other rule while keeping their source known. Releasing a claim returns surviving units to that source. Spending or losing units removes them; neither can later be released.",
+    "The forward path is `requested -> waiting -> started -> working -> finished -> delivered`. Side paths are `working -> stopped -> working`, `requested/waiting/working/stopped -> cancelled`, and `waiting/working/stopped/finished -> failed`. A recoverable failure reports `job-failed` and lands in `stopped` instead.",
+    "Not every job visits every state. `waiting` and `stopped` can return to the forward path. `cancelled`, terminal `failed`, and `delivered` are terminal. `started` is a transition boundary, not a waiting state. Entry to any terminal state immediately releases every working or waiting count. `releases-working-at` affects only the success path and never delays terminal release.",
+    "Every stopped job records all active stop causes and its resume point. It resumes only after every cause clears. Finish-gate causes are `output-full` and `inputs-unavailable-at-finish`; they are slot-retaining. Every other cause is non-retaining. Entry to `stopped` always releases a waiting count. A stopped job retains its working count only while every active cause is slot-retaining; the first non-retaining cause releases it. `partial-work` applies once when the first ordinary stop cause joins the set, never for a finish-gate cause. `failure-recovery` is neither: it is non-retaining, and `partial-work` never applies to it, because step 16 has already settled the loss.",
+    "Whenever a pool has free working room, it first offers that room to admitted jobs eligible to start or resume, in the pool's waiting order. A job stopped by an instruction joins that order at the stop moment and never outranks the job that displaced it. A cleared reason also causes a waiting or stopped job to be offered free room again. After those offers, the pool scans standing orders in written order. It also scans when created, after a rejection of a request the pool did not create in this scan, and when cited eligibility becomes true. A scan keeps creating eligible requests until no row is eligible or no room remains. A scan may create more than one job from the same row, filling all free room. These are level-triggered scans, not one-time edges.",
+    "### Request and accept",
+    "1. Read `job-declared-in` once. It names required inputs, one successful output unit, any in-place target, and game-owned choice or quality rules. If work limits exist, assign the request to exactly one pool. For separate place counts, assign it to exactly one cited place. Report `job-requested`. 2. Check availability without reserving anything. For required inputs, test the full requirement under the three whole-claim timings. Under progress-based claiming, test only the initial rounded share. A game rule may require a stricter offer check. If the tested share is missing, report `job-rejected` with cause `missing-inputs`; claim nothing, record no work, and create no output. Jobs with no inputs skip the check. 3. Decide whether the request would enter `waiting`, including a free pool whose order places an earlier admitted job first. Waiting admission always consumes waiting capacity. If that limit is full, reject with cause `job-limit-full`. A request that starts immediately uses no waiting count. 4. Attempt admission. When room must be reserved before start, reserve the whole output atomically. If room is unavailable, the request stays `requested`; `readmission-declared-in` causes another attempt without polling. Recheck input and waiting limits on delayed admission. On admission, accept the request. Claim the full requirement in the same batch when inputs are taken at request. An admitted request that cannot start enters `waiting`; report `job-waiting` and every current reason. No work is recorded in `waiting`, and no input is claimed there except the claim made by `taken-at-request`.",
+    "### Start",
+    "5. Recheck every admission and start gate. Claim the full requirement under start timing. Under progress-based timing, claim the initial share. A failed claim enters `waiting`, consuming waiting capacity; if the waiting limit is full, reject with cause `job-limit-full` and release any output reservation. Otherwise report `job-waiting` with cause `inputs-unavailable`. Inputs taken at request are already held; inputs taken at finish remain at their source. 6. Keep any output reservation through delivery; other output answers reserve nothing. Leave the waiting count, acquire the working count, and report `job-started`. 7. Without a work-phase row, resolve start and finish in one batch. The reports stay ordered unless `hold-undelivered`, all-refused `try-destinations`, or `on-collection` legally parks the job in visible `finished`, or a finish-gate cause stops it there. With a work phase, enter `working` and report `job-working`.",
+    "### Work and input claims",
+    "8. Work completes as `duration-declared-in` says: its clock advances or its completion event occurs. Record exposed work points at full precision. A display meter is outside this contract. 9. With progress-based timing, every observable advance first claims the rounded share for the proposed work point. If unavailable, do not record the advance; stop with cause `inputs-unavailable`. Whole-claim timings keep their full claim. Finish timing keeps inputs available elsewhere. 10. Reaching the required work moves to the finish gate. It does not yet spend inputs or create the successful output.",
+    "### Stop, resume, and interrupt",
+    "11. An interruption is a temporary inability or instruction to advance that is not refusal, failure, cancellation, or delivery. It moves `working -> stopped`, adds its cause, applies `partial-work` and the claim policy, then reports `job-stopped`. An instructed stop must be named by `interruptions-declared-in`. A later cause joins the set and reports `stopped -> stopped`; it does not apply the work answer again. 12. First adjust a progress-based claim to any reduced work. Then apply `stopped-claims`: hold the claim, or release it to its source. Whole claims taken at request or start follow the same answer. Finish timing has no claim. When the question is not asked, the claim is held. 13. When every cause clears, the job competes for free working room through its pool, or proceeds without a pool. Recheck every gate and reclaim any released share. If a gate or claim is unavailable, remain stopped and keep the room free. Otherwise report `job-resumed` and return to the recorded resume point: a waiting-origin failure continues at step 5 and acquires the selected count at step 6, while interrupted work reacquires the count and enters `working`. The same job resumes; no new request is created. 14. The finish gate tests capacity and any finish-time claim together. The finish-gate wait answer adds `output-full`; an unavailable claim adds `inputs-unavailable-at-finish`. These causes preserve completed work and retain working room unless another active cause releases it. They never apply `partial-work`. `stopped-claims` applies to finish-gate stops exactly as in step 12. When every cause clears and any released claim is reclaimed, report `job-resumed` and return directly to the finish gate.",
+    "### Fail",
+    "15. A failure row may fire only from its named state. A failure from `finished` is always terminal; no recoverable result exists there. Resolve its row result, or the shared failure answer when the row has none, atomically. For a recoverable result, apply the stopped-claim policy before the one `job-failed` report. 16. A partial result may lose a strict subset of claimed inputs, reduce work without passing below none, or do both. It creates no successful output. Under progress-based timing, apply losses first. If the claim is held, reduce work to the highest point the surviving claim supports and release excess claim. If the claim was released, reduce work only by the named loss. The same job lands in `stopped` with cause `failure-recovery`; its recorded resume point is the start gate for a waiting-origin failure, the prior work point for a working failure, or the already-recorded point for a stopped failure. Later recovery follows the normal resume rule. 17. A ruined job enters terminal `failed`, can never finish as the same job, and creates no successful output. Failure from `finished` destroys its one undelivered new output. For in-place work, it ruins the transformation, not the target's existence. The cited failure rule owns the damaged state. Failure itself returns no claimed input; remaining claims stay assigned to the failed job unless the cited failure rule disposes of them. After cited claim changes, terminal entry releases every count and reports `job-failed`.",
+    "### Cancel",
+    "18. A declared cancellation may target `requested`, `waiting`, `working`, or `stopped`. Snapshot current claims, release every count, apply the return answer when asked, enter `cancelled`, and report `job-cancelled`. Under the reset answer, terminal work becomes none after the snapshot. Cancellation creates no output and never undoes a finished or delivered output. 19. Returning claimed inputs releases every surviving claimed unit. Returning nothing spends them. A rule-sized return releases exactly its named subset and spends the rest. No answer recreates a unit already lost, and unclaimed inputs remain where they are. 20. A dependency is the declared static link from a later waiting job's requirement to the cancelled job's output. Ending dependents finds every transitive later waiting job whose requirement can no longer be met. After the first cancellation settles, cancel those jobs in waiting order, each with its own claim settlement and report. Leaving dependents keeps them waiting. Completed intermediate jobs and delivered outputs remain.",
+    "### Finish and deliver",
+    "21. At the finish gate, finish-time timing tries to claim the full input. If unavailable, follow the finish-gate stop rule. Other timings must hold the required claim. Atomically spend inputs and establish the one successful output: a new thing or a cited target transformed in place. An in-place output is delivered by that state change at its site. A compound output is still one atomic delivery unit. Report `job-finished`. 22. Resolve capacity by the selected answer. An always-accepting destination takes the whole output. A pre-start reservation is already held. A finish-gate wait follows the stop rule. A held output remains one owned, inaccessible output until its cited retry. An ordered route tries the normal destination and then fallback rows. Every refusal by any destination, including a held output's first refusal and each refusal on a cited retry, reports `destination-refused`. If all refuse, keep the same output until the cited retry. Delivery never polls. An in-place output has no destination capacity: it is delivered by the state change of step 21, and the adoption answers `never-full`. 23. Automatic delivery moves an accepted result `finished -> delivered` immediately. Collection keeps it accessible at its chosen destination until the cited event, then moves it to `delivered`. Report `job-delivered` exactly once. 24. On success, release working room after the transition named by the pool row and after that transition's report. Then run the room-offer and standing-order process. Rejection ends its run; a later retry belongs to the requester unless a standing order creates it.",
+    "### Ordering guarantee",
+    "One transition, all claim changes, and all reports settle before another transition begins. Claim changes happen before the transition report unless a step says otherwise. Automatic delivery to an accepting destination after an instant start keeps `job-started`, `job-finished`, and `job-delivered` in one ordered batch with no outside event between them. Events offered at the same moment enter this lifecycle one at a time in the order supplied by **Event resolution**. This contract creates no same-moment ordering rule."
+  ],
+  "answers": {
+    "job-inputs": "no-inputs",
+    "partial-work": "keep-with-job",
+    "output-full": "never-full"
+  },
+  "values": {},
+  "rows": {
+    "job": [
+      {
+        "job-declared-in": "research.topics",
+        "normal-destination-declared-in": "research.completed-ledger",
+        "output-kind": "new-thing"
+      }
+    ],
+    "work-phases": [
+      {
+        "id": "topic-work",
+        "duration-declared-in": "research.topic-times"
+      }
+    ],
+    "interruptions": [
+      {
+        "id": "topic-switching",
+        "interruptions-declared-in": "research.topic-switching"
+      }
+    ],
+    "work-limits": [
+      {
+        "id": "research-focus",
+        "covers-declared-in": "research.topic-requests",
+        "scope": "shared",
+        "working-limit-key": "numbers.one-active-topic",
+        "waiting-order": "request-order"
+      }
+    ],
+    "read-first": [],
+    "reversal-rules": [],
+    "progress-rounding-rules": [],
+    "cancel-return-rules": [],
+    "collection-events": [],
+    "readmission-events": [],
+    "redelivery-events": [],
+    "standing-orders": [],
+    "failures": [],
+    "cancellations": [],
+    "dependent-cancellations": [],
+    "delivery-cases": [],
+    "output-destinations": []
+  },
+  "pack": "sha256:bfbe0f8482c06bd771e70af5afb44d53afad291161ea87d85f32021397ab2c3b"
+}

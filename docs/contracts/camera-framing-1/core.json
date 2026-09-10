@@ -1,0 +1,364 @@
+{
+  "contract": "camera-framing",
+  "version": 1,
+  "summary": "Covers the views used during play and what each one keeps visible. It records fixed, follow, and free-camera modes, manual panning, view size, travel limits, safe areas, clearance, camera activities, and failure handling. Camera feel, physical input mappings, unit commands, HUD layout, and 3D occlusion stay elsewhere.",
+  "questions": {
+    "content-visibility": {
+      "asks": "In normal play, must these cameras keep anything from your game on screen?",
+      "rationale": "A follow target or camera travel limit does not prove that game content remains visible. This choice states whether these cameras make that promise.",
+      "options": {
+        "declared-content": {
+          "meaning": "The cameras keep named game content visible. A party view keeps every active hero on screen.",
+          "semantics": "Every visibility promise lives in a coverage-promises row and every effect on one lives in a camera-activities row; nothing outside those rows is promised."
+        },
+        "no-content-guarantee": {
+          "meaning": "The cameras make no promise about game content staying visible. An endless runner may leave the view during a fast fall.",
+          "semantics": "No visibility promise exists; the promise and activity row sets are declared empty."
+        }
+      }
+    }
+  },
+  "declares": {
+    "values": {},
+    "rows": {
+      "cameras": {
+        "description": "The play views in this camera family and the rules that move or limit each one.",
+        "when-empty": "An adoption without a camera row describes no play view, and a reviewer rejects it.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable camera name in game language, such as board-camera or tactical-view."
+          },
+          "active-when": {
+            "type": "citation",
+            "required": true,
+            "description": "The complete rule for when this camera supplies a displayed play view."
+          },
+          "view-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The rule naming this camera's final play region, aspect handling, and display sizes. For a fixed view it also names the authored base position; for a fixed size it also names the authored view size."
+          },
+          "follow-mode": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "fixed-view",
+              "locked-follow",
+              "slack-follow",
+              "free-view",
+              "free-with-recenter"
+            ],
+            "description": "A fixed room view's base position never moves or follows anything, and no input moves it; only a declared activity can offset it. Locked follow keeps a hero at the centre. Slack follow lets a runner move before the view follows. A free tactical view begins where the player moves it. A free map with recenter can return to a selected group."
+          },
+          "follow-target-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "follow-mode": [
+                  "locked-follow",
+                  "slack-follow",
+                  "free-with-recenter"
+                ]
+              }
+            },
+            "description": "The rule naming the followed target or the target used by recenter. For slack follow it also names the allowed positions around that target."
+          },
+          "manual-pan": {
+            "type": "string",
+            "when": {
+              "row": {
+                "follow-mode": [
+                  "free-view",
+                  "free-with-recenter"
+                ]
+              }
+            },
+            "options": [
+              "edge-scroll",
+              "drag-view",
+              "move-view-actions",
+              "several-methods"
+            ],
+            "description": "Edge scroll moves a strategy view at the screen edge. Drag view pulls a mission map. Move-view actions pan a tactics camera through mapped actions. Several methods gives a world map at least two of these."
+          },
+          "pan-actions-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "follow-mode": [
+                  "free-view",
+                  "free-with-recenter"
+                ]
+              }
+            },
+            "description": "The game actions that pan this camera. Several methods names at least two methods; platform inputs stay with Control options."
+          },
+          "recenter-action-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "follow-mode": [
+                  "free-with-recenter"
+                ]
+              }
+            },
+            "description": "The game action that returns this view to its cited target."
+          },
+          "travel-limit": {
+            "type": "string",
+            "when": {
+              "row": {
+                "follow-mode": [
+                  "locked-follow",
+                  "slack-follow",
+                  "free-view",
+                  "free-with-recenter"
+                ]
+              }
+            },
+            "options": [
+              "no-camera-travel-limit",
+              "one-world-region",
+              "changes-by-situation"
+            ],
+            "description": "No limit lets a runner view keep moving. One region keeps a board view inside its room. Situation changes can give a tactical map different regions by mission phase. A fixed view travels nowhere and is not asked."
+          },
+          "travel-limit-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "travel-limit": [
+                  "one-world-region",
+                  "changes-by-situation"
+                ]
+              }
+            },
+            "description": "The complete camera-position region and, when needed, the rule selecting the current region."
+          },
+          "view-size": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "fixed-size",
+              "player-held-zoom",
+              "automatic-fit"
+            ],
+            "description": "Fixed size keeps a runner at its authored view size. Player-held zoom lets a strategy player hold a chosen zoom level. Automatic fit widens a co-op view until the party and margins fit."
+          },
+          "view-size-rule-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "view-size": [
+                  "player-held-zoom",
+                  "automatic-fit"
+                ]
+              }
+            },
+            "description": "For player-held zoom, the zoom actions and allowed range. For automatic fit, the allowed range, aspect response, update timing, and simultaneous-promise rule."
+          },
+          "failure-response": {
+            "type": "string",
+            "when": {
+              "flag": {
+                "content-visibility": [
+                  "declared-content"
+                ]
+              }
+            },
+            "options": [
+              "hold-valid-frame",
+              "keep-priority-content",
+              "show-framing-failure",
+              "change-world-to-restore-frame",
+              "failure-unreachable"
+            ],
+            "description": "Hold valid frame leaves a puzzle transition on its last valid view. Keep priority content protects a tactics leader and records hidden allies as failed. Show framing failure adds a warning to a strategy view. Change world to restore frame applies a co-op tether or defeat rule. Failure unreachable cites why a fixed arena fits on every reachable display."
+          },
+          "failure-handling-declared-in": {
+            "type": "citation",
+            "when": {
+              "flag": {
+                "content-visibility": [
+                  "declared-content"
+                ]
+              }
+            },
+            "description": "The exact wait, priority, warning, or game rule used after failure, or the complete argument that failure cannot be reached."
+          }
+        }
+      },
+      "coverage-promises": {
+        "description": "The subjects or areas each camera keeps visible in named play situations.",
+        "when-empty": "No camera in this adoption promises to keep game content visible.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable promise name in game language, such as whole-board or selected-group."
+          },
+          "camera-id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The camera that keeps this promise, by the name you gave it."
+          },
+          "subject": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed game prose naming the subject or area that stays visible."
+          },
+          "applies-when": {
+            "type": "citation",
+            "required": true,
+            "description": "The complete play conditions in which this promise applies."
+          },
+          "coverage": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "whole-extent",
+              "reference-point"
+            ],
+            "description": "Whole extent keeps every edge of a selected squad visible. Reference point keeps a runner's cited centre visible even when the sprite reaches past the view."
+          },
+          "reference-point": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "coverage": [
+                  "reference-point"
+                ]
+              }
+            },
+            "description": "The exact point that stays visible."
+          },
+          "visibility-area": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "rendered-view",
+              "hud-safe-area"
+            ],
+            "description": "Rendered view measures a runner from the final view edges, so HUD overlap alone does not fail. HUD safe area measures a tactics objective from the cited unobscured area, so HUD-covered space counts outside."
+          },
+          "safe-area-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "visibility-area": [
+                  "hud-safe-area"
+                ]
+              }
+            },
+            "description": "The final unobscured rectangle or shape after the HUD elements named by this promise's conditions are placed."
+          },
+          "margin-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The top, right, bottom, and left clearance inside the chosen visibility area, with units. Zero is stated explicitly. A camera clamped at its travel limit may hold less than this clearance on the clamped side, but the subject still stays inside the area."
+          }
+        }
+      },
+      "camera-activities": {
+        "description": "Frame-changing situations and whether each one keeps or suspends all or named promises on its camera.",
+        "when-empty": "No camera activity has a visibility-promise effect in this adoption. With declared content, the promise-bearing cameras use none of the seven listed activities.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable activity name in game language, such as sprint-look-ahead or boss-hit-shake."
+          },
+          "camera-id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The camera this activity changes, by the name you gave it."
+          },
+          "activity-kind": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "look-ahead",
+              "manual-pan",
+              "aim-or-peek-offset",
+              "player-zoom",
+              "shake",
+              "temporary-zoom",
+              "scripted-move"
+            ],
+            "description": "Look-ahead leads a runner. Manual pan moves a tactical view. Aim or peek offsets a follow camera toward a target. Player zoom holds a strategy view at a chosen size. Shake offsets a boss hit. Temporary zoom changes a combat view's size. A scripted move frames a dialogue reveal."
+          },
+          "applies-when": {
+            "type": "citation",
+            "required": true,
+            "description": "The complete start and end conditions for this camera activity."
+          },
+          "extent-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "activity-kind": [
+                  "look-ahead",
+                  "aim-or-peek-offset",
+                  "shake",
+                  "temporary-zoom",
+                  "scripted-move"
+                ]
+              }
+            },
+            "description": "The rule naming this activity's strongest displacement or size change. Manual pan is bounded by the travel limit and controller instead; player zoom is bounded by the view-size citation."
+          },
+          "actions-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "activity-kind": [
+                  "aim-or-peek-offset"
+                ]
+              }
+            },
+            "description": "The game actions that produce this offset. Platform inputs stay with Control options."
+          },
+          "promises": {
+            "type": "citation",
+            "description": "The fixed list of promise names affected by this activity. When absent, the activity affects every promise on its camera."
+          },
+          "promise-effect": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "keeps-promise",
+              "may-suspend"
+            ],
+            "description": "Keeps promise preserves the affected rows, as when runner look-ahead stays inside its margin. May suspend allows those rows to fail only for this activity, as during a boss reveal."
+          }
+        }
+      }
+    }
+  },
+  "rules": {},
+  "origin": "https://opengdd.org/contracts/camera-framing-1",
+  "mechanism": [
+    "This is the single normative authority for each displayed play moment: which camera is active, what must remain visible, who moves the view, what may suspend a promise, how travel and view size are applied, what happens when content cannot fit, and when a suspended promise returns. Questions and rows supply choices and cited game rules; they do not define another order.",
+    "A **displayed play moment** is the final play image presented at one moment, after follow motion, manual pan, aim or peek offset, player-held zoom, shake, temporary zoom, scripted movement, viewport scaling, and HUD composition. A **play region** is the screen area named by `view-declared-in`; two regions are the same region whenever their screen areas overlap at all. A coverage row's **visibility area** is either the final rendered play region or that row's cited HUD-safe area. A **valid frame** satisfies every applicable, unsuspended coverage row at its settled margin. A **framing failure** exists only when no camera position and view size allowed by the camera can produce a valid frame.",
+    "### Select the view and promises",
+    "1. Read every camera whose `active-when` rule holds. Each active camera supplies the final play region named by `view-declared-in`. At most one camera may be active in one play region. Simultaneous split views settle independently only when their regions are distinct. 2. For each active camera, collect its coverage rows whose `applies-when` rules hold. `whole-extent` contributes the subject's complete displayed extent. For a set-valued subject, the whole extent is the union of its members' displayed extents. `reference-point` contributes only the cited point. 3. Construct each row's visibility area after display scaling and the HUD placement named by that row's conditions. HUD-covered space is outside a HUD-safe area; a rendered-view row deliberately ignores HUD overlap. Inset the area by the cited top, right, bottom, and left margin. Attach the one contract-supplied edge condition: a later travel clamp may reduce only the margin on its clamped side, never the underlying visibility area. A whole extent fits only when all of it lies inside the settled inset area. A reference point fits when that point lies inside it. A subject or point lying exactly on the boundary of the settled inset area fits.",
+    "### Apply activity permissions",
+    "4. Read every active activity row for the camera. Its `promises` citation, when present, selects the affected applicable promises; when absent, it selects every applicable promise on that camera. An active `may-suspend` row suspends only that set for its cited interval. Active `keeps-promise` rows do not cancel a different active suspension affecting the same promise. 5. A suspended promise is not tested and cannot create a framing failure. It becomes required again on the first displayed play moment after the last suspending activity affecting it ends. On a free-with-recenter camera, a suspending manual-pan interval begins when the view leaves its recentered state and ends on recenter or camera deactivation. 6. The player proposes motion and held zoom through the cited game actions; the camera controller disposes of the final frame. `free-view` and `free-with-recenter` name who initiates position changes, not who owns the displayed result. A `keeps-promise` manual-pan or aim-or-peek row therefore requires the controller to stop, redirect, or resize the proposed view before an affected promise fails.",
+    "### Build and test the frame",
+    "7. Build the candidate position in two stages. Stage one selects the base position inside the follow mode's set. A fixed view has only the base position named by `view-declared-in`. A locked follow has only its target point. A slack follow may use the allowed positions its citation names around the target. A free view starts from the player's proposal; a free-with-recenter view does the same until recenter selects its target point. The controller may search only within the set supplied by that mode. Apply any travel limit to the base position; a fixed view declares none. It constrains camera position, not the visible region, and it never proves that a subject is visible. Resolve the step-3 edge condition now: when this clamp alone prevents the subject from meeting a margin, reduce only the clamped-side margin by the exact shortfall, no lower than zero. The subject must still lie inside the underlying, uninset visibility area. Stage two applies each active position-changing activity as an offset to the settled base, bounded by its cited extent. An activity offset is outside the mode's search set and may carry the view past the travel limit; the final test in step 9 still decides every promise. 8. Settle view size once. `fixed-size` uses the size named by `view-declared-in`. `player-held-zoom` starts from the player's held level inside the cited range; its `player-zoom` activity row's effect decides whether the controller must keep every promise or may let the named ones suspend; with no such row, the controller must keep every applicable promise at every held level. `automatic-fit` applies the cited fit rule, choosing the largest allowed size at which the extent, the margins, the strongest cited displacement of every position-changing `keeps-promise` activity, and the largest cited size of every size-changing one fit together. On any view-size answer, an active temporary-zoom activity may propose its cited extent as a temporary size; an accepted temporary size replaces the size the answer would otherwise settle, for the activity's cited interval, and the authored size, held level, or fit result returns on the first displayed moment after it ends. The controller disposes of every proposal under the activity permission and all unsuspended promises together. The travel region still binds camera position only: if fitting needs a centre outside it, clamp the centre and continue fitting inside the allowed zoom range, even when the visible region extends beyond the travel region. If no allowed size and clamped position fits, step 11 applies. 9. Compose the final view and HUD, then test every unsuspended promise against its inset visibility area. This final test decides the outcome; a follow trigger, recenter action, camera travel limit, or earlier candidate frame never substitutes for it. 10. If every row passes, display the valid frame. A `keeps-promise` activity is demonstrated only when this final test passes on every displayed moment of its cited interval, including the strongest displacement or size change its extent citation names.",
+    "### Settle a framing failure and recovery",
+    "11. Only after no allowed candidate can pass, create one framing failure containing the camera id, failed promise ids, display size, visibility areas, settled margins, attempted position and view size, travel limit, active activities, and selected failure response. A failure response is not an ordinary precondition and cannot weaken a coverage row before this step. 12. `hold-valid-frame` does not display the invalid candidate. It keeps the last valid displayed frame or, before one exists, the cited non-play transition surface; the cited game rule decides whether play or a transition advances. `keep-priority-content` applies the cited total priority, displays the best allowed frame, and records each promise that did not fit. `show-framing-failure` displays the best allowed frame with its cited player-facing failure state. `change-world-to-restore-frame` applies the cited game rule to tether, defeat, or move content, then reruns steps 2–10 before another play moment is displayed; the cited rule may not change the active camera set or create a play region. `failure-unreachable` declares no runtime handling: reaching this step contradicts its cited argument and invalidates the design claim. 13. A failure remains a failure until a later settlement produces a valid frame or the camera deactivates. Priority, a visible notice, or starting a cited world change does not by itself turn an invalid frame into a kept promise. 14. When a suspension ends, run steps 2–10 before displaying the next play moment. The first displayed moment without an active suspension must be valid or must enter steps 11–13. At a camera handover, run steps 1–10: the incoming camera brings its own promise set and visibility areas, and its first frame follows this same first-valid-frame recovery path. Switching cannot insert an unchecked frame or leave two cameras active in one region.",
+    "The authority order is therefore: active play region, applicable promise, each coverage row's visibility area and margin, activity suspension, player proposal and controller disposal, camera-position travel limit, allowed position and view-size settlement, final composed-view test, failure response. Later stages never rewrite an earlier declaration."
+  ],
+  "pack": "sha256:4caf436eee5950d06c4368a78c14f9c4bff965e124c8d84695700ba82e2e7129"
+}

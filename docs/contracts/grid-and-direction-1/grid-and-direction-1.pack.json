@@ -1,0 +1,908 @@
+{
+  "contract": "grid-and-direction",
+  "version": 1,
+  "templates": [
+    {
+      "id": "axes-grow",
+      "title": "the numbers grow one way",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {
+        "growth-phrase": {
+          "flag": "origin-and-axes",
+          "map": {
+            "top-left": "right across rows and down columns",
+            "bottom-left": "right across rows and up columns",
+            "unbounded-right-and-down": "right across rows and down columns",
+            "unbounded-right-and-up": "right across rows and up columns"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} as this package lays it out, with at least two rows and at least two columns",
+        "when": [
+          "a cell is located in the layout",
+          "the cells one step from it across and down are located"
+        ],
+        "then": [
+          "the numbers grow {{bind:growth-phrase}}",
+          "moving one cell that way raises exactly one of the two numbers by one and lowers neither",
+          "moving one cell the opposite way lowers exactly one of them by one"
+        ],
+        "diagnostics": [
+          "{{instance}}-cell-addresses",
+          "{{instance}}-declared-layout"
+        ]
+      },
+      "text": "In {{instance}} the two numbers grow {{bind:growth-phrase}}, one per cell. The layout this is read against is the one this package declares, not the finished picture: a build may draw the grid any way its presentation chapter allows and still has to number it this way."
+    },
+    {
+      "id": "the-first-cell-is-in-one-corner",
+      "title": "the grid has a first cell, in one named corner",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "origin-and-axes": [
+            "top-left",
+            "bottom-left"
+          ]
+        }
+      },
+      "bindings": {
+        "corner-phrase": {
+          "flag": "origin-and-axes",
+          "map": {
+            "top-left": "the top-left corner of the grid as this package lays it out",
+            "bottom-left": "the bottom-left corner of the grid as this package lays it out"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} as this package lays it out",
+        "when": [
+          "the cell whose two numbers are both the smallest on the grid is located in the layout"
+        ],
+        "then": [
+          "that cell is {{bind:corner-phrase}}",
+          "no other corner of {{instance}} holds a smaller pair of numbers",
+          "the grid is bounded: every cell of it lies inside the declared number of rows and columns"
+        ],
+        "diagnostics": [
+          "{{instance}}-cell-addresses",
+          "{{instance}}-declared-layout"
+        ]
+      },
+      "text": "{{instance}} is a bounded rectangle whose first cell — the one whose two numbers are both smallest — is {{bind:corner-phrase}}. A build that numbers from the opposite corner fails this test even when every layout still loads."
+    },
+    {
+      "id": "the-grid-has-no-first-cell",
+      "title": "the grid runs on in every direction",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "origin-and-axes": [
+            "unbounded-right-and-down",
+            "unbounded-right-and-up"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} and the cell this package puts at zero on both axes",
+        "when": [
+          "cells are addressed on every side of that cell, including at negative numbers on each axis",
+          "a rule of this game reads or writes one of those cells"
+        ],
+        "then": [
+          "every one of those cells is a legal address and is handled the same way as any other",
+          "no rule of this game assumes a first cell, a last cell, or a corner",
+          "nothing shifts the numbers to make them positive before a rule of this game reads them"
+        ],
+        "diagnostics": [
+          "{{instance}}-cell-addresses",
+          "{{instance}}-negative-coordinate-trace"
+        ]
+      },
+      "text": "{{instance}} has no first cell. Its numbers are signed and it runs on in every direction, so a cell at a negative number is as ordinary as any other and no rule may assume a corner to count from. Six of thirteen externally surveyed grids are this shape, including two of the four format specifications, which is why it is an answer here rather than an omission."
+    },
+    {
+      "id": "coordinate-reading",
+      "title": "a written pair names the cell this package means",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "coordinate-order": [
+            "column-first",
+            "row-first"
+          ]
+        }
+      },
+      "bindings": {
+        "pair-phrase": {
+          "flag": "coordinate-order",
+          "map": {
+            "column-first": "the first number is the column, counted across the grid, and the second is the row, counted down it",
+            "row-first": "the first number is the row, counted down the grid, and the second is the column, counted across it"
+          }
+        },
+        "start-phrase": {
+          "flag": "counting-starts-at",
+          "map": {
+            "zero": "the first row and the first column are numbered 0",
+            "one": "the first row and the first column are numbered 1"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "{{instance}} with a different number of rows and columns, so that reading a pair the wrong way round cannot land on a real cell by luck, or a stated reason why no such grid exists in this game",
+        "when": [
+          "the build resolves a cell that this package's own material writes as a pair of numbers"
+        ],
+        "then": [
+          "{{bind:pair-phrase}}",
+          "{{bind:start-phrase}}",
+          "the cell the build resolves is the cell this package's material means",
+          "the same pair with its two numbers swapped resolves to a different cell, or to no cell at all"
+        ],
+        "diagnostics": [
+          "{{instance}}-resolved-cell",
+          "{{instance}}-source-reference"
+        ]
+      },
+      "text": "In {{instance}}, {{bind:pair-phrase}}, and {{bind:start-phrase}}. The test asks for a grid whose rows and columns differ in number on purpose: on a square grid a build that reads the pair backwards passes every test anyone would think to write, and ships transposed.\n\nOne surveyed game numbers its authored map files from one and its engine from zero, and records that nowhere but a source comment. The numbers this test is about are the ones this package's own material writes."
+    },
+    {
+      "id": "every-position-has-one-cell",
+      "title": "every position belongs to exactly one cell",
+      "type": "general",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "cell-ownership": [
+            "next-cell-along",
+            "truncate-toward-zero",
+            "cell-centres-are-whole-numbers"
+          ]
+        }
+      },
+      "bindings": {
+        "conversion-phrase": {
+          "flag": "cell-ownership",
+          "map": {
+            "next-cell-along": "dividing by {{value-cite:cell-size}} and rounding down — then adding 1 where this grid counts from 1 — the same way on both sides of zero",
+            "truncate-toward-zero": "dividing by {{value-cite:cell-size}} and cutting the fraction off — then adding 1 where this grid counts from 1 — so that the cell at zero is twice as wide as the rest",
+            "cell-centres-are-whole-numbers": "dividing by {{value-cite:cell-size}} and rounding to the nearest whole number — then adding 1 where this grid counts from 1 — the cell numbers naming centres"
+          }
+        }
+      },
+      "test": {
+        "type": "general",
+        "diagnostics": [
+          "{{instance}}-position-to-cell-trace",
+          "first-position-owned-twice"
+        ],
+        "holds": "the position belongs to exactly one cell of {{instance}}, found by {{bind:conversion-phrase}}; and converting that cell back to a position inside it and converting again returns the same cell",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}"
+      },
+      "text": "Within this adoption's verification scope — {{inputs:scope}} — every position of {{instance}} lands in exactly one cell, never in two and never in none, and the cell is found by {{bind:conversion-phrase}}. Converting back and forth closes the loop.\n\nThe scope and seeds are this game's, supplied through this adoption's verification inputs; the check and its oracle are the contract's. Rounding down and cutting the fraction off agree everywhere the numbers are positive and part company on the other side of zero, which is why the scope should reach both sides wherever this game has them.",
+      "inputs": {
+        "seeds": {
+          "default": [
+            "grid-position-a",
+            "grid-position-b"
+          ]
+        },
+        "scope": {
+          "default": "positions of every moving thing over one run, including positions on both sides of zero"
+        }
+      }
+    },
+    {
+      "id": "boundary-belongs-to-one-cell",
+      "title": "a position on a shared line belongs to one cell",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "cell-ownership": [
+            "next-cell-along",
+            "truncate-toward-zero",
+            "cell-centres-are-whole-numbers"
+          ]
+        }
+      },
+      "bindings": {
+        "positive-case-phrase": {
+          "flag": "cell-ownership",
+          "map": {
+            "next-cell-along": "cell 6, the cell with the larger number",
+            "truncate-toward-zero": "cell 6, the cell with the larger number, these numbers being positive",
+            "cell-centres-are-whole-numbers": "cell 6, a position exactly halfway between two centres going to the larger number"
+          }
+        },
+        "negative-case-phrase": {
+          "flag": "cell-ownership",
+          "map": {
+            "next-cell-along": "the cell with the larger number, by exactly the same rule as on the other side of zero",
+            "truncate-toward-zero": "the cell further from zero — which on this side is the cell with the smaller number, and is exactly where cutting the fraction off parts company with rounding down",
+            "cell-centres-are-whole-numbers": "the cell with the larger number, a position exactly halfway between two centres going the same way as on the other side of zero"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the cells numbered 5 and 6 on one axis of {{instance}}, and any position your rules read that lies below zero on either axis",
+        "when": [
+          "a position is placed exactly on the line between cells 5 and 6",
+          "a position below zero is placed exactly on a line between two cells",
+          "a position is placed exactly where four cells meet"
+        ],
+        "then": [
+          "the position between cells 5 and 6 is in {{bind:positive-case-phrase}}",
+          "wherever a position your rules read lies below zero, the position on the line there is in {{bind:negative-case-phrase}}",
+          "neither of those positions is in any other cell",
+          "the position where four cells meet is in the single cell picked by applying that same rule on both axes at once",
+          "every rule in the build that asks which cell any of those positions is in gets the same answer"
+        ],
+        "diagnostics": [
+          "{{instance}}-boundary-owner-report"
+        ]
+      },
+      "text": "In {{instance}}, a position exactly on the line between cells 5 and 6 is in {{bind:positive-case-phrase}}, and a position on a line below zero is in {{bind:negative-case-phrase}}. Real cell numbers are named here on purpose: this is the decision in the definition whose answers are easiest to state backwards, so the test states the winning one as a worked case rather than as a label. Cells 5 and 6 exist whether this grid counts from 0 or from 1, and where counting starts at 1 the conversion adds its one step and this case is unchanged.\n\nThe second clause asks about positions below zero rather than about cells at negative numbers, and the difference is not pedantry: a bounded board numbered from zero has no negative cells, yet where the cell numbers name centres the outer half-cell band of that same board sits at negative positions — which is exactly where two of the three conversions part company. Where no rule of this game ever reads a position below zero on either axis, the clause has nothing to check.\n\nThe last clause is worth reading twice: one answer, everywhere in the build, rather than one answer per system that happens to ask."
+    },
+    {
+      "id": "distance-is-measured",
+      "title": "distance between two cells is measured one way",
+      "type": "general",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "distance-metric": [
+            "no-diagonals",
+            "diagonals-count-the-same",
+            "octile",
+            "straight-line"
+          ]
+        }
+      },
+      "bindings": {
+        "metric-phrase": {
+          "flag": "distance-metric",
+          "map": {
+            "no-diagonals": "the steps across plus the steps down, as a whole number of cells",
+            "diagonals-count-the-same": "the larger of the steps across and the steps down, as a whole number of cells",
+            "octile": "the larger of the two differences plus the result of multiplying the smaller difference by the square root of two minus one (about 0.414)",
+            "straight-line": "the ruler distance between the two cell centres"
+          }
+        },
+        "worked-case-phrase": {
+          "flag": "distance-metric",
+          "map": {
+            "no-diagonals": "a cell 10 across is at 10, and a cell 8 across and 5 down is at 13",
+            "diagonals-count-the-same": "a cell 10 across is at 10, and a cell 8 across and 5 down is at 8",
+            "octile": "a cell 10 across is at exactly 10, and a cell 8 across and 5 down is at 8 plus 5 times the square root of two minus one, which is greater than 10 — a build using 1.4 in place of the square root would make those two equal, and this test fails it",
+            "straight-line": "a cell 10 across is at 10 cell widths, and a cell 8 across and 5 down is at the square root of 89, which is less than 10"
+          }
+        }
+      },
+      "test": {
+        "type": "general",
+        "diagnostics": [
+          "{{instance}}-distance-trace",
+          "first-disagreeing-rule"
+        ],
+        "holds": "the distance the rule uses between the two cells is {{bind:metric-phrase}}; the distance from a cell to itself is zero; it is the same whichever cell is asked about first; every rule in {{inputs:scope}} returns the same number for the same pair; and the worked case holds — measured from one cell, {{bind:worked-case-phrase}}",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}"
+      },
+      "text": "Where a rule of {{instance}} says nearest, in range, or within, the distance it means is {{bind:metric-phrase}}. It is zero from a cell to itself, it does not depend on which cell is asked about first, and — the clause that matters most — every such rule returns the same number for the same pair. One worked case pins the arithmetic where a near-enough value would pass unnoticed: measured from one cell, {{bind:worked-case-phrase}}.\n\nSeven of nine externally surveyed games measure distance more than one way, and one carries five measures at once. This test does not forbid that: a route planner's own estimate is craft and is outside {{inputs:scope}}. What it forbids is two rules telling a player two different things about the same two cells.",
+      "inputs": {
+        "seeds": {
+          "default": [
+            "grid-distance-a",
+            "grid-distance-b"
+          ]
+        },
+        "scope": {
+          "default": "every rule of this game that says nearest, in range, or within, over this game's declared grid"
+        }
+      }
+    },
+    {
+      "id": "equal-distance-is-decided",
+      "title": "two distances count as equal by a declared rule",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "distance-metric": [
+            "straight-line",
+            "octile"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": [
+          "the rule this game declares for deciding that two distances are the same: {{inputs:scope}}",
+          "two candidates whose distances from one cell are the same under that rule, and two more whose distances that rule tells apart"
+        ],
+        "when": [
+          "a rule of this game ranks each pair by distance",
+          "the same two pairs are ranked again with the two distances worked out in the opposite order"
+        ],
+        "then": [
+          "the first pair reaches the tie-break and the second does not",
+          "the rule supplied in this adoption's verification scope is the only comparison used: no other tolerance, rounding or nearly-equal test appears anywhere in the build",
+          "both rankings come out the same, whichever order the two distances were worked out in"
+        ],
+        "diagnostics": [
+          "{{instance}}-distance-trace",
+          "{{instance}}-tie-break-report"
+        ]
+      },
+      "text": "{{instance}} measures distance with a rule that does not come out in whole cells, so two distances being the same is itself a decision, and this game declares how:\n\n{{inputs:scope}}\n\nThat rule decides which pairs reach the tie-break question and which are settled before it, and it is the only comparison the build may use.\n\nAsking for it out loud is worth one line of an adoption. In a blind two-build experiment on this definition, one builder met exactly this gap, invented a tolerance of sixteen times the smallest representable step, got the right answer, and did not record the decision — the one number in that build the package had not supplied, sitting directly under a scored check.",
+      "inputs": {
+        "scope": {
+          "default": "compare squared distances as whole numbers; two are equal exactly when those numbers are equal, and no tolerance is used"
+        }
+      }
+    },
+    {
+      "id": "one-step-moves",
+      "title": "one step reaches exactly the neighbouring cells",
+      "type": "general",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "adjacency-for-movement": [
+            "four-neighbours",
+            "eight-neighbours"
+          ]
+        }
+      },
+      "bindings": {
+        "movement-neighbours-phrase": {
+          "flag": "adjacency-for-movement",
+          "map": {
+            "four-neighbours": "the four cells sharing an edge with it",
+            "eight-neighbours": "the eight cells sharing an edge or a corner with it"
+          }
+        }
+      },
+      "test": {
+        "type": "general",
+        "diagnostics": [
+          "{{instance}}-reachable-in-one-step",
+          "first-unexpected-destination"
+        ],
+        "holds": "of the cells on the grid, the ones a thing can move to from this cell in one step, with nothing standing in the way, are exactly {{bind:movement-neighbours-phrase}} — no more and no fewer",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}"
+      },
+      "text": "From any cell of {{instance}}, one step reaches exactly {{bind:movement-neighbours-phrase}}, with nothing standing in the way. What happens when a step would leave the grid, and whether something in the way blocks it, are settled elsewhere in this package; this test fixes only which cells a step can reach at all.",
+      "inputs": {
+        "seeds": {
+          "default": [
+            "grid-steps-a",
+            "grid-steps-b"
+          ]
+        },
+        "scope": {
+          "default": "every cell of this game's declared grid, with each kind of moving thing placed on it in turn"
+        }
+      }
+    },
+    {
+      "id": "next-to-means",
+      "title": "next to means the same cells in every rule",
+      "type": "general",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "adjacency-for-effects": [
+            "four-neighbours",
+            "eight-neighbours"
+          ]
+        }
+      },
+      "bindings": {
+        "effect-neighbours-phrase": {
+          "flag": "adjacency-for-effects",
+          "map": {
+            "four-neighbours": "the four cells sharing an edge with it",
+            "eight-neighbours": "the eight cells sharing an edge or a corner with it"
+          }
+        }
+      },
+      "test": {
+        "type": "general",
+        "diagnostics": [
+          "{{instance}}-neighbour-set-per-rule",
+          "first-disagreeing-rule"
+        ],
+        "holds": "wherever a rule of this game treats one cell as next to another, the cells it means are exactly {{bind:effect-neighbours-phrase}}, and the answer is the same in every such rule",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}"
+      },
+      "text": "Wherever a rule of {{instance}} says one cell is next to another, it means {{bind:effect-neighbours-phrase}} — and it means the same thing in every rule that says it. This is asked apart from movement because games answer the two differently, sometimes without noticing: one surveyed game plans routes over four neighbours while targeting by straight line, and one engine hands back four surrounding cells while its own direction list carries sixteen.",
+      "inputs": {
+        "seeds": {
+          "default": [
+            "grid-neighbours-a",
+            "grid-neighbours-b"
+          ]
+        },
+        "scope": {
+          "default": "every rule of this game that treats two cells as next to each other, over this game's declared grid"
+        }
+      }
+    },
+    {
+      "id": "authored-order-lists-every-cell",
+      "title": "this package's own material lists every cell once",
+      "type": "general",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "enumeration-order": [
+            "rows-then-columns",
+            "columns-then-rows",
+            "block-tiled"
+          ]
+        }
+      },
+      "bindings": {
+        "order-phrase": {
+          "flag": "enumeration-order",
+          "map": {
+            "rows-then-columns": "one whole row at a time, counting from the smallest numbers upward",
+            "columns-then-rows": "one whole column at a time, counting from the smallest numbers upward",
+            "block-tiled": "block by block, and cell by cell within a block, as this package's own prose describes the blocks"
+          }
+        }
+      },
+      "test": {
+        "type": "general",
+        "scope": "an authored layout of {{instance}}, with every cell distinguishable from every other, read from the first cell to the last as designers write it",
+        "holds": "the material lists every cell of {{instance}} exactly once, {{bind:order-phrase}}, and a board written out and read back arrives cell for cell the same",
+        "diagnostics": [
+          "{{instance}}-authored-order-sequence",
+          "first-cell-out-of-order",
+          "cells-listed-twice-or-never"
+        ]
+      },
+      "text": "An authored layout of {{instance}} lists every cell exactly once, {{bind:order-phrase}}, and reading that layout back gives the same cells in the same places.\n\nThis does not set save-file order, drawing order, update order, or the order in which rules visit cells. Naming the authored order stops a rule from quietly depending on one of those other orders."
+    },
+    {
+      "id": "block-layout-is-declared",
+      "title": "the blocks this material is written in are declared",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "enumeration-order": [
+            "block-tiled"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "an authored layout of {{instance}}, and the block size and the two orders as {{inputs:scope}} sets them out",
+        "when": [
+          "the material is read back cell by cell"
+        ],
+        "then": [
+          "the blocks come in the order that place sets out, and the cells inside each block come in the order it sets out",
+          "every block holds the number of cells that place states, apart from any partial block it also describes",
+          "reading the same material twice gives the same sequence"
+        ],
+        "diagnostics": [
+          "{{instance}}-authored-order-sequence",
+          "{{instance}}-block-boundaries"
+        ]
+      },
+      "text": "{{instance}} is written in blocks, so three things have to be readable before the material can be read at all: how big a block is, what order the blocks come in, and what order the cells inside a block come in. They are set out at {{inputs:scope}}, and this test reads the material against that place.\n\nThe three worlds in the external tally that store their grids this way are all too large to hold at once, and none of them states these three things in an authored artifact. The pointer is what this contract can carry; following it is a reviewer's job.",
+      "inputs": {
+        "scope": {}
+      }
+    },
+    {
+      "id": "tie-break-settles",
+      "title": "a tie between two cells settles the same way every time",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "tie-break-between-cells": [
+            "lower-column-wins",
+            "lower-row-wins",
+            "direction-order",
+            "named-priority-list"
+          ]
+        }
+      },
+      "bindings": {
+        "tie-phrase": {
+          "flag": "tie-break-between-cells",
+          "map": {
+            "lower-column-wins": "the candidate with the smaller column number, and if those are equal the one with the smaller row number",
+            "lower-row-wins": "the candidate with the smaller row number, and if those are equal the one with the smaller column number",
+            "direction-order": "the candidate found first by walking this game's grid-fixed direction words in their declared order, starting from whatever is choosing",
+            "named-priority-list": "the candidate whose kind comes first in the order this game declares in its own prose, with nothing about the cells deciding it"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "a rule of this game that must pick one cell, and the worked pair of equally ranked candidates described here: {{inputs:scope}}",
+        "when": [
+          "the rule runs",
+          "the same situation is set up again, with the two candidates created in the opposite order and drawn in the opposite order"
+        ],
+        "then": [
+          "the rule picks {{bind:tie-phrase}}",
+          "it picks the same candidate both times",
+          "the order the candidates were created in, the order they are drawn in, where the pointer is, and how the animation runs change nothing"
+        ],
+        "diagnostics": [
+          "{{instance}}-tie-break-report",
+          "{{instance}}-candidate-set"
+        ]
+      },
+      "text": "When a rule of {{instance}} must pick between two candidates it ranks equally, it picks {{bind:tie-phrase}}. The adoption demonstrates that answer with this worked case: {{inputs:scope}}. The test repeats the case after reversing creation and drawing order. A choice that changed would be a different answer to this question.",
+      "inputs": {
+        "scope": {}
+      }
+    },
+    {
+      "id": "tie-break-follows-arrival",
+      "title": "a tie between two cells goes to whichever came first",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "tie-break-between-cells": [
+            "arrival-order"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a rule of this game that must pick one cell, and two candidates the rule ranks equally, one of which came first by the moment {{inputs:scope}} names",
+        "when": [
+          "the rule runs",
+          "the same run is played again from a fresh start with the same inputs"
+        ],
+        "then": [
+          "the rule picks the candidate that came first by that moment, and not by any other moment in the two candidates' histories",
+          "the replayed run picks the same candidate, because it builds the two candidates in the same order",
+          "nothing about where the candidates sit on the grid changes the choice"
+        ],
+        "diagnostics": [
+          "{{instance}}-tie-break-report",
+          "{{instance}}-arrival-order-log"
+        ]
+      },
+      "text": "A tie in {{instance}} goes to whichever candidate came first, by the moment {{inputs:scope}} names — one moment, chosen and written down, rather than whichever of created, placed and stored happens to be handy at the call site. This is the plurality answer in the wild: five of nine externally surveyed games settle ties this way.\n\nThe test holds a build to the part it can be held to — a run replayed from a fresh start makes the same choice. Whether these ranks survive a save and reload is this game's own persistence rule, stated where that pointer leads, and this contract records the pointer rather than checking what it says.",
+      "inputs": {
+        "scope": {}
+      }
+    },
+    {
+      "id": "tie-break-is-arbitrary",
+      "title": "a tie between two cells comes out the same way in a replay",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "tie-break-between-cells": [
+            "deliberately-arbitrary"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a rule of this game that must pick one cell, and two candidates the rule ranks equally",
+        "when": [
+          "the rule runs",
+          "the same run is played again from a fresh start with the same inputs"
+        ],
+        "then": [
+          "one of the two candidates is picked, and the run carries on",
+          "the replayed run picks the same candidate",
+          "no rule of this game reports which candidate was picked as a promise a player or another rule may rely on"
+        ],
+        "diagnostics": [
+          "{{instance}}-tie-break-report",
+          "{{instance}}-tie-occurrence-log"
+        ]
+      },
+      "text": "{{instance}} promises no order between two candidates it ranks equally: the choice may come out either way. That is a decision rather than a shrug — two surveyed sources choose it on purpose, one of them deliberately mixing the choices so the leftmost candidate is not always favoured.\n\nThis test checks only what a build can be held to: one run, replayed from a fresh start with the same inputs, picks the same candidate. The design's real claim — that nothing a player sees depends on which one was taken — is recorded in the answer itself and cannot be tested here, because nothing can rerun a moment with the tie settled the other way. Nothing further is promised either: a save and reload may choose differently."
+    },
+    {
+      "id": "tie-break-is-drawn",
+      "title": "a tie between two cells is drawn from a declared stream",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "tie-break-between-cells": [
+            "random-from-a-declared-seed"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a rule of this game that must pick one cell, two candidates the rule ranks equally, and a run started from a named seed",
+        "when": [
+          "the rule runs",
+          "the same run is replayed from the same seed with the same inputs",
+          "the same situation is reached in a run started from a different seed"
+        ],
+        "then": [
+          "the candidate picked is drawn from the stream this game declares for it, and from no other source of randomness",
+          "the replay picks the same candidate",
+          "the draw consumes from that stream exactly as this game's own determinism rules say it does"
+        ],
+        "diagnostics": [
+          "{{instance}}-tie-break-report",
+          "{{instance}}-stream-consumption-log"
+        ]
+      },
+      "text": "A tie between two candidates in {{instance}} is drawn at random from a stream this game declares, so the same seed and the same inputs pick the same candidate every time. Random here means reproducible: a draw from an undeclared source would make two faithful builds of this spec disagree, which is what a declared stream prevents."
+    },
+    {
+      "id": "tie-break-asks-the-player",
+      "title": "a tie between two cells is put to the player",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "tie-break-between-cells": [
+            "player-chooses"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a rule of this game that must pick one cell, and two candidates the rule ranks equally",
+        "when": [
+          "the rule runs and the player can be asked",
+          "the rule runs where the player cannot be asked"
+        ],
+        "then": [
+          "in the first case the player is asked which candidate they mean, and the game picks neither on its own",
+          "in the second case the rule does not run and nothing about the game state changes",
+          "no candidate is ever picked because of the order things were created in, the order they are drawn in, or where the pointer is"
+        ],
+        "diagnostics": [
+          "{{instance}}-tie-break-prompt-log",
+          "{{instance}}-state-before-after"
+        ]
+      },
+      "text": "{{instance}} does not settle a tie between two equally ranked candidates by itself: the player is asked. Where a rule cannot ask — an automatic step, a replay, a resolution with nobody watching — it does not guess. It does not run, and nothing changes."
+    },
+    {
+      "id": "no-tie-ever-arises",
+      "title": "no rule ever faces a tie between two cells",
+      "type": "general",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "tie-break-between-cells": [
+            "not-applicable"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "general",
+        "diagnostics": [
+          "{{instance}}-tie-occurrence-log",
+          "first-unresolved-tie"
+        ],
+        "holds": "no rule of this game reaches a point where two candidates are ranked equally and one of them has to be chosen: either the situation cannot arise, or the rule affects every tied candidate alike",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}"
+      },
+      "text": "{{instance}} answers the tie-break question with not-applicable, and this is that answer checked rather than assumed: across {{inputs:scope}}, no rule ever has to choose between two candidates it ranks equally. Where a rule does meet a tie, it affects both alike and picks neither.\n\nThree corpus packages state exactly this claim in their own prose, and all nine externally surveyed games face the tie instead. It has a real failure mode — a rule quietly taking whichever candidate happened to be first in some list — and that is what this test looks for.",
+      "inputs": {
+        "seeds": {
+          "default": [
+            "grid-tie-a",
+            "grid-tie-b"
+          ]
+        },
+        "scope": {
+          "default": "every rule of this game that picks a cell or a target, over whole runs of ordinary play"
+        }
+      }
+    },
+    {
+      "id": "a-positive-turn-goes",
+      "title": "a positive turn goes one way",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "turn-direction": [
+            "clockwise",
+            "counter-clockwise"
+          ]
+        }
+      },
+      "bindings": {
+        "turn-phrase": {
+          "flag": "turn-direction",
+          "map": {
+            "clockwise": "clockwise",
+            "counter-clockwise": "counter-clockwise"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "something standing on {{instance}} that has a facing, with that facing recorded",
+        "when": [
+          "it turns by a positive amount",
+          "it then turns by the same amount the other way"
+        ],
+        "then": [
+          "the first turn moves its facing {{bind:turn-phrase}} on the grid as this package lays it out",
+          "the second turn brings the facing back exactly to where it started",
+          "every rule of this game that turns something turns it the same way for a positive amount"
+        ],
+        "diagnostics": [
+          "{{instance}}-facing-before-after",
+          "{{instance}}-turn-log"
+        ]
+      },
+      "text": "In {{instance}}, a positive turn moves a facing {{bind:turn-phrase}} on the declared grid, and turning back by the same amount returns the facing exactly. Naming the turn on the grid is deliberate: two corpus packages describe this same turn in opposite words, one counting from an axis and one naming the clock, and a reader has to do arithmetic to find out they agree."
+    },
+    {
+      "id": "grid-direction-points",
+      "title": "{{row.id}} points {{bind:points-phrase}}",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "directions",
+      "when": {
+        "row": {
+          "frame": [
+            "grid"
+          ]
+        }
+      },
+      "bindings": {
+        "points-phrase": {
+          "row_field": "points",
+          "map": {
+            "up": "toward the top of the declared grid",
+            "down": "toward the bottom of the declared grid",
+            "left": "toward the left of the declared grid",
+            "right": "toward the right of the declared grid",
+            "up-left": "diagonally toward the top-left of the declared grid",
+            "up-right": "diagonally toward the top-right of the declared grid",
+            "down-left": "diagonally toward the bottom-left of the declared grid",
+            "down-right": "diagonally toward the bottom-right of the declared grid"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "a cell of {{instance}} with a cell on every side of it",
+        "when": [
+          "a rule of this game moves something, points something, or reads a cell {{row.id}} of that cell"
+        ],
+        "then": [
+          "the cell it uses is the one {{bind:points-phrase}}",
+          "the word {{row.id}} means that same direction in every rule of this package and never another",
+          "the direction does not change with whatever is using it"
+        ],
+        "diagnostics": [
+          "{{instance}}-direction-resolution",
+          "{{instance}}-cell-addresses"
+        ]
+      },
+      "text": "In {{instance}}, the word {{row.id}} means the direction {{bind:points-phrase}}. It is fixed to the grid: it points the same way whoever uses it, and it never follows anything's facing. Naming it says nothing about whether anything may move that way — the movement question decides that, and a game whose pieces move to four neighbours may still name a diagonal for an effect or a line of sight.\n\nWriting the word down here is what stops a second document in this package using it for a different direction. One surveyed format ships eight named compass directions and never says where any of them points."
+    },
+    {
+      "id": "direction-walk-order",
+      "title": "{{row.id}} takes place {{row.order}} in the direction walk",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "directions",
+      "when": {
+        "flag": {
+          "tie-break-between-cells": [
+            "direction-order"
+          ]
+        },
+        "row": {
+          "frame": [
+            "grid"
+          ]
+        }
+      },
+      "bindings": {
+        "points-phrase": {
+          "row_field": "points",
+          "map": {
+            "up": "toward the top of the declared grid",
+            "down": "toward the bottom of the declared grid",
+            "left": "toward the left of the declared grid",
+            "right": "toward the right of the declared grid",
+            "up-left": "diagonally toward the top-left of the declared grid",
+            "up-right": "diagonally toward the top-right of the declared grid",
+            "down-left": "diagonally toward the bottom-left of the declared grid",
+            "down-right": "diagonally toward the bottom-right of the declared grid"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "a rule of this game settling a tie by walking the directions, and a tied candidate lying {{bind:points-phrase}} from whatever is choosing",
+        "when": [
+          "the walk runs"
+        ],
+        "then": [
+          "{{row.id}} is tried at place {{row.order}} in the walk, after every direction with a smaller number and before every direction with a larger one",
+          "the candidate lying that way is taken exactly when no direction tried earlier holds a tied candidate",
+          "the walk runs in this order every time, whatever built the situation up"
+        ],
+        "diagnostics": [
+          "{{instance}}-tie-break-report",
+          "{{instance}}-direction-walk-trace"
+        ]
+      },
+      "text": "When {{instance}} settles a tie by walking its directions, {{row.id}} — the direction {{bind:points-phrase}} — is tried at place {{row.order}}. The number is on the row so that the walk is visible here rather than inferred from the order the rows happen to sit in."
+    },
+    {
+      "id": "piece-direction-follows-facing",
+      "title": "{{row.id}} is read from the facing of whatever uses it",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "directions",
+      "when": {
+        "row": {
+          "frame": [
+            "piece"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "a thing standing on a cell of {{instance}}, with a facing and a cell on every side of it",
+        "when": [
+          "a rule of this game moves it, points it, or reads a cell {{row.id}} of it",
+          "the thing turns, and the same rule runs again"
+        ],
+        "then": [
+          "the direction the word {{row.id}} names is read from that thing's own facing, not from the grid",
+          "after the turn, {{row.id}} names a different direction on the grid, turned by exactly as much as the facing was",
+          "two things with different facings, standing on the same cell, resolve {{row.id}} differently"
+        ],
+        "diagnostics": [
+          "{{instance}}-direction-resolution",
+          "{{instance}}-facing-before-after"
+        ]
+      },
+      "text": "In {{instance}}, the word {{row.id}} is read from the facing of whatever uses it, so it points somewhere else after that thing turns, and it can mean two different directions for two things standing on the same cell. That is the whole difference from a word fixed to the grid, and it is worth stating in a package that uses both kinds."
+    }
+  ]
+}

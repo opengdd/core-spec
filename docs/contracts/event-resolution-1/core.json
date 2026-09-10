@@ -1,0 +1,729 @@
+{
+  "contract": "event-resolution",
+  "version": 1,
+  "summary": "Covers actions and events that meet at one game moment. It decides their order, ties, interruptions, chain reactions, and rejected actions. It also settles missing sources or targets, two removals reaching one target, simultaneous endings, and presentation delays. Individual effects, input buffering, clocks and pausing, displayed facts, and simulation pipeline stages stay elsewhere.",
+  "questions": {
+    "rejected-action-effect": {
+      "asks": "An action cannot happen exactly as proposed. What happens by default?",
+      "rationale": "The attempt may fail, spend a resource, use time, or continue at a smaller scale. Particular cases can choose another result in their own rows.",
+      "options": {
+        "nothing-changes": {
+          "meaning": "The rejected attempt changes nothing. A tactics unit blocked by a closed gate keeps its stamina and its turn.",
+          "semantics": "The rejection changes no game state, spends no cost, and advances no clock. Time already advancing independently may continue."
+        },
+        "cost-taken": {
+          "meaning": "The rejected attempt spends its cost and changes nothing else. A card rejected after commitment still spends its mana.",
+          "semantics": "The rejection applies the action's complete declared cost, produces none of the action's effects, and does not advance a clock because of the rejection."
+        },
+        "clock-advances": {
+          "meaning": "The rejected attempt moves time forward and spends no cost. A roguelike hero who walks into a wall still uses a turn.",
+          "semantics": "The rejection advances one clock once, applies no cost, and produces none of the action's effects. Every case using this result cites the clock rule in its rejection-cases row."
+        },
+        "cost-and-clock": {
+          "meaning": "The rejected attempt spends its cost and moves time forward. A dungeon wand that fizzles uses one charge and one turn.",
+          "semantics": "The rejection applies the complete declared cost and advances one clock once, but produces none of the action's effects. Every case using this result cites the clock rule in its rejection-cases row."
+        },
+        "derate": {
+          "meaning": "The action happens with a smaller result instead of failing. A factory machine on low power makes parts more slowly.",
+          "semantics": "The proposal is accepted rather than rejected. The scale rule cited by its rejection-cases row scales the complete effect and cost, and the event continues through this lifecycle."
+        },
+        "not-applicable": {
+          "meaning": "Every proposed action in this family is accepted. An arcade blaster always fires because ammunition and cooldown never refuse a shot.",
+          "semantics": "No action governed by this adoption has a rejection branch."
+        }
+      }
+    },
+    "within-class-order": {
+      "asks": "Two events of the same kind are ready together. What decides which goes first?",
+      "rationale": "The event rank cannot separate two events from one class. Their order can change targets, rewards, and later chains.",
+      "options": {
+        "stable-index": {
+          "meaning": "A named stable number decides the order. Strategy effects use priority first and spawn number to break a tie.",
+          "semantics": "Every class with a visible tie has a row naming an integer the event holds when it enters the waiting set. The number may be the event's own or inherited from its source object, such as a relic's acquisition number or a minion's board position. Lower numbers resolve first. An optional second named integer breaks equal first numbers; without one, equal-number order cannot arise or cannot change the result."
+        },
+        "arrival-order": {
+          "meaning": "The event that entered the waiting list first goes first. Card effects triggered together resolve in the order they were added.",
+          "semantics": "Earlier admission to the waiting list resolves first. Admission order is stable for the complete instant."
+        },
+        "map-reading-order": {
+          "meaning": "Positions decide the order like reading the game's map. Tied tactics units follow its first row, then its first column.",
+          "semantics": "The grid cited by the class or rank-tie row owns row and column meaning. Its own first row resolves first; within that row, its own first column resolves first."
+        },
+        "clockwise": {
+          "meaning": "Positions resolve clockwise around a fixed centre. Four boss hazards start from the direction the arena marks first.",
+          "semantics": "The grid cited by the class or rank-tie row owns the centre and first direction. Clockwise angle continues the order, and the row's named stable index breaks an equal angle and distance."
+        },
+        "no-visible-order": {
+          "meaning": "No order can change the game result. Racing-game confetti bursts may update in either order because neither affects the race.",
+          "semantics": "No event in the class observes another event in the same class during the instant, and every permitted execution order produces the same game state and player-facing result. This includes the case where two such events cannot arise together."
+        },
+        "declared-random": {
+          "meaning": "A declared random draw breaks the tie. Two creatures with equal speed roll to see which acts first.",
+          "semantics": "Each affected class has a within-class-rules row citing the random rule and its complete draw procedure. The result may vary between runs; the cited rule, not container order, selects it."
+        }
+      }
+    },
+    "terminal-precedence": {
+      "asks": "A win and a loss land at the same moment. Which ending does the game record?",
+      "rationale": "Ending checks may arrive through different events. This answer decides the recorded result after both conditions are known.",
+      "when": {
+        "row-count": {
+          "terminal-collisions": "non-empty"
+        }
+      },
+      "otherwise": "No declared ending pair can produce a win and a loss at the same instant.",
+      "options": {
+        "loss-only": {
+          "meaning": "Only the loss is recorded. An arena hero who defeats the boss while reaching zero health loses the run.",
+          "semantics": "The lifecycle records only the loss, regardless of event rank or the order in which the two ending conditions were detected."
+        },
+        "win-only": {
+          "meaning": "Only the win is recorded. A racing driver who crosses the finish line while crashing still wins.",
+          "semantics": "The lifecycle records only the win, regardless of event rank or the order in which the two ending conditions were detected."
+        },
+        "both-recorded": {
+          "meaning": "Both endings are recorded. A card duel in which both heroes reach zero health records a shared defeat and a completed victory condition.",
+          "semantics": "The lifecycle records both the win and the loss. The game's presentation rule decides whether that appears as a draw, one combined result, or two named results."
+        }
+      }
+    },
+    "presentation-timing": {
+      "asks": "Can an animation or sound delay an event, and can another event pass it?",
+      "rationale": "A visual delay and a rules delay are different decisions. The answer fixes whether only time changes or order changes too.",
+      "when": {
+        "row-count": {
+          "presentation-driven-events": "non-empty"
+        }
+      },
+      "otherwise": "No visual or sound delays an event or changes event order.",
+      "options": {
+        "never": {
+          "meaning": "Presentation never changes game timing or order. An attack lands at game time even when its animation runs early or late.",
+          "semantics": "No named event waits for presentation. The rows record that the game considered and declared this boundary; an empty row set is the undeclared closed case."
+        },
+        "may-delay": {
+          "meaning": "These events may wait, but later events wait behind them. A card attack lands after its animation while later effects keep their order.",
+          "semantics": "Only events named by presentation-driven-events wait for a cue of their own. Every event behind a held event in the order waits with it, so the delay cannot let a later event resolve first."
+        },
+        "may-delay-and-reorder": {
+          "meaning": "These events may wait while later events continue. A fighting-game cinematic can finish after a later poison pulse has already landed.",
+          "semantics": "Only events named by presentation-driven-events may wait. A later eligible event may resolve before a delayed event, and the delayed event keeps its original payload."
+        }
+      }
+    },
+    "two-events-one-target": {
+      "asks": "Two events would each remove the same target at this moment. What happens to the second one?",
+      "rationale": "The second event may vanish, still count, or create another ending. Particular target kinds can choose a different result.",
+      "when": {
+        "any": [
+          {
+            "row-count": {
+              "same-target-cases": "non-empty"
+            }
+          },
+          {
+            "row-count": {
+              "same-target-exceptions": "non-empty"
+            }
+          }
+        ]
+      },
+      "otherwise": "No two events in this adoption can each remove the same target at one instant.",
+      "options": {
+        "only-first-resolves": {
+          "meaning": "Only the first event affects the target. Two tactics arrows reach the last enemy, and the later arrow finds no target.",
+          "semantics": "The first ordered event applies to the target and removes it. Every later event in the collision applies nothing to that target; its cost and carrier follow their own game rules. Every class that can supply two events to such a collision has a visible order: its class row, its rank tie, or the general answer is not no-visible-order."
+        },
+        "all-resolve-one-ending": {
+          "meaning": "Every event lands, but the target is removed once. Two arena hits both count before one enemy defeat is recorded.",
+          "semantics": "All events in the collision apply to the target in order. Removal is deferred until the collision group ends and is recorded once."
+        },
+        "all-resolve-each-ending": {
+          "meaning": "Every event lands and each records its own removal result. Two arcade lasers can each award a break bonus from one target.",
+          "semantics": "Every event in the collision applies in order and records its own declared removal consequence, even after an earlier event recorded one."
+        }
+      }
+    },
+    "caused-events": {
+      "asks": "An event happening now causes another event due at this moment. When does the new event resolve?",
+      "rationale": "A chain can continue immediately, join the normal order, or wait for the next game moment.",
+      "when": {
+        "row-count": {
+          "caused-event-kinds": "non-empty"
+        }
+      },
+      "otherwise": "No non-interrupt event in this adoption causes another event due at the same instant.",
+      "options": {
+        "resolves-now": {
+          "meaning": "The new event resolves inside the event that caused it. A card's defeat effect draws a replacement before the next waiting card effect.",
+          "semantics": "The caused event finishes inside the event that caused it, before the next waiting event. Every caused-event row cites a finite chain bound."
+        },
+        "waits-for-its-place": {
+          "meaning": "The new event joins its normal place in the current order. An arena enemy activated early can attack later in the same moment.",
+          "semantics": "The caused event resolves in its declared class's place, this instant or the next. Every caused-event row cites a finite chain bound."
+        },
+        "next-instant": {
+          "meaning": "The new event always waits for the next game moment. A factory alarm raised now closes the conveyor gate on the next update.",
+          "semantics": "Every caused event is admitted to the next instant and none of its effects resolve during the instant that created it. Every caused-event row cites a finite chain bound."
+        }
+      }
+    },
+    "interrupt-entry": {
+      "asks": "A reaction can stop or replace an event already happening. When does it cut in?",
+      "rationale": "An interrupt needs a fixed entry point before it can stop or replace the event already in progress.",
+      "when": {
+        "row-count": {
+          "interrupts": "non-empty"
+        }
+      },
+      "otherwise": "No event in this adoption stops or replaces another event once it has been selected to resolve, at any point including before its first effect.",
+      "options": {
+        "before-next-effect": {
+          "meaning": "The interrupt cuts in before the current event's next effect. A card secret counters a spell before its damage lands.",
+          "semantics": "At each declared effect boundary, a valid interrupt resolves before the next effect of the active event. The interrupt row then stops or replaces the active event."
+        },
+        "after-current-effect": {
+          "meaning": "The current effect finishes before the interrupt cuts in. A parry accepts the sword's contact, prevents the remaining damage, and replaces it with stagger.",
+          "semantics": "The active effect commits first. A valid interrupt then resolves at the following declared boundary and stops or replaces every remaining effect of the active event."
+        },
+        "at-normal-rank": {
+          "meaning": "The interrupt joins the normal event order. A factory emergency stop waits for the safety rank, then cancels later machine work.",
+          "semantics": "The interrupt joins this instant when its class is current or has not passed, and otherwise joins the next instant. When it joins the next instant, the active event finishes unchanged in this one and the interrupt stops or replaces only events of its active class that are still waiting or active when it resolves. It remains an interrupt creation path, so the caused-events answer does not govern it."
+        }
+      }
+    },
+    "orphaned-events": {
+      "asks": "An event loses the source or target it needs. What happens by default?",
+      "rationale": "A queued card effect or tactics shot may outlive a source or target. The result must not depend on which object was cleaned up first.",
+      "when": {
+        "row-count": {
+          "orphan-cases": "non-empty"
+        }
+      },
+      "otherwise": "No event in this adoption can lose its required source or target while waiting or resolving.",
+      "options": {
+        "resolves-what-remains": {
+          "meaning": "The event still resolves with the state that remains. A card's queued effect continues after its minion leaves play.",
+          "semantics": "The event keeps its captured payload. A missing source or target is unavailable, effects that require it are skipped, and every independent effect still resolves. This is the default unless the orphan-cases row chooses another result."
+        },
+        "is-cancelled": {
+          "meaning": "The event is cancelled. A homing shot disappears when its only target leaves play before impact.",
+          "semantics": "The event produces no further effect after the required source or target becomes unavailable. Costs already committed are not restored by this contract. This is the default unless the orphan-cases row chooses another result."
+        }
+      }
+    }
+  },
+  "declares": {
+    "values": {},
+    "rows": {
+      "event-classes": {
+        "description": "The event kinds ordered at one instant. Lower rank resolves first; a higher-first game inverts its numbers once in this list. Rank may repeat only when one rank-ties row declares the shared rank. An ending event's resolution records nothing.",
+        "when-empty": "An empty event-classes list is never a behavior choice: this adoption requires at least one row, and a reviewer rejects a file without it.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable game-facing name for the event class, such as card-effects or enemy-removals."
+          },
+          "rank": {
+            "type": "integer",
+            "required": true,
+            "description": "The class position, lowest first. Equal ranks are allowed only with one matching rank-ties row."
+          },
+          "label": {
+            "type": "string",
+            "required": true,
+            "description": "The event class in the game's own words. A card duel might use triggered effects."
+          },
+          "declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed game rule that names the class and the events belonging to it."
+          }
+        }
+      },
+      "within-class-rules": {
+        "description": "Classes that use an order different from the general answer or must name the data that answer compares. A class using a stable number, map order, clockwise order, declared random draw, or custom game rule has a row whenever a visible tie can occur.",
+        "when-empty": "Every event class uses the general within-class answer.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable name for this class-specific order."
+          },
+          "class-id": {
+            "type": "string",
+            "required": true,
+            "unique": true,
+            "description": "The id of the affected event class."
+          },
+          "order": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "stable-index",
+              "arrival-order",
+              "map-reading-order",
+              "clockwise",
+              "no-visible-order",
+              "declared-random",
+              "game-rule"
+            ],
+            "description": "The class-specific order. A custom game rule is available here, not as the general answer."
+          },
+          "index-name": {
+            "type": "string",
+            "when": {
+              "row": {
+                "order": [
+                  "stable-index",
+                  "clockwise"
+                ]
+              }
+            },
+            "description": "For stable-index, the first named number. For clockwise, the stable number that breaks an equal angle and distance."
+          },
+          "second-index-name": {
+            "type": "string",
+            "required": false,
+            "description": "An optional stable second number that breaks an equal first number under stable-index. Omit it for every other order."
+          },
+          "grid-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "order": [
+                  "map-reading-order",
+                  "clockwise"
+                ]
+              }
+            },
+            "description": "The adopted Grid and direction rule that supplies the grid's own first row and first column, or the centre, first direction, and clockwise sense."
+          },
+          "rule-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "order": [
+                  "declared-random",
+                  "game-rule"
+                ]
+              }
+            },
+            "description": "For declared-random, the complete draw that produces one total order for the instant. For game-rule, one total deterministic order. The Fixed rule never points back here."
+          }
+        }
+      },
+      "rank-ties": {
+        "description": "Every rank shared by two or more event classes, with one tie-break for those classes.",
+        "when-empty": "No two event classes share a rank.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable name for the shared-rank group."
+          },
+          "rank": {
+            "type": "integer",
+            "required": true,
+            "unique": true,
+            "description": "The rank shared by the named classes."
+          },
+          "class-ids": {
+            "type": "string",
+            "required": true,
+            "description": "The comma-separated ids of every event class at this rank, each listed once."
+          },
+          "tie-break": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "stable-index",
+              "arrival-order",
+              "map-reading-order",
+              "clockwise",
+              "no-visible-order",
+              "declared-random",
+              "game-rule"
+            ],
+            "description": "The order used across all events of the tied classes at this rank."
+          },
+          "index-name": {
+            "type": "string",
+            "when": {
+              "row": {
+                "tie-break": [
+                  "stable-index",
+                  "clockwise"
+                ]
+              }
+            },
+            "description": "The stable number compared across tied classes, or the stable number that breaks an equal clockwise position."
+          },
+          "second-index-name": {
+            "type": "string",
+            "required": false,
+            "description": "An optional stable second number that breaks an equal first number under stable-index. Omit it for every other tie-break."
+          },
+          "grid-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "tie-break": [
+                  "map-reading-order",
+                  "clockwise"
+                ]
+              }
+            },
+            "description": "The adopted Grid and direction rule that supplies the grid's own first row and first column, or the centre, first direction, and clockwise sense."
+          },
+          "rule-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "tie-break": [
+                  "declared-random",
+                  "game-rule"
+                ]
+              }
+            },
+            "description": "For declared-random, the complete draw that produces one total order for the instant. For game-rule, one total deterministic order. The Fixed rule never points back here."
+          }
+        }
+      },
+      "rejection-cases": {
+        "description": "Named action-proposal cases that override the default answer or supply the scale or clock citation that answer requires.",
+        "when-empty": "No named case overrides the default. A reviewer rejects an empty list when a derated or clock-advancing rejection can occur, because that result requires its citation row.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "The proposal case in game language, such as blocked-movement or low-power-crafting."
+          },
+          "result": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "nothing-changes",
+              "cost-taken",
+              "clock-advances",
+              "cost-and-clock",
+              "derate"
+            ],
+            "description": "The result for this case. It may repeat the default only to carry a required scale or clock citation. A case that never rejects is not a rejection case and has no row."
+          },
+          "declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed game rule identifying this rejection case and when it applies."
+          },
+          "scale-rule-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "result": [
+                  "derate"
+                ]
+              }
+            },
+            "description": "The Fixed rule that scales the complete effect and cost."
+          },
+          "clock-rule-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "result": [
+                  "clock-advances",
+                  "cost-and-clock"
+                ]
+              }
+            },
+            "description": "The Fixed clock or turn rule naming exactly one advance caused by this rejection."
+          }
+        }
+      },
+      "terminal-collisions": {
+        "description": "Pairs of win and loss conditions that can become true in one instant.",
+        "when-empty": "A win and a loss cannot land together in this adoption.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable name for this ending collision."
+          },
+          "win-condition": {
+            "type": "string",
+            "required": true,
+            "description": "The winning condition in game language, such as boss defeated."
+          },
+          "loss-condition": {
+            "type": "string",
+            "required": true,
+            "description": "The losing condition in game language, such as hero defeated."
+          },
+          "declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed game rules that name both ending conditions and show how they can meet."
+          }
+        }
+      },
+      "same-target-cases": {
+        "description": "Target kinds for which two events can each be enough to remove the same target at one instant.",
+        "when-empty": "No general same-target removal case is declared; any same-target-exceptions rows are the only declared collisions.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable name for the target case."
+          },
+          "target-kind": {
+            "type": "string",
+            "required": true,
+            "unique": true,
+            "description": "The target kind, such as arena enemies or breakable cover."
+          },
+          "declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed game rule showing how two same-instant events can each remove this target kind."
+          }
+        }
+      },
+      "same-target-exceptions": {
+        "description": "Target kinds that use a result different from the general same-target answer.",
+        "when-empty": "Every declared same-target case uses the general answer.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable name for the exception."
+          },
+          "target-kind": {
+            "type": "string",
+            "required": true,
+            "unique": true,
+            "description": "The non-overlapping target kind covered by this exception."
+          },
+          "resolution": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "only-first-resolves",
+              "all-resolve-one-ending",
+              "all-resolve-each-ending"
+            ],
+            "description": "The result used for this target kind instead of the general answer."
+          },
+          "declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed game rule naming the target kind and its same-instant collision."
+          }
+        }
+      },
+      "presentation-driven-events": {
+        "description": "Events whose relation to a visual or sound is explicitly declared, including events declared never to wait.",
+        "when-empty": "No presentation timing rule is declared for an event in this adoption, so presentation does not delay an event or change event order.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable name for the event and presentation case."
+          },
+          "event-class": {
+            "type": "string",
+            "required": true,
+            "description": "The id of the event class whose timing is compared with presentation."
+          },
+          "presentation-cue": {
+            "type": "string",
+            "required": true,
+            "description": "The visual or sound in game language, such as a card attack animation."
+          },
+          "declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed game rule relating the event's game timing to its presentation cue and showing that the cue finishes in finite game or real time."
+          }
+        }
+      },
+      "caused-event-kinds": {
+        "description": "Non-interrupt events that can create another event due during the instant that created it.",
+        "when-empty": "No non-interrupt event creates another event due in the same instant.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A stable name for the chain, such as enemy-activation-to-attack."
+          },
+          "event-class": {
+            "type": "string",
+            "required": true,
+            "description": "The class of the newly caused event."
+          },
+          "declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed game rule naming the cause, the new event, and the finite bound on repeated caused events."
+          }
+        }
+      },
+      "interrupts": {
+        "description": "Events created through the interrupt path that can stop or replace another event at a declared effect boundary, including the boundary before its first effect.",
+        "when-empty": "No event stops or replaces another event after resolution begins or before its first effect.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "The interrupt in game language, such as counter-secret or sword-parry."
+          },
+          "active-class": {
+            "type": "string",
+            "required": true,
+            "description": "The event class that can be interrupted."
+          },
+          "interrupt-class": {
+            "type": "string",
+            "required": true,
+            "description": "The event class that cuts in."
+          },
+          "boundary-granularity": {
+            "type": "string",
+            "required": true,
+            "description": "The smallest named boundary the interrupt can use, such as before the first effect, after each hit, or at each crossed tile edge."
+          },
+          "result": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "stop-original",
+              "replace-remaining-effects"
+            ],
+            "description": "Whether the interrupt ends the active event or substitutes a cited set of effects for what remains."
+          },
+          "declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed game rule naming the validity window, effect boundaries, and stop result."
+          },
+          "replacement-declared-in": {
+            "type": "citation",
+            "when": {
+              "row": {
+                "result": [
+                  "replace-remaining-effects"
+                ]
+              }
+            },
+            "description": "The Fixed game rule stating every replacement effect and its order."
+          }
+        }
+      },
+      "orphan-cases": {
+        "description": "Events that can lose a required source or target while waiting or resolving. Each row selects its result, so opposite policies share one adoption.",
+        "when-empty": "No event can lose a required source or target while waiting or resolving.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "The missing-object case in game language, such as trigger-after-source-loss."
+          },
+          "event-class": {
+            "type": "string",
+            "required": true,
+            "description": "The event class that may become orphaned."
+          },
+          "missing": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "source",
+              "target",
+              "source-or-target"
+            ],
+            "description": "Which required game object may become unavailable while the event waits or resolves."
+          },
+          "resolution": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "default",
+              "resolves-what-remains",
+              "is-cancelled"
+            ],
+            "description": "Use the adoption's default orphan answer, or choose the result for this case."
+          },
+          "declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "The Fixed game rule identifying this orphan case, when it applies, the captured payload, and the source or target requirement."
+          }
+        }
+      }
+    }
+  },
+  "rules": {
+    "visible-first-needs-order": {
+      "forbid": {
+        "all": [
+          {
+            "flag": {
+              "within-class-order": [
+                "no-visible-order"
+              ]
+            }
+          },
+          {
+            "flag": {
+              "two-events-one-target": [
+                "only-first-resolves"
+              ]
+            }
+          }
+        ]
+      },
+      "severity": "warning",
+      "message": "Only-first removal needs a visible order for the colliding class; add a within-class row that decides which event reaches the target first."
+    }
+  },
+  "origin": "https://opengdd.org/contracts/event-resolution-1",
+  "mechanism": [
+    "This is the single normative authority for how a proposed action becomes a resolved event, how waiting events are ordered, where ties break, where an interrupt enters, and what happens to an orphan. Questions and rows supply choices and game rules; they do not define another sequence.",
+    "An **instant** is one moment the game treats as simultaneous. A **proposal** is an action requested by an actor. A **waiting event** has been accepted for an instant but has not begun resolving. An **active event** is currently applying its ordered effects. An **effect boundary** is a point named by a game rule at which an interrupt may enter; one exists before the event's first effect. An **orphan** is an event whose required source or target is no longer available. An **ending event** represents a possible match outcome, but its resolution records nothing. Step 15 is the sole outcome-recording step and reads final settled state: a single ending records there through the game's own cited rule, and a declared collision records through `terminal-precedence`.",
+    "A move through three tiles can be modelled as one effect per crossed tile edge. An overwatch shot can then name the edge where it enters. Each interrupt row carries that boundary granularity instead of leaving the decomposition implicit.",
+    "Turn-based games ask three of these in turn words: a tie on initiative is the same-instant question, a skipped turn is a rejected action, and a turn boundary is an instant like any other.",
+    "### Propose and admit",
+    "1. Read the proposed action against its Fixed game rules. A matching `rejection-cases` row supplies its result; otherwise apply the default `rejected-action-effect` once. `nothing-changes`, `cost-taken`, `clock-advances`, and `cost-and-clock` end the proposal without creating an event. `derate` accepts a scaled action and continues. `not-applicable` admits every proposal in this family. Repeating `nothing-changes` from the same state produces the same result because the first rejection left nothing behind. For every answer, the same proposal rejected from an identical pre-attempt state produces the same result. This idempotence is an obligation of the adoption, not a description of every observed game. 2. For an accepted action, commit its ordinary cost at the point named by its game rule. Create its event payload once. The payload captures every value that must survive later source loss; uncaptured state is read only when an effect resolves. 3. Assign every event to its declared class and due instant. Events already due when the instant opens enter its waiting set. An event created after the instant opens has one of two admission paths. A valid `interrupts` row creates an interrupt event; the interrupt entry answer governs it. Every other newly created event follows `caused-events`. The caused-event rows and their `otherwise` sentence exclude declared interrupts.",
+    "### Order the waiting set",
+    "4. Select the lowest rank among eligible waiting events. If several classes share that rank, the matching `rank-ties` row produces one total order over all events in those tied classes. A `no-visible-order` tie may use any order only because the result cannot expose it. 5. Within each class's remaining events at the selected rank, apply that class's `within-class-rules` row or the general `within-class-order` answer, and select the first event without changing its payload. Container order in the adoption file never selects an event. Where a `rank-ties` row produced one total order over the tied classes' events in step 4, that order already fixes each tied class's internal sequence; a tied class under such an order carries no `within-class-rules` row, and a reviewer rejects one as inert. 6. Apply presentation waiting to the selected event. `presentation-timing.otherwise` admits it immediately. Under `may-delay`, an unfinished cue holds that event and every event behind it in the order from steps 4–5. Under `may-delay-and-reorder`, temporarily skip only the named event and return to step 4; later eligible events may pass it. Under `never`, presentation does not hold it. A held event becomes eligible again when its cited cue finishes. The instant waits and cannot close while any presentation-held event remains. Carrying it to a later instant would invent a new game-time rule, so this branch waits instead. 7. Form any same-target collision group containing the selected event. Under `only-first-resolves`, only the first event keeps the target. Under `all-resolve-one-ending`, removal waits until the complete group resolves. Under `all-resolve-each-ending`, every event keeps its own removal consequence. A matching exception row replaces the general answer.",
+    "### Check the event and resolve it",
+    "8. Settle the same-target decision before the general orphan check. Later events suppressed by `only-first-resolves` apply nothing to that target. The other two answers keep the target available to every member of the collision group. A removal inside that group never turns another member into an orphan. Until an `all-resolve-one-ending` group ends, its target is live for non-member rules too; a non-member resolving before deferred removal therefore reads a live target. 9. Check the selected event's required source and target after its collision group is known, before its first effect, and again at every effect boundary. The matching `orphan-cases` row selects its own result or the adoption's default `orphaned-events` answer. `resolves-what-remains` skips only effects that require the missing object. `is-cancelled` removes a waiting event or discards an active event's remaining effects. This continuous gate covers a unit killed midway through a cast. A missing object outside the declared cases is an invalid adoption, not an implied result. 10. Make the selected event active and visit the boundary before its first effect. If it continues, apply effects in the order stated by its Fixed game rule. After each effect, commit that effect before reaching the next declared boundary. An ending event follows the same ordering and boundary rules, but its resolution records nothing. 11. At each boundary, discover every valid interrupt and create it through the interrupt path in step 3. When several are valid, select lowest rank first, apply the shared-rank event order when needed, then the selected class's within-class order. Under `before-next-effect`, the selected interrupt enters before the next effect, including before the first. Under `after-current-effect`, the just-finished effect remains committed. Under `at-normal-rank`, place it by the same current-or-next-instant rule as `waits-for-its-place`, then return to step 4. The active event advances only to boundaries its interrupt row permits while that interrupt waits. 12. An interrupt entering at the current boundary keeps presentation waiting, same-target collision grouping, continuous orphan checks, and its own boundaries: it passes through steps 6–11 before its result changes the interrupted event. `stop-original` discards every remaining original effect. `replace-remaining-effects` discards them and installs the complete cited replacement. Already committed effects and costs remain. The cited interrupt rule supplies a finite chain bound, and only one selected interrupt resolves at a time. A presentation skip of an interrupt returns to the interrupted event's boundary, not to step 4. 13. When an effect causes another event due now, apply `caused-events`. `resolves-now` resolves it at the current boundary before the active event continues. `waits-for-its-place` adds it to the current waiting set when its declared class is current or has not passed, otherwise to the next instant. `next-instant` always adds it to the next instant. Every route creates the caused event once and obeys the row's finite chain bound. The standard end-of-instant-sink model gives caused work one last class and drains that class to closure. 14. Finish the active event. Apply any deferred target removal required by its same-target group, record each selected consequence once, and remove the event from the waiting set. Return to step 4. If only presentation-held events remain, wait for a cited cue; a `may-delay-and-reorder` skip ends as soon as that event's cue finishes. Continue until the waiting set is empty.",
+    "### Settle the instant",
+    "15. After the waiting set is empty, the game's own cited ending rules record any single ending that holds in the final settled state; this contract does not re-derive them. Then read each `terminal-collisions` row's `win-condition` and `loss-condition` from that state. When both hold, record only the loss, only the win, or both according to `terminal-precedence`, overriding the single-ending recording for that pair. This is the only step at which a match outcome is recorded; class rank and ending-event resolution never override it. 16. Commit the instant's final state and the next-instant waiting set together. No event from the closed instant may later re-enter it. A presentation-held event never faces that rule, because step 14 forbids closure while it remains held. Presentation may continue after commitment only when its cited rule cannot change gameplay state or order.",
+    "Every settlement report carries the instant, event id, class, rank, tie-break when used, within-class order, source and target availability, effects applied, interrupt and replacement when present, caused-event destination, removal result, and terminal result when present."
+  ],
+  "pack": "sha256:571ce2328736c902d7f553fe4b00b2a762faf451393fbf8760e9f67a3fa39f1c"
+}

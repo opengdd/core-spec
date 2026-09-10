@@ -23,23 +23,25 @@
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
 </head>
 <body>
+<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="bar">
     <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
     <nav class="site-nav" aria-label="Site">
       <a href="/learn/">Learn</a>
-      <a href="/spec/" aria-current="page">Spec</a>
-      <a href="/standard/">Standard</a>
+      <a href="/contracts/">Contracts</a>
+      <a href="/spec/" aria-current="page">Specification</a>
       <a href="/authoring-tool/">Authoring tool</a>
       <a href="/about/">About</a>
       <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
     </nav>
   </div>
 </header>
-<main>
+<main id="main">
 <div class="doc-layout">
 <nav class="doc-toc" aria-label="Chapters"><p class="toc-title">Versions</p><ul>
-<li class="toc-h2"><a href="#v0-7-working-draft-unreleased">v0.7 working draft — unreleased</a></li>
+<li class="toc-h2"><a href="#v0-8-released-2026-09-10">v0.8 — released 2026-09-10</a></li>
+<li class="toc-h2"><a href="#v0-7-released-2026-08-31">v0.7 — released 2026-08-31</a></li>
 <li class="toc-h2"><a href="#v0-6-working-draft-2026-08-18">v0.6 working draft — 2026-08-18</a></li>
 <li class="toc-h2"><a href="#v0-5-draft-2026-08-12">v0.5 draft — 2026-08-12</a></li>
 <li class="toc-h2"><a href="#v0-4-draft-2026-08-09">v0.4 draft — 2026-08-09</a></li>
@@ -48,96 +50,108 @@
 </ul></nav>
 <article class="doc-body">
 <h1>Changelog</h1>
-<p>The format's early drafts carried a great deal of machinery that v0.6 and v0.7 removed. The full record of that, with diagnostic codes and schema changes, is in <a href="/spec/changelog/technical/">the technical changelog</a>.</p>
-<h2 id="v0-7-working-draft-unreleased">v0.7 working draft — unreleased<a class="heading-anchor" href="#v0-7-working-draft-unreleased" aria-label="Link to this section">#</a></h2>
-<p>v0.7 asked where the format made a designer think like a programmer. The specification fell from 35,188 words to 17,988, schema properties from 178 to 91, and validator codes from 255 to 189.</p>
-<p>If you have a v0.6 package, run <code>npx opengdd migrate &lt;package-dir&gt;</code>. The tool does the mechanical part and hands back a short list only a designer can decide: most often, an <code>or</code> rule, a <code>document-check</code> test, or a graph claim that has no field form. <code>opengdd migrate --build &lt;opengdd-build.json&gt;</code> rewrites a v0.6 build record.</p>
-<p><strong>Numbers.</strong> Three tables separate current values, allowed build choices, and required relationships (decision 36).</p>
+<p>Early drafts carried a lot of machinery. v0.6 and v0.7 removed it. The full record, with diagnostic codes and schema changes, is in <a href="/spec/changelog/technical/">the technical changelog</a>.</p>
+<h2 id="v0-8-released-2026-09-10">v0.8 — released 2026-09-10<a class="heading-anchor" href="#v0-8-released-2026-09-10" aria-label="Link to this section">#</a></h2>
+<p>v0.8 widens the contract layer (§<a class="section-ref" href="/spec/#10-contracts">10</a>). A definition can ask a question only when it applies, and say what holds when it does not.</p>
+<ul>
+<li>A gated question carries binding <code>otherwise</code> prose.</li>
+<li>A row set carries binding <code>when-empty</code> prose.</li>
+<li>A question condition can read value forms and row counts, and combine them with <code>any</code> or <code>all</code>.</li>
+<li>A value declaration can be conditional, and cite a number instead of repeating it.</li>
+<li>A definition can forbid an answer combination, with its own designer-facing message.</li>
+</ul>
+<p>Every widening is additive. A v0.7 definition keeps its exact meaning and needs no migration. Ten diagnostic codes are added. See the <a href="https://github.com/opengdd/core-spec/blob/main/conformance/README.md">conformance README</a>.</p>
+<p>One rule is tighter. A question condition must carry exactly one non-empty form. Before, an empty <code>when</code> or an empty <code>flag</code> map was accepted and meant nothing. It is now reported.</p>
+<p>One vocabulary change. No rule changes. The designer's document is now called a <strong>package</strong> everywhere. Earlier text called it a spec, which collided with the specification. The build record's <code>spec</code> field keeps its name.</p>
+<h2 id="v0-7-released-2026-08-31">v0.7 — released 2026-08-31<a class="heading-anchor" href="#v0-7-released-2026-08-31" aria-label="Link to this section">#</a></h2>
+<p>v0.7 asked where the format made a designer think like a programmer. The specification fell from 35,188 words to 17,988. Schema properties fell from 178 to 91, and validator codes from 255 to 189.</p>
+<p>If you have a v0.6 package, run <code>npx opengdd migrate &lt;package-dir&gt;</code>. The tool does the mechanical part. It hands back a short list only a designer can decide: most often an <code>or</code> rule, a <code>document-check</code> test, or a graph claim with no field form. <code>opengdd migrate --build &lt;opengdd-build.json&gt;</code> rewrites a v0.6 build record.</p>
+<p><strong>Numbers.</strong> Three tables separate current values, allowed build choices, and required relationships.</p>
 <ul>
 <li><code class="anchor">tuning.json</code> now has <code>values</code>, optional <code>ranges</code>, and optional <code>rules</code>. Clocks moved to <code class="anchor">clocks.json</code>.</li>
-<li>A build records one snapshot of the values it resolved instead of separate tunable and constant maps.</li>
-<li>Each rule is one comparison between two sums. It can use arithmetic, parentheses, <code>min</code>, <code>max</code>, and <code>floor</code>; write two rules when both comparisons must hold.</li>
-<li>The validator checks ranges and rules in both the package and the build record.</li>
+<li>A build records one snapshot of the values it resolved. The separate tunable and constant maps are gone.</li>
+<li>Each rule is one comparison between two sums. It can use arithmetic, parentheses, <code>min</code>, <code>max</code>, and <code>floor</code>. Write two rules when both comparisons must hold.</li>
+<li>The validator checks ranges and rules in the package and in the build record.</li>
 <li>You cannot start a tuning key with <code>colors</code>, <code>contrast</code>, <code>timing</code>, <code>values</code>, <code>ranges</code>, <code>rules</code>, or <code>runtime</code>. The validator names the word and suggests a new start. <code>references</code> and <code>viewing</code> work again.</li>
 </ul>
 <p><strong>Chapters.</strong></p>
 <ul>
-<li>The validator reads numbered root chapters in filename order. <code>01</code> to <code>05</code> keep their standard names; designer chapters begin at <code>06</code>.</li>
+<li>The validator reads numbered root chapters in filename order. <code>01</code> to <code>05</code> keep their standard names. Designer chapters begin at <code>06</code>.</li>
 <li>An unnumbered root Markdown file is not a chapter, but safety checks still read it.</li>
 <li>The presence of <code class="anchor">direction.json</code> or <code class="anchor">personalization.json</code> declares that mechanism.</li>
 <li>If chapters switch between sets of rules, mark each set with <code>&gt; RULESET: &lt;id&gt;</code>. Exactly one tag carries <code>(initial)</code>.</li>
-<li>One <code>#</code> title may appear before the fantasy block. In <code>target</code>, <code>platform</code> and <code>genre</code> are required; <code>session_minutes</code> and <code>audience</code> are optional.</li>
+<li>One <code>#</code> title may appear before the fantasy block. In <code>target</code>, <code>platform</code> and <code>genre</code> are required. <code>session_minutes</code> and <code>audience</code> are optional.</li>
 </ul>
-<p><strong>Art direction.</strong> Art direction moved into one <code class="anchor">direction.json</code> (decision 39).</p>
+<p><strong>Art direction.</strong> Art direction moved into one <code class="anchor">direction.json</code> so its palettes, moods, promises, and viewing context stay together.</p>
 <ul>
 <li>Palettes and moods moved from <code class="anchor">manifest.json</code> into <code class="anchor">direction.json</code>.</li>
 <li>Pillars, results to avoid, and things that must stay are named sentences. Colors, contrast, and timing are direct lists, with one viewing context for the file.</li>
 <li>Palette and mood references use dotted names such as <code class="anchor">palette.ui.warning</code> and <code class="anchor">mood.uneasy</code>. A timing promise names its tuning key without a <code>tuning:</code> prefix.</li>
-<li>You no longer record media hashes, formats, per-claim audit fields, test mirrors, or a direction fence. Images still use package paths and licences. <code>may_vary</code> retired, so you no longer write it.</li>
+<li>You no longer record media hashes, formats, per-claim audit fields, test mirrors, or a direction fence. Images still use package paths and licences. The <code>may_vary</code> field is retired.</li>
 <li>Build records no longer carry direction judgments.</li>
 </ul>
-<p><strong>Collections and links.</strong> A link now states its target and rules on the record field that carries it (decision 41).</p>
+<p><strong>Collections and links.</strong> A link now states its target and rules on the record field that carries it.</p>
 <ul>
 <li>A record schema can define a <code>link</code> field, a list of links, a mirrored field, and whether several links are allowed.</li>
 <li><code>loops: false</code> forbids a cycle. Omission or <code>true</code> permits one.</li>
 <li>Validation checks link types, targets, missing records, mirrors, and opted-in loop rules. Duplicate links produce a warning.</li>
-<li>You no longer declare a graph registry or write separate graph tests. Migration moves simple links onto their record fields and lists graph claims that have no field form for a designer to restate in prose.</li>
+<li>You no longer declare a graph registry or write separate graph tests. Migration moves simple links onto their record fields. It lists graph claims with no field form for a designer to restate in prose.</li>
 </ul>
 <p><strong>Time.</strong></p>
 <ul>
 <li><code>runtime.&lt;name&gt;</code> replaces the old addresses that named a changing value by its type.</li>
-<li>Each entry in <code class="anchor">clocks.json</code> gives its unit, a complete mode table using <code>running</code>, <code>paused</code>, <code>steps</code>, or <code>none</code>, and, where it drives a runtime value, what it advances.</li>
-<li>Write <code>unchanged</code> when a value must not change during a replay; the old expression form is no longer used.</li>
+<li>Each entry in <code class="anchor">clocks.json</code> gives its unit and a complete mode table using <code>running</code>, <code>paused</code>, <code>steps</code>, or <code>none</code>. Where it drives a runtime value, the entry says what it advances.</li>
+<li>Write <code>unchanged</code> when a value must not change during a replay. The old expression form is no longer used.</li>
 <li>The package stores replay data without interpreting it. A named runner profile defines its schedule, actions, and observations.</li>
 </ul>
-<p><strong>Tests.</strong> An acceptance test is one test block in one of two forms, with no prose restatement (decision 43).</p>
+<p><strong>Tests.</strong> An acceptance test is one test block in one of two forms, with no prose restatement.</p>
 <ul>
 <li>A <code>scenario</code> test uses <code>given</code>, <code>when</code>, and <code>then</code>.</li>
 <li>A <code>general</code> test states its <code>scope</code> and what <code>holds</code>, with optional reproducible <code>seeds</code>. It replaces the separate property, exhaustive-search, and document-check forms.</li>
 <li>Direction measurements use ordinary tests instead of a separate direction-check channel.</li>
 </ul>
-<p><strong>Personalization.</strong> Personalization now changes only numbers whose ranges state that a build may choose them.</p>
+<p><strong>Personalization.</strong> Personalization now changes only numbers whose ranges say a build may choose them.</p>
 <ul>
-<li>A v0.6 personalization file survives migration. Numeric pipelines become <code>sets</code> when the tool can rewrite them; otherwise they appear on the designer's short list.</li>
+<li>A v0.6 personalization file survives migration. Numeric pipelines become <code>sets</code> when the tool can rewrite them. Otherwise they appear on the designer's short list.</li>
 <li>A choice option assigns ranged values through <code>sets</code>.</li>
 <li>A number question names one ranged target, and the answer given for a build becomes its value.</li>
 <li>A build refuses an answer outside the declared range. Choice and text answers remain recorded instructions for the builder.</li>
 </ul>
-<p><strong>Contracts.</strong> Each adoption is one self-contained <code>contracts/&lt;adoption&gt;.json</code> with its copied definition, answers, fixed values, inline rows, and optional verification (decision 35).</p>
+<p><strong>Contracts.</strong> Each adoption is one file, <code>contracts/&lt;adoption&gt;.json</code>, with the copied definition, answers, fixed values, inline rows, and optional verification.</p>
 <ul>
 <li><code>when</code> decides which questions are asked. Contract rules use the same one-comparison grammar as number rules.</li>
 <li>A matching <code>.pack.json</code> turns an adoption from promised to checked and supplies its reusable tests.</li>
-<li>A contract's number rows can say which two values they must stay between (<code>within</code>), and the validator checks it. An error that exists only because an answer or a number is still missing is marked as waiting, so a freshly added contract's to-do count is honest.</li>
-<li>You no longer paste rendered contract tests into <code class="anchor">05-build-plan.md</code>; the validator renders them on demand with <code>--render-contract-tests</code>. A package that still contains the generated block fails validation, and migration removes it.</li>
+<li>A contract's number rows can say which two values they must stay between, using <code>within</code>, and the validator checks it. Some errors exist only because an answer or a number is still missing. They are marked as waiting, so a new contract's to-do count is honest.</li>
+<li>You no longer paste rendered contract tests into <code class="anchor">05-build-plan.md</code>. The validator renders them on demand with <code>--render-contract-tests</code>. A package that contains the generated block fails validation, and migration removes it.</li>
 <li>The build record lists every checked adoption and the exact pack it used.</li>
 </ul>
-<p><strong>The build record.</strong> Runtime evidence names its runner and version (decision 30).</p>
+<p><strong>The build record.</strong> Runtime evidence names its runner and version so the claim is attributable to the profile that produced it.</p>
 <ul>
 <li>You no longer add renderer, resource, capture-recipe, direction-result, direction-observation, or algorithm fields to a build record. The audit may request further evidence.</li>
 </ul>
 <p><strong>Tools.</strong> v0.6 shapes get focused migration messages.</p>
 <h2 id="v0-6-working-draft-2026-08-18">v0.6 working draft — 2026-08-18<a class="heading-anchor" href="#v0-6-working-draft-2026-08-18" aria-label="Link to this section">#</a></h2>
-<p>v0.6 replaced format-invented vocabulary with words designers already use, published the Handbook and closed schemas, and removed experimental machinery that had no outside demand. It also introduced the first contract and palette forms that v0.7 later simplified.</p>
-<p><strong>Collections and links.</strong> Collections became folders under <code>collections/</code>, with one record per file. Decisions 32 and 33 removed the manifest catalogue, members lists, authority fields, prose declaration tags, and the catalogue/items split.</p>
+<p>v0.6 replaced format-invented vocabulary with words designers already use. It published the Handbook and closed schemas, and removed experimental machinery that had no outside demand. It also introduced the first contract and palette forms that v0.7 later simplified.</p>
+<p><strong>Collections and links.</strong> Collections became folders under <code>collections/</code>, with one record per file. Presence now declares a collection, so the manifest catalogue, members lists, authority fields, prose declaration tags, and the catalogue/items split were removed.</p>
 <ul>
 <li>The folder and filename are the collection and record ids. Record bodies contain designer data only.</li>
 <li>An optional <code class="anchor">_collection.json</code> supplies a closed record schema. Without it, records are free-form.</li>
 <li>The record grammar gained a checked grid shape. Contract rows can be inline or come from a collection folder.</li>
-<li>Dotted <code>collections.&lt;collection&gt;.&lt;record&gt;</code> references became checked, while an unused collection produces a warning.</li>
+<li>Dotted <code>collections.&lt;collection&gt;.&lt;record&gt;</code> references became checked. An unused collection produces a warning.</li>
 </ul>
-<p><strong>Chapters.</strong> The required fantasy block widened to any number of player-fantasy lines within 280 trimmed characters. At least one line and closing punctuation remain required; digits are allowed, while typed references and tuning citations are not.</p>
+<p><strong>Chapters.</strong> The required fantasy block widened to any number of player-fantasy lines within 280 trimmed characters. At least one line and closing punctuation remain required. Digits are allowed. Typed references and tuning citations are not.</p>
 <ul>
 <li>Chapter prose cites tuning keys by bare dotted name. Reserved mechanism paths, file mentions, numeric tokens, and tuning citations became mechanically distinguishable.</li>
 <li>A tuning key cannot use a reserved first segment or reserved extension. State bindings gained explicit declaration locations, and chapter mode tags became checked.</li>
-<li>v0.6 replaced format-invented terms with designer words: <code>regime</code> became <code>mode</code>, <code>population</code> became <code>applies_to</code>, and the fidelity ladder became the precision levels <code>described</code>, <code>bounded</code>, and <code>exact</code>. The full list is in the technical changelog. There are no aliases; v0.5 spellings are rejected.</li>
+<li>v0.6 replaced format-invented terms with designer words: <code>regime</code> became <code>mode</code>, <code>population</code> became <code>applies_to</code>, and the fidelity ladder became the precision levels <code>described</code>, <code>bounded</code>, and <code>exact</code>. The full list is in the technical changelog. There are no aliases, and v0.5 spellings are rejected.</li>
 </ul>
 <p><strong>Art direction.</strong> v0.6 made palettes named color sets and made color constraints point to them.</p>
 <ul>
-<li><code class="anchor">manifest.json</code> gained palettes with ordered colors and optional color names. Dotted palette references resolve by whole key first; ambiguous keys and dangling colors fail validation.</li>
-<li><code class="anchor">constraints.colors</code> replaced palette roles. Exactness uses <code>tolerance: 0</code>; contrast thresholds name palette colors directly.</li>
-<li>Mood entries point to a palette but no longer carry their own colors. Unused palettes warn, and a construct's shape now fixes its audit class.</li>
-<li>Migrating from the earlier draft requires moving hex colors into the palette, renaming color and threshold fields, rewriting mood claims, and rechecking every contrast floor. Old palette shapes are rejected rather than converted silently.</li>
-<li>You no longer write the old motion rubric, certified palette-pin evidence, color <code>must_match</code>, or audio-direction annex. Exact colors remain testable.</li>
+<li><code class="anchor">manifest.json</code> gained palettes with ordered colors and optional color names. Dotted palette references resolve by whole key first. Ambiguous keys and dangling colors fail validation.</li>
+<li><code class="anchor">constraints.colors</code> replaced palette roles. Exactness uses <code>tolerance: 0</code>, and contrast thresholds name palette colors directly.</li>
+<li>Mood entries point to a palette but no longer carry their own colors. Unused palettes warn. A construct's shape now fixes its audit class.</li>
+<li>Migrating from the earlier draft means moving hex colors into the palette, renaming color and threshold fields, rewriting mood claims, and rechecking every contrast floor. Old palette shapes are rejected, not converted silently.</li>
+<li>You no longer write the old motion rubric, certified palette-pin evidence, color <code>must_match</code>, or the audio-direction annex. Exact colors remain testable.</li>
 </ul>
 <p><strong>Tests.</strong> Test blocks gained closed shapes for scenario, property, exhaustive-search, and document-check tests. Package-owned extra fields remain allowed but have no format meaning.</p>
 <ul>
@@ -145,35 +159,35 @@
 <li>Aggregate art-direction claims had to match their covering property test. Grid records gained checked row and column congruence.</li>
 <li>A build record became a completion claim: its passed count must equal the expanded acceptance-test count.</li>
 </ul>
-<p><strong>Personalization.</strong> Choice and text answers remained builder instructions. Numeric questions gained a deterministic pipeline over tunable numbers and contract knobs; <code>clamp</code> limits an answer and <code>reject</code> refuses it.</p>
+<p><strong>Personalization.</strong> Choice and text answers remained builder instructions. Numeric questions gained a deterministic pipeline over tunable numbers and contract knobs. <code>clamp</code> limits an answer, and <code>reject</code> refuses it.</p>
 <ul>
 <li>Defaults follow the same pipeline before number rules are checked.</li>
 <li><code>affects</code> names what an answer can reach but does not define selector or replacement behavior.</li>
 <li>Choice answers and defaults must name declared option ids. Authority tags gained exact scope and grammar.</li>
 </ul>
-<p><strong>Contracts.</strong> The first contract layer let a package copy a reusable convention into <code>contracts/</code>, fill its questions and knobs, bind rows, and generate named acceptance tests. The directory and <code>contracts.*</code> tuning prefix became reserved; silence was invalid and <code>not-applicable</code> was an explicit answer.</p>
+<p><strong>Contracts.</strong> The first contract layer let a package copy a reusable convention into <code>contracts/</code>, fill its questions and knobs, bind rows, and generate named acceptance tests. The directory and <code>contracts.*</code> tuning prefix became reserved. Silence was invalid, and <code>not-applicable</code> was an explicit answer.</p>
 <ul>
-<li>Adopted contract statements were Fixed, knobs entered the resolved tuning snapshot, and the experimental certification record preserved the adopted core digest.</li>
-<li>Two authored cores, four byte-identical generated blocks, a blind build, and a two-arm probe supplied the evidence for the mechanism.</li>
+<li>Adopted contract statements were Fixed, and knobs entered the resolved tuning snapshot. The experimental certification record preserved the adopted core digest.</li>
+<li>Two authored cores, four byte-identical generated blocks, a blind build, and a two-arm probe supplied the evidence.</li>
 </ul>
-<p><strong>The build record.</strong> Runtime evidence gained a runner id and version plus plain-language observation contexts for measured art direction. These identify how a pass was produced; they do not create a core certification verdict.</p>
+<p><strong>The build record.</strong> Runtime evidence gained a runner id and version, plus plain-language observation contexts for measured art direction. These identify how a pass was produced. They do not create a core certification verdict.</p>
 <ul>
-<li>Package conformance and build-record conformance became closed schema checks. Experimental execution and judgment remained outside both.</li>
+<li>Package and build-record conformance became closed schema checks. Experimental execution and judgment remained outside both.</li>
 <li>Versioned schemas were published without a floating alias, including new tuning, personalization, and collection schemas.</li>
 </ul>
-<p><strong>Tools.</strong> The public Handbook became the designer's task-oriented route, while <code class="anchor">SPEC.md</code> remained the exact OpenGDD specification. The beginner path gained the five-file kernel, a complete build plan, the maintained Garden Snake package, offline validation, and a builder handoff checklist.</p>
+<p><strong>Tools.</strong> The public Handbook became the designer's task-oriented route. <code class="anchor">SPEC.md</code> remained the exact OpenGDD specification. The beginner path gained the five-file kernel, a complete build plan, the maintained Garden Snake package, offline validation, and a builder handoff checklist.</p>
 <ul>
 <li>You no longer write unconfirmed material simulation, verification profiles, ruleset hooks and derived predicates, the open solver profile, or its deduction solution. The grid encoding, ruleset ids and tags, and industry-settled graph capability remained.</li>
 <li>Schema checks now cover tuning, personalization, test headings, option ids, build completion, grids, prose references, and fantasy placement.</li>
 </ul>
 <h2 id="v0-5-draft-2026-08-12">v0.5 draft — 2026-08-12<a class="heading-anchor" href="#v0-5-draft-2026-08-12" aria-label="Link to this section">#</a></h2>
-<p>v0.5 renamed named objects as scoped symbols while keeping descriptor shapes and reserving “collection” for structured content. It separated delivery platform from rendering technique and drew the first firm line between checking a package, checking a build record, and experimentally auditing a finished build.</p>
+<p>v0.5 renamed named objects as scoped symbols, kept descriptor shapes, and reserved “collection” for structured content. It separated delivery platform from rendering technique. It drew the first firm line between checking a package, checking a build record, and auditing a finished build by experiment.</p>
 <p><strong>Numbers.</strong> The <code>values</code> table in <code class="anchor">tuning.json</code> became <code>tunables</code>, and the build snapshot followed the same rename. This was a hard version cut.</p>
-<p><strong>The build record.</strong> The delivery target began naming <code>web-2d</code> or <code>web-3d</code>; a build could separately record its renderer. Three-dimensional capture certification remained undefined.</p>
+<p><strong>The build record.</strong> The delivery target began naming <code>web-2d</code> or <code>web-3d</code>, and a build could separately record its renderer. Three-dimensional capture certification remained undefined.</p>
 <ul>
 <li>Package and record conformance gained exact schema and check sets, severity rules, and ownership for prose obligations and per-build evaluations.</li>
 <li>Build certification was marked experimental. The draft protocol defined reproducible canonical payloads and hashes, but no normative certification verdict.</li>
-<li>A build record became a completion claim, with incomplete work reported through ambiguity records. Passing tests remained necessary evidence, not proof by itself.</li>
+<li>A build record became a completion claim, with incomplete work reported through ambiguity records. Passing tests remained necessary evidence, not proof on their own.</li>
 <li>Choice answers and defaults had to name declared option ids. The experimental audit owned fixture reach, execution semantics, judged art direction, and narrowed-evidence review.</li>
 </ul>
 <p><strong>Tools.</strong> Migrating from v0.4 means renaming both number maps and replacing “named object” with “symbol”. The v0.5 validator rejects the old map names.</p>
@@ -189,16 +203,16 @@
 <p><strong>The build record.</strong> Optional capture profile, resource digests, and direction results recorded more provenance. A resource digest covered one named artifact and did not claim a complete inventory.</p>
 <p><strong>Tools.</strong> Prose, schemas, and validation aligned on counts, identifier grammar, claim classes, palette-pin ownership, and cross-file presence. The audio annex was planning guidance only.</p>
 <ul>
-<li>Most v0.3 packages needed only a version bump. A package already using the reserved art-direction slot or <code>parallel-string-layers-1</code> name for something else had to rename it or supply the new valid shape.</li>
-<li>Current source and build records move to <code>&quot;0.4&quot;</code>; historical v0.3 build records may remain with v0.3.</li>
+<li>Most v0.3 packages needed only a version bump. A package already using the reserved art-direction slot or the <code>parallel-string-layers-1</code> name for something else had to rename it or supply the new valid shape.</li>
+<li>Current source and build records move to <code>&quot;0.4&quot;</code>. Historical v0.3 build records may remain with v0.3.</li>
 </ul>
 <h2 id="v0-3-draft-2026-08-08">v0.3 draft — 2026-08-08<a class="heading-anchor" href="#v0-3-draft-2026-08-08" aria-label="Link to this section">#</a></h2>
 <p>v0.3 added reusable structures for connected records, changing rulesets, mixed clocks, material experiments, and build evidence.</p>
 <p><strong>Collections and links.</strong> Declared graph edge sets added cross-record links and checks for existence, cycles, reciprocity, bounded reachability, and values that move in one direction along a path.</p>
-<p><strong>Time.</strong> Rulesets gained finite registries, applicability tags, hooks, derived predicates, and state bindings. Clocks described several regimes and replay transitions; atomic transactions and snapshots remained deferred.</p>
+<p><strong>Time.</strong> Rulesets gained finite registries, applicability tags, hooks, derived predicates, and state bindings. Clocks described several regimes and replay transitions. Atomic transactions and snapshots remained deferred.</p>
 <p><strong>Tests.</strong> The material-simulation envelope described feature width, observation schedules, interactions, measures, and bounded outcomes. It did not certify universal emergence. A solver note supplied a finite-domain exhaustive-search pattern without fixing a universal puzzle profile.</p>
 <p><strong>The build record.</strong> <code class="anchor">opengdd-build.json</code> gained a schema and checks for identity, parties, personalization, resolved tuning, evidence payloads, digests, and acceptance counts. The manifest reserved an art-direction slot for v0.4 but did not use it yet.</p>
-<p><strong>Tools.</strong> Package mechanisms were additive, so migration usually meant changing <code>&quot;0.2&quot;</code> to <code>&quot;0.3&quot;</code>. New builds needed the v0.3 build-record shape; historical v0.2 records stayed with v0.2.</p>
+<p><strong>Tools.</strong> Package mechanisms were additive, so migration usually meant changing <code>&quot;0.2&quot;</code> to <code>&quot;0.3&quot;</code>. New builds needed the v0.3 build-record shape. Historical v0.2 records stayed with v0.2.</p>
 <h2 id="v0-2-draft-2026-08-06">v0.2 draft — 2026-08-06<a class="heading-anchor" href="#v0-2-draft-2026-08-06" aria-label="Link to this section">#</a></h2>
 <p>v0.2 introduced the first structured mechanisms around the prose document. It separated kinds of numeric authority, reusable content, tests, personalization, and package safety.</p>
 <p><strong>Numbers.</strong> Mutable values, Fixed constants, per-record facts, and test inputs gained distinct homes. Closed typed expressions covered numbers, Booleans, finite lists, and runtime state.</p>
@@ -212,7 +226,7 @@
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
-    <span><a href="/about/">About the standard</a></span>
+    <span><a href="/about/">About OpenGDD</a></span>
     <span>Prose CC-BY 4.0 · code MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
