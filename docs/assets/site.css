@@ -891,6 +891,7 @@ a:focus-visible, button:focus-visible {
   font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
 }
 .doc-body { min-width: 0; max-width: 46rem; font-size: 0.94rem; line-height: 1.75; }
+.doc-body :not(pre) > code { overflow-wrap: anywhere; }
 .doc-shot { display: block; max-width: 100%; height: auto; margin: 1.1rem 0; border: 1px solid var(--line); border-radius: 6px; }
 
 .heading-anchor {
