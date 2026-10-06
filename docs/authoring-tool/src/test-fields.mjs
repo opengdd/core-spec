@@ -324,8 +324,8 @@ async function embeddedHeadingChange(context, entity, value) {
 
 export function routeAcceptanceTestFinding(finding, entity) {
   const message = String(finding.message ?? "");
-  if (!message.includes(entity.id) && finding.code !== "VERIFICATION_AT_MISSING") return false;
-  if (["VERIFICATION_BLOCK", "VERIFICATION_SHAPE", "VERIFICATION_AT_ORDER", "VERIFICATION_AT_MISSING"].includes(finding.code)) return "header";
+  if (!message.includes(entity.id)) return false;
+  if (["VERIFICATION_BLOCK", "VERIFICATION_SHAPE", "VERIFICATION_AT_ORDER"].includes(finding.code)) return "header";
   if (["VERIFICATION_CLASS", "VERIFICATION_TYPE_RETIRED"].includes(finding.code)) return "type";
   if (finding.code === "VERIFICATION_GENERAL_SCOPE") return "scope";
   if (finding.code === "VERIFICATION_GENERAL_HOLDS") return "holds";

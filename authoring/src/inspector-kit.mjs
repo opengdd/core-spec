@@ -2,6 +2,7 @@ import { INSPECTOR_COPY } from "./copy/inspector-copy.mjs";
 import { element } from "./dom.mjs";
 import { removeEntity, renameEntity } from "./entity-lifecycle.mjs";
 import { walkJsonDocument } from "./edits-json.mjs";
+import { findingMessage } from "./findings.mjs";
 import { packageFiles } from "./json-path.mjs";
 import { pointerAtLine, pointerRange } from "./json-pointer-lines.mjs";
 // The read-only group helpers live apart so field modules can import them
@@ -28,6 +29,8 @@ export function openInEditor(context, entity) {
   }, { reveal: true, focus: true });
 }
 
+let actionReasonCount = 0;
+
 export function entityHeader({ document, context, entity, actions = [] }) {
   const header = element(document, "header", undefined, "opengdd-author-entity-header");
   header.dataset.entityHeader = entity.id;
@@ -43,14 +46,24 @@ export function entityHeader({ document, context, entity, actions = [] }) {
     if (!action) continue;
     const button = element(document, "button", action.label);
     button.type = "button";
+    button.disabled = action.disabled === true;
+    if (action.title) button.title = action.title;
     if (action.dataset) button.dataset[action.dataset] = "";
+    controls.append(button);
+    // A disabled action says why beside it, not only in a tooltip.
+    if (button.disabled && action.reason) {
+      const reason = element(document, "span", action.reason, "opengdd-author-action-reason");
+      reason.id = `opengdd-action-reason-${++actionReasonCount}`;
+      if (action.dataset) reason.dataset[`${action.dataset}Reason`] = "";
+      button.setAttribute("aria-describedby", reason.id);
+      controls.append(reason);
+    }
     button.addEventListener("click", () => Promise.resolve(action.run(button)).catch(failure => {
       button.title = failure.message;
       const message = String(failure.message ?? failure);
       error.textContent = message;
       error.hidden = !message;
     }));
-    controls.append(button);
   }
   header.append(controls, error);
   return header;
@@ -122,7 +135,7 @@ export function attachFindings(form, routes = {}) {
       const target = targets.get(key);
       if ((!box || !control) && !target) { atHeader.push(...items); continue; }
       if (target && (!box || !control)) {
-        const finding = element(document, "p", items.map(item => item.message).join(" "), "opengdd-author-form-finding");
+        const finding = element(document, "p", items.map(findingMessage).join(" "), "opengdd-author-form-finding");
         finding.id = `opengdd-inspector-${key}-finding`;
         target.append(finding);
         target.dataset.findingDescribedBase = target.getAttribute("aria-describedby") ?? "";
@@ -130,7 +143,7 @@ export function attachFindings(form, routes = {}) {
         continue;
       }
       if (!control.id) control.id = `opengdd-inspector-${key}`;
-      const finding = element(document, "p", items.map(item => item.message).join(" "), "opengdd-author-form-finding");
+      const finding = element(document, "p", items.map(findingMessage).join(" "), "opengdd-author-form-finding");
       finding.id = `${control.id}-finding`;
       box.append(finding);
       control.dataset.findingDescribedBase = control.getAttribute("aria-describedby") ?? "";
@@ -142,7 +155,7 @@ export function attachFindings(form, routes = {}) {
       list.dataset.inspectorFindings = "";
       for (const finding of atHeader) {
         const item = element(document, "li");
-        const button = element(document, "button", finding.message);
+        const button = element(document, "button", findingMessage(finding));
         button.type = "button";
         button.addEventListener("click", () => context.services.validation.reveal(finding));
         item.append(button);
@@ -287,7 +300,8 @@ export function createEntityInspector(context, shape) {
     const create = typeof shape.create === "function" ? shape.create(context, entity) : shape.create;
     const actions = [];
     for (const item of Array.isArray(create) ? create : create ? [create] : []) {
-      actions.push({ label: item.label, dataset: item.dataset ?? "entityCreate", run: anchor => item.run(context, { anchor }) });
+      actions.push({ label: item.label, dataset: item.dataset ?? "entityCreate", disabled: item.disabled,
+        title: item.title, reason: item.reason, run: anchor => item.run(context, { anchor }) });
     }
     if (shape.renameAction) actions.push({ label: INSPECTOR_COPY.rename, dataset: "entityRename",
       run: anchor => shape.renameAction(context, entity, anchor) });

@@ -4,7 +4,7 @@ import { findFencedJson, readEmbedded } from "./embedded-json.mjs";
 import { parseJson, plainObject, pointer } from "./json-path.mjs";
 import { pointerAtLine, pointerRange } from "./json-pointer-lines.mjs";
 import { positionToOffset } from "./text-coordinates.mjs";
-import { tuningKeys } from "./tuning-fields.mjs";
+
 import { entityChips, locationRows, referenceGroup } from "./inspector-groups.mjs";
 
 const HEX = /^#[0-9A-Fa-f]{6}$/;
@@ -193,9 +193,9 @@ export function directionPromiseFields(context, entity) {
   }, ...common];
   if (entity.kind === "contrast") {
     const operands = (Array.isArray(entity.value.colors) ? entity.value.colors : []).map((_value, index) => ({
-      key: `colors-${index}`, row: `colors-${index}`, rowLabel: INSPECTOR_COPY.promiseContrastColor(index),
-      label: INSPECTOR_COPY.promiseContrastColour, ariaLabel: INSPECTOR_COPY.promiseContrastColorLabel(index),
-      help: INSPECTOR_COPY.promiseContrastColorHelp, helpShared: "contrast-colour", type: "reference", required: true,
+      key: `colors-${index}`, row: `colors-${index}`, rowLabel: INSPECTOR_COPY.promiseContrastColorRow(index),
+      label: INSPECTOR_COPY.promiseContrastColor, ariaLabel: INSPECTOR_COPY.promiseContrastColorLabel(index),
+      help: INSPECTOR_COPY.promiseContrastColorHelp, helpShared: "contrast-color", type: "reference", required: true,
       labels: { change: INSPECTOR_COPY.changeDirectionPromise },
       binding: { file: "direction.json", pointer: `${entity.pointer}/colors/${index}` },
       options: { candidates: colors, allowFree: false }, mount: mountContrastColorActions(context, entity, index)
@@ -217,7 +217,7 @@ export function directionPromiseFields(context, entity) {
     key: "key", label: INSPECTOR_COPY.promiseTimingKey, help: INSPECTOR_COPY.promiseTimingKeyHelp,
     type: "reference", required: true, labels: { change: INSPECTOR_COPY.changeDirectionPromise },
     binding: { file: "direction.json", pointer: `${entity.pointer}/key` },
-    options: { candidates: candidateOptions(tuningKeys(context.package), INSPECTOR_COPY.promiseTimingCandidates), allowFree: false },
+    options: { candidates: candidateOptions(Object.keys(parseJson(context.package.read("tuning.json"))?.values ?? {}), INSPECTOR_COPY.promiseTimingCandidates), allowFree: false },
     status(value) {
       const tuning = parseJson(context.package.read("tuning.json"));
       const values = plainObject(tuning?.values) ? tuning.values : {};
@@ -785,7 +785,7 @@ function mountNameControl(index, mounted) {
   };
 }
 
-function mountHexControl(context, entity, index, colour) {
+function mountHexControl(context, entity, index, color) {
   return ({ document, box, control }) => {
     control.dataset.paletteColorHex = String(index);
     const swatch = element(document, "span", undefined, "opengdd-author-palette-swatch");
@@ -807,11 +807,11 @@ function mountHexControl(context, entity, index, colour) {
       button.addEventListener("click", () => Promise.resolve(run()).catch(error => { button.title = error.message; }));
       actions.append(button);
     };
-    action(INSPECTOR_COPY.moveColorUp, INSPECTOR_COPY.moveColorUpLabel(colour), "paletteMoveUp",
+    action(INSPECTOR_COPY.moveColorUp, INSPECTOR_COPY.moveColorUpLabel(color), "paletteMoveUp",
       () => movePaletteColor(context, entity, index, index - 1), index === 0);
-    action(INSPECTOR_COPY.moveColorDown, INSPECTOR_COPY.moveColorDownLabel(colour), "paletteMoveDown",
+    action(INSPECTOR_COPY.moveColorDown, INSPECTOR_COPY.moveColorDownLabel(color), "paletteMoveDown",
       () => movePaletteColor(context, entity, index, index + 1), index === entity.entries.length - 1);
-    action(INSPECTOR_COPY.removeColor, INSPECTOR_COPY.removeColorLabel(colour), "paletteRemoveColor", async () => {
+    action(INSPECTOR_COPY.removeColor, INSPECTOR_COPY.removeColorLabel(color), "paletteRemoveColor", async () => {
       await commitJson(context, INSPECTOR_COPY.removeColorUndo,
         json => json.remove(pointer(["palette", entity.id, index])));
       const remaining = entity.entries.length - 1;
@@ -828,11 +828,11 @@ export function paletteFields(context, entity) {
     const current = () => directionFrom(context.package)?.palette?.[entity.id]?.[index];
     const currentParts = () => entryParts(current());
     const currentName = currentParts().name;
-    const colour = INSPECTOR_COPY.paletteColorLabel(currentName, index, currentParts().hex);
+    const color = INSPECTOR_COPY.paletteColorLabel(currentName, index, currentParts().hex);
     const mountedName = {};
     return [{
       key: `palette-${index}-name`, row: `palette-${index}`, label: INSPECTOR_COPY.paletteName,
-      rowLabel: colour, ariaLabel: INSPECTOR_COPY.paletteNameLabel(colour),
+      rowLabel: color, ariaLabel: INSPECTOR_COPY.paletteNameLabel(color),
       help: INSPECTOR_COPY.paletteNameHelp, helpShared: "palette-name", type: "text", commitOnBlur: true,
       binding: { file: "direction.json", pointer: entryPointer },
       read: () => currentParts().name,
@@ -859,7 +859,7 @@ export function paletteFields(context, entity) {
       mount: mountNameControl(index, mountedName)
     }, {
       key: `palette-${index}-hex`, row: `palette-${index}`, label: INSPECTOR_COPY.paletteHex,
-      rowLabel: colour, ariaLabel: INSPECTOR_COPY.paletteHexLabel(colour),
+      rowLabel: color, ariaLabel: INSPECTOR_COPY.paletteHexLabel(color),
       help: INSPECTOR_COPY.paletteHexHelp, helpShared: "palette-hex", type: "text", monospace: true, required: true, commitOnBlur: true,
       binding: { file: "direction.json", pointer: currentName ? pointer(["palette", entity.id, index, currentName]) : entryPointer },
       read: () => currentParts().hex,
@@ -873,7 +873,7 @@ export function paletteFields(context, entity) {
         await commitJson(context, INSPECTOR_COPY.changeColor, json => json.set(
           currentParts().name ? pointer(["palette", entity.id, index, currentParts().name]) : entryPointer, value));
       },
-      mount: mountHexControl(context, entity, index, colour)
+      mount: mountHexControl(context, entity, index, color)
     }];
   });
 }

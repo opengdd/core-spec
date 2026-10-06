@@ -167,9 +167,7 @@ function openAddModeDialog(context, entity, anchor) {
     const mode = input.value.trim();
     add.disabled = true;
     try {
-      if (!plainObject(clocksFrom(context)[entity.id]?.modes)) throw new Error(INSPECTOR_COPY.clockModesUnreadable);
-      await commitJson(context, INSPECTOR_COPY.addClockModeUndo,
-        json => json.insert(pointer([entity.id, "modes"]), mode, DEFAULT_CLOCK_MODE));
+      await addClockMode(context, mode);
       dialog.remove();
       context.internal.focusField?.("clocks.json", `mode-${modeIds(context.package).indexOf(mode)}`);
     } catch (failure) {
@@ -181,6 +179,16 @@ function openAddModeDialog(context, entity, anchor) {
   anchor.after(dialog);
   input.focus();
   return dialog;
+}
+
+export async function addClockMode(context, mode) {
+  if (!MODE_ID.test(mode)) throw new Error(INSPECTOR_COPY.clockModeIdInvalid);
+  if (modeIds(context.package).includes(mode)) throw new Error(INSPECTOR_COPY.clockModeTaken(mode));
+  const clocks = clocksFrom(context);
+  if (Object.values(clocks).some(clock => !plainObject(clock?.modes))) throw new Error(INSPECTOR_COPY.clockModesUnreadable);
+  await commitJson(context, INSPECTOR_COPY.addClockModeUndo, json => {
+    for (const name of Object.keys(clocks)) json.insert(pointer([name, "modes"]), mode, DEFAULT_CLOCK_MODE);
+  });
 }
 
 function clockGroup(context, key, title, help, fields, after) {

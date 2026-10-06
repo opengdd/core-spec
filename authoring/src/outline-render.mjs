@@ -4,7 +4,7 @@ import { WIDGET_COPY } from "./copy/widget-copy.mjs";
 import { kindClass, kindDefinition } from "./kinds.mjs";
 import { buildOutlineModel } from "./outline-view.mjs";
 import { isContractDependentFinding, isContractTodoFinding } from "./contracts.mjs";
-import { findingAccessibleName, findingLocation } from "./findings.mjs";
+import { findingAccessibleName, findingLocation, findingMessage } from "./findings.mjs";
 
 export const OUTLINE_CREATE_ITEMS = Object.freeze(CREATION_COPY.outlineItems.flatMap(item => item === "Collection" ? [item, CONTRACT_COPY.create] : [item]));
 const outlineData = value => encodeURIComponent(value);
@@ -176,7 +176,7 @@ export function createOutlineRenderer({
     const renderProblem = (finding, parentKey) => {
       const index = finding.index;
       const severity = finding.severity === "error" ? "error" : "warning";
-      const message = String(finding.message);
+      const message = findingMessage(finding);
       const location = findingLocation(finding);
       const focusKey = `finding-${index}`;
       const accessible = findingAccessibleName(finding);
@@ -186,17 +186,23 @@ export function createOutlineRenderer({
     const renderEntity = (entity, level, parentKey) => {
       const focusKey = focusKeyForEntity(entity);
       const display = entity.display || entity.name;
-      const typeLabel = kindDefinition(entity.kind).labels.singular;
+      // A tuning number shows one badge (open or value) and its number:
+      // the guess of an open number, or a decided value with its range.
+      const tuningNumber = entity.kind === "value" && Object.hasOwn(entity, "number");
+      const typeLabel = tuningNumber && entity.open ? WIDGET_COPY.outlineOpenTag : kindDefinition(entity.kind).labels.singular;
+      const numberTag = tuningNumber ? WIDGET_COPY.outlineNumberDetail(entity.open, entity.number, entity.bounds) : "";
+      const shownTag = tuningNumber ? numberTag : entity.rangeTag;
+      const spokenTag = tuningNumber ? WIDGET_COPY.outlineNumberSpoken(entity.open, entity.number, entity.bounds) : entity.rangeTag;
       const selected = model.selection === entity.identity;
       const contractBadge = entity.kind === "contract" ? contractFindingBadge(entity.findings, validationFindings) : undefined;
       const accessible = contractBadge
         ? `${display}, ${typeLabel}, ${contractBadge.accessible}${problemTail(contractBadge.ordinaryIndexes, validationFindings)}`
-        : `${display}, ${typeLabel}${problemTail(entity.findings, validationFindings)}`;
-      const rangeTag = entity.rangeTag ? `<span class="opengdd-author-outline-range-tag">${escapeHtml(entity.rangeTag)}</span>` : "";
+        : `${display}, ${typeLabel}${spokenTag ? `, ${spokenTag}` : ""}${problemTail(entity.findings, validationFindings)}`;
+      const rangeTag = shownTag ? `<span class="opengdd-author-outline-range-tag">${escapeHtml(shownTag)}</span>` : "";
       const badges = contractBadge
         ? `${contractBadge.markup}${findingBadge(contractBadge.ordinaryIndexes, validationFindings)}`
         : findingBadge(entity.findings, validationFindings);
-      return `<li role="treeitem" aria-level="${level}" aria-selected="${selected}" aria-label="${escapeHtml(accessible)}" tabindex="-1" data-outline-entry="${outlineData(entity.identity)}" data-outline-parent="${escapeHtml(parentKey)}" data-outline-focus="${focusKey}" data-outline-name="${escapeHtml(display.toLocaleLowerCase())}" class="opengdd-author-outline-entry opengdd-author-outline-entry--${escapeHtml(entity.kind)} opengdd-author-kind--${kindClass(entity.kind)}${selected ? " opengdd-author-is-selected" : ""}"><div class="opengdd-author-outline-row"><span class="opengdd-author-outline-chevron" aria-hidden="true"></span>${outlineIcon(entity.kind, kindClass(entity.kind))}<span class="opengdd-author-outline-name">${escapeHtml(display)}</span><span class="opengdd-author-outline-kind-tag">${escapeHtml(typeLabel)}</span>${rangeTag}${badges}</div></li>`;
+      return `<li role="treeitem" aria-level="${level}" aria-selected="${selected}" aria-label="${escapeHtml(accessible)}" tabindex="-1" data-outline-entry="${outlineData(entity.identity)}" data-outline-parent="${escapeHtml(parentKey)}" data-outline-focus="${focusKey}" data-outline-name="${escapeHtml(display.toLocaleLowerCase())}" class="opengdd-author-outline-entry opengdd-author-outline-entry--${escapeHtml(entity.kind)} opengdd-author-kind--${kindClass(entity.kind)}${selected ? " opengdd-author-is-selected" : ""}"><div class="opengdd-author-outline-row"><span class="opengdd-author-outline-chevron" aria-hidden="true"></span>${outlineIcon(entity.kind, kindClass(entity.kind))}<span class="opengdd-author-outline-name" title="${escapeHtml(display)}">${escapeHtml(display)}</span><span class="opengdd-author-outline-kind-tag">${escapeHtml(typeLabel)}</span>${rangeTag}${badges}</div></li>`;
     };
 
     const renderBranch = (branch, mechanismKey) => {

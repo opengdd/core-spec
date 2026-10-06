@@ -1,8 +1,8 @@
 # OpenGDD authoring component
 
 Source: <https://github.com/opengdd/core-spec/tree/main/authoring>. Licensed
-under the [MIT licence](LICENSE). Tool v0.5 is versioned independently of the
-OpenGDD format and supports packages that declare OpenGDD 0.8. Problems and
+under the [MIT license](LICENSE). Tool v0.6 is versioned independently of the
+OpenGDD format and supports packages that declare OpenGDD 0.9. Problems and
 suggestions go to [GitHub Discussions](https://github.com/opengdd/core-spec/discussions);
 the published tool's "Report a problem" link opens one with the tool version
 filled in. Pull requests are welcome; see [CONTRIBUTING](../CONTRIBUTING.md).
@@ -13,19 +13,21 @@ There is one published authoring host. `/authoring-tool/` on the OpenGDD site
 mounts `src/workbench/shell.mjs` across the window below the site's top bar.
 The site supplies static schemas, listed packages,
 contract deep links, and its own theme state to that shell. The published page
-passes no reader URL, so the Prose header shows no reader link there;
-`serve.mjs` keeps its `/read/` route.
+passes no reader URL, so the Prose header shows no reader link there.
 
-The check scripts under `scripts/` and the development server live in the steward's repository, not in this published source tree; `workbench.html` loads only through that server.
+The built files of that host are in `docs/authoring-tool/` in the public
+repository. `docs/authoring-tool/embed.html` is a minimal host page that runs
+from those files. "Embed in another site" below describes it.
 
-`node authoring/scripts/serve.mjs` serves the same shell for local development.
-Its `/file/`, `/api/authoring/package`, and `/read/` routes are the shell's
-defaults, so `workbench.html` needs no host configuration. The bare component
-embed remains a compatibility and test surface; it is not a second published
-authoring tool.
+The public repository includes neither the development server of the tool
+nor its check scripts. The bare component embed remains a compatibility and
+test surface; it is not a second published authoring tool.
 
 `mountWorkbenchShell(target, options)` is the full-window host entry point.
-Omitting its data options keeps the local development routes. `showTheme`
+When its data options are omitted, the shell uses the routes of that
+development server: `/file/` for schemas, `/api/authoring/package` for
+packages, and `/read/` for reader pages. A host without that server supplies
+`schemas`, `listPackages` and `loadPackage`, as `embed.html` does. `showTheme`
 defaults to `true`; the site passes `false` because its top-bar theme toggle
 owns the published page.
 
@@ -37,15 +39,26 @@ documentation. It lists its own **Harbour Lights** package through
 `listPackages`, opens it through `loadPackage`, and uses the same generated
 asset paths and import map as the published host.
 
-Copy these files while preserving their relative layout under one public URL
-such as `/authoring-tool/`:
+Copy these parts of the built folder `docs/authoring-tool/` of the public
+repository to one public URL, such as `/authoring-tool/`, and keep their
+relative layout:
 
-- `authoring/authoring.css`;
-- all of `authoring/src/`;
-- all of `authoring/panels/` if using the bundled panels;
-- `lang-tools/src/analysis.mjs` as `lib/lang/tools/src/analysis.mjs`;
-- `conformance/package-syntax.mjs`, `file-map-host.mjs`, `migrate.mjs`, and
-  `validate-core.mjs` under `lib/opengdd/conformance/`.
+- `authoring.css`;
+- all of `src/`;
+- all of `panels/` if using the bundled panels;
+- `lib/lang/tools/src/analysis.mjs`, the analysis module;
+- `lib/opengdd/conformance/`, which holds `package-syntax.mjs`,
+  `file-map-host.mjs`, `migrate.mjs`, and `validate-core.mjs`.
+
+Copy `lib/` from the built folder. Do not assemble it from other folders of
+the repository. The modules in `lib/` have import paths for this layout, and
+the public repository has no other copy of the analysis module. `index.html`
+and `example/` in the built folder belong to the page of the OpenGDD site.
+The embed does not need them.
+
+The addresses in `embed.html` start with `/authoring-tool/`. When you serve
+the folder at another URL, change that start in the two stylesheet links, in
+the import map and in the three module imports of the page.
 
 Serve the seven schemas named under Mount options from URLs your `schemas`
 loader controls. Load both stylesheets, in this order:
@@ -63,17 +76,17 @@ and mount into an element with a bounded width and height.
 
 The shell accepts `panels`, `preparedConventionsUrl`, `schemas`, `packages`,
 `listPackages`, `loadPackage`, `defaultPackageId`, `readerUrl`,
-`initialContract`, `contractsCatalogueUrl`, `links`, and `showTheme`. `examples` remains
+`initialContract`, `contractsCatalogUrl`, `links`, and `showTheme`. `examples` remains
 an alias for `packages` for one release and logs a deprecation warning. Unknown
 options also warn. `packages` is a static list; `listPackages()` is its dynamic
 equivalent and takes precedence. Supply `loadPackage(id)` with either. The
 shell consumes `packages`, `preparedConventionsUrl`, `links`, and `showTheme` itself and
 forwards the component-facing subset: `panels`, `schemas`, `listPackages`,
 `loadPackage`, `defaultPackageId`, `readerUrl`, `initialContract`, and
-`contractsCatalogueUrl`.
+`contractsCatalogUrl`.
 
 Set `readerUrl: null` when the host has no reading route. Set
-`contractsCatalogueUrl` to the page designers should use to find contract
+`contractsCatalogUrl` to the page designers should use to find contract
 definitions, or omit it to hide that link. `preparedConventionsUrl` is the
 shell's optional link to host-maintained prepared mechanics. `links` is a
 list of `{ href, label }` pairs shown in the status strip after the version;
@@ -82,7 +95,7 @@ the published tool uses it for the source and the Get started guide. With
 does not write classes, data attributes, `color-scheme`, custom properties, or
 any other state on `document.documentElement`.
 
-Load `authoring.css`, provide the six import-map names shown in `workbench.html`, then mount the single JavaScript entry:
+Load `authoring.css`, provide the six import-map names shown in `embed.html`, then mount the single JavaScript entry:
 
 ```js
 import { mountAuthoringTool } from "/authoring-tool/src/tool.mjs";
@@ -110,8 +123,8 @@ All options are optional. Checking remains unavailable until `schemas` supplies 
 | `capabilities` | Named host policy flags shaped as `{protectedFiles?, workbenchLabels?, hostUndo?, delete?, coldStart?}`. When `regions` is supplied and this option is absent, all five default to `true` for compatibility with existing regional hosts. When an object is supplied, omitted flags default to `false`. Without either regions or explicit capabilities, all five are `false`, preserving the ordinary widget. Unknown members and non-boolean values are rejected. |
 | `panels` | An array of revision-1 panel descriptor default exports, or an async function returning one. Descriptors register in order; a rejected descriptor is reported and skipped without preventing the remaining panels from mounting. Revision 0 is not accepted. |
 | `outlineFolds` | Optional outline fold-state host shaped as `{collapsed(), setCollapsed(ids)}`. It stores mechanism and Tuning-branch fold ids. The workbench keeps one global set in its existing layout record; the ordinary widget omits the hook, so folds last only for the mount. `outlineCollections` with the same shape is still accepted for one release as a compatibility alias, but new hosts should use `outlineFolds`. |
-| `contractsCatalogueUrl` | Link shown under Add a contract when the designer needs a definition. No default: while unset, the dialog shows no catalogue link. The published site passes `/contracts/`; the development workbench passes nothing. |
-| `initialContract()` | Async function returning `{definitionText, packText?}` when the host arrived with a contract already chosen (a catalogue deep link), or a falsy value for none. After the initial package opens, the tool opens Add a contract with that source loaded; the designer still names the copy and confirms. `packText` carries the pack file's exact bytes as a `Uint8Array` so its hash can be checked. A source that is not a contract is reported and nothing opens. |
+| `contractsCatalogUrl` | Link shown under Add a contract when the designer needs a definition. No default: while unset, the dialog shows no catalog link. The published site passes `/contracts/`; the development workbench passes nothing. |
+| `initialContract()` | Async function returning `{definitionText, packText?}` when the host arrived with a contract already chosen (a catalog deep link), or a falsy value for none. After the initial package opens, the tool opens Add a contract with that source loaded; the designer still names the copy and confirms. `packText` carries the pack file's exact bytes as a `Uint8Array` so its hash can be checked. A source that is not a contract is reported and nothing opens. |
 | `preparedStartingPoints` | Optional array of trusted host adapters for prepared mechanics. Adds a guided review entry and reconnects it from the contract inspector. Not a revision-1 extension service or contract-format field. The earlier `experimentalStartingPoints` name remains a compatibility fallback; the maintained name takes precedence. |
 | `schemas` | Schema object/`Map`, or an async function returning one, keyed by the six required names: `manifest.schema.json`, `tuning.schema.json`, `personalization.schema.json`, `collection.schema.json`, `direction.schema.json`, and `opengdd-build.schema.json`. `clocks.schema.json` is optional for checking and required only for migration preview. Additional keys are accepted and unused. Failed required loads may be retried. |
 | `defaultPackageId` | Optional id of the built-in package selected on mount. Defaults to the first item returned by `listPackages()`. |
@@ -119,6 +132,9 @@ All options are optional. Checking remains unavailable until `schemas` supplies 
 | `loadPackage(id)` | Returns a built-in package for the selected id. Provide it with `listPackages`. |
 | `readerUrl(packagePath, file)` | Returns the host's reader URL for an unchanged repository Markdown file. |
 | `downloadPackage({name, bytes, type})` | Receives an exported ZIP. Omit it to use the browser's normal file download. |
+
+The tool reads the earlier `contractsCatalogueUrl` name only when
+`contractsCatalogUrl` is absent. New hosts use `contractsCatalogUrl`.
 
 ### Prepared starting points
 
@@ -140,7 +156,9 @@ Optional `questionCopy` supplies game-specific wording keyed by question id:
 `{asks?, rationale?, options?: {optionId: meaning}}`. Only nonblank strings
 replace displayed wording. Original option identities, liveness, semantic
 fields and saved definition bytes are unchanged; extra option keys are ignored.
-Both the private reading page and guided review use the same projection.
+The guided review shows this wording through `preparedQuestionCopy` in
+`src/prepared-contract.mjs`. A host page that shows the same adoption for
+reading can call the same function, so both show the same wording.
 This is trusted host presentation, never instructions from imported data.
 
 An optional `list` projects one row list into editable cards. It supplies
@@ -188,26 +206,23 @@ editor's revision, pending prose buffer and unsaved prepared-form changes.
 Check it again after asynchronous validation and before handing off the files.
 The action appears beside an existing adoption and after save; new adoptions
 and changed forms must be saved first. Rejections are displayed beside the
-action. The host owns validation, destination, transport and cleanup. The local
-squad, checkpoint, camera, poison and backpack previews use a bounded one-way snapshot
-and a fresh model per launch. This hook is not a public extension API or a
-contract-format field.
+action. The host owns validation, destination, transport and cleanup. This
+hook is not a public extension API or a contract-format field.
 
-Optional `matches(adoption, files)` distinguishes supplied conventions that
-share a family and version, such as jump and reload. Matching checks the family
-and version first, then this trusted host predicate. Both the launcher and
-contract inspector use it. The trial recognizes the cited ordinary setup
-section; no new identity field is added to the format. Matching offers the
+Optional `matches(adoption, files)` distinguishes supplied adapters that
+share a contract and version. Matching checks the contract and version first,
+then this trusted host predicate. Both the launcher and
+contract inspector use it. A predicate can, for example, recognize the
+chapter section that the adoption cites. No identity field is added to the
+format. Matching offers the
 appropriate editor; the save guard still verifies the complete definition,
 local rules and current file revision before writing.
 
-The maintained adapters live under
-`conventions/ui/`: stamina supplies a
-prepared action list, placement an editable tower list with ordinary effect
-sections, jump and reload shared assistance with conditional questions, and
-backpack an editable item list. Each is limited to its supplied behavior. A changed definition or local
-rules requires review. This is trusted host configuration, not a general
-catalogue extension API. Opening the guide stages
+The public source holds this host contract and no adapter. A host writes its
+own adapters and passes them in `preparedStartingPoints`. Each adapter is
+limited to the behavior that it supplies. A changed definition or changed
+local rules require review. This is trusted host configuration, not a general
+catalog extension API. Opening the guide stages
 changes locally; Save validates and commits contract, tuning, companion rules,
 chapter additions and pack together. Cancel writes nothing. Source changes
 retain old tuning values and remind the designer to review existing prose and
@@ -246,15 +261,15 @@ Supplying regions relocates component-owned surfaces into host-owned elements. E
 
 The workbench places the inspector in a resizable band under the prose and Validation in a fixed-height panel beneath the inspector. The inspector body defaults to two fifths of the height left after Validation, with a 14rem floor; the band's total height adds its measured header, while the editor keeps an 8rem floor. When those floors no longer fit, the same inspector Element moves into a full-column sheet. The widget host keeps its anchored inspector drawer.
 
-Validation keeps the last completed findings visible while a new check runs. Its body is only replaced when the rendered findings actually change, so typing does not collapse the list, reset its scroll, or resize the editor. Findings form one compact list without error/warning subheadings; each row keeps its message and location on one line, with only the `ERROR` or `WARNING` keyword carrying the red or amber severity colour. JSON syntax errors come before other errors, carry a source line when it can be identified, and suspend findings that depend on reading that malformed document. Collapsing Validation reduces it to its summary row; it also uses that compact form automatically while the short-window Inspector sheet is active.
+Validation keeps the last completed findings visible while a new check runs. Its body is only replaced when the rendered findings actually change, so typing does not collapse the list, reset its scroll, or resize the editor. Findings form one compact list without error/warning subheadings; each row keeps its message and location on one line, with only the `ERROR` or `WARNING` keyword carrying the red or amber severity color. JSON syntax errors come before other errors, carry a source line when it can be identified, and suspend findings that depend on reading that malformed document. Collapsing Validation reduces it to its summary row; it also uses that compact form automatically while the short-window Inspector sheet is active.
 
-For an OpenGDD 0.6 package, the workbench shows a conditional Migration companion beneath Notes instead of inserting the flow into Validation. Its actions remain above the companion's scrolling preview, and the companion disappears again for a current package. Regional compatibility hosts without that companion placement retain the migration flow in Validation.
+For an OpenGDD 0.6, 0.7, or 0.8 package, the workbench shows a conditional Migration companion beneath Notes instead of inserting the flow into Validation. Its actions remain above the companion's scrolling preview. Manual items and review notes appear in separate lists, and review notes do not count as remaining work. The companion disappears again for a current package. Regional compatibility hosts without that companion placement retain the migration flow in Validation.
 
 In the expanded band, keyboard focus reaches the horizontal resize handle, the collapse button, and then the panel's controls in document order; Escape from the inspector restores the editor's last caret and scroll position. The collapsed strip opens from the strip itself or **Open inspector**. In sheet mode, **Back to your text** comes first, followed by the inspector controls; that button and Escape both close the sheet and restore the editor's last caret and scroll position. The sheet auto-opens only for a matching selection from the outline sidebar or a panel. Opening a package, choosing a file in the explorer, and prose hover or caret selections all ask for the editor: they update the inspector and make **Open inspector** available without covering the editor. Band mode always renders the matching selection in place.
 
 ### Outline hierarchy
 
-The outline is one tree organized by designer-facing mechanism: Collections, Contracts, Tuning, Time, Direction, Sections, Acceptance tests, and Personalization. Collections, Tuning, Sections, and Acceptance tests always render; Contracts also remains a standing door, while the other mechanisms appear when their package file or declarations are present. Mechanism rows are selectable, show the number of selectable entities they own, expose their primary creation action as a compact `+` on hover or focus, and use their chevron to fold without selecting. Tuning values sit under predictable first-segment folds, with rules under one `rules` fold. Records, contract values, colours, runtime values, rulesets, pillars, anti-references, and must-keep entries remain citable and selectable through their owning inspectors but do not become tree rows.
+The outline is one tree organized by designer-facing mechanism: Collections, Contracts, Tuning, Time, Direction, Sections, Acceptance tests, and Personalization. Collections, Tuning, Sections, and Acceptance tests always render; Contracts also remains a standing door, while the other mechanisms appear when their package file or declarations are present. Mechanism rows are selectable, show the number of selectable entities they own, expose their primary creation action as a compact `+` on hover or focus, and use their chevron to fold without selecting. Tuning values sit under predictable first-segment folds, with rules under one `rules` fold. Records, contract values, colors, runtime values, rulesets, pillars, anti-references, and must-keep entries remain citable and selectable through their owning inspectors but do not become tree rows.
 
 The tree uses one roving tab stop. Arrow keys move, expand, collapse, and reach parents or children; Home and End jump; typing a printable character finds the next visible name. Enter or Space selects a mechanism or entity without moving focus into the raw editor, while a second Enter enters its inspector and Escape returns to the originating row. Shift+Enter runs a mechanism's primary creation action. Rows contain no tabbable controls, and declaration-row accessible names contain the visible name, type, and problem count without file or line metadata. Reanalysis preserves outline scroll and focus and recomputes exactly one tab stop.
 
@@ -313,7 +328,7 @@ The reusable record table accepts a row adapter with this interface:
 
 The inline contract-row adapter reads its adoption from the package at the start of every adapter call. A table may synchronously refresh after `add`, `move`, or `remove`, and a later write must resolve the named row against that current authored order rather than an object parsed before the mutation.
 
-An adapter that offers editable cells must also supply `field(id, key, shape)` and `binding(id, key)`. The folder adapter uses them to give the table a form-kit descriptor and its JSON location; the table then routes the kit's committed value through `write`. Without both, the cell is labelled read-only and does not pretend that opening the record is an edit. Spreadsheet paste additionally requires `previewAdd(rows)`. Without it, the paste preview says that the adapter does not take pasted rows and **Add them** stays disabled. These descriptor and preview members are part of the table contract for those capabilities, including the inline contract-row adapter.
+An adapter that offers editable cells must also supply `field(id, key, shape)` and `binding(id, key)`. The folder adapter uses them to give the table a form-kit descriptor and its JSON location; the table then routes the kit's committed value through `write`. Without both, the cell is labeled read-only and does not pretend that opening the record is an edit. Spreadsheet paste additionally requires `previewAdd(rows)`. Without it, the paste preview says that the adapter does not take pasted rows and **Add them** stays disabled. These descriptor and preview members are part of the table contract for those capabilities, including the inline contract-row adapter.
 
 The form kit's `reference` type is the current contract-citation picker. It renders a grouped select over tuning values, contract values, and chapter sections; `references.pick` is not used because no anchored general picker exists yet. A current non-candidate value remains visible with its validator error so opening the form never conceals authored data.
 
@@ -323,7 +338,7 @@ The extension context exposes these services. A panel declares the whole service
 |---|---|
 | `selection` | `current`, `subscribe`, `select`, `clear` |
 | `edits` | `begin` |
-| `validation` | `current`, `subscribe`, `forFile`, `reveal`, `contribute`. Contributed `warning` or `info` advice renders as warnings labelled with the panel title and increments the displayed warning count. |
+| `validation` | `current`, `subscribe`, `forFile`, `reveal`, `contribute`. Contributed `warning` or `info` advice renders as warnings labeled with the panel title and increments the displayed warning count. |
 | `references` | `families`, `resolve`, `usages`, `planRename`, `applyRename`, `planUseContractValue`, `applyUseContractValue`. This cut enumerates the `collection`, `collection-record`, `collection-field`, and `contract` families across prose and JSON. The last two members are the contract family's second job: remove one tuning key and its range, when present, and rewrite every prose citation to a named contract value as one validated plan. A tuning rule that names the key refuses the plan before confirmation and names the rule that must be rewritten first. |
 | `forms` | `create` |
 | `grid` | Not implemented yet. |
@@ -356,50 +371,6 @@ The controller's `selection.current()` and `selection.subscribe(listener)` membe
 | `outlineProblemsOnly(value)` | Enables or disables the outline problems-only filter and returns the resulting state. |
 | `destroy()` | Stops work and removes only this instance's owned DOM and listeners. |
 | `testHooks` | Test-only analysis-view and editor-revision observations used by the browser behavior harness; not a supported host API. |
-
-## Local pages and checks
-
-These pages and checks exist in the steward's repository, not in the public
-copy; they are listed so a reader knows what the tool is tested against.
-
-Run `node authoring/scripts/serve.mjs` from the repository root. The workbench is served at `/author/workbench.html` (and at `/` by the local server).
-
-| Check | Dependency |
-|---|---|
-| `node authoring/scripts/check-creation.mjs` | Node.js standard library only. |
-| `node authoring/scripts/check-contracts.mjs` | Node.js standard library only; checks contract addition, update, worksheet, rows, and undo against in-memory fixtures. |
-| `node authoring/scripts/check-contract-parity.mjs` | Node.js standard library only; compares the tool's contract liveness with the validator across every forge adoption and a deterministic sample of mutations; `--full` runs every mutation (about 4½ minutes). |
-| `node authoring/scripts/check-prepared-contracts.mjs` | Node.js standard library only; checks the local stamina adapter with new/WIP adoption, source reuse/creation, conditional round trips, companion rules and byte-exact undo. |
-| `node authoring/scripts/check-contract-transfer.mjs` | Node.js standard library only; checks transfer of a complete contract package and its exact files. |
-| `node authoring/scripts/check-edits.mjs` | Node.js standard library only. |
-| `node authoring/scripts/check-forms.mjs` | Node.js standard library only; drives every form field through the real lossless JSON patch helpers. |
-| `node authoring/scripts/check-migrate.mjs` | Node.js standard library only; compares collected browser migration outputs with a real CLI migration and checks byte-exact undo. |
-| `node authoring/scripts/check-references.mjs` | Node.js standard library only; checks reference plans, atomic application, and byte-restoring undo. |
-| `node authoring/scripts/check-inspectors.mjs` | Node.js standard library only; checks inspector models, field edits, finding routing, and byte-exact undo. |
-| `node authoring/scripts/check-sample.mjs` | Node.js standard library only; checks three maintained sample packages. |
-| `node authoring/scripts/check-workbench.mjs` | Node.js standard library only. |
-| `node authoring/scripts/check-server.mjs` | Node.js standard library plus the assembled static-site fixture. |
-| `node authoring/scripts/check-lifecycle.mjs` | Node.js plus the platform archive tools it exercises (`tar`/`unzip` and PowerShell on Windows). |
-| `node authoring/scripts/check-panels.mjs` | Node.js standard library only; checks descriptor validation, revision exclusion, creator `requires`, and selection delivery. |
-| `node authoring/scripts/check-table.mjs` | Node.js standard library only; checks the folder adapter, table view operations, paste, field inference, and schema rewrite operations against in-memory fixtures. |
-| `node authoring/scripts/check-all.mjs` | Runs every Node check above once and inherits their dependencies. |
-| `/author/browser-behavior-check.html` | A browser; self-asserting behavior and DOM-fixture harness. |
-| `/author/browser-behavior-check-headless.html` | A browser runner that does not deliver animation frames. |
-| `/author/embed-check.html` | A browser; checks the embedded authoring surface. |
-| `py -3.12 authoring/scripts/perf-typing.py --assert` | Optional Playwright for Python plus its Chromium browser (`playwright install chromium`). |
-
-Run the two self-reporting browser pages and the built `/authoring-tool/` page
-with `node authoring/scripts/run-browser-checks.mjs`. The runner reads
-Playwright from `OPENGDD_PLAYWRIGHT_DIR`, `--playwright <dir>`, or the default
-scratch directory `<os.tmpdir()>/opengdd-harness`; it does not add a repository
-dependency. In that scratch directory, install the pinned runner with `npm i
-playwright@1.62.1`, then install its browser with `npx playwright install
-chromium`. Use `--port <n>` to replace port 8123, or add page paths to replace
-the three defaults. `--screenshots` saves the published page at 1440×900 and
-1280×720 under the operating system's temporary directory;
-`--screenshot-dir <dir>` chooses another scratch directory.
-
-The Node and browser checks read repository fixtures into memory. They never write inside the repository; temporary migration copies are created under the operating system's temporary directory.
 
 ## Theme contract
 

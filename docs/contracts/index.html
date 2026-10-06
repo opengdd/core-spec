@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Contracts — OpenGDD</title>
-<meta name="description" content="Reuse a game mechanic in your OpenGDD design. Learn how contracts supply questions and acceptance tests, with a short stamina example.">
+<meta name="description" content="Reuse a game mechanic in your OpenGDD package. Learn how contracts supply questions and acceptance tests, with a short stamina example.">
 <link rel="canonical" href="https://opengdd.org/contracts/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Contracts — OpenGDD">
-<meta property="og:description" content="Reuse a game mechanic in your OpenGDD design. Learn how contracts supply questions and acceptance tests, with a short stamina example.">
+<meta property="og:description" content="Reuse a game mechanic in your OpenGDD package. Learn how contracts supply questions and acceptance tests, with a short stamina example.">
 <meta property="og:url" content="https://opengdd.org/contracts/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta property="og:image:type" content="image/png">
@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
 <meta name="twitter:title" content="Contracts — OpenGDD">
-<meta name="twitter:description" content="Reuse a game mechanic in your OpenGDD design. Learn how contracts supply questions and acceptance tests, with a short stamina example.">
+<meta name="twitter:description" content="Reuse a game mechanic in your OpenGDD package. Learn how contracts supply questions and acceptance tests, with a short stamina example.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -29,8 +29,8 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
 <link rel="stylesheet" href="/assets/site.css">
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
-<link rel="stylesheet" href="/assets/contracts.css?v=ff285f28dd16">
-<script type="module" src="/assets/contracts.mjs?v=ff285f28dd16"></script>
+<link rel="stylesheet" href="/assets/contracts.css?v=1e8e4c011773">
+<script type="module" src="/assets/contracts.mjs?v=1e8e4c011773"></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -48,13 +48,13 @@
   </div>
 </header>
 <main id="main">
-<div class="doc-layout contract-catalogue">
+<div class="doc-layout contract-catalog">
 <nav class="doc-toc contract-nav" aria-label="Contracts">
 <details class="contract-nav-disclosure">
   <summary>Contracts</summary>
   <div class="contract-nav-content">
     <p class="toc-title">Contracts</p>
-    <ul class="contract-nav-home"><li><a href="/contracts/" aria-current="page">Overview</a></li><li><a href="/contracts/catalogue/">Contract catalogue</a></li></ul>
+    <ul class="contract-nav-home"><li><a href="/contracts/" aria-current="page">Overview</a></li><li><a href="/contracts/catalog/">Contract catalog</a></li></ul>
 <div class="toc-group contract-page-nav">
   <p class="toc-group-title">On this page</p>
   <ul><li><a href="#concept">Contract and adoption</a></li>
@@ -67,10 +67,10 @@
 <p class="contract-positioning">A <strong>contract</strong> is a short list of questions about one game mechanic, such as a stamina bar or a backpack. Answer the questions, and the mechanic is defined well enough to build and test. Contracts are optional: a package is complete without one.</p>
 <section class="contract-concept" aria-labelledby="concept">
 <h2 id="concept">Contract and adoption</h2>
-<p>A contract asks the questions about one mechanic. An <strong>adoption</strong> is one set of answers to those questions, and a set of answers is one specific behaviour. Answer <a href="/contracts/ranged-value-1/">Ranged value</a> one way and you have an XP bar that fills into the next level; answer it another way and you have a stamina bar that refuses an attack you cannot afford. <a href="/contracts/ranged-value-1/health/">Health</a>, <a href="/contracts/ranged-value-1/stamina/">Stamina</a> and <a href="/contracts/ranged-value-1/oxygen/">Oxygen</a> are three adoptions of the same contract.</p>
+<p>An <strong>adoption</strong> is one set of answers to the questions of a contract. One set of answers defines one behavior. With one set of answers, <a href="/contracts/ranged-value-2/">Ranged value</a> is an XP bar that fills into the next level. With another set of answers, it is a stamina bar that blocks an attack when the player has too little stamina. <a href="/contracts/ranged-value-2/health/">Health</a>, <a href="/contracts/ranged-value-2/stamina/">Stamina</a> and <a href="/contracts/ranged-value-2/oxygen/">Oxygen</a> are three adoptions of the same contract.</p>
 <ol class="contract-flow">
-<li><h3>Contract</h3><p>The questions about one mechanic. 15 for Ranged value.</p></li>
-<li><h3>Adoption</h3><p>One set of answers, which is one behaviour. Change an answer and you have a different adoption.</p></li>
+<li><h3>Contract</h3><p>The questions about one mechanic. The Ranged value contract has 15 questions.</p></li>
+<li><h3>Adoption</h3><p>One set of answers. If you change one answer, you have a different adoption.</p></li>
 </ol>
 <p>The Ranged value contract asks, among its 15 questions:</p>
 <div class="contract-table-scroll" role="region" aria-label="Two stamina questions and their answers" tabindex="0"><table class="contract-concept-table"><thead><tr><th scope="col">The contract asks</th><th scope="col">The Stamina adoption answers</th></tr></thead><tbody>
@@ -82,11 +82,11 @@
 <section class="contract-start-choice" aria-labelledby="starting-points">
 <h2 id="starting-points">Your first adoption</h2>
 <ol class="contract-mini-flow">
-<li><strong>Find the contract</strong> for your mechanic in the <a href="/contracts/catalogue/">catalogue</a>. Search with the word you already use: health bar, backpack, coyote time, autosave.</li>
+<li><strong>Find the contract</strong> for your mechanic in the <a href="/contracts/catalog/">catalog</a>. Search with the word you already use: health bar, backpack, coyote time, autosave.</li>
 <li><strong>Pick the adoption</strong> closest to your game. If none fits, start from the contract itself and answer the questions yourself.</li>
 <li><strong>Open it in the authoring tool</strong> with the button on its page, change the answers and numbers that do not fit, and save it into your package.</li>
 </ol>
-<p>That is the whole workflow. The files that come out of it are ordinary package files; <a href="/handbook/contracts/">the Handbook chapter</a> shows what they look like.</p>
+<p>These three steps are the complete process. They add ordinary package files to your package. The <a href="/handbook/contracts/">Contracts chapter of the Handbook</a> shows these files.</p>
 </section>
 </article>
 </div>
@@ -94,7 +94,7 @@
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

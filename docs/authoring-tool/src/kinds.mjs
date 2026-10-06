@@ -9,7 +9,7 @@ const row = (kind, singular, plural, mechanism, entity, colorClass, selection = 
   mechanismOwned
 });
 
-// One vocabulary for analysis declarations, outline routing, editor colour,
+// One vocabulary for analysis declarations, outline routing, editor color,
 // creation copy, and panel selection. A kind can belong to a mechanism
 // without being an outline entity: those declarations remain selectable and
 // citable, while their inspector-owning entity (or mechanism) owns the row.
@@ -26,8 +26,8 @@ export const KIND_TAXONOMY = Object.freeze([
   row("ruleset", "ruleset", "rulesets", "sections", false, "ruleset"),
   row("mood", "mood", "moods", "direction", true, "mood", true, "bare"),
   row("palette", "palette", "palettes", "direction", true, "palette", true, "bare"),
-  row("color", "colour", "colours", "direction", false, "color"),
-  row("colors", "colour promise", "colour promises", "direction", true, "colors", true, "bare"),
+  row("color", "color", "colors", "direction", false, "color"),
+  row("colors", "color promise", "color promises", "direction", true, "colors", true, "bare"),
   row("contrast", "contrast promise", "contrast promises", "direction", true, "contrast", true, "bare"),
   row("timing", "timing promise", "timing promises", "direction", true, "timing", true, "bare"),
   row("pillars", "pillar", "pillars", "direction", false, "pillars", true, "full", true),

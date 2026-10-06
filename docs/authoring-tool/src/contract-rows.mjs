@@ -139,12 +139,12 @@ export function createContractRows({ file, set, schema, readAdoption, internal, 
       const adoption = currentAdoption();
       const rows = authored(adoption);
       const index = indexOf(rows, id);
-      const neighbour = direction === "up" ? index - 1 : direction === "down" ? index + 1 : -1;
+      const neighbor = direction === "up" ? index - 1 : direction === "down" ? index + 1 : -1;
       if (index < 0) throw new Error(copy.rowMissing(id));
-      if (neighbour < 0 || neighbour >= rows.length) return false;
+      if (neighbor < 0 || neighbor >= rows.length) return false;
       await writeBoundary(adoption, { changes: [
         { parts: ["rows", set, index], remove: true },
-        { parts: ["rows", set], insert: neighbour, value: structuredClone(rows[index]) }
+        { parts: ["rows", set], insert: neighbor, value: structuredClone(rows[index]) }
       ], label: copy.undo.moveRow });
       return true;
     },

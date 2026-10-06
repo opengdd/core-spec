@@ -10,8 +10,7 @@ certified builds.
 A hardened specification has evidence that its published text and data—not
 shared private context—are sufficient to produce faithful implementations.
 At least two builders start from the same specification package, produce
-separately certified builds, and agree on the document's resolved numeric
-values.
+separately certified builds, and agree on the numbers that the package fixes.
 
 Hardening is evidence about the document. It is not a promise that every
 future build will be correct, visually identical, or certified.
@@ -46,11 +45,20 @@ Each build goes through the certification protocol:
 
 ## Cross-build agreement
 
-After the builds are individually certified, compare the full resolved tuning
-snapshot—`tunables` and Fixed `constants`—using the canonical serialization in
-[CERTIFICATION.md](CERTIFICATION.md). Values that the specification fixes must
-agree exactly. A divergence is evidence of ambiguity and routes back to the
-designer; it is not resolved by choosing a preferred implementation.
+After the builds are individually certified, compare the numbers in
+`resolved_tuning.values` of their build records, using the canonical
+serialization in [CERTIFICATION.md](CERTIFICATION.md). That map holds every
+key of `values` and of `open` in `tuning.json`, every present open record
+field, and every value of an active contract declaration, each with its
+resolved number.
+
+A ranged number may differ between builds, inside its range. An open number
+may differ too, inside its range when it has one. A number that a
+personalization answer set equals that answer, so it agrees when the answers
+agree. The numbers that the package fixes must agree exactly. They are the
+decided tuning values and the contract values. A divergence in one of them is
+evidence of ambiguity and routes back to the designer; it is not resolved by
+choosing a preferred implementation.
 
 Aesthetic and presentational areas are excluded from byte-exact agreement
 unless the specification explicitly pins them through a certifiable

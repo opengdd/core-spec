@@ -31,7 +31,7 @@ ranges.
 
 Scope: the Fixed requirements in
 [04-presentation.md](04-presentation.md), including the mark-ink
-colour promise declared in [direction.json](direction.json).
+color promise declared in [direction.json](direction.json).
 
 - Checkpoint: AT-4 passes, and every Fixed requirement in
   [04-presentation.md](04-presentation.md) is reviewed against the
@@ -143,14 +143,14 @@ X O .
 }
 ```
 
-The claim's colour reference, tolerance, and scope, and the palette colour it
+The claim's color reference, tolerance, and scope, and the palette color it
 names, are read from [direction.json](direction.json); none is repeated here.
 A member is one
 placed mark or one grid line; the capture procedure samples each member's
 interior pixels, excluding antialiased edges, once, in a stable
 resting frame after any placement animation, and every sampled
 interior pixel must sit within the declared tolerance of the declared
-colour. The in-game state ends
-the moment the game ends, so a win highlight may recolour the winning
+color. The in-game state ends
+the moment the game ends, so a win highlight may recolor the winning
 lines freely. The run records its viewport and rendering environment
 alongside its diagnostics.

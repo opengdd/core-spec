@@ -17,7 +17,7 @@ const INSPECTOR_FLOOR_REM = 14;
 const EDITOR_FLOOR_REM = 8;
 const SHEET_AUTO_OPEN_SURFACES = new Set(["sidebar", "panel"]);
 const DEFAULT_EXAMPLES = Object.freeze([
-  Object.freeze({ id: "tic-tac-toe", title: "Tic-Tac-Toe", revision: "opengdd-0.8" })
+  Object.freeze({ id: "tic-tac-toe", title: "Tic-Tac-Toe", revision: "opengdd-0.9" })
 ]);
 
 function readLocal(key, fallback = null) {
@@ -156,6 +156,7 @@ export function mountWorkbenchShell(target, options = {}) {
     defaultPackageId,
     readerUrl: suppliedReaderUrl,
     initialContract,
+    contractsCatalogUrl,
     contractsCatalogueUrl,
     links = [],
     showTheme = true,
@@ -386,6 +387,7 @@ export function mountWorkbenchShell(target, options = {}) {
     schemas: schemas === undefined ? loadSchemas : schemas,
     defaultPackageId,
     initialContract,
+    contractsCatalogUrl,
     contractsCatalogueUrl,
     regions,
     capabilities: {

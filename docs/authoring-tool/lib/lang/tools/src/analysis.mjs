@@ -1,8 +1,8 @@
-import { isObject, markdownSlug, unfencedLines } from "../../../opengdd/conformance/package-syntax.mjs";
+import { authorityTagScopes, isObject, markdownSlug, unfencedLines } from "../../../opengdd/conformance/package-syntax.mjs";
 
 const DOTTED_KEY = /^[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+$/;
 const FILE_ANCHOR = /^(?:[^`\s#]+\/)*[^`\s#]+\.(?:json|md|txt|csv|tsv|ya?ml)(?:#[A-Za-z0-9._-]+)?$/i;
-const ID_ANCHOR = /^(?:AT-\d+|RULE-[A-Za-z0-9._-]+|INV-[A-Za-z0-9._-]+)$/i;
+const ID_ANCHOR = /^AT-\d+$/i;
 const SECTION_ANCHOR = /^#[A-Za-z0-9._-]+$/;
 
 function zeroRange(line = 0, start = 0, length = 1) {
@@ -53,6 +53,14 @@ function addJsonNames(index, relative, text, document, problems) {
       const range = jsonKeyRange(text, name, Math.max(cursor, 0));
       cursor = text.indexOf(JSON.stringify(name), Math.max(cursor, 0)) + 1;
       index.add({ name, kind: "value", value, file: relative, range, detail: `values.${name}` });
+    }
+  }
+  if (isObject(document.open)) {
+    let cursor = text.indexOf('"open"');
+    for (const [name, value] of Object.entries(document.open)) {
+      const range = jsonKeyRange(text, name, Math.max(cursor, 0));
+      cursor = text.indexOf(JSON.stringify(name), Math.max(cursor, 0)) + 1;
+      index.add({ name, kind: "value", value, file: relative, range, detail: "open number" });
     }
   }
   if (isObject(document.rules)) {
@@ -151,15 +159,22 @@ function basename(relative) {
 
 function addMarkdownNames(index, relative, text) {
   const numberedChapter = !relative.includes("/") && /^\d\d-[^/]+\.md$/i.test(relative);
+  const lines = text.split(/\r?\n/);
+  if (numberedChapter) for (const scope of authorityTagScopes(lines)) {
+    if (scope.level !== "ruleset" || scope.ruleset === "all"
+      || !/^[a-z0-9]+(?:-[a-z0-9]+)*(?:\s+\(initial\))?\s*$/.test(scope.content)) continue;
+    const start = lines[scope.start].indexOf(scope.ruleset, lines[scope.start].indexOf("RULESET:"));
+    if (!index.byName.has(scope.ruleset)) index.add({
+      name: scope.ruleset, kind: "ruleset", file: relative,
+      range: zeroRange(scope.start, start, scope.ruleset.length),
+      extent: { start: { line: scope.start, character: 0 }, end: { line: scope.end - 1, character: lines[scope.end - 1].length } },
+      detail: scope.initial ? "initial ruleset" : "ruleset"
+    });
+  }
   for (const item of unfencedLines(text)) {
     if (numberedChapter) {
       for (const match of item.text.matchAll(/`(runtime\.[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?(?:\.[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?)*)`/g)) {
         if (!index.byName.has(match[1])) index.add({ name: match[1], kind: "runtime", file: relative, range: zeroRange(item.line - 1, match.index + 1, match[1].length), detail: "runtime value declared by use" });
-      }
-      const ruleset = /^\s*>\s*RULESET:\s*([a-z0-9]+(?:-[a-z0-9]+)*)(?:\s+\(initial\))?\s*$/.exec(item.text);
-      if (ruleset && ruleset[1] !== "all") {
-        const start = item.text.indexOf(ruleset[1]);
-        if (!index.byName.has(ruleset[1])) index.add({ name: ruleset[1], kind: "ruleset", file: relative, range: zeroRange(item.line - 1, start, ruleset[1].length), detail: item.text.includes("(initial)") ? "initial ruleset" : "ruleset" });
       }
     }
     const heading = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(item.text);
@@ -181,11 +196,6 @@ function addMarkdownNames(index, relative, text) {
     if (at) {
       const atStart = item.text.indexOf(at[1]);
       index.add({ name: at[1].toUpperCase(), kind: "acceptance-test", value: title, file: relative, range: zeroRange(item.line - 1, atStart, at[1].length), detail });
-    }
-    const rule = /\b((?:RULE|INV)-[A-Za-z0-9._-]+)\b/i.exec(title);
-    if (rule) {
-      const ruleStart = item.text.indexOf(rule[1]);
-      index.add({ name: rule[1], kind: "rule", value: title, file: relative, range: zeroRange(item.line - 1, ruleStart, rule[1].length), detail });
     }
   }
 }
@@ -242,6 +252,19 @@ function addCollectionNames(index, documents, folders) {
     }
     const record = recordPattern.exec(relative);
     if (!record) continue;
+    const document = parsedDocument(documents, relative)?.value;
+    const schema = parsedDocument(documents, `collections/${record[1]}/_collection.json`)?.value?.record;
+    const fields = new Set([...Object.keys(isObject(document) ? document : {}), ...Object.keys(isObject(schema) ? schema : {})]);
+    for (const field of fields) {
+      if (field.startsWith("_")) continue;
+      index.add({
+        name: `collections.${record[1]}.${record[2]}.${field}`,
+        kind: "collection-record",
+        file: relative,
+        range: zeroRange(),
+        detail: `${record[1]} record field`
+      });
+    }
     drawersWithRecords.add(record[1]);
     if (!drawerFiles.has(record[1])) drawerFiles.set(record[1], relative);
     index.add({
@@ -268,8 +291,8 @@ function addCollectionNames(index, documents, folders) {
     const range = file.endsWith("/")
       ? { start: { line: 0, character: 0 }, end: { line: 0, character: 0 } }
       : zeroRange();
-    index.add({ name: drawer, kind: "collection", file, range, detail: "collection drawer" });
-    index.add({ name: `collections.${drawer}`, kind: "collection", file, range, detail: "collection drawer" });
+    index.add({ name: drawer, kind: "collection", file, range, detail: "collection" });
+    index.add({ name: `collections.${drawer}`, kind: "collection", file, range, detail: "collection" });
   }
 }
 
@@ -279,7 +302,7 @@ function firstSentence(value) {
   return sentence || "contract value";
 }
 
-// SPEC §10.6: an adoption filename supplies the middle address segment. Packs
+// SPEC §10.9: an adoption filename supplies the middle address segment. Packs
 // deliberately add no names; only filled forms can be cited by a package.
 export function addContractNames(index, documents) {
   const adoptionPattern = /^contracts\/([a-z0-9]+(?:-[a-z0-9]+)*)\.json$/;
@@ -328,19 +351,18 @@ function addPersonalizationNames(index, documents) {
 }
 
 export function resolveAnchor(definitionsByName, name) {
-  // SPEC §1b lets prose cite into record fields without making fields a
-  // separate name kind. The stable address is the record, so longer
-  // collection citations deliberately stop at their three-segment prefix.
+  // SPEC §1b requires the first field to exist in the record or its schema.
+  // Navigation opens the containing record. Further segments do not add checks.
   const segments = name.split(".");
   let resolvedName = name;
   if (segments[0] === "collections" && segments.length >= 4
-    && definitionsByName.has(segments.slice(0, 3).join("."))) {
-    resolvedName = segments.slice(0, 3).join(".");
+    && definitionsByName.has(segments.slice(0, 4).join("."))) {
+    resolvedName = segments.slice(0, 4).join(".");
   } else if (segments[0] === "contracts" && segments.length >= 4
     && definitionsByName.has(segments.slice(0, 3).join("."))) {
     // Contract addresses are closed at the declared value, but editor tokens
     // may continue (for example punctuation-adjacent dotted prose). Resolve as
-    // far as the longest declared contract prefix, matching §10.6.
+    // far as the longest declared contract prefix, matching §10.9.
     resolvedName = segments.slice(0, 3).join(".");
   }
   const definitions = definitionsByName.get(resolvedName) ?? [];

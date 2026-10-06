@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Modes and clocks | OpenGDD handbook</title>
-<meta name="description" content="When real time meets a pause or a turn structure, clocks.json says which clocks run in which situation. A time mode is one situation, such as diving or reading the map. …">
+<title>Modes and clocks | OpenGDD Handbook</title>
+<meta name="description" content="When a game mixes real time with a pause or with turns, clocks.json says which clocks run in which situation. A time mode is one situation, such as diving or reading the …">
 <link rel="canonical" href="https://opengdd.org/handbook/modes-and-clocks/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Modes and clocks | OpenGDD handbook">
-<meta property="og:description" content="When real time meets a pause or a turn structure, clocks.json says which clocks run in which situation. A time mode is one situation, such as diving or reading the map. …">
+<meta property="og:title" content="Modes and clocks | OpenGDD Handbook">
+<meta property="og:description" content="When a game mixes real time with a pause or with turns, clocks.json says which clocks run in which situation. A time mode is one situation, such as diving or reading the …">
 <meta property="og:url" content="https://opengdd.org/handbook/modes-and-clocks/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta property="og:image:type" content="image/png">
@@ -20,8 +20,8 @@
 <meta name="twitter:site" content="@OpenGDD">
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
-<meta name="twitter:title" content="Modes and clocks | OpenGDD handbook">
-<meta name="twitter:description" content="When real time meets a pause or a turn structure, clocks.json says which clocks run in which situation. A time mode is one situation, such as diving or reading the map. …">
+<meta name="twitter:title" content="Modes and clocks | OpenGDD Handbook">
+<meta name="twitter:description" content="When a game mixes real time with a pause or with turns, clocks.json says which clocks run in which situation. A time mode is one situation, such as diving or reading the …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -53,7 +53,7 @@
 <li><a href="/handbook/" class="toc-resource-current">Handbook</a></li>
 </ul>
 <div class="toc-group">
-<p class="toc-group-title">Start and foundations</p>
+<p class="toc-group-title">The basic parts</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
 <li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
@@ -78,12 +78,12 @@
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-color-promises/">Palette and color promises</a></li>
 <li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanics</p>
+<p class="toc-group-title">Contracts: reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -92,14 +92,14 @@
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
-<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you send it to the builder</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
 <h1>Modes and clocks</h1>
 <p class="chapter-scope"><span class="scope-badge">Optional</span></p>
-<p>When real time meets a pause or a turn structure, <code>clocks.json</code> says which clocks run in which situation. A <strong>time mode</strong> is one situation, such as diving or reading the map. A <strong>clock</strong> is one source of passing time, such as elapsed dive time. Writing this down keeps timing promises clear for the builder and for acceptance tests. The example is the same diving game as the <a href="/handbook/runtime-values/">Runtime values</a> chapter.</p>
+<p>When a game mixes real time with a pause or with turns, <code>clocks.json</code> says which clocks run in which situation. A <strong>time mode</strong> is one situation, such as diving or reading the map. A <strong>clock</strong> is one source of passing time, such as elapsed dive time. Writing this down keeps timing promises clear for the builder and for acceptance tests. The example is the same diving game as the <a href="/handbook/runtime-values/">Runtime values</a> chapter.</p>
 <p><em><code>clocks.json</code>, two clocks: diving, and reading the map</em></p>
 <pre><code class="lang-json">{
   &quot;dive_clock&quot;: {
@@ -120,7 +120,7 @@
   }
 }</code></pre>
 <p>Here the modes are <code>dive</code> and <code>map</code>, and the clocks are <code>dive_clock</code> and <code>oxygen_clock</code>. While the player reads the map, both clocks pause. You choose each clock's <code>unit</code>, such as <code>seconds</code>, <code>turns</code> or <code>beats</code>. The format has no fixed list.</p>
-<p>A clock name uses letters, digits, <code>_</code> and <code>-</code>, and does not start or end with a hyphen. A mode id is lowercase words joined by hyphens. Two clocks never advance the same runtime value.</p>
+<p>A clock name uses letters, digits, <code>_</code> and <code>-</code>, and does not start or end with a hyphen. A mode id is lowercase words joined by hyphens. Two clocks must not advance the same runtime value.</p>
 <h2 id="every-clock-covers-every-mode">Every clock covers every mode<a class="heading-anchor" href="#every-clock-covers-every-mode" aria-label="Link to this section">#</a></h2>
 <p>The set of time modes is every mode that any clock names. If one clock names a mode and another leaves it out, validation reports the clock and the missing mode. In this excerpt, <code>…</code> marks fields left out.</p>
 <p><em><code>clocks.json</code>, one clock missing <code>map</code></em></p>
@@ -134,12 +134,12 @@
 <ul>
 <li><code>running</code>: the clock moves continuously.</li>
 <li><code>paused</code>: it keeps its value without moving.</li>
-<li><code>steps</code>: it moves only when a turn or another discrete step is taken.</li>
+<li><code>steps</code>: it moves only when a turn or another single step is taken.</li>
 <li><code>none</code>: the clock has no value at all in that mode, such as a turn counter outside a mission.</li>
 </ul>
 <p><code>advances</code> lists the runtime values this clock moves forward. The <a href="/handbook/runtime-values/">Runtime values</a> chapter explains that <code>runtime.oxygen_seconds</code> is a changing value named by the design.</p>
 <h2 id="rules-that-apply-in-one-mode">Rules that apply in one mode<a class="heading-anchor" href="#rules-that-apply-in-one-mode" aria-label="Link to this section">#</a></h2>
-<p>A mode tag at the end of a heading limits that section to one mode. Capitals are the custom, but case does not matter. The tag must name a mode your <code>clocks.json</code> declares. Square brackets only mean something at the end of a heading. In a paragraph they are just text.</p>
+<p>A mode tag in a heading limits that section to one mode. The tag can stand anywhere in the heading. Capital letters are usual, but small letters work too. The tag must name a mode your <code>clocks.json</code> declares. Square brackets have this meaning only in a heading. In a paragraph they are ordinary text.</p>
 <p><em><code>02-mechanics.md</code>, a section that applies only while the map is open</em></p>
 <pre><code class="lang-markdown">## Reading the map [MAP]</code></pre>
 <p>Leave a heading untagged when its section applies in every mode.</p>
@@ -153,7 +153,7 @@
   }
 }</code></pre>
 <p>Every value it names must be declared in a chapter or in a clock's <code>advances</code>. An unknown value is reported.</p>
-<p>Clocks do not program the game. A clock with unusual behaviour, such as one that runs only while the player moves, is written as a rule in prose. <code>clocks.json</code> says only which clocks run, pause, step or do not exist in each mode.</p>
+<p>Clocks do not program the game. A clock with unusual behavior, such as one that runs only while the player moves, is written as a rule in prose. <code>clocks.json</code> says only which clocks run, pause, step or do not exist in each mode.</p>
 <p><em>Full rules: <a href="/spec/#4b-2-time-modes-and-clocks">OpenGDD specification</a>, §4b.</em></p>
 <p class="note chapter-pager"><a href="/handbook/runtime-values/">← Runtime values</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/seeds/">Seeds and repeatable randomness →</a></p>
 </article>
@@ -162,7 +162,7 @@
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Evolution — OpenGDD</title>
-<meta name="description" content="How the OpenGDD game design document format evolves: the 0.x policy, the 1.0 promise, public proposals, and open questions.">
+<meta name="description" content="How the OpenGDD game design document format evolves: the 0.x policy, the criteria for version 1.0, how to propose a change, and areas for further work.">
 <link rel="canonical" href="https://opengdd.org/evolution/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Evolution — OpenGDD">
-<meta property="og:description" content="How the OpenGDD game design document format evolves: the 0.x policy, the 1.0 promise, public proposals, and open questions.">
+<meta property="og:description" content="How the OpenGDD game design document format evolves: the 0.x policy, the criteria for version 1.0, how to propose a change, and areas for further work.">
 <meta property="og:url" content="https://opengdd.org/evolution/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta property="og:image:type" content="image/png">
@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
 <meta name="twitter:title" content="Evolution — OpenGDD">
-<meta name="twitter:description" content="How the OpenGDD game design document format evolves: the 0.x policy, the 1.0 promise, public proposals, and open questions.">
+<meta name="twitter:description" content="How the OpenGDD game design document format evolves: the 0.x policy, the criteria for version 1.0, how to propose a change, and areas for further work.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -51,7 +51,7 @@
 <p class="toc-title">About OpenGDD</p>
 <ul><li><a href="/about/">Overview</a></li>
 <li><a href="/schema/">Schemas</a></li>
-<li><a href="/conformance/">Validator</a><ul><li class="toc-h3"><a href="/conformance/certification/">Experimental certification protocol</a></li></ul></li>
+<li><a href="/conformance/">Validator</a><ul><li class="toc-h3"><a href="/conformance/certification/">Experimental certification protocol</a></li><li class="toc-h3"><a href="/conformance/injection-lint/">Safety scan</a></li></ul></li>
 <li><a href="/evolution/" aria-current="page">Evolution</a></li></ul>
 </nav>
 <div class="doc-body">
@@ -67,31 +67,44 @@ structure, remain available at their versioned addresses.</p>
 
 <h2>Move a package to the released version</h2>
 
-<p><code>opengdd migrate</code> rewrites a v0.6 or v0.7 package or build
-record into the v0.8 form. Use <code>--dry-run</code> to see the changes without writing
-them, or <code>--json</code> for a machine-readable report.</p>
+<p><code>opengdd migrate</code> rewrites a v0.6, v0.7, or v0.8 package or build
+record into the v0.9 form. Use <code>--dry-run</code> to see the changes without
+writing them, or <code>--json</code> for a machine-readable report.</p>
 
 <pre><code>npx opengdd migrate &lt;package-dir&gt; [--dry-run] [--json]
-npx opengdd migrate --build &lt;opengdd-build.json&gt; [--dry-run] [--json]</code></pre>
+npx opengdd migrate --build &lt;opengdd-build.json&gt; [&lt;package-dir&gt;] [--dry-run] [--json]</code></pre>
+
+<p>For a build record, you may add its source package after the record path.
+The migrator changes a v0.8 record to v0.9 only when the recorded and source
+address lists are the same. Without the package, the record stays at v0.8
+and the report asks for the source package. When an address changed, the
+record stays at v0.8 and the builder must issue a new record.</p>
+
+<p>The meaning of tag scope changed in v0.9. The v0.8 to v0.9 version step
+keeps chapter text unchanged. It reports each passage that needs review. Quote the lines that
+should stay under the tag, or leave them unquoted as Fixed text or text that
+applies in every ruleset. Equal address lists do not prove unchanged chapter
+meaning. Build-record migration still requires tag-scope review.</p>
 
 <p>Exit code <code>0</code> means the migration is complete with no manual
 items. Exit code <code>1</code> means manual items remain. Exit code
 <code>2</code> means invalid arguments, unreadable input, or another migration
 error.</p>
 
-<h2>The 1.0 promise</h2>
+<h2>Criteria for version 1.0</h2>
 
 <p>Version 1.0 has no target date. It depends on five criteria:</p>
 
 <ol>
 <li><strong>Stability.</strong> A package that meets version 1.0's requirements
-will keep meeting them in later 1.x releases. Breaking changes wait for
-version 2.0.</li>
+will keep meeting them in later 1.x releases. A change that makes such a
+package fail is made only in version 2.0.</li>
 <li><strong>Clear checking requirements.</strong> Automated checks give
 repeatable results. Requirements that need human review are listed
-separately. A reader can then tell a tool check apart from a full review. The
-reference validator is tested against repository fixtures; version 1.0 also
-requires a published suite that independent validators can run.</li>
+separately. A reader can then see which checks a tool made and which checks
+a person made. The reference validator is tested with example packages in the
+repository. Version 1.0 also requires a published set of tests that other
+validators can run.</li>
 <li><strong>An independent implementation.</strong> Someone outside the
 project has built a working tool from the written specification alone.</li>
 <li><strong>Public review.</strong> A public review round has run, and
@@ -103,13 +116,14 @@ can describe their designs accurately. The
 
 <p>Until these criteria are met, OpenGDD remains a 0.x working draft.</p>
 
-<h2>How proposals happen</h2>
+<h2>How to propose a change</h2>
 
 <p>The steward decides what enters the
 specification. Proposals and questions go through
 <a href="https://github.com/opengdd/core-spec/discussions">GitHub
 Discussions</a>. Accepted changes appear in the
-<a href="/spec/changelog/">changelog</a> with the version they land in.</p>
+<a href="/spec/changelog/">changelog</a> with the version that contains
+them.</p>
 
 <p>A useful proposal shows a real design problem. It explains how the current
 format handles it. It suggests a small change. Examples from unrelated games
@@ -117,10 +131,8 @@ show whether the change would help many designers. Ideas can be tried in
 prototypes first. Evidence from those trials decides which changes enter the
 specification.</p>
 
-<p>Proposals go to
-<a href="https://github.com/opengdd/core-spec/discussions">GitHub
-Discussions on the specification repository</a>. Include a small example
-that other people can examine or reproduce. Security reports go to
+<p>Include with your proposal a small example that other people can examine
+or reproduce. Security reports go to
 <a href="mailto:security@opengdd.org">security@opengdd.org</a>,
 never to public threads.</p>
 
@@ -132,7 +144,7 @@ never to public threads.</p>
 <li><strong>A designer shorthand for acceptance tests.</strong> A simpler
 writing form could let designers describe a check that a tool turns into the
 required test data.</li>
-<li><strong>Long design chapters.</strong> Authors need a way to split a
+<li><strong>Long design chapters.</strong> Designers need a way to split a
 large chapter into smaller files and keep its writing and data connected.</li>
 <li><strong>Maps and levels.</strong> The format can describe grids as
 layers of text. Overlapping terrain, objects and other features need more
@@ -144,15 +156,15 @@ shared rules for receiving the puzzle and reporting a solution.</li>
 Rendered 3D images cannot. A shared method that works across different
 rendering systems is still missing.</li>
 </ul>
-<p>The <a href="/spec/limitations/">known limitations</a> describe current
-boundaries. The <a href="/spec/">OpenGDD specification</a> gives the exact rules.</p>
+<p>The <a href="/spec/limitations/">known limitations</a> page describes what
+the format does not cover yet. The <a href="/spec/">OpenGDD specification</a> gives the exact rules.</p>
 </div>
 </div>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

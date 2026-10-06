@@ -25,13 +25,18 @@ export function recordIds(files, collection) {
   return recordFiles(files, collection).map(path => path.slice(path.lastIndexOf("/") + 1, -".json".length));
 }
 
-export function schemaShapeError(shape, collections) {
+export function schemaShapeError(shape, collections, topLevel = true) {
   if (!plainObject(shape) || !TYPES.has(shape.type)) return "A field needs one of the six collection kinds.";
-  const members = new Set(["type", "required", "when", "options", "pattern", "unique", "description", "to", "many", "loops", "mirrored_by", "of"]);
+  const members = new Set(["type", "required", "when", "options", "pattern", "unique", "description", "open", "to", "many", "loops", "mirrored_by", "of"]);
   const unknown = Object.keys(shape).find(key => !members.has(key));
   if (unknown) return `${unknown} is not a field-shape member.`;
   if (Object.hasOwn(shape, "required") && Object.hasOwn(shape, "when")) return "A field is either always required or required only when — not both.";
   if (Object.hasOwn(shape, "required") && typeof shape.required !== "boolean") return "required must be true or false.";
+  if (Object.hasOwn(shape, "open")) {
+    if (shape.open !== true) return "Open must be switched on or left out.";
+    if (!topLevel || !["number", "integer"].includes(shape.type)) return "Only a top-level number or whole number can be open.";
+    if (Object.hasOwn(shape, "required")) return "An open field cannot carry required, even when required is false.";
+  }
   if (Object.hasOwn(shape, "unique") && typeof shape.unique !== "boolean") return "no two records share it must be true or false.";
   if (Object.hasOwn(shape, "description") && typeof shape.description !== "string") return "The sentence must be text.";
   if (Object.hasOwn(shape, "options")) {
@@ -47,11 +52,12 @@ export function schemaShapeError(shape, collections) {
     if (Object.hasOwn(shape, "loops") && typeof shape.loops !== "boolean") return "no loops must be true or false.";
     if (Object.hasOwn(shape, "mirrored_by") && (typeof shape.mirrored_by !== "string" || !FIELD_ID.test(shape.mirrored_by))) return "mirrored by must name a field.";
   } else if (["to", "many", "loops", "mirrored_by"].some(key => Object.hasOwn(shape, key))) return "Link settings are legal on link fields only.";
+  if (shape.type === "grid" && !topLevel) return "A grid field must be at the top level of a record.";
   if (shape.type === "list") {
     if (!plainObject(shape.of)) return "Lines need the fields each line holds.";
     for (const [key, nested] of Object.entries(shape.of)) {
       if (!FIELD_ID.test(key)) return `${key} is not a legal field name.`;
-      const error = schemaShapeError(nested, collections);
+      const error = schemaShapeError(nested, collections, false);
       if (error) return error;
     }
   } else if (Object.hasOwn(shape, "of")) return "each line holds is legal on lines fields only.";

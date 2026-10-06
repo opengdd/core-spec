@@ -8,6 +8,7 @@ import { rangedTuningKeys } from "./tuning-fields.mjs";
 
 const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const PERSONALIZATION_FILE = "personalization.json";
+const assignmentNotes = new WeakMap();
 const candidateOptions = values => values.map(value => ({
   value, label: value, group: INSPECTOR_COPY.questionRangedCandidates
 }));
@@ -94,6 +95,11 @@ export async function changeQuestionType(context, entity, next, anchor, confirm 
   await commitJson(context, INSPECTOR_COPY.questionTypeChange, json => {
     json.set(`${entity.pointer}/type`, next);
     for (const item of forbidden) json.remove(item.pointer);
+    const validDefault = next === "number"
+      ? typeof question.default === "number" && Number.isFinite(question.default)
+      : typeof question.default === "string" && (next !== "choice"
+        || question.options?.some(option => option.id === question.default));
+    if (Object.hasOwn(question, "default") && !validDefault) json.remove(`${entity.pointer}/default`);
   });
   context.internal.focusField?.(PERSONALIZATION_FILE, "type");
   return true;
@@ -144,8 +150,19 @@ export async function addQuestionOptionSet(context, entity, optionIndex) {
   const key = rangedTuningKeys(context.package).find(candidate => !Object.hasOwn(sets, candidate));
   if (!key) throw new Error(INSPECTOR_COPY.noQuestionSetCandidate);
   const tuning = parseJson(context.package.read("tuning.json"));
-  const value = typeof tuning?.values?.[key] === "number" ? tuning.values[key] : 0;
+  const current = tuning?.values?.[key] ?? tuning?.open?.[key];
+  const candidate = typeof current === "number" && Number.isFinite(current) ? current : 0;
+  const range = tuning?.ranges?.[key];
+  const value = Array.isArray(range) && range.length === 2
+    ? Math.max(range[0], Math.min(range[1], candidate)) : candidate;
+  if (!Number.isFinite(value)) throw new Error("Enter a finite number.");
   const base = `${entity.pointer}/options/${optionIndex}`;
+  const notes = assignmentNotes.get(context.package) ?? new Map();
+  notes.set(`${base}/sets/${pointer([key]).slice(1)}`, { value,
+    message: INSPECTOR_COPY.questionSetStartingNumber(value, value !== candidate ? "the nearest range bound"
+      : typeof current === "number" ? Object.hasOwn(tuning.values ?? {}, key) ? "the current value" : "the current guess"
+        : "zero because no guess is available") });
+  assignmentNotes.set(context.package, notes);
   await commitJson(context, INSPECTOR_COPY.addQuestionSetUndo, json => {
     if (plainObject(option?.sets)) json.insert(`${base}/sets`, key, value);
     else json.insert(base, "sets", { [key]: value }, { pretty: true });
@@ -256,6 +273,7 @@ const optionFields = (context, entity, option, optionIndex, count) => {
       label: INSPECTOR_COPY.questionOptionSetValue, ariaLabel: `${INSPECTOR_COPY.questionOptionSetValue} ${key}`,
       help: INSPECTOR_COPY.questionOptionSetValueHelp, helpShared: "question-set-value", type: "number", required: true,
       binding: { file: PERSONALIZATION_FILE, pointer: `${base}/sets/${pointer([key]).slice(1)}` },
+      note: assignmentNotes.get(context.package)?.get(`${base}/sets/${pointer([key]).slice(1)}`)?.message ?? "",
       labels: { change: INSPECTOR_COPY.changeQuestionSet },
       mount: setRemoveMount(context, entity, optionIndex, key)
     });

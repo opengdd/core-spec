@@ -40,7 +40,7 @@ export const WORKBENCH_COPY = Object.freeze({
   undoHistory: "Undo history",
   undoAction: action => `Undo ${action}`,
   nothingToUndo: "Nothing to undo",
-  undoHelp: "Undo reaches back 200 actions. Continuous typing may count as one action; older work is still safe in the file.",
+  undoHelp: "Undo can reverse the last 200 actions. Continuous typing may count as one action. Older changes stay saved in the file.",
   newFile: "New file",
   newFolder: "New folder",
   coldNew: "New package from a minimal template",

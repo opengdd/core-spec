@@ -67,7 +67,7 @@ async function handle(message) {
     try {
       const sha256 = await createPackageSha256(files);
       const host = withExplicitFolders(createFileMapHost(files, { schemas, bytes: false, sha256 }), folders);
-      const run = validatePackage(host, "/package");
+      const run = validatePackage(host, "/package", { review: message.review === true });
       postMessage({ type: "validation", revision: message.revision, run });
     } catch (error) {
       // A validator crash is the page's to report, not this worker's to die of.

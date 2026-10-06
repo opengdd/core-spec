@@ -103,7 +103,7 @@ function linkIds(value, many) {
 
 export function createFolderRows({
   collection, package: packageService, edits, validatePackage, openAddRecord,
-  field, confirmRemove, renameRecord, references, copy
+  field, confirmRemove, renameRecord, references, errors, copy
 }) {
   if (!collection || !packageService || !edits || typeof validatePackage !== "function") {
     throw new TypeError("A folder row adapter needs a collection, package, edits, and staged validator.");
@@ -199,6 +199,7 @@ export function createFolderRows({
     ...(renameRecord ? { async rename(id, anchor) { return renameRecord({ id, anchor }); } } : {}),
     binding(id, key) { return { file: pathFor(id), pointer: pointer(key) }; },
     field(id, key, shape) { return field?.(id, key, shape); },
+    errors(id) { return errors?.(id) ?? ""; },
     files: () => packageFiles(packageService)
   };
   return Object.freeze(adapter);
@@ -492,7 +493,9 @@ export function createRecordTable(elementHost, { schema: initialSchema, rows, fo
           cell.append(open);
         } else {
           const value = rows.read(row.id, column.key);
-          const descriptor = rows.field?.(row.id, column.key, column.shape);
+          // A mixed column (say numbers beside a "no guess yet" null in an
+          // undescribed collection) has no shape to build a field from.
+          const descriptor = column.open ? undefined : rows.field?.(row.id, column.key, column.shape);
           const editable = descriptor && !descriptor.inapplicable && rows.binding?.(row.id, column.key);
           if (descriptor?.inapplicable) {
             const unavailable = element(document, "span", descriptor.display);

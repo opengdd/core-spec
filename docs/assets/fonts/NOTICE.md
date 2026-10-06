@@ -47,9 +47,7 @@ https://github.com/sora-xor/sora-font/blob/master/OFL.txt
 
 ## Reviewed file identities
 
-The repository-separation review retained these nine font files byte-for-byte.
-The hashes below identify the reviewed files without claiming an unrecorded
-package version.
+The hashes below identify the nine bundled font files.
 
 | File | SHA-256 |
 |---|---|

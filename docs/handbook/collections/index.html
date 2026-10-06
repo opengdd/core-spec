@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Collections | OpenGDD handbook</title>
+<title>Collections | OpenGDD Handbook</title>
 <meta name="description" content="Games are full of lists: technologies, recipes, cards, levels. A collection keeps one kind of content in one folder, with one JSON file per item. The example is the …">
 <link rel="canonical" href="https://opengdd.org/handbook/collections/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Collections | OpenGDD handbook">
+<meta property="og:title" content="Collections | OpenGDD Handbook">
 <meta property="og:description" content="Games are full of lists: technologies, recipes, cards, levels. A collection keeps one kind of content in one folder, with one JSON file per item. The example is the …">
 <meta property="og:url" content="https://opengdd.org/handbook/collections/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
@@ -20,7 +20,7 @@
 <meta name="twitter:site" content="@OpenGDD">
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
-<meta name="twitter:title" content="Collections | OpenGDD handbook">
+<meta name="twitter:title" content="Collections | OpenGDD Handbook">
 <meta name="twitter:description" content="Games are full of lists: technologies, recipes, cards, levels. A collection keeps one kind of content in one folder, with one JSON file per item. The example is the …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
@@ -53,7 +53,7 @@
 <li><a href="/handbook/" class="toc-resource-current">Handbook</a></li>
 </ul>
 <div class="toc-group">
-<p class="toc-group-title">Start and foundations</p>
+<p class="toc-group-title">The basic parts</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
 <li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
@@ -78,12 +78,12 @@
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-color-promises/">Palette and color promises</a></li>
 <li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanics</p>
+<p class="toc-group-title">Contracts: reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -92,7 +92,7 @@
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
-<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you send it to the builder</a></li>
 </ul>
 </div>
 </nav>
@@ -110,7 +110,8 @@
     recipe-charcoal.json
   items/
     charcoal.json</code></pre>
-<p>Each folder under <code>collections/</code> is one collection. The folder name is its id, and each other file is one <strong>record</strong>, named by its filename. Making the folder is enough: there is no index file to update.</p>
+<p>Each folder under <code>collections/</code> is one collection. The folder name is its id. Each JSON file in the folder is one <strong>record</strong>, named by its filename. The one exception is the optional schema file <code>_collection.json</code>, shown below. Making the folder is enough: there is no index file to update.</p>
+<p>A collection cannot contain subfolders. To group records, use several collections side by side, such as <code>enemies-bosses</code> and <code>enemies-minions</code>.</p>
 <p><em><code>collections/technologies/kiln-building.json</code>, one record</em></p>
 <pre><code class="lang-json">{
   &quot;title&quot;: &quot;Kiln Building&quot;,
@@ -120,9 +121,10 @@
 <p>The fields are yours. <code>title</code> is what the game shows; <code>kiln-building</code> is the id the package refers to. In prose:</p>
 <ul>
 <li><code>collections.technologies</code> means the whole collection;</li>
-<li><code>collections.technologies.kiln-building</code> means this record.</li>
+<li><code>collections.technologies.kiln-building</code> means this record;</li>
+<li><code>collections.technologies.kiln-building.era_order</code> means one field of it. The field must be in the record, or in the schema shown below.</li>
 </ul>
-<p>If you rename a record, the validator (the checking tool) points at every reference that still uses the old id.</p>
+<p>If you rename a record, the validator (the checking tool) lists every reference that still uses the old id.</p>
 <p>Records may use whatever fields they need. When every record should use the same fields, add the optional schema file to the folder.</p>
 <p><em><code>collections/technologies/_collection.json</code></em></p>
 <pre><code class="lang-json">{
@@ -142,7 +144,39 @@
 }</code></pre>
 <p>Each description says how to use the field. With a schema, the validator reports missing fields, wrong value types, unexpected fields, and repeated values in a field marked <code>unique</code>.</p>
 <p>A field can point at another record. The <a href="/handbook/links/">Links</a> chapter shows the <code>link</code> field type and its checks.</p>
-<p>Leave <code>_collection.json</code> out when the records do not need the same fields. Both forms are complete collections.</p>
+<p>Records are Fixed: the builder follows each record exactly. The builder is the person, team or AI that turns your package into a game. There are two exceptions: an open field, which the next section explains, and records that a <code>&gt; DELEGATED:</code> passage leaves to the builder.</p>
+<p>In such a passage, cite the collection or the records, and say what the builder may do, such as leave a record out or change it. A record that the passage covers is then a suggestion inside the limits you state. When the change affects how the game plays, also state its target. The <a href="/handbook/who-decides/">Who decides</a> chapter explains Delegated passages and targets.</p>
+<h2 id="numbers-you-have-not-decided">Numbers you have not decided<a class="heading-anchor" href="#numbers-you-have-not-decided" aria-label="Link to this section">#</a></h2>
+<p>A number that belongs to one technology, such as its research time, is written in that technology's record. When you do not know those numbers yet, mark the field <strong>open</strong> in the schema. The builder then finds values that work.</p>
+<p><em><code>collections/technologies/_collection.json</code>, one more field inside <code>record</code></em></p>
+<pre><code class="lang-json">{
+  &quot;research_seconds&quot;: {
+    &quot;type&quot;: &quot;number&quot;,
+    &quot;open&quot;: true,
+    &quot;description&quot;: &quot;how long researching this technology takes&quot;
+  }
+}</code></pre>
+<p>In an open field, each record says one of three things:</p>
+<ul>
+<li>a number is your guess: <code>stone-tools.json</code> holds <code>&quot;research_seconds&quot;: 40</code>;</li>
+<li><code>null</code> means you have no guess yet: <code>kiln-building.json</code> holds <code>&quot;research_seconds&quot;: null</code>;</li>
+<li>a missing field means the field does not apply: <code>fire-making.json</code> has no <code>research_seconds</code>, because the player knows fire from the start.</li>
+</ul>
+<p>Only a top-level <code>number</code> or <code>integer</code> field can be open, and an open field cannot also be <code>required</code>. The builder's report of a build records the value used for every open field that applies. An <code>integer</code> field stays a whole number.</p>
+<h2 id="rules-across-records">Rules across records<a class="heading-anchor" href="#rules-across-records" aria-label="Link to this section">#</a></h2>
+<p>A rule in <code>tuning.json</code> can read a record's top-level number field by its full address. The field must be present in that record. This rule protects a new player:</p>
+<p><em><code>tuning.json</code>, under <code>rules</code></em></p>
+<pre><code class="lang-json">{
+  &quot;tools-before-first-night&quot;: &quot;collections.technologies.stone-tools.research_seconds &lt; day.length_seconds&quot;
+}</code></pre>
+<p>If stone tools took longer than one day, a new player would meet the first night without tools. <code>day.length_seconds</code> is a shared number in the <code>values</code> part of <code>tuning.json</code>. A rule can also compare two records. As with the open numbers in the <a href="/handbook/tuning/">Tuning</a> chapter, a guess that breaks a rule gives a warning. A rule that reads a <code>null</code> has no number to use, so the validator skips it while you write. The exception is a number that an equality rule decides, as shown below. Every rule is checked against the build.</p>
+<p>In an open field, every record's number is a guess. When playtesting shows the right number for one record, decide it with an equality rule:</p>
+<p><em><code>tuning.json</code>, under <code>rules</code></em></p>
+<pre><code class="lang-json">{
+  &quot;stone-tools-takes-40&quot;: &quot;collections.technologies.stone-tools.research_seconds == 40&quot;
+}</code></pre>
+<p>This rule decides the number for that one record. The other records stay open. From then on, the validator checks your other rules with 40 as a decided number, so a rule it breaks is an error. An equality rule also decides the number of a record that holds <code>null</code>. Two equality rules for the same record field must give the same number, and an <code>integer</code> field must get a whole number.</p>
+<p>To decide a number, the other side of <code>==</code> may hold only plain numbers and numbers you have decided. A number that another equality rule decided does not count, so the order of your rules never matters. If the other side names an open number, or a number that another equality rule decided, the rule decides nothing. The validator checks it like any other rule.</p>
 <p><em>Full rules: <a href="/spec/#1b-structured-content-collections">OpenGDD specification</a>, §1b.</em></p>
 <p class="note chapter-pager"><a href="/handbook/acceptance-tests/">← Acceptance tests</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/links/">Links →</a></p>
 </article>
@@ -151,7 +185,7 @@
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

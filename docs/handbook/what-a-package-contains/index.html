@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>What a package contains | OpenGDD handbook</title>
-<meta name="description" content="A package is one folder with the complete design of one game. You give that folder to the builder: the person, team or AI that turns your package into a game.">
+<title>What a package contains | OpenGDD Handbook</title>
+<meta name="description" content="A package is one folder with the complete design of one game. You give that folder to the builder: the person, team or AI that turns your package into a game. You can …">
 <link rel="canonical" href="https://opengdd.org/handbook/what-a-package-contains/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="What a package contains | OpenGDD handbook">
-<meta property="og:description" content="A package is one folder with the complete design of one game. You give that folder to the builder: the person, team or AI that turns your package into a game.">
+<meta property="og:title" content="What a package contains | OpenGDD Handbook">
+<meta property="og:description" content="A package is one folder with the complete design of one game. You give that folder to the builder: the person, team or AI that turns your package into a game. You can …">
 <meta property="og:url" content="https://opengdd.org/handbook/what-a-package-contains/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta property="og:image:type" content="image/png">
@@ -20,8 +20,8 @@
 <meta name="twitter:site" content="@OpenGDD">
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
-<meta name="twitter:title" content="What a package contains | OpenGDD handbook">
-<meta name="twitter:description" content="A package is one folder with the complete design of one game. You give that folder to the builder: the person, team or AI that turns your package into a game.">
+<meta name="twitter:title" content="What a package contains | OpenGDD Handbook">
+<meta name="twitter:description" content="A package is one folder with the complete design of one game. You give that folder to the builder: the person, team or AI that turns your package into a game. You can …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -53,7 +53,7 @@
 <li><a href="/handbook/" class="toc-resource-current">Handbook</a></li>
 </ul>
 <div class="toc-group">
-<p class="toc-group-title">Start and foundations</p>
+<p class="toc-group-title">The basic parts</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
 <li class="toc-h2"><a href="/handbook/what-a-package-contains/" class="here" aria-current="page">What a package contains</a></li>
@@ -78,12 +78,12 @@
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-color-promises/">Palette and color promises</a></li>
 <li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanics</p>
+<p class="toc-group-title">Contracts: reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -92,21 +92,21 @@
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
-<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you send it to the builder</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
 <h1>What a package contains</h1>
 <p class="chapter-scope"><span class="scope-badge">Required</span></p>
-<p>A <strong>package</strong> is one folder with the complete design of one game. You give that folder to the builder: the person, team or AI that turns your package into a game.</p>
+<p>A <strong>package</strong> is one folder with the complete design of one game. You give that folder to the builder: the person, team or AI that turns your package into a game. You can share it in any way, for example as a zip file or a git repository. You can give the same package to several builders. When the package has acceptance tests, the same tests judge every build. One person can also be both the designer and the builder.</p>
 <p><em>the five required files</em></p>
 <pre><code class="lang-text">my-dungeon-crawler/
   manifest.json       what this is
   tuning.json         the numbers
   01-overview.md      the player fantasy and the pitch
   02-mechanics.md     the rules
-  05-build-plan.md    build stages and acceptance tests</code></pre>
+  05-build-plan.md    build stages and any acceptance tests</code></pre>
 <p>These five files can describe a complete game. Everything else is optional.</p>
 <p><em>the same package with optional files</em></p>
 <pre><code class="lang-text">my-dungeon-crawler/
@@ -116,7 +116,7 @@
   02-mechanics.md       the rules
   03-content.md         prose about the game's content
   04-presentation.md    art direction and presentation
-  05-build-plan.md      build stages and acceptance tests
+  05-build-plan.md      build stages and any acceptance tests
   06-traps.md           a chapter of your own
   personalization.json  questions the builder answers for one build
   direction.json        structured art direction
@@ -126,15 +126,15 @@
 <p>The builder reads <code>manifest.json</code> first, then the chapters in order.</p>
 <p><em><code>manifest.json</code>, complete</em></p>
 <pre><code class="lang-json">{
-  &quot;opengdd&quot;: &quot;0.8&quot;,
+  &quot;opengdd&quot;: &quot;0.9&quot;,
   &quot;id&quot;: &quot;my-dungeon-crawler&quot;,
   &quot;version&quot;: &quot;0.1.0&quot;,
   &quot;title&quot;: &quot;My Dungeon Crawler&quot;,
   &quot;designer&quot;: { &quot;name&quot;: &quot;You&quot; },
   &quot;target&quot;: { &quot;platform&quot;: &quot;web-2d&quot;, &quot;genre&quot;: &quot;dungeon crawler&quot; }
 }</code></pre>
-<p><code>opengdd</code> is the format version. <code>id</code>, <code>version</code>, <code>title</code> and <code>designer</code> say which package this is. <code>target</code> needs <code>platform</code> and <code>genre</code>; <code>session_minutes</code> and <code>audience</code> are optional. <code>genre</code> is free text. The manifest carries the package's identity and target, plus optional commerce terms. It does not list the chapters, the optional files, or the collections. Their presence in the folder is the declaration.</p>
-<p>These are plain Markdown and JSON files. They do not depend on any engine or build system. The authoring tool can create the folder and keep the names in it connected.</p>
+<p><code>opengdd</code> is the format version. <code>id</code>, <code>version</code>, <code>title</code> and <code>designer</code> say which package this is. <code>target</code> needs <code>platform</code> and <code>genre</code>; <code>session_minutes</code> and <code>audience</code> are optional. <code>genre</code> is free text. The manifest holds the package's identity and target, and optional commerce terms. It does not list the chapters, the optional files, or the collections. A file or folder is part of the package because it is in the folder. You do not declare it anywhere else.</p>
+<p>These are plain Markdown and JSON files. They do not depend on any engine or build system. The authoring tool can create the folder. While you write, it tracks where each name is defined and where it is used.</p>
 <p>In later JSON examples, <code>…</code> means that unrelated fields were left out.</p>
 <p><em>Full rules: <a href="/spec/#1-package-layout">OpenGDD specification</a>, §1 and <a href="/spec/#3-manifest-json">§3</a>.</em></p>
 <p class="note chapter-pager"><a href="/handbook/complete-example/">← A complete example: Garden Snake</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/player-fantasy/">The player fantasy →</a></p>
@@ -144,7 +144,7 @@
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

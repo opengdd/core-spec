@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>About — OpenGDD</title>
-<meta name="description" content="Stewardship, licenses, privacy, and contact for OpenGDD, an open format for game design documents.">
+<meta name="description" content="OpenGDD is an open format for game design documents. This page describes the project, its licenses, the privacy of this site, and how to contact the project.">
 <link rel="canonical" href="https://opengdd.org/about/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="About — OpenGDD">
-<meta property="og:description" content="Stewardship, licenses, privacy, and contact for OpenGDD, an open format for game design documents.">
+<meta property="og:description" content="OpenGDD is an open format for game design documents. This page describes the project, its licenses, the privacy of this site, and how to contact the project.">
 <meta property="og:url" content="https://opengdd.org/about/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta property="og:image:type" content="image/png">
@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
 <meta name="twitter:title" content="About — OpenGDD">
-<meta name="twitter:description" content="Stewardship, licenses, privacy, and contact for OpenGDD, an open format for game design documents.">
+<meta name="twitter:description" content="OpenGDD is an open format for game design documents. This page describes the project, its licenses, the privacy of this site, and how to contact the project.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -51,7 +51,7 @@
 <p class="toc-title">About OpenGDD</p>
 <ul><li><a href="/about/" aria-current="page">Overview</a></li>
 <li><a href="/schema/">Schemas</a></li>
-<li><a href="/conformance/">Validator</a><ul><li class="toc-h3"><a href="/conformance/certification/">Experimental certification protocol</a></li></ul></li>
+<li><a href="/conformance/">Validator</a><ul><li class="toc-h3"><a href="/conformance/certification/">Experimental certification protocol</a></li><li class="toc-h3"><a href="/conformance/injection-lint/">Safety scan</a></li></ul></li>
 <li><a href="/evolution/">Evolution</a></li></ul>
 </nav>
 <div class="doc-body about-page">
@@ -67,19 +67,18 @@ validator, and documentation.</p>
 The <a href="/evolution/">evolution page</a> explains how changes are proposed
 and reviewed.</p>
 
-<h2 id="resources">Understanding the standard</h2>
+<h2 id="resources">More about the format</h2>
 
-<p>These pages explain the file definitions, the checks, and how the
-standard develops.</p>
 
 <div class="card-grid about-resources">
   <a class="card" href="/schema/">
     <h3>Schemas</h3>
-    <p>Data-file definitions for people building or configuring tools.</p>
+    <p>Schemas define the structure of the data files. They are for people
+    who build or configure tools.</p>
   </a>
   <a class="card" href="/conformance/">
     <h3>Validator</h3>
-    <p>How OpenGDD checks design files and how a finished game can be reviewed.</p>
+    <p>How OpenGDD checks a package and how a finished game can be reviewed.</p>
   </a>
   <a class="card" href="/evolution/">
     <h3>Evolution</h3>
@@ -87,10 +86,10 @@ standard develops.</p>
   </a>
 </div>
 
-<p class="note">Read <a href="/spec/changelog/">changes between versions</a>
-or the <a href="/spec/limitations/">current limitations</a>.</p>
+<p class="note">Read the <a href="/spec/changelog/">changelog</a>
+or the <a href="/spec/limitations/">known limitations</a>.</p>
 
-<h2>Licences</h2>
+<h2>Licenses</h2>
 
 <p>© 2026 Starphase Lab. The specification text and documentation are licensed
 <a href="https://creativecommons.org/licenses/by/4.0/">CC-BY 4.0</a>.
@@ -99,7 +98,7 @@ The schemas, validator code, and authoring tool source are licensed
 
 <h2>Intellectual property</h2>
 
-<p>Contributions are accepted under the same licences above. You may say that
+<p>Contributions are accepted under the same licenses above. You may say that
 a tool reads or writes OpenGDD packages, or that a package conforms to a stated
 version. Do not use the OpenGDD name to imply that a tool, package, or
 organization is certified or endorsed; no certification program exists.</p>
@@ -126,7 +125,7 @@ uploads nothing.</p>
 <ul>
 <li>Questions, proposals and examples:
 <a href="https://github.com/opengdd/core-spec/discussions">GitHub Discussions</a>.</li>
-<li>Project enquiries by email:
+<li>Project inquiries by email:
 <a href="mailto:steward@opengdd.org">steward@opengdd.org</a>.</li>
 <li>Security vulnerabilities:
 <a href="mailto:security@opengdd.org">security@opengdd.org</a>.
@@ -139,7 +138,7 @@ Contact details are also available in <a href="/.well-known/security.txt">securi
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

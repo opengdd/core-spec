@@ -1,16 +1,15 @@
-/* Contract catalogue. These rules stay scoped to contract pages and do not
+/* Contract catalog. These rules stay scoped to contract pages and do not
    change the handbook table of contents. */
 
-.contract-catalogue .doc-body { max-width: none; }
+.contract-catalog .doc-body { max-width: none; }
 
 /* Card surfaces. The site's dark theme keeps light Canvas cards elsewhere;
-   contract pages are card-dense, so their cards go dark with the page
-   (steward ruling, 2026-08-30). */
-.contract-catalogue {
+   contract pages are card-dense, so their cards go dark with the page. */
+.contract-catalog {
   --ccard-bg: var(--card-bg);
   --ccard-ink: var(--card-ink);
 }
-:root[data-theme="dark"] .contract-catalogue {
+:root[data-theme="dark"] .contract-catalog {
   --ccard-bg: color-mix(in srgb, var(--canvas) 7%, transparent);
   --ccard-ink: var(--ink);
 }
@@ -264,7 +263,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .contract-catalogue * { scroll-behavior: auto !important; }
+  .contract-catalog * { scroll-behavior: auto !important; }
 }
 
 /* The concept guide uses real ordered content; its reading order survives

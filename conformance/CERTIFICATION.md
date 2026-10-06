@@ -34,28 +34,32 @@ true:
    obligation according to its fenced `test` block: the package's own `AT-n`
    tests and the tests rendered from every checked contract pack, named
    `AT <adoption>/<template>` or `AT <adoption>/<template>/<row>` (SPEC
-   §§6, 10.5). Rendered tests execute exactly as game-local ones do, after the
+   §§6, 10.7). Rendered tests execute exactly as game-local ones do, after the
    package and pack have passed package validation. The format defines their
    package shape but not their runtime execution semantics (SPEC §§2d, 6), so
    executing them is this protocol's obligation. Use the exact
    runner profile id and version named by `evidence.runner`; the runner may be
-   a person, a capable agent, or a versioned harness. Report
-   non-acceptance checkpoints separately; do not silently count them as tests
-   or hide them when they fail. The [Runner profile](#runner-profile) states
-   the execution meanings the format leaves open. For each game-local general
-   test, record its id in `evidence.acceptance.sampled` when the runner checked
-   a sample rather than the whole scope.
+   a person, a capable agent, or a versioned harness. A test that needs a
+   person watching is always reported `not-run`, even when a person ran it
+   (SPEC §§6, 7). Report non-acceptance checkpoints separately; do not
+   silently count them as tests or hide them when they fail. The [Runner profile](#runner-profile) states
+   the execution meanings the format leaves open. For each general test,
+   game-local or rendered from a contract pack, record its name in
+   `evidence.acceptance.sampled` when the runner checked a sample rather than
+   the whole scope.
 3. **Runtime data matches the resolved snapshot.** Resolve personalization in
    declared order. For every key in `resolved_tuning.values` the audit chooses
    to check, including each fixed contract value at
-   `contracts.<adoption>.<value>` (SPEC §10.6), compare the value actually consumed at runtime with the
+   `contracts.<adoption>.<value>` (SPEC §10.9), compare the value actually consumed at runtime with the
    corresponding resolved value. Source-file equality alone is insufficient.
    The [Audit profile](#audit-profile) owns this selection and comparison.
 4. **`opengdd-build.json` is complete.** The build record identifies the
    format revision, package and build, designer and builder, personalization
    answers, full resolved tuning snapshot, the `evidence` record's counts,
-   result hash, and conditional runner identity. The runner identity resolves
-   to the [Runner profile](#runner-profile).
+   conditional result hash and payload, and conditional runner identity. The
+   hash and payload are required only when a test ran; the runner is required
+   only when a runtime test ran. The runner identity resolves to the
+   [Runner profile](#runner-profile).
 5. **The result hash is reproducible.** The evidence defines exactly which
    payload is hashed and uses the canonical serialization below.
 6. **A separate audit supports the verdict.** A passing result from the
@@ -113,7 +117,7 @@ adoption and no promised adoption:
 `pack` is the SHA-256 of the exact bytes of
 `contracts/<contract>-<version>.pack.json`. The
 source-backed record check requires the adoption ids and hashes to equal the
-source package exactly (SPEC §§7, 10.5). The pack is immutable under that hash,
+source package exactly (SPEC §§7, 10.8). The pack is immutable under that hash,
 so this record says which rendered tests the reported acceptance count used.
 
 The audit separately records the identity it actually judged for every
@@ -135,10 +139,10 @@ the remaining object with two-space indentation and authored member order; use
 LF endings and no trailing newline; encode as UTF-8; and record the lowercase
 hexadecimal SHA-256. The validator's **definition-comparison form** is
 different: it strips annotations and emits the top-level definition fields in
-SPEC §10.2 order before comparing adoptions, while preserving member order
+SPEC §10.11 order before comparing adoptions, while preserving member order
 inside them. The audit keeps annotations because they are part of what the
 auditor actually judged. The audit serialization exposes a fork without
-making an online catalogue lookup a package check (SPEC §10.9).
+making an online catalog lookup a package check (SPEC §10.11).
 
 Both digests are claims. The source-backed record validator checks the pack
 hash; the auditor recomputes the definition digest under audit question 5.
@@ -155,9 +159,9 @@ declared `scope`. When `seeds` is present, it states that method and its sample
 count for each seed. The package owns `scope`, `holds`, and `seeds`; a runner
 never narrows them.
 
-When the runner samples a game-local general test, the build record names it
-in `evidence.acceptance.sampled`. The runner may report that the checked cases
-met the claim, including a measure bounded by the test's `holds` sentence. It
+When the runner samples a general test, game-local or rendered from a
+contract pack, the build record names it in `evidence.acceptance.sampled`.
+The runner may report that the checked cases met the claim, including a measure bounded by the test's `holds` sentence. It
 MUST NOT report that a sample established absence, a minimum, or a universal.
 When the whole declared scope was walked, the result may establish those
 claims.
@@ -229,7 +233,7 @@ should answer these questions:
 The audit ends with a reasoned `certify`, `certify-with-notes`, or
 `do-not-certify` verdict. A failed acceptance test, certified runtime mismatch,
 a Fixed-statement deviation established by the audit, evidence narrower than
-its claimed scope, incomplete required build record, or unreproducible result
+its claimed scope, an invalid required build record, or unreproducible result
 hash blocks certification. Other release gates may still block distribution, but their
 status must not be folded into the acceptance-test result.
 

@@ -1,16 +1,15 @@
 import { INSPECTOR_COPY } from "./copy/inspector-copy.mjs";
+import { authorityTagScopes, headingModeTags, markdownSlug, unfencedLines } from "opengdd-syntax";
 import { element } from "./dom.mjs";
 import { openTextEditDialog } from "./entity-lifecycle.mjs";
 import { entityChips, locationRows, referenceGroup } from "./inspector-groups.mjs";
 
 const HEADING = /^(#{1,6})\s+(.+?)\s*#*\s*$/u;
 const EXPLICIT = /\s*\{#([A-Za-z0-9._-]+)\}\s*$/u;
-const MODE = /\s+\[([A-Za-z0-9_-]+)\]\s*$/u;
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 
 export function markdownHeadingSlug(text) {
-  return String(text).toLowerCase().replace(/<[^>]*>/gu, "").replace(/[`*_~]/gu, "")
-    .replace(/[^\p{L}\p{N}\s-]/gu, "").trim().replace(/\s+/gu, "-");
+  return markdownSlug(String(text));
 }
 
 export function sectionEntity(selection, files, revision) {
@@ -20,14 +19,19 @@ export function sectionEntity(selection, files, revision) {
   const lines = text.split(/\r?\n/u);
   const lineNumber = selection.range?.start?.line;
   if (!Number.isInteger(lineNumber)) return null;
-  const line = lines[lineNumber] ?? "";
+  const line = unfencedLines(text).find(item => item.line === lineNumber + 1)?.text ?? "";
   const heading = HEADING.exec(line);
   if (!heading) return null;
   const raw = heading[2];
   const explicit = EXPLICIT.exec(raw);
   const withoutAnchor = explicit ? raw.slice(0, explicit.index).trimEnd() : raw;
-  const mode = MODE.exec(withoutAnchor);
-  const title = mode ? withoutAnchor.slice(0, mode.index).trimEnd() : withoutAnchor.trim();
+  let clocks;
+  try { clocks = JSON.parse(files.get("clocks.json") ?? "{}"); } catch {}
+  const declaredModes = new Set(Object.values(clocks ?? {}).flatMap(clock => Object.keys(clock?.modes ?? {})));
+  const modeTags = declaredModes.size ? headingModeTags(withoutAnchor) : [];
+  let title = withoutAnchor;
+  for (const tag of [...modeTags].reverse()) title = title.slice(0, tag.index) + title.slice(tag.index + tag[0].length);
+  title = title.trim().replace(/\s{2,}/gu, " ");
   const slug = explicit?.[1] ?? markdownHeadingSlug(withoutAnchor);
   const titleStart = line.indexOf(title, heading[1].length + 1);
   const rawStart = line.indexOf(raw, heading[1].length + 1);
@@ -39,7 +43,8 @@ export function sectionEntity(selection, files, revision) {
   }
   return {
     id: slug, address: `${selection.file}#${slug}`, title, titleIsProse: true, kindLabel: INSPECTOR_COPY.sectionKind,
-    file: selection.file, line: lineNumber, level, slug, explicit: explicit?.[1], mode: mode?.[1],
+    file: selection.file, line: lineNumber, level, slug, explicit: explicit?.[1], mode: modeTags[0]?.[1],
+    modeTags: modeTags.map(tag => tag[0]), rawStart, rawEnd: rawStart + raw.length,
     lineText: line, text, sectionEndLine: endLine,
     extent: {
       start: { line: lineNumber, character: 0 },
@@ -48,7 +53,7 @@ export function sectionEntity(selection, files, revision) {
     range: {
       start: { line: lineNumber, character: 0 }, end: { line: lineNumber, character: line.length }, revision
     },
-    titleRange: {
+    titleRange: titleStart < 0 ? undefined : {
       start: { line: lineNumber, character: titleStart }, end: { line: lineNumber, character: titleStart + title.length }, revision
     },
     anchorRange: explicit ? {
@@ -64,8 +69,22 @@ export function sectionEntity(selection, files, revision) {
 
 const currentEntity = (context, entity) => sectionEntity(
   { kind: "section", file: entity.file, range: { start: { line: entity.line } } },
-  new Map([[entity.file, context.package.read(entity.file)]]), context.package.revision(entity.file)
+  new Map([[entity.file, context.package.read(entity.file)], ["clocks.json", context.package.read("clocks.json")]]), context.package.revision(entity.file)
 );
+
+function headingReplacement(current, title, anchor = current.explicit) {
+  const contiguous = current.titleRange && current.titleRange.start.character >= current.rawStart;
+  let heading = contiguous
+    ? current.lineText.slice(0, current.titleRange.start.character) + title + current.lineText.slice(current.titleRange.end.character)
+    : current.lineText.slice(0, current.rawStart) + title + (current.modeTags.length ? ` ${current.modeTags.join(" ")}` : "")
+      + (current.explicit ? ` {#${current.explicit}}` : "") + current.lineText.slice(current.rawEnd);
+  if (current.explicit && anchor) return heading.replace(`{#${current.explicit}}`, `{#${anchor}}`);
+  if (anchor) {
+    const at = heading.length - (current.lineText.length - current.rawEnd);
+    heading = heading.slice(0, at) + ` {#${anchor}}` + heading.slice(at);
+  }
+  return heading;
+}
 
 async function replaceText(context, label, file, range, value) {
   const transaction = context.internal.begin(label);
@@ -78,14 +97,8 @@ async function writeHeading(context, entity, value) {
   if (!current || value === current.title) return;
   if (!value.trim()) throw new Error(INSPECTOR_COPY.sectionHeadingRequired);
   const transaction = context.internal.begin(INSPECTOR_COPY.changeSectionHeading);
-  transaction.text(current.file).replace(current.titleRange, value.trim());
-  if (!current.explicit) {
-    const derived = markdownHeadingSlug(`${value.trim()}${current.mode ? ` [${current.mode}]` : ""}`);
-    if (derived !== current.slug) transaction.text(current.file).replace({
-      start: { line: current.line, character: current.lineText.length },
-      end: { line: current.line, character: current.lineText.length }, revision: current.range.revision
-    }, ` {#${current.slug}}`);
-  }
+  const heading = headingReplacement(current, value.trim(), current.slug);
+  transaction.text(current.file).replace(current.range, heading);
   await transaction.commit();
 }
 
@@ -131,17 +144,17 @@ export function sectionFields(context, entity) {
 
 function sectionRulesets(context, entity) {
   const lines = entity.text.split(/\r?\n/u);
-  const tags = [];
-  for (let index = entity.line + 1; index < entity.sectionEndLine; index += 1) {
-    const match = /^\s*>\s*RULESET:\s*([a-z0-9]+(?:-[a-z0-9]+)*)(?:\s+(\(initial\)))?\s*$/u.exec(lines[index]);
-    if (match && match[1] !== "all") tags.push({ id: match[1], initial: Boolean(match[2]), line: index });
-  }
+  const tags = authorityTagScopes(lines).filter(scope => scope.level === "ruleset"
+    && scope.start > entity.line && scope.start < entity.sectionEndLine
+    && /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\s+\(initial\))?\s*$/u.test(scope.content)
+    && scope.ruleset !== "all").map(scope => ({ id: scope.ruleset, initial: scope.initial, line: scope.start, end: scope.end }));
   tags.sort((left, right) => Number(right.initial) - Number(left.initial) || left.line - right.line);
   const rows = tags.length ? [entityChips(context, tags.map(tag => ({
       name: INSPECTOR_COPY.sectionRulesetLabel(tag.id, tag.initial), kind: INSPECTOR_COPY.rulesetKind,
       dataset: { [tag.initial ? "sectionInitialRuleset" : "sectionRuleset"]: "" }, selection: {
         kind: "ruleset", name: tag.id, file: entity.file,
-        range: { start: { line: tag.line, character: 0 }, end: { line: tag.line, character: lines[tag.line].length } }
+        range: { start: { line: tag.line, character: 0 }, end: { line: tag.line, character: lines[tag.line].length } },
+        extent: { start: { line: tag.line, character: 0 }, end: { line: tag.end - 1, character: lines[tag.end - 1].length } }
       }
     })))] : [];
   const section = referenceGroup(context, { key: "rulesets", label: INSPECTOR_COPY.sectionRulesets,
@@ -188,18 +201,13 @@ export function renameSection(context, entity, anchor) {
       if (!SLUG.test(next)) throw new Error(INSPECTOR_COPY.sectionAnchorInvalid);
       const plan = context.services.references.planRename(current.address, next);
       if (plan.safety !== "complete") throw new Error(plan.reason);
-      const edits = [
-        { range: current.titleRange, text: title },
-        current.anchorRange
-          ? { range: current.anchorRange, text: next }
-          : { range: current.anchorInsertRange, text: ` {#${next}}` }
-      ];
+      const replacement = headingReplacement(current, title, next);
+      const edits = [{ range: current.range, text: replacement }];
       const result = await context.services.references.applyRename({ ...plan, headingEdit: {
         address: current.address, file: current.file, edits
       } });
       if (!result.applied) throw new Error(result.reason);
-      const anchorDelta = current.explicit ? next.length - current.explicit.length : next.length + 4;
-      const lineLength = current.lineText.length + title.length - current.title.length + anchorDelta;
+      const lineLength = replacement.length;
       context.services.selection.select({ kind: "section", name: next, file: current.file,
         range: { start: { line: current.line, character: 0 }, end: { line: current.line, character: lineLength } },
         extent: current.extent });

@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Names and addresses | OpenGDD handbook</title>
-<meta name="description" content="Write each number once, give it a name, and use the name everywhere else. A name like stamina.dash_cost is an identifier. The whole name with its dots is its address: …">
+<title>Names and addresses | OpenGDD Handbook</title>
+<meta name="description" content="When your prose needs a number, write it once, give it a name, and use the name everywhere else. A name like stamina.dash_cost is an identifier. The whole name with its …">
 <link rel="canonical" href="https://opengdd.org/handbook/naming-things/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Names and addresses | OpenGDD handbook">
-<meta property="og:description" content="Write each number once, give it a name, and use the name everywhere else. A name like stamina.dash_cost is an identifier. The whole name with its dots is its address: …">
+<meta property="og:title" content="Names and addresses | OpenGDD Handbook">
+<meta property="og:description" content="When your prose needs a number, write it once, give it a name, and use the name everywhere else. A name like stamina.dash_cost is an identifier. The whole name with its …">
 <meta property="og:url" content="https://opengdd.org/handbook/naming-things/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta property="og:image:type" content="image/png">
@@ -20,8 +20,8 @@
 <meta name="twitter:site" content="@OpenGDD">
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
-<meta name="twitter:title" content="Names and addresses | OpenGDD handbook">
-<meta name="twitter:description" content="Write each number once, give it a name, and use the name everywhere else. A name like stamina.dash_cost is an identifier. The whole name with its dots is its address: …">
+<meta name="twitter:title" content="Names and addresses | OpenGDD Handbook">
+<meta name="twitter:description" content="When your prose needs a number, write it once, give it a name, and use the name everywhere else. A name like stamina.dash_cost is an identifier. The whole name with its …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -53,7 +53,7 @@
 <li><a href="/handbook/" class="toc-resource-current">Handbook</a></li>
 </ul>
 <div class="toc-group">
-<p class="toc-group-title">Start and foundations</p>
+<p class="toc-group-title">The basic parts</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
 <li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
@@ -78,12 +78,12 @@
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-color-promises/">Palette and color promises</a></li>
 <li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanics</p>
+<p class="toc-group-title">Contracts: reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -92,14 +92,14 @@
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
-<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you send it to the builder</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
 <h1>Names and addresses</h1>
 <p class="chapter-scope"><span class="scope-badge">Required</span></p>
-<p>Write each number once, give it a name, and use the name everywhere else. A name like <code>stamina.dash_cost</code> is an <strong>identifier</strong>. The whole name with its dots is its <strong>address</strong>: what you type to point at it. An address written in backticks in prose is a <strong>citation</strong>.</p>
+<p>When your prose needs a number, write it once, give it a name, and use the name everywhere else. A name like <code>stamina.dash_cost</code> is an <strong>identifier</strong>. The whole name with its dots is its <strong>address</strong>: what you type to point at it. An address written in backticks in prose is a <strong>citation</strong>.</p>
 <p><em>in a mechanics chapter</em></p>
 <blockquote>
 <p>A dash costs <code>stamina.dash_cost</code>, and cannot start when the bar holds less than that.</p>
@@ -110,10 +110,11 @@
     &quot;stamina.dash_cost&quot;: 25
   }
 }</code></pre>
-<p>The sentence does not repeat the cost. It points at the value, so a balance change happens in one place and every sentence stays correct. The <a href="/handbook/tuning/">Tuning</a> chapter explains how the numbers file is organised.</p>
-<p>A citation must point at something the package declares. If it points at nothing, validation fails and names the dangling citation. Runtime values are the one exception: writing <code>runtime.</code> and a name in a chapter is what declares it. The authoring tool shows where each name is defined, reports missing ones, and can create a missing value while you write.</p>
-<p>OpenGDD uses this pattern everywhere. Collections, palettes, runtime values and contracts all define a name once and refer to it by address. Most ids are lowercase words joined by hyphens, such as <code>kiln-building</code>: package ids, collection and record ids, rule names, <a href="/handbook/modes-and-clocks/">clock mode names</a>, <a href="/handbook/palette-and-colour-promises/">palette colour names</a> and <a href="/handbook/contracts/">contract names</a>. Tuning keys use dots between parts and usually underscores inside a part. The specification gives the exact grammar for each kind of name.</p>
-<p>A name carries no meaning on its own. What the number means, and when it is read, lives in the sentence around the citation and in the tuning file.</p>
+<p>The sentence does not repeat the cost. It points at the value, so a balance change happens in one place and every sentence stays correct. The <a href="/handbook/tuning/">Tuning</a> chapter explains how the numbers file is organized.</p>
+<p>A citation must point at something the package declares. If it points at nothing, validation fails and names that citation. Runtime values are the one exception: writing <code>runtime.</code> and a name in a chapter declares the runtime value. The authoring tool shows where each name is defined, reports missing ones, and can create a missing value while you write.</p>
+<p>A backticked file name such as <code>tuning.json</code> is a file mention, not a citation. A file whose name starts with a word OpenGDD reserves, such as clocks.json, is the exception: in backticks it reads as an address that names nothing, and validation fails. Write such a file name without backticks.</p>
+<p>OpenGDD uses this pattern in many parts of the format. Collections, palettes, runtime values and contracts all define a name once and refer to it by address. Most ids are lowercase words joined by hyphens, such as <code>kiln-building</code>: package ids, collection and record ids, rule names, <a href="/handbook/modes-and-clocks/">clock mode names</a>, <a href="/handbook/palette-and-color-promises/">palette color names</a> and <a href="/handbook/contracts/">contract names</a>. Tuning keys use dots between parts and usually underscores inside a part. The OpenGDD specification gives the exact grammar for each kind of name.</p>
+<p>A name has no meaning by itself. The sentence around the citation, and the tuning file, say what the number means and when it is read.</p>
 <p><em>Full rules: <a href="/spec/#identifiers">OpenGDD specification</a>, §1 and <a href="/spec/#4-tuning-json">§4</a>.</em></p>
 <p class="note chapter-pager"><a href="/handbook/who-decides/">← Who decides</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/tuning/">Tuning →</a></p>
 </article>
@@ -122,7 +123,7 @@
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

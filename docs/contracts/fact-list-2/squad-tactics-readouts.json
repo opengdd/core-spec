@@ -1,0 +1,187 @@
+{
+  "contract": "fact-list",
+  "version": 2,
+  "origin": "https://opengdd.org/contracts/fact-list-2",
+  "summary": "This contract covers facts that players must be able to read. It says how each fact is shown, heard, or felt. Color alone does not count as a way to read a listed fact. This contract does not cover HUD layout or tutorials.",
+  "mechanism": [
+    "Each readable-facts row is one fact-and-channel promise. A fact carried by several non-color channels repeats the same Fixed citation in several rows; a fact with no row makes no channel-readability promise under this contract.",
+    "A row promises that its channel alone lets a player distinguish the states the cited Fixed prose defines in every play situation the citation names. The check repeats for each named situation. Every other route to the fact, declared or not, is removed or made identical across the states that the observer must distinguish. The named channel is then the only thing that changes with the fact. Developer instrumentation that the game does not present to the player, such as an audit pane, a debug overlay, or a save file, is not a route. Within each named play situation, an observer meets each state the cited prose names at least once, in an order that the observer does not know, and must name the state every time from the named channel alone.",
+    "A fact carried by memorable authored content, such as a published deck or a fixed map, can be readable through a route the channel rows do not describe; the rows promise presentation, not secrecy.",
+    "The ten channel ids are text, symbol-or-shape, place-or-size, animation, outline-or-contrast, audio-cue, spatial-audio, narration, audio-description, and haptic. Color is not another channel: color-alone is a game-wide policy for every fact the game shows, including a fact with no row, while a fact appears in readable-facts only when at least one non-color channel carries it.",
+    "A listed fact may be a unit state, warning direction, resource amount, or card state. This contract records whether that fact is readable; it does not define tutorials, controls, or how the state changes.",
+    "Each row declares every player-facing setting that changes or can disable its channel. If a setting can disable that row's channel, the adoption either names another row for the same fact that remains readable or states that the fact becomes unreadable. The unreadable result is forbidden whenever another selected policy requires the fact to remain readable under that setting.",
+    "Package validation checks the list's shape, ids, channel choices, Fixed citations, and required setting declarations. The verification pack separately audits list completeness, the game-wide color and audio policies, each setting declaration, and whether each channel distinguishes the cited states. Under fixed-by-game a row may declare no affected setting. A setting that a row does declare is binding and is audited like any other row fact. The answer player-recolorable to color-alone still promises its color setting, whatever the answer to presentation-control is."
+  ],
+  "questions": {
+    "color-alone": {
+      "asks": "Can color be the only way to read a fact that the game shows?",
+      "rationale": "Some players cannot tell some colors apart. A second way to read the fact keeps enemies and allies distinct for every player. A color setting helps only the player who finds it.",
+      "guidance": "never",
+      "options": {
+        "never": {
+          "meaning": "Color is never the only way to read a fact. Red enemies and green allies also differ by an outline or a label.",
+          "semantics": "Every fact the game shows remains readable when all hue differences are removed. Player color settings may still be offered, but they do not replace this requirement."
+        },
+        "player-recolorable": {
+          "meaning": "Color may be the only way to read a fact when the player can replace the color. A player who cannot tell red and green apart can choose two colors that the player can tell apart.",
+          "semantics": "Any fact the game shows may use hue as its sole distinction only when a player-facing setting lets the player change every color carrying that fact. The changed presentation must preserve the same fact."
+        }
+      }
+    },
+    "audio-alone": {
+      "asks": "Can sound be the only way to read a fact listed here?",
+      "rationale": "A sound-only warning disappears when the game is muted or a player cannot hear it. This choice says whether another way to read the fact is required.",
+      "guidance": "never",
+      "options": {
+        "never": {
+          "meaning": "Sound is never the only way to read a listed fact. A danger tone also has a label or an icon.",
+          "semantics": "Every promised fact remains readable with audio muted. The reviewer groups rows by fact citation and confirms at least one non-audio channel per fact: text, symbol-or-shape, place-or-size, animation, outline-or-contrast, or haptic."
+        },
+        "allowed": {
+          "meaning": "Sound may be the only way to read a listed fact. Muting a rising danger tone may hide how close a timer is to ending.",
+          "semantics": "A promised fact may become unreadable when all audio is muted. Its Fixed citation must identify every play situation in which the audio-only promise applies."
+        }
+      }
+    },
+    "presentation-control": {
+      "asks": "Are you promising a player setting for any listed fact?",
+      "rationale": "Different players need different ways to read a fact. This choice says whether your game promises any presentation setting.",
+      "guidance": "player-configurable",
+      "options": {
+        "fixed-by-game": {
+          "meaning": "Your game promises no player setting for the listed facts. Your game may still have settings, and a row may name one. A color setting that your color answer promises is still promised.",
+          "semantics": "Every row still declares any player-facing setting that changes or can disable its channel. The adoption promises none of those settings through this answer, even when a row names a setting that the game has. A setting that a row does name is still binding: its declared result is audited like any other row fact. Answering color-alone with player-recolorable independently promises its color setting."
+        },
+        "player-configurable": {
+          "meaning": "Your game promises a player setting for at least one listed fact. A warning-volume setting changes the same warning wherever it appears.",
+          "semantics": "The adoption promises at least one player-facing setting that changes or can disable a channel named by a readable-facts row. Every affected row names the setting and its result. The changed presentation is observable in every applicable play situation named by the citation of each affected fact."
+        }
+      }
+    }
+  },
+  "declares": {
+    "rows": {
+      "readable-facts": {
+        "description": "List every fact and every independent way players can read it without color. Use one row per pair, with no repeats. Two ways to read health need two rows whose fact field names the same place in your game's rules. A finished adoption needs at least one row. No automatic check counts the rows. A person who reviews the design checks that the list has at least one row.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A short name for this fact and its channel in your game's words, such as health-number or threat-arrow. Use a different name for each row."
+          },
+          "fact": {
+            "type": "citation",
+            "required": true,
+            "description": "Where your game's rules define the fact and its states. The same rules must name every play situation that this row covers."
+          },
+          "channel": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "text",
+              "symbol-or-shape",
+              "place-or-size",
+              "animation",
+              "outline-or-contrast",
+              "audio-cue",
+              "spatial-audio",
+              "narration",
+              "audio-description",
+              "haptic"
+            ],
+            "description": "The non-color way that carries this fact by itself. In each named situation, an observer must identify every state from this way alone. Text uses words or numbers shown to the player. Symbol-or-shape uses a pictorial symbol, a plain shape, or a pattern, such as a shield badge or hatching. Place-or-size uses where something sits or how large or full it is, such as a threat arrow's direction. Animation uses movement over time, such as a pulsing border. Outline-or-contrast uses an outline or a contrast between light and dark. Audio-cue uses a sound whose direction and position do not matter. Spatial-audio uses the direction or position of a sound. Narration reads interface content. Audio description explains visual action that the interface does not name. Haptic uses vibration or another touch pattern."
+          },
+          "presentation-settings": {
+            "type": "string",
+            "required": true,
+            "description": "Name every player setting that changes this row's channel or can disable it. Say what happens at each end of the setting's range. For a switch, say what happens when it is on and when it is off. Write 'none' when no setting affects the channel. If a setting can disable the channel, name another row for the same fact that remains readable, or state that the fact becomes unreadable. The fact may become unreadable only when your color and sound answers do not require it to stay readable. The automatic check only sees that this field is filled in. A person who reviews the design checks that it is true."
+          },
+          "without-audio": {
+            "type": "string",
+            "when": {
+              "row": {
+                "channel": [
+                  "audio-cue",
+                  "spatial-audio",
+                  "narration",
+                  "audio-description"
+                ]
+              }
+            },
+            "description": "Say what a player gets when audio is off. Name a non-audio row for the same fact, or state that the fact becomes unreadable. The fact may become unreadable only when your color and sound answers do not require it to stay readable. The automatic check only sees that this field is filled in on an audio row. A person who reviews the design checks that it is true."
+          }
+        }
+      }
+    }
+  },
+  "pack": "sha256:6a83cb5dfb2ce52df9f147e4b20e1dc8322d89fe4d44dbcda826548a09f66eee",
+  "answers": {
+    "color-alone": "never",
+    "audio-alone": "never",
+    "presentation-control": "player-configurable"
+  },
+  "values": {},
+  "rows": {
+    "readable-facts": [
+      {
+        "id": "squad-allegiance-symbol",
+        "fact": "02-mechanics.md#squad-allegiance",
+        "channel": "symbol-or-shape",
+        "presentation-settings": "Color-blind palette recolors the chevron badge but preserves its shape; HUD scale enlarges or shrinks it; no setting disables it."
+      },
+      {
+        "id": "squad-allegiance-text",
+        "fact": "02-mechanics.md#squad-allegiance",
+        "channel": "text",
+        "presentation-settings": "HUD scale enlarges or shrinks the squad label; no setting disables it."
+      },
+      {
+        "id": "offscreen-threat-bearing",
+        "fact": "02-mechanics.md#offscreen-threat-direction",
+        "channel": "place-or-size",
+        "presentation-settings": "HUD scale changes the threat arrow's size and distance from the screen edge while preserving its bearing; no setting disables it."
+      },
+      {
+        "id": "offscreen-threat-spatial-audio",
+        "fact": "02-mechanics.md#offscreen-threat-direction",
+        "channel": "spatial-audio",
+        "presentation-settings": "Audio-off disables the directional radio call; offscreen-threat-bearing remains readable.",
+        "without-audio": "The offscreen-threat-bearing row keeps the threat direction readable through the screen-edge arrow."
+      },
+      {
+        "id": "action-points-pips",
+        "fact": "02-mechanics.md#action-points-remaining",
+        "channel": "place-or-size",
+        "presentation-settings": "HUD scale changes the action-point pip size and spacing while preserving the number filled; no setting disables it."
+      },
+      {
+        "id": "action-points-number",
+        "fact": "02-mechanics.md#action-points-remaining",
+        "channel": "text",
+        "presentation-settings": "HUD scale changes the number's size; no setting disables it."
+      },
+      {
+        "id": "overwatch-symbol",
+        "fact": "02-mechanics.md#overwatch-state",
+        "channel": "symbol-or-shape",
+        "presentation-settings": "Color-blind palette recolors the eye badge but preserves its shape; HUD scale resizes it; no setting disables it."
+      },
+      {
+        "id": "overwatch-pulse",
+        "fact": "02-mechanics.md#overwatch-state",
+        "channel": "animation",
+        "presentation-settings": "Reduced motion disables the pulsing border; overwatch-symbol remains readable."
+      }
+    ]
+  },
+  "verification": {
+    "fact-policy-holds": {
+      "scope": "all Fixed mechanics prose that promises the player can read a squad allegiance, threat direction, action-point total, or overwatch state, and every readable-facts row"
+    },
+    "presentation-control-visible": {
+      "scope": "color-blind palette, HUD scale, reduced motion, and audio-off at both ends of their supported ranges, across every applicable cited planning and combat situation"
+    }
+  }
+}

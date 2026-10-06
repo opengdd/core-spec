@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Before you hand it over | OpenGDD handbook</title>
-<meta name="description" content="The validator (the checking tool) checks what it can prove from the files. A last human read checks the part only a designer can see: whether the package says one clear …">
+<title>Before you send it to the builder | OpenGDD Handbook</title>
+<meta name="description" content="The validator (the checking tool) checks what it can prove from the files. A final read by a person checks what only a designer can judge: whether the package describes …">
 <link rel="canonical" href="https://opengdd.org/handbook/before-handoff/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Before you hand it over | OpenGDD handbook">
-<meta property="og:description" content="The validator (the checking tool) checks what it can prove from the files. A last human read checks the part only a designer can see: whether the package says one clear …">
+<meta property="og:title" content="Before you send it to the builder | OpenGDD Handbook">
+<meta property="og:description" content="The validator (the checking tool) checks what it can prove from the files. A final read by a person checks what only a designer can judge: whether the package describes …">
 <meta property="og:url" content="https://opengdd.org/handbook/before-handoff/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta property="og:image:type" content="image/png">
@@ -20,8 +20,8 @@
 <meta name="twitter:site" content="@OpenGDD">
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
-<meta name="twitter:title" content="Before you hand it over | OpenGDD handbook">
-<meta name="twitter:description" content="The validator (the checking tool) checks what it can prove from the files. A last human read checks the part only a designer can see: whether the package says one clear …">
+<meta name="twitter:title" content="Before you send it to the builder | OpenGDD Handbook">
+<meta name="twitter:description" content="The validator (the checking tool) checks what it can prove from the files. A final read by a person checks what only a designer can judge: whether the package describes …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -53,7 +53,7 @@
 <li><a href="/handbook/" class="toc-resource-current">Handbook</a></li>
 </ul>
 <div class="toc-group">
-<p class="toc-group-title">Start and foundations</p>
+<p class="toc-group-title">The basic parts</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
 <li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
@@ -78,12 +78,12 @@
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-color-promises/">Palette and color promises</a></li>
 <li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanics</p>
+<p class="toc-group-title">Contracts: reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -92,39 +92,42 @@
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
-<li class="toc-h2"><a href="/handbook/before-handoff/" class="here" aria-current="page">Before you hand it over</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/" class="here" aria-current="page">Before you send it to the builder</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
-<h1>Before you hand it over</h1>
-<p>The validator (the checking tool) checks what it can prove from the files. A last human read checks the part only a designer can see: whether the package says one clear thing. Use this list before you hand the design to a builder.</p>
-<h4 id="the-package-opens-cleanly">The package opens cleanly<a class="heading-anchor" href="#the-package-opens-cleanly" aria-label="Link to this section">#</a></h4>
+<h1>Before you send it to the builder</h1>
+<p>The validator (the checking tool) checks what it can prove from the files. A final read by a person checks what only a designer can judge: whether the package describes one clear game. Use this list before you give the design to a builder.</p>
+<h4 id="the-package-passes-validation">The package passes validation<a class="heading-anchor" href="#the-package-passes-validation" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Run <code>npx opengdd validate &lt;package-dir&gt;</code> and fix every error.</li>
 <li>Read each warning. Fix the accidental ones and confirm the intended ones.</li>
 <li>Confirm the five required files are there: <code>manifest.json</code>, <code>tuning.json</code>, <code>01-overview.md</code>, <code>02-mechanics.md</code> and <code>05-build-plan.md</code>. Every numbered chapter should have its own purpose.</li>
 </ul>
-<h4 id="the-design-reads-as-one-game">The design reads as one game<a class="heading-anchor" href="#the-design-reads-as-one-game" aria-label="Link to this section">#</a></h4>
+<h4 id="the-chapters-describe-one-game">The chapters describe one game<a class="heading-anchor" href="#the-chapters-describe-one-game" aria-label="Link to this section">#</a></h4>
 <ul>
-<li>Read the fantasy block, then skim every chapter against it. The rules, the mood and the presentation should describe the same experience.</li>
-<li>Check that each rule is stated once, and that shared numbers are named by their tuning key instead of copied into prose. Keep an item's own numbers in its collection record, and test inputs with their tests.</li>
-<li>Find anything a player would notice that changes how the game plays, not just how it looks. Define each one in prose, or as a Personalization question. Leave a choice to the builder only when its limits are clear.</li>
+<li>Read the fantasy block. Then read every chapter quickly and compare it with the block. The rules, the mood and the presentation should describe the same experience.</li>
+<li>Check that each rule is stated once, and briefly. Being thorough means deciding every rule, not writing more words. Check that shared numbers are named by their tuning key instead of copied into prose. Keep an item's own numbers in its collection record, and test inputs with their tests.</li>
+<li>Find anything a player would notice that changes how the game plays, not just how it looks. Decide each one by its value or by its target: a rule, a test, or a sentence saying what it must achieve. A Personalization question can decide it too. You can leave a choice to the builder. When the choice changes how the game plays, write the target it must reach and its limits. When it does not, write its limits.</li>
+<li>Check that every <a href="/handbook/tuning/">open number</a>, one you have not decided yet, has a target next to its citation. Check also that you have not named numbers whose values no player could tell apart.</li>
 </ul>
 <h4 id="optional-files-are-connected">Optional files are connected<a class="heading-anchor" href="#optional-files-are-connected" aria-label="Link to this section">#</a></h4>
 <ul>
-<li>Make sure every <a href="/handbook/collections/">collection</a> is reached from prose or from a link in another record. Add a <code>_collection.json</code> schema when the records share required fields or link fields.</li>
-<li>For each <a href="/handbook/links/">link</a> field, confirm <code>to</code> names the right collection. If links must not run in a circle, or must exist both ways, write that on the field (<code>loops: false</code>, <code>mirrored_by</code>).</li>
-<li>For art direction and palettes, keep judged intent separate from measured promises, and connect every measured promise to an acceptance test.</li>
-<li>For Personalization, give every question a meaningful default, and check that every possible answer still gives a game you would ship.</li>
-<li>For a contract, read its questions, answer every one that applies, and run <code>npx opengdd render-contract-tests &lt;package-dir&gt;</code> after an answer changes. Review the tests it renders; do not paste them into the build plan.</li>
+<li>Make sure every <a href="/handbook/collections/">collection</a> is cited in prose, linked from another record, or named by a rule in <code>tuning.json</code>. Add a <code>_collection.json</code> schema when the records share required fields or link fields.</li>
+<li>For each <a href="/handbook/links/">link</a> field, confirm <code>to</code> names the right collection. If links must not form a loop, or must exist in both directions, write that on the field (<code>loops: false</code>, <code>mirrored_by</code>).</li>
+<li>For art direction and palettes, keep the intent that people judge separate from the measured promises. Connect every measured promise to an acceptance test.</li>
+<li>For Personalization, give every question a meaningful default. Check that every possible answer still gives a game you would release.</li>
+<li>For a contract, read its questions, answer every one that applies, and run <code>npx opengdd render-contract-tests &lt;package-dir&gt;</code> after an answer changes. Review the tests it shows; do not paste them into the build plan.</li>
 </ul>
 <h4 id="the-build-plan-is-complete">The build plan is complete<a class="heading-anchor" href="#the-build-plan-is-complete" aria-label="Link to this section">#</a></h4>
 <ul>
-<li>Read the build stages in <code>05-build-plan.md</code> in order. Each stage should say what to build, which chapters define it, and how to recognise that it is done. The format requires the stages, but the validator cannot check them. You check them by hand.</li>
-<li>Read every acceptance test. Together they should cover the promises that matter most, without prescribing the builder's code or engine.</li>
+<li>Read the build stages in <code>05-build-plan.md</code> in order. Each stage must say what to build. A stage can also name the chapters that define the work, and say how to recognize that it is done. Both are optional. A common order is core loop, content, tuning, presentation, then polish. The format requires at least one stage, but the validator cannot check the stages. You check them by hand.</li>
+<li>Read every acceptance test. Together they should cover the promises that matter most, without telling the builder which code or engine to use. Tests are optional, but a build of a package without tests is reported as not verified.</li>
 </ul>
-<p>When this read finds a format question, open the <a href="/spec/">OpenGDD specification</a>. When it finds an open design decision, update the package.</p>
+<p>If this read raises a question about the format, open the <a href="/spec/">OpenGDD specification</a>. If it shows a design decision you have not made yet, make it and update the package.</p>
+<h4 id="after-the-handoff">After the handoff<a class="heading-anchor" href="#after-the-handoff" aria-label="Link to this section">#</a></h4>
+<p>A first build of your own, or one made for you, shows which rules the package did not state. When a builder finds a place where the package is unclear, they can write an <strong>ambiguity report</strong>: what they found, what the package left open, and which version of the package they used. A builder can send it to you as an issue against the package. Settle the question, update the package, and give the builder the new version.</p>
 <p class="note chapter-pager"><a href="/handbook/how-checking-works/">← What validation proves</a> · <a href="/handbook/">All chapters</a></p>
 </article>
 </div>
@@ -132,7 +135,7 @@
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

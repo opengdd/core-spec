@@ -1,0 +1,666 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Card keyword state — Fact list adoption — OpenGDD</title>
+<meta name="description" content="Card keyword state is a Fact list adoption with supplied answers, numbers and matching acceptance tests.">
+<link rel="canonical" href="https://opengdd.org/contracts/fact-list-2/card-keyword-state/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Card keyword state — Fact list adoption — OpenGDD">
+<meta property="og:description" content="Card keyword state is a Fact list adoption with supplied answers, numbers and matching acceptance tests.">
+<meta property="og:url" content="https://opengdd.org/contracts/fact-list-2/card-keyword-state/">
+<meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="OpenGDD. An open format for game design documents.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@OpenGDD">
+<meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
+<meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
+<meta name="twitter:title" content="Card keyword state — Fact list adoption — OpenGDD">
+<meta name="twitter:description" content="Card keyword state is a Fact list adoption with supplied answers, numbers and matching acceptance tests.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+<link rel="stylesheet" href="/assets/contracts.css?v=1e8e4c011773">
+<script type="module" src="/assets/contracts.mjs?v=1e8e4c011773"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/" aria-current="page">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout contract-catalog contract-entry-page contract-instance-page" data-contract-root data-core-id="fact-list" data-contract-preset="{&quot;color-alone&quot;:&quot;never&quot;,&quot;audio-alone&quot;:&quot;never&quot;,&quot;presentation-control&quot;:&quot;player-configurable&quot;}" data-contract-facts="{&quot;rowCounts&quot;:{&quot;readable-facts&quot;:7},&quot;valueForms&quot;:{},&quot;rows&quot;:{&quot;readable-facts&quot;:[{&quot;id&quot;:&quot;exhausted-symbol&quot;,&quot;fact&quot;:&quot;02-mechanics.md#exhausted-cards&quot;,&quot;channel&quot;:&quot;symbol-or-shape&quot;,&quot;presentation-settings&quot;:&quot;Color-blind palette recolors the hourglass badge but preserves its shape; HUD scale resizes it; reduced motion and audio-off do not affect it.&quot;},{&quot;id&quot;:&quot;exhausted-text&quot;,&quot;fact&quot;:&quot;02-mechanics.md#exhausted-cards&quot;,&quot;channel&quot;:&quot;text&quot;,&quot;presentation-settings&quot;:&quot;HUD scale resizes the Exhausted label; color-blind palette, reduced motion, and audio-off do not affect it.&quot;},{&quot;id&quot;:&quot;shielded-symbol&quot;,&quot;fact&quot;:&quot;02-mechanics.md#shielded-cards&quot;,&quot;channel&quot;:&quot;symbol-or-shape&quot;,&quot;presentation-settings&quot;:&quot;Color-blind palette recolors the shield badge but preserves its shape; HUD scale resizes it; reduced motion and audio-off do not affect it.&quot;},{&quot;id&quot;:&quot;shielded-text&quot;,&quot;fact&quot;:&quot;02-mechanics.md#shielded-cards&quot;,&quot;channel&quot;:&quot;text&quot;,&quot;presentation-settings&quot;:&quot;HUD scale resizes the Shielded label and shield value; color-blind palette, reduced motion, and audio-off do not affect it.&quot;},{&quot;id&quot;:&quot;shielded-shimmer&quot;,&quot;fact&quot;:&quot;02-mechanics.md#shielded-cards&quot;,&quot;channel&quot;:&quot;animation&quot;,&quot;presentation-settings&quot;:&quot;Reduced motion disables the shield shimmer; shielded-symbol and shielded-text remain readable.&quot;},{&quot;id&quot;:&quot;silenced-symbol&quot;,&quot;fact&quot;:&quot;02-mechanics.md#silenced-cards&quot;,&quot;channel&quot;:&quot;symbol-or-shape&quot;,&quot;presentation-settings&quot;:&quot;Color-blind palette recolors the crossed-rune badge but preserves its shape; HUD scale resizes it; reduced motion and audio-off do not affect it.&quot;},{&quot;id&quot;:&quot;silenced-text&quot;,&quot;fact&quot;:&quot;02-mechanics.md#silenced-cards&quot;,&quot;channel&quot;:&quot;text&quot;,&quot;presentation-settings&quot;:&quot;HUD scale resizes the Silenced label; color-blind palette, reduced motion, and audio-off do not affect it.&quot;}]}}">
+<nav class="doc-toc contract-nav" aria-label="Contracts">
+<details class="contract-nav-disclosure">
+  <summary>Contracts</summary>
+  <div class="contract-nav-content">
+    <p class="toc-title">Contracts</p>
+    <ul class="contract-nav-home"><li><a href="/contracts/">Overview</a></li><li><a href="/contracts/catalog/">Contract catalog</a></li></ul>
+<div class="toc-group contract-page-nav">
+  <p class="toc-group-title">On this page</p>
+  <ul><li><a href="#use-this">Use in your package</a></li>
+<li><a href="#questions">Questions</a></li>
+<li><a href="#values">Numbers</a></li>
+<li><a href="#lists">Lists</a></li>
+<li><a href="#tests">Acceptance tests</a></li>
+<li><a href="#adoption-json">JSON</a></li></ul>
+</div>
+  </div>
+</details>
+</nav>
+<article class="doc-body contract-entry-body">
+<p class="label"><a href="/contracts/catalog/#legibility">Legibility</a></p>
+<div class="contract-entry-title-row">
+  <div><h1>Card keyword state</h1><p class="contract-core-name"><code>card-keyword-state</code> · an adoption of <a href="/contracts/fact-list-2/">Fact list</a>, version 2</p></div>
+  <div><span class="contract-badge ">Tests included</span></div>
+</div>
+
+<section class="contract-handoff" aria-labelledby="use-this">
+  <h2 id="use-this">Use in your package</h2>
+  <p>The first button opens the authoring tool with these answers and numbers already filled in. You still add the rules and tuning of your own game.</p>
+  <div class="contract-actions">
+    <a class="cta" href="/authoring-tool/?contract=fact-list-2&amp;adoption=card-keyword-state">Open in the authoring tool</a>
+    <a class="cta-quiet" href="/contracts/fact-list-2/card-keyword-state.zip" download="card-keyword-state.zip">Download zip file</a>
+  </div>
+  <details><summary>What is in the zip file</summary><p>The zip file holds the adoption and its acceptance tests. In the authoring tool, choose <strong>Add contract</strong> and pick this zip file. If you edit your package outside the authoring tool, unpack the zip file in your package folder. The files of the zip file go into <code>contracts/</code>.</p><div class="contract-actions"><a href="/contracts/fact-list-2/card-keyword-state.json" download="card-keyword-state.json">Download adoption JSON</a> · <a href="/contracts/fact-list-2/fact-list-2.pack.json" download="fact-list-2.pack.json">Download verification pack</a><button type="button" class="cta-quiet" data-copy-core data-core-url="/contracts/fact-list-2/card-keyword-state.json" data-copy-kind="adoption">Copy adoption JSON</button><span role="status" aria-live="polite" data-copy-status></span></div></details>
+</section>
+<section class="contract-overview">
+  <h2>The contract that this adoption uses</h2>
+  <p>This contract covers facts that players must be able to read. It says how each fact is shown, heard, or felt. Color alone does not count as a way to read a listed fact. This contract does not cover HUD layout or tutorials.</p>
+  <p><a href="/contracts/fact-list-2/">Read the full Fact list contract →</a></p>
+</section>
+<section class="contract-form-section" id="questions">
+  <h2>Questions</h2>
+  <p>The supplied answer is marked on each question. Pick other answers to see what changes. Nothing is saved here: the zip file and the authoring tool use the supplied answers.</p>
+  <div class="contract-actions contract-question-tools">
+    <button type="button" class="cta-quiet contract-reset" data-reset-choices>Restore supplied answers</button>
+    <label class="contract-switch"><input type="checkbox" data-builder-wording> Show exact wording for builders</label>
+  </div>
+  <div class="contract-question-list">
+  <article class="contract-question" id="question-color-alone" data-contract-question data-flag="color-alone" data-when="null">
+  <h3>Can color be the only way to read a fact that the game shows?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Can color be the only way to read a fact that the game shows?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="fact-list-color-alone" value="never" data-contract-choice><span class="contract-option-label">Never</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">Color is never the only way to read a fact. Red enemies and green allies also differ by an outline or a label.</span><p class="contract-option-semantics">Every fact the game shows remains readable when all hue differences are removed. Player color settings may still be offered, but they do not replace this requirement.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="fact-list-color-alone" value="player-recolorable" data-contract-choice><span class="contract-option-label">Player recolorable</span></label></th>
+  <td><span class="contract-option-meaning">Color may be the only way to read a fact when the player can replace the color. A player who cannot tell red and green apart can choose two colors that the player can tell apart.</span><p class="contract-option-semantics">Any fact the game shows may use hue as its sole distinction only when a player-facing setting lets the player change every color carrying that fact. The changed presentation must preserve the same fact.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Some players cannot tell some colors apart. A second way to read the fact keeps enemies and allies distinct for every player. A color setting helps only the player who finds it.</p></details>
+</article>
+<article class="contract-question" id="question-audio-alone" data-contract-question data-flag="audio-alone" data-when="null">
+  <h3>Can sound be the only way to read a fact listed here?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Can sound be the only way to read a fact listed here?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="fact-list-audio-alone" value="never" data-contract-choice><span class="contract-option-label">Never</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">Sound is never the only way to read a listed fact. A danger tone also has a label or an icon.</span><p class="contract-option-semantics">Every promised fact remains readable with audio muted. The reviewer groups rows by fact citation and confirms at least one non-audio channel per fact: text, symbol-or-shape, place-or-size, animation, outline-or-contrast, or haptic.</p></td>
+</tr>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="fact-list-audio-alone" value="allowed" data-contract-choice><span class="contract-option-label">Allowed</span></label></th>
+  <td><span class="contract-option-meaning">Sound may be the only way to read a listed fact. Muting a rising danger tone may hide how close a timer is to ending.</span><p class="contract-option-semantics">A promised fact may become unreadable when all audio is muted. Its Fixed citation must identify every play situation in which the audio-only promise applies.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>A sound-only warning disappears when the game is muted or a player cannot hear it. This choice says whether another way to read the fact is required.</p></details>
+</article>
+<article class="contract-question" id="question-presentation-control" data-contract-question data-flag="presentation-control" data-when="null">
+  <h3>Are you promising a player setting for any listed fact?</h3>
+  <fieldset class="contract-options contract-option-table-wrap">
+    <legend class="visually-hidden">Choices for Are you promising a player setting for any listed fact?</legend>
+    <table class="contract-option-table"><tbody>
+<tr class="contract-option-row">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="fact-list-presentation-control" value="fixed-by-game" data-contract-choice><span class="contract-option-label">Fixed by game</span></label></th>
+  <td><span class="contract-option-meaning">Your game promises no player setting for the listed facts. Your game may still have settings, and a row may name one. A color setting that your color answer promises is still promised.</span><p class="contract-option-semantics">Every row still declares any player-facing setting that changes or can disable its channel. The adoption promises none of those settings through this answer, even when a row names a setting that the game has. A setting that a row does name is still binding: its declared result is audited like any other row fact. Answering color-alone with player-recolorable independently promises its color setting.</p></td>
+</tr>
+<tr class="contract-option-row is-supplied">
+  <th scope="row"><label class="contract-option-choice"><input type="radio" name="fact-list-presentation-control" value="player-configurable" data-contract-choice><span class="contract-option-label">Player configurable</span></label><span class="contract-option-mark"><span class="contract-suggested">Supplied answer</span></span></th>
+  <td><span class="contract-option-meaning">Your game promises a player setting for at least one listed fact. A warning-volume setting changes the same warning wherever it appears.</span><p class="contract-option-semantics">The adoption promises at least one player-facing setting that changes or can disable a channel named by a readable-facts row. Every affected row names the setting and its result. The changed presentation is observable in every applicable play situation named by the citation of each affected fact.</p></td>
+</tr>
+    </tbody></table>
+  </fieldset>
+  <details class="contract-rationale contract-question-rationale"><summary>Why this is asked</summary><p>Different players need different ways to read a fact. This choice says whether your game promises any presentation setting.</p></details>
+</article>
+  </div>
+</section>
+<aside class="contract-relief" aria-labelledby="relief-title">
+  <p class="contract-relief-title" id="relief-title">The main decisions are above.</p>
+  <p>The sections below show the numbers, lists and test inputs that this adoption supplies, and the tests that come with the contract. You can change all of them in the authoring tool. You do not need to read the sections below to use this adoption.</p>
+</aside>
+<details class="contract-form-section contract-fold" id="values">
+  <summary><span class="contract-fold-title">Numbers</span><span class="contract-fold-note">no numbers</span></summary>
+  <p>This contract has no numbers to set.</p>
+</details>
+<details class="contract-form-section contract-fold" id="rules">
+  <summary><span class="contract-fold-title">Rules</span><span class="contract-fold-note">no rules</span></summary>
+  <p>A rule is a check between the numbers. Validation reports a rule that fails.</p>
+  <p>This contract has no rules between its numbers.</p>
+</details>
+<details class="contract-form-section contract-fold" id="lists">
+  <summary><span class="contract-fold-title">Lists</span><span class="contract-fold-note">1 list</span></summary>
+  <p>Each list holds the rows this adoption supplies. A list can be empty.</p>
+  <article class="contract-collection">
+<h3>Readable facts</h3>
+<p class="contract-exact-name"><code>readable-facts</code></p>
+<div class="table-scroll"><table class="contract-fields">
+<thead><tr><th>Id</th><th>Fact</th><th>Channel</th><th>Presentation settings</th><th>Without audio</th></tr></thead>
+<tbody>
+<tr><td><code>exhausted-symbol</code></td><td><code>02-mechanics.md#exhausted-cards</code></td><td><code>symbol-or-shape</code></td><td><code>Color-blind palette recolors the hourglass badge but preserves its shape; HUD scale resizes it; reduced motion and audio-off do not affect it.</code></td><td>—</td></tr>
+<tr><td><code>exhausted-text</code></td><td><code>02-mechanics.md#exhausted-cards</code></td><td><code>text</code></td><td><code>HUD scale resizes the Exhausted label; color-blind palette, reduced motion, and audio-off do not affect it.</code></td><td>—</td></tr>
+<tr><td><code>shielded-symbol</code></td><td><code>02-mechanics.md#shielded-cards</code></td><td><code>symbol-or-shape</code></td><td><code>Color-blind palette recolors the shield badge but preserves its shape; HUD scale resizes it; reduced motion and audio-off do not affect it.</code></td><td>—</td></tr>
+<tr><td><code>shielded-text</code></td><td><code>02-mechanics.md#shielded-cards</code></td><td><code>text</code></td><td><code>HUD scale resizes the Shielded label and shield value; color-blind palette, reduced motion, and audio-off do not affect it.</code></td><td>—</td></tr>
+<tr><td><code>shielded-shimmer</code></td><td><code>02-mechanics.md#shielded-cards</code></td><td><code>animation</code></td><td><code>Reduced motion disables the shield shimmer; shielded-symbol and shielded-text remain readable.</code></td><td>—</td></tr>
+<tr><td><code>silenced-symbol</code></td><td><code>02-mechanics.md#silenced-cards</code></td><td><code>symbol-or-shape</code></td><td><code>Color-blind palette recolors the crossed-rune badge but preserves its shape; HUD scale resizes it; reduced motion and audio-off do not affect it.</code></td><td>—</td></tr>
+<tr><td><code>silenced-text</code></td><td><code>02-mechanics.md#silenced-cards</code></td><td><code>text</code></td><td><code>HUD scale resizes the Silenced label; color-blind palette, reduced motion, and audio-off do not affect it.</code></td><td>—</td></tr>
+</tbody></table></div>
+</article>
+</details>
+<details class="contract-form-section contract-fold" id="verification">
+  <summary><span class="contract-fold-title">Test inputs</span><span class="contract-fold-note">scope and seeds</span></summary>
+  <p>Some tests need a scope or seeds from the adoption before they can run.</p>
+  <div class="contract-detail-grid"><article class="contract-detail-card">
+  <p class="contract-exact-name"><code>fact-policy-holds</code></p>
+  <h3>Fact policy holds</h3>
+  <dl class="contract-inline-facts"><div><dt>Scope</dt><dd>all Fixed mechanics prose that promises the player can read Exhausted, Shielded, or Silenced on a card in hand or on the board, and every readable-facts row</dd></div></dl>
+</article>
+<article class="contract-detail-card">
+  <p class="contract-exact-name"><code>presentation-control-visible</code></p>
+  <h3>Presentation control visible</h3>
+  <dl class="contract-inline-facts"><div><dt>Scope</dt><dd>color-blind palette, HUD scale, reduced motion, and audio-off at both ends of their supported ranges, for Exhausted, Shielded, and Silenced cards in hand and on the board</dd></div></dl>
+</article></div>
+</details>
+<details class="contract-form-section contract-fold" id="tests">
+  <summary><span class="contract-fold-title">Acceptance tests</span><span class="contract-fold-note">17 tests apply</span></summary>
+  <p>The contract comes with 6 tests. A test that runs once per row is counted once for each row. Tests that do not apply to these answers are still listed, with the reason.</p>
+  <div class="contract-test-list"><article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fact-policy-holds</code></p>
+      <h3>the readable-facts list is complete and has no duplicate pair</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to card-keyword-state.</p>
+  <p class="contract-test-text">Audit class: observer-judged. Across the supplied scope, the readable-facts list has at least one row, every fact the Fixed prose promises the player can read appears in at least one row, and no two rows name the same fact citation and the same channel.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Scope</dt><dd><p><code class="contract-placeholder">all Fixed mechanics prose that promises the player can read Exhausted, Shielded, or Silenced on a card in hand or on the board, and every readable-facts row</code></p></dd></div>
+<div><dt>Holds</dt><dd><p>the readable-facts list has at least one row; every fact the Fixed prose promises the player can read appears in at least one row; no two rows name the same fact citation and the same channel</p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-fact-list-completeness</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>color-and-audio-policy-holds</code></p>
+      <h3>the promised color and audio policies hold throughout play</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to card-keyword-state.</p>
+  <p class="contract-test-text">Audit class: observer-judged. Across every fact the game&#39;s Fixed prose says the player can tell, including facts with no readable-facts row, and the play situations that prose names, every fact the game shows remains readable after all hue differences are removed; every promised fact remains readable with audio muted and has at least one row whose channel is text, symbol-or-shape, place-or-size, animation, outline-or-contrast, or haptic.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Scope</dt><dd><p>every fact the game&#39;s Fixed prose says the player can tell, including facts with no readable-facts row, across the play situations that prose names</p></dd></div>
+<div><dt>Holds</dt><dd><p>every fact the game shows remains readable after all hue differences are removed; every promised fact remains readable with audio muted and has at least one row whose channel is text, symbol-or-shape, place-or-size, animation, outline-or-contrast, or haptic</p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-fact-observer-results</li><li><code class="contract-placeholder">card-keyword-state</code>-color-and-audio-state</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>presentation-control-visible</code></p>
+      <h3>the promised presentation setting changes a fact in play</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">general</span><span class="contract-badge ">once</span></div>
+  </div>
+  <p class="contract-test-status">Applies to card-keyword-state.</p>
+  <p class="contract-test-text">Audit class: observer-judged. Across the supplied scope, at least one player-facing setting changes or can disable a channel named by a readable-facts row. Every row names each setting that affects its channel and the result at every supported end, and the running game matches that declaration in every applicable cited situation. A row whose channel a setting can disable names another readable row for the same fact, or states that the fact becomes unreadable. An unreadable result obeys the selected color and audio policies.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Scope</dt><dd><p><code class="contract-placeholder">color-blind palette, HUD scale, reduced motion, and audio-off at both ends of their supported ranges, for Exhausted, Shielded, and Silenced cards in hand and on the board</code></p></dd></div>
+<div><dt>Holds</dt><dd><p>at least one player-facing setting changes or can disable a channel named by a readable-facts row; every row names every setting that changes or can disable its channel and states the result at each supported end; each declaration matches the running game in every applicable play situation named by the row&#39;s fact citation; when a setting can disable the row&#39;s channel, the row names another channel row for the same fact that remains readable or states that the fact becomes unreadable, and any unreadable result obeys the selected color and audio policies</p></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-presentation-settings</li><li><code class="contract-placeholder">card-keyword-state</code>-presentation-observer-results</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>presentation-setting-effect-holds · exhausted-symbol</code></p>
+      <h3>the setting declaration for <code class="contract-placeholder">exhausted-symbol</code> matches play</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the exhausted-symbol row.</p>
+  <p class="contract-test-text">Audit class: observer-judged. For <code class="contract-placeholder">exhausted-symbol</code>, observe every named setting at both ends of its supported range in every applicable situation named at <code class="contract-placeholder">02-mechanics.md#exhausted-cards</code>. The channel changes or is disabled exactly as declared. If the channel is disabled, another row keeps the fact readable or this row states that the fact becomes unreadable, and that result obeys the selected color and audio policies. This row declares: <code class="contract-placeholder">Color-blind palette recolors the hourglass badge but preserves its shape; HUD scale resizes it; reduced motion and audio-off do not affect it.</code></p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the channel at <code class="contract-placeholder">02-mechanics.md#exhausted-cards</code>; this row declares: <code class="contract-placeholder">Color-blind palette recolors the hourglass badge but preserves its shape; HUD scale resizes it; reduced motion and audio-off do not affect it.</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>every named setting is observed at both ends of its supported range in every applicable play situation named at <code class="contract-placeholder">02-mechanics.md#exhausted-cards</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the channel changes or is disabled exactly as declared</li><li>if the channel is disabled, another declared row keeps the fact readable or this row states that the fact becomes unreadable, and that result obeys the selected color and audio policies</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-<code class="contract-placeholder">exhausted-symbol</code>-presentation-setting-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>presentation-setting-effect-holds · exhausted-text</code></p>
+      <h3>the setting declaration for <code class="contract-placeholder">exhausted-text</code> matches play</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the exhausted-text row.</p>
+  <p class="contract-test-text">Audit class: observer-judged. For <code class="contract-placeholder">exhausted-text</code>, observe every named setting at both ends of its supported range in every applicable situation named at <code class="contract-placeholder">02-mechanics.md#exhausted-cards</code>. The channel changes or is disabled exactly as declared. If the channel is disabled, another row keeps the fact readable or this row states that the fact becomes unreadable, and that result obeys the selected color and audio policies. This row declares: <code class="contract-placeholder">HUD scale resizes the Exhausted label; color-blind palette, reduced motion, and audio-off do not affect it.</code></p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the channel at <code class="contract-placeholder">02-mechanics.md#exhausted-cards</code>; this row declares: <code class="contract-placeholder">HUD scale resizes the Exhausted label; color-blind palette, reduced motion, and audio-off do not affect it.</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>every named setting is observed at both ends of its supported range in every applicable play situation named at <code class="contract-placeholder">02-mechanics.md#exhausted-cards</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the channel changes or is disabled exactly as declared</li><li>if the channel is disabled, another declared row keeps the fact readable or this row states that the fact becomes unreadable, and that result obeys the selected color and audio policies</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-<code class="contract-placeholder">exhausted-text</code>-presentation-setting-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>presentation-setting-effect-holds · shielded-symbol</code></p>
+      <h3>the setting declaration for <code class="contract-placeholder">shielded-symbol</code> matches play</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the shielded-symbol row.</p>
+  <p class="contract-test-text">Audit class: observer-judged. For <code class="contract-placeholder">shielded-symbol</code>, observe every named setting at both ends of its supported range in every applicable situation named at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code>. The channel changes or is disabled exactly as declared. If the channel is disabled, another row keeps the fact readable or this row states that the fact becomes unreadable, and that result obeys the selected color and audio policies. This row declares: <code class="contract-placeholder">Color-blind palette recolors the shield badge but preserves its shape; HUD scale resizes it; reduced motion and audio-off do not affect it.</code></p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the channel at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code>; this row declares: <code class="contract-placeholder">Color-blind palette recolors the shield badge but preserves its shape; HUD scale resizes it; reduced motion and audio-off do not affect it.</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>every named setting is observed at both ends of its supported range in every applicable play situation named at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the channel changes or is disabled exactly as declared</li><li>if the channel is disabled, another declared row keeps the fact readable or this row states that the fact becomes unreadable, and that result obeys the selected color and audio policies</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-<code class="contract-placeholder">shielded-symbol</code>-presentation-setting-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>presentation-setting-effect-holds · shielded-text</code></p>
+      <h3>the setting declaration for <code class="contract-placeholder">shielded-text</code> matches play</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the shielded-text row.</p>
+  <p class="contract-test-text">Audit class: observer-judged. For <code class="contract-placeholder">shielded-text</code>, observe every named setting at both ends of its supported range in every applicable situation named at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code>. The channel changes or is disabled exactly as declared. If the channel is disabled, another row keeps the fact readable or this row states that the fact becomes unreadable, and that result obeys the selected color and audio policies. This row declares: <code class="contract-placeholder">HUD scale resizes the Shielded label and shield value; color-blind palette, reduced motion, and audio-off do not affect it.</code></p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the channel at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code>; this row declares: <code class="contract-placeholder">HUD scale resizes the Shielded label and shield value; color-blind palette, reduced motion, and audio-off do not affect it.</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>every named setting is observed at both ends of its supported range in every applicable play situation named at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the channel changes or is disabled exactly as declared</li><li>if the channel is disabled, another declared row keeps the fact readable or this row states that the fact becomes unreadable, and that result obeys the selected color and audio policies</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-<code class="contract-placeholder">shielded-text</code>-presentation-setting-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>presentation-setting-effect-holds · shielded-shimmer</code></p>
+      <h3>the setting declaration for <code class="contract-placeholder">shielded-shimmer</code> matches play</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the shielded-shimmer row.</p>
+  <p class="contract-test-text">Audit class: observer-judged. For <code class="contract-placeholder">shielded-shimmer</code>, observe every named setting at both ends of its supported range in every applicable situation named at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code>. The channel changes or is disabled exactly as declared. If the channel is disabled, another row keeps the fact readable or this row states that the fact becomes unreadable, and that result obeys the selected color and audio policies. This row declares: <code class="contract-placeholder">Reduced motion disables the shield shimmer; shielded-symbol and shielded-text remain readable.</code></p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the channel at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code>; this row declares: <code class="contract-placeholder">Reduced motion disables the shield shimmer; shielded-symbol and shielded-text remain readable.</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>every named setting is observed at both ends of its supported range in every applicable play situation named at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the channel changes or is disabled exactly as declared</li><li>if the channel is disabled, another declared row keeps the fact readable or this row states that the fact becomes unreadable, and that result obeys the selected color and audio policies</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-<code class="contract-placeholder">shielded-shimmer</code>-presentation-setting-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>presentation-setting-effect-holds · silenced-symbol</code></p>
+      <h3>the setting declaration for <code class="contract-placeholder">silenced-symbol</code> matches play</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the silenced-symbol row.</p>
+  <p class="contract-test-text">Audit class: observer-judged. For <code class="contract-placeholder">silenced-symbol</code>, observe every named setting at both ends of its supported range in every applicable situation named at <code class="contract-placeholder">02-mechanics.md#silenced-cards</code>. The channel changes or is disabled exactly as declared. If the channel is disabled, another row keeps the fact readable or this row states that the fact becomes unreadable, and that result obeys the selected color and audio policies. This row declares: <code class="contract-placeholder">Color-blind palette recolors the crossed-rune badge but preserves its shape; HUD scale resizes it; reduced motion and audio-off do not affect it.</code></p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the channel at <code class="contract-placeholder">02-mechanics.md#silenced-cards</code>; this row declares: <code class="contract-placeholder">Color-blind palette recolors the crossed-rune badge but preserves its shape; HUD scale resizes it; reduced motion and audio-off do not affect it.</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>every named setting is observed at both ends of its supported range in every applicable play situation named at <code class="contract-placeholder">02-mechanics.md#silenced-cards</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the channel changes or is disabled exactly as declared</li><li>if the channel is disabled, another declared row keeps the fact readable or this row states that the fact becomes unreadable, and that result obeys the selected color and audio policies</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-<code class="contract-placeholder">silenced-symbol</code>-presentation-setting-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>presentation-setting-effect-holds · silenced-text</code></p>
+      <h3>the setting declaration for <code class="contract-placeholder">silenced-text</code> matches play</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the silenced-text row.</p>
+  <p class="contract-test-text">Audit class: observer-judged. For <code class="contract-placeholder">silenced-text</code>, observe every named setting at both ends of its supported range in every applicable situation named at <code class="contract-placeholder">02-mechanics.md#silenced-cards</code>. The channel changes or is disabled exactly as declared. If the channel is disabled, another row keeps the fact readable or this row states that the fact becomes unreadable, and that result obeys the selected color and audio policies. This row declares: <code class="contract-placeholder">HUD scale resizes the Silenced label; color-blind palette, reduced motion, and audio-off do not affect it.</code></p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the channel at <code class="contract-placeholder">02-mechanics.md#silenced-cards</code>; this row declares: <code class="contract-placeholder">HUD scale resizes the Silenced label; color-blind palette, reduced motion, and audio-off do not affect it.</code></p></dd></div>
+<div><dt>When</dt><dd><ul><li>every named setting is observed at both ends of its supported range in every applicable play situation named at <code class="contract-placeholder">02-mechanics.md#silenced-cards</code></li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>the channel changes or is disabled exactly as declared</li><li>if the channel is disabled, another declared row keeps the fact readable or this row states that the fact becomes unreadable, and that result obeys the selected color and audio policies</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-<code class="contract-placeholder">silenced-text</code>-presentation-setting-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test is-not-applicable">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>audio-off-result-holds</code></p>
+      <h3>the audio-off result for <code class="contract-placeholder">Row.id</code> matches play</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  </div>
+  <p class="contract-test-status">Does not apply to card-keyword-state: no row in readable-facts matches channel audio cue or spatial audio or narration or audio description.</p>
+  
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fact-readable-by-channel · exhausted-symbol</code></p>
+      <h3>the fact defined at <code class="contract-placeholder">02-mechanics.md#exhausted-cards</code> is readable through a pictorial symbol, distinct shape, or pattern alone</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the exhausted-symbol row.</p>
+  <p class="contract-test-text">Audit class: observer-judged. The check repeats in every play situation named at <code class="contract-placeholder">02-mechanics.md#exhausted-cards</code>. Every other route to the fact, declared or not, is removed or made identical across the states that the observer must distinguish. Then the only thing that changes with the fact is a pictorial symbol, distinct shape, or pattern. Developer instrumentation that the game does not present to the player, such as an audit pane, a debug overlay, or a save file, is not a route. Within each named play situation, an observer meets each state the cited prose names at least once, in an order that the observer does not know, and correctly names the state every time from a pictorial symbol, distinct shape, or pattern alone.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the fact defined at <code class="contract-placeholder">02-mechanics.md#exhausted-cards</code>, checked separately in every play situation named there; every other route to the fact, declared or not, is removed or made identical across the states that the observer must distinguish, so that a pictorial symbol, distinct shape, or pattern is the only thing that changes with the fact; developer instrumentation that the game does not present to the player, such as an audit pane, a debug overlay, or a save file, is not a route</p></dd></div>
+<div><dt>When</dt><dd><ul><li>within each named play situation, an observer using a pictorial symbol, distinct shape, or pattern meets each state the cited prose names at least once, in an order the observer does not know, with no prior knowledge of which state is present</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>in each named play situation, the observer correctly names the state every time from a pictorial symbol, distinct shape, or pattern alone</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-<code class="contract-placeholder">exhausted-symbol</code>-observer-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fact-readable-by-channel · exhausted-text</code></p>
+      <h3>the fact defined at <code class="contract-placeholder">02-mechanics.md#exhausted-cards</code> is readable through words or numbers shown to the player alone</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the exhausted-text row.</p>
+  <p class="contract-test-text">Audit class: observer-judged. The check repeats in every play situation named at <code class="contract-placeholder">02-mechanics.md#exhausted-cards</code>. Every other route to the fact, declared or not, is removed or made identical across the states that the observer must distinguish. Then the only thing that changes with the fact is words or numbers shown to the player. Developer instrumentation that the game does not present to the player, such as an audit pane, a debug overlay, or a save file, is not a route. Within each named play situation, an observer meets each state the cited prose names at least once, in an order that the observer does not know, and correctly names the state every time from words or numbers shown to the player alone.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the fact defined at <code class="contract-placeholder">02-mechanics.md#exhausted-cards</code>, checked separately in every play situation named there; every other route to the fact, declared or not, is removed or made identical across the states that the observer must distinguish, so that words or numbers shown to the player is the only thing that changes with the fact; developer instrumentation that the game does not present to the player, such as an audit pane, a debug overlay, or a save file, is not a route</p></dd></div>
+<div><dt>When</dt><dd><ul><li>within each named play situation, an observer using words or numbers shown to the player meets each state the cited prose names at least once, in an order the observer does not know, with no prior knowledge of which state is present</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>in each named play situation, the observer correctly names the state every time from words or numbers shown to the player alone</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-<code class="contract-placeholder">exhausted-text</code>-observer-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fact-readable-by-channel · shielded-symbol</code></p>
+      <h3>the fact defined at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code> is readable through a pictorial symbol, distinct shape, or pattern alone</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the shielded-symbol row.</p>
+  <p class="contract-test-text">Audit class: observer-judged. The check repeats in every play situation named at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code>. Every other route to the fact, declared or not, is removed or made identical across the states that the observer must distinguish. Then the only thing that changes with the fact is a pictorial symbol, distinct shape, or pattern. Developer instrumentation that the game does not present to the player, such as an audit pane, a debug overlay, or a save file, is not a route. Within each named play situation, an observer meets each state the cited prose names at least once, in an order that the observer does not know, and correctly names the state every time from a pictorial symbol, distinct shape, or pattern alone.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the fact defined at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code>, checked separately in every play situation named there; every other route to the fact, declared or not, is removed or made identical across the states that the observer must distinguish, so that a pictorial symbol, distinct shape, or pattern is the only thing that changes with the fact; developer instrumentation that the game does not present to the player, such as an audit pane, a debug overlay, or a save file, is not a route</p></dd></div>
+<div><dt>When</dt><dd><ul><li>within each named play situation, an observer using a pictorial symbol, distinct shape, or pattern meets each state the cited prose names at least once, in an order the observer does not know, with no prior knowledge of which state is present</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>in each named play situation, the observer correctly names the state every time from a pictorial symbol, distinct shape, or pattern alone</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-<code class="contract-placeholder">shielded-symbol</code>-observer-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fact-readable-by-channel · shielded-text</code></p>
+      <h3>the fact defined at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code> is readable through words or numbers shown to the player alone</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the shielded-text row.</p>
+  <p class="contract-test-text">Audit class: observer-judged. The check repeats in every play situation named at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code>. Every other route to the fact, declared or not, is removed or made identical across the states that the observer must distinguish. Then the only thing that changes with the fact is words or numbers shown to the player. Developer instrumentation that the game does not present to the player, such as an audit pane, a debug overlay, or a save file, is not a route. Within each named play situation, an observer meets each state the cited prose names at least once, in an order that the observer does not know, and correctly names the state every time from words or numbers shown to the player alone.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the fact defined at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code>, checked separately in every play situation named there; every other route to the fact, declared or not, is removed or made identical across the states that the observer must distinguish, so that words or numbers shown to the player is the only thing that changes with the fact; developer instrumentation that the game does not present to the player, such as an audit pane, a debug overlay, or a save file, is not a route</p></dd></div>
+<div><dt>When</dt><dd><ul><li>within each named play situation, an observer using words or numbers shown to the player meets each state the cited prose names at least once, in an order the observer does not know, with no prior knowledge of which state is present</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>in each named play situation, the observer correctly names the state every time from words or numbers shown to the player alone</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-<code class="contract-placeholder">shielded-text</code>-observer-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fact-readable-by-channel · shielded-shimmer</code></p>
+      <h3>the fact defined at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code> is readable through movement over time alone</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the shielded-shimmer row.</p>
+  <p class="contract-test-text">Audit class: observer-judged. The check repeats in every play situation named at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code>. Every other route to the fact, declared or not, is removed or made identical across the states that the observer must distinguish. Then the only thing that changes with the fact is movement over time. Developer instrumentation that the game does not present to the player, such as an audit pane, a debug overlay, or a save file, is not a route. Within each named play situation, an observer meets each state the cited prose names at least once, in an order that the observer does not know, and correctly names the state every time from movement over time alone.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the fact defined at <code class="contract-placeholder">02-mechanics.md#shielded-cards</code>, checked separately in every play situation named there; every other route to the fact, declared or not, is removed or made identical across the states that the observer must distinguish, so that movement over time is the only thing that changes with the fact; developer instrumentation that the game does not present to the player, such as an audit pane, a debug overlay, or a save file, is not a route</p></dd></div>
+<div><dt>When</dt><dd><ul><li>within each named play situation, an observer using movement over time meets each state the cited prose names at least once, in an order the observer does not know, with no prior knowledge of which state is present</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>in each named play situation, the observer correctly names the state every time from movement over time alone</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-<code class="contract-placeholder">shielded-shimmer</code>-observer-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fact-readable-by-channel · silenced-symbol</code></p>
+      <h3>the fact defined at <code class="contract-placeholder">02-mechanics.md#silenced-cards</code> is readable through a pictorial symbol, distinct shape, or pattern alone</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the silenced-symbol row.</p>
+  <p class="contract-test-text">Audit class: observer-judged. The check repeats in every play situation named at <code class="contract-placeholder">02-mechanics.md#silenced-cards</code>. Every other route to the fact, declared or not, is removed or made identical across the states that the observer must distinguish. Then the only thing that changes with the fact is a pictorial symbol, distinct shape, or pattern. Developer instrumentation that the game does not present to the player, such as an audit pane, a debug overlay, or a save file, is not a route. Within each named play situation, an observer meets each state the cited prose names at least once, in an order that the observer does not know, and correctly names the state every time from a pictorial symbol, distinct shape, or pattern alone.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the fact defined at <code class="contract-placeholder">02-mechanics.md#silenced-cards</code>, checked separately in every play situation named there; every other route to the fact, declared or not, is removed or made identical across the states that the observer must distinguish, so that a pictorial symbol, distinct shape, or pattern is the only thing that changes with the fact; developer instrumentation that the game does not present to the player, such as an audit pane, a debug overlay, or a save file, is not a route</p></dd></div>
+<div><dt>When</dt><dd><ul><li>within each named play situation, an observer using a pictorial symbol, distinct shape, or pattern meets each state the cited prose names at least once, in an order the observer does not know, with no prior knowledge of which state is present</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>in each named play situation, the observer correctly names the state every time from a pictorial symbol, distinct shape, or pattern alone</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-<code class="contract-placeholder">silenced-symbol</code>-observer-result</li></ul></dd></div></dl></details>
+</article>
+<article class="contract-test">
+  <div class="contract-test-heading">
+    <div>
+      <p class="contract-exact-name"><code>fact-readable-by-channel · silenced-text</code></p>
+      <h3>the fact defined at <code class="contract-placeholder">02-mechanics.md#silenced-cards</code> is readable through words or numbers shown to the player alone</h3>
+    </div>
+    <div class="contract-test-badges"><span class="contract-badge ">scenario</span><span class="contract-badge ">per readable-facts row</span></div>
+  </div>
+  <p class="contract-test-status">Applies to the silenced-text row.</p>
+  <p class="contract-test-text">Audit class: observer-judged. The check repeats in every play situation named at <code class="contract-placeholder">02-mechanics.md#silenced-cards</code>. Every other route to the fact, declared or not, is removed or made identical across the states that the observer must distinguish. Then the only thing that changes with the fact is words or numbers shown to the player. Developer instrumentation that the game does not present to the player, such as an audit pane, a debug overlay, or a save file, is not a route. Within each named play situation, an observer meets each state the cited prose names at least once, in an order that the observer does not know, and correctly names the state every time from words or numbers shown to the player alone.</p>
+  <details><summary>Test steps and diagnostics</summary><dl class="contract-test-steps"><div><dt>Given</dt><dd><p>the fact defined at <code class="contract-placeholder">02-mechanics.md#silenced-cards</code>, checked separately in every play situation named there; every other route to the fact, declared or not, is removed or made identical across the states that the observer must distinguish, so that words or numbers shown to the player is the only thing that changes with the fact; developer instrumentation that the game does not present to the player, such as an audit pane, a debug overlay, or a save file, is not a route</p></dd></div>
+<div><dt>When</dt><dd><ul><li>within each named play situation, an observer using words or numbers shown to the player meets each state the cited prose names at least once, in an order the observer does not know, with no prior knowledge of which state is present</li></ul></dd></div>
+<div><dt>Then</dt><dd><ul><li>in each named play situation, the observer correctly names the state every time from words or numbers shown to the player alone</li></ul></dd></div>
+<div><dt>Diagnostics</dt><dd><ul><li><code class="contract-placeholder">card-keyword-state</code>-<code class="contract-placeholder">silenced-text</code>-observer-result</li></ul></dd></div></dl></details>
+</article></div>
+</details>
+<details class="contract-form-section contract-fold" id="adoption-json">
+  <summary><span class="contract-fold-title">JSON</span><span class="contract-fold-note">the adoption as one file</span></summary>
+  <p>Answers you try on this page do not change this file. To change an adoption, open it in the authoring tool.</p>
+
+  <pre class="contract-json"><code>{
+  &quot;contract&quot;: &quot;fact-list&quot;,
+  &quot;version&quot;: 2,
+  &quot;origin&quot;: &quot;https://opengdd.org/contracts/fact-list-2&quot;,
+  &quot;summary&quot;: &quot;This contract covers facts that players must be able to read. It says how each fact is shown, heard, or felt. Color alone does not count as a way to read a listed fact. This contract does not cover HUD layout or tutorials.&quot;,
+  &quot;mechanism&quot;: [
+    &quot;Each readable-facts row is one fact-and-channel promise. A fact carried by several non-color channels repeats the same Fixed citation in several rows; a fact with no row makes no channel-readability promise under this contract.&quot;,
+    &quot;A row promises that its channel alone lets a player distinguish the states the cited Fixed prose defines in every play situation the citation names. The check repeats for each named situation. Every other route to the fact, declared or not, is removed or made identical across the states that the observer must distinguish. The named channel is then the only thing that changes with the fact. Developer instrumentation that the game does not present to the player, such as an audit pane, a debug overlay, or a save file, is not a route. Within each named play situation, an observer meets each state the cited prose names at least once, in an order that the observer does not know, and must name the state every time from the named channel alone.&quot;,
+    &quot;A fact carried by memorable authored content, such as a published deck or a fixed map, can be readable through a route the channel rows do not describe; the rows promise presentation, not secrecy.&quot;,
+    &quot;The ten channel ids are text, symbol-or-shape, place-or-size, animation, outline-or-contrast, audio-cue, spatial-audio, narration, audio-description, and haptic. Color is not another channel: color-alone is a game-wide policy for every fact the game shows, including a fact with no row, while a fact appears in readable-facts only when at least one non-color channel carries it.&quot;,
+    &quot;A listed fact may be a unit state, warning direction, resource amount, or card state. This contract records whether that fact is readable; it does not define tutorials, controls, or how the state changes.&quot;,
+    &quot;Each row declares every player-facing setting that changes or can disable its channel. If a setting can disable that row&#39;s channel, the adoption either names another row for the same fact that remains readable or states that the fact becomes unreadable. The unreadable result is forbidden whenever another selected policy requires the fact to remain readable under that setting.&quot;,
+    &quot;Package validation checks the list&#39;s shape, ids, channel choices, Fixed citations, and required setting declarations. The verification pack separately audits list completeness, the game-wide color and audio policies, each setting declaration, and whether each channel distinguishes the cited states. Under fixed-by-game a row may declare no affected setting. A setting that a row does declare is binding and is audited like any other row fact. The answer player-recolorable to color-alone still promises its color setting, whatever the answer to presentation-control is.&quot;
+  ],
+  &quot;questions&quot;: {
+    &quot;color-alone&quot;: {
+      &quot;asks&quot;: &quot;Can color be the only way to read a fact that the game shows?&quot;,
+      &quot;rationale&quot;: &quot;Some players cannot tell some colors apart. A second way to read the fact keeps enemies and allies distinct for every player. A color setting helps only the player who finds it.&quot;,
+      &quot;guidance&quot;: &quot;never&quot;,
+      &quot;options&quot;: {
+        &quot;never&quot;: {
+          &quot;meaning&quot;: &quot;Color is never the only way to read a fact. Red enemies and green allies also differ by an outline or a label.&quot;,
+          &quot;semantics&quot;: &quot;Every fact the game shows remains readable when all hue differences are removed. Player color settings may still be offered, but they do not replace this requirement.&quot;
+        },
+        &quot;player-recolorable&quot;: {
+          &quot;meaning&quot;: &quot;Color may be the only way to read a fact when the player can replace the color. A player who cannot tell red and green apart can choose two colors that the player can tell apart.&quot;,
+          &quot;semantics&quot;: &quot;Any fact the game shows may use hue as its sole distinction only when a player-facing setting lets the player change every color carrying that fact. The changed presentation must preserve the same fact.&quot;
+        }
+      }
+    },
+    &quot;audio-alone&quot;: {
+      &quot;asks&quot;: &quot;Can sound be the only way to read a fact listed here?&quot;,
+      &quot;rationale&quot;: &quot;A sound-only warning disappears when the game is muted or a player cannot hear it. This choice says whether another way to read the fact is required.&quot;,
+      &quot;guidance&quot;: &quot;never&quot;,
+      &quot;options&quot;: {
+        &quot;never&quot;: {
+          &quot;meaning&quot;: &quot;Sound is never the only way to read a listed fact. A danger tone also has a label or an icon.&quot;,
+          &quot;semantics&quot;: &quot;Every promised fact remains readable with audio muted. The reviewer groups rows by fact citation and confirms at least one non-audio channel per fact: text, symbol-or-shape, place-or-size, animation, outline-or-contrast, or haptic.&quot;
+        },
+        &quot;allowed&quot;: {
+          &quot;meaning&quot;: &quot;Sound may be the only way to read a listed fact. Muting a rising danger tone may hide how close a timer is to ending.&quot;,
+          &quot;semantics&quot;: &quot;A promised fact may become unreadable when all audio is muted. Its Fixed citation must identify every play situation in which the audio-only promise applies.&quot;
+        }
+      }
+    },
+    &quot;presentation-control&quot;: {
+      &quot;asks&quot;: &quot;Are you promising a player setting for any listed fact?&quot;,
+      &quot;rationale&quot;: &quot;Different players need different ways to read a fact. This choice says whether your game promises any presentation setting.&quot;,
+      &quot;guidance&quot;: &quot;player-configurable&quot;,
+      &quot;options&quot;: {
+        &quot;fixed-by-game&quot;: {
+          &quot;meaning&quot;: &quot;Your game promises no player setting for the listed facts. Your game may still have settings, and a row may name one. A color setting that your color answer promises is still promised.&quot;,
+          &quot;semantics&quot;: &quot;Every row still declares any player-facing setting that changes or can disable its channel. The adoption promises none of those settings through this answer, even when a row names a setting that the game has. A setting that a row does name is still binding: its declared result is audited like any other row fact. Answering color-alone with player-recolorable independently promises its color setting.&quot;
+        },
+        &quot;player-configurable&quot;: {
+          &quot;meaning&quot;: &quot;Your game promises a player setting for at least one listed fact. A warning-volume setting changes the same warning wherever it appears.&quot;,
+          &quot;semantics&quot;: &quot;The adoption promises at least one player-facing setting that changes or can disable a channel named by a readable-facts row. Every affected row names the setting and its result. The changed presentation is observable in every applicable play situation named by the citation of each affected fact.&quot;
+        }
+      }
+    }
+  },
+  &quot;declares&quot;: {
+    &quot;rows&quot;: {
+      &quot;readable-facts&quot;: {
+        &quot;description&quot;: &quot;List every fact and every independent way players can read it without color. Use one row per pair, with no repeats. Two ways to read health need two rows whose fact field names the same place in your game&#39;s rules. A finished adoption needs at least one row. No automatic check counts the rows. A person who reviews the design checks that the list has at least one row.&quot;,
+        &quot;record&quot;: {
+          &quot;id&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;pattern&quot;: &quot;kebab-case&quot;,
+            &quot;unique&quot;: true,
+            &quot;description&quot;: &quot;A short name for this fact and its channel in your game&#39;s words, such as health-number or threat-arrow. Use a different name for each row.&quot;
+          },
+          &quot;fact&quot;: {
+            &quot;type&quot;: &quot;citation&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;Where your game&#39;s rules define the fact and its states. The same rules must name every play situation that this row covers.&quot;
+          },
+          &quot;channel&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;options&quot;: [
+              &quot;text&quot;,
+              &quot;symbol-or-shape&quot;,
+              &quot;place-or-size&quot;,
+              &quot;animation&quot;,
+              &quot;outline-or-contrast&quot;,
+              &quot;audio-cue&quot;,
+              &quot;spatial-audio&quot;,
+              &quot;narration&quot;,
+              &quot;audio-description&quot;,
+              &quot;haptic&quot;
+            ],
+            &quot;description&quot;: &quot;The non-color way that carries this fact by itself. In each named situation, an observer must identify every state from this way alone. Text uses words or numbers shown to the player. Symbol-or-shape uses a pictorial symbol, a plain shape, or a pattern, such as a shield badge or hatching. Place-or-size uses where something sits or how large or full it is, such as a threat arrow&#39;s direction. Animation uses movement over time, such as a pulsing border. Outline-or-contrast uses an outline or a contrast between light and dark. Audio-cue uses a sound whose direction and position do not matter. Spatial-audio uses the direction or position of a sound. Narration reads interface content. Audio description explains visual action that the interface does not name. Haptic uses vibration or another touch pattern.&quot;
+          },
+          &quot;presentation-settings&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;required&quot;: true,
+            &quot;description&quot;: &quot;Name every player setting that changes this row&#39;s channel or can disable it. Say what happens at each end of the setting&#39;s range. For a switch, say what happens when it is on and when it is off. Write &#39;none&#39; when no setting affects the channel. If a setting can disable the channel, name another row for the same fact that remains readable, or state that the fact becomes unreadable. The fact may become unreadable only when your color and sound answers do not require it to stay readable. The automatic check only sees that this field is filled in. A person who reviews the design checks that it is true.&quot;
+          },
+          &quot;without-audio&quot;: {
+            &quot;type&quot;: &quot;string&quot;,
+            &quot;when&quot;: {
+              &quot;row&quot;: {
+                &quot;channel&quot;: [
+                  &quot;audio-cue&quot;,
+                  &quot;spatial-audio&quot;,
+                  &quot;narration&quot;,
+                  &quot;audio-description&quot;
+                ]
+              }
+            },
+            &quot;description&quot;: &quot;Say what a player gets when audio is off. Name a non-audio row for the same fact, or state that the fact becomes unreadable. The fact may become unreadable only when your color and sound answers do not require it to stay readable. The automatic check only sees that this field is filled in on an audio row. A person who reviews the design checks that it is true.&quot;
+          }
+        }
+      }
+    }
+  },
+  &quot;pack&quot;: &quot;sha256:6a83cb5dfb2ce52df9f147e4b20e1dc8322d89fe4d44dbcda826548a09f66eee&quot;,
+  &quot;answers&quot;: {
+    &quot;color-alone&quot;: &quot;never&quot;,
+    &quot;audio-alone&quot;: &quot;never&quot;,
+    &quot;presentation-control&quot;: &quot;player-configurable&quot;
+  },
+  &quot;values&quot;: {},
+  &quot;rows&quot;: {
+    &quot;readable-facts&quot;: [
+      {
+        &quot;id&quot;: &quot;exhausted-symbol&quot;,
+        &quot;fact&quot;: &quot;02-mechanics.md#exhausted-cards&quot;,
+        &quot;channel&quot;: &quot;symbol-or-shape&quot;,
+        &quot;presentation-settings&quot;: &quot;Color-blind palette recolors the hourglass badge but preserves its shape; HUD scale resizes it; reduced motion and audio-off do not affect it.&quot;
+      },
+      {
+        &quot;id&quot;: &quot;exhausted-text&quot;,
+        &quot;fact&quot;: &quot;02-mechanics.md#exhausted-cards&quot;,
+        &quot;channel&quot;: &quot;text&quot;,
+        &quot;presentation-settings&quot;: &quot;HUD scale resizes the Exhausted label; color-blind palette, reduced motion, and audio-off do not affect it.&quot;
+      },
+      {
+        &quot;id&quot;: &quot;shielded-symbol&quot;,
+        &quot;fact&quot;: &quot;02-mechanics.md#shielded-cards&quot;,
+        &quot;channel&quot;: &quot;symbol-or-shape&quot;,
+        &quot;presentation-settings&quot;: &quot;Color-blind palette recolors the shield badge but preserves its shape; HUD scale resizes it; reduced motion and audio-off do not affect it.&quot;
+      },
+      {
+        &quot;id&quot;: &quot;shielded-text&quot;,
+        &quot;fact&quot;: &quot;02-mechanics.md#shielded-cards&quot;,
+        &quot;channel&quot;: &quot;text&quot;,
+        &quot;presentation-settings&quot;: &quot;HUD scale resizes the Shielded label and shield value; color-blind palette, reduced motion, and audio-off do not affect it.&quot;
+      },
+      {
+        &quot;id&quot;: &quot;shielded-shimmer&quot;,
+        &quot;fact&quot;: &quot;02-mechanics.md#shielded-cards&quot;,
+        &quot;channel&quot;: &quot;animation&quot;,
+        &quot;presentation-settings&quot;: &quot;Reduced motion disables the shield shimmer; shielded-symbol and shielded-text remain readable.&quot;
+      },
+      {
+        &quot;id&quot;: &quot;silenced-symbol&quot;,
+        &quot;fact&quot;: &quot;02-mechanics.md#silenced-cards&quot;,
+        &quot;channel&quot;: &quot;symbol-or-shape&quot;,
+        &quot;presentation-settings&quot;: &quot;Color-blind palette recolors the crossed-rune badge but preserves its shape; HUD scale resizes it; reduced motion and audio-off do not affect it.&quot;
+      },
+      {
+        &quot;id&quot;: &quot;silenced-text&quot;,
+        &quot;fact&quot;: &quot;02-mechanics.md#silenced-cards&quot;,
+        &quot;channel&quot;: &quot;text&quot;,
+        &quot;presentation-settings&quot;: &quot;HUD scale resizes the Silenced label; color-blind palette, reduced motion, and audio-off do not affect it.&quot;
+      }
+    ]
+  },
+  &quot;verification&quot;: {
+    &quot;fact-policy-holds&quot;: {
+      &quot;scope&quot;: &quot;all Fixed mechanics prose that promises the player can read Exhausted, Shielded, or Silenced on a card in hand or on the board, and every readable-facts row&quot;
+    },
+    &quot;presentation-control-visible&quot;: {
+      &quot;scope&quot;: &quot;color-blind palette, HUD scale, reduced motion, and audio-off at both ends of their supported ranges, for Exhausted, Shielded, and Silenced cards in hand and on the board&quot;
+    }
+  }
+}
+</code></pre>
+</details>
+</article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

@@ -8,20 +8,27 @@ const [command, ...rest] = process.argv.slice(2);
 
 const HELP = [
   "Usage:",
-  "  opengdd validate [--json] <package-dir>",
+  "  opengdd validate [--json] [--review] <package-dir>",
   "  opengdd validate --build [--json] <opengdd-build.json> [<package-dir>]",
   "  opengdd migrate [--dry-run] [--json] <package-dir>",
-  "  opengdd migrate --build [--dry-run] [--json] <opengdd-build.json>",
+  "  opengdd migrate --build [--dry-run] [--json] <opengdd-build.json> [<package-dir>]",
   "  opengdd render-contract-tests <package-dir>",
   "  opengdd --help",
   "  opengdd --version",
   "",
   "Options:",
   "  --json                   Write a JSON report.",
+  "  --review                 Include optional English-language review hints.",
   "  --build                  Validate or migrate a build record; validation may name the package it is checked against.",
   "  --dry-run                Report migration changes without writing them.",
   "  --help                   Print this help text.",
-  "  --version                Print the validator and format versions."
+  "  --version                Print the validator and format versions.",
+  "",
+  "Build validation exit codes:",
+  "  0  Conforming.",
+  "  1  Invalid.",
+  "  2  CLI usage error.",
+  "  3  Incomplete, not verified, or not checked."
 ].join("\n");
 
 if (command === "--help") {
@@ -30,7 +37,7 @@ if (command === "--help") {
 }
 
 if (command === "--version") {
-  process.stdout.write("opengdd 0.8.0 (OpenGDD format 0.8)\n");
+  process.stdout.write("opengdd 0.9.0 (OpenGDD format 0.9)\n");
   process.exit(0);
 }
 

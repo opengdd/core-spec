@@ -29,8 +29,8 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
 <link rel="stylesheet" href="/assets/site.css">
 <script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
-<link rel="stylesheet" href="/authoring-tool/authoring.css?v=9e90533a9ecc">
-<link rel="stylesheet" href="/authoring-tool/src/workbench/workbench.css?v=9e90533a9ecc">
+<link rel="stylesheet" href="/authoring-tool/authoring.css?v=6d328337d265">
+<link rel="stylesheet" href="/authoring-tool/src/workbench/workbench.css?v=6d328337d265">
 <style>
 .opengdd-authoring,
 .opengdd-author-file-meta a { font-family: var(--font-body); }
@@ -126,12 +126,12 @@ body {
 <script type="importmap">
 {
   "imports": {
-    "opengdd-analysis": "/authoring-tool/lib/lang/tools/src/analysis.mjs?v=9e90533a9ecc",
-    "opengdd-syntax": "/authoring-tool/lib/opengdd/conformance/package-syntax.mjs?v=9e90533a9ecc",
-    "opengdd-file-map-host": "/authoring-tool/lib/opengdd/conformance/file-map-host.mjs?v=9e90533a9ecc",
-    "opengdd-migrate": "/authoring-tool/lib/opengdd/conformance/migrate.mjs?v=9e90533a9ecc",
-    "opengdd-validation": "/authoring-tool/lib/opengdd/conformance/validate-core.mjs?v=9e90533a9ecc",
-    "opengdd-authoring-version": "/authoring-tool/src/version.mjs?v=9e90533a9ecc"
+    "opengdd-analysis": "/authoring-tool/lib/lang/tools/src/analysis.mjs?v=6d328337d265",
+    "opengdd-syntax": "/authoring-tool/lib/opengdd/conformance/package-syntax.mjs?v=6d328337d265",
+    "opengdd-file-map-host": "/authoring-tool/lib/opengdd/conformance/file-map-host.mjs?v=6d328337d265",
+    "opengdd-migrate": "/authoring-tool/lib/opengdd/conformance/migrate.mjs?v=6d328337d265",
+    "opengdd-validation": "/authoring-tool/lib/opengdd/conformance/validate-core.mjs?v=6d328337d265",
+    "opengdd-authoring-version": "/authoring-tool/src/version.mjs?v=6d328337d265"
   }
 }
 </script>
@@ -154,11 +154,11 @@ body {
 <main id="main" class="authoring-tool-page">
 <h1 class="authoring-tool-title">The authoring tool</h1>
 <div id="workbench" class="opengdd-workbench">
-  <p class="opengdd-workbench-loading">Write and check a package in your browser. Files stay in this browser; nothing is uploaded. The <a href="/get-started/">Get started</a> guide writes a first package. The tool needs a browser with JavaScript modules and import-map support.</p>
+  <p class="opengdd-workbench-loading">Write and check a package in your browser. Your files stay in this browser. Nothing is uploaded. To learn how to write a first package, read <a href="/get-started/">Get started</a>. The tool needs a current browser with JavaScript turned on. It uses JavaScript modules and import maps.</p>
 </div>
 <script type="module">
-import { mountWorkbenchShell } from "/authoring-tool/src/workbench/shell.mjs?v=9e90533a9ecc";
-import panels from "/authoring-tool/panels/index.mjs?v=9e90533a9ecc";
+import { mountWorkbenchShell } from "/authoring-tool/src/workbench/shell.mjs?v=6d328337d265";
+import panels from "/authoring-tool/panels/index.mjs?v=6d328337d265";
 
 const fetchJson = async (url) => {
   const response = await fetch(url);
@@ -171,7 +171,7 @@ const fetchText = async (url) => {
   return response.text();
 };
 
-const SCHEMA_BASE = "/schema/core/v0.8/";
+const SCHEMA_BASE = "/schema/core/v0.9/";
 const requiredSchemaNames = [
   "manifest.schema.json", "tuning.schema.json", "personalization.schema.json",
   "collection.schema.json", "direction.schema.json", "opengdd-build.schema.json",
@@ -188,7 +188,7 @@ const loadSchemas = () => schemaRequest ??= Promise.all(
   return Object.fromEntries(entries);
 }).catch((error) => { schemaRequest = undefined; throw error; });
 
-const exampleSources = [{"id":"tic-tac-toe","title":"Tic-Tac-Toe","base":"/authoring-tool/example/","files":["manifest.json","tuning.json","01-overview.md","02-mechanics.md","04-presentation.md","direction.json","05-build-plan.md"],"revision":"3d122da9a127"}];
+const exampleSources = [{"id":"tic-tac-toe","title":"Tic-Tac-Toe","base":"/authoring-tool/example/","files":["manifest.json","tuning.json","01-overview.md","02-mechanics.md","04-presentation.md","direction.json","05-build-plan.md"],"revision":"dbd7bbabe412"}];
 const exampleList = exampleSources.map(({ id, title, revision }) => ({ id, title, revision }));
 
 // The tool follows the site's theme toggle, not the operating system: the
@@ -202,7 +202,7 @@ const syncTheme = () => {
 syncTheme();
 new MutationObserver(syncTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-// A catalogue link supplies a contract and, optionally, a filled adoption.
+// A catalog link supplies a contract and, optionally, a filled adoption.
 // The source and its pack live on this same site; the tool opens its
 // Add-a-contract dialog with them once the package is ready.
 const contractSlug = new URLSearchParams(location.search).get("contract") || "";
@@ -222,7 +222,7 @@ const initialContract = validContractName(contractSlug) && (!adoptionSlug || val
 
 mountWorkbenchShell(shellElement, {
   initialContract,
-  contractsCatalogueUrl: "/contracts/",
+  contractsCatalogUrl: "/contracts/",
   panels,
   schemas: loadSchemas,
   packages: exampleList,
@@ -230,7 +230,7 @@ mountWorkbenchShell(shellElement, {
     const example = exampleSources.find(item => item.id === id);
     if (!example) throw new Error("Unknown package: " + id);
     const files = await Promise.all(example.files.map(async (path) => ({
-      path, text: await fetchText(example.base + path + "?v=9e90533a9ecc"),
+      path, text: await fetchText(example.base + path + "?v=6d328337d265"),
     })));
     return { id, title: example.title, path: example.base, files };
   },
@@ -242,7 +242,7 @@ mountWorkbenchShell(shellElement, {
     { href: "/get-started/", label: "Get started" },
     // A new Discussion with the tool version in the title. Nothing from the
     // package travels with the link; the person writes the report.
-    { href: "https://github.com/opengdd/core-spec/discussions/new?category=authoring-tool&title=Authoring%20tool%200.5%3A%20", label: "Report a problem" }
+    { href: "https://github.com/opengdd/core-spec/discussions/new?category=authoring-tool&title=Authoring%20tool%200.6%3A%20", label: "Report a problem" }
   ],
   // The site toggle is the only theme control on the published page.
   showTheme: false,
@@ -252,7 +252,7 @@ mountWorkbenchShell(shellElement, {
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

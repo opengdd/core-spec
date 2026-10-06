@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Schemas — OpenGDD</title>
-<meta name="description" content="JSON Schemas for structured data in OpenGDD game design documents: package manifest, art direction, and finished-build evidence.">
+<meta name="description" content="JSON Schemas for structured data in OpenGDD game design documents: package manifest, art direction, and the build record.">
 <link rel="canonical" href="https://opengdd.org/schema/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Schemas — OpenGDD">
-<meta property="og:description" content="JSON Schemas for structured data in OpenGDD game design documents: package manifest, art direction, and finished-build evidence.">
+<meta property="og:description" content="JSON Schemas for structured data in OpenGDD game design documents: package manifest, art direction, and the build record.">
 <meta property="og:url" content="https://opengdd.org/schema/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta property="og:image:type" content="image/png">
@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
 <meta name="twitter:title" content="Schemas — OpenGDD">
-<meta name="twitter:description" content="JSON Schemas for structured data in OpenGDD game design documents: package manifest, art direction, and finished-build evidence.">
+<meta name="twitter:description" content="JSON Schemas for structured data in OpenGDD game design documents: package manifest, art direction, and the build record.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -51,64 +51,74 @@
 <p class="toc-title">About OpenGDD</p>
 <ul><li><a href="/about/">Overview</a></li>
 <li><a href="/schema/" aria-current="page">Schemas</a></li>
-<li><a href="/conformance/">Validator</a><ul><li class="toc-h3"><a href="/conformance/certification/">Experimental certification protocol</a></li></ul></li>
+<li><a href="/conformance/">Validator</a><ul><li class="toc-h3"><a href="/conformance/certification/">Experimental certification protocol</a></li><li class="toc-h3"><a href="/conformance/injection-lint/">Safety scan</a></li></ul></li>
 <li><a href="/evolution/">Evolution</a></li></ul>
 </nav>
 <div class="doc-body">
 <h1>Schemas</h1>
 <p>A <strong>schema</strong> describes the structure of a data file so tools
-can check it. OpenGDD uses JSON Schema, a standard format for these
-definitions.</p>
+can check it. OpenGDD uses JSON Schema, a standard format for
+schemas.</p>
 <p>These downloads are for people who build or configure tools. If you use
 OpenGDD's <a href="/authoring-tool/">authoring tool</a>, you do not need
 them. The tool already includes the checks.</p>
 <p>A schema checks one file. OpenGDD's <a href="/conformance/">validator</a>
-also checks the connections between files and the numeric rules. A person
+also checks the connections between files and the rules in
+<code>tuning.json</code>. A person
 reviews the written design.</p>
 <h2>Schema files</h2>
-<p>The schema files are <code>v0.8</code>. Use the definitions and
-validator that match the package you check.</p>
+<p>The schema files are <code>v0.9</code>. Use the schema files and
+the validator that match the version of the package you check.</p>
 <div class="table-scroll"><table class="schema-index">
 <thead><tr><th>Schema file</th><th>What the data file contains</th></tr></thead>
 <tbody><tr>
-<td><a href="/schema/core/v0.8/manifest.schema.json"><code>manifest.schema.json</code></a></td>
+<td><a href="/schema/core/v0.9/manifest.schema.json"><code>manifest.schema.json</code></a></td>
 <td>Identifies the game, its designer and its target platform.</td>
 </tr>
 <tr>
-<td><a href="/schema/core/v0.8/clocks.schema.json"><code>clocks.schema.json</code></a></td>
+<td><a href="/schema/core/v0.9/clocks.schema.json"><code>clocks.schema.json</code></a></td>
 <td>Optional. How game time advances, when it pauses, and how that affects values that change over time.</td>
 </tr>
 <tr>
-<td><a href="/schema/core/v0.8/direction.schema.json"><code>direction.schema.json</code></a></td>
+<td><a href="/schema/core/v0.9/direction.schema.json"><code>direction.schema.json</code></a></td>
 <td>Optional. Art direction: colors, mood, visual priorities and measurable requirements.</td>
 </tr>
 <tr>
-<td><a href="/schema/core/v0.8/tuning.schema.json"><code>tuning.schema.json</code></a></td>
-<td>Shared gameplay numbers, the ranges they may take, and the calculation rules.</td>
+<td><a href="/schema/core/v0.9/tuning.schema.json"><code>tuning.schema.json</code></a></td>
+<td>The numbers of the game, the ranges they may take, and the rules between them.</td>
 </tr>
 <tr>
-<td><a href="/schema/core/v0.8/personalization.schema.json"><code>personalization.schema.json</code></a></td>
+<td><a href="/schema/core/v0.9/personalization.schema.json"><code>personalization.schema.json</code></a></td>
 <td>Optional. Questions each build answers, with defaults and the gameplay numbers they change.</td>
 </tr>
 <tr>
-<td><a href="/schema/core/v0.8/collection.schema.json"><code>collection.schema.json</code></a></td>
+<td><a href="/schema/core/v0.9/collection.schema.json"><code>collection.schema.json</code></a></td>
 <td>Optional. The _collection.json file, which sets the structure of items such as enemies or cards.</td>
 </tr>
 <tr>
-<td><a href="/schema/core/v0.8/opengdd-build.schema.json"><code>opengdd-build.schema.json</code></a></td>
-<td>The builder's report: game identity, choices, final numbers, test results and evidence.</td>
+<td><a href="/schema/core/v0.9/opengdd-build.schema.json"><code>opengdd-build.schema.json</code></a></td>
+<td>The build record: game identity, choices, final numbers, test results and evidence.</td>
 </tr></tbody>
 </table></div>
 <h2>Versioned addresses</h2>
 <p>Each schema has a versioned web address. The schema records that address
-in its <code>$id</code> field, which identifies the definition:</p>
+in its <code>$id</code> field, which identifies the schema:</p>
 <pre><code>https://opengdd.org/schema/&lt;layer&gt;/v&lt;minor&gt;/&lt;file&gt;.schema.json</code></pre>
-<p>The current schema group is <code>core</code>. A published address keeps
-its original version. A change that alters which files pass needs a new
+<p>The <code>&lt;layer&gt;</code> part of the address names the schema group.
+The current group is <code>core</code>. The file at a published address
+always has the version that the address names. A change that alters which files pass needs a new
 versioned address. A correction at an existing address must not change
 validation results.</p>
 <h2>Earlier versions</h2>
-<p>OpenGDD core v0.7 remains available at its permanent URLs:
+<p>OpenGDD core v0.8 remains available at its permanent addresses:
+<a href="/schema/core/v0.8/manifest.schema.json"><code>manifest.schema.json</code></a>,
+<a href="/schema/core/v0.8/tuning.schema.json"><code>tuning.schema.json</code></a>,
+<a href="/schema/core/v0.8/clocks.schema.json"><code>clocks.schema.json</code></a>,
+<a href="/schema/core/v0.8/personalization.schema.json"><code>personalization.schema.json</code></a>,
+<a href="/schema/core/v0.8/direction.schema.json"><code>direction.schema.json</code></a>,
+<a href="/schema/core/v0.8/collection.schema.json"><code>collection.schema.json</code></a>, and
+<a href="/schema/core/v0.8/opengdd-build.schema.json"><code>opengdd-build.schema.json</code></a>.</p>
+<p>OpenGDD core v0.7 remains available at its permanent addresses:
 <a href="/schema/core/v0.7/manifest.schema.json"><code>manifest.schema.json</code></a>,
 <a href="/schema/core/v0.7/tuning.schema.json"><code>tuning.schema.json</code></a>,
 <a href="/schema/core/v0.7/clocks.schema.json"><code>clocks.schema.json</code></a>,
@@ -116,18 +126,18 @@ validation results.</p>
 <a href="/schema/core/v0.7/direction.schema.json"><code>direction.schema.json</code></a>,
 <a href="/schema/core/v0.7/collection.schema.json"><code>collection.schema.json</code></a>, and
 <a href="/schema/core/v0.7/opengdd-build.schema.json"><code>opengdd-build.schema.json</code></a>.</p>
-<p>OpenGDD core v0.6 remains available at its permanent URLs:
+<p>OpenGDD core v0.6 remains available at its permanent addresses:
 <a href="/schema/core/v0.6/manifest.schema.json"><code>manifest.schema.json</code></a>,
 <a href="/schema/core/v0.6/tuning.schema.json"><code>tuning.schema.json</code></a>,
 <a href="/schema/core/v0.6/personalization.schema.json"><code>personalization.schema.json</code></a>,
 <a href="/schema/core/v0.6/direction.schema.json"><code>direction.schema.json</code></a>,
 <a href="/schema/core/v0.6/collection.schema.json"><code>collection.schema.json</code></a>, and
 <a href="/schema/core/v0.6/opengdd-build.schema.json"><code>opengdd-build.schema.json</code></a>.</p>
-<p>OpenGDD core v0.5 remains available at its permanent URLs:
+<p>OpenGDD core v0.5 remains available at its permanent addresses:
 <a href="/schema/core/v0.5/manifest.schema.json"><code>manifest.schema.json</code></a>,
 <a href="/schema/core/v0.5/direction.schema.json"><code>direction.schema.json</code></a>, and
 <a href="/schema/core/v0.5/opengdd-build.schema.json"><code>opengdd-build.schema.json</code></a>.</p>
-<p>OpenGDD core v0.4 remains available at its permanent URLs:
+<p>OpenGDD core v0.4 remains available at its permanent addresses:
 <a href="/schema/core/v0.4/manifest.schema.json"><code>manifest.schema.json</code></a>,
 <a href="/schema/core/v0.4/direction.schema.json"><code>direction.schema.json</code></a>, and
 <a href="/schema/core/v0.4/opengdd-build.schema.json"><code>opengdd-build.schema.json</code></a>.</p>
@@ -137,7 +147,7 @@ validation results.</p>
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

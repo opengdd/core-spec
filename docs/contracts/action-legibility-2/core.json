@@ -1,0 +1,268 @@
+{
+  "contract": "action-legibility",
+  "version": 2,
+  "summary": "This contract covers which actions players can discover in each situation, how availability is presented, and what an unavailable action shows. It also covers which action is offered when one control signal has several candidate actions. This contract does not cover physical controls, input timing help, displayed game facts, or event order. The Control options contract covers physical controls, the Input forgiveness contract covers input timing help, the Fact list contract covers displayed game facts, and the Event resolution contract covers event order.",
+  "questions": {
+    "action-discovery-default": {
+      "asks": "By default, how can players discover an action in a situation where the action applies?",
+      "rationale": "Different actions may need different help. This answer is the default answer. An action case can choose another answer in its own row.",
+      "when": {
+        "row-count": {
+          "action-cases": "non-empty"
+        }
+      },
+      "otherwise": "With no action case, this adoption makes no default discovery promise.",
+      "options": {
+        "looks-usable": {
+          "meaning": "The action looks possible before it is tried. A platformer marks a climbable ledge with a clear edge shape.",
+          "semantics": "At least one player-facing presentation identifies that the action can be attempted in the current situation before the attempt."
+        },
+        "explanation-on-demand": {
+          "meaning": "An explanation of the action is available in a situation where the action applies. The explanation names the action and says how to attempt it. An adventure game can show 'Open: needs the brass key' beside a sealed door.",
+          "semantics": "A player-facing route available in the current situation names the action and explains how to attempt it."
+        },
+        "current-binding-is-shown": {
+          "meaning": "The action prompt shows its current control. A racing game updates the pit-stop prompt after confirm moves to another button.",
+          "semantics": "Every prompt for the action names the current device's actual control under the applicable control rule. A wrong-device glyph, an old binding, or a hardware glyph in place of the actual touch region or gesture fails this promise."
+        },
+        "assistive-tech-can-name-it": {
+          "meaning": "Assistive technology can name the action and its purpose. A strategy game's screen reader identifies the end-turn control.",
+          "semantics": "A player-facing interface element exposes a determinable action name and role to supported assistive technology."
+        },
+        "none": {
+          "meaning": "The game gives no discovery route for the action. A fighting game leaves a secret finisher for players to uncover outside ordinary prompts.",
+          "semantics": "No player-facing presentation promises the action's identity or availability before it is attempted; accidental discovery and memorable authored content do not violate this answer."
+        }
+      }
+    },
+    "unavailable-action-default": {
+      "asks": "By default, what appears when an action cannot be used?",
+      "rationale": "A missing prompt, a dimmed control, and an explanation create different expectations. This answer is the default answer.",
+      "when": {
+        "row-count": {
+          "action-cases": "non-empty"
+        }
+      },
+      "otherwise": "With no action case, this adoption makes no default unavailable-action promise.",
+      "options": {
+        "hidden": {
+          "meaning": "The action disappears while unavailable. A racing boost prompt vanishes while the boost meter is empty.",
+          "semantics": "The action's availability presentation is absent while the action cannot be attempted."
+        },
+        "shown-unavailable": {
+          "meaning": "The action stays visible but clearly unavailable. A card game dims a card that cannot be played this turn.",
+          "semantics": "The presentation keeps the action identifiable and carries a distinct unavailable state without promising a reason."
+        },
+        "reason-is-shown": {
+          "meaning": "The action stays visible and states why it is unavailable. A survival recipe says that two pieces of wood are missing.",
+          "semantics": "The presentation identifies the action, marks it unavailable, and states the current blocking reason."
+        },
+        "unchanged": {
+          "meaning": "The action looks the same whether or not it can be used. A mystery game's bookcase gives no hint that its hidden passage is locked.",
+          "semantics": "The action's player-facing presentation is identical across its available and unavailable states."
+        },
+        "never-unavailable": {
+          "meaning": "The action can always be used in the situations that its action case covers, so the game never shows it as unavailable. A rhythm game's pause action works at every playable moment of every song.",
+          "semantics": "No reachable state in a covered situation makes the action unavailable."
+        }
+      }
+    }
+  },
+  "declares": {
+    "values": {},
+    "rows": {
+      "action-cases": {
+        "description": "Actions in the situations where their discovery and unavailable presentation are promised. The effective answer of a case is its own answer, or the default answer when the row says use-game-default. When the effective discovery answer is not none, the case has at least one availability-presentations row on each platform that it covers. When the effective discovery answer is none, the case has no availability-presentations row. No case has the effective discovery answer none together with the effective unavailable answer reason-is-shown. No two cases cover the same action in overlapping situations.",
+        "when-empty": "No action receives a legibility promise from this adoption.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A short name for this case in your game's words, such as open-door-nearby or jump-at-gap."
+          },
+          "action-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "Where your game's rules name the action, its ordinary permission, and its complete effect."
+          },
+          "situation-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "Where your game's rules name every play situation that this case covers. The same rules also name the nearest similar situations that this case does not cover."
+          },
+          "discoverability": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "use-game-default",
+              "looks-usable",
+              "explanation-on-demand",
+              "current-binding-is-shown",
+              "assistive-tech-can-name-it",
+              "none"
+            ],
+            "description": "The minimum discovery promise for this action case. Use the default answer, or choose another answer for this row. A secret arcade command may state that no discovery route exists."
+          },
+          "when-unavailable": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "use-game-default",
+              "hidden",
+              "shown-unavailable",
+              "reason-is-shown",
+              "unchanged",
+              "never-unavailable"
+            ],
+            "description": "What the player-facing presentation does while the action cannot be used. Use the default answer, or choose another answer for this row. A crafting action may remain visible with its missing material named."
+          },
+          "presentation-rule-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "Where your game's rules state every player-facing discovery route and every unavailable state of this case. When no route exists, the rules say so explicitly."
+          }
+        }
+      },
+      "availability-presentations": {
+        "description": "Independent channels that present one action case's availability. No two rows repeat one action case and channel pair.",
+        "when-empty": "No action case promises a player-facing availability channel.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A short name in your game's words for one action case and one channel, such as jump-at-gap-shape."
+          },
+          "action-case": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The id of the action-cases row of this adoption presented through this channel."
+          },
+          "channel": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "text",
+              "icon",
+              "shape",
+              "outline-or-contrast",
+              "audio-cue",
+              "spatial-audio",
+              "narration",
+              "audio-description",
+              "haptic"
+            ],
+            "description": "The independent presentation channel. Text and icons can name or depict an action; shape, contrast, sound, position, speech, description, and touch can distinguish availability under their cited rules."
+          },
+          "platform-declared-in": {
+            "type": "citation",
+            "description": "Where your game's rules name the platform on which this presentation applies. When this field is absent, the presentation applies on every platform that the action case covers."
+          },
+          "channel-rule-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "Where your game's rules state the form of this channel in the available state and in the unavailable state. For a case whose effective unavailable answer is never-unavailable or unchanged, the rules state the available form alone. The rules also state whether the channel identifies the action. A channel is judged by an observer who meets that channel alone."
+          }
+        }
+      },
+      "shared-input-cases": {
+        "description": "Situations where one action input can offer several actions and one choice must be made visible.",
+        "when-empty": "No action input offers several actions in one situation.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A short name for the situation in your game's words, such as porch-interactions."
+          },
+          "situation-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "Where your game's rules name the situation in which several actions share one action input."
+          },
+          "actions-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "Where your game's rules list the candidate actions and the conditions that make each candidate eligible."
+          },
+          "action-input": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "description": "The name of the one action input that carries these candidates, such as porch-interact."
+          },
+          "action-input-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "Where your game's control rules name this shared input and the physical activation that produces it."
+          },
+          "selection": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "rule-selects-one",
+              "player-selects-one"
+            ],
+            "description": "Whether the cited rule selects one candidate by ordering or a situation test, or the player chooses before the attempt. A village interact may prefer talking over picking up an item."
+          },
+          "selection-rule-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "Where your game's rules select exactly one offered action and decide every reachable tie."
+          },
+          "presentation-rule-declared-in": {
+            "type": "citation",
+            "required": true,
+            "description": "Where your game's rules say how the selected action is identified to the player before the shared input becomes an action attempt."
+          }
+        }
+      }
+    }
+  },
+  "rules": {
+    "secret-default-cannot-explain-a-block": {
+      "forbid": {
+        "all": [
+          {
+            "flag": {
+              "action-discovery-default": [
+                "none"
+              ]
+            }
+          },
+          {
+            "flag": {
+              "unavailable-action-default": [
+                "reason-is-shown"
+              ]
+            }
+          }
+        ]
+      },
+      "message": "A secret action cannot use a default answer that names it and explains why it is blocked."
+    }
+  },
+  "origin": "https://opengdd.org/contracts/action-legibility-2",
+  "mechanism": [
+    "This text decides the order of the steps for action discovery, availability presentation, and shared-input selection. The questions and rows supply choices and cited game rules. They do not change the order.",
+    "An **action input** is one signal that the game receives. Control options declares it when that contract is adopted; otherwise it comes from the game's Fixed control rule. Control options owns how bindings emit it; this contract consumes one action input and the candidate actions it carries. The current binding comes from the same optional source. An **action case** is one action in one cited situation. A **candidate** is an action carried by the input whose optional binding context holds and whose Fixed permission rule — or a forgiveness acceptance from Input forgiveness — accepts it in the situation at the accepted moment. Forgiveness applies to each candidate separately. The forgiveness rows of a candidate action read the shared input as the input of that action. When forgiveness shifts the acceptance for one candidate, the accepted moment that this contract reads shifts with it. An action is **offered** when it is identified to the player as the result of selection.",
+    "1. Read the current situation and every matching action case — action cases are platform-neutral — then every presentation row whose optional platform citation applies on the current platform. When no action case matches, this adoption makes no legibility promise.",
+    "2. Resolve each row's effective discovery and unavailable answers. A row value other than `use-game-default` applies. Otherwise the answer to the matching question applies.",
+    "3. Read ordinary action permission from the cited Fixed action rule. This contract does not grant permission and does not make an unavailable action succeed.",
+    "4. While an action is available, apply its effective discovery promise through the matching presentation rows. Under `none`, no discovery route is promised.",
+    "5. While an action is unavailable, apply its effective unavailable answer. Hidden removes its presentation. Shown-unavailable keeps identity and marks the state. Reason-is-shown also names the current block. Unchanged exposes no availability difference. Never-unavailable admits no unavailable state in the cited situation.",
+    "6. Read the one action input and all of its candidate actions. This contract consumes one input carrying its candidates; it never splits one input into several.",
+    "7. When the action input has at most one candidate at the accepted moment, that candidate is offered and no shared-input-cases row is needed. A physical input may differ by platform without changing this step.",
+    "8. When the action input has several candidates, exactly one matching `shared-input-cases` row applies. Under `rule-selects-one`, its cited rule uses its declared ordering or situation test. Under `player-selects-one`, an explicit choice is required. The row consumes one input with N candidates and offers exactly one. Present that offered action under the row's cited presentation rule before the accepted input becomes an action attempt. Other candidates may remain visible, but none is presented as what will happen now. While an input waits in a buffer, this presentation does not promise which candidate will be offered. The promise applies from the accepted moment.",
+    "9. First, the physical input occurs. Then Control options, when adopted, emits the action input. Then Input forgiveness, when adopted, may shift the accepted moment. Then this contract selects the offered candidate at the accepted moment. The result is one action proposal. Thus an interact buffered during a cutscene evaluates candidates in the situation where the input is accepted, not the situation where it was pressed. Event resolution owns ordering, refusal, and effects after the proposal.",
+    "10. Whenever a presentation shows the current binding, it shows the actual current device control, including the touch region or gesture on a touch platform.",
+    "11. When availability, situation, platform, binding, or candidate eligibility changes, recompute the presentation from step 1. A previous prompt or selection does not remain current unless the cited rules still select it.",
+    "The order of the steps is: situation, row defaults, ordinary permission, discovery, unavailable presentation, candidate set, shared-input selection at the accepted moment with its offered-action presentation, one action proposal, current-device binding, and refresh."
+  ],
+  "pack": "sha256:e8bc008156a44034a292f2641015b40a9840cd8afb0e08e4405009d0e3f362b4"
+}

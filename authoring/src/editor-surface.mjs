@@ -524,11 +524,18 @@ export function createEditorSurface({
   function renderDialog(focus = false) {
     if (!quickfix) return;
     const selected = quickfix.actions[quickfix.index];
-    const actions = quickfix.actions.map((action, index) => ({ action, index }))
-      .filter(({ action }) => !action.hiddenUntilError || quickfix.revealAnyway)
-      .map(({ action, index }) => `<button type="button" role="radio" aria-checked="${index === quickfix.index}" tabindex="${index === quickfix.index ? 0 : -1}" data-quickfix-action="${index}" class="${index === quickfix.index ? "opengdd-author-is-active" : ""}">${escapeHtml(action.choice)}</button>`).join("");
+    const shown = quickfix.actions.map((action, index) => ({ action, index }))
+      .filter(({ action }) => !action.hiddenUntilError || quickfix.revealAnyway);
+    // One short line under the choices says what each choice means.
+    const hintId = index => `opengdd-quickfix-hint-${index}`;
+    const actions = shown
+      .map(({ action, index }) => `<button type="button" role="radio" aria-checked="${index === quickfix.index}" tabindex="${index === quickfix.index ? 0 : -1}" data-quickfix-action="${index}"${action.hint ? ` aria-describedby="${hintId(index)}"` : ""} class="${index === quickfix.index ? "opengdd-author-is-active" : ""}">${escapeHtml(action.choice)}</button>`).join("");
+    const hinted = shown.filter(({ action }) => action.hint);
+    const hints = hinted.length
+      ? `<ul class="opengdd-author-quickfix-hints" data-quickfix-hints>${hinted.map(({ action, index }) => `<li id="${hintId(index)}">${escapeHtml(action.hint)}</li>`).join("")}</ul>`
+      : "";
     const value = selected.needsValue
-      ? `<label>${escapeHtml(selected.valueLabel ?? CREATION_COPY.jsonValue)}<input data-role="quickfix-value" value="${escapeHtml(quickfix.value)}" autocomplete="off" spellcheck="false"></label>`
+      ? `<label>${escapeHtml(selected.valueLabel ?? CREATION_COPY.jsonValue)}<input data-role="quickfix-value" value="${escapeHtml(quickfix.value)}" autocomplete="off" spellcheck="false"></label>${selected.valueHelp ? `<p class="opengdd-author-form-help">${escapeHtml(selected.valueHelp)}</p>` : ""}`
       : "";
     const suggestions = quickfix.suggestions?.length
       ? `<p>${CREATION_COPY.useExisting}</p><div class="opengdd-author-quickfix-suggestions">${quickfix.suggestions.map(entry => {
@@ -536,7 +543,7 @@ export function createEditorSurface({
         return `<button type="button" data-quickfix-use="${escapeHtml(entry.name)}" title="${escapeHtml(CREATION_COPY.useExistingAction(entry.name))}"><code>${escapeHtml(entry.name)}</code><span>${escapeHtml(label)}</span></button>`;
       }).join("")}</div>`
       : "";
-    ui.quickfix.innerHTML = `${suggestions}<p>${CREATION_COPY.createNew} <code>${escapeHtml(quickfix.name)}</code> ${CREATION_COPY.as}</p><div class="opengdd-author-quickfix-actions" role="radiogroup" aria-label="${CREATION_COPY.kind}">${actions}</div><div class="opengdd-author-quickfix-confirm">${value}<button type="button" data-quickfix-confirm>${CREATION_COPY.confirm}</button><button type="button" data-quickfix-cancel>${CREATION_COPY.cancelEsc}</button></div><p class="opengdd-author-quickfix-error" aria-live="polite">${escapeHtml(quickfix.error)}</p>`;
+    ui.quickfix.innerHTML = `${suggestions}<p>${CREATION_COPY.createNew} <code>${escapeHtml(quickfix.name)}</code> ${CREATION_COPY.as}</p><div class="opengdd-author-quickfix-actions" role="radiogroup" aria-label="${CREATION_COPY.kind}">${actions}</div>${hints}<div class="opengdd-author-quickfix-confirm">${value}<button type="button" data-quickfix-confirm>${CREATION_COPY.confirm}</button><button type="button" data-quickfix-cancel>${CREATION_COPY.cancelEsc}</button></div><p class="opengdd-author-quickfix-error" aria-live="polite">${escapeHtml(quickfix.error)}</p>`;
     ui.quickfix.setAttribute("aria-label", CREATION_COPY.createNamed(quickfix.name));
     ui.quickfix.hidden = false;
     positionPopup(ui.quickfix);

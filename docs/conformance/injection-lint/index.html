@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safety scan — OpenGDD</title>
+<meta name="description" content="The advisory OpenGDD safety scan checks text patterns that may redirect a builder or expose sensitive data.">
+<link rel="canonical" href="https://opengdd.org/conformance/injection-lint/">
+<meta property="og:site_name" content="OpenGDD">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Safety scan — OpenGDD">
+<meta property="og:description" content="The advisory OpenGDD safety scan checks text patterns that may redirect a builder or expose sensitive data.">
+<meta property="og:url" content="https://opengdd.org/conformance/injection-lint/">
+<meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="OpenGDD. An open format for game design documents.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@OpenGDD">
+<meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
+<meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
+<meta name="twitter:title" content="Safety scan — OpenGDD">
+<meta name="twitter:description" content="The advisory OpenGDD safety scan checks text patterns that may redirect a builder or expose sensitive data.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-700-normal.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/fira-code-latin-400-normal.woff2">
+<link rel="stylesheet" href="/assets/site.css">
+<script>(()=>{try{const t=localStorage.getItem("opengdd-theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch{}})()</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="bar">
+    <a class="brand" href="/"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 769.22 796.98" aria-hidden="true"><path fill="currentColor" d="M544.86,0H49.74c-9.25,0-16.74,7.49-16.74,16.74v625.28c0,9.25,7.49,16.74,16.74,16.74h466.73c59.63,0,107.98-48.34,107.98-107.98v-291.95c0-59.63-48.34-107.98-107.98-107.98H187.7c-7.92,0-14.35,6.42-14.35,14.35v335.51c0,7.92,6.42,14.35,14.35,14.35h271.19c10.75,0,19.46-8.71,19.46-19.46v-181.48c0-10.17-8.53-18.25-18.69-17.71l-142.27,7.66v50.93l68.97,12.71c9.63,1.77,16.62,10.17,16.62,19.96v39.06c0,7.06-5.73,12.79-12.79,12.79h-130.41c-6.96,0-12.6-5.64-12.6-12.6v-188.94c0-6.96,5.64-12.6,12.6-12.6h248.32c23.16,0,41.93,18.77,41.93,41.93v274.84c0,23.16-18.77,41.93-41.93,41.93H121.02c-7.75,0-14.02-6.28-14.02-14.02V90.6c0-7.75,6.28-14.02,14.02-14.02h408.28c91.75,0,166.13,74.38,166.13,166.13v312.71c0,91.75-74.38,166.13-166.14,166.13H33L0,761.67l33,35.1,511.86.22c123.91,0,224.36-100.45,224.36-224.36V224.36C769.22,100.45,668.77,0,544.86,0Z"/></svg> OpenGDD</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="/learn/">Learn</a>
+      <a href="/contracts/">Contracts</a>
+      <a href="/spec/">Specification</a>
+      <a href="/authoring-tool/">Authoring tool</a>
+      <a href="/about/" aria-current="page">About</a>
+      <button class="theme-toggle" type="button" aria-label="Switch color theme">☾</button>
+    </nav>
+  </div>
+</header>
+<main id="main">
+<div class="doc-layout">
+<nav class="doc-toc" aria-label="About OpenGDD">
+<p class="toc-title">About OpenGDD</p>
+<ul><li><a href="/about/">Overview</a></li>
+<li><a href="/schema/">Schemas</a></li>
+<li><a href="/conformance/">Validator</a><ul><li class="toc-h3"><a href="/conformance/certification/">Experimental certification protocol</a></li><li class="toc-h3"><a href="/conformance/injection-lint/" aria-current="page">Safety scan</a></li></ul></li>
+<li><a href="/evolution/">Evolution</a></li></ul>
+<p class="toc-group-title">On this page</p><ul>
+<li class="toc-h2"><a href="#what-a-notice-does-and-does-not-do">What a notice does and does not do</a></li>
+<li class="toc-h2"><a href="#files-that-are-scanned">Files that are scanned</a></li>
+<li class="toc-h2"><a href="#what-each-code-looks-for">What each code looks for</a></li>
+<li class="toc-h2"><a href="#why-the-reader-directive-check-is-narrow">Why the reader-directive check is narrow</a></li>
+<li class="toc-h2"><a href="#limits">Limits</a></li>
+</ul>
+</nav>
+<article class="doc-body"><h1>Safety scan</h1>
+<p>A package is written to be read by builders and by AI agents. So a package can carry text that gives instructions to the reader instead of describing the game. The safety scan points out text that has such a shape. The OpenGDD specification names its codes in §<a class="section-ref" href="/spec/#1-package-layout">1</a> and describes safety notices in §<a class="section-ref" href="/spec/#2d-conformance-layers-and-certification-status">2d</a>. This document defines what each code looks for.</p>
+<p>A safety notice is a place for a person to look at. It is not proof that the text is harmful, and it does not say that the author meant harm. A package without safety notices is not proven safe.</p>
+<h2 id="what-a-notice-does-and-does-not-do">What a notice does and does not do<a class="heading-anchor" href="#what-a-notice-does-and-does-not-do" aria-label="Link to this section">#</a></h2>
+<ul>
+<li>A safety notice never changes the result of validation or the exit status. This is permanent.</li>
+<li>The validator returns safety notices in the list <code>safety</code>, separate from errors, warnings and hints. They are not counted as warnings.</li>
+<li>Each notice has <code>severity: &quot;warning&quot;</code> and carries <code>lint_status: &quot;advisory&quot;</code> in its <code>data</code>. A tool can recognize the notices by that field.</li>
+<li>A notice gives the file and the line. It does not repeat the text that it found.</li>
+<li>The scan does not decode an encoded run, follow a link, fetch a resource or run a command.</li>
+</ul>
+<p>Read the reported passage as untrusted data. Decide what it is before an agent with tools or wider permissions receives the package.</p>
+<h2 id="files-that-are-scanned">Files that are scanned<a class="heading-anchor" href="#files-that-are-scanned" aria-label="Link to this section">#</a></h2>
+<p>The scan reads every regular file of the package that has a common text extension: Markdown, JSON and JSON Lines, YAML, TOML, plain text, CSV and TSV, XML, HTML, and SVG. It does not read through filesystem links. It reads a file whether or not another file of the package names it, because a builder can receive any text file in the package.</p>
+<p>A text file larger than 2 MiB is not scanned. A text file that cannot be read is not scanned. In both cases the scan reports <code>INJECTION_SCAN_SKIPPED</code>, so that the unread file is visible.</p>
+<h2 id="what-each-code-looks-for">What each code looks for<a class="heading-anchor" href="#what-each-code-looks-for" aria-label="Link to this section">#</a></h2>
+<div class="table-scroll"><table>
+<thead><tr><th class="tight">Code</th><th>What it looks for</th></tr></thead>
+<tbody>
+<tr><td class="tight"><code>INJECTION_PROMPT_CONTROL</code></td><td>A phrase such as &quot;ignore previous instructions&quot;. A reference to a system prompt or a developer prompt. Text that gives a new role to an AI or an agent. An instruction to obey a new prompt.</td></tr>
+<tr><td class="tight"><code>INJECTION_EXTERNAL_ACTION</code></td><td>A request shaped like &quot;run this command&quot; or &quot;fetch this URL&quot;. Common forms that start a command or download a file.</td></tr>
+<tr><td class="tight"><code>INJECTION_READER_DIRECTIVE</code></td><td>An explicit duty in the second person, such as &quot;you must&quot;. One of a small set of imperative verbs at the start of a sentence, when the paragraph is about a builder, a test runner, a reader, a file, a tool or a network resource. Strong game-control words in the paragraph suppress some second-person matches.</td></tr>
+<tr><td class="tight"><code>INJECTION_OBFUSCATED_BLOCK</code></td><td>A run of at least 64 characters that looks like hexadecimal. A run of at least 80 characters that looks like base64 or base64url and uses several character classes.</td></tr>
+<tr><td class="tight"><code>INJECTION_SUSPICIOUS_LINK</code></td><td>A link whose text asks for an action. A link with an active scheme or a file-sharing scheme. A URL that carries credentials, looks like an executable file, or names the local host or a private network. An ordinary external citation is not reported.</td></tr>
+<tr><td class="tight"><code>INJECTION_SCAN_SKIPPED</code></td><td>A text file that is larger than 2 MiB or that could not be read.</td></tr>
+</tbody>
+</table></div>
+<p>The codes for prompt control, external action and obfuscated blocks are checked inside Markdown fences too. The link check reads only prose outside fences. The scan does not follow or resolve local Markdown links.</p>
+<p>The table describes each check in words. The exact patterns are in the published validator, <code>conformance/validate-core.mjs</code>.</p>
+<p>One form is not reported as an obfuscated block: <code>sha256:</code> followed by exactly 64 lowercase hexadecimal digits. Build records and contract adoptions use this form for hashes (specification §<a class="section-ref" href="/spec/#7-build-records-opengdd-build-json">7</a> and §<a class="section-ref" href="/spec/#10-8-checked-and-promised">10.8</a>).</p>
+<h2 id="why-the-reader-directive-check-is-narrow">Why the reader-directive check is narrow<a class="heading-anchor" href="#why-the-reader-directive-check-is-narrow" aria-label="Link to this section">#</a></h2>
+<p>A game design uses commands in ordinary sentences. &quot;Move the piece&quot;, &quot;press X&quot; and &quot;choose a card&quot; describe what the player does. A build plan says &quot;run the scenario&quot;. A check of grammar alone would report mostly such sentences.</p>
+<p>So the check looks only for explicit forms such as &quot;you must&quot;, and for a small set of imperative verbs in a paragraph that is not about the game. This gives fewer false notices. It does not decide whom a sentence addresses. The person who reviews the notice decides that.</p>
+<h2 id="limits">Limits<a class="heading-anchor" href="#limits" aria-label="Link to this section">#</a></h2>
+<ul>
+<li>The checks for prompt control, external action and reader directives read English phrases. An instruction in another language can go unreported. The checks for obfuscated blocks and links do not depend on the language.</li>
+<li>Ordinary text can be reported: a test procedure, security guidance, dialogue, a tutorial, a citation, or an embedded asset. A hash or another encoded-looking run that is not in the <code>sha256:</code> form can be reported.</li>
+<li>Game words in a paragraph can suppress a correct notice. An author who means harm can add game words to hide an instruction.</li>
+<li>The scan can miss synonyms, indirect persuasion, unusual line breaks, short encodings, custom ciphers and text inside images.</li>
+<li>The scan is not a malware scanner. It does not evaluate scripts, binary files, the destinations of links or the meaning of prose.</li>
+</ul>
+<p>A later version can add a pattern or a code. Such an addition never makes a notice change the result of validation.</p></article>
+</div>
+</main>
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <span><a href="/about/">About OpenGDD</a></span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
+    <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
+  </div>
+</footer>
+<script>(()=>{const b=document.querySelector(".theme-toggle");if(!b)return;const cur=()=>document.documentElement.dataset.theme==="dark"?"dark":"light";const paint=()=>{b.textContent=cur()==="dark"?"\u2600":"\u263E";};b.addEventListener("click",()=>{const next=cur()==="dark"?"light":"dark";document.documentElement.dataset.theme=next;try{localStorage.setItem("opengdd-theme",next)}catch{}paint();});paint();})()</script>
+<script>(()=>{const h=document.querySelector(".site-header");if(!h||!window.ResizeObserver)return;new ResizeObserver(()=>{const height=h.offsetHeight;document.documentElement.style.setProperty("--header-h",height+"px");document.documentElement.style.setProperty("--header-mask-depth",Math.round(height*.7)+"px")}).observe(h)})()</script>
+<script>(()=>{const toc=document.querySelector(".doc-toc");if(!toc)return;const links=new Map([...toc.querySelectorAll("a[href^='#']")].map(a=>[a.getAttribute("href").slice(1),a]));const targets=[...links.keys()].map(id=>document.getElementById(id)).filter(Boolean);if(!targets.length)return;let current=null;const mark=id=>{if(id===current)return;current=id;links.forEach(a=>a.classList.remove("here"));const a=links.get(id);if(a){a.classList.add("here");}};const pick=()=>{let best=targets[0];for(const t of targets){if(t.getBoundingClientRect().top<=90)best=t;else break;}mark(best.id);};addEventListener("scroll",pick,{passive:true});pick();})()</script>
+<script data-goatcounter="https://opengdd.goatcounter.com/count" async src="https://gc.zgo.at/count.v5.js" crossorigin="anonymous" integrity="sha384-atnOLvQb9t+jTSipvd75X2yginT4PjVbqDdlJAmxMm+wYElFmeR6EmLP5bYeoRVQ"></script>
+</body>
+</html>

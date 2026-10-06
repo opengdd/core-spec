@@ -6,12 +6,14 @@
   <url><loc>https://opengdd.org/spec/</loc></url>
   <url><loc>https://opengdd.org/spec/v0.7/</loc></url>
   <url><loc>https://opengdd.org/spec/v0.8/</loc></url>
+  <url><loc>https://opengdd.org/spec/v0.9/</loc></url>
   <url><loc>https://opengdd.org/spec/changelog/</loc></url>
   <url><loc>https://opengdd.org/spec/changelog/technical/</loc></url>
   <url><loc>https://opengdd.org/spec/limitations/</loc></url>
   <url><loc>https://opengdd.org/schema/</loc></url>
   <url><loc>https://opengdd.org/conformance/</loc></url>
   <url><loc>https://opengdd.org/conformance/certification/</loc></url>
+  <url><loc>https://opengdd.org/conformance/injection-lint/</loc></url>
   <url><loc>https://opengdd.org/evolution/</loc></url>
   <url><loc>https://opengdd.org/authoring-tool/</loc></url>
   <url><loc>https://opengdd.org/about/</loc></url>
@@ -29,99 +31,99 @@
   <url><loc>https://opengdd.org/handbook/modes-and-clocks/</loc></url>
   <url><loc>https://opengdd.org/handbook/seeds/</loc></url>
   <url><loc>https://opengdd.org/handbook/direction/</loc></url>
-  <url><loc>https://opengdd.org/handbook/palette-and-colour-promises/</loc></url>
+  <url><loc>https://opengdd.org/handbook/palette-and-color-promises/</loc></url>
   <url><loc>https://opengdd.org/handbook/personalization/</loc></url>
   <url><loc>https://opengdd.org/handbook/contracts/</loc></url>
   <url><loc>https://opengdd.org/handbook/how-checking-works/</loc></url>
   <url><loc>https://opengdd.org/handbook/before-handoff/</loc></url>
   <url><loc>https://opengdd.org/handbook/complete-example/package/</loc></url>
   <url><loc>https://opengdd.org/contracts/</loc></url>
-  <url><loc>https://opengdd.org/contracts/catalogue/</loc></url>
-  <url><loc>https://opengdd.org/contracts/action-legibility-1/</loc></url>
-  <url><loc>https://opengdd.org/contracts/action-legibility-1/cozy-scene/</loc></url>
-  <url><loc>https://opengdd.org/contracts/action-legibility-1/door-interact/</loc></url>
-  <url><loc>https://opengdd.org/contracts/action-legibility-1/secret-finisher/</loc></url>
-  <url><loc>https://opengdd.org/contracts/action-legibility-1/traversal-affordances/</loc></url>
-  <url><loc>https://opengdd.org/contracts/camera-framing-1/</loc></url>
-  <url><loc>https://opengdd.org/contracts/camera-framing-1/couch-coop-camera/</loc></url>
-  <url><loc>https://opengdd.org/contracts/camera-framing-1/endless-runner-camera/</loc></url>
-  <url><loc>https://opengdd.org/contracts/camera-framing-1/party-rpg-with-a-tactical-view/</loc></url>
-  <url><loc>https://opengdd.org/contracts/camera-framing-1/platformer-follow-camera/</loc></url>
-  <url><loc>https://opengdd.org/contracts/camera-framing-1/puzzle-board-camera/</loc></url>
-  <url><loc>https://opengdd.org/contracts/camera-framing-1/top-down-objective-camera/</loc></url>
-  <url><loc>https://opengdd.org/contracts/container-1/</loc></url>
-  <url><loc>https://opengdd.org/contracts/container-1/backpack/</loc></url>
-  <url><loc>https://opengdd.org/contracts/container-1/hunters-satchel/</loc></url>
-  <url><loc>https://opengdd.org/contracts/container-1/workshop-stockpile/</loc></url>
-  <url><loc>https://opengdd.org/contracts/control-options-1/</loc></url>
-  <url><loc>https://opengdd.org/contracts/control-options-1/fighting-inputs/</loc></url>
-  <url><loc>https://opengdd.org/contracts/control-options-1/held-repair/</loc></url>
-  <url><loc>https://opengdd.org/contracts/control-options-1/mobile-touch/</loc></url>
-  <url><loc>https://opengdd.org/contracts/control-options-1/pc-console/</loc></url>
-  <url><loc>https://opengdd.org/contracts/control-options-1/rts-pointer/</loc></url>
-  <url><loc>https://opengdd.org/contracts/control-options-1/shooter-layers/</loc></url>
-  <url><loc>https://opengdd.org/contracts/event-resolution-1/</loc></url>
-  <url><loc>https://opengdd.org/contracts/event-resolution-1/arena-wave/</loc></url>
-  <url><loc>https://opengdd.org/contracts/event-resolution-1/card-duel/</loc></url>
-  <url><loc>https://opengdd.org/contracts/event-resolution-1/solo-puzzle/</loc></url>
-  <url><loc>https://opengdd.org/contracts/event-resolution-1/tactics-tie/</loc></url>
-  <url><loc>https://opengdd.org/contracts/fact-list-1/</loc></url>
-  <url><loc>https://opengdd.org/contracts/fact-list-1/card-keyword-state/</loc></url>
-  <url><loc>https://opengdd.org/contracts/fact-list-1/squad-tactics-readouts/</loc></url>
-  <url><loc>https://opengdd.org/contracts/grid-and-direction-1/</loc></url>
-  <url><loc>https://opengdd.org/contracts/grid-and-direction-1/chess-board/</loc></url>
-  <url><loc>https://opengdd.org/contracts/grid-and-direction-1/dungeon-map/</loc></url>
-  <url><loc>https://opengdd.org/contracts/grid-and-direction-1/racing-track-grid/</loc></url>
-  <url><loc>https://opengdd.org/contracts/input-forgiveness-1/</loc></url>
-  <url><loc>https://opengdd.org/contracts/input-forgiveness-1/fighting-game-action-classes/</loc></url>
-  <url><loc>https://opengdd.org/contracts/input-forgiveness-1/platformer-jump-and-dash/</loc></url>
-  <url><loc>https://opengdd.org/contracts/input-forgiveness-1/race-start-throttle/</loc></url>
-  <url><loc>https://opengdd.org/contracts/input-forgiveness-1/rhythm-lane-hit/</loc></url>
-  <url><loc>https://opengdd.org/contracts/input-forgiveness-1/single-action-turn-puzzle/</loc></url>
-  <url><loc>https://opengdd.org/contracts/input-forgiveness-1/soulslike-action-buffer/</loc></url>
-  <url><loc>https://opengdd.org/contracts/job-resolution-1/</loc></url>
-  <url><loc>https://opengdd.org/contracts/job-resolution-1/assembler/</loc></url>
-  <url><loc>https://opengdd.org/contracts/job-resolution-1/barracks/</loc></url>
-  <url><loc>https://opengdd.org/contracts/job-resolution-1/construction-site/</loc></url>
-  <url><loc>https://opengdd.org/contracts/job-resolution-1/hand-bench/</loc></url>
-  <url><loc>https://opengdd.org/contracts/job-resolution-1/kitchen/</loc></url>
-  <url><loc>https://opengdd.org/contracts/job-resolution-1/point-research/</loc></url>
-  <url><loc>https://opengdd.org/contracts/job-resolution-1/research-lab/</loc></url>
-  <url><loc>https://opengdd.org/contracts/job-resolution-1/salvage/</loc></url>
-  <url><loc>https://opengdd.org/contracts/pointer-command-1/</loc></url>
-  <url><loc>https://opengdd.org/contracts/pointer-command-1/arpg-held-click-to-move-and-attack/</loc></url>
-  <url><loc>https://opengdd.org/contracts/pointer-command-1/colony-work-designation/</loc></url>
-  <url><loc>https://opengdd.org/contracts/pointer-command-1/moba-selection-and-smart-cast/</loc></url>
-  <url><loc>https://opengdd.org/contracts/pointer-command-1/point-and-click-adventure-verb-coin/</loc></url>
-  <url><loc>https://opengdd.org/contracts/pointer-command-1/rts-select-order-and-cast/</loc></url>
-  <url><loc>https://opengdd.org/contracts/pointer-command-1/tower-defense-placement/</loc></url>
-  <url><loc>https://opengdd.org/contracts/ranged-value-1/</loc></url>
-  <url><loc>https://opengdd.org/contracts/ranged-value-1/boss-stagger/</loc></url>
-  <url><loc>https://opengdd.org/contracts/ranged-value-1/experience/</loc></url>
-  <url><loc>https://opengdd.org/contracts/ranged-value-1/health/</loc></url>
-  <url><loc>https://opengdd.org/contracts/ranged-value-1/karma/</loc></url>
-  <url><loc>https://opengdd.org/contracts/ranged-value-1/oxygen/</loc></url>
-  <url><loc>https://opengdd.org/contracts/ranged-value-1/stamina/</loc></url>
-  <url><loc>https://opengdd.org/contracts/replay-scope-1/</loc></url>
-  <url><loc>https://opengdd.org/contracts/replay-scope-1/patched-racing-ghost/</loc></url>
-  <url><loc>https://opengdd.org/contracts/replay-scope-1/puzzle-solution-share/</loc></url>
-  <url><loc>https://opengdd.org/contracts/replay-scope-1/racing-ghost-lap/</loc></url>
-  <url><loc>https://opengdd.org/contracts/replay-scope-1/roguelike-daily-run/</loc></url>
-  <url><loc>https://opengdd.org/contracts/replay-scope-1/rts-observer-replay/</loc></url>
-  <url><loc>https://opengdd.org/contracts/state-persistence-scope-1/</loc></url>
-  <url><loc>https://opengdd.org/contracts/state-persistence-scope-1/account-settings/</loc></url>
-  <url><loc>https://opengdd.org/contracts/state-persistence-scope-1/arcade-score/</loc></url>
-  <url><loc>https://opengdd.org/contracts/state-persistence-scope-1/cloud-campaign/</loc></url>
-  <url><loc>https://opengdd.org/contracts/state-persistence-scope-1/continuous-world/</loc></url>
-  <url><loc>https://opengdd.org/contracts/state-persistence-scope-1/roguelike-run/</loc></url>
-  <url><loc>https://opengdd.org/contracts/state-persistence-scope-1/story-campaign/</loc></url>
-  <url><loc>https://opengdd.org/contracts/suspension-and-catch-up-1/</loc></url>
-  <url><loc>https://opengdd.org/contracts/suspension-and-catch-up-1/daily-reward/</loc></url>
-  <url><loc>https://opengdd.org/contracts/suspension-and-catch-up-1/energy-refill-while-away/</loc></url>
-  <url><loc>https://opengdd.org/contracts/suspension-and-catch-up-1/lives-refill-while-away/</loc></url>
-  <url><loc>https://opengdd.org/contracts/suspension-and-catch-up-1/pumpkin-growth-window/</loc></url>
-  <url><loc>https://opengdd.org/contracts/suspension-and-catch-up-1/puzzle-position/</loc></url>
-  <url><loc>https://opengdd.org/contracts/timed-window-1/</loc></url>
-  <url><loc>https://opengdd.org/contracts/timed-window-1/dodge-roll-invulnerability/</loc></url>
-  <url><loc>https://opengdd.org/contracts/timed-window-1/poison-window/</loc></url>
+  <url><loc>https://opengdd.org/contracts/catalog/</loc></url>
+  <url><loc>https://opengdd.org/contracts/action-legibility-2/</loc></url>
+  <url><loc>https://opengdd.org/contracts/action-legibility-2/cozy-scene/</loc></url>
+  <url><loc>https://opengdd.org/contracts/action-legibility-2/door-interact/</loc></url>
+  <url><loc>https://opengdd.org/contracts/action-legibility-2/secret-finisher/</loc></url>
+  <url><loc>https://opengdd.org/contracts/action-legibility-2/traversal-affordances/</loc></url>
+  <url><loc>https://opengdd.org/contracts/camera-framing-2/</loc></url>
+  <url><loc>https://opengdd.org/contracts/camera-framing-2/couch-coop-camera/</loc></url>
+  <url><loc>https://opengdd.org/contracts/camera-framing-2/endless-runner-camera/</loc></url>
+  <url><loc>https://opengdd.org/contracts/camera-framing-2/party-rpg-with-a-tactical-view/</loc></url>
+  <url><loc>https://opengdd.org/contracts/camera-framing-2/platformer-follow-camera/</loc></url>
+  <url><loc>https://opengdd.org/contracts/camera-framing-2/puzzle-board-camera/</loc></url>
+  <url><loc>https://opengdd.org/contracts/camera-framing-2/top-down-objective-camera/</loc></url>
+  <url><loc>https://opengdd.org/contracts/container-2/</loc></url>
+  <url><loc>https://opengdd.org/contracts/container-2/backpack/</loc></url>
+  <url><loc>https://opengdd.org/contracts/container-2/hunters-satchel/</loc></url>
+  <url><loc>https://opengdd.org/contracts/container-2/workshop-stockpile/</loc></url>
+  <url><loc>https://opengdd.org/contracts/control-options-2/</loc></url>
+  <url><loc>https://opengdd.org/contracts/control-options-2/fighting-inputs/</loc></url>
+  <url><loc>https://opengdd.org/contracts/control-options-2/held-repair/</loc></url>
+  <url><loc>https://opengdd.org/contracts/control-options-2/mobile-touch/</loc></url>
+  <url><loc>https://opengdd.org/contracts/control-options-2/pc-console/</loc></url>
+  <url><loc>https://opengdd.org/contracts/control-options-2/rts-pointer/</loc></url>
+  <url><loc>https://opengdd.org/contracts/control-options-2/shooter-layers/</loc></url>
+  <url><loc>https://opengdd.org/contracts/event-resolution-2/</loc></url>
+  <url><loc>https://opengdd.org/contracts/event-resolution-2/arena-wave/</loc></url>
+  <url><loc>https://opengdd.org/contracts/event-resolution-2/card-duel/</loc></url>
+  <url><loc>https://opengdd.org/contracts/event-resolution-2/solo-puzzle/</loc></url>
+  <url><loc>https://opengdd.org/contracts/event-resolution-2/tactics-tie/</loc></url>
+  <url><loc>https://opengdd.org/contracts/fact-list-2/</loc></url>
+  <url><loc>https://opengdd.org/contracts/fact-list-2/card-keyword-state/</loc></url>
+  <url><loc>https://opengdd.org/contracts/fact-list-2/squad-tactics-readouts/</loc></url>
+  <url><loc>https://opengdd.org/contracts/grid-and-direction-2/</loc></url>
+  <url><loc>https://opengdd.org/contracts/grid-and-direction-2/chess-board/</loc></url>
+  <url><loc>https://opengdd.org/contracts/grid-and-direction-2/dungeon-map/</loc></url>
+  <url><loc>https://opengdd.org/contracts/grid-and-direction-2/racing-track-grid/</loc></url>
+  <url><loc>https://opengdd.org/contracts/input-forgiveness-2/</loc></url>
+  <url><loc>https://opengdd.org/contracts/input-forgiveness-2/fighting-game-action-classes/</loc></url>
+  <url><loc>https://opengdd.org/contracts/input-forgiveness-2/platformer-jump-and-dash/</loc></url>
+  <url><loc>https://opengdd.org/contracts/input-forgiveness-2/race-start-throttle/</loc></url>
+  <url><loc>https://opengdd.org/contracts/input-forgiveness-2/rhythm-lane-hit/</loc></url>
+  <url><loc>https://opengdd.org/contracts/input-forgiveness-2/single-action-turn-puzzle/</loc></url>
+  <url><loc>https://opengdd.org/contracts/input-forgiveness-2/soulslike-action-buffer/</loc></url>
+  <url><loc>https://opengdd.org/contracts/job-resolution-2/</loc></url>
+  <url><loc>https://opengdd.org/contracts/job-resolution-2/assembler/</loc></url>
+  <url><loc>https://opengdd.org/contracts/job-resolution-2/barracks/</loc></url>
+  <url><loc>https://opengdd.org/contracts/job-resolution-2/construction-site/</loc></url>
+  <url><loc>https://opengdd.org/contracts/job-resolution-2/hand-bench/</loc></url>
+  <url><loc>https://opengdd.org/contracts/job-resolution-2/kitchen/</loc></url>
+  <url><loc>https://opengdd.org/contracts/job-resolution-2/point-research/</loc></url>
+  <url><loc>https://opengdd.org/contracts/job-resolution-2/research-lab/</loc></url>
+  <url><loc>https://opengdd.org/contracts/job-resolution-2/salvage/</loc></url>
+  <url><loc>https://opengdd.org/contracts/pointer-command-2/</loc></url>
+  <url><loc>https://opengdd.org/contracts/pointer-command-2/arpg-held-click-to-move-and-attack/</loc></url>
+  <url><loc>https://opengdd.org/contracts/pointer-command-2/colony-work-designation/</loc></url>
+  <url><loc>https://opengdd.org/contracts/pointer-command-2/moba-selection-and-smart-cast/</loc></url>
+  <url><loc>https://opengdd.org/contracts/pointer-command-2/point-and-click-adventure-verb-coin/</loc></url>
+  <url><loc>https://opengdd.org/contracts/pointer-command-2/rts-select-order-and-cast/</loc></url>
+  <url><loc>https://opengdd.org/contracts/pointer-command-2/tower-defense-placement/</loc></url>
+  <url><loc>https://opengdd.org/contracts/ranged-value-2/</loc></url>
+  <url><loc>https://opengdd.org/contracts/ranged-value-2/boss-stagger/</loc></url>
+  <url><loc>https://opengdd.org/contracts/ranged-value-2/experience/</loc></url>
+  <url><loc>https://opengdd.org/contracts/ranged-value-2/health/</loc></url>
+  <url><loc>https://opengdd.org/contracts/ranged-value-2/karma/</loc></url>
+  <url><loc>https://opengdd.org/contracts/ranged-value-2/oxygen/</loc></url>
+  <url><loc>https://opengdd.org/contracts/ranged-value-2/stamina/</loc></url>
+  <url><loc>https://opengdd.org/contracts/replay-scope-2/</loc></url>
+  <url><loc>https://opengdd.org/contracts/replay-scope-2/patched-racing-ghost/</loc></url>
+  <url><loc>https://opengdd.org/contracts/replay-scope-2/puzzle-solution-share/</loc></url>
+  <url><loc>https://opengdd.org/contracts/replay-scope-2/racing-ghost-lap/</loc></url>
+  <url><loc>https://opengdd.org/contracts/replay-scope-2/roguelike-daily-run/</loc></url>
+  <url><loc>https://opengdd.org/contracts/replay-scope-2/rts-observer-replay/</loc></url>
+  <url><loc>https://opengdd.org/contracts/state-persistence-scope-2/</loc></url>
+  <url><loc>https://opengdd.org/contracts/state-persistence-scope-2/account-settings/</loc></url>
+  <url><loc>https://opengdd.org/contracts/state-persistence-scope-2/arcade-score/</loc></url>
+  <url><loc>https://opengdd.org/contracts/state-persistence-scope-2/cloud-campaign/</loc></url>
+  <url><loc>https://opengdd.org/contracts/state-persistence-scope-2/continuous-world/</loc></url>
+  <url><loc>https://opengdd.org/contracts/state-persistence-scope-2/roguelike-run/</loc></url>
+  <url><loc>https://opengdd.org/contracts/state-persistence-scope-2/story-campaign/</loc></url>
+  <url><loc>https://opengdd.org/contracts/suspension-and-catch-up-2/</loc></url>
+  <url><loc>https://opengdd.org/contracts/suspension-and-catch-up-2/daily-reward/</loc></url>
+  <url><loc>https://opengdd.org/contracts/suspension-and-catch-up-2/energy-refill-while-away/</loc></url>
+  <url><loc>https://opengdd.org/contracts/suspension-and-catch-up-2/lives-refill-while-away/</loc></url>
+  <url><loc>https://opengdd.org/contracts/suspension-and-catch-up-2/pumpkin-growth-window/</loc></url>
+  <url><loc>https://opengdd.org/contracts/suspension-and-catch-up-2/puzzle-position/</loc></url>
+  <url><loc>https://opengdd.org/contracts/timed-window-2/</loc></url>
+  <url><loc>https://opengdd.org/contracts/timed-window-2/dodge-roll-invulnerability/</loc></url>
+  <url><loc>https://opengdd.org/contracts/timed-window-2/poison-window/</loc></url>
 </urlset>

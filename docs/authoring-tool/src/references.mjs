@@ -12,7 +12,7 @@ const CONTRACT = /^contracts\.([a-z0-9]+(?:-[a-z0-9]+)*)(?:\.([a-z0-9]+(?:-[a-z0
 // Keep this spelling aligned with validate-core's TUNING_KEY_PATTERN/PREFIX.
 // Hyphens inside a key are names; a leading minus is always an operator.
 const TUNING_KEY_SOURCE = "[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?(?:\\.[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?)+";
-const DOTTED_KEY = new RegExp(`^${TUNING_KEY_SOURCE}$`, "u");
+const DOTTED_KEY = new RegExp(`^(?![0-9]+(?:\\.[0-9]+)+$)${TUNING_KEY_SOURCE}$`, "u");
 const RULE_KEY_PREFIX = new RegExp(`^${TUNING_KEY_SOURCE}`, "u");
 const RULE_NUMBER_PREFIX = /^(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/u;
 const CLOCK_KEY = /^[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?$/u;
@@ -129,8 +129,10 @@ function genericFamilyFor(name, files, view) {
   if (match && plainObject(direction?.[match[1]]) && Object.hasOwn(direction[match[1]], match[2])) {
     return { family: "direction-promise", kind: match[1], key: match[2], address: name };
   }
-  if (plainObject(tuning?.values) && Object.hasOwn(tuning.values, name) && (hasKind("value") || DOTTED_KEY.test(name))) {
-    return { family: "tuning-value", key: name, address: name };
+  const tuningTable = plainObject(tuning?.values) && Object.hasOwn(tuning.values, name) ? "values"
+    : plainObject(tuning?.open) && Object.hasOwn(tuning.open, name) ? "open" : undefined;
+  if (tuningTable && (hasKind("value") || DOTTED_KEY.test(name))) {
+    return { family: "tuning-value", key: name, address: name, table: tuningTable };
   }
   if (plainObject(tuning?.rules) && Object.hasOwn(tuning.rules, name) && (hasKind("rule") || KEBAB.test(name))) {
     return { family: "tuning-rule", key: name, address: name };
@@ -407,7 +409,7 @@ function genericJsonSites(packageService, files, target) {
   }
   const tuning = parseJson(files.get("tuning.json"));
   if (target.family === "tuning-value") {
-    add("tuning.json", { pointer: pointer(["values", target.key]), kind: "declaration-key", operation: "rename-key" });
+    add("tuning.json", { pointer: pointer([target.table ?? "values", target.key]), kind: "declaration-key", operation: "rename-key" });
     if (plainObject(tuning?.ranges) && Object.hasOwn(tuning.ranges, target.key)) add("tuning.json", {
       pointer: pointer(["ranges", target.key]), kind: "tuning-range", operation: "rename-key"
     });

@@ -3,7 +3,7 @@ import { plainObject, pointerSegment } from "./json-path.mjs";
 import { INSPECTOR_COPY } from "./copy/inspector-copy.mjs";
 
 const FIELD_TYPES = new Set([
-  "text", "longtext", "number", "integer", "boolean", "enum", "choice", "list", "link", "lines", "reference"
+  "text", "longtext", "number", "integer", "open-number", "boolean", "enum", "choice", "list", "link", "lines", "reference"
 ]);
 
 let nextFormId = 0;
@@ -298,6 +298,7 @@ export function createForms({ package: packageService, edits, validatePackage, c
         const control = document.createElement(field.type === "longtext" || field.type === "list" ? "textarea" : "input");
         if (control.tagName?.toLowerCase() === "input") control.type = field.type === "number" || field.type === "integer" ? "number" : "text";
         if (field.type === "integer") control.step = "1";
+        if (typeof field.placeholder === "string" && field.placeholder) control.placeholder = field.placeholder;
         if (control.tagName?.toLowerCase() === "textarea") control.rows = 2;
         chrome.attach(control);
         const mounted = typeof field.mount === "function"
@@ -396,6 +397,80 @@ export function createForms({ package: packageService, edits, validatePackage, c
         const refresh = () => { control.checked = readField(packageService, field).value === true; chrome.setError(""); };
         control.addEventListener("change", () => write(field, Boolean(control.checked)).catch(error => chrome.setError(error.message)));
         control.addEventListener("blur", () => { burst += 1; });
+        refresh();
+        return { refresh };
+      }
+
+      function openNumberRenderer(parent, field, options = {}) {
+        const chrome = fieldChrome(parent, field, { ...options, group: true });
+        const holder = document.createElement("div");
+        // The three states read as one choice row, like the tool's other
+        // choices; the guess box sits inline right after Guess.
+        holder.className = "opengdd-author-form-enum opengdd-author-form-open-number";
+        holder.dataset.openNumber = "";
+        chrome.attach(holder);
+
+        const guess = document.createElement("button");
+        guess.type = "button";
+        guess.textContent = field.copy?.guess ?? "Guess";
+        guess.dataset.openNumberState = "guess";
+        const noGuess = document.createElement("button");
+        noGuess.type = "button";
+        noGuess.textContent = field.copy?.noGuessYet ?? "No guess yet";
+        noGuess.dataset.openNumberState = "no-guess";
+        const notApplicable = document.createElement("button");
+        notApplicable.type = "button";
+        notApplicable.textContent = field.copy?.doesNotApplyChoice ?? "Does not apply";
+        notApplicable.dataset.openNumberState = "not-applicable";
+        const input = document.createElement("input");
+        input.type = "number";
+        if (field.integer) input.step = "1";
+        input.setAttribute("aria-label", `${field.label}: ${field.copy?.guess ?? "Guess"}`);
+        input.setAttribute("aria-describedby", chrome.describedBy);
+        input.dataset.openNumberGuess = "";
+        input.disabled = field.disabled === true;
+        for (const button of [guess, noGuess, notApplicable]) {
+          button.setAttribute("aria-describedby", chrome.describedBy);
+          button.disabled = field.disabled === true;
+        }
+        holder.append(guess, input, noGuess, notApplicable);
+
+        const stateOf = current => !current.exists ? "not-applicable"
+          : typeof current.value === "number" && Number.isFinite(current.value) ? "guess"
+            : "no-guess";
+        const refresh = () => {
+          const current = readField(packageService, field);
+          const state = stateOf(current);
+          for (const button of [guess, noGuess, notApplicable]) {
+            const chosen = button.dataset.openNumberState === state;
+            button.setAttribute("aria-pressed", String(chosen));
+            button.classList.toggle("opengdd-author-form-open-number--chosen", chosen);
+            button.classList.toggle("opengdd-author-form-enum--chosen", chosen);
+          }
+          input.hidden = state !== "guess";
+          if (document.activeElement !== input) input.value = state === "guess" ? String(current.value) : "";
+          chrome.setError("");
+        };
+        const commit = (value, options) => write(field, value, { coalesce: false, ...options })
+          .then(refresh).catch(error => chrome.setError(error.message));
+        guess.addEventListener("click", () => {
+          const current = readField(packageService, field);
+          if (stateOf(current) === "guess") return input.focus?.();
+          return commit(0).then(() => { input.focus?.(); input.select?.(); });
+        });
+        noGuess.addEventListener("click", () => stateOf(readField(packageService, field)) === "no-guess" ? undefined : commit(null));
+        notApplicable.addEventListener("click", () => commit(undefined, { action: "clear", remove: true }));
+        input.addEventListener("input", () => {
+          if (input.value === "") return commit(null);
+          const value = Number(input.value);
+          if (!Number.isFinite(value)) { chrome.setError("Enter a finite number."); return; }
+          if (field.integer && !Number.isInteger(value)) {
+            chrome.setError("Enter a whole number without decimals.");
+            return;
+          }
+          return commit(value, { coalesce: true });
+        });
+        input.addEventListener("blur", () => { burst += 1; });
         refresh();
         return { refresh };
       }
@@ -861,6 +936,7 @@ export function createForms({ package: packageService, edits, validatePackage, c
       function renderField(parent, field, options = {}) {
         let renderer;
         if (["text", "longtext", "number", "integer", "list"].includes(field.type)) renderer = scalarRenderer(parent, field, options);
+        else if (field.type === "open-number") renderer = openNumberRenderer(parent, field, options);
         else if (field.type === "boolean") renderer = booleanRenderer(parent, field, options);
         else if (field.type === "enum") renderer = enumRenderer(parent, field, options);
         else if (field.type === "choice") renderer = choiceRenderer(parent, field, options);

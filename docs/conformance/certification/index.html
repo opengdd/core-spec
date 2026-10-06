@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Experimental certification protocol — OpenGDD</title>
-<meta name="description" content="The experimental OpenGDD runner and audit protocol for evaluating a particular build and its evidence.">
+<meta name="description" content="The experimental OpenGDD protocol for running the tests of a build and auditing the build and its evidence.">
 <link rel="canonical" href="https://opengdd.org/conformance/certification/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Experimental certification protocol — OpenGDD">
-<meta property="og:description" content="The experimental OpenGDD runner and audit protocol for evaluating a particular build and its evidence.">
+<meta property="og:description" content="The experimental OpenGDD protocol for running the tests of a build and auditing the build and its evidence.">
 <meta property="og:url" content="https://opengdd.org/conformance/certification/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta property="og:image:type" content="image/png">
@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
 <meta name="twitter:title" content="Experimental certification protocol — OpenGDD">
-<meta name="twitter:description" content="The experimental OpenGDD runner and audit protocol for evaluating a particular build and its evidence.">
+<meta name="twitter:description" content="The experimental OpenGDD protocol for running the tests of a build and auditing the build and its evidence.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -51,7 +51,7 @@
 <p class="toc-title">About OpenGDD</p>
 <ul><li><a href="/about/">Overview</a></li>
 <li><a href="/schema/">Schemas</a></li>
-<li><a href="/conformance/">Validator</a><ul><li class="toc-h3"><a href="/conformance/certification/" aria-current="page">Experimental certification protocol</a></li></ul></li>
+<li><a href="/conformance/">Validator</a><ul><li class="toc-h3"><a href="/conformance/certification/" aria-current="page">Experimental certification protocol</a></li><li class="toc-h3"><a href="/conformance/injection-lint/">Safety scan</a></li></ul></li>
 <li><a href="/evolution/">Evolution</a></li></ul>
 <p class="toc-group-title">On this page</p><ul>
 <li class="toc-h2"><a href="#certification-gate">Certification gate</a></li>
@@ -65,7 +65,7 @@
 </nav>
 <article class="doc-body"><h1>Experimental certification protocol</h1>
 <p class="note">This page is for people who audit a finished build against
-its package. Designers do not need it; <a href="/conformance/">The validator</a>
+its package. Designers do not need it. The <a href="/conformance/">validator page</a>
 explains what the validator checks. No certification program exists yet.</p>
 <p>This protocol describes how to audit one finished game against its design package. The auditor receives the package, the build, the builder's report and supporting evidence. The audit examines whether the game follows the design and whether the evidence supports the report. It produces a reasoned verdict with findings and the limits of the review.</p>
 <p>Three checks serve different purposes:</p>
@@ -79,9 +79,9 @@ explains what the validator checks. No certification program exists yet.</p>
 <p>A build is eligible for a certification verdict only when all of these are true:</p>
 <ol>
 <li><strong>The package conforms.</strong> Run the version-matched OpenGDD validator, then review every applicable package-level prose obligation under SPEC §<a class="section-ref" href="/spec/#2d-conformance-layers-and-certification-status">2d</a>, before interpreting build evidence. A clean CLI run establishes the implemented machine checks, not the human review.</li>
-<li><strong>Every declared acceptance test is reported.</strong> Execute each acceptance-test obligation according to its fenced <code>test</code> block: the package's own <code>AT-n</code> tests and the tests rendered from every checked contract pack, named <code>AT &lt;adoption&gt;/&lt;template&gt;</code> or <code>AT &lt;adoption&gt;/&lt;template&gt;/&lt;row&gt;</code> (SPEC §§<a class="section-ref" href="/spec/#6-build-plan-and-acceptance-tests-05-build-plan-md">6</a>, <a class="section-ref" href="/spec/#10-5-promised-and-checked">10.5</a>). Rendered tests execute exactly as game-local ones do, after the package and pack have passed package validation. The format defines their package shape but not their runtime execution semantics (SPEC §§<a class="section-ref" href="/spec/#2d-conformance-layers-and-certification-status">2d</a>, <a class="section-ref" href="/spec/#6-build-plan-and-acceptance-tests-05-build-plan-md">6</a>), so executing them is this protocol's obligation. Use the exact runner profile id and version named by <code class="anchor">evidence.runner</code>; the runner may be a person, a capable agent, or a versioned harness. Report non-acceptance checkpoints separately; do not silently count them as tests or hide them when they fail. The <a href="#runner-profile">Runner profile</a> states the execution meanings the format leaves open. For each game-local general test, record its id in <code class="anchor">evidence.acceptance.sampled</code> when the runner checked a sample rather than the whole scope.</li>
-<li><strong>Runtime data matches the resolved snapshot.</strong> Resolve personalization in declared order. For every key in <code class="anchor">resolved_tuning.values</code> the audit chooses to check, including each fixed contract value at <code>contracts.&lt;adoption&gt;.&lt;value&gt;</code> (SPEC §<a class="section-ref" href="/spec/#10-6-addresses">10.6</a>), compare the value actually consumed at runtime with the corresponding resolved value. Source-file equality alone is insufficient. The <a href="#audit-profile">Audit profile</a> owns this selection and comparison.</li>
-<li><strong><code class="anchor">opengdd-build.json</code> is complete.</strong> The build record identifies the format revision, package and build, designer and builder, personalization answers, full resolved tuning snapshot, the <code>evidence</code> record's counts, result hash, and conditional runner identity. The runner identity resolves to the <a href="#runner-profile">Runner profile</a>.</li>
+<li><strong>Every declared acceptance test is reported.</strong> Execute each acceptance-test obligation according to its fenced <code>test</code> block: the package's own <code>AT-n</code> tests and the tests rendered from every checked contract pack, named <code>AT &lt;adoption&gt;/&lt;template&gt;</code> or <code>AT &lt;adoption&gt;/&lt;template&gt;/&lt;row&gt;</code> (SPEC §§<a class="section-ref" href="/spec/#6-build-plan-and-acceptance-tests-05-build-plan-md">6</a>, <a class="section-ref" href="/spec/#10-7-the-pack">10.7</a>). Rendered tests execute exactly as game-local ones do, after the package and pack have passed package validation. The format defines their package shape but not their runtime execution semantics (SPEC §§<a class="section-ref" href="/spec/#2d-conformance-layers-and-certification-status">2d</a>, <a class="section-ref" href="/spec/#6-build-plan-and-acceptance-tests-05-build-plan-md">6</a>), so executing them is this protocol's obligation. Use the exact runner profile id and version named by <code class="anchor">evidence.runner</code>; the runner may be a person, a capable agent, or a versioned harness. A test that needs a person watching is always reported <code>not-run</code>, even when a person ran it (SPEC §§<a class="section-ref" href="/spec/#6-build-plan-and-acceptance-tests-05-build-plan-md">6</a>, <a class="section-ref" href="/spec/#7-build-records-opengdd-build-json">7</a>). Report non-acceptance checkpoints separately; do not silently count them as tests or hide them when they fail. The <a href="#runner-profile">Runner profile</a> states the execution meanings the format leaves open. For each general test, game-local or rendered from a contract pack, record its name in <code class="anchor">evidence.acceptance.sampled</code> when the runner checked a sample rather than the whole scope.</li>
+<li><strong>Runtime data matches the resolved snapshot.</strong> Resolve personalization in declared order. For every key in <code class="anchor">resolved_tuning.values</code> the audit chooses to check, including each fixed contract value at <code>contracts.&lt;adoption&gt;.&lt;value&gt;</code> (SPEC §<a class="section-ref" href="/spec/#10-9-addresses">10.9</a>), compare the value actually consumed at runtime with the corresponding resolved value. Source-file equality alone is insufficient. The <a href="#audit-profile">Audit profile</a> owns this selection and comparison.</li>
+<li><strong><code class="anchor">opengdd-build.json</code> is complete.</strong> The build record identifies the format revision, package and build, designer and builder, personalization answers, full resolved tuning snapshot, the <code>evidence</code> record's counts, conditional result hash and payload, and conditional runner identity. The hash and payload are required only when a test ran; the runner is required only when a runtime test ran. The runner identity resolves to the <a href="#runner-profile">Runner profile</a>.</li>
 <li><strong>The result hash is reproducible.</strong> The evidence defines exactly which payload is hashed and uses the canonical serialization below.</li>
 <li><strong>A separate audit supports the verdict.</strong> A passing result from the builder is evidence, not the final judgment. Apply the <a href="#audit-profile">Audit profile</a>.</li>
 </ol>
@@ -104,7 +104,7 @@ explains what the validator checks. No certification program exists yet.</p>
   &quot;adoption&quot;: &quot;stamina&quot;,
   &quot;pack&quot;: &quot;sha256:&lt;64 lowercase hex&gt;&quot;
 }</code></pre>
-<p><code>pack</code> is the SHA-256 of the exact bytes of <code>contracts/&lt;contract&gt;-&lt;version&gt;.pack.json</code>. The source-backed record check requires the adoption ids and hashes to equal the source package exactly (SPEC §§<a class="section-ref" href="/spec/#7-build-records-opengdd-build-json">7</a>, <a class="section-ref" href="/spec/#10-5-promised-and-checked">10.5</a>). The pack is immutable under that hash, so this record says which rendered tests the reported acceptance count used.</p>
+<p><code>pack</code> is the SHA-256 of the exact bytes of <code>contracts/&lt;contract&gt;-&lt;version&gt;.pack.json</code>. The source-backed record check requires the adoption ids and hashes to equal the source package exactly (SPEC §§<a class="section-ref" href="/spec/#7-build-records-opengdd-build-json">7</a>, <a class="section-ref" href="/spec/#10-8-checked-and-promised">10.8</a>). The pack is immutable under that hash, so this record says which rendered tests the reported acceptance count used.</p>
 <p>The audit separately records the identity it actually judged for every adoption, promised or checked:</p>
 <pre><code class="lang-json">{
   &quot;adoption&quot;: &quot;stamina&quot;,
@@ -113,12 +113,12 @@ explains what the validator checks. No certification program exists yet.</p>
   &quot;origin&quot;: &quot;https://opengdd.org/contracts/ranged-value-1&quot;,
   &quot;definition_digest&quot;: &quot;&lt;64 lowercase hex&gt;&quot;
 }</code></pre>
-<p><code>definition_digest</code> uses the <strong>audit identity serialization</strong>: omit <code>answers</code>, <code>values</code>, <code>rows</code>, and <code>verification</code>; keep <code>_</code>-prefixed annotations; serialize the remaining object with two-space indentation and authored member order; use LF endings and no trailing newline; encode as UTF-8; and record the lowercase hexadecimal SHA-256. The validator's <strong>definition-comparison form</strong> is different: it strips annotations and emits the top-level definition fields in SPEC §<a class="section-ref" href="/spec/#10-2-the-adoption-file">10.2</a> order before comparing adoptions, while preserving member order inside them. The audit keeps annotations because they are part of what the auditor actually judged. The audit serialization exposes a fork without making an online catalogue lookup a package check (SPEC §<a class="section-ref" href="/spec/#10-9-forking">10.9</a>).</p>
+<p><code>definition_digest</code> uses the <strong>audit identity serialization</strong>: omit <code>answers</code>, <code>values</code>, <code>rows</code>, and <code>verification</code>; keep <code>_</code>-prefixed annotations; serialize the remaining object with two-space indentation and authored member order; use LF endings and no trailing newline; encode as UTF-8; and record the lowercase hexadecimal SHA-256. The validator's <strong>definition-comparison form</strong> is different: it strips annotations and emits the top-level definition fields in SPEC §<a class="section-ref" href="/spec/#10-11-forking-and-definition-identity">10.11</a> order before comparing adoptions, while preserving member order inside them. The audit keeps annotations because they are part of what the auditor actually judged. The audit serialization exposes a fork without making an online catalog lookup a package check (SPEC §<a class="section-ref" href="/spec/#10-11-forking-and-definition-identity">10.11</a>).</p>
 <p>Both digests are claims. The source-backed record validator checks the pack hash; the auditor recomputes the definition digest under audit question 5.</p>
 <h2 id="runner-profile">Runner profile<a class="heading-anchor" href="#runner-profile" aria-label="Link to this section">#</a></h2>
 <p>This profile is experimental; nothing in the package validator reads it. A runtime result names the runner profile through the non-empty <code>id</code> and <code>version</code> strings in <code class="anchor">evidence.runner</code>. The runner's published description must give those exact strings and state the execution meanings below.</p>
 <p>For a general test, the description states how the runner samples or walks the declared <code>scope</code>. When <code>seeds</code> is present, it states that method and its sample count for each seed. The package owns <code>scope</code>, <code>holds</code>, and <code>seeds</code>; a runner never narrows them.</p>
-<p>When the runner samples a game-local general test, the build record names it in <code class="anchor">evidence.acceptance.sampled</code>. The runner may report that the checked cases met the claim, including a measure bounded by the test's <code>holds</code> sentence. It MUST NOT report that a sample established absence, a minimum, or a universal. When the whole declared scope was walked, the result may establish those claims.</p>
+<p>When the runner samples a general test, game-local or rendered from a contract pack, the build record names it in <code class="anchor">evidence.acceptance.sampled</code>. The runner may report that the checked cases met the claim, including a measure bounded by the test's <code>holds</code> sentence. It MUST NOT report that a sample established absence, a minimum, or a universal. When the whole declared scope was walked, the result may establish those claims.</p>
 <p>The description also states the replay schedule and action vocabulary it accepts, and how it takes observations for <code>target</code> and <code>tolerance</code>. Those meanings belong to that named runner and do not become format vocabulary.</p>
 <h2 id="audit-profile">Audit profile<a class="heading-anchor" href="#audit-profile" aria-label="Link to this section">#</a></h2>
 <p>This profile is experimental; nothing in the package validator reads it. In its own record, the audit records the id of the capture recipe it used under <code>capture_profile</code>; <code>capture_profile</code> is not a field in <code class="anchor">opengdd-build.json</code>. The one existing recipe id is <code>web-1</code>:</p>
@@ -143,14 +143,14 @@ explains what the validator checks. No certification program exists yet.</p>
 <li><strong>Is the result attributable?</strong> Re-run with the exact <code class="anchor">evidence.runner</code> id and version.</li>
 </ol>
 <h2 id="verdict-and-evidence">Verdict and evidence<a class="heading-anchor" href="#verdict-and-evidence" aria-label="Link to this section">#</a></h2>
-<p>The audit ends with a reasoned <code>certify</code>, <code>certify-with-notes</code>, or <code>do-not-certify</code> verdict. A failed acceptance test, certified runtime mismatch, a Fixed-statement deviation established by the audit, evidence narrower than its claimed scope, incomplete required build record, or unreproducible result hash blocks certification. Other release gates may still block distribution, but their status must not be folded into the acceptance-test result.</p>
+<p>The audit ends with a reasoned <code>certify</code>, <code>certify-with-notes</code>, or <code>do-not-certify</code> verdict. A failed acceptance test, certified runtime mismatch, a Fixed-statement deviation established by the audit, evidence narrower than its claimed scope, an invalid required build record, or unreproducible result hash blocks certification. Other release gates may still block distribution, but their status must not be folded into the acceptance-test result.</p>
 <p>Certification evidence belongs to the build: validator output, test records, hash payload definition, <code class="anchor">opengdd-build.json</code>, the separate audit, and any ambiguity reports. It must not be rewritten as a claim that every future build of the same package is certified.</p></article>
 </div>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

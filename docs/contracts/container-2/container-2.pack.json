@@ -1,0 +1,507 @@
+{
+  "contract": "container",
+  "version": 2,
+  "templates": [
+    {
+      "id": "delivery-that-fits",
+      "title": "a delivery that fits is accepted whole",
+      "type": "scenario",
+      "expand": "once",
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} container with room for the whole of the delivery below",
+        "when": [
+          "a delivery offers n items of a type {{instance}} accepts"
+        ],
+        "then": [
+          "{{instance}} holds exactly n more items of that type than it did",
+          "nothing already in {{instance}} is removed, destroyed, or changed into another type",
+          "nothing is handed back, dropped, or destroyed"
+        ],
+        "diagnostics": [
+          "{{instance}}-contents-before-after"
+        ]
+      },
+      "text": "A delivery that {{instance}} has room for is accepted whole. The container gains exactly what was offered and keeps everything it already held. Nothing is left over."
+    },
+    {
+      "id": "refuses-whole",
+      "title": "a delivery that does not fit is refused whole",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "partial-acceptance": [
+            "all-or-nothing"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} container with room for fewer than n items of a type it accepts",
+        "when": [
+          "a delivery offers n items of that type"
+        ],
+        "then": [
+          "{{instance}} holds exactly what it held before",
+          "none of the n items goes in, not even the items that would fit",
+          "the delivery reports that it did not happen"
+        ],
+        "diagnostics": [
+          "{{instance}}-contents-before-after",
+          "{{instance}}-delivery-report"
+        ]
+      },
+      "text": "A delivery larger than the room available does not change {{instance}}. No item of the delivery goes in, not even the items that would fit. The delivery reports that it did not happen. Whether the action that offered the items still occurs is decided in this game's own prose, not in this contract."
+    },
+    {
+      "id": "takes-what-fits",
+      "title": "a delivery that does not fit is split",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "partial-acceptance": [
+            "fill-what-fits"
+          ]
+        }
+      },
+      "bindings": {
+        "leftover-phrase": {
+          "flag": "leftover-destination",
+          "map": {
+            "back-to-the-sender": "handed back to whatever offered it, intact",
+            "left-where-it-is": "left outside {{instance}} as a loose item where the delivery happened",
+            "another-store": "moved into the second store this game names, intact and not destroyed",
+            "destroyed": "destroyed, so that neither the sender nor the world receives it"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} container with room for m items of a type it accepts, where m is more than zero and less than n",
+        "when": [
+          "a delivery offers n items of that type"
+        ],
+        "then": [
+          "{{instance}} holds exactly m more items of that type",
+          "the remaining n minus m items are {{bind:leftover-phrase}}",
+          "the delivery reports n minus m as the number it could not take"
+        ],
+        "diagnostics": [
+          "{{instance}}-contents-before-after",
+          "{{instance}}-delivery-report"
+        ]
+      },
+      "text": "When a delivery is larger than the room available, {{instance}} takes the items that fit, and the delivery reports the number of items that did not fit. The part that did not fit is {{bind:leftover-phrase}}. This game's own prose decides where that part goes next and who is responsible for it after that."
+    },
+    {
+      "id": "slots-are-the-limit",
+      "title": "the container is full when its slots are full",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "capacity-limit": [
+            "slot-count",
+            "slots-and-size"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} container with all {{value-cite:slot-count}} slots in use and no slot in use able to take more of the type below",
+        "when": [
+          "a delivery offers one item of that type"
+        ],
+        "then": [
+          "{{instance}} takes none of it",
+          "the number of slots in use is still the number stated by {{value-cite:slot-count}}"
+        ],
+        "diagnostics": [
+          "{{instance}}-slot-occupancy",
+          "{{instance}}-delivery-report"
+        ]
+      },
+      "text": "This container is full when every slot stated by the value at {{value-cite:slot-count}} is in use and none of them can take more of what is being offered. This test cites that value and restates the number nowhere."
+    },
+    {
+      "id": "size-is-the-limit",
+      "title": "the container is full when its size budget is spent",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "capacity-limit": [
+            "size-budget",
+            "slots-and-size"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} container holding items whose sizes add up to less than {{value-cite:size-budget}}",
+        "when": [
+          "a delivery offers items whose sizes would take the total past {{value-cite:size-budget}}"
+        ],
+        "then": [
+          "the sizes of the items {{instance}} holds never add up to more than {{value-cite:size-budget}}",
+          "each item's size is the size written on its own type's row, in the unit this game's prose names for the budget"
+        ],
+        "diagnostics": [
+          "{{instance}}-size-total",
+          "{{instance}}-delivery-report"
+        ]
+      },
+      "text": "This container is full when the next item's size would take the total past the value at {{value-cite:size-budget}}. Sizes come from the item rows and the budget from that value; this test restates neither number."
+    },
+    {
+      "id": "never-refuses",
+      "title": "no delivery is refused for lack of room",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "capacity-limit": [
+            "no-limit"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} container holding any amount at all",
+        "when": [
+          "a delivery offers any number of items of a type {{instance}} accepts"
+        ],
+        "then": [
+          "every offered item goes in",
+          "nothing is handed back, dropped, or destroyed for lack of room",
+          "the result is the same whatever amount the container already holds"
+        ],
+        "diagnostics": [
+          "{{instance}}-contents-before-after"
+        ]
+      },
+      "text": "This container has no capacity limit, so no delivery can fail for lack of room. This container's capacity answer records that decision."
+    },
+    {
+      "id": "fill-order-holds",
+      "title": "an accepted item is placed in the declared slot",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "fill-order": [
+            "top-up-then-first-empty",
+            "first-slot-that-fits",
+            "append"
+          ]
+        }
+      },
+      "bindings": {
+        "fill-phrase": {
+          "flag": "fill-order",
+          "map": {
+            "top-up-then-first-empty": "in a slot that already holds that type while any such slot can take more, and only then in the first empty slot",
+            "first-slot-that-fits": "in the first slot in the container's own order that can take it",
+            "append": "behind everything already held, at the end of the container's own order, never in a gap left by an earlier removal"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} container holding some of a type in one slot, with at least one other slot free and at least one slot freed by an earlier removal, its slots numbered as {{inputs:scope}} states",
+        "when": [
+          "a delivery offers one more item of that type"
+        ],
+        "then": [
+          "the item is placed {{bind:fill-phrase}}",
+          "the same delivery made again from the same starting contents is placed in the same slot"
+        ],
+        "diagnostics": [
+          "{{instance}}-slot-occupancy",
+          "{{instance}}-fill-trace"
+        ]
+      },
+      "text": "An item that {{instance}} accepts is placed {{bind:fill-phrase}}. The rule is repeatable: the same delivery from the same starting contents is placed in the same slot every time. Slot numbering is the numbering identified by this adoption's verification scope.",
+      "inputs": {
+        "scope": {}
+      }
+    },
+    {
+      "id": "draw-order-by-position",
+      "title": "the game takes from the declared slot",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "draw-order": [
+            "first-in-order",
+            "last-in-order"
+          ]
+        }
+      },
+      "bindings": {
+        "draw-phrase": {
+          "flag": "draw-order",
+          "map": {
+            "first-in-order": "from the first slot in the container's own order that holds the type, moving on only when that slot is empty",
+            "last-in-order": "from the last slot in the container's own order that holds the type, moving backwards only when that slot is empty"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} container holding the same type in at least two slots, its slots numbered as {{inputs:scope}} states",
+        "when": [
+          "the game takes fewer of that type than {{instance}} holds, on its own rather than at a player's direction"
+        ],
+        "then": [
+          "the items come {{bind:draw-phrase}}",
+          "the same take made again from the same starting contents comes from the same slot",
+          "no slot other than the one the rule names changes while that slot can still supply the take"
+        ],
+        "diagnostics": [
+          "{{instance}}-slot-occupancy",
+          "{{instance}}-take-trace"
+        ]
+      },
+      "text": "A take that the game makes from {{instance}} on its own comes {{bind:draw-phrase}}. The same take from the same starting contents comes from the same slot every time. The slots are numbered as {{inputs:scope}} states.",
+      "inputs": {
+        "scope": {}
+      }
+    },
+    {
+      "id": "draw-order-by-arrival",
+      "title": "the time at which each stack received items decides which stack the game takes from",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "draw-order": [
+            "newest-first",
+            "oldest-first"
+          ]
+        }
+      },
+      "bindings": {
+        "arrival-phrase": {
+          "flag": "draw-order",
+          "map": {
+            "newest-first": "from the stack that most recently received items, where adding items to an existing stack counts as receiving",
+            "oldest-first": "from the stack that has held items longest, where adding items to an existing stack does not change the age of that stack"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} container holding the same type in at least two stacks that received items at different times, one of them receiving more items after the other stack was made",
+        "when": [
+          "the game takes fewer of that type than {{instance}} holds, on its own rather than at a player's direction"
+        ],
+        "then": [
+          "the items come {{bind:arrival-phrase}}",
+          "the position of each stack makes no difference to which stack supplies the take",
+          "the same take made again from the same starting contents and the same arrival history comes from the same stack"
+        ],
+        "diagnostics": [
+          "{{instance}}-stack-arrival-log",
+          "{{instance}}-take-trace"
+        ]
+      },
+      "text": "A take that the game makes on its own comes {{bind:arrival-phrase}}. The position of a stack does not decide which stack supplies the take. {{instance}} records when each stack received items. The draw-order answer states whether adding items to an existing stack counts as receiving."
+    },
+    {
+      "id": "stack-limit-holds",
+      "title": "{{row.id}} stacks no higher than its limit",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "items",
+      "when": {
+        "flag": {
+          "capacity-limit": [
+            "slot-count",
+            "slots-and-size",
+            "no-limit"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} container with one slot holding {{row.stack-limit}} of {{row.id}}",
+        "when": [
+          "a delivery offers one more {{row.id}}"
+        ],
+        "then": [
+          "that slot still holds exactly {{row.stack-limit}} of {{row.id}}",
+          "the extra one starts a new stack in a free slot; where this container's slots can run out and none is free, it counts as not fitting, and the partial-acceptance answer applies"
+        ],
+        "diagnostics": [
+          "{{instance}}-slot-occupancy",
+          "{{instance}}-delivery-report"
+        ]
+      },
+      "text": "A stack of {{row.id}} in {{instance}} never holds more than {{row.stack-limit}}. This number is the stack limit on the row for {{row.id}} in this adoption."
+    },
+    {
+      "id": "unlisted-type-refused",
+      "title": "a type the list does not name is refused",
+      "type": "scenario",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "type-restriction": [
+            "only-these"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} container with free room",
+        "when": [
+          "a delivery offers an item of a type the item list does not name"
+        ],
+        "then": [
+          "{{instance}} takes none of it, however much room it has",
+          "nothing already in {{instance}} changes",
+          "the refused item is not destroyed"
+        ],
+        "diagnostics": [
+          "{{instance}}-contents-before-after",
+          "{{instance}}-delivery-report"
+        ]
+      },
+      "text": "This container holds only the types its item list names. A delivery of anything else is refused whole even when there is room. The refused item is not destroyed.\n\nWhere the item list is this game's whole catalog, no unlisted type exists to offer and this test has no reachable case: a builder records it as unreachable rather than inventing a type to refuse."
+    },
+    {
+      "id": "forced-out-holds",
+      "title": "{{row.id}} leaves {{instance}} in the declared way",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "items",
+      "when": {
+        "row": {
+          "when-forced-out": [
+            "dropped-nearby",
+            "moved-to-another-store",
+            "destroyed"
+          ]
+        }
+      },
+      "bindings": {
+        "fate-phrase": {
+          "row_field": "when-forced-out",
+          "map": {
+            "dropped-nearby": "left as a loose item where {{instance}} is, for anyone to pick up",
+            "moved-to-another-store": "moved into the second store this game names, intact",
+            "destroyed": "destroyed"
+          }
+        }
+      },
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} container holding more than one {{row.id}} and, when it has slots and more than one slot is needed for that many, holding that type in more than one slot, together with any types carrying lower or higher forced-out order numbers",
+        "when": [
+          "{{instance}} is made to give items up without a take"
+        ],
+        "then": [
+          "{{row.id}} is {{bind:fate-phrase}}",
+          "{{row.id}} leaves at position {{row.forced-out-order}} in the order: any type present with a lower number has left before it, and any type present with a higher number leaves after it",
+          "when the container has slots and {{row.id}} is in more than one slot, the last occupied slot of that type is emptied first, and the other occupied slots of that type follow from last to first in the container's own order",
+          "no type that did not have to leave leaves"
+        ],
+        "diagnostics": [
+          "{{instance}}-forced-removal-log",
+          "{{instance}}-contents-before-after"
+        ]
+      },
+      "text": "When {{instance}} is made to give items up, {{row.id}} is {{bind:fate-phrase}}, and it leaves at position {{row.forced-out-order}} in the declared order. When the container has slots and {{row.id}} is in more than one slot, the last of those slots is emptied first. The row number orders the types, and that rule orders the slots inside one type."
+    },
+    {
+      "id": "never-forced-out",
+      "title": "{{row.id}} is never given up by {{instance}} itself",
+      "type": "scenario",
+      "expand": "per-row",
+      "collection": "items",
+      "when": {
+        "row": {
+          "when-forced-out": [
+            "never"
+          ]
+        }
+      },
+      "bindings": {},
+      "test": {
+        "type": "scenario",
+        "given": "the {{instance}} container holding {{row.id}} at a moment when a change would make it hold more than it can: its slots shrank, or its rules changed",
+        "when": [
+          "that change is attempted"
+        ],
+        "then": [
+          "no {{row.id}} leaves {{instance}}: the type is skipped while types that can leave are given up in their declared order",
+          "if giving up every type that can leave is still not enough, {{instance}} refuses the change",
+          "no {{row.id}} is dropped, moved to another store, or destroyed by {{instance}} itself"
+        ],
+        "diagnostics": [
+          "{{instance}}-forced-removal-log",
+          "{{instance}}-contents-before-after"
+        ]
+      },
+      "text": "Nothing that this container does on its own removes {{row.id}} from it. When {{instance}} must give items up, it skips this type. When giving up every type that can leave is still not enough, {{instance}} refuses the change. When a player drops, sells, or destroys {{row.id}}, this game's own rules apply. This test does not cover that case.\n\nWhere this game has no way to shrink {{instance}} or change its rules while it runs, this test has no reachable case: a builder records it as unreachable rather than inventing a trigger for it."
+    },
+    {
+      "id": "capacity-holds",
+      "title": "the limit holds after every delivery and take",
+      "type": "general",
+      "expand": "once",
+      "when": {
+        "flag": {
+          "capacity-limit": [
+            "slot-count",
+            "size-budget",
+            "slots-and-size"
+          ]
+        }
+      },
+      "bindings": {
+        "limit-clause": {
+          "flag": "capacity-limit",
+          "map": {
+            "slot-count": "the number of slots in use never goes above the container's declared slot count",
+            "size-budget": "the sizes of the items held never add up to more than the container's declared size budget",
+            "slots-and-size": "the number of slots in use never goes above the container's declared slot count, and the sizes of the items held never add up to more than its declared size budget"
+          }
+        }
+      },
+      "test": {
+        "type": "general",
+        "diagnostics": [
+          "{{instance}}-contents-trace",
+          "first-violating-delivery-or-take"
+        ],
+        "holds": "after every delivery and every take, {{bind:limit-clause}}",
+        "seeds": "{{inputs:seeds}}",
+        "scope": "{{inputs:scope}}"
+      },
+      "text": "For every delivery and take in this adoption's verification scope ({{inputs:scope}}), {{bind:limit-clause}}. This adoption supplies the scope and seeds through its verification inputs. This test checks the limit that this container's capacity answer states.",
+      "inputs": {
+        "scope": {
+          "default": "sequences of legal deliveries and takes over one run"
+        },
+        "seeds": {
+          "default": [
+            "audit-a",
+            "audit-b"
+          ]
+        }
+      }
+    }
+  ]
+}

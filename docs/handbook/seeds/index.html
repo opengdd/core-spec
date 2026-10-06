@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Seeds and repeatable randomness | OpenGDD handbook</title>
+<title>Seeds and repeatable randomness | OpenGDD Handbook</title>
 <meta name="description" content="A seed is a text value that makes random results repeatable. The same seed gives the same world, as long as the procedure that uses it is Fixed. A draw is one request …">
 <link rel="canonical" href="https://opengdd.org/handbook/seeds/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Seeds and repeatable randomness | OpenGDD handbook">
+<meta property="og:title" content="Seeds and repeatable randomness | OpenGDD Handbook">
 <meta property="og:description" content="A seed is a text value that makes random results repeatable. The same seed gives the same world, as long as the procedure that uses it is Fixed. A draw is one request …">
 <meta property="og:url" content="https://opengdd.org/handbook/seeds/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
@@ -20,7 +20,7 @@
 <meta name="twitter:site" content="@OpenGDD">
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
-<meta name="twitter:title" content="Seeds and repeatable randomness | OpenGDD handbook">
+<meta name="twitter:title" content="Seeds and repeatable randomness | OpenGDD Handbook">
 <meta name="twitter:description" content="A seed is a text value that makes random results repeatable. The same seed gives the same world, as long as the procedure that uses it is Fixed. A draw is one request …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
@@ -53,7 +53,7 @@
 <li><a href="/handbook/" class="toc-resource-current">Handbook</a></li>
 </ul>
 <div class="toc-group">
-<p class="toc-group-title">Start and foundations</p>
+<p class="toc-group-title">The basic parts</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
 <li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
@@ -78,12 +78,12 @@
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-color-promises/">Palette and color promises</a></li>
 <li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanics</p>
+<p class="toc-group-title">Contracts: reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -92,7 +92,7 @@
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
-<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you send it to the builder</a></li>
 </ul>
 </div>
 </nav>
@@ -105,8 +105,11 @@
 <p>Every floor draws its layout from the seed address <code>{seed}:floor:{n}:stream:layout</code>. Here <code>n</code> counts floors from 1 at the entrance and never goes negative, and the stream's draws are consumed in room order, outward from the stairs.</p>
 </blockquote>
 <p>So <code>n</code> is the floor number, starting at 1 at the entrance, and the generator takes random values room by room, starting at the stairs.</p>
+<p>A seed contains no colon (<code>:</code>). Colons separate the parts of a seed address.</p>
+<h2 id="when-you-need-seeds">When you need seeds<a class="heading-anchor" href="#when-you-need-seeds" aria-label="Link to this section">#</a></h2>
+<p>Seed addresses are optional, and they are a testing tool. They help when a test must get the same layout in different builds. Replaying a run inside one build is the builder's job, so you do not need to write anything for it. Players normally do not see seeds: a game shows a seed, or lets the player enter one, only when your design asks for it.</p>
 <h2 id="what-you-write">What you write<a class="heading-anchor" href="#what-you-write" aria-label="Link to this section">#</a></h2>
-<p>The format fixes the random algorithm. The same seed and seed address give the same sequence in every build, as long as the procedure that uses them is Fixed (the builder follows it exactly). Your chapter defines what each seed address means. For each one, state:</p>
+<p>The format defines one random algorithm for every build. The same seed and seed address give the same sequence in every build, as long as the procedure that uses them is Fixed (the builder follows it exactly). When you declare seed addresses, your chapter defines what each one means. For each one, state:</p>
 <ul>
 <li>what labels such as <code>floor</code> and <code>layout</code> mean;</li>
 <li>what each number counts, and whether counting starts at 0 or 1;</li>
@@ -125,7 +128,7 @@
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

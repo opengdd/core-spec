@@ -9,7 +9,7 @@ import { FORMAT_VERSION, VALIDATOR_VERSION, formatReport, renderContractTests, v
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const USAGE = [
   "Usage:",
-  "  node conformance/validate.mjs [--json] <package-dir>",
+  "  node conformance/validate.mjs [--json] [--review] <package-dir>",
   "  node conformance/validate.mjs --build [--json] <opengdd-build.json> [<package-dir>]",
   "  node conformance/validate.mjs --render-contract-tests <package-dir>",
   "  node conformance/validate.mjs --help",
@@ -17,10 +17,17 @@ const USAGE = [
   "",
   "Options:",
   "  --json                   Write a JSON report.",
+  "  --review                 Include optional English-language review hints.",
   "  --build                  Validate a build record; <package-dir> is the package it is checked against.",
   "  --render-contract-tests  Render checked contract tests as Markdown.",
   "  --help                   Print this help text.",
-  "  --version                Print the validator and format versions."
+  "  --version                Print the validator and format versions.",
+  "",
+  "Build exit codes:",
+  "  0  Conforming.",
+  "  1  Invalid.",
+  "  2  CLI usage error.",
+  "  3  Incomplete, not verified, or not checked."
 ].join("\n");
 
 export function createNodeHost() {
@@ -53,7 +60,7 @@ export function createNodeHost() {
     loadSchema: name => {
       const file = [
         path.resolve(HERE, "..", name),
-        path.resolve(HERE, "..", "schema", "core", "v0.8", name)
+        path.resolve(HERE, "..", "schema", "core", "v0.9", name)
       ].find(candidate => fs.existsSync(candidate));
       if (!file) throw new Error(`schema ${name} was not found beside conformance/; the schema checks cannot run`);
       return JSON.parse(fs.readFileSync(file, "utf8"));
@@ -74,6 +81,7 @@ function usage(jsonMode, message) {
 function main(args) {
   const jsonMode = args.includes("--json");
   const buildMode = args.includes("--build");
+  const reviewMode = args.includes("--review");
   const renderMode = args.includes("--render-contract-tests");
   const helpMode = args.includes("--help");
   const versionMode = args.includes("--version");
@@ -86,13 +94,16 @@ function main(args) {
     process.exitCode = 0;
     return;
   }
-  const positional = args.filter(arg => arg !== "--json" && arg !== "--build" && arg !== "--render-contract-tests");
+  const positional = args.filter(arg => arg !== "--json" && arg !== "--review" && arg !== "--build" && arg !== "--render-contract-tests");
   const unknownOptions = positional.filter(arg => arg.startsWith("-"));
   // Render checked contract tests for reading. The list exists only in memory;
   // it is never pasted into or compared with the build plan.
   if (renderMode) {
-    if (unknownOptions.length || buildMode || positional.length !== 1) {
-      usage(jsonMode, unknownOptions.length ? `unknown option: ${unknownOptions[0]}` : "--render-contract-tests requires exactly one package directory");
+    if (unknownOptions.length || buildMode || reviewMode || positional.length !== 1) {
+      usage(jsonMode, unknownOptions.length ? `unknown option: ${unknownOptions[0]}`
+        : reviewMode ? "--review cannot be used with --render-contract-tests"
+        : buildMode ? "--build cannot be used with --render-contract-tests"
+        : "--render-contract-tests requires exactly one package directory");
       return;
     }
     const run = renderContractTests(createNodeHost(), positional[0]);
@@ -108,20 +119,20 @@ function main(args) {
     return;
   }
   if (buildMode) {
-    if (unknownOptions.length || positional.length < 1 || positional.length > 2) {
-      usage(jsonMode, unknownOptions.length ? `unknown option: ${unknownOptions[0]}` : "--build requires <opengdd-build.json> and an optional <package-dir>");
+    if (unknownOptions.length || reviewMode || positional.length < 1 || positional.length > 2) {
+      usage(jsonMode, unknownOptions.length ? `unknown option: ${unknownOptions[0]}` : reviewMode ? "--review cannot be used with --build" : "--build requires <opengdd-build.json> and an optional <package-dir>");
       return;
     }
     const run = validateBuildManifest(createNodeHost(), positional[0], positional[1]);
     process.stdout.write(formatReport(run, jsonMode));
-    process.exitCode = run.summary.errors ? 1 : 0;
+    process.exitCode = run.outcome === "invalid" ? 1 : ["incomplete", "not verified", "not checked"].includes(run.outcome) ? 3 : 0;
     return;
   }
   if (unknownOptions.length || positional.length !== 1) {
     usage(jsonMode, unknownOptions.length ? `unknown option: ${unknownOptions[0]}` : "exactly one package directory is required");
     return;
   }
-  const run = validatePackage(createNodeHost(), positional[0]);
+  const run = validatePackage(createNodeHost(), positional[0], { review: reviewMode });
   process.stdout.write(formatReport(run, jsonMode));
   process.exitCode = run.summary.errors ? 1 : 0;
 }

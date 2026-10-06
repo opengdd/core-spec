@@ -82,9 +82,16 @@ export function buildAuthoringView(analysis, revisionFor = () => undefined, file
   const fileSet = new Set(fileList);
   const fileText = new Map(fileEntries);
   let tuningRanges = {};
+  let tuningOpen = {};
+  let tuningValues = {};
   try {
     const tuning = JSON.parse(fileText.get("tuning.json"));
     if (tuning?.ranges && !Array.isArray(tuning.ranges) && typeof tuning.ranges === "object") tuningRanges = tuning.ranges;
+    if (tuning?.values && !Array.isArray(tuning.values) && typeof tuning.values === "object") tuningValues = tuning.values;
+    if (tuning?.open && !Array.isArray(tuning.open) && typeof tuning.open === "object") {
+      tuningOpen = tuning.open;
+
+    }
   } catch {}
   const questionIndexesById = new Map();
   try {
@@ -104,8 +111,18 @@ export function buildAuthoringView(analysis, revisionFor = () => undefined, file
     completionNames.push({ name: named.name, definitions: definitions.map(copyValue) });
   }
 
+  const analysisAnchors = (analysis?.anchors ?? []).map(anchor => {
+    const definitions = (anchor.definitions ?? []).map(copyValue);
+
+    return {
+      ...copyValue(anchor), definitions,
+      classification: definitions.length === 1 ? "known" : definitions.length > 1 ? "ambiguous" : "unknown"
+    };
+  });
+
   const byPhysicalIdentity = new Map();
-  for (const named of analysis?.nameIndex ?? []) {
+  const indexedNames = analysis?.nameIndex ?? [];
+  for (const named of indexedNames) {
     let questionOccurrence = 0;
     for (const definition of named.definitions ?? []) {
       const mechanism = mechanismForDefinition(definition);
@@ -134,13 +151,25 @@ export function buildAuthoringView(analysis, revisionFor = () => undefined, file
           display: kindDisplayName(definition.kind, named.name),
           file: definition.file,
           range,
-          ...(definition.kind === "section" ? { extent: headingExtent(fileText.get(definition.file), range) } : {}),
+          ...(definition.kind === "section" ? { extent: headingExtent(fileText.get(definition.file), range) }
+            : definition.extent ? { extent: copyRange(definition.extent) } : {}),
           revision: revisionFor(definition.file),
           citations: [],
           ...(definition.kind === "question" ? { declaredIndex } : {}),
           rangeTag: definition.kind === "value" && Array.isArray(tuningRanges[named.name])
-            ? `[${tuningRanges[named.name].join(", ")}]`
+            && !Object.hasOwn(tuningOpen, named.name) ? `[${tuningRanges[named.name].join(", ")}]`
+            : definition.kind === "value" && Object.hasOwn(tuningOpen, named.name)
+              ? tuningOpen[named.name] === null ? "open, no guess yet" : `open, guess ${tuningOpen[named.name]}`
             : "",
+          open: definition.kind === "value" && Object.hasOwn(tuningOpen, named.name),
+          // The number the outline shows beside the name: an open number's
+          // guess (null is no guess yet), or a decided value and its range.
+          ...(definition.kind === "value" && definition.file === "tuning.json" ? {
+            number: Object.hasOwn(tuningOpen, named.name) ? copyValue(tuningOpen[named.name])
+              : Object.hasOwn(tuningValues, named.name) ? copyValue(tuningValues[named.name]) : undefined,
+            bounds: Array.isArray(tuningRanges[named.name]) && tuningRanges[named.name].length === 2
+              ? copyValue(tuningRanges[named.name]) : undefined
+          } : {}),
           rangeRefusal: definition.kind === "value" && Array.isArray(tuningRanges[named.name])
             ? rangeRefusalFor(named.name)
             : undefined
@@ -162,7 +191,7 @@ export function buildAuthoringView(analysis, revisionFor = () => undefined, file
     || left.file.localeCompare(right.file) || left.range.start.line - right.range.start.line);
 
   const citationOrdinals = new Map();
-  for (const anchor of analysis?.anchors ?? []) {
+  for (const anchor of analysisAnchors) {
     const targets = (anchor.definitions ?? []).map(definition => byPhysicalIdentity.get(physicalIdentity(definition))).filter(Boolean);
     for (const entry of targets) {
       const ordinalKey = `${entry.identity}\0${anchor.name}\0${anchor.file}`;
@@ -218,7 +247,7 @@ export function buildAuthoringView(analysis, revisionFor = () => undefined, file
 
   return {
     definitionsByName,
-    anchors: (analysis?.anchors ?? []).map(copyValue),
+    anchors: analysisAnchors.map(copyValue),
     nameCount: completionNames.length,
     declarationCount: completionNames.reduce((total, entry) => total
       + entry.definitions.filter(definition => designerFile(definition.file)).length, 0),

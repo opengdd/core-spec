@@ -7,6 +7,7 @@ import { COLLECTION_COPY } from "../../src/copy/collection-copy.mjs";
 import { WIDGET_COPY } from "../../src/copy/widget-copy.mjs";
 import { INSPECTOR_COPY } from "../../src/copy/inspector-copy.mjs";
 import { anchoredConfirmation, element, renderBackticks } from "../../src/dom.mjs";
+import { findingMessage } from "../../src/findings.mjs";
 import { locationRows, referenceGroup } from "../../src/inspector-groups.mjs";
 import { packageFiles, plainObject, pointer } from "../../src/json-path.mjs";
 import { createFolderRows, createRecordTable } from "../../src/record-table.mjs";
@@ -26,6 +27,10 @@ function kindLabel(shape) {
 function normalizeShapeForType(shape, type, collections) {
   const common = {};
   if (shape.required === true) common.required = true;
+  if (["number", "integer"].includes(type) && shape.open === true) {
+    common.open = true;
+    delete common.required;
+  }
   if (shape.unique === true) common.unique = true;
   if (shape.description) common.description = shape.description;
   if (shape.when) { delete common.required; common.when = shape.when; }
@@ -129,7 +134,7 @@ export default {
       const table = element(document, "table");
       const head = element(document, "thead");
       const headRow = element(document, "tr");
-      for (const name of ["name", "kind", COLLECTION_COPY.columns.required, COLLECTION_COPY.columns.sentence]) {
+      for (const name of ["name", "kind", COLLECTION_COPY.columns.required, COLLECTION_COPY.columns.open, COLLECTION_COPY.columns.sentence]) {
         const heading = element(document, "th", name); heading.scope = "col"; headRow.append(heading);
       }
       head.append(headRow);
@@ -145,17 +150,44 @@ export default {
         }
         kind.value = initial.type;
         const kindHelp = element(document, "p", kindLabel(initial));
-        kind.addEventListener("change", () => { draft[field] = normalizeShapeForType(draft[field], kind.value, collectionNames(files)); kindHelp.textContent = kindLabel(draft[field]); validateDraft(); });
+        kind.addEventListener("change", () => {
+          draft[field] = normalizeShapeForType(draft[field], kind.value, collectionNames(files));
+          kindHelp.textContent = kindLabel(draft[field]); syncOpen(); validateDraft();
+        });
         kindCell.append(kind, kindHelp);
         const requiredCell = element(document, "td");
-        const required = element(document, "input"); required.type = "checkbox"; required.checked = initial.required === true; required.setAttribute("aria-label", `${field} ${COLLECTION_COPY.columns.required}`);
-        required.addEventListener("change", () => { if (required.checked) draft[field].required = true; else delete draft[field].required; validateDraft(); });
+        const required = element(document, "input"); required.type = "checkbox"; required.checked = initial.required === true; required.dataset.describeRequired = field; required.setAttribute("aria-label", `${field} ${COLLECTION_COPY.columns.required}`);
+        required.addEventListener("change", () => { if (required.checked) draft[field].required = true; else delete draft[field].required; syncOpen(); validateDraft(); });
         requiredCell.append(required);
+        const openCell = element(document, "td");
+        const open = element(document, "input"); open.type = "checkbox"; open.checked = initial.open === true;
+        open.dataset.describeOpen = field;
+        open.setAttribute("aria-label", `${field} ${COLLECTION_COPY.columns.open}`);
+        const openHelp = element(document, "p", "", "opengdd-author-form-help"); openHelp.dataset.openBlocked = field;
+        open.addEventListener("change", () => {
+          if (open.checked) { draft[field].open = true; delete draft[field].required; required.checked = false; }
+          else delete draft[field].open;
+          syncOpen(); validateDraft();
+        });
+        const syncOpen = () => {
+          const numeric = ["number", "integer"].includes(draft[field].type);
+          open.checked = draft[field].open === true;
+          open.disabled = !numeric || draft[field].required === true;
+          required.disabled = draft[field].open === true;
+          // Only the required conflict is spelled out in the row; a text or
+          // link field simply cannot be open, so its reason stays a tooltip
+          // instead of repeating one sentence down the whole table.
+          openHelp.textContent = draft[field].required === true && numeric ? COLLECTION_COPY.openRequiredBlocked : "";
+          openHelp.hidden = !openHelp.textContent;
+          open.title = !numeric ? COLLECTION_COPY.openNumbersOnly
+            : draft[field].required === true ? COLLECTION_COPY.openRequiredBlocked : "";
+        };
+        openCell.append(open, openHelp); syncOpen();
         const sentenceCell = element(document, "td");
         const sentence = element(document, "input"); sentence.type = "text"; sentence.value = initial.description ?? ""; sentence.placeholder = COLLECTION_COPY.noSentence;
         sentence.addEventListener("input", () => { if (sentence.value) draft[field].description = sentence.value; else delete draft[field].description; validateDraft(); });
         sentenceCell.append(sentence);
-        row.append(name, kindCell, requiredCell, sentenceCell);
+        row.append(name, kindCell, requiredCell, openCell, sentenceCell);
         tbody.append(row);
       }
       table.append(head, tbody);
@@ -199,7 +231,7 @@ export default {
 
     async function writeShape(collection, field, shape, error, parentPath = [], reset) {
       const files = packageFiles(context);
-      const preliminary = schemaShapeError(shape, collectionNames(files));
+      const preliminary = schemaShapeError(shape, collectionNames(files), parentPath.length === 0);
       if (preliminary) { error.textContent = preliminary; reset?.(); return false; }
       const path = `collections/${collection}/_collection.json`;
       const shapePointer = ["record", ...parentPath.flatMap(key => [key, "of"]), field];
@@ -345,13 +377,29 @@ export default {
             () => { kind.value = shape.type; });
         });
         kindCell.append(kind);
-        const requiredCell = element(document, "td"); const required = element(document, "input"); required.type = "checkbox"; required.checked = shape.required === true;
+        const requiredCell = element(document, "td"); const required = element(document, "input"); required.type = "checkbox"; required.checked = shape.required === true; required.dataset.fieldRequired = field;
         required.setAttribute("aria-label", `${field} ${COLLECTION_COPY.columns.required}`);
+        required.disabled = shape.open === true;
         required.addEventListener("change", async () => {
           if (required.checked && shape.when) { required.checked = false; error.textContent = COLLECTION_COPY.exclusive; return; }
           const next = { ...shape }; if (required.checked) next.required = true; else delete next.required;
           await writeShape(collection, field, next, error, parentPath, () => { required.checked = shape.required === true; });
         }); requiredCell.append(required);
+        const openCell = element(document, "td");
+        const open = element(document, "input"); open.type = "checkbox"; open.checked = shape.open === true;
+        open.dataset.fieldOpen = field;
+        open.setAttribute("aria-label", `${field} ${COLLECTION_COPY.columns.open}`);
+        const canOpen = parentPath.length === 0 && ["number", "integer"].includes(shape.type);
+        open.disabled = !canOpen || shape.required === true;
+        open.title = !canOpen ? COLLECTION_COPY.openNumbersOnly : shape.required === true ? COLLECTION_COPY.openRequiredBlocked : "";
+        open.addEventListener("change", async () => {
+          const next = { ...shape };
+          if (open.checked) { next.open = true; delete next.required; }
+          else delete next.open;
+          await writeShape(collection, field, next, error, parentPath, () => { open.checked = shape.open === true; });
+        });
+        openCell.append(open);
+        if (shape.required === true && canOpen) openCell.append(element(document, "p", COLLECTION_COPY.openRequiredBlocked, "opengdd-author-form-help"));
         const uniqueCell = element(document, "td"); const unique = element(document, "input"); unique.type = "checkbox"; unique.checked = shape.unique === true; unique.setAttribute("aria-label", `${field} ${COLLECTION_COPY.columns.unique}`);
         unique.addEventListener("change", async () => { const next = { ...shape }; if (unique.checked) next.unique = true; else delete next.unique;
           await writeShape(collection, field, next, error, parentPath, () => { unique.checked = shape.unique === true; }); }); uniqueCell.append(unique);
@@ -381,11 +429,11 @@ export default {
           stageRemoveField(transaction, files, collection, field, { removeMirrors: mirrors.length > 0, parentPath });
           try { await validatedCommit(transaction); refreshPackage(); } catch (failure) { error.textContent = failure.message; }
         }, undefined, error); actionCell.append(remove, error);
-        row.append(nameCell, kindCell, requiredCell, uniqueCell, choicesCell, patternCell, whenCell, sentenceCell, actionCell);
+        row.append(nameCell, kindCell, requiredCell, openCell, uniqueCell, choicesCell, patternCell, whenCell, sentenceCell, actionCell);
         tbody.append(row);
         if (shape.type === "link" || shape.type === "list") {
           const extras = element(document, "tr"); extras.dataset.fieldExtras = field; extras.dataset.fieldDepth = String(depth);
-          const extrasCell = element(document, "td"); extrasCell.colSpan = 9;
+          const extrasCell = element(document, "td"); extrasCell.colSpan = 10;
           const summary = shape.type === "link" ? linkSummary(shape)
             : `${COLLECTION_COPY.eachLineHolds} ${Object.keys(shape.of ?? {}).join(" · ") || "no fields yet"}`;
           const editExtras = actionButton(summary, anchor => shape.type === "link"
@@ -412,7 +460,7 @@ export default {
       section.append(element(document, "h3", COLLECTION_COPY.fields));
       const table = element(document, "table"); table.dataset.fieldsTable = "";
       const thead = element(document, "thead"); const row = element(document, "tr");
-      for (const [headingText, label] of [["name", "name"], ["kind", "kind"], ["required", COLLECTION_COPY.columns.required], ["unique", COLLECTION_COPY.columns.unique],
+      for (const [headingText, label] of [["name", "name"], ["kind", "kind"], ["required", COLLECTION_COPY.columns.required], ["open", COLLECTION_COPY.columns.open], ["unique", COLLECTION_COPY.columns.unique],
         ["choices", COLLECTION_COPY.columns.choices], ["kebab", COLLECTION_COPY.columns.pattern], ["only when", COLLECTION_COPY.columns.when], ["sentence", COLLECTION_COPY.columns.sentence]]) {
         const heading = element(document, "th", headingText); heading.scope = "col"; heading.title = label; heading.setAttribute("aria-label", label); row.append(heading);
       }
@@ -540,6 +588,10 @@ export default {
           })
         }),
         field: (id, key, shape) => descriptorFor(collection, id, key, shape),
+        errors: id => {
+          const run = context.services.validation.forFile(`collections/${collection}/${id}.json`);
+          return [...run.findings, ...run.advice].map(findingMessage).join(" ");
+        },
         confirmRemove: detail => confirmRemove(body.querySelector?.(`[data-record-row="${detail.id}"] button`) ?? add, detail),
         copy: COLLECTION_COPY
       });

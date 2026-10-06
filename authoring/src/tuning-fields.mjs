@@ -1,3 +1,5 @@
+import { readTuningEnvironments } from "opengdd-validation";
+import { createFileMapHost } from "opengdd-file-map-host";
 import { CONTRACT_SAME_NUMBER_ACCEPTED } from "./contracts.mjs";
 import { CONTRACT_COPY } from "./copy/contract-copy.mjs";
 import { INSPECTOR_COPY } from "./copy/inspector-copy.mjs";
@@ -71,7 +73,7 @@ const ruleNames = ast => {
   return found;
 };
 
-export function tuningRuleState(source, values, { parseRule, evaluateRule }) {
+export function tuningRuleState(source, values, { parseRule, evaluateRule }, options = {}) {
   let ast;
   try {
     ast = parseRule(source);
@@ -79,6 +81,53 @@ export function tuningRuleState(source, values, { parseRule, evaluateRule }) {
     return { error, keys: [], verdict: INSPECTOR_COPY.tuningRuleInvalid };
   }
   const keys = ruleNames(ast);
+  if (options.conflicts?.some(conflict => keys.includes(conflict.key))) {
+    return { ast, keys, conflict: true, severity: "error", verdict: INSPECTOR_COPY.tuningRulePinConflict,
+      check: INSPECTOR_COPY.tuningRulePinConflict };
+  }
+  if (options.environments) {
+    const pinError = options.pinDiagnostics?.find(finding => finding.message.includes(`rule ${JSON.stringify(
+      options.validRules.find(entry => entry.source === source)?.name)}`));
+    if (pinError) return { ast, keys, error: new Error(pinError.message), severity: "error",
+      verdict: INSPECTOR_COPY.tuningRuleInvalid, check: INSPECTOR_COPY.tuningRuleInvalid };
+    let fails = false;
+    for (const environment of options.environments) {
+      if (!keys.every(key => environment.lookup.has(key))) continue;
+      try {
+        if (!evaluateRule(ast, environment.lookup)) fails = true;
+      } catch (error) {
+        return { ast, keys, error, severity: "error", verdict: INSPECTOR_COPY.tuningRuleInvalid,
+          check: INSPECTOR_COPY.tuningRuleInvalid };
+      }
+    }
+    if (fails) return { ast, keys, holds: false, verdict: INSPECTOR_COPY.tuningRuleFails,
+      check: INSPECTOR_COPY.tuningRuleChecked };
+  }
+  if (options.openKeys) {
+    const guesses = options.guesses instanceof Map ? options.guesses : new Map();
+    const unknown = keys.find(key => !values.has(key) && !options.openKeys.has(key));
+    if (unknown) return { ast, keys, error: new Error(`unknown number ${unknown}`), verdict: INSPECTOR_COPY.tuningRuleInvalid,
+      check: INSPECTOR_COPY.tuningRuleInvalid };
+    if (keys.some(key => options.openKeys.has(key) && !guesses.has(key))) {
+      return { ast, keys, verdict: INSPECTOR_COPY.tuningRuleWaits, check: INSPECTOR_COPY.tuningRuleWaits };
+    }
+    const usesGuesses = keys.some(key => options.openKeys.has(key));
+    const lookup = usesGuesses ? new Map([...values, ...guesses]) : values;
+    try {
+      const holds = evaluateRule(ast, lookup);
+      // The verdict says whether the rule holds (the rule lists show it); the
+      // check line says what it was checked against (the Rule inspector header).
+      const verdict = holds ? INSPECTOR_COPY.tuningRuleHolds : INSPECTOR_COPY.tuningRuleFails;
+      return { ast, keys, holds, guessFailed: usesGuesses && !holds,
+        verdict: usesGuesses ? INSPECTOR_COPY.tuningRuleGuessVerdict(verdict) : verdict,
+        check: usesGuesses ? INSPECTOR_COPY.tuningRuleCheckedGuesses : INSPECTOR_COPY.tuningRuleChecked };
+    } catch (error) {
+      const guessedArithmetic = error.kind === "arithmetic"
+        && [...(error.dependencies ?? [])].some(key => options.openKeys.has(key) && guesses.has(key));
+      const verdict = guessedArithmetic ? INSPECTOR_COPY.tuningRuleGuessesUncomputable : INSPECTOR_COPY.tuningRuleInvalid;
+      return { ast, error, keys, severity: guessedArithmetic ? "warning" : "error", verdict, check: verdict };
+    }
+  }
   try {
     return { ast, keys, verdict: evaluateRule(ast, values)
       ? INSPECTOR_COPY.tuningRuleHolds : INSPECTOR_COPY.tuningRuleFails };
@@ -89,21 +138,29 @@ export function tuningRuleState(source, values, { parseRule, evaluateRule }) {
 
 export function tuningKeys(files) {
   const tuning = parseJson(readFiles(files).get("tuning.json"));
-  return Object.keys(plainObject(tuning?.values) ? tuning.values : {});
+  return [...new Set([
+    ...Object.keys(plainObject(tuning?.values) ? tuning.values : {}),
+    ...Object.keys(plainObject(tuning?.open) ? tuning.open : {})
+  ])];
 }
 
 export function rangedTuningKeys(files) {
   const tuning = parseJson(readFiles(files).get("tuning.json"));
   const values = plainObject(tuning?.values) ? tuning.values : {};
+  const open = plainObject(tuning?.open) ? tuning.open : {};
   const ranges = plainObject(tuning?.ranges) ? tuning.ranges : {};
-  return Object.keys(values).filter(key => Array.isArray(ranges[key]) && ranges[key].length === 2);
+  return [...Object.keys(values).filter(key => Array.isArray(ranges[key]) && ranges[key].length === 2), ...Object.keys(open)];
+}
+
+export function ruleNumberState(files) {
+  return readTuningEnvironments(createFileMapHost(readFiles(files), { bytes: false }), "/package");
 }
 
 export function tuningValueDependencies(context, key, ruleTools) {
   const tuning = parseJson(context.package.read("tuning.json"));
-  const values = new Map(Object.entries(plainObject(tuning?.values) ? tuning.values : {}));
+  const numbers = ruleNumberState(packageFiles(context.package), ruleTools);
   const rules = Object.entries(plainObject(tuning?.rules) ? tuning.rules : {}).flatMap(([name, source]) => {
-    const state = tuningRuleState(source, values, ruleTools);
+    const state = tuningRuleState(source, numbers.decided, ruleTools, numbers);
     return state.keys.includes(key) ? [{ name, source, ...state }] : [];
   });
   const personalization = parseJson(context.package.read("personalization.json"));
@@ -123,24 +180,36 @@ export function tuningValueDependencies(context, key, ruleTools) {
 }
 
 const valueRangeError = (context, entity, role, candidate) => {
+  if (role === "value" && entity.open && candidate === null) return "";
   if (typeof candidate !== "number" || !Number.isFinite(candidate)) return INSPECTOR_COPY.tuningFiniteNumber;
   const tuning = parseJson(context.package.read("tuning.json"));
-  const value = role === "value" ? candidate : tuning?.values?.[entity.id];
+  const value = role === "value" ? candidate : tuning?.[entity.table]?.[entity.id];
   const range = tuning?.ranges?.[entity.id];
   if (!Array.isArray(range) || range.length !== 2) return "";
   const minimum = role === "minimum" ? candidate : range[0];
   const maximum = role === "maximum" ? candidate : range[1];
   if (minimum > maximum) return INSPECTOR_COPY.tuningRangeOrder(minimum, maximum);
-  if (value < minimum || value > maximum) return INSPECTOR_COPY.tuningValueOutside(value, minimum, maximum);
+  if (typeof value === "number" && Number.isFinite(value) && (value < minimum || value > maximum)) {
+    return INSPECTOR_COPY.tuningValueOutside(value, minimum, maximum);
+  }
   return "";
 };
 
 export function tuningValueFields(context, entity) {
   const fields = [{
-    key: "value", label: INSPECTOR_COPY.tuningValue, help: INSPECTOR_COPY.tuningValueHelp,
-    type: "number", required: true, binding: { file: "tuning.json", pointer: pointer(["values", entity.id]) },
-    labels: { change: INSPECTOR_COPY.changeTuningValue },
-    format: value => numberSpelling(context.package.read("tuning.json"), pointer(["values", entity.id]), value),
+    key: "value", label: entity.open ? INSPECTOR_COPY.tuningGuess : INSPECTOR_COPY.tuningValue,
+    help: entity.open ? INSPECTOR_COPY.tuningGuessHelp : INSPECTOR_COPY.tuningValueHelp,
+    placeholder: entity.open ? INSPECTOR_COPY.tuningGuessPlaceholder : undefined,
+    type: "number", required: !entity.open, binding: { file: "tuning.json", pointer: pointer([entity.table, entity.id]) },
+    validateTransaction: true,
+    labels: { change: entity.open ? INSPECTOR_COPY.changeTuningGuess : INSPECTOR_COPY.changeTuningValue },
+    parse: entity.open ? source => {
+      if (source === "") return null;
+      const value = Number(source);
+      if (!Number.isFinite(value)) throw new Error(INSPECTOR_COPY.tuningFiniteNumber);
+      return value;
+    } : undefined,
+    format: value => numberSpelling(context.package.read("tuning.json"), pointer([entity.table, entity.id]), value),
     validate: value => valueRangeError(context, entity, "value", value)
   }];
   if (!Array.isArray(entity.bounds) || entity.bounds.length !== 2) return fields;
@@ -148,6 +217,7 @@ export function tuningValueFields(context, entity) {
     key: "range-minimum", row: "range", rowLabel: INSPECTOR_COPY.tuningRange,
     label: INSPECTOR_COPY.tuningMinimum, ariaLabel: INSPECTOR_COPY.tuningMinimum,
     help: INSPECTOR_COPY.tuningMinimumHelp, type: "number", required: true,
+    validateTransaction: true,
     binding: { file: "tuning.json", pointer: pointer(["ranges", entity.id, 0]) },
     labels: { change: INSPECTOR_COPY.changeTuningRange },
     format: value => numberSpelling(context.package.read("tuning.json"), pointer(["ranges", entity.id, 0]), value),
@@ -156,6 +226,7 @@ export function tuningValueFields(context, entity) {
     key: "range-maximum", row: "range", rowLabel: INSPECTOR_COPY.tuningRange,
     label: INSPECTOR_COPY.tuningMaximum, ariaLabel: INSPECTOR_COPY.tuningMaximum,
     help: INSPECTOR_COPY.tuningMaximumHelp, type: "number", required: true,
+    validateTransaction: true,
     binding: { file: "tuning.json", pointer: pointer(["ranges", entity.id, 1]) },
     labels: { change: INSPECTOR_COPY.changeTuningRange },
     format: value => numberSpelling(context.package.read("tuning.json"), pointer(["ranges", entity.id, 1]), value),
@@ -173,8 +244,34 @@ export async function applyTuningRangeChange(context, key, rangePlanner) {
     if (operation.type === "insert") json.insert(operation.pointer, operation.keyOrIndex, operation.value, operation.options);
     else if (operation.type === "remove") json.remove(operation.pointer);
   }
+  try { await context.internal.validatePackage(transaction); }
+  catch (error) { transaction.abort(); throw error; }
   await transaction.commit();
   return { applied: true, remove: change.remove };
+}
+
+export function stageTuningKindChange(transaction, tuning, key, { open }) {
+  const from = open ? "open" : "values";
+  const to = open ? "values" : "open";
+  const value = tuning?.[from]?.[key];
+  if (open && !(typeof value === "number" && Number.isFinite(value))) {
+    throw new Error(INSPECTOR_COPY.decideTuningNumberHelp);
+  }
+  const json = transaction.json("tuning.json");
+  if (Object.keys(tuning[from]).length === 1) json.remove(pointer([from]));
+  else json.remove(pointer([from, key]));
+  if (plainObject(tuning[to])) json.insert(pointer([to]), key, value);
+  else json.insert("", to, { [key]: value }, { recordSpacing: true });
+}
+
+export async function applyTuningKindChange(context, entity) {
+  const tuning = parseJson(context.package.read("tuning.json"));
+  const transaction = context.internal.begin(entity.open
+    ? INSPECTOR_COPY.decideTuningNumberUndo : INSPECTOR_COPY.makeTuningNumberOpenUndo);
+  stageTuningKindChange(transaction, tuning, entity.id, { open: entity.open });
+  try { await context.internal.validatePackage(transaction); }
+  catch (error) { transaction.abort(); throw error; }
+  await transaction.commit();
 }
 
 function rangeSection(context, entity, rangePlanner) {
@@ -337,17 +434,17 @@ const decodeJsonString = source => {
 
 const pointerToken = source => source.replaceAll("~1", "/").replaceAll("~0", "~");
 
-function tuningValueSubject(message) {
-  let match = /^(?:values|ranges)\s+key\s+("(?:\\.|[^"\\])*")/u.exec(message);
+export function tuningValueSubject(message) {
+  let match = /^(?:values|open|ranges)\s+key\s+("(?:\\.|[^"\\])*")/u.exec(message);
   if (match) return decodeJsonString(match[1]);
-  match = /^(?:values|ranges)\.([A-Za-z0-9_.-]+)(?=$|[\s"'`:;=,\[\](){}])/u.exec(message);
+  match = /^(?:values|open|ranges)\.([A-Za-z0-9_.-]+)(?=$|[\s"'`:;=,\[\](){}])/u.exec(message);
   if (match) return match[1];
-  match = /^#\/(?:values|ranges)\/([^/\s]+)/u.exec(message);
+  match = /^#\/(?:values|open|ranges)\/([^/\s]+)/u.exec(message);
   return match ? pointerToken(match[1]) : undefined;
 }
 
-function tuningRuleSubject(message) {
-  let match = /^rule(?:\s+name)?\s+("(?:\\.|[^"\\])*")/u.exec(message);
+export function tuningRuleSubject(message) {
+  let match = /^(?:guesses break\s+)?rule(?:\s+name)?\s+("(?:\\.|[^"\\])*")/u.exec(message);
   if (match) return decodeJsonString(match[1]);
   match = /^#\/rules\/([^/\s]+)/u.exec(message);
   return match ? pointerToken(match[1]) : undefined;
@@ -375,6 +472,7 @@ export function routeTuningValueFinding(finding, entity) {
     if (message.includes(`/ranges/${escaped}/1`)) return "range-maximum";
     if (message.includes("/ranges/")) return "range-minimum";
     if (message.includes("/values/")) return "value";
+    if (message.includes("/open/")) return "value";
   }
   return subject === entity.id ? "header" : null;
 }
@@ -399,9 +497,19 @@ export function tuningRuleFields(_context, entity, ruleTools) {
 
 export function tuningRuleSections(context, entity) {
   const rows = entity.ruleState.keys.length ? [entityChips(context, entity.ruleState.keys.map(key => ({
-    name: key, kind: INSPECTOR_COPY.tuningValueKind, detail: String(entity.values.get(key)),
-    selection: (() => { let range; try { range = pointerRange(context.package.read("tuning.json"), pointer(["values", key])); } catch {}
-      return { kind: "value", name: key, file: "tuning.json", range }; })()
+    name: key,
+    kind: entity.numbers?.declaredOpen?.has(key) ? INSPECTOR_COPY.tuningOpenNumberKind : INSPECTOR_COPY.tuningValueKind,
+    detail: entity.numbers?.declaredOpen?.has(key)
+      ? !entity.numbers.openKeys.has(key) && entity.numbers.decided.has(key) ? `decided ${entity.numbers.decided.get(key)}`
+        : INSPECTOR_COPY.tuningGuessDetail(entity.numbers.guesses.has(key) ? entity.numbers.guesses.get(key) : null)
+      : String(entity.values.get(key)),
+    selection: (() => {
+      const record = /^collections\.([^.]+)\.([^.]+)\.[^.]+$/u.exec(key);
+      if (record) return { kind: "collection-record", name: record[2], file: `collections/${record[1]}/${record[2]}.json` };
+      const table = entity.numbers?.declaredOpen?.has(key) ? "open" : "values";
+      let range; try { range = pointerRange(context.package.read("tuning.json"), pointer([table, key])); } catch {}
+      return { kind: "value", name: key, file: "tuning.json", range };
+    })()
   })))] : [];
   const section = referenceGroup(context, { label: INSPECTOR_COPY.tuningRuleReads,
     help: entity.ruleState.keys.length ? INSPECTOR_COPY.tuningRuleReadsHelp : INSPECTOR_COPY.tuningRuleReadsNone, rows });
@@ -414,7 +522,7 @@ export function routeTuningRuleFinding(finding, entity) {
   const message = String(finding.message ?? "");
   const subject = tuningRuleSubject(message);
   if (subject !== undefined && subject !== entity.id) return false;
-  if (subject === entity.id && ["TUNING_RULE_INVALID", "TUNING_RULE_FAILED"].includes(finding.code)) return "line";
+  if (subject === entity.id && ["TUNING_RULE_INVALID", "TUNING_RULE_FAILED", "TUNING_RULE_GUESS_FAILED"].includes(finding.code)) return "line";
   return subject === entity.id ? "header" : null;
 }
 
@@ -425,9 +533,9 @@ export function tuningMechanismFields() {
 function tuningRuleList(context, tuning, text, ruleTools) {
   const document = context.document;
   const entries = Object.entries(plainObject(tuning?.rules) ? tuning.rules : {});
-  const values = new Map(Object.entries(plainObject(tuning?.values) ? tuning.values : {}));
+  const numbers = ruleNumberState(packageFiles(context.package), ruleTools);
   const rows = entries.length ? [entityChips(context, entries.map(([name, source]) => {
-    const state = tuningRuleState(source, values, ruleTools);
+    const state = tuningRuleState(source, numbers.decided, ruleTools, numbers);
     let range;
     try { range = pointerRange(text, pointer(["rules", name])); } catch {}
     return { name, kind: INSPECTOR_COPY.tuningRuleKind, detail: state.verdict,
@@ -443,13 +551,17 @@ export function tuningMechanismSections(context, _entity, ruleTools) {
   const text = context.package.read("tuning.json");
   const tuning = parseJson(text);
   const values = plainObject(tuning?.values) ? Object.entries(tuning.values) : [];
+  const open = plainObject(tuning?.open) ? Object.entries(tuning.open) : [];
   const ranges = plainObject(tuning?.ranges) ? tuning.ranges : {};
-  const rows = values.length ? [entityChips(context, values.map(([key, value]) => {
+  const numbers = [...values.map(([key, value]) => ({ key, value, table: "values", open: false })),
+    ...open.map(([key, value]) => ({ key, value, table: "open", open: true }))];
+  const rows = numbers.length ? [entityChips(context, numbers.map(({ key, value, table, open: isOpen }) => {
     let range;
-    try { range = pointerRange(text, pointer(["values", key])); } catch {}
+    try { range = pointerRange(text, pointer([table, key])); } catch {}
     const bounds = Array.isArray(ranges[key]) && ranges[key].length === 2 ? ranges[key] : undefined;
-    return { name: key, kind: INSPECTOR_COPY.tuningValueKind,
-      detail: INSPECTOR_COPY.tuningValueDetail(value, bounds), dataset: { tuningValue: key },
+    return { name: key, kind: isOpen ? INSPECTOR_COPY.tuningOpenNumberKind : INSPECTOR_COPY.tuningValueKind,
+      detail: isOpen ? INSPECTOR_COPY.tuningGuessDetail(value)
+        : INSPECTOR_COPY.tuningValueDetail(value, bounds), dataset: { tuningValue: key },
       selection: { kind: "value", name: key, file: "tuning.json", range } };
   }))] : [];
   const valueList = referenceGroup(context, { label: INSPECTOR_COPY.tuningValues,

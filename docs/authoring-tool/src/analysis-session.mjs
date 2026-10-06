@@ -22,6 +22,7 @@ export function createAnalysisSession({
   schemas,
   revisionFor = () => undefined,
   folders = () => [],
+  review = () => false,
   Worker,
   analysisDelay = 150,
   validationDelay = 400
@@ -203,13 +204,13 @@ export function createAnalysisSession({
     if (worker) {
       if (postedSchemas !== available && !postToWorker({ type: "schemas", schemas: available })) return;
       postedSchemas = available;
-      if (sendPackageToWorker()) postToWorker({ type: "validate", revision: version });
+      if (sendPackageToWorker()) postToWorker({ type: "validate", revision: version, review: review() === true });
       return;
     }
     try {
       const sha256 = await createPackageSha256(files);
       const host = withExplicitFolders(createFileMapHost(files, { schemas: available, bytes: false, sha256 }), folders());
-      const run = validatePackage(host, "/package");
+      const run = validatePackage(host, "/package", { review: review() === true });
       if (version === validationRevision) publish({ type: "validation", validation: { status: "ready", run } });
     } catch (error) {
       if (version === validationRevision) publish({ type: "validation", validation: { status: "crashed", run: null, message: error.message } });

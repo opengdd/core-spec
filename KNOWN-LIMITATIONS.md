@@ -1,37 +1,43 @@
-# OpenGDD v0.8 — known limitations
+# OpenGDD v0.9 — known limitations
 
 
-This page describes the OpenGDD v0.8 working draft. A package can express
+This page describes the OpenGDD v0.9 working draft. A package can express
 things that a tool cannot always find or check. Certification is experimental
-in v0.8, and nothing below grants or withholds a certification outcome.
+in this version. Nothing on this page changes a certification result.
 
 ## Deliberately out of scope
 
 The current OpenGDD core does not define:
 
 - multiplayer session, delivery, networking, or private-view behavior;
-- rendered-capture checks for 3D renderers. A `web-3d` package validates, but
-  no 3D capture profile says how to sample rendered output;
+- checks of rendered 3D images. A `web-3d` package can pass validation, but
+  the format does not say how to capture and measure rendered 3D images;
 - binary asset pipelines;
-- audio direction. The transmission experiment has not run, so this version
-  makes no audio-direction claims;
+- audio direction (see Audio below);
 - localization structure;
-- monetization design beyond the optional commerce split, including IAP
-  design;
+- monetization design, including in-app purchases. The format has only the
+  optional `commerce` field in the manifest, which records the designer's
+  share and the builder's share;
 - a registry API; or
-- target families beyond web delivery (`web-2d` and `web-3d`).
+- target platforms other than `web-2d` and `web-3d`.
 
-`platform` names the delivery target and the state space the designer is
-responsible for. It does not name the rendering technique. A planar game is
-`web-2d` even when a builder draws it with a perspective 3D renderer. `web-3d`
-is for game state that needs three dimensions. The renderer is the builder's
-fact and belongs in the build record.
+`platform` says where the game runs and whether its game state needs two or
+three dimensions. It does not name the rendering technique. A game with flat
+game state is `web-2d` even when a builder draws it with a perspective 3D
+renderer. `web-3d`
+is for game state that needs three dimensions. The builder chooses the
+rendering technique unless the package states otherwise. Every requirement
+of the package must still hold with the chosen technique. When a technique
+changes how the game plays, the package must settle that decision. §2a of
+the OpenGDD specification lists the five things that decide whether a
+difference changes how the game plays. The build record does not record the
+rendering technique.
 
 Real host-filesystem, save-byte, achievement, and recording integration is
 also not standardized for the current web targets. Simulated versions inside
 the game's fiction are ordinary game state.
 
-## In-scope boundaries that remain open
+## Parts in scope that the format does not define yet
 
 A limit here does not mean a game is unbuildable. It means the package still
 needs its own prose or tests that independent tools cannot infer from OpenGDD
@@ -44,40 +50,43 @@ core has no shared model for session membership, network authority, delivery,
 reconciliation, or private-view non-leakage. Those facilities need a future
 profile.
 
-### Authored-puzzle solver interfaces
+### Puzzle-solving tools
 
-The working draft defines the `parallel-string-layers-1` grid layout. It can
-carry finite domains, replays, and general tests. It does not define a shared
-solver adapter or predicate vocabulary. Until one exists, the package defines
-its own command alphabet and predicates.
+The working draft defines the `parallel-string-layers-1` grid layout. A
+package can describe a puzzle and require that the puzzle has a solution.
+Independent tools still need shared rules for receiving the puzzle and
+reporting a solution. Until such rules exist, each package defines its own
+commands and conditions.
 
-### Open-ended rule mutation
+### Rules that change without a fixed list
 
-Finite, author-declared rules can be activated or replaced through Fixed
-prose, declared ruleset state, and tests. Runtime creation of vocabulary or
-behavior outside an author-declared finite set is not standardized.
+A package can activate or replace rules when the designer has declared every
+such rule. The package does this through Fixed prose, declared ruleset state,
+and tests. The format does not standardize a game that creates new words or
+new behavior during play, outside the declared list of rules.
 
 ### What a player knows or feels
 
-Claims about knowledge, perception, belief, discovery, taste, or narrative
-quality are not state predicates. A package can test operational facts such
-as reachability, causal history, elimination necessity, or batch-validation
-behavior. It cannot turn those facts into proof of a player's interpretation.
+A test of game state cannot prove what a player knows, understands or
+enjoys. A test can show which places can be reached and which events
+happened. Those observations do not prove how a player understands the game.
 
-### Simulation below an observable envelope
+### Simulation detail smaller than the package specifies
 
-You can specify large-scale outcomes without fixing implementation grain.
+A package can specify large-scale results without specifying the size of
+simulation cells or steps.
 Below a declared feature width, or between declared observation times, visible
 outcomes may depend on cell size, neighborhood, update order, or another
-architectural choice. OpenGDD can state a bounded observable requirement and
-the test that checks it. v0.8 defines no general material-simulation profile,
-and does not standardize every grain or intermediate state.
+architectural choice. OpenGDD can state a limited requirement on what is
+observed, and the test that checks the requirement. This version defines no
+general rules for material simulation. It does not standardize every cell
+size or intermediate state.
 
 ### Personalized presentation
 
-A player may choose part of the presentation, such as colours. The direction
+A player may choose part of the presentation, such as colors. The direction
 file does not define how those choices combine with the package's palette and
-colour promises. Exact visual properties have an audit path only
+color promises. An exact visual property can be audited only
 where a test and machine-checkable evidence show the result. Prose direction
 remains open to interpretation.
 
@@ -85,15 +94,17 @@ remains open to interpretation.
 
 Text, named palettes, and annotated reference imagery can communicate separate
 features such as shape, stitches, edge treatments, and shadows. Continuous
-qualities such as fiber, sheen, and deformation remain harder to transmit
-consistently. The direction format has claims, annotated references,
-colour and timing promises, and an experimental judged-evidence shape. It has
-no general material-rendering solution.
+qualities such as fiber, sheen, and deformation are harder to describe so
+that different builders produce the same result. The direction format has pillars, moods, anti-references,
+must-keep entries, annotated references, and color, contrast and timing
+promises. It has no general material-rendering solution. Judging a build
+against the direction belongs to the audit, which is part of the experimental
+certification protocol.
 
-## Authoring lessons the format cannot absorb
+## What the format cannot correct in a package
 
-OpenGDD cannot compensate for a package that leaves its own rules
-contradictory or its evidence incomplete:
+OpenGDD cannot correct a package that has contradictory rules or incomplete
+evidence:
 
 1. **Specify outcomes, not architecture.** Require the observable result and
    its evidence. Leave renderer structure and equivalent implementation
@@ -103,32 +114,34 @@ contradictory or its evidence incomplete:
 3. **Do not create a second authority channel.** Local fields must not
    silently redefine Fixed, Delegated, or Personalization authority.
 4. **Do not restate tuning values in normative prose.** Prose binds to keys
-   and formulas. Literal examples are non-normative or generated from
-   authoritative data.
+   and formulas. A number in an example carries no authority. A reader
+   decides whether a sentence restates a rule.
 
-Schema validity is only the first gate. Publication still requires semantic
-review, reachable test setups, reference closure, successful replay, and
-honest disclosure of claims the available evidence cannot support.
+A package that passes the schema checks is not proven complete. Before
+sharing a package, its author reviews the rules, confirms that every
+reference resolves, and confirms that each test can be set up and repeated.
+The author also states which claims the available evidence does not support.
 
 ## Art direction
 
-Art direction is optional in the v0.8 working draft. When it is used, one
+Art direction is optional in the current working draft. When it is used, one
 `direction.json` file at the package root carries palettes, pillars, mood,
 anti-references, and `must_keep` requirements. It also carries measured
 `colors`, `contrast`, and `timing` promises, and the package's `viewing`
-conditions. Colour promises use CIEDE2000 distance, contrast promises use the
-WCAG 2.1 contrast ratio, and timing promises cite a value in `tuning.json`.
+conditions. Color promises use CIEDE2000 distance, contrast promises use the
+WCAG 2.1 contrast ratio, and timing promises cite a number in the
+`values` table of `tuning.json`.
 The format fixes those metrics. An entry cannot choose its own. Every
 `colors`, `contrast`, and `timing` entry must be covered by at least one
 acceptance test through its `direction_claims` field.
 
-Palette and shape language transmit more exactly than continuous material
-feel. Not every exact visual surface has a machine-checkable evidence path. An
+Different builders reproduce a palette and shapes more exactly than a
+continuous material quality. Not every exact visual surface has a machine-checkable evidence path. An
 exact texture with no applicable test stays a prose requirement, and package
 validation cannot decide whether it is met.
 
 ## Audio
 
-Audio direction remains draft material in v0.8. It can be described in prose,
-but this version makes no audio-direction claims and defines no audio judgment
-protocol.
+Audio direction remains draft material in this version. A package can
+describe audio in prose. OpenGDD makes no claims about audio direction and
+defines no method to judge audio.

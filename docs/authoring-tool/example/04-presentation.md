@@ -12,7 +12,7 @@
 - The cells are separated by drawn grid lines.
 - An empty cell and an occupied cell are unmistakable at a glance.
 - The cross mark and the ring mark are distinguishable by shape
-  alone; colour never carries player identity.
+  alone; color never carries player identity.
 - While a game is in progress, the identity of the active player is
   visible at all times.
 - A win names the winning mark and visibly indicates every completed

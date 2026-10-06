@@ -1,4 +1,4 @@
-// Read-only inspector groups: a labelled group row, browsable source rows, and
+// Read-only inspector groups: a labeled group row, browsable source rows, and
 // entity chips carrying name and kind. Copy and DOM only, so field modules can
 // import this without the kit's lifecycle.
 import { INSPECTOR_COPY } from "./copy/inspector-copy.mjs";

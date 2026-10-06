@@ -53,12 +53,12 @@ const descriptor = {
   create(context) {
     const shape = { ...paletteShape, compact: "reflow", remove(entity) {
       const uses = paletteUses(context.package, entity.id);
-      const colourAddresses = entity.entries.flatMap(entry => plainObject(entry)
+      const colorAddresses = entity.entries.flatMap(entry => plainObject(entry)
         ? Object.keys(entry).map(name => `${entity.address}.${name}`) : []);
       const expectedFindings = [
         { code: "PROSE_CITATION_DANGLING", address: entity.address },
         { code: "DIRECTION_MOOD_PALETTE_DANGLING", address: entity.address },
-        ...colourAddresses.flatMap(address => [
+        ...colorAddresses.flatMap(address => [
           { code: "PROSE_CITATION_DANGLING", address },
           { code: "DIRECTION_COLOR_DANGLING", address }
         ])

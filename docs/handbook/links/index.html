@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Links | OpenGDD handbook</title>
-<meta name="description" content="A link is a field that holds another record&#39;s id. It connects items in your collections, and validation reports a missing target where the link is defined. The examples …">
+<title>Links | OpenGDD Handbook</title>
+<meta name="description" content="A link is a field that holds another record&#39;s id. It connects items in your collections. If a link names a record that does not exist, validation reports it and names …">
 <link rel="canonical" href="https://opengdd.org/handbook/links/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Links | OpenGDD handbook">
-<meta property="og:description" content="A link is a field that holds another record&#39;s id. It connects items in your collections, and validation reports a missing target where the link is defined. The examples …">
+<meta property="og:title" content="Links | OpenGDD Handbook">
+<meta property="og:description" content="A link is a field that holds another record&#39;s id. It connects items in your collections. If a link names a record that does not exist, validation reports it and names …">
 <meta property="og:url" content="https://opengdd.org/handbook/links/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta property="og:image:type" content="image/png">
@@ -20,8 +20,8 @@
 <meta name="twitter:site" content="@OpenGDD">
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
-<meta name="twitter:title" content="Links | OpenGDD handbook">
-<meta name="twitter:description" content="A link is a field that holds another record&#39;s id. It connects items in your collections, and validation reports a missing target where the link is defined. The examples …">
+<meta name="twitter:title" content="Links | OpenGDD Handbook">
+<meta name="twitter:description" content="A link is a field that holds another record&#39;s id. It connects items in your collections. If a link names a record that does not exist, validation reports it and names …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -53,7 +53,7 @@
 <li><a href="/handbook/" class="toc-resource-current">Handbook</a></li>
 </ul>
 <div class="toc-group">
-<p class="toc-group-title">Start and foundations</p>
+<p class="toc-group-title">The basic parts</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
 <li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
@@ -78,12 +78,12 @@
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-color-promises/">Palette and color promises</a></li>
 <li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanics</p>
+<p class="toc-group-title">Contracts: reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -92,14 +92,14 @@
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
-<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you send it to the builder</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
 <h1>Links</h1>
 <p class="chapter-scope"><span class="scope-badge">Optional</span></p>
-<p>A <strong>link</strong> is a field that holds another record's id. It connects items in your collections, and validation reports a missing target where the link is defined. The examples below continue the technology tree from the <a href="/handbook/collections/">Collections</a> chapter.</p>
+<p>A <strong>link</strong> is a field that holds another record's id. It connects items in your collections. If a link names a record that does not exist, validation reports it and names the record and the field that hold the link. The examples below continue the technology tree from the <a href="/handbook/collections/">Collections</a> chapter.</p>
 <p><em><code>collections/technologies/_collection.json</code>, one link field</em></p>
 <pre><code class="lang-json">{
   &quot;record&quot;: {
@@ -117,7 +117,7 @@
   &quot;era_order&quot;: 2,
   &quot;requires&quot;: [&quot;fire-making&quot;]
 }</code></pre>
-<p><code>to</code> names the target collection, here the same one. <code>many: true</code> makes the field a list of ids. <code>fire-making.json</code> exists in <code>technologies/</code>, so the link resolves. <code>loops: false</code> says a technology can never require itself, directly or through a chain. Validation reports the loop if one appears. The field name <code>requires</code> is yours, and your chapters explain what requiring means in the game.</p>
+<p><code>to</code> names the target collection, here the same one. One link field points into one collection. When records need links to two kinds of target, such as units and buildings, use one field for each kind. <code>many: true</code> makes the field a list of ids. <code>fire-making.json</code> exists in <code>technologies/</code>, so the link points at a real record. <code>loops: false</code> says a technology can never require itself, directly or through a chain. Validation reports the loop if one appears. The field name <code>requires</code> is yours, and your chapters explain what requiring means in the game.</p>
 <h2 id="more-link-options">More link options<a class="heading-anchor" href="#more-link-options" aria-label="Link to this section">#</a></h2>
 <p>Add <code>required: true</code> when a record must carry at least one link. <code>loops</code> only works for links inside one collection. Leave it out when loops are allowed or when the link points at another collection.</p>
 <p>Use <code>mirrored_by</code> when both records must name the relationship. Here every technology-to-recipe link must have an <code>unlocked_by</code> link back from the recipe:</p>
@@ -133,7 +133,7 @@
   }
 }</code></pre>
 <p>The <code>recipes</code> schema declares <code>unlocked_by</code> as a link back to <code>technologies</code>. A link present in only one direction is reported with both record ids.</p>
-<p>A <code>list</code> keeps small lines of data together. Its <code>of</code> object describes the fields in each line, and those fields can be links:</p>
+<p>A <code>list</code> field holds several small entries, such as the ingredients of a recipe. Its <code>of</code> object describes the fields in each entry, and those fields can be links:</p>
 <p><em><code>collections/recipes/_collection.json</code>, one field inside <code>record</code></em></p>
 <pre><code class="lang-json">{
   &quot;ingredients&quot;: {
@@ -144,7 +144,7 @@
     }
   }
 }</code></pre>
-<p>The schema checks the target ids and the shape of each line. It says nothing about what a requirement or an ingredient does in play. The builder reads your chapters for that.</p>
+<p>The schema checks the ids that the links name, and the fields of each entry. It says nothing about what a requirement or an ingredient does in play. The builder reads your chapters for that.</p>
 <p><em>Full rules: <a href="/spec/#links-between-records">OpenGDD specification</a>, §1b.</em></p>
 <p class="note chapter-pager"><a href="/handbook/collections/">← Collections</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/runtime-values/">Runtime values →</a></p>
 </article>
@@ -153,7 +153,7 @@
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

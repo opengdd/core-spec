@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The player fantasy | OpenGDD handbook</title>
-<meta name="description" content="Every game starts with what the player gets to be and feel. OpenGDD asks for that first, in a short fantasy block at the top of 01-overview.md. The block comes before …">
+<title>The player fantasy | OpenGDD Handbook</title>
+<meta name="description" content="Every game starts with an idea: who the player is in the game, and how playing should feel. OpenGDD asks for that first, in a short fantasy block at the top of …">
 <link rel="canonical" href="https://opengdd.org/handbook/player-fantasy/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="The player fantasy | OpenGDD handbook">
-<meta property="og:description" content="Every game starts with what the player gets to be and feel. OpenGDD asks for that first, in a short fantasy block at the top of 01-overview.md. The block comes before …">
+<meta property="og:title" content="The player fantasy | OpenGDD Handbook">
+<meta property="og:description" content="Every game starts with an idea: who the player is in the game, and how playing should feel. OpenGDD asks for that first, in a short fantasy block at the top of …">
 <meta property="og:url" content="https://opengdd.org/handbook/player-fantasy/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta property="og:image:type" content="image/png">
@@ -20,8 +20,8 @@
 <meta name="twitter:site" content="@OpenGDD">
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
-<meta name="twitter:title" content="The player fantasy | OpenGDD handbook">
-<meta name="twitter:description" content="Every game starts with what the player gets to be and feel. OpenGDD asks for that first, in a short fantasy block at the top of 01-overview.md. The block comes before …">
+<meta name="twitter:title" content="The player fantasy | OpenGDD Handbook">
+<meta name="twitter:description" content="Every game starts with an idea: who the player is in the game, and how playing should feel. OpenGDD asks for that first, in a short fantasy block at the top of …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -53,7 +53,7 @@
 <li><a href="/handbook/" class="toc-resource-current">Handbook</a></li>
 </ul>
 <div class="toc-group">
-<p class="toc-group-title">Start and foundations</p>
+<p class="toc-group-title">The basic parts</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
 <li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
@@ -78,12 +78,12 @@
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-color-promises/">Palette and color promises</a></li>
 <li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanics</p>
+<p class="toc-group-title">Contracts: reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -92,15 +92,15 @@
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
-<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you send it to the builder</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
 <h1>The player fantasy</h1>
 <p class="chapter-scope"><span class="scope-badge">Required</span></p>
-<p>Every game starts with what the player gets to be and feel. OpenGDD asks for that first, in a short <strong>fantasy block</strong> at the top of <code>01-overview.md</code>. The block comes before any rule. Only a <code>#</code> title line, or an HTML comment, may stand above it.</p>
-<p><em><code>01-overview.md</code>, straight after the title</em></p>
+<p>Every game starts with an idea: who the player is in the game, and how playing should feel. OpenGDD asks for that first, in a short <strong>fantasy block</strong> at the top of <code>01-overview.md</code>. The block comes before any rule. Only a <code>#</code> title line, or an HTML comment, may come before it.</p>
+<p><em><code>01-overview.md</code>, directly after the title</em></p>
 <pre><code class="lang-fantasy">You are a small forest spirit, a mote of light in a dying woodland.
 You leap, cling, and glide through roots and ruins, rekindling what the decay took.
 The forest grieves in silence, and answers every light you restore.
@@ -109,18 +109,19 @@ NOT: grimdark, gory, hopeless.</code></pre>
 <p>The block has three parts:</p>
 <ul>
 <li>one or more <strong>fantasy statements</strong>: what the player is and does, at most 280 characters together;</li>
-<li>one <strong><code>Feel:</code></strong> line with three to five adjectives;</li>
+<li>one <strong><code>Feel:</code></strong> line with three to five entries that describe how the game feels. Each entry is one word or one short phrase;</li>
 <li>one <strong><code>NOT:</code></strong> line naming the tones, genres or directions the game must avoid. You may write <code>Anti-references:</code> instead of <code>NOT:</code>.</li>
 </ul>
-<p>Each fantasy statement ends with <code>.</code>, <code>!</code> or <code>?</code>. A statement may wrap across lines. One statement is enough. If you add more, each should describe a different part of the experience.</p>
+<p>OpenGDD does not check the punctuation of a fantasy statement, so a statement in any language is checked the same way. A statement may continue over several lines. One statement is enough. If you add more, each should describe a different part of the experience: what the player does, what the world looks and sounds like, or what playing feels like. Extra statements help the builder with choices that the first statement does not settle.</p>
+<p>You may write the block in any language. The labels <code>Feel:</code> and <code>NOT:</code> stay as they are, in English and with an ordinary colon. A line that starts <code>Feel：</code> with a full-width colon is not a <code>Feel:</code> line. Separate the entries with commas; <code>、</code>, <code>，</code>, <code>،</code> and <code>・</code> count as commas too.</p>
 <p>The builder uses the block to decide everything the rules leave open. The builder is the person, team or AI that turns your package into a game. In this example, decay should feel sad rather than horrifying, because the block says <code>NOT: grimdark</code>.</p>
 <p>What the block is not:</p>
 <ul>
 <li>Not marketing text. It is written for the builder.</li>
 <li>Not a feature list. Later chapters define the features.</li>
-<li>Not a place for references. Names of tuning values, runtime values, typed references such as <code>tuning:</code> or <code>palette:</code>, and links to other chapters are not allowed here. Plain numbers are fine.</li>
+<li>Not a place for references. Names of tuning values, runtime values, typed references such as <code>tuning:</code> or <code>palette:</code>, and links to other chapters are not allowed here. Plain numbers are allowed.</li>
 </ul>
-<p>The validator (the checking tool) counts the characters and the adjectives for you. If anything else comes before the block, it reports the code <code>FANTASY_POSITION</code>.</p>
+<p>The validator (the checking tool) counts the characters and the feel entries for you. If anything else comes before the block, it reports the code <code>FANTASY_POSITION</code>.</p>
 <p><em>Full rules: <a href="/spec/#1a-the-fantasy-block-required">OpenGDD specification</a>, §1a.</em></p>
 <p class="note chapter-pager"><a href="/handbook/what-a-package-contains/">← What a package contains</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/who-decides/">Who decides →</a></p>
 </article>
@@ -129,7 +130,7 @@ NOT: grimdark, gory, hopeless.</code></pre>
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

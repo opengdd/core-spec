@@ -71,6 +71,7 @@ export function fieldDescriptor(context, files, collection, recordName, recordFi
     binding: depth ? undefined : { file: recordFile, pointer: pointer(key) },
     labels: {
       change: shape.type === "link" ? RECORD_FORM_COPY.undo.changeLink : RECORD_FORM_COPY.undo.changeField,
+      clear: RECORD_FORM_COPY.undo.removeField,
       addLine: RECORD_FORM_COPY.undo.addLine,
       removeLine: RECORD_FORM_COPY.undo.removeLine
     },
@@ -91,7 +92,21 @@ export function fieldDescriptor(context, files, collection, recordName, recordFi
       helpOptional: !shape.description && !patternHelp
     };
   }
-  if (shape.type === "integer" || shape.type === "number") return { ...common, type: shape.type };
+  if (shape.type === "integer" || shape.type === "number") {
+    if (depth === 0 && shape.open === true) return {
+      ...common,
+      type: "open-number",
+      required: false,
+      clearRemoves: false,
+      integer: shape.type === "integer",
+      copy: RECORD_FORM_COPY,
+      // The field's own description is its help, as for every other field.
+      help: shape.description || RECORD_FORM_COPY.openNumberHelp,
+      helpOptional: false,
+      validateTransaction: true
+    };
+    return { ...common, type: shape.type };
+  }
   if (shape.type === "grid") {
     const otherGrid = Object.entries(schema).find(([otherKey, otherShape]) => otherKey !== key && otherShape?.type === "grid" && Array.isArray(record[otherKey]))?.[0];
     return {

@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The handbook — OpenGDD</title>
-<meta name="description" content="The OpenGDD handbook: what each part of the format is for and how the parts fit together, one short chapter per mechanism.">
+<title>The Handbook — OpenGDD</title>
+<meta name="description" content="The OpenGDD Handbook explains what each part of a package is for, in short chapters.">
 <link rel="canonical" href="https://opengdd.org/handbook/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="The handbook — OpenGDD">
-<meta property="og:description" content="The OpenGDD handbook: what each part of the format is for and how the parts fit together, one short chapter per mechanism.">
+<meta property="og:title" content="The Handbook — OpenGDD">
+<meta property="og:description" content="The OpenGDD Handbook explains what each part of a package is for, in short chapters.">
 <meta property="og:url" content="https://opengdd.org/handbook/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta property="og:image:type" content="image/png">
@@ -20,8 +20,8 @@
 <meta name="twitter:site" content="@OpenGDD">
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
-<meta name="twitter:title" content="The handbook — OpenGDD">
-<meta name="twitter:description" content="The OpenGDD handbook: what each part of the format is for and how the parts fit together, one short chapter per mechanism.">
+<meta name="twitter:title" content="The Handbook — OpenGDD">
+<meta name="twitter:description" content="The OpenGDD Handbook explains what each part of a package is for, in short chapters.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -53,7 +53,7 @@
 <li><a href="/handbook/" aria-current="page">Handbook</a></li>
 </ul>
 <div class="toc-group">
-<p class="toc-group-title">Start and foundations</p>
+<p class="toc-group-title">The basic parts</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
 <li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
@@ -78,12 +78,12 @@
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-color-promises/">Palette and color promises</a></li>
 <li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanics</p>
+<p class="toc-group-title">Contracts: reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -92,62 +92,64 @@
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
-<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you send it to the builder</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
-<h1>The handbook</h1>
+<h1>The Handbook</h1>
 
-<p>Come here with a design question. Each short chapter shows what one
-part of OpenGDD gives you, where it lives, and how to use it. If you are
+<p>Use the Handbook when you have a design question. Each short chapter
+explains one part of a package: what the part is for, where you write it,
+and how to use it. If you are
 new to the format, read the first group below in order, or follow the
 <a href="/get-started/">Get started</a> guide. The
-<a href="/spec/">specification</a> has the exact rules.</p>
+<a href="/spec/">OpenGDD specification</a> has the exact rules.</p>
 
 <p>A chapter marked <span class="scope-badge">Required</span> describes
 something every package has. <span class="scope-badge">Optional</span>
 chapters describe things you add when your game needs them. Chapters
-without a badge are guides.</p>
+without a badge show the complete example, or explain checking and the
+handoff to a builder.</p>
 
 <div class="handbook-groups">
 <section class="handbook-group" aria-labelledby="group-foundations">
-<h2 id="group-foundations">Start and foundations</h2>
-<p class="handbook-group-intro">See a finished package, then the core ideas behind its prose, numbers and tests.</p>
+<h2 id="group-foundations">The basic parts</h2>
+<p class="handbook-group-intro">Read a finished package first. Then learn the main ideas in its prose, numbers and tests.</p>
 <div class="card-grid">
   <a class="card" href="/handbook/complete-example/">
     <h3>A complete example: Garden Snake</h3>
-    <p>You already know Snake. Here is a complete OpenGDD package for it, in five small files. It is a different game from the platformer in Get started, chosen because you …</p>
+    <p>You already know Snake, so you can see where the format puts each rule. Here is a complete OpenGDD package for it, in five small files. It is a different game from the …</p>
   </a>
   <a class="card" href="/handbook/what-a-package-contains/">
     <h3>What a package contains</h3>
-    <p>A package is one folder with the complete design of one game. You give that folder to the builder: the person, team or AI that turns your package into a game.</p>
+    <p>A package is one folder with the complete design of one game. You give that folder to the builder: the person, team or AI that turns your package into a game. You can …</p>
   </a>
   <a class="card" href="/handbook/player-fantasy/">
     <h3>The player fantasy</h3>
-    <p>Every game starts with what the player gets to be and feel. OpenGDD asks for that first, in a short fantasy block at the top of 01-overview.md. The block comes before …</p>
+    <p>Every game starts with an idea: who the player is in the game, and how playing should feel. OpenGDD asks for that first, in a short fantasy block at the top of …</p>
   </a>
   <a class="card" href="/handbook/who-decides/">
     <h3>Who decides</h3>
-    <p>Every sentence in your design has an owner. OpenGDD calls this authority, and there are three levels:</p>
+    <p>Every sentence in your design has a level of authority: it says who decides that part of the game. There are three levels:</p>
   </a>
   <a class="card" href="/handbook/naming-things/">
     <h3>Names and addresses</h3>
-    <p>Write each number once, give it a name, and use the name everywhere else. A name like stamina.dash_cost is an identifier. The whole name with its dots is its address: …</p>
+    <p>When your prose needs a number, write it once, give it a name, and use the name everywhere else. A name like stamina.dash_cost is an identifier. The whole name with its …</p>
   </a>
   <a class="card" href="/handbook/tuning/">
     <h3>Tuning</h3>
-    <p>tuning.json holds the shared numbers of your game: costs, speeds, sizes, timings. The builder reads them from here, and your prose points at them by name. The file has …</p>
+    <p>tuning.json holds the shared numbers of your game: costs, speeds, sizes, timings. The builder, the person, team or AI that turns your package into a game, reads them …</p>
   </a>
   <a class="card" href="/handbook/acceptance-tests/">
     <h3>Acceptance tests</h3>
-    <p>An acceptance test turns one important promise of your design into a check the finished game must pass. The builder has to show that the check passes. The builder is the …</p>
+    <p>An acceptance test turns one important promise of your design into a check the finished game must pass. The builder, the person, team or AI that turns your package into …</p>
   </a>
 </div>
 </section>
 <section class="handbook-group" aria-labelledby="group-systems">
 <h2 id="group-systems">Content, links and time</h2>
-<p class="handbook-group-intro">Organise repeated content, connect records, name changing values, and say how time passes.</p>
+<p class="handbook-group-intro">Organize repeated content, connect records, name changing values, and say how time passes.</p>
 <div class="card-grid">
   <a class="card" href="/handbook/collections/">
     <h3>Collections</h3>
@@ -155,7 +157,7 @@ without a badge are guides.</p>
   </a>
   <a class="card" href="/handbook/links/">
     <h3>Links</h3>
-    <p>A link is a field that holds another record's id. It connects items in your collections, and validation reports a missing target where the link is defined. The examples …</p>
+    <p>A link is a field that holds another record's id. It connects items in your collections. If a link names a record that does not exist, validation reports it and names …</p>
   </a>
   <a class="card" href="/handbook/runtime-values/">
     <h3>Runtime values</h3>
@@ -163,7 +165,7 @@ without a badge are guides.</p>
   </a>
   <a class="card" href="/handbook/modes-and-clocks/">
     <h3>Modes and clocks</h3>
-    <p>When real time meets a pause or a turn structure, clocks.json says which clocks run in which situation. A time mode is one situation, such as diving or reading the map. …</p>
+    <p>When a game mixes real time with a pause or with turns, clocks.json says which clocks run in which situation. A time mode is one situation, such as diving or reading the …</p>
   </a>
   <a class="card" href="/handbook/seeds/">
     <h3>Seeds and repeatable randomness</h3>
@@ -177,11 +179,11 @@ without a badge are guides.</p>
 <div class="card-grid">
   <a class="card" href="/handbook/direction/">
     <h3>Art direction</h3>
-    <p>Art direction says what the game must look and feel like, without saying how to make it. The builder keeps the craft, and you keep the intent. The builder is the person, …</p>
+    <p>Art direction says what the game must look and feel like, without saying how to make it. You decide the intent, and the builder decides how to achieve it. The builder is …</p>
   </a>
-  <a class="card" href="/handbook/palette-and-colour-promises/">
-    <h3>Palette and colour promises</h3>
-    <p>A palette keeps the colours that define a game's look in one named place. Prose points at the whole set or at one named colour, and never copies a hex value. The example …</p>
+  <a class="card" href="/handbook/palette-and-color-promises/">
+    <h3>Palette and color promises</h3>
+    <p>A palette keeps the colors that define a game's look in one named place. Prose points at the whole set or at one named color, and never copies a hex value. The example …</p>
   </a>
   <a class="card" href="/handbook/personalization/">
     <h3>Personalization questions</h3>
@@ -190,8 +192,8 @@ without a badge are guides.</p>
 </div>
 </section>
 <section class="handbook-group" aria-labelledby="group-contracts">
-<h2 id="group-contracts">Reusable mechanics</h2>
-<p class="handbook-group-intro">Adopt a familiar game mechanic by answering its questions, with tests included.</p>
+<h2 id="group-contracts">Contracts: reusable mechanics</h2>
+<p class="handbook-group-intro">A contract is a list of questions about one familiar game mechanic. Answer the questions to define the mechanic. The tests of the contract come in a separate file, the verification pack.</p>
 <div class="card-grid">
   <a class="card" href="/handbook/contracts/">
     <h3>Contracts</h3>
@@ -201,15 +203,15 @@ without a badge are guides.</p>
 </section>
 <section class="handbook-group" aria-labelledby="group-checking">
 <h2 id="group-checking">Checking and handoff</h2>
-<p class="handbook-group-intro">Understand what validation proves, then give the package one last human read.</p>
+<p class="handbook-group-intro">Understand what validation proves, then read the package one last time yourself.</p>
 <div class="card-grid">
   <a class="card" href="/handbook/how-checking-works/">
     <h3>What validation proves</h3>
     <p>Three different checks happen between a design and a finished game. Each one proves something different, so a pass means something different each time.</p>
   </a>
   <a class="card" href="/handbook/before-handoff/">
-    <h3>Before you hand it over</h3>
-    <p>The validator (the checking tool) checks what it can prove from the files. A last human read checks the part only a designer can see: whether the package says one clear …</p>
+    <h3>Before you send it to the builder</h3>
+    <p>The validator (the checking tool) checks what it can prove from the files. A final read by a person checks what only a designer can judge: whether the package describes …</p>
   </a>
 </div>
 </section>
@@ -220,7 +222,7 @@ without a badge are guides.</p>
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

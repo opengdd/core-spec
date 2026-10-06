@@ -1,5 +1,6 @@
 import { WIDGET_COPY } from "./copy/widget-copy.mjs";
 import { CONTRACT_PACK_FILED_CODES, contractFindingOwner } from "./contracts.mjs";
+import { tuningRuleSubject, tuningValueSubject } from "./tuning-fields.mjs";
 
 const mechanismIdentity = mechanism => `mechanism\0${mechanism.id}\0${mechanism.file ?? ""}`;
 const copyLocation = location => ({
@@ -51,6 +52,18 @@ function findingAddress(finding) {
   return /^([A-Za-z0-9_.-]+)(?=[ =:"]|$)/u.exec(message)?.[1];
 }
 
+// A tuning.json finding names its key or rule in the message. The key picks
+// the row; the finding's line may point at another entry (a value's range, a
+// rule that reads it), so the line only helps when no key is named.
+function tuningRoutable(finding, routables) {
+  const message = String(finding.message ?? "");
+  const rule = tuningRuleSubject(message);
+  const value = rule === undefined ? tuningValueSubject(message) : undefined;
+  const [kind, name] = rule !== undefined ? ["rule", rule] : ["value", value];
+  if (name === undefined) return undefined;
+  return routables.find(routable => routable.kind === kind && routable.file === "tuning.json" && routable.name === name);
+}
+
 function addressRoutable(finding, routables) {
   const address = findingAddress(finding);
   if (!address) return undefined;
@@ -65,7 +78,7 @@ function addressRoutable(finding, routables) {
     if (question) return question;
   }
   if (finding.file === "tuning.json") {
-    const bare = /^(?:values|ranges|rules)\.(.+)$/u.exec(address)?.[1];
+    const bare = /^(?:values|open|ranges|rules)\.(.+)$/u.exec(address)?.[1];
     if (bare) addresses.push(bare);
   }
   return routables.flatMap(routable => {
@@ -161,6 +174,10 @@ export function buildOutlineModel({
     const fileOwned = routables.find(routable => routable.kind === "collection-record" && routable.file === finding.file)
       ?? entities.find(entity => entity.kind === "contract" && entity.file === finding.file);
     if (fileOwned && attach(ownerOf(fileOwned), index)) continue;
+    if (finding.file === "tuning.json") {
+      const keyed = tuningRoutable(finding, routables);
+      if (keyed && attach(ownerOf(keyed), index)) continue;
+    }
 
     const line = Number.isInteger(finding.line) ? finding.line - 1 : null;
     const inRange = routables.filter(routable => routable.file === finding.file && line !== null
@@ -214,7 +231,7 @@ export function buildOutlineModel({
   }
 
   // A selection that names something the tree does not list (a record, a
-  // contract value, a colour) highlights the row that owns it.
+  // contract value, a color) highlights the row that owns it.
   const rowIdentities = new Set([...mechanisms.map(mechanism => mechanism.identity), ...entities.map(entity => entity.identity)]);
   const selectedRoutable = selection && !rowIdentities.has(selection) ? routables.find(routable => routable.identity === selection) : undefined;
   const resolvedSelection = selectedRoutable ? (ownerOf(selectedRoutable)?.identity ?? selection) : selection;

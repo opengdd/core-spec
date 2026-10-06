@@ -1,8 +1,8 @@
 // Pure validation engine. All environment access is supplied by the host.
-import { isObject, markdownSlug, own, slash, unfencedLines } from "./package-syntax.mjs?v=9e90533a9ecc";
+import { authorityTagScopes, tagScopeAt, headingModeTags, isObject, markdownSlug, own, slash, unfencedLines } from "./package-syntax.mjs?v=6d328337d265";
 
-export const FORMAT_VERSION = "0.8";
-export const VALIDATOR_VERSION = "0.8.0";
+export const FORMAT_VERSION = "0.9";
+export const VALIDATOR_VERSION = "0.9.0";
 const SPEC_VERSION = FORMAT_VERSION;
 // The revision that reserved the `palette` first segment. §4's versioning clause requires the
 // diagnostics on a newly reserved segment to name their revision, so this is
@@ -13,7 +13,7 @@ const PALETTE_REVISION = "0.6";
 // format's last silent-rename gap: a prose citation of a drawer or record is
 // classified as a mechanism path and a dangling one is a hard failure.
 const COLLECTIONS_REVISION = "0.6";
-const TUNING_KEY_PATTERN = /^[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?(?:\.[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?)+$/;
+const TUNING_KEY_PATTERN = /^(?![0-9]+(?:\.[0-9]+)+$)[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?(?:\.[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?)+$/;
 const TUNING_KEY_PREFIX = /^[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?(?:\.[A-Za-z0-9_](?:[A-Za-z0-9_-]*[A-Za-z0-9_])?)+/;
 
 // SPEC §4's versioned prose-citation classifier. Exported so browser-side
@@ -218,6 +218,39 @@ export function parseRule(source, options = {}) {
   return ast;
 }
 
+function ruleKeys(ast) {
+  const keys = new Set();
+  const pending = [ast];
+  while (pending.length) {
+    const node = pending.pop();
+    if (node.type === "key") keys.add(node.name);
+    else if (node.type === "group") pending.push(node.expression);
+    else if (node.type === "unary") pending.push(node.argument);
+    else if (node.type === "binary") pending.push(node.left, node.right);
+    else if (node.type === "call") pending.push(...node.args);
+  }
+  return keys;
+}
+
+function ruleKeyNodes(ast) {
+  const nodes = [];
+  const pending = [ast];
+  while (pending.length) {
+    const node = pending.pop();
+    if (node.type === "key") nodes.push(node);
+    else if (node.type === "group") pending.push(node.expression);
+    else if (node.type === "unary") pending.push(node.argument);
+    else if (node.type === "binary") pending.push(node.right, node.left);
+    else if (node.type === "call") pending.push(...[...node.args].reverse());
+  }
+  return nodes.sort((left, right) => left.start - right.start);
+}
+
+function ungroupRuleNode(node) {
+  while (node?.type === "group") node = node.expression;
+  return node;
+}
+
 function ruleLookup(lookup, name, position) {
   let found = false;
   let value;
@@ -227,7 +260,7 @@ function ruleLookup(lookup, name, position) {
   if (!found) {
     const lookupHas = key => lookup instanceof Map ? lookup.has(key) : isObject(lookup) ? own(lookup, key) : false;
     const subtractionHint = [...name].some((character, index) => character === "-" && lookupHas(name.slice(0, index)) && lookupHas(name.slice(index + 1)));
-    const hint = subtractionHint ? " (write spaces around `-` for subtraction)" : "";
+    const hint = subtractionHint ? " (put a space before the minus)" : "";
     throw ruleFailure("reference", `unknown key ${JSON.stringify(name)}${hint}`, position);
   }
   if (typeof value !== "number" || !Number.isFinite(value)) throw ruleFailure("arithmetic", `key ${JSON.stringify(name)} does not resolve to a finite number`, position);
@@ -260,9 +293,9 @@ function evaluateRuleNode(ast, lookup) {
     const right = evaluateRuleNode(ast.right, lookup);
     if (["+", "-", "*", "/"].includes(ast.op)) {
       if (typeof left !== "number" || typeof right !== "number") throw ruleFailure("type", `\`${ast.op}\` requires number operands`, ast.start);
-      if (ast.op === "/" && right === 0) throw ruleFailure("arithmetic", "division by zero", ast.start);
+      if (ast.op === "/" && right === 0) throw Object.assign(ruleFailure("arithmetic", "division by zero", ast.start), { dependencies: ruleKeys(ast.right) });
       const result = ast.op === "+" ? left + right : ast.op === "-" ? left - right : ast.op === "*" ? left * right : left / right;
-      if (!Number.isFinite(result)) throw ruleFailure("arithmetic", `\`${ast.op}\` produced a non-finite result`, ast.start);
+      if (!Number.isFinite(result)) throw Object.assign(ruleFailure("arithmetic", `\`${ast.op}\` produced a non-finite result`, ast.start), { dependencies: ruleKeys(ast) });
       return result;
     }
     if (["==", "!="].includes(ast.op)) {
@@ -324,6 +357,141 @@ function ruleFailureDetail(sourceAst, failed, lookup) {
   return `${ruleNodeText({ ...failed, source: sourceAst.source }, lookup)} evaluates ${String(evaluateRuleNode(failed, lookup))}`;
 }
 
+function canonical(value) {
+  if (Array.isArray(value)) return value.map(canonical);
+  if (isObject(value)) {
+    return Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])]));
+  }
+  return value;
+}
+
+function deepKey(value) {
+  return JSON.stringify(canonical(value));
+}
+
+// SPEC §4 — "package defaults" means the resolved tuning snapshot produced by
+// applying every question's `default` through the §5 pipeline. For a package
+// with no personalization.json it equals the authored values. Package rule
+// validation reads this default-resolved snapshot.
+//
+function applyPersonalizationAnswers(base, questions, answerFor, canSet, assigned = undefined) {
+  const resolved = new Map(base);
+  const assign = (key, value) => {
+    if (typeof key === "string" && resolved.has(key) && canSet(key) && typeof value === "number" && Number.isFinite(value)) {
+      resolved.set(key, value);
+      assigned?.add(key);
+    }
+  };
+  for (const question of questions) {
+    if (!isObject(question)) continue;
+    const answer = answerFor(question);
+    if (question.type === "choice" && Array.isArray(question.options)) {
+      const option = question.options.find(item => isObject(item) && item.id === answer);
+      if (isObject(option?.sets)) for (const [key, value] of Object.entries(option.sets)) assign(key, value);
+    } else if (question.type === "number") {
+      assign(question.sets, answer);
+    }
+  }
+  return resolved;
+}
+
+function resolveDefaultTuning(doc, personalization, base) {
+  const questions = isObject(personalization?.doc) && Array.isArray(personalization.doc.questions) ? personalization.doc.questions : [];
+  const ranges = isObject(doc?.ranges) ? doc.ranges : {};
+  const open = isObject(doc?.open) ? doc.open : {};
+  const assigned = new Set();
+  const values = applyPersonalizationAnswers(base, questions, question => question.default, key => own(ranges, key) || own(open, key), assigned);
+  return { values, assigned };
+}
+
+const emptyRecordNumbers = () => ({ known: new Set(), decided: new Map(), guesses: new Map(),
+  open: new Set(), openTypes: new Map(), referenceProblems: new Map() });
+
+// Shared calculation. Pins read the unchanged base of each environment.
+export function calculateTuningEnvironments({ doc, tuning, openTuning, recordNumbers = emptyRecordNumbers(),
+  personalization, validRules = [] }, reportError = () => {}) {
+  const pinDiagnostics = [];
+  const error = (...args) => {
+    const [code, section, file, message, line] = args;
+    pinDiagnostics.push({ code, section, file, message, line });
+    reportError(...args);
+  };
+  const defaultSeed = new Map([...tuning, ...openTuning]);
+  const defaults = resolveDefaultTuning(doc, personalization, defaultSeed);
+  const authoredBase = new Map([...recordNumbers.decided, ...tuning]);
+  const packageBase = new Map(recordNumbers.decided);
+  for (const [key, value] of defaults.values) {
+    if (tuning.has(key) || defaults.assigned.has(key)) packageBase.set(key, value);
+  }
+  function derivePins(base, environment) {
+    const conflicts = [];
+    const lookup = new Map(base);
+    const invalidPins = new Set();
+    const pins = new Map();
+    for (const entry of validRules) {
+      if (entry.ast.op !== "==") continue;
+      for (const [targetNode, valueNode] of [[ungroupRuleNode(entry.ast.left), entry.ast.right], [ungroupRuleNode(entry.ast.right), entry.ast.left]]) {
+        if (targetNode?.type !== "key" || !recordNumbers.open.has(targetNode.name)) continue;
+        if (![...ruleKeys(valueNode)].every(key => base.has(key))) continue;
+        try {
+          const value = evaluateRuleNode(valueNode, base);
+          if (recordNumbers.openTypes.get(targetNode.name) === "integer" && !Number.isInteger(value)) {
+            error("TUNING_RULE_INVALID", "§4", "tuning.json", `rule ${JSON.stringify(entry.name)}: pin for integer field ${JSON.stringify(targetNode.name)} resolves to non-integer value ${value}`, entry.line);
+            invalidPins.add(entry);
+            continue;
+          }
+          const previous = pins.get(targetNode.name);
+          if (previous && previous.value !== value) {
+            error("TUNING_PIN_CONFLICT", "§4", "tuning.json", `rules ${JSON.stringify(previous.entry.name)} and ${JSON.stringify(entry.name)} pin ${JSON.stringify(targetNode.name)} to different numbers ${previous.value} and ${value} in the ${environment} environment`, entry.line);
+            conflicts.push({ key: targetNode.name, first: previous.entry, second: entry, values: [previous.value, value], environment });
+            invalidPins.add(previous.entry);
+            invalidPins.add(entry);
+            previous.conflict = true;
+          } else if (!previous) pins.set(targetNode.name, { value, entry });
+        } catch (cause) {
+          error("TUNING_RULE_INVALID", "§4", "tuning.json", `rule ${JSON.stringify(entry.name)}: ${cause.message} at position ${cause.position ?? valueNode.start ?? 0}`, entry.line);
+          invalidPins.add(entry);
+        }
+      }
+    }
+    for (const [key, pin] of pins) if (!pin.conflict) lookup.set(key, pin.value);
+    return { name: environment, base, lookup, invalidPins, pins, conflicts };
+  }
+  const environments = [derivePins(authoredBase, "authored")];
+  if (deepKey(Object.fromEntries(authoredBase)) !== deepKey(Object.fromEntries(packageBase))) environments.push(derivePins(packageBase, "personalization-default"));
+  const { lookup: packageLookup } = environments.at(-1);
+  const guesses = new Map(packageLookup);
+  const guessedKeys = new Set();
+  for (const [key, value] of [...openTuning, ...recordNumbers.guesses]) {
+    if (guesses.has(key) || typeof value !== "number" || !Number.isFinite(value)) continue;
+    guesses.set(key, value);
+    guessedKeys.add(key);
+  }
+  const declaredOpen = new Set([...openTuning.keys(), ...recordNumbers.open]);
+  return { defaultSeed, defaults, authoredBase, packageBase, environments, decided: packageLookup, guesses, guessedKeys,
+    declaredOpen, recordOpen: recordNumbers.open, openKeys: new Set([...declaredOpen].filter(key => !packageLookup.has(key))),
+    known: new Set([...tuning.keys(), ...openTuning.keys(), ...recordNumbers.known]), validRules, pinDiagnostics,
+    conflicts: environments.flatMap(environment => environment.conflicts) };
+}
+
+// SPEC §1a: a fantasy sentence ends with any Unicode sentence terminator,
+// optionally followed by closing quotes or brackets. `Feel:` words are
+// separated by a comma: , 、 ， ، or ・.
+const FANTASY_SENTENCE_END = /\p{Sentence_Terminal}[\p{Pe}\p{Pf}"']*$/u;
+const FANTASY_FEEL_SEPARATOR = /[,、，،・]/u;
+// SPEC §1a: a chapter anchor in a fantasy line, `<file>.md#<anchor>` or a bare
+// `#<anchor>` after whitespace or at the line start. A heading's anchor keeps
+// Unicode letters and numbers (§1a's derivation lowercases it), so an anchor
+// written in any script counts. Upper-case letters never occur in an anchor;
+// a bare anchor needs at least one letter, so "the #1 spot" is plain text.
+const ANCHOR_START = String.raw`[\p{Ll}\p{Lo}\p{Lm}\p{N}]`;
+const ANCHOR_REST = String.raw`[\p{Ll}\p{Lo}\p{Lm}\p{N}\p{M}]`;
+const ANCHOR_ID = `${ANCHOR_START}${ANCHOR_REST}*(?:-${ANCHOR_REST}+)*`;
+const FANTASY_CHAPTER_ANCHOR = new RegExp(
+  String.raw`(?:[\p{L}\p{N}_./-]+\.md#${ANCHOR_ID}|(?:^|\s)#(?=[\p{Ll}\p{Lo}\p{Lm}\p{N}\p{M}-]*[\p{Ll}\p{Lo}\p{Lm}])${ANCHOR_ID}(?![\p{Ll}\p{Lo}\p{Lm}\p{N}\p{M}-]))`,
+  "u"
+);
+
 function formatRuleFailure(name, source, ast, lookup, subject = undefined) {
   const details = [`  ${ruleFailureDetail(ast, ast, lookup)}`];
   return `${subject ? `${subject} ` : ""}rule ${JSON.stringify(name)} does not hold\n  ${source}\n${details.join("\n")}`;
@@ -333,6 +501,10 @@ function createValidator(host) {
   const { path } = host;
   const findings = [];
   const findingKeys = new Set();
+  const hints = [];
+  const hintKeys = new Set();
+  const safety = [];
+  const safetyKeys = new Set();
   const skipped = [];
   const skippedChecks = new Set();
 
@@ -342,10 +514,11 @@ function createValidator(host) {
     skipped.push({ check, reason });
   }
 
-  // The injection-surface lint is a review aid, not a conformance requirement.
-  // Every finding in this family MUST remain WARNING, never FAIL.
-  const INJECTION_LINT_STATUS = "advisory-v0.7";
-  const INJECTION_LINT_SECTION = "SPEC v0.7 — specs are data (injection-surface lint)";
+  // The injection-surface scan is a safety aid, not a conformance requirement.
+  // Its standing item severity remains WARNING, but its separate report channel
+  // means it is never counted as a conformance warning and never affects FAIL.
+  const INJECTION_LINT_STATUS = "advisory";
+  const INJECTION_LINT_SECTION = "§1";
   const INJECTION_SCAN_MAX_BYTES = 2 * 1024 * 1024;
   const INJECTION_TEXT_EXTENSIONS = new Set([
     ".csv", ".htm", ".html", ".json", ".jsonl", ".markdown", ".md",
@@ -376,20 +549,22 @@ function createValidator(host) {
     }
   }
 
+  function addAuxiliary(target, keys, severity, code, section, file, message, line = undefined, data = undefined) {
+    if (findingsSuppressed > 0) return;
+    const item = { severity, code, spec_section: section, file: slash(file), message };
+    if (line !== undefined) item.line = line;
+    if (data !== undefined) item.data = data;
+    const key = JSON.stringify([severity, code, section, item.file, line, message]);
+    if (!keys.has(key)) {
+      keys.add(key);
+      target.push(item);
+    }
+  }
+
   const error = (...args) => addFinding("error", ...args);
   const warning = (...args) => addFinding("warning", ...args);
-  function canonical(value) {
-    if (Array.isArray(value)) return value.map(canonical);
-    if (isObject(value)) {
-      return Object.fromEntries(Object.keys(value).sort().map(key => [key, canonical(value[key])]));
-    }
-    return value;
-  }
-
-  function deepKey(value) {
-    return JSON.stringify(canonical(value));
-  }
-
+  const hint = (...args) => addAuxiliary(hints, hintKeys, "hint", ...args);
+  const safetyNotice = (...args) => addAuxiliary(safety, safetyKeys, "warning", ...args);
   function pointerEscape(token) {
     return String(token).replaceAll("~", "~0").replaceAll("/", "~1");
   }
@@ -450,7 +625,7 @@ function createValidator(host) {
       const problem = typeof text === "string"
         ? jsonSyntaxProblem(text, cause)
         : { message: `could not be read as JSON: ${cause?.message ?? String(cause)}`, line: undefined };
-      error(code, section, display, problem.message, problem.line);
+      error(code, section, display, problem.message, problem.line ?? (display === "tuning.json" ? 1 : undefined));
       return undefined;
     }
   }
@@ -698,58 +873,21 @@ function createValidator(host) {
   // ---------------------------------------------------------------------------
   // SPEC §2 — where an authority tag reaches.
   //
-  // A tag scopes from its own line to the end of the heading section holding
-  // it, so a section is Fixed only when no tag sits anywhere inside it and no
-  // enclosing section's tag reaches down into it. A tag on the section's first
-  // line and a tag three paragraphs later hand away exactly as much. Both
-  // §1b's `> COLLECTION:` claims and §10.7 citations ask that one question,
-  // so they ask it in one place.
+  // Non-default authority ends with the tagged blockquote. Whole-section
+  // contract citations still require every part of the target to be Fixed.
+  // Review hints and citation checks share package-syntax's quote ranges.
   // ---------------------------------------------------------------------------
   function markdownHeadings(lines) {
-    return lines.map((line, index) => {
+    return unfencedLines(lines.join("\n")).map(({ text: line, line: number }) => {
       const match = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(line);
-      return match ? { level: match[1].length, title: match[2], slug: markdownSlug(match[2]), line: index + 1, index } : undefined;
+      return match ? { level: match[1].length, title: match[2], slug: markdownSlug(match[2]), line: number, index: number - 1 } : undefined;
     }).filter(Boolean);
   }
 
   function authorityTagReaching(lines, headings, heading) {
     const sectionEnd = anchor => headings.find(item => item.index > anchor.index && item.level <= anchor.level)?.index ?? lines.length;
     const end = sectionEnd(heading);
-    let fenced = false;
-    for (let index = 0; index < lines.length; index += 1) {
-      if (/^\s*```/.test(lines[index])) { fenced = !fenced; continue; }
-      if (fenced) continue;
-      const match = /^\s*> (DELEGATED|PERSONALIZATION):\s*(\S*)/.exec(lines[index]);
-      if (!match) continue;
-      const tag = {
-        label: match[1] === "DELEGATED" ? "Delegated" : "a Personalization",
-        level: match[1] === "DELEGATED" ? "delegated" : "personalization",
-        question: match[2] || undefined,
-        line: index + 1
-      };
-      if (index > heading.index && index < end) return { ...tag, where: "inside" };
-      const owner = [...headings].reverse().find(item => item.index < index);
-      if (owner && index < heading.index && heading.index < sectionEnd(owner)) return { ...tag, where: "enclosing" };
-    }
-    return undefined;
-  }
-
-  function authorityTagScopes(lines) {
-    const headings = markdownHeadings(lines);
-    const sectionEnd = heading => headings.find(item => item.index > heading.index && item.level <= heading.level)?.index ?? lines.length;
-    const tags = [];
-    let fenced = false;
-    lines.forEach((line, index) => {
-      if (/^\s*```/.test(line)) { fenced = !fenced; return; }
-      if (fenced || !/^\s*>\s*(?:DELEGATED|PERSONALIZATION):/.test(line)) return;
-      const owner = [...headings].reverse().find(item => item.index < index);
-      if (owner) tags.push({ index, owner });
-    });
-    return tags.map((tag, tagIndex) => {
-      const end = sectionEnd(tag.owner);
-      const next = tags.slice(tagIndex + 1).find(item => item.owner === tag.owner && item.index < end);
-      return { start: tag.index, end: next?.index ?? end };
-    });
+    return authorityTagScopes(lines).find(scope => scope.level !== "ruleset" && scope.start < end && scope.end > heading.index);
   }
 
   function loadPersonalization(packageRoot, manifest, resolvePath) {
@@ -827,26 +965,28 @@ function createValidator(host) {
     return `[unbounded, ${bounds.max}]`;
   }
 
-  // SPEC §5 — every `sets` target exists, carries a range, and receives a
-  // value inside that range. Contract values are Fixed adoption data and are
-  // never personalization targets.
+  // SPEC §5 — every `sets` target is either a ranged `values` key or an
+  // `open` key, and every assigned value lies inside its range when it has
+  // one. Contract values are Fixed adoption data and are never
+  // personalization targets.
   function validatePersonalizationSets(personalization, tuningDoc) {
     const doc = personalization?.doc;
     if (!isObject(doc) || !isObject(tuningDoc)) return;
     const display = personalization.display ?? "personalization.json";
     const values = isObject(tuningDoc.values) ? tuningDoc.values : {};
+    const open = isObject(tuningDoc.open) ? tuningDoc.open : {};
     const ranges = isObject(tuningDoc.ranges) ? tuningDoc.ranges : {};
     const targetRange = (key, site) => {
       if (key.startsWith("contracts.")) {
         error("PERSONALIZATION_SETS_TARGET", "§5", display, `${site} names ${JSON.stringify(key)}; a contract's values are fixed in the adoption; they cannot be set per build`);
         return undefined;
       }
-      if (!own(values, key)) {
-        error("PERSONALIZATION_SETS_TARGET", "§5", display, `${site} names no declared values key`);
+      if (!own(values, key) && !own(open, key)) {
+        error("PERSONALIZATION_SETS_TARGET", "§5", display, `${site} names no declared values or open key`);
         return undefined;
       }
       const range = boundsFromPair(ranges[key]);
-      if (!range) error("PERSONALIZATION_SETS_UNRANGED", "§5", display, `${site} names ${JSON.stringify(key)}, but only a key with a range can be set`);
+      if (own(values, key) && !range) error("PERSONALIZATION_SETS_UNRANGED", "§5", display, `${site} names ${JSON.stringify(key)}, but a values key must have a range to be set; add a range or move it to \`open\``);
       return range;
     };
     const checkValue = (key, value, site) => {
@@ -943,7 +1083,7 @@ function createValidator(host) {
   // minus `.json` the record's id and address, the body designer data. The
   // optional `_collection.json` label appears only when it has something to
   // say, and its one field is `record`: an optional record schema in the
-  // closed field grammar §10.4 and §1b share (with `grid` as §1b's dialect
+  // closed field grammar §12.1 and §1b share (with `grid` as §1b's dialect
   // and `citation`/flag-domain conditions as §10's — the two implementations
   // below and in the contracts layer must stay verdict-aligned). With a
   // schema every record is validated against it; without one, records are
@@ -958,11 +1098,11 @@ function createValidator(host) {
   const COLLECTION_FIELD_ID = /^[a-z0-9_](?:[a-z0-9_-]*[a-z0-9_])?$/;
   const COLLECTION_FIELD_TYPES = new Set(["number", "integer", "string", "grid", "link", "list"]);
 
-  // The record schema's own shape: the §10.4 field grammar, row-domain
+  // The record schema's own shape: the §12.1 field grammar, row-domain
   // conditions only (there are no flags to read outside a contract), and
   // `grid` in place of `citation`. Returns the field map, or undefined when
   // the schema is too broken to check records against.
-  function validateDrawerSchema(record, display, root = "#/record") {
+  function validateDrawerSchema(record, display, root = "#/record", topLevel = true) {
     if (!isObject(record)) {
       error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${root} must map field names to field-shape objects`);
       return undefined;
@@ -983,7 +1123,7 @@ function createValidator(host) {
         continue;
       }
       for (const key of Object.keys(shape)) {
-        if (!["type", "required", "when", "options", "pattern", "unique", "description", "to", "many", "loops", "mirrored_by", "of"].includes(key)) {
+        if (!["type", "required", "when", "options", "pattern", "unique", "description", "open", "to", "many", "loops", "mirrored_by", "of"].includes(key)) {
           error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/${key} is not a field-shape member`);
         }
       }
@@ -998,6 +1138,14 @@ function createValidator(host) {
       if (own(shape, "required") && typeof shape.required !== "boolean") {
         error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/required must be a boolean`);
       }
+      if (own(shape, "open")) {
+        if (shape.open !== true) error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/open, when present, must be true`);
+        if (!topLevel || (shape.type !== "number" && shape.type !== "integer")) error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/open is legal only on a top-level number or integer field`);
+        if (own(shape, "required")) error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at} declares both open and required; an open field is optional by presence`);
+      }
+      if (!topLevel && shape.type === "grid") {
+        error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/type grid is legal on a top-level field only; a layer set belongs to the record, not to a list entry`);
+      }
       if (own(shape, "unique") && typeof shape.unique !== "boolean") {
         error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/unique must be a boolean`);
       }
@@ -1011,11 +1159,11 @@ function createValidator(host) {
       if (own(shape, "options")) {
         if (shape.type !== "string") error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/options is legal on a string field only`);
         if (!Array.isArray(shape.options) || shape.options.length === 0 || shape.options.some(value => typeof value !== "string" || !COLLECTION_ID.test(value) || value.length > 64)) {
-          error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/options must be a non-empty array of kebab-case values of at most 64 characters (§10.4's closed-choice rule)`);
+          error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/options must be a non-empty array of kebab-case values of at most 64 characters (§12.1's closed-choice rule)`);
         }
       }
       if (shape.type === "link") {
-        if (typeof shape.to !== "string" || !COLLECTION_ID.test(shape.to)) error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/to is required on a link and must be a drawer id`);
+        if (typeof shape.to !== "string" || !COLLECTION_ID.test(shape.to)) error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/to is required on a link and must be a collection id`);
         if (own(shape, "many") && typeof shape.many !== "boolean") error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/many must be a boolean`);
         if (own(shape, "loops") && typeof shape.loops !== "boolean") {
           const hint = shape.loops === "never" ? '; `"loops": "never"` is now `"loops": false` (run `opengdd migrate`)' : "";
@@ -1026,12 +1174,12 @@ function createValidator(host) {
         for (const key of ["to", "many", "loops", "mirrored_by"]) if (own(shape, key)) error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/${key} is legal on a link field only`);
       }
       if (shape.type === "list") {
-        shape.of = validateDrawerSchema(shape.of, display, `${at}/of`);
+        shape.of = validateDrawerSchema(shape.of, display, `${at}/of`, false);
       } else if (own(shape, "of")) {
         error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/of is legal on a list field only`);
       }
       if (own(shape, "when")) {
-        // §§10.3–10.4: an absent or empty `when` is satisfied, so `{}` is legal
+        // §12.3: an absent or empty `when` is satisfied, so `{}` is legal
         // here exactly as it is on the contracts side.
         if (!isObject(shape.when) || Object.keys(shape.when).some(key => key !== "row")) {
           error("COLLECTION_SCHEMA_SHAPE", "§1b", display, `${at}/when must be a condition object with a row domain only; there are no flags outside a contract`);
@@ -1055,7 +1203,7 @@ function createValidator(host) {
         if (key.startsWith("_")) continue;
         if (!fieldsHere.has(key)) {
           const fieldAt = at ? `${at}.${key}` : key;
-          error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `carries field ${JSON.stringify(fieldAt)}, which the drawer's record schema does not declare`, undefined, { record: entry.id, field: fieldAt });
+          error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `carries field ${JSON.stringify(fieldAt)}, which the collection's record schema does not declare`, undefined, { record: entry.id, field: fieldAt });
         }
       }
       for (const [field, shape] of fieldsHere) {
@@ -1072,9 +1220,10 @@ function createValidator(host) {
           continue;
         }
         const value = row[field];
-        if (shape.type === "number" && typeof value !== "number") {
+        const openNumber = shape.open === true && (shape.type === "number" || shape.type === "integer");
+        if (shape.type === "number" && !(typeof value === "number" || (openNumber && value === null))) {
           error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `${field} must be a number, got ${JSON.stringify(value)}`, undefined, { record: entry.id, field });
-        } else if (shape.type === "integer" && !Number.isInteger(value)) {
+        } else if (shape.type === "integer" && !(Number.isInteger(value) || (openNumber && value === null))) {
           error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `${field} must be an integer, got ${JSON.stringify(value)}`, undefined, { record: entry.id, field });
         } else if (shape.type === "string" && typeof value !== "string") {
           error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `${field} must be a string, got ${JSON.stringify(value)}`, undefined, { record: entry.id, field });
@@ -1113,7 +1262,7 @@ function createValidator(host) {
         if (shape.unique === true) {
           const key = `${field}\u0000${JSON.stringify(value)}`;
           if (uniqueSeen.has(key)) {
-            error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `${field} repeats value ${JSON.stringify(value)}, which the schema declares unique within the drawer`, undefined, { record: entry.id, field });
+            error("COLLECTION_RECORD_SCHEMA", "§1b", entry.display, `${field} repeats value ${JSON.stringify(value)}, which the schema declares unique within the collection`, undefined, { record: entry.id, field });
           } else uniqueSeen.set(key, entry.id);
         }
       }
@@ -1159,7 +1308,7 @@ function createValidator(host) {
         for (const [field, shape] of fields ?? []) {
           if (shape.type === "link") {
             const target = context.collections.get(shape.to);
-            if (!target) error("COLLECTION_LINK_TARGET", "§1b", info.labelDisplay ?? `collections/${info.id}/_collection.json`, `link field ${JSON.stringify(field)} names missing drawer ${JSON.stringify(shape.to)}`, undefined, { field, drawer: info.id, target: shape.to });
+            if (!target) error("COLLECTION_LINK_TARGET", "§1b", info.labelDisplay ?? `collections/${info.id}/_collection.json`, `link field ${JSON.stringify(field)} names missing collection ${JSON.stringify(shape.to)}`, undefined, { field, drawer: info.id, target: shape.to });
             else target.reached = true;
             if (own(shape, "mirrored_by") && target) {
               const mirror = target.fields?.get(shape.mirrored_by);
@@ -1177,7 +1326,7 @@ function createValidator(host) {
     for (const link of links) {
       const target = context.collections.get(link.shape.to);
       if (target && !collectionRecordIndex(target).has(link.targetId)) {
-        error("COLLECTION_LINK_DANGLING", "§1b", link.display, `record ${JSON.stringify(link.record)} field ${JSON.stringify(link.fieldAt)} links to ${JSON.stringify(link.targetId)}, which is not a record in drawer ${JSON.stringify(link.shape.to)}`, undefined, { record: link.record, field: link.fieldAt, value: link.targetId, drawer: link.shape.to });
+        error("COLLECTION_LINK_DANGLING", "§1b", link.display, `record ${JSON.stringify(link.record)} field ${JSON.stringify(link.fieldAt)} links to ${JSON.stringify(link.targetId)}, which is not a record in collection ${JSON.stringify(link.shape.to)}`, undefined, { record: link.record, field: link.fieldAt, value: link.targetId, drawer: link.shape.to });
       }
     }
     const declarations = new Map();
@@ -1212,14 +1361,22 @@ function createValidator(host) {
 
   function validateContent(packageRoot, manifest, resolvePath, questionsById) {
     const collections = new Map();
-    const context = { collections, documents: [] };
+    const recordNumbers = {
+      known: new Set(),
+      decided: new Map(),
+      guesses: new Map(),
+      open: new Set(),
+      openTypes: new Map(),
+      referenceProblems: new Map()
+    };
+    const context = { collections, documents: [], recordNumbers };
     const links = [];
     const collectionsRoot = path.join(packageRoot, "collections");
     if (host.exists(collectionsRoot) && host.isDirectory(collectionsRoot)) {
       const drawerEntries = [...host.readDir(collectionsRoot)].sort((left, right) => (left.name < right.name ? -1 : 1));
       for (const drawerEntry of drawerEntries) {
         if (!drawerEntry.isDirectory) {
-          error("COLLECTION_STRAY_FILE", "§1b", `collections/${drawerEntry.name}`, "collections/ holds one directory per collection; a loose file here belongs inside a drawer");
+          error("COLLECTION_STRAY_FILE", "§1b", `collections/${drawerEntry.name}`, "collections/ holds one directory per collection; a loose file here belongs inside a collection");
           continue;
         }
         const id = drawerEntry.name;
@@ -1235,7 +1392,7 @@ function createValidator(host) {
         for (const member of members) {
           const display = `collections/${id}/${member.name}`;
           if (member.isDirectory) {
-            error("COLLECTION_SUBDIRECTORY", "§1b", display, "subdirectories inside a drawer are not defined in this revision; organize as sibling drawers with compound kebab names");
+            error("COLLECTION_SUBDIRECTORY", "§1b", display, "subdirectories inside a collection are not defined in this revision; organize as sibling collections with compound kebab names");
             continue;
           }
           if (member.name === "_collection.json") {
@@ -1253,7 +1410,7 @@ function createValidator(host) {
             continue;
           }
           if (!member.name.endsWith(".json")) {
-            error("COLLECTION_STRAY_FILE", "§1b", display, "a drawer holds its optional `_collection.json` label and one `.json` file per record; anything else is not defined by this revision");
+            error("COLLECTION_STRAY_FILE", "§1b", display, "a collection holds its optional `_collection.json` schema file and one `.json` file per record; anything else is not defined by this revision");
             continue;
           }
           const recordId = member.name.slice(0, -".json".length);
@@ -1281,6 +1438,41 @@ function createValidator(host) {
         const info = { id, fields, docs, records: recordEntries, recordIds, allIds, reached: false, labelDisplay: fields ? `collections/${id}/_collection.json` : undefined };
         context.collections.set(id, info);
         context.documents.push(...docs.map(doc => ({ ...doc, collection: info })));
+        for (const entry of recordEntries) {
+          if (fields) {
+            for (const [field, shape] of fields) {
+              const address = `collections.${id}.${entry.id}.${field}`;
+              if (shape.type !== "number" && shape.type !== "integer") {
+                recordNumbers.referenceProblems.set(address, `record field ${JSON.stringify(address)} is not a number`);
+                continue;
+              }
+              if (!own(entry.record, field)) {
+                if (shape.open === true) recordNumbers.referenceProblems.set(address, `open field ${JSON.stringify(address)} is absent from that record`);
+                continue;
+              }
+              const value = entry.record[field];
+              const isOpen = shape.open === true;
+              if ((typeof value === "number" && Number.isFinite(value)) || (isOpen && value === null)) recordNumbers.known.add(address);
+              if (isOpen) {
+                recordNumbers.open.add(address);
+                recordNumbers.openTypes.set(address, shape.type);
+                if (typeof value === "number" && Number.isFinite(value)) recordNumbers.guesses.set(address, value);
+              } else if (typeof value === "number" && Number.isFinite(value)) {
+                recordNumbers.decided.set(address, value);
+              }
+            }
+          } else {
+            for (const [field, value] of Object.entries(entry.record)) {
+              const address = `collections.${id}.${entry.id}.${field}`;
+              if (typeof value !== "number" || !Number.isFinite(value)) {
+                recordNumbers.referenceProblems.set(address, `record field ${JSON.stringify(address)} is not a number`);
+                continue;
+              }
+              recordNumbers.known.add(address);
+              recordNumbers.decided.set(address, value);
+            }
+          }
+        }
       }
     }
 
@@ -1290,7 +1482,7 @@ function createValidator(host) {
     for (const { chapter, text } of chapterTexts(packageRoot)) {
       for (const item of unfencedLines(text)) {
         if (/^\s*>\s*COLLECTION:/.test(item.text)) {
-          error("COLLECTION_TAG_RETIRED", "§1b", slash(chapter), "`> COLLECTION:` is retired; presence declares the drawer, prose cites it, and the label's `record` schema owns the shape", item.line);
+          error("COLLECTION_TAG_RETIRED", "§1b", slash(chapter), "`> COLLECTION:` is retired. A collection is declared by its folder. Prose cites the collection. The schema file's `record` field defines the record structure.", item.line);
         }
       }
     }
@@ -1329,9 +1521,17 @@ function createValidator(host) {
     const initial = [];
     const tags = [];
     for (const { chapter, text } of chapterTexts(packageRoot)) {
-      for (const item of unfencedLines(text)) {
-        if (!/^\s*>\s*RULESET:/.test(item.text)) continue;
-        const match = /^\s*>\s*RULESET:\s*([a-z0-9]+(?:-[a-z0-9]+)*)(?:\s+(\(initial\)))?\s*$/.exec(item.text);
+      const scopes = authorityTagScopes(text.split(/\r?\n/));
+      const authority = scopes.filter(scope => scope.level !== "ruleset");
+      for (const [index, item] of authority.entries()) {
+        const earlier = authority.slice(0, index).find(scope => scope.depth === item.depth && scope.end > item.start);
+        if (earlier) error("AUTHORITY_TAG_OVERLAP", "§2", slash(chapter), `authority tag ${item.tag} at quote depth ${item.depth} overlaps ${earlier.tag} at line ${earlier.line}; one blockquote may have only one authority tag at each depth`, item.line);
+      }
+      const rulesets = scopes.filter(scope => scope.level === "ruleset");
+      for (const [index, item] of rulesets.entries()) {
+        const earlier = rulesets.slice(0, index).find(scope => scope.depth === item.depth && scope.end > item.start);
+        if (earlier) error("RULESET_TAG_OVERLAP", "§2c", slash(chapter), `ruleset tag ${item.tag}: at quote depth ${item.depth} overlaps ${earlier.tag}: at line ${earlier.line}; write each ruleset in its own blockquote`, item.line);
+        const match = /^([a-z0-9]+(?:-[a-z0-9]+)*)(?:\s+(\(initial\)))?\s*$/.exec(item.content);
         if (!match) {
           error("RULESET_TAG_SHAPE", "§2c", slash(chapter), "ruleset tags use `> RULESET: <kebab-case-id>` with optional `(initial)`", item.line);
           continue;
@@ -1355,23 +1555,17 @@ function createValidator(host) {
     return rulesetIds;
   }
 
-  // SPEC §2 — the authority tags, given the §2c tag treatment. A tag's first
-  // token is what follows the colon. After `DELEGATED:` that token is an
-  // optional free-text label: the §9 direction fence requires the specific
-  // label `presentation-direction` (checked in parseDirectionFence), and
-  // elsewhere it is descriptive only, so there is nothing here to resolve and
-  // nothing to fail. After `PERSONALIZATION:` it MUST be a declared question
-  // id, and a tag naming no declared question is a hard failure: the section
-  // claims an answer decides it, and no answer exists.
+  // SPEC §2 — text after `DELEGATED:` is part of the delegated passage.
+  // After `PERSONALIZATION:` the first token MUST be a declared question
+  // id, and a tag naming no declared question is a hard failure: the
+  // blockquote claims an answer decides it, and no answer exists.
   function validatePersonalizationTags(packageRoot, manifest, personalization) {
     // A declared personalization.json that would not parse already reported
     // itself; resolving ids against an empty map would only repeat that.
     if (personalization.declared && !personalization.readable) return;
     for (const { chapter, text } of chapterTexts(packageRoot)) {
-      for (const item of unfencedLines(text)) {
-        const match = /^\s*>\s*(DELEGATED|PERSONALIZATION):\s*(\S*)/.exec(item.text);
-        if (!match || match[1] !== "PERSONALIZATION") continue;
-        const id = match[2];
+      for (const item of authorityTagScopes(text.split(/\r?\n/)).filter(scope => scope.level === "personalization")) {
+        const id = item.question;
         if (!personalization.questions.has(id)) {
           error("PERSONALIZATION_TAG_DANGLING", "§2", slash(chapter), `> PERSONALIZATION: ${id || "(no id)"} does not name a declared personalization question`, item.line);
         }
@@ -1388,10 +1582,9 @@ function createValidator(host) {
     for (const { chapter, text } of chapterTexts(packageRoot)) {
       for (const item of unfencedLines(text)) {
         if (!/^\s{0,3}#{1,6}\s/.test(item.text)) continue;
-        for (const found of item.text.matchAll(/\[([A-Za-z0-9_-]+)\](?![([])/g)) {
+        for (const found of headingModeTags(item.text)) {
           const tag = found[1];
           const modeId = tag.toLowerCase();
-          if (/^\d+$/.test(tag)) continue;
           if (modeId === "all") {
             error("MODE_TAG_DANGLING", "§4b", slash(chapter), `chapter mode tag [${tag}] is retired; leave the statement untagged; it already holds in every mode`, item.line);
           } else if (modes.size && !modes.has(modeId)) {
@@ -1414,7 +1607,7 @@ function createValidator(host) {
       return result;
     }
     if (own(clocks, "modes") || own(clocks, "clocks")) {
-      error("CLOCKS_SHAPE", "§4b", file, "v0.6 clocks.json used root `modes` / `clocks`; v0.7 puts each clock at the root with its own `modes` map (`opengdd migrate <package-dir>`)");
+      error("CLOCKS_SHAPE", "§4b", file, "v0.6 clocks.json used root `modes` / `clocks`; the current format puts each clock at the root with its own `modes` map (`opengdd migrate <package-dir>`)");
       return result;
     }
     const clockEntries = [];
@@ -1491,35 +1684,6 @@ function createValidator(host) {
     }
   }
 
-  // SPEC §4 — "package defaults" means the resolved tuning snapshot produced by
-  // applying every question's `default` through the §5 pipeline. For a package
-  // with no personalization.json it equals the authored values. Rule validation
-  // reads both the authored values and this default snapshot.
-  //
-  function applyPersonalizationAnswers(base, questions, answerFor, canSet) {
-    const resolved = new Map(base);
-    const assign = (key, value) => {
-      if (typeof key === "string" && resolved.has(key) && canSet(key) && typeof value === "number" && Number.isFinite(value)) resolved.set(key, value);
-    };
-    for (const question of questions) {
-      if (!isObject(question)) continue;
-      const answer = answerFor(question);
-      if (question.type === "choice" && Array.isArray(question.options)) {
-        const option = question.options.find(item => isObject(item) && item.id === answer);
-        if (isObject(option?.sets)) for (const [key, value] of Object.entries(option.sets)) assign(key, value);
-      } else if (question.type === "number") {
-        assign(question.sets, answer);
-      }
-    }
-    return resolved;
-  }
-
-  function resolveDefaultTuning(doc, personalization, base) {
-    const questions = isObject(personalization?.doc) && Array.isArray(personalization.doc.questions) ? personalization.doc.questions : [];
-    const ranges = isObject(doc?.ranges) ? doc.ranges : {};
-    return applyPersonalizationAnswers(base, questions, question => question.default, key => own(ranges, key));
-  }
-
   // SPEC §4 rule 3, second half: a key MUST NOT open with a segment reserved
   // for prose citation, and MUST NOT carry a reserved extension segment in any
   // position. Either would make the key unciteable — §4's classification rule
@@ -1530,37 +1694,81 @@ function createValidator(host) {
   // wrong. Left out of tuning.schema.json deliberately — the schema can state
   // the constraint only as a lookahead-and-lookbehind pattern that no reader
   // can check by eye, and cannot name a revision.
-  function validateTuningKeySegments(role, key) {
+  function validateTuningKeySegments(role, key, line) {
     const segments = key.split(".");
     if (RESERVED_FIRST_SEGMENT_SET.has(segments[0])) {
       const rest = segments.slice(1).join(".") || "value";
-      error("TUNING_KEY_RESERVED", "§4", "tuning.json", `${role} key ${JSON.stringify(key)} opens with \`${segments[0]}\`, a format word reserved for prose citation in v${reservedIn(segments[0])}; try \`feel.${rest}\``);
+      error("TUNING_KEY_RESERVED", "§4", "tuning.json", `${role} key ${JSON.stringify(key)} opens with \`${segments[0]}\`, a format word reserved for prose citation in v${reservedIn(segments[0])}; try \`feel.${rest}\``, line);
     }
     const extension = segments.find(segment => RESERVED_EXTENSION_SET.has(segment));
     if (extension !== undefined) {
-      error("TUNING_KEY_RESERVED", "§4", "tuning.json", `${role} key ${JSON.stringify(key)} carries the reserved extension segment \`${extension}\`, which marks a file mention in prose in v${SPEC_VERSION}`);
+      error("TUNING_KEY_RESERVED", "§4", "tuning.json", `${role} key ${JSON.stringify(key)} carries the reserved extension segment \`${extension}\`, which marks a file mention in prose in v${SPEC_VERSION}`, line);
     }
   }
 
   function validateTuning(packageRoot, contentContext, personalization = undefined) {
     const file = path.join(packageRoot, "tuning.json");
+    let source = "";
+    try { if (host.exists(file)) source = host.readText(file); } catch { /* parseJsonFile reports the read failure */ }
+    // The member `name` directly inside the object that opens at offset
+    // `open`: its key's offset and the offset of its value. Strings and
+    // nested values are skipped, so a key of the same name deeper in the file,
+    // or inside a string, is never taken for it.
+    const member = (text, name, open) => {
+      let depth = 0;
+      for (let index = open; index < text.length; index += 1) {
+        const character = text[index];
+        if (character === '"') {
+          const keyAt = index;
+          index += 1;
+          while (index < text.length && text[index] !== '"') index += text[index] === "\\" ? 2 : 1;
+          if (depth !== 1) continue;
+          let cursor = index + 1;
+          while (/\s/u.test(text[cursor] ?? "")) cursor += 1;
+          if (text[cursor] !== ":") continue;
+          let key;
+          try { key = JSON.parse(text.slice(keyAt, index + 1)); } catch { continue; }
+          if (key !== name) continue;
+          cursor += 1;
+          while (/\s/u.test(text[cursor] ?? "")) cursor += 1;
+          return { keyAt, valueAt: cursor };
+        } else if (character === "{" || character === "[") depth += 1;
+        else if ((character === "}" || character === "]") && --depth === 0) return undefined;
+      }
+      return undefined;
+    };
+    // A table is looked up among the top-level members only, then its key
+    // among that table's own members.
+    const tuningLine = (table, key = undefined) => {
+      const rootAt = source.search(/\S/u);
+      if (rootAt < 0 || source[rootAt] !== "{") return 1;
+      const tableMember = member(source, table, rootAt);
+      if (!tableMember) return 1;
+      const keyMember = key !== undefined && source[tableMember.valueAt] === "{" ? member(source, key, tableMember.valueAt) : undefined;
+      return lineAtOffset(source, (keyMember ?? tableMember).keyAt);
+    };
+    const schemaLine = pointer => {
+      const segments = String(pointer).replace(/^#\/?/u, "").split("/").filter(Boolean).map(segment => segment.replaceAll("~1", "/").replaceAll("~0", "~"));
+      return segments.length > 1 ? tuningLine(segments[0], segments[1]) : segments.length ? tuningLine(segments[0]) : 1;
+    };
     const doc = host.exists(file) ? parseJsonFile(file, "tuning.json", "§4", "TUNING_JSON") : undefined;
     const tuning = new Map();
-    const context = { ...contentContext, tuning };
+    const openTuning = new Map();
+    const context = { ...contentContext, tuning, openTuning };
     if (doc === undefined) return { doc, context };
     // SPEC §2d — tuning.json is one of the schema-validated package files. The
     // bespoke §4 checks below stay: ranges and rules read sibling tables.
     const tuningSchema = loadSchema("tuning.schema.json", "§4");
     if (tuningSchema) {
       for (const problem of schemaProblems(doc, tuningSchema, tuningSchema)) {
-        error("TUNING_SCHEMA", "§4", "tuning.json", `${problem.path} ${problem.message}`);
+        error("TUNING_SCHEMA", "§4", "tuning.json", `${problem.path} ${problem.message}`, schemaLine(problem.path));
       }
     }
     if (!isObject(doc)) {
-      error("TUNING_SHAPE", "§4", "tuning.json", "top level must be an object");
+      error("TUNING_SHAPE", "§4", "tuning.json", "top level must be an object", 1);
       return { doc, context };
     }
-    const allowedTop = new Set(["values", "ranges", "rules"]);
+    const allowedTop = new Set(["values", "open", "ranges", "rules"]);
     const historical = new Map([
       ["tunables", "merge it into `values`"],
       ["constants", "merge it into `values`"],
@@ -1573,11 +1781,12 @@ function createValidator(host) {
       const message = historical.has(key)
         ? `top-level field ${JSON.stringify(key)} is a v0.6 field; ${historical.get(key)}. \`opengdd migrate <package-dir>\` rewrites the file`
         : `unknown top-level field ${JSON.stringify(key)}`;
-      error("TUNING_SHAPE", "§4", "tuning.json", message);
+      error("TUNING_SHAPE", "§4", "tuning.json", message, tuningLine(key));
     }
-    if (!isObject(doc.values)) error("TUNING_SHAPE", "§4", "tuning.json", "values is required and must be a flat object");
-    if (own(doc, "ranges") && !isObject(doc.ranges)) error("TUNING_SHAPE", "§4", "tuning.json", "ranges must be a flat object when present");
-    if (own(doc, "rules") && !isObject(doc.rules)) error("TUNING_SHAPE", "§4", "tuning.json", "rules must be an object when present");
+    if (!isObject(doc.values)) error("TUNING_SHAPE", "§4", "tuning.json", "values is required and must be a flat object", own(doc, "values") ? tuningLine("values") : 1);
+    if (own(doc, "open") && !isObject(doc.open)) error("TUNING_SHAPE", "§4", "tuning.json", "open must be a flat object when present", tuningLine("open"));
+    if (own(doc, "ranges") && !isObject(doc.ranges)) error("TUNING_SHAPE", "§4", "tuning.json", "ranges must be a flat object when present", tuningLine("ranges"));
+    if (own(doc, "rules") && !isObject(doc.rules)) error("TUNING_SHAPE", "§4", "tuning.json", "rules must be an object when present", tuningLine("rules"));
 
     const clocksFile = path.join(packageRoot, "clocks.json");
     const clocksDoc = host.exists(clocksFile) && host.isFile(clocksFile)
@@ -1593,47 +1802,117 @@ function createValidator(host) {
     const dotted = TUNING_KEY_PATTERN;
     if (isObject(doc.values)) {
       for (const [key, value] of Object.entries(doc.values)) {
-        if (!dotted.test(key)) error("TUNING_KEY", "§4", "tuning.json", `values key ${JSON.stringify(key)} is not a flat dotted key`);
-        else validateTuningKeySegments("values", key);
-        if (typeof value !== "number" || !Number.isFinite(value)) error("TUNING_NUMBER", "§4", "tuning.json", `values.${key} must be a finite JSON number`);
+        const line = tuningLine("values", key);
+        if (!dotted.test(key)) error("TUNING_KEY", "§4", "tuning.json", `values key ${JSON.stringify(key)} is not a flat dotted key`, line);
+        else validateTuningKeySegments("values", key, line);
+        if (typeof value !== "number" || !Number.isFinite(value)) error("TUNING_NUMBER", "§4", "tuning.json", `values.${key} must be a finite JSON number`, line);
         else context.tuning.set(key, value);
+      }
+    }
+    if (isObject(doc.open)) {
+      for (const [key, value] of Object.entries(doc.open)) {
+        const line = tuningLine("open", key);
+        if (!dotted.test(key)) error("TUNING_KEY", "§4", "tuning.json", `open key ${JSON.stringify(key)} is not a flat dotted key`, line);
+        else validateTuningKeySegments("open", key, line);
+        if (isObject(doc.values) && own(doc.values, key)) error("TUNING_OPEN_OVERLAP", "§4", "tuning.json", `key ${JSON.stringify(key)} appears in both values and open; a number has one kind`, line);
+        if (!((typeof value === "number" && Number.isFinite(value)) || value === null)) error("TUNING_NUMBER", "§4", "tuning.json", `open.${key} must be a finite JSON number or null`, line);
+        else context.openTuning.set(key, value);
       }
     }
     if (isObject(doc.ranges)) {
       for (const [key, range] of Object.entries(doc.ranges)) {
-        if (!dotted.test(key)) error("TUNING_KEY", "§4", "tuning.json", `ranges key ${JSON.stringify(key)} is not a flat dotted key`);
-        else validateTuningKeySegments("ranges", key);
-        if (!isObject(doc.values) || !own(doc.values, key)) error("TUNING_RANGE_KEY", "§4", "tuning.json", `ranges key ${JSON.stringify(key)} does not exist in values`);
+        const line = tuningLine("ranges", key);
+        if (!dotted.test(key)) error("TUNING_KEY", "§4", "tuning.json", `ranges key ${JSON.stringify(key)} is not a flat dotted key`, line);
+        else validateTuningKeySegments("ranges", key, line);
+        const inValues = isObject(doc.values) && own(doc.values, key);
+        const inOpen = isObject(doc.open) && own(doc.open, key);
+        if (!inValues && !inOpen) error("TUNING_RANGE_KEY", "§4", "tuning.json", `ranges key ${JSON.stringify(key)} does not exist in values or open`, line);
         if (!Array.isArray(range) || range.length !== 2 || range.some(value => typeof value !== "number" || !Number.isFinite(value))) {
-          error("TUNING_RANGE", "§4", "tuning.json", `ranges.${key} must be two finite numbers`);
+          error("TUNING_RANGE", "§4", "tuning.json", `ranges.${key} must be two finite numbers`, line);
           continue;
         }
-        if (range[0] > range[1]) error("TUNING_RANGE", "§4", "tuning.json", `ranges.${key} minimum ${range[0]} exceeds maximum ${range[1]}`);
-        const value = doc.values?.[key];
+        if (range[0] > range[1]) error("TUNING_RANGE", "§4", "tuning.json", `ranges.${key} minimum ${range[0]} exceeds maximum ${range[1]}`, line);
+        const table = inValues ? "values" : "open";
+        const value = inValues ? doc.values?.[key] : doc.open?.[key];
         if (typeof value === "number" && Number.isFinite(value) && (value < range[0] || value > range[1])) {
-          error("TUNING_RANGE_VALUE", "§4", "tuning.json", `values.${key}=${value} is outside inclusive range [${range[0]}, ${range[1]}]`);
+          error("TUNING_RANGE_VALUE", "§4", "tuning.json", `${table}.${key}=${value} is outside inclusive range [${range[0]}, ${range[1]}]`, line);
         }
       }
     }
     if (isObject(doc.rules)) {
-      const defaults = resolveDefaultTuning(doc, personalization, context.tuning);
+      const parsed = [];
       for (const [name, source] of Object.entries(doc.rules)) {
-        if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)) error("TUNING_RULE_INVALID", "§4", "tuning.json", `rule name ${JSON.stringify(name)} must be kebab-case`);
+        const line = tuningLine("rules", name);
+        if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name)) error("TUNING_RULE_INVALID", "§4", "tuning.json", `rule name ${JSON.stringify(name)} must be kebab-case`, line);
         if (typeof source !== "string") {
-          error("TUNING_RULE_INVALID", "§4", "tuning.json", `rule ${JSON.stringify(name)} must be a string`);
+          error("TUNING_RULE_INVALID", "§4", "tuning.json", `rule ${JSON.stringify(name)} must be a string`, line);
           continue;
         }
         try {
           const ast = parseRule(source);
-          for (const lookup of [context.tuning, defaults]) {
-            try {
-              if (!evaluateRule(ast, lookup)) error("TUNING_RULE_FAILED", "§4", "tuning.json", formatRuleFailure(name, source, ast, lookup));
-            } catch (cause) {
-              error("TUNING_RULE_INVALID", "§4", "tuning.json", `rule ${JSON.stringify(name)}: ${cause.message} at position ${cause.position ?? 0}`);
-            }
+          parsed.push({ name, source, ast, keyNodes: ruleKeyNodes(ast), keys: ruleKeys(ast), line });
+        } catch (cause) {
+          error("TUNING_RULE_INVALID", "§4", "tuning.json", `rule ${JSON.stringify(name)}: ${cause.message} at position ${cause.position ?? 0}`, line);
+        }
+      }
+
+      const recordNumbers = contentContext.recordNumbers ?? {
+        known: new Set(), decided: new Map(), guesses: new Map(), open: new Set(), openTypes: new Map(), referenceProblems: new Map()
+      };
+      const known = new Set([...context.tuning.keys(), ...context.openTuning.keys(), ...recordNumbers.known]);
+      const validRules = [];
+      for (const entry of parsed) {
+        for (const node of entry.keyNodes) {
+          if (!node.name.startsWith("collections.")) continue;
+          const drawer = node.name.split(".")[1];
+          const info = contentContext.collections?.get(drawer);
+          if (info) info.reached = true;
+        }
+        const unknown = entry.keyNodes.find(node => !known.has(node.name));
+        if (unknown === undefined) {
+          validRules.push(entry);
+          continue;
+        }
+        const recordProblem = recordNumbers.referenceProblems.get(unknown.name);
+        if (recordProblem) {
+          error("TUNING_RULE_INVALID", "§4", "tuning.json", `rule ${JSON.stringify(entry.name)}: ${recordProblem} at position ${unknown.start}`, entry.line);
+          continue;
+        }
+        try {
+          const diagnosticLookup = new Map([...known].map(key => [key, 0]));
+          ruleLookup(diagnosticLookup, unknown.name, unknown.start);
+        } catch (cause) {
+          error("TUNING_RULE_INVALID", "§4", "tuning.json", `rule ${JSON.stringify(entry.name)}: ${cause.message} at position ${cause.position ?? unknown.start}`, entry.line);
+        }
+      }
+
+      const ruleNumbers = calculateTuningEnvironments({ doc, tuning: context.tuning,
+        openTuning: context.openTuning, recordNumbers, personalization, validRules }, error);
+      context.ruleNumbers = ruleNumbers;
+      const { environments, guesses, guessedKeys } = ruleNumbers;
+      const { invalidPins } = environments.at(-1);
+      for (const { lookup, invalidPins } of environments) {
+        for (const entry of validRules) {
+          if (invalidPins.has(entry) || ![...entry.keys].every(key => lookup.has(key))) continue;
+          try {
+            if (!evaluateRule(entry.ast, lookup)) error("TUNING_RULE_FAILED", "§4", "tuning.json", formatRuleFailure(entry.name, entry.source, entry.ast, lookup), entry.line);
+          } catch (cause) {
+            error("TUNING_RULE_INVALID", "§4", "tuning.json", `rule ${JSON.stringify(entry.name)}: ${cause.message} at position ${cause.position ?? 0}`, entry.line);
+          }
+        }
+      }
+
+      for (const entry of validRules) {
+        if (invalidPins.has(entry) || ![...entry.keys].every(key => guesses.has(key)) || ![...entry.keys].some(key => guessedKeys.has(key))) continue;
+        try {
+          if (!evaluateRule(entry.ast, guesses)) {
+            const message = formatRuleFailure(entry.name, entry.source, entry.ast, guesses).replace(/^rule /, "guesses break rule ").replace(" does not hold", "");
+            warning("TUNING_RULE_GUESS_FAILED", "§4", "tuning.json", message, entry.line);
           }
         } catch (cause) {
-          error("TUNING_RULE_INVALID", "§4", "tuning.json", `rule ${JSON.stringify(name)}: ${cause.message} at position ${cause.position ?? 0}`);
+          const guessedArithmetic = cause.kind === "arithmetic" && [...(cause.dependencies ?? [])].some(key => guessedKeys.has(key));
+          if (guessedArithmetic) warning("TUNING_RULE_GUESS_UNCOMPUTABLE", "§4", "tuning.json", `guesses cannot evaluate rule ${JSON.stringify(entry.name)}: ${cause.message} at position ${cause.position ?? 0}`, entry.line);
+          else error("TUNING_RULE_INVALID", "§4", "tuning.json", `rule ${JSON.stringify(entry.name)}: ${cause.message} at position ${cause.position ?? 0}`, entry.line);
         }
       }
     }
@@ -1656,43 +1935,34 @@ function createValidator(host) {
     if (prefix) error("FANTASY_POSITION", "§1a", "01-overview.md", "fantasy block must be the first substantive content after the document title");
     const lines = match[1].split(/\r?\n/).map(line => line.trim()).filter(Boolean);
     // SPEC §1a line grammar: the player fantasy is every unlabeled line. There
-    // MUST be at least one; each run of them MUST close on `.`, `!`, or `?`;
-    // and their combined trimmed length MUST NOT exceed 280 characters.
-    const isLabelled = line => /^(?:Feel|NOT|Anti-references):/i.test(line);
-    const fantasyLines = lines.filter(line => !isLabelled(line));
+    // MUST be at least one, and their combined trimmed length MUST NOT exceed
+    // 280 characters. Punctuation is not checked, so a fantasy reads the same
+    // way in any language (principle 10). The labels stay syntax: `Feel:` with
+    // its ASCII colon, `NOT:`, `Anti-references:`.
+    const isLabeled = line => /^(?:Feel|NOT|Anti-references):/i.test(line);
+    const fantasyLines = lines.filter(line => !isLabeled(line));
     // SPEC §1a: each label MAY appear at most once. A second `Feel:` line, or a
     // second anti-reference line under either spelling, leaves no rule for which
     // one binds, so it is a hard failure.
     const labelSlot = line => (/^Feel:/i.test(line) ? "Feel:" : "NOT: / Anti-references:");
     const labelCounts = new Map();
-    for (const line of lines.filter(isLabelled)) labelCounts.set(labelSlot(line), (labelCounts.get(labelSlot(line)) ?? 0) + 1);
+    for (const line of lines.filter(isLabeled)) labelCounts.set(labelSlot(line), (labelCounts.get(labelSlot(line)) ?? 0) + 1);
     for (const [label, count] of labelCounts) {
       if (count > 1) error("FANTASY_LABEL_DUPLICATE", "§1a", "01-overview.md", `fantasy block carries ${count} ${label} lines; each label may appear at most once`);
     }
     if (!fantasyLines.length) {
       error("FANTASY_SENTENCE", "§1a", "01-overview.md", "fantasy block must contain at least one line of player fantasy");
     } else {
-      const runs = [];
-      lines.forEach(line => {
-        if (isLabelled(line)) { runs.push(undefined); return; }
-        if (runs.length && runs[runs.length - 1] !== undefined) runs[runs.length - 1] += ` ${line}`;
-        else runs.push(line);
-      });
-      for (const run of runs) {
-        if (run !== undefined && !/[.!?]$/.test(run)) {
-          error("FANTASY_SENTENCE", "§1a", "01-overview.md", `player fantasy must end with a sentence-ending mark (. ! ?); got ${JSON.stringify(run)}`);
-        }
-      }
       const budget = fantasyLines.reduce((total, line) => total + [...line].length, 0);
       if (budget > 280) {
         error("FANTASY_LENGTH", "§1a", "01-overview.md", `player fantasy is ${budget} characters; SPEC §1a allows at most 280 combined, newlines not counted`);
       }
     }
     const feel = lines.find(line => /^Feel:/i.test(line));
-    const adjectives = feel ? feel.replace(/^Feel:\s*/i, "").replace(/[.!?]$/, "").split(",").map(item => item.trim()).filter(Boolean) : [];
-    if (adjectives.length < 3 || adjectives.length > 5) error("FANTASY_FEEL", "§1a", "01-overview.md", `fantasy block must contain 3–5 feel adjectives; found ${adjectives.length}`);
+    const feelEntries = feel ? feel.replace(/^Feel:\s*/i, "").replace(FANTASY_SENTENCE_END, "").split(FANTASY_FEEL_SEPARATOR).map(item => item.trim()).filter(Boolean) : [];
+    if (feelEntries.length < 3 || feelEntries.length > 5) error("FANTASY_FEEL", "§1a", "01-overview.md", `fantasy block must contain 3–5 feel entries; found ${feelEntries.length}`);
     const anti = lines.find(line => /^(?:NOT|Anti-references):/i.test(line));
-    if (!anti || !anti.replace(/^(?:NOT|Anti-references):\s*/i, "").replace(/[.!?]$/, "").trim()) {
+    if (!anti || !anti.replace(/^(?:NOT|Anti-references):\s*/i, "").replace(FANTASY_SENTENCE_END, "").trim()) {
       error("FANTASY_ANTI_REFERENCES", "§1a", "01-overview.md", "fantasy block must contain non-empty anti-references");
     }
     // SPEC §1a: a fantasy line MUST NOT carry a reference. That covers the §4b
@@ -1703,7 +1973,7 @@ function createValidator(host) {
     // happens to exist is not what the fence is about.
     const bodyStart = text.slice(0, match.index).split(/\r?\n/).length + 1;
     match[1].split(/\r?\n/).forEach((raw, offset) => {
-      if (isLabelled(raw.trim())) return;
+      if (isLabeled(raw.trim())) return;
       const at = bodyStart + offset;
       for (const typed of raw.matchAll(/(?:^|[^A-Za-z0-9_:-])(tuning|state|collections|descriptor|palette):([A-Za-z0-9_:-]+(?:\.[A-Za-z0-9_:-]+)*)/g)) {
         error("FANTASY_REFERENCE", "§1a", "01-overview.md", `fantasy line carries the typed reference \`${typed[1]}:${typed[2]}\`; §1a admits no reference in the fantasy block`, at);
@@ -1714,7 +1984,7 @@ function createValidator(host) {
         if (classified?.kind !== "tuning" && !RUNTIME_ADDRESS.test(token)) continue;
         error("FANTASY_REFERENCE", "§1a", "01-overview.md", `fantasy line cites \`${token}\`; §1a admits no tuning or runtime reference in the fantasy block`, at);
       }
-      const chapterAnchor = /(?:[A-Za-z0-9_./-]+\.md#[a-z0-9]+(?:-[a-z0-9]+)*|(?:^|\s)#(?=[a-z0-9-]*[a-z])[a-z0-9]+(?:-[a-z0-9]+)*(?![a-z0-9-]))/.exec(raw);
+      const chapterAnchor = FANTASY_CHAPTER_ANCHOR.exec(raw);
       if (chapterAnchor) {
         error("FANTASY_REFERENCE", "§1a", "01-overview.md", `fantasy line carries the chapter anchor ${JSON.stringify(chapterAnchor[0].trim())}; §1a admits no reference in the fantasy block`, at);
       }
@@ -1742,9 +2012,9 @@ function createValidator(host) {
     return paragraphs;
   }
 
-  // DRAFT-pending-v0.4. These patterns deliberately look for shapes, not intent.
-  // A warning can be benign game prose; the validator never follows links,
-  // decodes payloads, executes commands, or turns these warnings into errors.
+  // These advisory checks identify text patterns. They do not determine intent.
+  // A notice can be benign game prose; the validator never follows links,
+  // decodes payloads, executes commands, or turns these notices into errors.
   const INJECTION_PROMPT_CONTROL_PATTERNS = [
     /\b(?:ignore|disregard|forget|override|bypass)\b.{0,80}\b(?:(?:previous|prior|earlier|above)(?:\s+[\p{L}\p{N}_-]+){0,3}\s+(?:instructions?|prompts?|messages?|rules?)|(?:system|developer|user)\s+(?:instructions?|prompts?|messages?|rules?))\b/iu,
     /\b(?:system|developer|assistant)\s+(?:message|prompt|instructions?)\b/iu,
@@ -1835,12 +2105,12 @@ function createValidator(host) {
       try {
         const size = host.size(file);
         if (size > INJECTION_SCAN_MAX_BYTES) {
-          warning("INJECTION_SCAN_SKIPPED", INJECTION_LINT_SECTION, display, `text-like file exceeds the 2 MiB lint limit and was not scanned; review it as untrusted data`, undefined, { lint_status: INJECTION_LINT_STATUS, bytes: size });
+          safetyNotice("INJECTION_SCAN_SKIPPED", INJECTION_LINT_SECTION, display, `text-like file exceeds the 2 MiB lint limit and was not scanned; review it as untrusted data`, undefined, { lint_status: INJECTION_LINT_STATUS, bytes: size });
           continue;
         }
         text = host.readText(file);
       } catch (cause) {
-        warning("INJECTION_SCAN_SKIPPED", INJECTION_LINT_SECTION, display, `text-like file could not be scanned (${cause.code ?? "read error"}); review it as untrusted data`, undefined, { lint_status: INJECTION_LINT_STATUS });
+        safetyNotice("INJECTION_SCAN_SKIPPED", INJECTION_LINT_SECTION, display, `text-like file could not be scanned (${cause.code ?? "read error"}); review it as untrusted data`, undefined, { lint_status: INJECTION_LINT_STATUS });
         continue;
       }
 
@@ -1854,26 +2124,26 @@ function createValidator(host) {
         const line = index + 1;
 
         if (injectionPatternStartsHere(INJECTION_PROMPT_CONTROL_PATTERNS, current, window)) {
-          warning("INJECTION_PROMPT_CONTROL", INJECTION_LINT_SECTION, display, `prompt-control language may address a reader or agent; treat this line as untrusted data`, line, { lint_status: INJECTION_LINT_STATUS, signal: "prompt-control-language" });
+          safetyNotice("INJECTION_PROMPT_CONTROL", INJECTION_LINT_SECTION, display, `prompt-control language may address a reader or agent; treat this line as untrusted data`, line, { lint_status: INJECTION_LINT_STATUS, signal: "prompt-control-language" });
         }
         if (injectionPatternStartsHere(INJECTION_EXTERNAL_ACTION_PATTERNS, current, window)) {
-          warning("INJECTION_EXTERNAL_ACTION", INJECTION_LINT_SECTION, display, `external-action language may ask a reader or agent to run code or contact a resource; do not execute it`, line, { lint_status: INJECTION_LINT_STATUS, signal: "external-action-language" });
+          safetyNotice("INJECTION_EXTERNAL_ACTION", INJECTION_LINT_SECTION, display, `external-action language may ask a reader or agent to run code or contact a resource; do not execute it`, line, { lint_status: INJECTION_LINT_STATUS, signal: "external-action-language" });
         }
         if (injectionPatternStartsHere(INJECTION_SECOND_PERSON_PATTERNS, current, window) && (!INJECTION_GAME_CONTEXT.test(window) || INJECTION_AGENT_CONTEXT.test(window))) {
-          warning("INJECTION_READER_DIRECTIVE", INJECTION_LINT_SECTION, display, `second-person directive may address the reader or agent rather than describe game behavior; review the context`, line, { lint_status: INJECTION_LINT_STATUS, signal: "second-person-directive" });
+          safetyNotice("INJECTION_READER_DIRECTIVE", INJECTION_LINT_SECTION, display, `second-person directive may address the reader or agent rather than describe game behavior; review the context`, line, { lint_status: INJECTION_LINT_STATUS, signal: "second-person-directive" });
         }
 
         const hexLength = injectionHexLength(raw);
         if (hexLength !== undefined) {
-          warning("INJECTION_OBFUSCATED_BLOCK", INJECTION_LINT_SECTION, display, `long hex-like run (${hexLength} characters) may conceal instructions; do not decode it automatically`, line, { lint_status: INJECTION_LINT_STATUS, signal: "hex-like-run", characters: hexLength });
+          safetyNotice("INJECTION_OBFUSCATED_BLOCK", INJECTION_LINT_SECTION, display, `long hex-like run (${hexLength} characters) may conceal instructions; do not decode it automatically`, line, { lint_status: INJECTION_LINT_STATUS, signal: "hex-like-run", characters: hexLength });
         }
         const base64Length = injectionBase64Length(raw);
         if (base64Length !== undefined) {
-          warning("INJECTION_OBFUSCATED_BLOCK", INJECTION_LINT_SECTION, display, `long base64-like run (${base64Length} characters) may conceal instructions; do not decode it automatically`, line, { lint_status: INJECTION_LINT_STATUS, signal: "base64-like-run", characters: base64Length });
+          safetyNotice("INJECTION_OBFUSCATED_BLOCK", INJECTION_LINT_SECTION, display, `long base64-like run (${base64Length} characters) may conceal instructions; do not decode it automatically`, line, { lint_status: INJECTION_LINT_STATUS, signal: "base64-like-run", characters: base64Length });
         }
 
         if (!fenced[index] && (INJECTION_DANGEROUS_LINK.test(raw) || INJECTION_ACTION_LINK.test(raw))) {
-          warning("INJECTION_SUSPICIOUS_LINK", INJECTION_LINT_SECTION, display, `prose contains a link with action-oriented, executable, local-network, credential, or active-scheme indicators; do not follow it automatically`, line, { lint_status: INJECTION_LINT_STATUS, signal: "suspicious-link" });
+          safetyNotice("INJECTION_SUSPICIOUS_LINK", INJECTION_LINT_SECTION, display, `prose contains a link with action-oriented, executable, local-network, credential, or active-scheme indicators; do not follow it automatically`, line, { lint_status: INJECTION_LINT_STATUS, signal: "suspicious-link" });
         }
       });
 
@@ -1883,7 +2153,7 @@ function createValidator(host) {
         const agentContext = INJECTION_AGENT_CONTEXT.test(paragraph.text);
         const buildPlanContext = path.basename(file).toLowerCase() === "05-build-plan.md";
         if ((!agentContext && !buildPlanContext) || (INJECTION_GAME_CONTEXT.test(paragraph.text) && !agentContext && !buildPlanContext)) continue;
-        warning("INJECTION_READER_DIRECTIVE", INJECTION_LINT_SECTION, display, `imperative ${JSON.stringify(match[1].toLowerCase())} may address the builder or test runner rather than describe game behavior; review the context`, paragraph.line, { lint_status: INJECTION_LINT_STATUS, signal: "imperative-reader-directive", verb: match[1].toLowerCase() });
+        safetyNotice("INJECTION_READER_DIRECTIVE", INJECTION_LINT_SECTION, display, `imperative ${JSON.stringify(match[1].toLowerCase())} may address the builder or test runner rather than describe game behavior; review the context`, paragraph.line, { lint_status: INJECTION_LINT_STATUS, signal: "imperative-reader-directive", verb: match[1].toLowerCase() });
       }
     }
   }
@@ -1892,14 +2162,22 @@ function createValidator(host) {
     const file = path.join(packageRoot, "02-mechanics.md");
     if (!host.exists(file)) return;
     const text = host.readText(file);
-    const authorityScopes = authorityTagScopes(text.split(/\r?\n/));
+    const lines = text.split(/\r?\n/);
+    // A ruleset restricts applicability, not authority. Its Fixed prose still
+    // needs tie-break review; only Delegated and Personalization are exempt.
+    const tagScopes = authorityTagScopes(lines);
+    // Remove only scoped lines, preserving line numbers. This also separates
+    // Fixed text immediately after a quote without an intervening blank line.
+    const fixedText = lines.map((line, index) => {
+      if (tagScopeAt(tagScopes, index)) return "";
+      if (tagScopes.some(scope => scope.level === "ruleset" && index === scope.start)) return "";
+      return /^\s*(?:>\s*)+$/.test(line) ? "" : line;
+    }).join("\n");
     const choice = /\b(?:nearest|closest|first|last|when both|both conditions|simultaneous(?:ly)?|equal distance|equidistant|ties?|targets?|selects?|chooses?|choice|ordering)\b/i;
     const sharedCeiling = /(?:\b(?:total|combined|shared|all)\b.{0,180}\b(?:cap(?:ped)?|ceiling|limit(?:ed)?|maximum|max)\b|\b(?:cap(?:ped)?|ceiling)\b.{0,180}\b(?:allocation|composition|formula|total|combined|shared|reduce|remaining|regardless)\b)/i;
     const resolution = /\b(?:tie[- ]?break|lowest|highest|ascending|descending|clockwise|counterclockwise|lexicograph|priority|prioritize|prefer|wins|random|prng|listed order|declared order|fixed order|by id)\b/i;
     const allocationResolution = /\b(?:priority|prioritize|preserve|clamp\s+(?:the\s+)?(?:first|second|[a-z-]+)|remove\s+(?:the\s+)?(?:first|second|[a-z-]+)|reduce\s+(?:the\s+)?(?:first|second|[a-z-]+)|remaining capacity|allocated first|allocated last|wins)\b/i;
-    for (const paragraph of proseParagraphs(text)) {
-      const paragraphIndex = paragraph.line - 1;
-      if (authorityScopes.some(scope => paragraphIndex >= scope.start && paragraphIndex < scope.end)) continue;
+    for (const paragraph of proseParagraphs(fixedText)) {
       // A backticked token is a citation, not English; a
       // record id like `first-note` is cited constantly, and reading it as
       // the word "first" makes every such paragraph choice-shaped. The
@@ -1910,7 +2188,7 @@ function createValidator(host) {
       const isChoice = choice.test(spoken);
       if ((!isChoice && !isShared) || resolution.test(paragraph.text) || (isShared && allocationResolution.test(paragraph.text))) continue;
       const excerpt = paragraph.text.length > 180 ? `${paragraph.text.slice(0, 177)}…` : paragraph.text;
-      warning(isShared ? "TIE_BREAK_SHARED_CEILING" : "TIE_BREAK_CHOICE", "§2a", "02-mechanics.md", `choice-shaped rule lacks a mechanically apparent tie-break: ${excerpt}`, paragraph.line);
+      hint(isShared ? "TIE_BREAK_SHARED_CEILING" : "TIE_BREAK_CHOICE", "§2a", "02-mechanics.md", `choice-shaped rule lacks a mechanically apparent tie-break: ${excerpt}`, paragraph.line);
     }
   }
 
@@ -1933,7 +2211,7 @@ function createValidator(host) {
     const numberPattern = /(?<![A-Za-z0-9_.-])-?(?:\d+\.\d+|\d+)(?![A-Za-z0-9_.-])/g;
     for (const { chapter, text } of chapterTexts(packageRoot)) {
       for (const item of unfencedLines(text)) {
-        if (/^\s*#/.test(item.text) || /non[- ]normative/i.test(item.text) || /^\s*Format (?:revision|version):/i.test(item.text)) continue;
+        if (/^\s*#/.test(item.text) || /^\s*Format (?:revision|version):/i.test(item.text)) continue;
         for (const match of item.text.matchAll(numberPattern)) {
           const raw = match[0];
           const before = item.text.slice(Math.max(0, match.index - 4), match.index);
@@ -1941,7 +2219,7 @@ function createValidator(host) {
           const numeric = Number(raw);
           const keys = numericValues.get(numeric);
           if (!keys) continue;
-          warning("PROSE_TUNING_LITERAL", "§4", slash(chapter), `numbers belong in tuning.json, not in prose: replace ${raw} with a citation of the key it means (${displayKeys(keys)} ${keys.length === 1 ? "has" : "have"} this value), or mark the line non-normative`, item.line, { value: numeric, tuning_keys: keys });
+          hint("PROSE_TUNING_LITERAL", "§4", slash(chapter), `prose repeats a decided value from tuning.json: replace ${raw} with a citation of the key it means (${displayKeys(keys)} ${keys.length === 1 ? "has" : "have"} this value) when the sentence states that shared rule`, item.line, { value: numeric, tuning_keys: keys });
         }
       }
     }
@@ -1976,7 +2254,7 @@ function createValidator(host) {
   // - `rules`, against tuning.json's rule map by name;
   // - `clocks`, against the declared mode ids and clock names of
   //   `clocks.json` (§4b);
-  // - `contracts`, against the adoption file that owns the value (§10.6),
+  // - `contracts`, against the adoption file that owns the value (§10.9),
   //   handled on its own branch below.
   //
   // The remaining reserved segments — `runtime`, `manifest`, and `build` —
@@ -2167,7 +2445,7 @@ function createValidator(host) {
   // declared-but-unused data, and draws a warning on the `duplicate-edge`
   // precedent — usually an editing slip, worth seeing, decides nothing. The
   // four reaching constructs are §9.1's closed list: a mood's `palette`
-  // field, a §9.6 colour promise, a §9.6 contrast operand, and a §4 prose
+  // field, a §9.6 color promise, a §9.6 contrast operand, and a §4 prose
   // citation. Granularity is per palette, so
   // an unused color name inside a reached palette draws nothing.
   function reportUnreachedPalettes(paletteCtx) {
@@ -2202,7 +2480,7 @@ function createValidator(host) {
   // is chapter prose like any other, "so it resolves and it reaches". Those
   // lines rejoin the scan here, for every citation family this walk handles
   // rather than for palettes alone: the sentence names the palette case because
-  // that is the one it had to settle, and the rationale under a colour is the
+  // that is the one it had to settle, and the rationale under a color is the
   // same rationale prose wherever it sits. The fence's own citation lines stay
   // out: they are fence grammar, resolved by the fence machinery, and scanning
   // them here would report every fence entry twice.
@@ -2234,6 +2512,56 @@ function createValidator(host) {
     return edits + (long.length - longIndex) <= 1;
   }
 
+  // Edit distance counting insertions, deletions, substitutions, and swaps of
+  // two neighboring characters, each as one edit. Stops early above `limit`.
+  function editDistance(left, right, limit) {
+    const a = [...left];
+    const b = [...right];
+    if (Math.abs(a.length - b.length) > limit) return limit + 1;
+    let before = [];
+    let previous = Array.from({ length: b.length + 1 }, (_, index) => index);
+    for (let i = 1; i <= a.length; i += 1) {
+      const current = [i];
+      let rowMinimum = i;
+      for (let j = 1; j <= b.length; j += 1) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        let value = Math.min(previous[j] + 1, current[j - 1] + 1, previous[j - 1] + cost);
+        if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) value = Math.min(value, before[j - 2] + 1);
+        current.push(value);
+        rowMinimum = Math.min(rowMinimum, value);
+      }
+      if (rowMinimum > limit) return limit + 1;
+      before = previous;
+      previous = current;
+    }
+    return previous[b.length];
+  }
+
+  // The declared name an unresolved citation most likely meant, for the
+  // did-you-mean part of its message. One edit is allowed for names shorter
+  // than 12 characters and two for longer ones; names of three characters or
+  // fewer get no suggestion. When two names are equally close, none is
+  // suggested, because a guess between them would mislead.
+  function nearestName(token, names) {
+    let best;
+    let bestDistance = Infinity;
+    let tied = false;
+    for (const name of names) {
+      const length = Math.max([...token].length, [...name].length);
+      const limit = length <= 3 ? 0 : length < 12 ? 1 : 2;
+      if (!limit || name === token) continue;
+      const distance = editDistance(token, name, limit);
+      if (distance > limit) continue;
+      if (distance < bestDistance) {
+        best = name;
+        bestDistance = distance;
+        tied = false;
+      } else if (distance === bestDistance && name !== best) tied = true;
+    }
+    return tied ? undefined : best;
+  }
+  const didYouMean = suggestion => suggestion === undefined ? "" : `; did you mean \`${suggestion}\`?`;
+
   // ---------------------------------------------------------------------------
   // Retired typed prose forms stay recognizable so their failures can carry a
   // precise migration hint. Runtime values and collection paths use dotted
@@ -2251,7 +2579,7 @@ function createValidator(host) {
       const number = /^state:number:([^:]+)$/.exec(token);
       return { section: "§4b", message: number ? `is retired; \`state:number:${number[1]}\` is now \`runtime.${number[1]}\`` : "is retired; write a `runtime.<name>` address and state the condition in a sentence" };
     }
-    if (/^collections\b/.test(token) && token.includes(":")) return { section: "§1b", message: "uses a retired colon count form; cite the drawer with its dotted address and state the count in prose" };
+    if (/^collections\b/.test(token) && token.includes(":")) return { section: "§1b", message: "uses a retired colon count form. Cite the collection by its dotted address. State the count in prose only when nothing else in the package needs it. Otherwise store the count under a tuning key and cite that key." };
     return undefined;
   }
 
@@ -2266,7 +2594,7 @@ function createValidator(host) {
     // batch already routed the palette branch around the sibling
     // no-direction-file gate for the same reason.
     const tuningReadable = isObject(tuningDoc) && isObject(tuningDoc.values);
-    const keys = new Set(tuningReadable ? Object.keys(tuningDoc.values) : []);
+    const keys = new Set(tuningReadable ? [...Object.keys(tuningDoc.values), ...Object.keys(isObject(tuningDoc.open) ? tuningDoc.open : {})] : []);
     const directionDoc = directionCtx?.directionDoc;
     // The same gate skips the direction mentions below, so the unmentioned
     // check cannot run either: it would report every judged entry as
@@ -2311,13 +2639,19 @@ function createValidator(host) {
           if (first === "values" || first === "ranges") {
             const table = isObject(tuningDoc?.[first]) ? tuningDoc[first] : {};
             const key = classified.segments.slice(1).join(".");
-            if (!own(table, key)) error("PROSE_CITATION_DANGLING", "§4", slash(chapter), `prose citation \`${token}\` does not resolve to a declared tuning.json ${first} key`, line, { token });
+            if (!own(table, key)) {
+              const near = nearestName(key, Object.keys(table));
+              error("PROSE_CITATION_DANGLING", "§4", slash(chapter), `prose citation \`${token}\` does not resolve to a declared tuning.json ${first} key${didYouMean(near && `${first}.${near}`)}`, line, { token });
+            }
             continue;
           }
           if (first === "rules") {
             const rules = isObject(tuningDoc?.rules) ? tuningDoc.rules : {};
             const name = classified.segments[1];
-            if (!own(rules, name)) error("PROSE_CITATION_DANGLING", "§4", slash(chapter), `prose citation \`${token}\` does not resolve to a declared tuning.json rule name`, line, { token });
+            if (!own(rules, name)) {
+              const near = nearestName(name, Object.keys(rules));
+              error("PROSE_CITATION_DANGLING", "§4", slash(chapter), `prose citation \`${token}\` does not resolve to a declared tuning.json rule name${didYouMean(near && `rules.${near}`)}`, line, { token });
+            }
             continue;
           }
           if (first === "runtime") continue;
@@ -2329,29 +2663,43 @@ function createValidator(host) {
             const [, second] = classified.segments;
             const resolved = classified.segments.length === 2 && names.has(second);
             if (!resolved) {
-              error("PROSE_CITATION_DANGLING", "§4b", slash(chapter), `prose citation \`${token}\` does not resolve to a declared clocks.json clock; use \`clocks.<name>\``, line, { token });
+              const near = classified.segments.length === 2 ? nearestName(second, names) : undefined;
+              const advice = near ? didYouMean(`clocks.${near}`) : "; use `clocks.<name>`";
+              error("PROSE_CITATION_DANGLING", "§4b", slash(chapter), `prose citation \`${token}\` does not resolve to a declared clocks.json clock${advice}`, line, { token });
             }
             continue;
           }
           // §1b: `collections.<drawer>` cites the drawer as a
-          // set and `collections.<drawer>.<record>` cites one record; a longer
-          // token names a member of the record's own data and resolves as far
-          // as the record, the rule descriptors and invariants use. A dangling
+          // set, `collections.<drawer>.<record>` cites one record, and the
+          // next segment must name a field present in that record or its
+          // schema. A dangling
           // citation is a hard failure — with graph edges, contract row
           // sources, and expression references already hard-checked, this
           // closes the format's last silent-rename gap: renaming a record
           // makes every stale reference a finding with a file and line.
           if (first === "collections") {
             const drawers = exprContext?.collections ?? new Map();
-            const [, drawer, record] = classified.segments;
+            const [, drawer, record, field] = classified.segments;
             const info = drawers.get(drawer);
             if (!info) {
-              error("PROSE_CITATION_DANGLING", "§1b", slash(chapter), `prose citation \`${token}\` names no collections/ drawer`, line, { token });
+              const near = drawer === undefined ? undefined : nearestName(drawer, drawers.keys());
+              error("PROSE_CITATION_DANGLING", "§1b", slash(chapter), `prose citation \`${token}\` names no collection in collections/${didYouMean(near && ["collections", near, ...classified.segments.slice(2)].join("."))}`, line, { token });
               continue;
             }
             info.reached = true;
             if (record !== undefined && !info.recordIds.has(record)) {
-              error("PROSE_CITATION_DANGLING", "§1b", slash(chapter), `prose citation \`${token}\` does not resolve to a record of collections/${drawer}; the record's id is its filename`, line, { token });
+              const near = nearestName(record, info.recordIds);
+              error("PROSE_CITATION_DANGLING", "§1b", slash(chapter), `prose citation \`${token}\` does not resolve to a record of collections/${drawer}; the record's id is its filename${didYouMean(near && ["collections", drawer, near, ...classified.segments.slice(3)].join("."))}`, line, { token });
+              continue;
+            }
+            if (record !== undefined && field !== undefined) {
+              const entry = collectionRecordIndex(info).get(record);
+              const fieldExists = (isObject(entry?.record) && own(entry.record, field)) || info.fields?.has(field);
+              if (!fieldExists) {
+                const fields = new Set([...(isObject(entry?.record) ? Object.keys(entry.record) : []), ...(info.fields?.keys() ?? [])]);
+                const near = nearestName(field, fields);
+                error("PROSE_CITATION_DANGLING", "§1b", slash(chapter), `prose citation \`${token}\` does not resolve to a field of collections/${drawer}/${record}; the field must exist in the record or its schema${didYouMean(near && ["collections", drawer, record, near, ...classified.segments.slice(4)].join("."))}`, line, { token });
+              }
             }
             continue;
           }
@@ -2391,11 +2739,12 @@ function createValidator(host) {
         }
         if (keys.has(token)) continue;
         const near = RESERVED_FIRST_SEGMENTS.find(segment => isNearMiss(classified.segments[0], segment));
+        const nearKey = nearestName(token, keys);
         const migrated = /^constraints\.(colors|thresholds|timing)\./.test(token)
           ? `; \`${token}\` is a retired direction path (for example, \`constraints.colors.x\` is now \`colors.x\`)`
           : "";
-        const hint = migrated || (near ? `; did you mean the reserved \`${near}.\` family?` : "");
-        error("PROSE_CITATION_DANGLING", "§4", slash(chapter), `prose citation \`${token}\` does not resolve to a tuning.json key${hint}`, line, { token, first_segment: classified.segments[0] });
+        const suggestion = migrated || (nearKey ? `; did you mean \`${nearKey}\`?` : near ? `; did you mean the reserved \`${near}.\` family?` : "");
+        error("PROSE_CITATION_DANGLING", "§4", slash(chapter), `prose citation \`${token}\` does not resolve to a tuning.json key${suggestion}`, line, { token, first_segment: classified.segments[0] });
       }
     }
   }
@@ -2468,7 +2817,7 @@ function createValidator(host) {
           : undefined;
         const resolved = address === undefined ? { kind: "dangling" } : resolvePaletteReference(paletteCtx, address);
         if (resolved.kind === "palette") paletteCtx.reached.add(resolved.key);
-        else if (resolved.kind === "color") error("DIRECTION_MOOD_PALETTE_DANGLING", "§9", declaredPath, `mood.${key}.palette ${JSON.stringify(entry.palette)} names a colour, not a palette`);
+        else if (resolved.kind === "color") error("DIRECTION_MOOD_PALETTE_DANGLING", "§9", declaredPath, `mood.${key}.palette ${JSON.stringify(entry.palette)} names a color, not a palette`);
         else error("DIRECTION_MOOD_PALETTE_DANGLING", "§9", declaredPath, `mood.${key}.palette ${JSON.stringify(entry.palette)} does not resolve to a declared palette address`);
       }
 
@@ -2639,7 +2988,7 @@ function createValidator(host) {
     if (!host.exists(file)) return undefined;
     const text = host.readText(file);
     const headings = [...text.matchAll(/^#{1,6}\s+(AT-(\d+))\b.*$/gm)].map(match => ({ id: match[1], number: Number(match[2]), index: match.index, after: match.index + match[0].length, line: text.slice(0, match.index).split(/\r?\n/).length }));
-    // §10.8: a generated acceptance test carries a derived name rather than a
+    // §10.7: a generated acceptance test carries a derived name rather than a
     // number — `<instance>/<template>[/<row>]` — so it never enters §6's
     // consecutive numbering, and counting it needs its own arm.
     const generated = [...text.matchAll(/^#{1,6}\s+AT\s+([a-z0-9-]+\/[a-z0-9-]+(?:\/[a-z0-9-]+)?)\s+—.*$/gm)].map(match => ({ name: match[1], index: match.index, after: match.index + match[0].length, line: text.slice(0, match.index).split(/\r?\n/).length }));
@@ -2675,9 +3024,6 @@ function createValidator(host) {
     const retiredMarker = text.search(/^<!-- opengdd:contracts:generated:(?:begin|end)\b/m);
     const retiredAt = retiredMarker;
     if (retiredAt >= 0) error("CONTRACT_BLOCK_RETIRED", "§10", display, "the build plan carries a retired generated-contracts block; run `opengdd migrate` to remove its markers and content", text.slice(0, retiredAt).split(/\r?\n/).length);
-    if (headings.length === 0) {
-      error("VERIFICATION_AT_MISSING", "§6", display, "build plan must contain numbered AT-<n> acceptance tests");
-    }
     headings.forEach((heading, index) => {
       // SPEC §6: AT numbers are unique and ascending in document order. Gaps are
       // permitted — a deleted test's number is retired, never reused.
@@ -2733,7 +3079,7 @@ function createValidator(host) {
     return value;
   }
 
-  // §10.4: every envelope object is closed. Members whose names begin with `_`
+  // §10.2: every envelope object is closed. Members whose names begin with `_`
   // are annotations — legal everywhere, read by nothing, excluded from every
   // key-set comparison, and never interpolated.
   function contractClosed(object, allowed, required, display, pointer) {
@@ -2754,7 +3100,7 @@ function createValidator(host) {
     return false;
   }
 
-  // §10.6: what the designer names is kebab-case and dot-free, so
+  // §10.9: what the designer names is kebab-case and dot-free, so
   // `contracts.<instance>.<knob>` parses unambiguously in the §4 dotted-key
   // namespace and an id can never collide with the item-3 fragment syntax.
   function contractKebab(value, display, pointer, what, maxLength = 0) {
@@ -2769,7 +3115,7 @@ function createValidator(host) {
     return true;
   }
 
-  // §§10.3–10.4 use one condition: an object with optional `flag` and `row`
+  // §§10.5, 10.7 and 12.3 use one condition: an object with optional `flag` and `row`
   // submembers, each mapping a name to a non-empty array of legal values.
   function contractWhenShape(when, display, pointer, rowDomainLegal) {
     if (when === undefined) return;
@@ -2795,7 +3141,7 @@ function createValidator(host) {
     }
   }
 
-  // §§10.3–10.4 and §10.8: satisfied when every listed flag's recorded answer and every
+  // §12.3: satisfied when every listed flag's recorded answer and every
   // listed row field's value is in its array. A condition naming a pruned flag
   // is unsatisfied — there is no recorded answer to read. Absent or empty is
   // satisfied.
@@ -2815,7 +3161,7 @@ function createValidator(host) {
     return true;
   }
 
-  // §10.3 (v0.8): a question condition carries exactly one of five forms; a
+  // §12.3 (v0.8): a question condition carries exactly one of five forms; a
   // value-declaration condition adds standalone `row-has`. Shape only —
   // references are checked with the definition, truth per adoption.
   const CONTRACT_CONDITION_FORMS = ["flag", "value-form", "row-count", "any", "all", "row-has"];
@@ -2878,7 +3224,7 @@ function createValidator(host) {
   // v0.7 `flag` references keep CONTRACT_REFERENCE via checkWhen, so questions
   // pass checkFlag=false; value declarations have no other flag checker and
   // pass true. Every widened form uses the caller's condition code, per the
-  // §10.4 validator obligations. Recursion stops one combinator deep: the
+  // §§10.3–10.4 validator obligations. Recursion stops one combinator deep: the
   // shape checker already rejects nesting, so deeper members are not walked.
   function contractConditionRefs(when, display, pointer, code, model, checkFlag = false, nested = false) {
     if (!isObject(when)) return;
@@ -2964,9 +3310,9 @@ function createValidator(host) {
     return found;
   }
 
-  // §10.4: the value-citation grammar — a dotted address with no space, hash,
+  // §10.10: the value-citation grammar — a dotted address with no space, hash,
   // colon, or brace, and no empty segment. A string outside this grammar has
-  // no form, so a value-form condition reading it is false (§10.3); the
+  // no form, so a value-form condition reading it is false (§12.3); the
   // grammar violation is reported where the value is validated.
   function contractValueCitationForm(value) {
     return typeof value === "string" && value.trim() !== "" && !/[\s#:{}]/.test(value) && value.includes(".") && !value.split(".").some(segment => !segment);
@@ -3052,7 +3398,7 @@ function createValidator(host) {
     return found;
   }
 
-  // §10.8 substitution, two contexts. Whole-value: a string that is exactly one
+  // §10.7 substitution, two contexts. Whole-value: a string that is exactly one
   // placeholder is replaced by the raw JSON value. In-string: an embedded
   // placeholder substitutes as text — strings bare, numbers in shortest
   // round-trip decimal. Arrays and objects are legal in whole-value position
@@ -3083,7 +3429,7 @@ function createValidator(host) {
     return value;
   }
 
-  // §10.8's injection ban, applied recursively over every string inside a
+  // §10.7's injection ban, applied recursively over every string inside a
   // supplied value: a value carrying `{{`, `}}`, or a code-fence delimiter
   // could break out of the fenced test block it lands in.
   function contractInjectionBan(value, display, pointer, what) {
@@ -3116,21 +3462,28 @@ function createValidator(host) {
       const { doc: specTuning, context: exprContext } = validateTuning(specRoot, contentContext, personalization);
       const directionCtx = validateDirection(specRoot, resolvePath, exprContext);
       const result = validateContractsV07(specRoot, specManifest, contentContext, resolvePath, specTuning, exprContext, directionCtx);
-      if (!result) return undefined;
       const values = new Map();
       const rules = [];
-      for (const adoption of result.instances) {
+      for (const adoption of result?.instances ?? []) {
         for (const name of adoption.model.values.keys()) {
           const key = `contracts.${adoption.id}.${name}`;
           if (adoption.valueValues.has(name)) values.set(key, adoption.valueValues.get(name));
         }
         for (const rule of adoption.parsedRules) rules.push({ adoption: adoption.id, ...rule });
       }
-      return { values, rules, generatedTotal: result.generatedTotal, generatedTests: result.generatedTests, checked: result.checked };
+      return {
+        values,
+        rules,
+        generatedTotal: result?.generatedTotal ?? 0,
+        generatedTests: result?.generatedTests ?? [],
+        checked: result?.checked ?? [],
+        recordNumbers: contentContext.recordNumbers,
+        tuning: specTuning
+      };
     });
   }
 
-  // §10.7's closed citation grammar: a dotted value address, or a chapter-
+  // §10.10's closed citation grammar: a dotted value address, or a chapter-
   // section reference `<file>.md#<anchor>` carrying the extension, as
   // §1a reads one. A citation MUST resolve, and never to a section any
   // authority tag reaches — a test whose pass condition lives in prose the
@@ -3146,11 +3499,15 @@ function createValidator(host) {
       error("CONTRACT_CITATION_GRAMMAR", CONTRACT_SECTION, display, `${at} citation ${JSON.stringify(value)} uses a retired colon form; use the thing's dotted address`);
       return;
     }
+    if (ctx.openTuningKeys?.has(value)) {
+      error("CONTRACT_CITATION_OPEN", CONTRACT_SECTION, display, `${at} cites ${JSON.stringify(value)}, an open number; a contract may cite a key in tuning.json.values; it cannot cite an open number`);
+      return;
+    }
     if (ctx.tuningKeys.has(value) || (value.startsWith("contracts.") && value.split(".").length === 2 && ctx.instanceIds?.has(value.split(".")[1]))) {
       return;
     }
     if (ctx.contractKeys.has(value)) {
-      // §10.6: the declaration exists, but when its condition does not hold
+      // §10.9: the declaration exists, but when its condition does not hold
       // the address is absent, and a citation that reads it fails.
       if (ctx.activeContractKeys && !ctx.activeContractKeys.has(value)) {
         error("CONTRACT_CITATION_DANGLING", CONTRACT_SECTION, display, `${at} cites ${JSON.stringify(value)}, which names an inactive declaration; the address is absent`);
@@ -3178,29 +3535,24 @@ function createValidator(host) {
     const text = host.readText(file);
     const lines = text.split(/\r?\n/);
     const headings = markdownHeadings(lines);
-    const heading = headings.find(item => item.slug === fragment.toLowerCase());
+    const matches = headings.filter(item => item.slug === fragment.toLowerCase());
+    const heading = matches[0];
     if (!heading) {
       error("CONTRACT_CITATION_DANGLING", CONTRACT_SECTION, display, `${at} cites ${JSON.stringify(value)}, whose fragment matches no Markdown heading in ${slash(filePart)}`);
       return;
     }
-    // A citation's target must be Fixed *throughout*. A tag anywhere inside the
-    // cited section, not merely at its head, means some statement a reader
-    // finds under that anchor is one the builder may vary — and the citation
-    // does not say which statement it meant. Enclosing sections count too: a
-    // tag scoped above the anchor governs it by inheritance. A tag scoped to a
-    // sub-topic *below* the cited anchor is what the reader would land on, so
-    // it counts as well; the cure is a finer anchor.
-    // Inside the cited section: any tag at all disqualifies it. A section that
-    // hands any part of itself away can no longer be relied on whole, and the
-    // citation does not say which part it meant. Outside it: §2 scopes a tag
-    // from its own line to the end of the heading section holding it, so an
-    // enclosing section's tag reaches down into this one while a sibling's
-    // stops short of it.
+    if (matches.length !== 1) {
+      error("CONTRACT_CITATION_AMBIGUOUS", CONTRACT_SECTION, display, `${at} cites ${JSON.stringify(value)}, whose fragment matches ${matches.length} Markdown headings in ${slash(filePart)}; a contract citation must match exactly one heading`);
+      return;
+    }
+    // A cited section must be wholly Fixed, including its subtopics. A tag
+    // inside it delegates its blockquote, so the whole section is not Fixed.
+    // A quote above the anchor ends before the unquoted heading and cannot
+    // delegate the cited section by inheritance.
     const reaching = authorityTagReaching(lines, headings, heading);
     if (reaching) {
-      error("CONTRACT_CITATION_AUTHORITY", CONTRACT_SECTION, display, reaching.where === "inside"
-        ? `${at} cites ${JSON.stringify(value)}, whose target section carries ${reaching.label} authority tag at line ${reaching.line}; a legal target carries no tag anywhere inside it`
-        : `${at} cites ${JSON.stringify(value)}, which sits inside the scope of ${reaching.label} authority tag at line ${reaching.line}; a legal target is covered by no enclosing tag`);
+      error("CONTRACT_CITATION_AUTHORITY", CONTRACT_SECTION, display,
+        `${at} cites ${JSON.stringify(value)}, whose target section contains a blockquote with ${reaching.label} authority tag at line ${reaching.line}; a legal target must be wholly Fixed, including its blockquotes`);
     }
   }
 
@@ -3266,7 +3618,7 @@ function createValidator(host) {
           if (Array.isArray(shape.options) && !shape.options.includes(value)) {
             error("CONTRACT_ROW_CHOICE", CONTRACT_SECTION, display, `${at}/${field} is ${JSON.stringify(value)}, which is outside the field's closed option set (${shape.options.join(", ")})`);
           }
-          // §10.4 caps `options` values at 64 characters; a `pattern` field
+          // §12.1 caps `options` values at 64 characters; a `pattern` field
           // carries the lexical class alone, so no length rule is invented here.
           if (shape.pattern === "kebab-case") contractKebab(value, display, at, `${field} value`);
           if (shape.type === "citation") contractResolveCitation(value, `${at}/${field}`, display, ctx);
@@ -3407,14 +3759,17 @@ function createValidator(host) {
   }
 
   function contractValidateDefinition(document, display, model) {
+    const nonEmptyText = (value, at, key) => {
+      if (typeof value !== "string" || !value.trim()) error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, `${at}/${key} must be a non-empty string`);
+    };
     const widened = contractDefinitionWidened(document);
     contractClosed(document, [...CONTRACT_DEFINITION_FIELDS, ...CONTRACT_DESIGNER_FIELDS], ["contract", "version", "summary", "mechanism", "questions", "declares", "answers", "values"], display, "#");
     if (own(document, "contract")) contractKebab(document.contract, display, "#", "contract id");
     if (own(document, "version") && !Number.isInteger(document.version)) error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, `#/version must be an integer, got ${JSON.stringify(document.version)}`);
     if (own(document, "origin") && typeof document.origin !== "string") error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, "#/origin must be a string");
     if (!own(document, "origin")) warning("CONTRACT_ORIGIN_ABSENT", CONTRACT_SECTION, display, "the definition declares no origin; a contract SHOULD name where its blank form came from");
-    if (own(document, "summary")) contractType(document.summary, "string", display, "#", "summary");
-    if (own(document, "mechanism") && (!Array.isArray(document.mechanism) || !document.mechanism.every(item => typeof item === "string"))) error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, "#/mechanism must be an array of strings");
+    if (own(document, "summary")) nonEmptyText(document.summary, "#", "summary");
+    if (own(document, "mechanism") && (!Array.isArray(document.mechanism) || document.mechanism.length === 0 || !document.mechanism.every(item => typeof item === "string" && item.trim()))) error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, "#/mechanism must be an array with at least one entry, each a non-empty string");
     if (own(document, "pack") && (typeof document.pack !== "string" || !CONTRACT_PACK_HASH_PATTERN.test(document.pack))) error("CONTRACT_ENVELOPE_TYPE", CONTRACT_SECTION, display, "#/pack must be sha256 followed by 64 lowercase hexadecimal digits");
 
     if (!isObject(document.questions)) {
@@ -3428,7 +3783,8 @@ function createValidator(host) {
         continue;
       }
       contractClosed(question, ["asks", "rationale", "guidance", "when", "otherwise", "options"], ["asks", "options"], display, at);
-      for (const key of ["asks", "rationale", "guidance"]) if (own(question, key)) contractType(question[key], "string", display, at, key);
+      if (own(question, "asks")) nonEmptyText(question.asks, at, "asks");
+      for (const key of ["rationale", "guidance"]) if (own(question, key)) contractType(question[key], "string", display, at, key);
       if (own(question, "when")) contractConditionShape(question.when, display, `${at}/when`, "CONTRACT_QUESTION_CONDITION", false);
       if (own(question, "otherwise") && !(typeof question.otherwise === "string" && question.otherwise.trim())) {
         error("CONTRACT_QUESTION_OTHERWISE", CONTRACT_SECTION, display, `${at}/otherwise must be one non-empty string of binding mechanism prose`);
@@ -3447,7 +3803,8 @@ function createValidator(host) {
           continue;
         }
         contractClosed(option, ["meaning", "semantics", "rationale"], ["meaning"], display, optionAt);
-        for (const key of ["meaning", "semantics", "rationale"]) if (own(option, key)) contractType(option[key], "string", display, optionAt, key);
+        if (own(option, "meaning")) nonEmptyText(option.meaning, optionAt, "meaning");
+        for (const key of ["semantics", "rationale"]) if (own(option, key)) contractType(option[key], "string", display, optionAt, key);
       }
     }
 
@@ -3460,6 +3817,7 @@ function createValidator(host) {
         if (name.startsWith("_")) continue;
         const at = `#/declares/values/${pointerEscape(name)}`;
         contractKebab(name, display, at, "value name");
+        if (!/^[a-z]/.test(name)) error("CONTRACT_NAME_GRAMMAR", CONTRACT_SECTION, display, `${at} value name must begin with a lowercase letter, so that a bare token of digits in a rule is always a literal number, got ${JSON.stringify(name)}`);
         if (["and", "or", "not"].includes(name)) error("CONTRACT_NAME_GRAMMAR", CONTRACT_SECTION, display, `${at} value name ${JSON.stringify(name)} is reserved by the rule grammar`);
         if (model.questions.has(name)) error("CONTRACT_NAME_UNIQUE", CONTRACT_SECTION, display, `${at} collides with a question of the same name`);
         if (!isObject(declaration)) {
@@ -3467,7 +3825,7 @@ function createValidator(host) {
           continue;
         }
         contractClosed(declaration, ["description", "range", "forms", "when"], ["description"], display, at);
-        if (own(declaration, "description")) contractType(declaration.description, "string", display, at, "description");
+        if (own(declaration, "description")) nonEmptyText(declaration.description, at, "description");
         if (own(declaration, "range") && (!Array.isArray(declaration.range) || declaration.range.length !== 2 || !declaration.range.every(value => typeof value === "number" && Number.isFinite(value)) || declaration.range[0] > declaration.range[1])) {
           error("CONTRACT_VALUE_RANGE", CONTRACT_SECTION, display, `${at}/range must be an inclusive [min, max] pair of finite numbers with min <= max`);
         }
@@ -3575,7 +3933,7 @@ function createValidator(host) {
       }
     }
 
-    // §10.7 value citations: a dotted tuning address or a numeric value
+    // §10.10 value citations: a dotted tuning address or a numeric value
     // address in this adoption, resolved acyclically to a number.
     const resolving = new Set();
     const resolveValueCitation = name => {
@@ -3610,6 +3968,10 @@ function createValidator(host) {
           }
           return resolveValueCitation(target);
         }
+        if (ctx.openTuningKeys?.has(cite)) {
+          error("CONTRACT_CITATION_OPEN", CONTRACT_SECTION, display, `${at} cites ${JSON.stringify(cite)}, an open number; a contract may cite a key in tuning.json.values; it cannot cite an open number`);
+          return undefined;
+        }
         if (!ctx.tuningKeys.has(cite)) {
           error("CONTRACT_CITATION_DANGLING", CONTRACT_SECTION, display, `${at} cites ${JSON.stringify(cite)}, which resolves to no tuning value`);
           return undefined;
@@ -3642,7 +4004,7 @@ function createValidator(host) {
         error("CONTRACT_ROWS_BINDING", CONTRACT_SECTION, display, `#/rows is missing declared row set ${JSON.stringify(name)}; write an inline array, including [] when it has no rows`);
         boundRows.set(name, []);
       } else if (!Array.isArray(sourceRows[name])) {
-        error("CONTRACT_ROWS_SHAPE", CONTRACT_SECTION, display, `#/rows/${pointerEscape(name)} must be an inline array; the bound-drawer form is retired (run \`opengdd migrate\`)`);
+        error("CONTRACT_ROWS_SHAPE", CONTRACT_SECTION, display, `#/rows/${pointerEscape(name)} must be an inline array; binding rows to a collection is retired (run \`opengdd migrate\`)`);
         boundRows.set(name, []);
       } else boundRows.set(name, contractValidateRows(sourceRows[name], name, info, `#/rows/${pointerEscape(name)}`, display, rowCtx));
     }
@@ -3665,7 +4027,7 @@ function createValidator(host) {
             else if (node.type === "binary") pending.push(node.left, node.right);
             else if (node.type === "call") pending.push(...node.args);
           }
-          // §10.4: a comparison naming a conditional declaration is evaluated
+          // §10.6: a comparison naming a conditional declaration is evaluated
           // only while every declaration it names is active; an unresolved
           // citation already carries its own diagnostic.
           const missing = [...model.values.keys()].filter(key => activeValues.has(key) && referenced.has(key) && !own(sourceValues, key));
@@ -3681,7 +4043,7 @@ function createValidator(host) {
           error("CONTRACT_RULE_INVALID", CONTRACT_SECTION, display, `rule ${JSON.stringify(name)}: ${cause.message} at position ${cause.position ?? 0}`);
         }
       } else if (isObject(source)) {
-        // §10.4 answer-aware rule: forbid + message, optional severity.
+        // §10.6 answer-aware rule: forbid + message, optional severity.
         const bad = message => error("CONTRACT_RULE_INVALID", CONTRACT_SECTION, display, `rule ${JSON.stringify(name)}: ${message}`);
         let shapeOk = true;
         for (const key of Object.keys(source)) if (!key.startsWith("_") && !["forbid", "message", "severity"].includes(key)) { bad(`answer-aware rule carries unknown field ${JSON.stringify(key)}`); shapeOk = false; }
@@ -3909,7 +4271,7 @@ function createValidator(host) {
       if (isObject(template.bindings)) for (const binding of Object.values(template.bindings)) {
         if (isObject(binding) && typeof binding.flag === "string" && !adoption.asked.has(binding.flag)) genuineBlock = true;
       }
-      // §10.8: a template whose {{value-cite:}} names an inactive declaration
+      // §10.7: a template whose {{value-cite:}} names an inactive declaration
       // is not live; no live template reads an inactive declaration.
       if (adoption.activeValues) {
         const citeSources = [template.title, template.text, template.test];
@@ -4088,18 +4450,19 @@ function createValidator(host) {
     adoptionEntries.sort((a, b) => a.fileId.localeCompare(b.fileId));
     packEntries.sort((a, b) => a.display.localeCompare(b.display));
 
-    const tuningKeys = new Set(Object.keys(isObject(tuningDoc?.values) ? tuningDoc.values : {}));
+    const openTuningKeys = new Set(Object.keys(isObject(tuningDoc?.open) ? tuningDoc.open : {}));
+    const tuningKeys = new Set([...Object.keys(isObject(tuningDoc?.values) ? tuningDoc.values : {}), ...openTuningKeys]);
     const tuningValues = new Map(Object.entries(isObject(tuningDoc?.values) ? tuningDoc.values : {}).filter(([, value]) => typeof value === "number" && Number.isFinite(value)));
     const contractKeys = new Set();
     for (const entry of adoptionEntries) for (const name of entry.model.values.keys()) contractKeys.add(`contracts.${entry.fileId}.${name}`);
-    // §10.6: an address naming an inactive declaration is absent rather than
+    // §10.9: an address naming an inactive declaration is absent rather than
     // dangling in itself, but a citation that reads it fails. The pre-pass
     // recomputes each adoption's active set findings-free so row citation
-    // fields agree with the §10.4 value-citation path about the same address.
+    // fields agree with the §10.10 value-citation path about the same address.
     const activeContractKeys = new Set();
     for (const entry of adoptionEntries) for (const name of contractAdoptionActivation(entry.document, entry.model).activeValues) activeContractKeys.add(`contracts.${entry.fileId}.${name}`);
     const instanceIds = new Set(adoptionEntries.map(entry => entry.fileId));
-    const ctx = { resolvePath, contentContext, tuningKeys, tuningValues, contractKeys, activeContractKeys, instanceIds, manifest, exprContext, directionCtx };
+    const ctx = { resolvePath, contentContext, tuningKeys, openTuningKeys, tuningValues, contractKeys, activeContractKeys, instanceIds, manifest, exprContext, directionCtx };
     const instances = adoptionEntries.map(entry => contractValidateAdoption(entry, ctx));
 
     const byDefinition = new Map();
@@ -4163,11 +4526,13 @@ function createValidator(host) {
     return { instances, generatedTotal, generatedTests, checked, contractKeys, instanceIds, rendered: rendered.length ? `${rendered.join("\n\n")}\n` : "" };
   }
 
-  function validatePackage(packageArgument) {
+  function validatePackage(packageArgument, options = {}) {
+    // Review runs only for the literal `true`; `1` or `"yes"` leave it off.
+    const review = options?.review === true;
     const packageRoot = path.resolve(packageArgument);
     if (!host.exists(packageRoot) || !host.isDirectory(packageRoot)) {
       error("PACKAGE_DIRECTORY", "§1", ".", `package directory does not exist or is not a directory: ${packageRoot}`);
-      return { packageRoot, packageName: null, manifest: undefined };
+      return { packageRoot, packageName: null, review, manifest: undefined };
     }
     const resolvePath = makePathResolver(packageRoot);
     const required = ["manifest.json", "tuning.json", "01-overview.md", "02-mechanics.md", "05-build-plan.md"];
@@ -4206,8 +4571,10 @@ function createValidator(host) {
     const { doc: tuningDoc, context: exprContext } = validateTuning(packageRoot, contentContext, personalization);
     validateFantasy(packageRoot);
     validateInjectionSurface(packageRoot);
-    validateTieBreakLint(packageRoot);
-    validateProseLiterals(packageRoot, manifest, tuningDoc);
+    if (review) {
+      validateTieBreakLint(packageRoot);
+      validateProseLiterals(packageRoot, manifest, tuningDoc);
+    }
     const directionCtx = validateDirection(packageRoot, resolvePath, exprContext);
     const paletteCtx = directionCtx.paletteCtx;
     const contractsCtx = validateContractsV07(packageRoot, manifest, contentContext, resolvePath, tuningDoc, exprContext, directionCtx);
@@ -4223,11 +4590,12 @@ function createValidator(host) {
     // §1b's twin of the palette rule: a drawer nothing reaches — no prose
     // citation and no link field — is a review lead, not an order.
     for (const [id, info] of contentContext.collections) {
-      if (!info.reached) warning("COLLECTION_UNCITED", "§1b", `collections/${id}/`, `nothing reaches drawer ${JSON.stringify(id)}: no prose cites it and no link field points to it`);
+      if (!info.reached) warning("COLLECTION_UNCITED", "§1b", `collections/${id}/`, `Nothing reaches collection ${JSON.stringify(id)}: no prose cites it, no link field points to it, and no tuning rule names a record field in it.`);
     }
     return {
       packageRoot,
       packageName: manifest?.id ?? path.basename(packageRoot),
+      review,
       manifest,
       contractTests: contractsCtx?.rendered,
       contractAdoptions: contractsCtx?.instances.length,
@@ -4240,17 +4608,56 @@ function createValidator(host) {
   // ---------------------------------------------------------------------------
 
   function expectedBuildSnapshot(specTuning, sourceQuestions, answers, contractFacts) {
-    const values = new Map(Object.entries(isObject(specTuning?.values) ? specTuning.values : {}));
-    const assignable = new Set(Object.keys(isObject(specTuning?.ranges) ? specTuning.ranges : {}));
-    for (const [key, value] of contractFacts?.values ?? []) {
-      values.set(key, value);
-    }
-    return applyPersonalizationAnswers(
+    const values = new Map([
+      ...Object.entries(isObject(specTuning?.values) ? specTuning.values : {}),
+      ...Object.entries(isObject(specTuning?.open) ? specTuning.open : {})
+    ]);
+    const ranges = isObject(specTuning?.ranges) ? specTuning.ranges : {};
+    const open = isObject(specTuning?.open) ? specTuning.open : {};
+    const assigned = new Set();
+    const resolved = applyPersonalizationAnswers(
       values,
       [...sourceQuestions.values()],
       question => own(answers, question.id) ? answers[question.id] : question.default,
-      key => assignable.has(key)
+      key => own(ranges, key) || own(open, key),
+      assigned
     );
+    for (const [key, value] of contractFacts?.values ?? []) {
+      resolved.set(key, value);
+    }
+    return { values: resolved, assigned };
+  }
+
+  function readTuningEnvironments(packageArgument) {
+    return quietly(() => {
+      const packageRoot = path.resolve(packageArgument);
+      const resolvePath = makePathResolver(packageRoot);
+      const file = path.join(packageRoot, "manifest.json");
+      const manifest = host.exists(file) ? parseJsonFile(file, "manifest.json", "§3", "MANIFEST_JSON") : undefined;
+      const personalization = loadPersonalization(packageRoot, isObject(manifest) ? manifest : undefined, resolvePath);
+      const content = validateContent(packageRoot, isObject(manifest) ? manifest : undefined, resolvePath, personalization.questions);
+      const { doc, context } = validateTuning(packageRoot, content, personalization);
+      return context.ruleNumbers ?? calculateTuningEnvironments({ doc, tuning: context.tuning,
+        openTuning: context.openTuning, recordNumbers: content.recordNumbers, personalization });
+    });
+  }
+
+  function buildSnapshotAddresses(packageArgument) {
+    return quietly(() => {
+      const packageRoot = path.resolve(packageArgument);
+      const manifestFile = path.join(packageRoot, "manifest.json");
+      if (!host.exists(manifestFile) || !host.isFile(manifestFile)) return undefined;
+      const manifest = parseJsonFile(manifestFile, "manifest.json", "§7", "MANIFEST_JSON");
+      if (!isObject(manifest)) return undefined;
+      const facts = contractBuildFacts(packageRoot, manifest);
+      if (!isObject(facts?.tuning)) return undefined;
+      return [...new Set([
+        ...Object.keys(isObject(facts.tuning.values) ? facts.tuning.values : {}),
+        ...Object.keys(isObject(facts.tuning.open) ? facts.tuning.open : {}),
+        ...(facts.recordNumbers?.open ?? new Set()),
+        ...(facts.values?.keys() ?? [])
+      ])].sort();
+    });
   }
 
   function validateBuildManifest(buildFilePath, specRoot) {
@@ -4283,10 +4690,10 @@ function createValidator(host) {
       }
     }
     if (hasLegacyResolvedRoles) {
-      error("BUILD_SCHEMA", "§7", "opengdd-build.json", "resolved_tuning.tunables/constants are historical; v0.7 requires resolved_tuning.values (`opengdd migrate --build`)");
+      error("BUILD_SCHEMA", "§7", "opengdd-build.json", "resolved_tuning.tunables/constants are historical; current records require resolved_tuning.values (`opengdd migrate --build`)");
     }
     if (hasLegacyDirection) {
-      error("BUILD_SCHEMA", "§7", "opengdd-build.json", "`direction_result` / `evidence.direction_observations` are historical; v0.7 records carry neither (`opengdd migrate --build`)");
+      error("BUILD_SCHEMA", "§7", "opengdd-build.json", "`direction_result` / `evidence.direction_observations` are historical; current records carry neither (`opengdd migrate --build`)");
     }
     if (hasLegacyBuildProfile) {
     error("BUILD_SCHEMA", "§7", "opengdd-build.json", "`capture_profile` is recorded in the audit's own record (`conformance/CERTIFICATION.md`, Audit profile); `renderer` and `resources` are retired (`opengdd migrate --build`)");
@@ -4307,11 +4714,15 @@ function createValidator(host) {
         "BUILD_SPEC_CROSS_CHECKS_SKIPPED",
         "§7",
         "opengdd-build.json",
-        "certifying package directory was not supplied; skipped source-dependent SPEC §7 package-consistency checks (spec id/version, designer, personalization answers, resolved_tuning values, acceptance-test total, completion, and runtime runner identity) plus optional commerce equality. Supply the optional <package-dir> argument to enable them; until then this run reports NOT CHECKED rather than any passing verdict, because most of the record's subject was never decided"
+        "The source package directory was not supplied. Source-dependent checks did not run: spec id/version, designer, personalization answers, resolved_tuning values, test names, runner identity, and optional commerce equality. The acceptance sum is checked from the record alone. A record with errors is invalid and exits 1. An error-free record is not checked: valid is null, the verdict is NOT CHECKED, and it exits 3. Supply <package-dir> to run source-dependent checks."
       );
     }
 
     let specManifest;
+    let sourceTestTotal;
+    const reportedNotPassed = isObject(build?.evidence?.acceptance?.not_passed)
+      ? Object.keys(build.evidence.acceptance.not_passed).length
+      : 0;
     if (specRoot) {
       const specResolvedRoot = path.resolve(specRoot);
       const specManifestFile = path.join(specResolvedRoot, "manifest.json");
@@ -4363,13 +4774,15 @@ function createValidator(host) {
         const specTuningRelative = "tuning.json";
         const specTuningFile = specResolvePath(specTuningRelative, "canonical tuning file", "§7", "BUILD_SPEC_TUNING_MISSING", { mustExist: true, kind: "file", display: "opengdd-build.json" });
         const specTuning = specTuningFile ? parseJsonFile(specTuningFile, slash(specTuningRelative), "§7", "TUNING_JSON") : undefined;
-        // The snapshot contains every package tuning value plus every filled
-        // contract value, including promised adoptions.
+        // The snapshot contains every tuning value, every present open record
+        // field, and every filled contract value, including promised adoptions.
         const contractFacts = contractBuildFacts(specResolvedRoot, specManifest);
         if (isObject(specTuning) && isObject(build?.resolved_tuning)) {
           const source = isObject(specTuning.values) ? specTuning.values : {};
+          const sourceOpen = isObject(specTuning.open) ? specTuning.open : {};
           const contractKeys = [...(contractFacts?.values ?? new Map()).keys()];
-          const expected = new Set([...Object.keys(source), ...contractKeys]);
+          const openRecordKeys = [...(contractFacts?.recordNumbers?.open ?? new Set())];
+          const expected = new Set([...Object.keys(source), ...Object.keys(sourceOpen), ...openRecordKeys, ...contractKeys]);
           const resolved = isObject(build.resolved_tuning.values) ? build.resolved_tuning.values : {};
           const missing = [...expected].filter(key => !own(resolved, key)).sort();
           const extra = Object.keys(resolved).filter(key => !expected.has(key)).sort();
@@ -4378,8 +4791,7 @@ function createValidator(host) {
               missing.length ? `missing ${missing.map(key => JSON.stringify(key)).join(", ")}` : undefined,
               extra.length ? `unexpected ${extra.map(key => JSON.stringify(key)).join(", ")}` : undefined
             ].filter(Boolean).join("; ");
-            const union = contractKeys.length ? `${slash(specTuningRelative)} values keys unioned with the live contract key set` : `${slash(specTuningRelative)} values keys`;
-            error("BUILD_TUNING_KEYS", "§7", "opengdd-build.json", `resolved_tuning.values keys must exactly equal ${union}: ${details}`);
+            error("BUILD_TUNING_KEYS", "§7", "opengdd-build.json", `resolved_tuning.values keys must exactly equal the source values, open numbers, applicable open record fields, and live contract values: ${details}`);
           }
           if (isObject(specTuning.ranges)) {
             for (const [key, range] of Object.entries(specTuning.ranges)) {
@@ -4391,26 +4803,46 @@ function createValidator(host) {
           }
           const answers = isObject(build?.personalization?.answers) ? build.personalization.answers : {};
           const expectedSnapshot = expectedBuildSnapshot(specTuning, sourceQuestions, answers, contractFacts);
-          for (const [key, expectedValue] of expectedSnapshot) {
+          for (const [key, expectedValue] of expectedSnapshot.values) {
             if (!own(resolved, key) || resolved[key] === expectedValue) continue;
+            const rangedBuilderChoice = own(source, key) && own(specTuning.ranges ?? {}, key) && !expectedSnapshot.assigned.has(key);
+            const openBuilderChoice = own(sourceOpen, key) && !expectedSnapshot.assigned.has(key);
+            if (rangedBuilderChoice || openBuilderChoice) continue;
             error("BUILD_TUNING_VALUE", "§7", "opengdd-build.json", `resolved_tuning.values.${key} is ${JSON.stringify(resolved[key])}; the canonical source-and-answer pipeline resolves it to ${JSON.stringify(expectedValue)}`);
           }
-          const snapshot = new Map(Object.entries(resolved).filter(([, value]) => typeof value === "number" && Number.isFinite(value)));
+          for (const key of openRecordKeys) {
+            if (!own(resolved, key)) continue;
+            const value = resolved[key];
+            if (typeof value === "number" && Number.isFinite(value) && contractFacts?.recordNumbers?.openTypes?.get(key) === "integer" && !Number.isInteger(value)) {
+              error("BUILD_RECORD_VALUE", "§7", "opengdd-build.json", `resolved_tuning.values.${key} must be an integer for the source open record field, got ${value}`);
+            }
+          }
+          const snapshot = new Map([
+            ...(contractFacts?.recordNumbers?.decided ?? new Map()),
+            ...Object.entries(resolved).filter(([, value]) => typeof value === "number" && Number.isFinite(value))
+          ]);
           if (isObject(specTuning.rules)) {
             for (const [name, sourceRule] of Object.entries(specTuning.rules)) {
               if (typeof sourceRule !== "string") continue;
               try {
                 const ast = parseRule(sourceRule);
+                const missingRecorded = [...ruleKeys(ast)].filter(key => !snapshot.has(key));
+                if (missingRecorded.length) {
+                  const unreported = missingRecorded.find(key => !expected.has(key) && !contractFacts?.recordNumbers?.decided?.has(key));
+                  if (unreported) error("BUILD_TUNING_RULE", "§4", "opengdd-build.json", `rule ${JSON.stringify(name)} has no recorded number for key ${JSON.stringify(unreported)}`);
+                  continue;
+                }
                 if (!evaluateRule(ast, snapshot)) error("BUILD_TUNING_RULE", "§4", "opengdd-build.json", formatRuleFailure(name, sourceRule, ast, snapshot));
               } catch (cause) {
-                error("BUILD_TUNING_RULE", "§4", "opengdd-build.json", `rule ${JSON.stringify(name)} could not be evaluated over resolved_tuning.values: ${cause.message} at position ${cause.position ?? 0}`);
+                const message = cause.kind === "reference" ? "a named key has no recorded number" : cause.message;
+                error("BUILD_TUNING_RULE", "§4", "opengdd-build.json", `rule ${JSON.stringify(name)} could not be evaluated over resolved_tuning.values: ${message} at position ${cause.position ?? 0}`);
               }
             }
           }
           for (const entry of contractFacts?.rules ?? []) {
             const prefix = `contracts.${entry.adoption}.`;
             const local = new Map([...snapshot].filter(([key]) => key.startsWith(prefix)).map(([key, value]) => [key.slice(prefix.length), value]));
-            // §10.4: an absent address marks an inactive declaration; a
+            // §10.6: an absent address marks an inactive declaration; a
             // comparison naming one is skipped, not failed.
             const referenced = [];
             const pending = [entry.ast];
@@ -4476,30 +4908,53 @@ function createValidator(host) {
         // Checked adoptions contribute their in-memory rendered tests; promised
         // adoptions contribute none. Generated headings in the build plan are
         // retired and never count.
-        const plan = buildPlanAcceptanceHeadings(specResolvedRoot, specManifest);
+        const specPlanRelative = "05-build-plan.md";
+        const specPlanFile = specResolvePath(specPlanRelative, "canonical build plan", "§7", "BUILD_SPEC_PLAN_MISSING", { mustExist: true, kind: "file", display: "opengdd-build.json" });
+        const plan = specPlanFile ? buildPlanAcceptanceHeadings(specResolvedRoot, specManifest) : undefined;
         const planDescriptors = buildPlanAcceptanceDescriptors(plan);
         if (plan && typeof build?.evidence?.acceptance?.total === "number") {
           const generated = contractFacts?.generatedTotal ?? 0;
           const expectedTotal = plan.headings.length + generated;
+          sourceTestTotal = expectedTotal;
           if (build.evidence.acceptance.total !== expectedTotal) {
             const split = generated ? ` (${plan.headings.length} game-local plus ${generated} generated)` : "";
             error("BUILD_ACCEPTANCE_TOTAL", "§7", "opengdd-build.json", `evidence.acceptance.total ${build.evidence.acceptance.total} does not match the source package's ${expectedTotal} enumerated acceptance tests${split}`);
           }
         }
         if (Array.isArray(build?.evidence?.acceptance?.sampled)) {
-          const localTests = new Map(planDescriptors.filter(test => /^AT-[1-9][0-9]*$/.test(test.name)).map(test => [test.name, test.descriptor]));
+          const sourceDescriptors = new Map([
+            ...planDescriptors.filter(test => /^AT-[1-9][0-9]*$/.test(test.name)),
+            ...(contractFacts?.generatedTests ?? [])
+          ].map(test => [test.name, test.descriptor]));
           for (const id of new Set(build.evidence.acceptance.sampled)) {
-            if (typeof id !== "string" || !/^AT-[1-9][0-9]*$/.test(id)) continue;
-            if (!localTests.has(id)) error("BUILD_SAMPLED_UNKNOWN", "§7", "opengdd-build.json", `evidence.acceptance.sampled names ${JSON.stringify(id)}, which is not an acceptance test in the source package`);
-            else if (localTests.get(id)?.type !== "general") error("BUILD_SAMPLED_TYPE", "§7", "opengdd-build.json", `evidence.acceptance.sampled names ${JSON.stringify(id)}, whose source test type is ${JSON.stringify(localTests.get(id)?.type)}; only general tests may be sampled`);
+            if (typeof id !== "string") continue;
+            if (!sourceDescriptors.has(id)) error("BUILD_SAMPLED_UNKNOWN", "§7", "opengdd-build.json", `evidence.acceptance.sampled names ${JSON.stringify(id)}, which is not an acceptance test in the source package`);
+            else if (sourceDescriptors.get(id)?.type !== "general") error("BUILD_SAMPLED_TYPE", "§7", "opengdd-build.json", `evidence.acceptance.sampled names ${JSON.stringify(id)}, whose source test type is ${JSON.stringify(sourceDescriptors.get(id)?.type)}; only general tests may be sampled`);
+          }
+        }
+        const notPassed = isObject(build?.evidence?.acceptance?.not_passed) ? build.evidence.acceptance.not_passed : {};
+        const sourceTests = new Set([
+          ...(plan?.headings ?? []).map(test => test.id),
+          ...(contractFacts?.generatedTests ?? []).map(test => test.name)
+        ]);
+        for (const [name, result] of Object.entries(notPassed)) {
+          if (!sourceTests.has(name)) {
+            const contractHint = name.startsWith("AT ")
+              ? ` Contract test keys omit the heading's \"AT \" prefix: use <adoption>/<template> or <adoption>/<template>/<row-id> exactly as defined in §10.7.`
+              : "";
+            error("BUILD_NOT_PASSED_UNKNOWN", "§7", "opengdd-build.json", `evidence.acceptance.not_passed names ${JSON.stringify(name)}, which is not an acceptance test in the source package.${contractHint}`);
+          }
+          if (result?.result === "not-run" && Array.isArray(build?.evidence?.acceptance?.sampled) && build.evidence.acceptance.sampled.includes(name)) {
+            error("BUILD_SAMPLED_NOT_RUN", "§7", "opengdd-build.json", `evidence.acceptance.sampled names ${JSON.stringify(name)}, but not_passed says that test did not run`);
           }
         }
         const runtimeTests = [...planDescriptors, ...(contractFacts?.generatedTests ?? [])].filter(({ descriptor }) => isObject(descriptor) && (
           ["scenario", "general"].includes(descriptor.type)
           || ["replay", "target", "direction_claims"].some(field => own(descriptor, field))
         ));
-        if (runtimeTests.length > 0 && isObject(build?.evidence) && !own(build.evidence, "runner")) {
-          error("BUILD_RUNNER_REQUIRED", "§7", "opengdd-build.json", `evidence.runner is required because the source package carries runtime acceptance test${runtimeTests.length === 1 ? "" : "s"}: ${runtimeTests.map(test => test.name).join(", ")}`);
+        const runtimeTestsRun = runtimeTests.filter(test => notPassed[test.name]?.result !== "not-run");
+        if (runtimeTestsRun.length > 0 && isObject(build?.evidence) && !own(build.evidence, "runner")) {
+          error("BUILD_RUNNER_REQUIRED", "§7", "opengdd-build.json", `evidence.runner is required because acceptance test${runtimeTestsRun.length === 1 ? "" : "s"} ran: ${runtimeTestsRun.map(test => test.name).join(", ")}`);
         }
 
       }
@@ -4508,12 +4963,24 @@ function createValidator(host) {
     if (isObject(build) && isObject(build.evidence)) {
       if (typeof build.evidence.acceptance?.total !== "number" || typeof build.evidence.acceptance?.passed !== "number") {
         error("BUILD_ACCEPTANCE_SHAPE", "§7", "opengdd-build.json", "evidence.acceptance must declare numeric passed and total");
-      } else if (build.evidence.acceptance.passed !== build.evidence.acceptance.total) {
-        error("BUILD_ACCEPTANCE_INCOMPLETE", "§7", "opengdd-build.json", `evidence.acceptance ${build.evidence.acceptance.passed}/${build.evidence.acceptance.total} — a conforming build requires passed == total; the build does not conform`);
+      } else {
+        const accounted = build.evidence.acceptance.passed + reportedNotPassed;
+        if (accounted !== build.evidence.acceptance.total) {
+          error("BUILD_ACCEPTANCE_ACCOUNTING", "§7", "opengdd-build.json", `evidence.acceptance passed ${build.evidence.acceptance.passed} plus ${reportedNotPassed} not_passed entr${reportedNotPassed === 1 ? "y" : "ies"} equals ${accounted}, not total ${build.evidence.acceptance.total}`);
+        }
       }
     }
 
-    return { packageRoot: buildFile, packageName: build?.spec?.id ?? path.basename(buildFile), indeterminate };
+    return {
+      packageRoot: buildFile,
+      packageName: build?.spec?.id ?? path.basename(buildFile),
+      indeterminate,
+      buildOutcomeBasis: {
+        sourceTestTotal,
+        reportedNotPassed,
+        notPassedNames: isObject(build?.evidence?.acceptance?.not_passed) ? Object.keys(build.evidence.acceptance.not_passed) : []
+      }
+    };
   }
 
   function finish(result) {
@@ -4521,6 +4988,9 @@ function createValidator(host) {
       const severity = { error: 0, warning: 1 };
       return severity[a.severity] - severity[b.severity] || a.file.localeCompare(b.file) || (a.line ?? 0) - (b.line ?? 0) || a.code.localeCompare(b.code);
     });
+    const auxiliaryOrder = (a, b) => a.file.localeCompare(b.file) || (a.line ?? 0) - (b.line ?? 0) || a.code.localeCompare(b.code);
+    hints.sort(auxiliaryOrder);
+    safety.sort(auxiliaryOrder);
     const errors = findings.filter(item => item.severity === "error").length;
     const dependent = findings.filter(item => item.severity === "error" && item.dependent === true).length;
     const warnings = findings.filter(item => item.severity === "warning").length;
@@ -4531,13 +5001,28 @@ function createValidator(host) {
     // `valid` is null. Zero errors is not a passing verdict when most of the
     // subject was never looked at.
     const indeterminate = result.indeterminate === true && errors === 0;
-    const verdict = errors ? "FAIL" : indeterminate ? "NOT CHECKED" : warnings ? "PASS WITH WARNINGS" : "PASS";
+    const isBuild = result.validationKind === "build";
+    const outcome = isBuild
+      ? errors ? "invalid"
+        : indeterminate ? "not checked"
+          : result.buildOutcomeBasis?.sourceTestTotal === 0 ? "not verified"
+            : result.buildOutcomeBasis?.reportedNotPassed > 0 ? "incomplete"
+              : "conforming"
+      : undefined;
+    const verdict = errors ? "FAIL"
+      : outcome === "not checked" ? "NOT CHECKED"
+        : outcome === "incomplete" ? "INCOMPLETE"
+          : outcome === "not verified" ? "NOT VERIFIED"
+            : warnings ? "PASS WITH WARNINGS" : "PASS";
     return {
       ...result,
       valid: indeterminate ? null : errors === 0,
       verdict,
-      summary: { errors, dependent, warnings, findings: findings.length },
+      ...(outcome ? { outcome } : {}),
+      summary: { errors, dependent, warnings, hints: isBuild ? 0 : hints.length, safety: isBuild ? 0 : safety.length, findings: findings.length },
       findings,
+      hints: isBuild ? [] : hints,
+      safety: isBuild ? [] : safety,
       skipped
     };
   }
@@ -4545,6 +5030,8 @@ function createValidator(host) {
   return {
     validatePackage,
     validateBuildManifest,
+    buildSnapshotAddresses,
+    readTuningEnvironments,
     finish,
     validateSchemaDocument: (document, schema) => schemaProblems(document, schema, schema)
   };
@@ -4554,9 +5041,9 @@ export function validateSchemaDocument(document, schema) {
   return createValidator({}).validateSchemaDocument(document, schema);
 }
 
-export function validatePackage(host, packageArgument) {
+export function validatePackage(host, packageArgument, options = {}) {
   const validator = createValidator(host);
-  return validator.finish({ ...validator.validatePackage(packageArgument), validationKind: "package" });
+  return validator.finish({ ...validator.validatePackage(packageArgument, options), validationKind: "package" });
 }
 
 export function validateBuildManifest(host, buildFile, specDirectory) {
@@ -4564,19 +5051,34 @@ export function validateBuildManifest(host, buildFile, specDirectory) {
   return validator.finish({ ...validator.validateBuildManifest(buildFile, specDirectory), validationKind: "build" });
 }
 
+// Read package inputs through the same loaders used by validateTuning.
+export function readTuningEnvironments(host, packageArgument) {
+  return createValidator(host).readTuningEnvironments(packageArgument);
+}
+
+export function buildSnapshotAddresses(host, packageArgument) {
+  return createValidator(host).buildSnapshotAddresses(packageArgument);
+}
+
 // Rendering is a read-only view of the live tests supplied by checked contract
 // adoptions; no build-plan bytes are written or compared.
-export function renderContractTests(host, packageArgument) {
+export function renderContractTests(host, packageArgument, options = {}) {
   const validator = createValidator(host);
-  const run = validator.finish({ ...validator.validatePackage(packageArgument), validationKind: "package" });
+  const run = validator.finish({ ...validator.validatePackage(packageArgument, options), validationKind: "package" });
   return {
     markdown: run.contractTests,
     findings: run.findings,
+    hints: run.hints,
+    safety: run.safety,
     summary: run.summary,
     contractAdoptions: run.contractAdoptions,
     checkedContractAdoptions: run.checkedContractAdoptions
   };
 }
+
+// The one sentence that states the safety scan's limit. The authoring tool
+// prints the same sentence under its own safety section.
+export const SAFETY_SCAN_LIMIT = "Three of the scan's checks read only English, so a hostile instruction in another language passes unseen, and a clean scan does not prove a package safe.";
 
 export function formatReport(run, jsonMode) {
   const isBuild = run.validationKind === "build";
@@ -4588,21 +5090,42 @@ export function formatReport(run, jsonMode) {
     [isBuild ? "build" : "package"]: subject,
     valid: run.valid,
     verdict: run.verdict,
+    ...(isBuild ? { outcome: run.outcome } : {}),
     summary: run.summary,
-    findings: run.findings
+    findings: run.findings,
+    hints: run.hints,
+    safety: run.safety
   };
   if (jsonMode) return `${JSON.stringify(output, null, 2)}\n`;
 
-  const status = run.verdict;
+  const status = isBuild ? run.outcome.toUpperCase() : run.verdict;
   const lines = [
     `OpenGDD v${SPEC_VERSION} ${isBuild ? "build" : "package"} validation`,
     `${isBuild ? "Build" : "Package"}: ${run.packageName ?? "(unread)"} (${run.packageRoot})`,
     `Result: ${status} — ${run.summary.errors} error(s)${run.summary.dependent ? ` (${run.summary.dependent} waiting on designer input)` : ""}, ${run.summary.warnings} warning(s)`
   ];
+  if (run.outcome === "incomplete") lines.push(`Not passed: ${run.buildOutcomeBasis.notPassedNames.join(", ")}`);
+  else if (run.outcome === "not verified") lines.push("The source package declares no acceptance tests.");
   if (run.findings.length) lines.push("");
   for (const finding of run.findings) {
     const location = `${finding.file}${finding.line ? `:${finding.line}` : ""}`;
     lines.push(`${finding.severity.toUpperCase()} [${finding.code}] ${location} — ${finding.message} (SPEC ${finding.spec_section})`);
+  }
+  if (!isBuild && run.review) {
+    lines.push("", `Hints (${run.hints.length})`);
+    lines.push("Hints point at places worth a second look. They are never errors, and they only understand English.");
+    for (const item of run.hints) {
+      const location = `${item.file}${item.line ? `:${item.line}` : ""}`;
+      lines.push(`HINT [${item.code}] ${location} — ${item.message} (SPEC ${item.spec_section})`);
+    }
+  }
+  if (!isBuild) {
+    lines.push("", `Safety scan (${run.safety.length})`);
+    lines.push(SAFETY_SCAN_LIMIT);
+    for (const item of run.safety) {
+      const location = `${item.file}${item.line ? `:${item.line}` : ""}`;
+      lines.push(`WARNING [${item.code}] ${location} — ${item.message} (SPEC ${item.spec_section})`);
+    }
   }
   return `${lines.join("\n")}\n`;
 }

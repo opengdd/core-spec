@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Get started — OpenGDD</title>
-<meta name="description" content="Write a first OpenGDD package in seven short steps: the folder, the player fantasy, the rules, the numbers, who decides, the build plan, and the check.">
+<meta name="description" content="Write a first OpenGDD package in 7 short steps: the folder, the player fantasy, the rules, the numbers, who decides, the build plan, and the check.">
 <link rel="canonical" href="https://opengdd.org/get-started/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Get started — OpenGDD">
-<meta property="og:description" content="Write a first OpenGDD package in seven short steps: the folder, the player fantasy, the rules, the numbers, who decides, the build plan, and the check.">
+<meta property="og:description" content="Write a first OpenGDD package in 7 short steps: the folder, the player fantasy, the rules, the numbers, who decides, the build plan, and the check.">
 <meta property="og:url" content="https://opengdd.org/get-started/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta property="og:image:type" content="image/png">
@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
 <meta name="twitter:title" content="Get started — OpenGDD">
-<meta name="twitter:description" content="Write a first OpenGDD package in seven short steps: the folder, the player fantasy, the rules, the numbers, who decides, the build plan, and the check.">
+<meta name="twitter:description" content="Write a first OpenGDD package in 7 short steps: the folder, the player fantasy, the rules, the numbers, who decides, the build plan, and the check.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -55,8 +55,8 @@
 <li class="toc-h2"><a href="#rules"><span class="toc-num">3</span>Write the rules in plain language</a></li>
 <li class="toc-h2"><a href="#tuning-keys"><span class="toc-num">4</span>Name the numbers</a></li>
 <li class="toc-h2"><a href="#authority"><span class="toc-num">5</span>Who decides</a></li>
-<li class="toc-h2"><a href="#build-plan"><span class="toc-num">6</span>Promise what the build must show</a></li>
-<li class="toc-h2"><a href="#try-it"><span class="toc-num">7</span>Check it and hand it over</a></li>
+<li class="toc-h2"><a href="#build-plan"><span class="toc-num">6</span>Write the tests that the game must pass</a></li>
+<li class="toc-h2"><a href="#try-it"><span class="toc-num">7</span>Check it and send it to the builder</a></li>
 <li><a href="/handbook/">Handbook</a></li>
 </ul></nav>
 <article class="doc-body">
@@ -65,15 +65,16 @@
 <p class="note">OpenGDD is a way to describe a game clearly enough that
 someone else can build it. You write the rules and the intended experience
 in Markdown. The numbers go in a small JSON file. A tool then checks that
-everything fits together. This guide writes a first package in seven short
-steps. The example is a small forest-spirit platformer. You need a text
-editor. The last step uses the free Node.js runtime for the check.</p>
+the files agree with each other. In this guide you write a first package in
+7 short steps. The example is a small forest-spirit platformer. You need a text
+editor. The last step uses the free Node.js program for the check. Use
+Node.js 18 or later.</p>
 <section class="chapter">
 <h2 id="the-package"><span class="chapter-num">1</span>Make the folder<a class="heading-anchor" href="#the-package" aria-label="Link to this section">#</a></h2>
 <p>A package is one folder. Five files make it complete.</p>
 
 <pre><code class="lang-text">forest-spirit/
-  manifest.json      what this is
+  manifest.json      what the game is
   tuning.json        the numbers
   01-overview.md     the player fantasy and the pitch
   02-mechanics.md    the rules
@@ -84,7 +85,7 @@ called, who designed it, and what kind of game to build.</p>
 
 <p class="file-label"><code>manifest.json</code>, complete</p>
 <pre><code class="lang-json">{
-  "opengdd": "0.8",
+  "opengdd": "0.9",
   "id": "forest-spirit",
   "version": "0.1.0",
   "title": "Forest Spirit",
@@ -96,22 +97,23 @@ called, who designed it, and what kind of game to build.</p>
 }</code></pre>
 
 <p><code>opengdd</code> is the format version. Packages declare
-<code>0.8</code>, the current version. <code>version</code> is the version of
+<code>0.9</code>, the current version. <code>version</code> is the version of
 your design. <code>platform</code> is <code>web-2d</code> or <code>web-3d</code>.
 <code>genre</code> is free text. The folder name does not have to match
 <code>id</code>.</p>
 
 <p>The numbered Markdown files are chapters. A tool reads them in filename
-order. The numbers <code>01</code> to <code>05</code> have fixed names. Two of
-them, <code>03-content.md</code> and <code>04-presentation.md</code>, are
-optional and not used here. Acceptance tests are the checks the finished game
-must pass. Step 6 writes one. The next steps fill the other four files.</p>
+order. The files numbered <code>01</code> to <code>05</code> have fixed names.
+Two of these files, <code>03-content.md</code> and
+<code>04-presentation.md</code>, are optional and not used here. Acceptance
+tests are the checks that the finished game must pass. You write one in
+step 6. In the next steps you write the other four files.</p>
 </section>
 <section class="chapter">
 <h2 id="fantasy"><span class="chapter-num">2</span>Say what the player feels<a class="heading-anchor" href="#fantasy" aria-label="Link to this section">#</a></h2>
-<p><code>01-overview.md</code> opens with the <strong>fantasy
-block</strong>: what the player gets to be and feel, in a few lines. It comes
-right after the title, before anything else.</p>
+<p><code>01-overview.md</code> starts with the <strong>fantasy
+block</strong>. The fantasy block says in a few lines who the player is in
+the game and how playing should feel. It comes directly after the title.</p>
 
 <p class="file-label">the opening of <code>01-overview.md</code></p>
 <pre><code class="lang-text"># Forest Spirit
@@ -125,10 +127,12 @@ NOT: grimdark, gory, hopeless.
 ```</code></pre>
 
 <p>Write one or more fantasy statements. Together they may use at most 280
-characters. End each one with a full stop, exclamation mark or question mark.
-Then write a <code>Feel:</code> line with three to five adjectives. Then a
-<code>NOT:</code> line with what the game must not become. Everything you
-write after this should serve these lines. The rest of the overview is the
+characters. Punctuation is not checked. Then write a <code>Feel:</code>
+line with three to five entries that describe how the game feels. Each
+entry is one word or one short phrase, and commas separate the entries.
+Then write a <code>NOT:</code> line with
+what the game must not become. Everything you write after this should
+support these lines. The rest of the overview is the
 pitch, in ordinary prose.</p>
 </section>
 <section class="chapter">
@@ -182,16 +186,17 @@ Change it there and every rule that names it stays correct.</p>
 }</code></pre>
 
 <p><code>values</code> holds the numbers. A <strong>range</strong> is the
-lowest and highest value allowed. When balancing, you or whoever balances the
-build may pick any value between them, including the two ends. No delegation
-is needed for that. Here the leap may be tuned between 2.5 and 4 tiles. A
+lowest and highest value allowed. When balancing, you or the person who
+balances the build may pick any value between the lowest and the highest,
+including those two values. This needs no Delegated passage (see step 5).
+Here the leap may be tuned between 2.5 and 4 tiles. A
 number without a range stays as written.</p>
 
 <p>A <strong>rule</strong> is a one-line check that must stay true. Here, a
 full leap clears the thorn. Raise the thorn to 4 tiles and the
 <strong>validator</strong>, the tool that checks a package, reports the rule
 as false. The level would be impossible. The validator also reports a name
-that points at nothing. The <a href="/handbook/tuning/">Tuning</a> chapter
+that is not defined anywhere. The <a href="/handbook/tuning/">Tuning</a> chapter
 lists the full rule syntax and the reserved words. The authoring tool shows
 where each key is set while you write.</p>
 
@@ -202,27 +207,28 @@ where each key is set while you write.</p>
 <section class="chapter">
 <h2 id="authority"><span class="chapter-num">5</span>Who decides<a class="heading-anchor" href="#authority" aria-label="Link to this section">#</a></h2>
 <p>Every rule is <strong>Fixed</strong> unless you say otherwise:
-the builder follows it exactly. To hand a decision to the builder, tag the
-section <strong>Delegated</strong> and write the limits.</p>
+the builder follows it exactly. To give a decision to the builder, write it
+in a <strong>Delegated</strong> blockquote, with its limits.</p>
 
-<p class="file-label">a Delegated section in <code>02-mechanics.md</code></p>
-<pre><code class="lang-markdown">&gt; DELEGATED: landing-feedback
-&gt;
-&gt; Choose the landing animation and sound. A landing must remain readable
-&gt; without hiding the next hazard.</code></pre>
+<p class="file-label">a Delegated passage in <code>02-mechanics.md</code></p>
+<pre><code class="lang-markdown">&gt; DELEGATED: Choose the landing animation and sound. A landing must
+&gt; remain readable without hiding the next hazard.</code></pre>
 
-<p>The builder chooses the animation and the sound. Readability and the clear
-view of the next hazard stay required. There is a third level,
-<strong>Personalization</strong>: a question each build answers for itself.
-The <a href="/handbook/personalization/">Personalization questions</a> chapter
+<p>The builder chooses the animation and the sound. The landing must still
+be readable, and it must still not hide the next hazard. There is also
+<strong>Personalization</strong>: a question that the builder answers for
+each build. The <a href="/handbook/personalization/">Personalization questions</a> chapter
 explains it.</p>
 </section>
 <section class="chapter">
-<h2 id="build-plan"><span class="chapter-num">6</span>Promise what the build must show<a class="heading-anchor" href="#build-plan" aria-label="Link to this section">#</a></h2>
+<h2 id="build-plan"><span class="chapter-num">6</span>Write the tests that the game must pass<a class="heading-anchor" href="#build-plan" aria-label="Link to this section">#</a></h2>
 <p><code>05-build-plan.md</code> splits the work into stages. It
 also holds the <strong>acceptance tests</strong>: checks the finished game
 must pass. A test gives a starting situation, what happens, and what must be
 true afterwards.</p>
+
+<p>Tests are optional. Without them, a build can only be reported as not
+verified, never as passing.</p>
 
 <p class="file-label"><code>05-build-plan.md</code>, complete small plan</p>
 <pre><code class="lang-markdown"># Build plan
@@ -232,7 +238,7 @@ Scope: Implement movement, leaping, thorns, and hearts.
 Chapters: 02-mechanics.md.
 Checkpoint: The spirit can cross one test room and take damage.
 
-### AT-1: Jump over a spike
+### AT-1: Jump over a thorn
 ```test
 {
   "type": "scenario",
@@ -248,50 +254,56 @@ Scope: Build one short level with readable visuals and sound, then apply the nam
 Chapters: 01-overview.md and 02-mechanics.md.
 Checkpoint: The route is clear, and AT-1 passes.</code></pre>
 
-<p>Each stage says what to build and when it is done. A test is a heading
-that starts with <code>AT-</code> and a number. A JSON block marked
-<code>test</code> must follow that heading directly.
+<p>The format requires at least one stage. Each stage says what to build. The
+chapters that describe the work, and a checkpoint, which says when the stage
+is done, are optional. Writing these as <code>Scope:</code>, <code>Chapters:</code> and
+<code>Checkpoint:</code> lines is a helpful habit. The validator checks none
+of this.</p>
+
+<p>A test is a heading that starts with <code>AT-</code> and a number. A
+JSON block marked <code>test</code> must follow that heading directly.
 <code>diagnostics</code> names the evidence to keep if the test fails. Names
 inside a test, such as <code>jump.height_tiles</code>, are for the person
-running it. The validator ignores them. The format requires the stages. The
-<code>Scope</code>, <code>Chapters</code> and <code>Checkpoint</code> lines
-are a helpful habit that the validator does not check.</p>
+running it. The validator does not check them.</p>
 </section>
 <section class="chapter">
-<h2 id="try-it"><span class="chapter-num">7</span>Check it and hand it over<a class="heading-anchor" href="#try-it" aria-label="Link to this section">#</a></h2>
-<p>The validator checks that the files, names and references fit
-together. It needs <a href="https://nodejs.org/">Node.js</a> on your computer.
-Nothing else to install. <code>npx</code> is a command that comes with
-Node.js. It runs the validator without a separate install.</p>
+<h2 id="try-it"><span class="chapter-num">7</span>Check it and send it to the builder<a class="heading-anchor" href="#try-it" aria-label="Link to this section">#</a></h2>
+<p>The validator checks that the files, names and references agree
+with each other. The validator needs <a href="https://nodejs.org/">Node.js</a>
+on your computer. <code>npx</code> is a command that comes with Node.js. It
+runs the validator, so you do not need to install anything else.</p>
 
-<p>In a CI job, pin the validator version:
-<code>npx opengdd@0.8 validate &lt;dir&gt;</code>. Later 0.x releases may
-change which checks run.</p>
+<p>If the check runs automatically, for example in a continuous integration (CI) job, name the exact
+validator version: <code>npx opengdd@0.9 validate &lt;dir&gt;</code>. Later
+0.x releases may change which checks run.</p>
 
 <ol>
 <li>Open a terminal in the folder that contains your package folder and
 run <code>npx opengdd validate forest-spirit</code>.</li>
-<li>Fix every error. Read each warning. Sometimes your design already
-answers it.</li>
-<li>Send the whole folder to the builder as a zip or a Git repository.</li>
+<li>Fix every error. Read each warning. A warning does not always need a
+change.</li>
+<li>Send the whole folder to the builder as a zip file or a Git repository.</li>
 <li>Tell the builder to read <code>manifest.json</code> first, build the
 stages in <code>05-build-plan.md</code>, and return the build with the test
-evidence the plan asks for. That evidence comes back as one small file,
-<code>opengdd-build.json</code>; the <a href="/conformance/">validator</a>
-page says what it records.</li>
+evidence the plan asks for. The builder returns that evidence in one small
+file, the build record <code>opengdd-build.json</code>. The
+<a href="/conformance/">validator</a> page says what the build record
+contains.</li>
 </ol>
 
-<p>A clean run ends with this line:</p>
+<p>A run with no errors and no warnings shows this result line. A short
+<a href="/handbook/how-checking-works/">safety scan</a> section follows
+the line.</p>
 
 <pre><code class="lang-text">Result: PASS — 0 error(s), 0 warning(s)</code></pre>
 
 <p>These five files are a complete design. When your game needs more, the
-handbook has one short chapter per addition: lists of content in
-<a href="/handbook/collections/">collections</a>, the look in
-<a href="/handbook/direction/">art direction</a>, changing values in
-<a href="/handbook/runtime-values/">runtime values</a>, and the
-<a href="/handbook/">rest</a>. The <a href="/spec/">specification</a> has the
-exact rules.</p>
+Handbook has a short chapter for each optional part.
+<a href="/handbook/collections/">Collections</a> hold lists of content.
+<a href="/handbook/direction/">Art direction</a> describes the look.
+<a href="/handbook/runtime-values/">Runtime values</a> are values that change
+during play. The <a href="/handbook/">Handbook</a> lists all chapters. The
+<a href="/spec/">OpenGDD specification</a> has the exact rules.</p>
 
 <div class="cta-row">
   <a class="cta" href="/handbook/complete-example/">Open the complete example</a>
@@ -304,7 +316,7 @@ exact rules.</p>
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

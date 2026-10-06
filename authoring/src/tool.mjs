@@ -39,7 +39,7 @@ import { matchesPreparedAdoption } from "./prepared-contract.mjs";
 import { kindDefinition } from "./kinds.mjs";
 import { anchoredConfirmation } from "./dom.mjs";
 import { INSPECTOR_COPY } from "./copy/inspector-copy.mjs";
-import { findingAccessibleName, findingLocation } from "./findings.mjs";
+import { findingAccessibleName, findingLocation, findingMessage } from "./findings.mjs";
 
 export { AUTHORING_TOOL_VERSION } from "opengdd-authoring-version";
 
@@ -86,10 +86,13 @@ export function mountAuthoringTool(rootElement, host = {}) {
     ? host.headingLevel
     : 1;
   const headingTag = `h${headingLevel}`;
-  // A host supplies its available catalogue; local maintained material is not
+  // A host supplies its available catalog; local maintained material is not
   // implicitly exposed by the published authoring embed.
-  const contractsCatalogueUrl = typeof host.contractsCatalogueUrl === "string" && host.contractsCatalogueUrl
-    ? host.contractsCatalogueUrl : "";
+  const contractsCatalogUrl = typeof host.contractsCatalogUrl === "string" && host.contractsCatalogUrl
+    ? host.contractsCatalogUrl
+    : typeof host.contractsCatalogueUrl === "string" && host.contractsCatalogueUrl
+      ? host.contractsCatalogueUrl
+      : "";
   // Preserve earlier hosts while maintained hosts use the supported name.
   // Recipes remain trusted host configuration, not package data.
   const preparedStartingPoints = host.preparedStartingPoints ?? host.experimentalStartingPoints;
@@ -346,6 +349,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
     isBuiltin: false,
     dragged: null,
     validation: { status: "pending", run: null },
+    showHints: false,
     coldStart: false,
     saveStatus: WORKBENCH_COPY.notSaved,
     outlineProblemsOnly: false,
@@ -356,7 +360,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
     outlineFolds: new Set((host.outlineFolds ?? host.outlineCollections)?.collapsed?.() ?? []),
     outlineInspectorReturn: "",
     outlineAnnouncement: "",
-    migration: { status: "idle", report: null, changes: [], hiddenNoOp: false, manualAfter: null, notice: null }
+    migration: { status: "idle", report: null, changes: [], hiddenNoOp: false, manualAfter: null, reviewNotesAfter: null, notice: null }
   };
   let editController;
   let editSaveAnnouncements = [];
@@ -513,7 +517,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
       const run = state.validation.run;
       return {
         status: state.validation.status,
-        findings: run?.findings ?? [], advice: [...panelAdvice.values()].flat(), summary: run?.summary,
+        findings: run?.findings ?? [], hints: run?.hints ?? [], safety: run?.safety ?? [], advice: [...panelAdvice.values()].flat(), summary: run?.summary,
         packageRevision: run?.packageRevision ?? 0, validationRevision
       };
     },
@@ -796,7 +800,10 @@ export function mountAuthoringTool(rootElement, host = {}) {
       if (!result || controller !== editController) return;
       if (direction === "undo" && label) redoLabels.push(label);
       else if (direction === "redo") redoLabels.pop();
-      if (direction === "undo" && label === WIDGET_COPY.migrationUndo) state.migration.manualAfter = null;
+      if (direction === "undo" && label === WIDGET_COPY.migrationUndo) {
+        state.migration.manualAfter = null;
+        state.migration.reviewNotesAfter = null;
+      }
       editorSurface.closeDialog(false);
       if (!state.package.files.has(state.openPath)) {
         const movedPath = result.moves.find(move => move.from === openPath)?.to;
@@ -840,6 +847,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
     Worker: view.Worker,
     revisionFor: path => editController.revision(path),
     folders: () => state.package?.folders ?? [],
+    review: () => state.showHints,
     analysisDelay: () => ui.textarea.value.length > MAX_WRAPPED_TEXT_CHARS ? 300 : 150,
     schemas: suppliedSchemas
   });
@@ -876,7 +884,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
   async function validateStagedTransaction(transaction, { collectIntroduced = false } = {}) {
     const staged = await stagedValidation(transaction);
     if (collectIntroduced) return staged;
-    if (staged.introduced[0]) throw new Error(staged.introduced[0].message);
+    if (staged.introduced[0]) throw new Error(findingMessage(staged.introduced[0]));
     return staged.run;
   }
 
@@ -1192,7 +1200,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
     state.outlineInspectorReturn = "";
     state.outlineAnnouncement = "";
     renderedDiagnostics = "";
-    state.migration = { status: "idle", report: null, changes: [], hiddenNoOp: false, manualAfter: null, notice: null };
+    state.migration = { status: "idle", report: null, changes: [], hiddenNoOp: false, manualAfter: null, reviewNotesAfter: null, notice: null };
     panelAdvice.clear();
     pendingContractDuplicateChecks.clear();
     pendingContractUpdateNotices.clear();
@@ -1387,8 +1395,8 @@ export function mountAuthoringTool(rootElement, host = {}) {
 
   // `source` skips the owner routing: the outline's problem rows go to the
   // file and line the validator named, whoever owns the finding.
-  function openFinding(index, { source = false } = {}) {
-    const finding = state.validation.run?.findings[index];
+  function openFinding(index, { source = false, list = "findings" } = {}) {
+    const finding = state.validation.run?.[list]?.[index];
     if (!finding || !state.package.files.has(finding.file)) return;
     const selected = selectionBus.current();
     if (!source && selected?.file === finding.file && selected.kind !== "file" && panelHost?.inspectorMatches(selected)) {
@@ -1448,9 +1456,9 @@ export function mountAuthoringTool(rootElement, host = {}) {
     return finding;
   }
 
-  function safelyOpenFinding(index) {
+  function safelyOpenFinding(index, options = {}) {
     try {
-      openFinding(index);
+      openFinding(index, options);
       return true;
     } catch {
       return false;
@@ -1694,7 +1702,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
       if (controller !== editController) return;
       state.migration = {
         status: "idle", report: null, changes: [], hiddenNoOp: false,
-        manualAfter: [...migration.manual], notice: null
+        manualAfter: [...migration.manual], reviewNotesAfter: [...(migration.reviewNotes ?? [])], notice: null
       };
       analyzeNow();
       renderAll();
@@ -1708,10 +1716,14 @@ export function mountAuthoringTool(rootElement, host = {}) {
 
   function migrationMarkup() {
     const migration = state.migration;
-    const manualAfter = migration.manualAfter?.length
+    const manualAfterItems = migration.manualAfter?.length
       ? `<section class="opengdd-author-migration opengdd-author-migration--after"><h3>${WIDGET_COPY.migrationAfter}</h3><ul class="opengdd-author-migration-decisions">${migration.manualAfter.map(migrationManualMarkup).join("")}</ul><button type="button" data-action="migration-dismiss-manual">${WIDGET_COPY.dismissMigrationManual}</button></section>`
       : "";
-    const needsMigration = ["0.6", "0.7"].includes(state.authoringView?.manifest?.opengdd);
+    const reviewNotesAfter = migration.reviewNotesAfter?.length
+      ? `<section class="opengdd-author-migration"><h3>${WIDGET_COPY.migrationReviewNotes}</h3><p>${WIDGET_COPY.migrationReviewExplanation}</p><ul>${migration.reviewNotesAfter.map(item => `<li data-migration-review-note>${escapeHtml(item)}</li>`).join("")}</ul><button type="button" data-action="migration-dismiss-notes">${WIDGET_COPY.dismissMigrationManual}</button></section>`
+      : "";
+    const manualAfter = manualAfterItems + reviewNotesAfter;
+    const needsMigration = ["0.6", "0.7", "0.8"].includes(state.authoringView?.manifest?.opengdd);
     if (migration.status === "no-op") {
       const notice = migration.notice ? `<p>${migration.notice}</p>` : "";
       return `<section class="opengdd-author-migration">${notice}<p>${WIDGET_COPY.migrationNoOp}</p><button type="button" data-action="migration-dismiss-no-op">${WIDGET_COPY.dismissMigrationNoOp}</button></section>${manualAfter}`;
@@ -1735,9 +1747,12 @@ export function mountAuthoringTool(rootElement, host = {}) {
       const manual = migration.report.manual.length
         ? `<details class="opengdd-author-migration-details"><summary>${WIDGET_COPY.migrationManual} <span>(${migration.report.manual.length})</span></summary><ul class="opengdd-author-migration-decisions">${migration.report.manual.map(migrationManualMarkup).join("")}</ul></details>`
         : "";
+      const reviewNotes = migration.report.reviewNotes?.length
+        ? `<details class="opengdd-author-migration-details"><summary>${WIDGET_COPY.migrationReviewNotes} <span>(${migration.report.reviewNotes.length})</span></summary><p>${WIDGET_COPY.migrationReviewExplanation}</p><ul>${migration.report.reviewNotes.map(item => `<li data-migration-review-note>${escapeHtml(item)}</li>`).join("")}</ul></details>`
+        : "";
       const refusal = migration.report.refused ? `<p>${WIDGET_COPY.migrationRefused}</p>` : "";
       const apply = migration.report.refused ? "" : `<button type="button" data-action="migration-apply">${WIDGET_COPY.applyMigration}</button>`;
-      return `<section class="opengdd-author-migration"><div class="opengdd-author-migration-actions">${apply}<button type="button" data-action="migration-not-now">${WIDGET_COPY.notNow}</button></div>${introduction}${notice}${refusal}${changes}${manual}</section>${manualAfter}`;
+      return `<section class="opengdd-author-migration"><div class="opengdd-author-migration-actions">${apply}<button type="button" data-action="migration-not-now">${WIDGET_COPY.notNow}</button></div>${introduction}${notice}${refusal}${changes}${manual}${reviewNotes}</section>${manualAfter}`;
     }
     return `<section class="opengdd-author-migration">${introduction}<button type="button" data-action="migration-preview">${WIDGET_COPY.previewMigration}</button></section>${manualAfter}`;
   }
@@ -1764,10 +1779,15 @@ export function mountAuthoringTool(rootElement, host = {}) {
     const replaceDiagnostics = markup => {
       if (markup === renderedDiagnostics) return;
       const scroll = { top: ui.diagnostics.scrollTop, left: ui.diagnostics.scrollLeft };
+      // The Show hints switch is rebuilt with the report; keyboard focus stays on it.
+      const hintsFocused = ui.diagnostics.getRootNode().activeElement?.closest?.('[data-action="show-hints"]');
       renderedDiagnostics = markup;
       ui.diagnostics.innerHTML = markup;
       ui.diagnostics.scrollTop = scroll.top;
       ui.diagnostics.scrollLeft = scroll.left;
+      if (hintsFocused && ui.diagnostics.contains(hintsFocused) === false) {
+        ui.diagnostics.querySelector('[data-action="show-hints"]')?.focus({ preventScroll: true });
+      }
     };
     if (capabilities.workbenchLabels) ui.diagnosticSummary.classList.remove("opengdd-author-verdict--pass", "opengdd-author-verdict--warnings", "opengdd-author-verdict--fail");
     if (status === "pending") {
@@ -1789,6 +1809,8 @@ export function mountAuthoringTool(rootElement, host = {}) {
     }
 
     const advice = validationService.current().advice;
+    const hints = run.hints ?? [];
+    const safety = run.safety ?? [];
     const summary = { errors: run.summary.errors, warnings: run.summary.warnings + advice.length };
     const verdict = summary.errors ? WIDGET_COPY.fail : summary.warnings ? WIDGET_COPY.passWithWarnings : WIDGET_COPY.pass;
     const verdictClass = summary.errors ? "fail" : summary.warnings ? "warnings" : "pass";
@@ -1811,20 +1833,35 @@ export function mountAuthoringTool(rootElement, host = {}) {
         const severity = finding.severity;
         const accessible = findingAccessibleName(finding);
         const code = capabilities.workbenchLabels ? "" : `<code>${escapeHtml(finding.code)}</code>`;
-        return `<li><button type="button" class="opengdd-author-diagnostic-line" data-finding="${index}" aria-label="${escapeHtml(accessible)}" title="${escapeHtml(finding.message)}"><span class="opengdd-author-diagnostic-severity opengdd-author-diagnostic-severity--${severity}" aria-hidden="true">${severity}</span>${code}<span class="opengdd-author-diagnostic-message">${escapeHtml(finding.message)}</span><span class="opengdd-author-diagnostic-location">${escapeHtml(location)}</span></button></li>`;
+        return `<li><button type="button" class="opengdd-author-diagnostic-line" data-finding="${index}" aria-label="${escapeHtml(accessible)}" title="${escapeHtml(findingMessage(finding))}"><span class="opengdd-author-diagnostic-severity opengdd-author-diagnostic-severity--${severity}" aria-hidden="true">${severity}</span>${code}<span class="opengdd-author-diagnostic-message">${escapeHtml(findingMessage(finding))}</span><span class="opengdd-author-diagnostic-location">${escapeHtml(location)}</span></button></li>`;
+      }).join("")}</ul>`
+      : "";
+    const auxiliaryList = (items, list, label) => items.length
+      ? `<ul class="opengdd-author-diagnostic-list">${items.map((item, index) => {
+        const location = findingLocation(item);
+        const accessible = findingAccessibleName(item);
+        return `<li><button type="button" class="opengdd-author-diagnostic-line" data-finding="${index}" data-report-list="${list}" aria-label="${escapeHtml(accessible)}" title="${escapeHtml(item.message)}"><span class="opengdd-author-diagnostic-severity opengdd-author-diagnostic-severity--${item.severity}" aria-hidden="true">${label}</span><code>${escapeHtml(item.code)}</code><span class="opengdd-author-diagnostic-message">${escapeHtml(item.message)}</span><span class="opengdd-author-diagnostic-location">${escapeHtml(location)}</span></button></li>`;
       }).join("")}</ul>`
       : "";
     const adviceList = advice.length
       ? `<ul class="opengdd-author-diagnostic-list opengdd-author-panel-advice">${advice.map(finding => {
         const location = findingLocation(finding);
-        return `<li><div class="opengdd-author-diagnostic-line"><span class="opengdd-author-diagnostic-severity opengdd-author-diagnostic-severity--warning" aria-hidden="true">warning</span><span class="opengdd-author-diagnostic-panel">${escapeHtml(finding.panelTitle)}</span><span class="opengdd-author-diagnostic-message">${escapeHtml(finding.message)}</span><span class="opengdd-author-diagnostic-location">${escapeHtml(location)}</span></div></li>`;
+        return `<li><div class="opengdd-author-diagnostic-line"><span class="opengdd-author-diagnostic-severity opengdd-author-diagnostic-severity--warning" aria-hidden="true">warning</span><span class="opengdd-author-diagnostic-panel">${escapeHtml(finding.panelTitle)}</span><span class="opengdd-author-diagnostic-message">${escapeHtml(findingMessage(finding))}</span><span class="opengdd-author-diagnostic-location">${escapeHtml(location)}</span></div></li>`;
       }).join("")}</ul>` : "";
     const empty = run.findings.length || advice.length ? "" : `<p class="opengdd-author-validation-empty">${WIDGET_COPY.noFindings}</p>`;
     const skipped = run.skipped.length
       ? `<p class="opengdd-author-validation-skipped">${WIDGET_COPY.skippedMediaChecks}</p>`
       : "";
     const verdictLine = capabilities.workbenchLabels ? "" : `<p class="opengdd-author-verdict opengdd-author-verdict--${verdictClass}">${WIDGET_COPY.validationSummaryFull(verdict, summary.errors, summary.warnings)}</p>`;
-    replaceDiagnostics(`${migration}${verdictLine}${empty}${findingList}${adviceList}${skipped}`);
+    const reviewControl = `<label class="opengdd-author-review-toggle"><input type="checkbox" data-action="show-hints"${state.showHints ? " checked" : ""}> ${WIDGET_COPY.showHints}</label>`;
+    // A run made without review has no hints to count. Until the review run
+    // arrives, the section says it is checking instead of showing a stale 0.
+    const hintsReady = run.review === true;
+    const hintsSection = state.showHints
+      ? `<section class="opengdd-author-report-section opengdd-author-report-section--hints"><h3>${hintsReady ? WIDGET_COPY.hintsTitle(run.summary.hints ?? hints.length) : WIDGET_COPY.hintsHeading}</h3><p>${WIDGET_COPY.hintsExplanation}</p>${hintsReady ? auxiliaryList(hints, "hints", "hint") : `<p class="opengdd-author-muted">${WIDGET_COPY.checkingEllipsis}</p>`}</section>`
+      : "";
+    const safetySection = `<section class="opengdd-author-report-section opengdd-author-report-section--safety"><h3>${WIDGET_COPY.safetyTitle(run.summary.safety ?? safety.length)}</h3><p>${WIDGET_COPY.safetyExplanation}</p>${auxiliaryList(safety, "safety", "warning")}</section>`;
+    replaceDiagnostics(`${migration}${verdictLine}${reviewControl}${empty}${findingList}${adviceList}${hintsSection}${safetySection}${skipped}`);
   }
 
   function openContractRenameFromPanel(anchor, file) {
@@ -2059,7 +2096,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
         details = `${sequence}${reused}${updates}<label for="opengdd-contract-name">${CONTRACT_COPY.nameQuestion}</label><p class="opengdd-author-create-help">${escapeHtml(CONTRACT_COPY.nameHelp)}</p><input id="opengdd-contract-name" data-contract-name autocomplete="off" value="${escapeHtml(collectionDialog.contractName)}"${collectionDialog.contractUpdateFile ? " disabled" : ""}>${start}${pack}<p data-contract-todo></p>${skip}`;
       }
       ui.collectionDialog.setAttribute("aria-labelledby", "opengdd-collection-dialog-title");
-      const sourcePicker = `<label class="opengdd-author-contract-drop">${CONTRACT_COPY.drop}<input data-contract-file type="file" accept=".json,.zip,application/json,application/zip" multiple></label><textarea data-contract-paste aria-label="${CONTRACT_COPY.pastePlaceholder}" placeholder="${CONTRACT_COPY.pastePlaceholder}">${escapeHtml(collectionDialog.pasteValue)}</textarea>${contractsCatalogueUrl ? `<p>${escapeHtml(CONTRACT_COPY.catalogue)} <a href="${escapeHtml(contractsCatalogueUrl)}">${escapeHtml(contractsCatalogueUrl)}</a>.</p>` : ""}`;
+      const sourcePicker = `<label class="opengdd-author-contract-drop">${CONTRACT_COPY.drop}<input data-contract-file type="file" accept=".json,.zip,application/json,application/zip" multiple></label><textarea data-contract-paste aria-label="${CONTRACT_COPY.pastePlaceholder}" placeholder="${CONTRACT_COPY.pastePlaceholder}">${escapeHtml(collectionDialog.pasteValue)}</textarea>${contractsCatalogUrl ? `<p>${escapeHtml(CONTRACT_COPY.catalog)} <a href="${escapeHtml(contractsCatalogUrl)}">${escapeHtml(contractsCatalogUrl)}</a>.</p>` : ""}`;
       const title = source ? CONTRACT_COPY.addTitle(source.value.contract, source.value.version) : CONTRACT_COPY.title;
       const picker = !source ? sourcePicker : collectionDialog.contractOffered ? "" : `<details><summary>Choose a different file</summary>${sourcePicker}</details>`;
       ui.collectionDialog.innerHTML = `<h3 id="opengdd-collection-dialog-title">${escapeHtml(title)}</h3>${source ? details + picker : picker}<p class="opengdd-author-create-error" data-contract-error aria-live="polite"></p><div class="opengdd-author-create-actions"><button type="button" data-collection-confirm>${CONTRACT_COPY.add}</button><button type="button" data-collection-cancel>${CONTRACT_COPY.cancel}</button></div>`;
@@ -2120,7 +2157,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
     renderCollectionDialog();
   }
 
-  // A host may arrive with a contract already chosen (a catalogue deep link).
+  // A host may arrive with a contract already chosen (a catalog deep link).
   // The offer opens the ordinary Add-a-contract dialog with that source loaded,
   // after the initial package is open so the dialog measures the right files.
   async function offerInitialContract() {
@@ -2999,7 +3036,8 @@ export function mountAuthoringTool(rootElement, host = {}) {
     const finding = event.target.closest("[data-finding]");
     if (finding) {
       dismissPersistentNotice();
-      safelyOpenFinding(Number(finding.dataset.finding));
+      const list = finding.dataset.reportList ?? "findings";
+      safelyOpenFinding(Number(finding.dataset.finding), { list, source: list !== "findings" });
       return;
     }
     const treeItem = event.target.closest("[data-tree-type]");
@@ -3024,7 +3062,11 @@ export function mountAuthoringTool(rootElement, host = {}) {
       return;
     }
     try {
-      if (action === "widget-outline") openWidgetDrawer("outline");
+      if (action === "show-hints") {
+        state.showHints = actionControl.checked === true;
+        validationChanged();
+      }
+      else if (action === "widget-outline") openWidgetDrawer("outline");
       else if (action === "widget-inspector") openWidgetDrawer("inspector");
       else if (action === "migration-preview") await previewMigration();
       else if (action === "migration-apply") await applyMigration();
@@ -3033,6 +3075,9 @@ export function mountAuthoringTool(rootElement, host = {}) {
         renderDiagnostics();
       } else if (action === "migration-dismiss-no-op") {
         state.migration = { ...state.migration, status: "idle", report: null, changes: [], hiddenNoOp: true, notice: null };
+        renderDiagnostics();
+      } else if (action === "migration-dismiss-notes") {
+        state.migration = { ...state.migration, reviewNotesAfter: null };
         renderDiagnostics();
       } else if (action === "migration-dismiss-manual") {
         state.migration = { ...state.migration, manualAfter: null };
@@ -3148,7 +3193,7 @@ export function mountAuthoringTool(rootElement, host = {}) {
   });
 
   on(ui.packageSelect, "change", async () => {
-    // Captured before anything runs: cancelling a pending delete publishes,
+    // Captured before anything runs: canceling a pending delete publishes,
     // and that render re-syncs the select to the still-open package.
     const selected = ui.packageSelect.value;
     dismissPersistentNotice();

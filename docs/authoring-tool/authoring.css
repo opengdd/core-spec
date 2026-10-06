@@ -601,7 +601,7 @@
 }
 
 .opengdd-author-form-field > :is(input, textarea, select, .opengdd-author-form-enum,
-  .opengdd-author-form-choice, .opengdd-author-form-link, .opengdd-author-form-lines,
+  .opengdd-author-form-choice, .opengdd-author-form-open-number, .opengdd-author-form-link, .opengdd-author-form-lines,
   .opengdd-author-promise-color-control) {
   grid-column: 2;
   grid-row: 1;
@@ -891,6 +891,18 @@
   white-space: nowrap;
 }
 
+/* Record fields are labeled with the field's own name, as the fields table
+   and the record table show it; long names wrap instead of running under
+   the controls. */
+.opengdd-author-record-form .opengdd-author-form-field > :is(label, p:first-child:not([class])) {
+  min-width: 0;
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: normal;
+  text-transform: none;
+  overflow-wrap: anywhere;
+}
+
 .opengdd-author-record-free-row > label {
   display: grid;
   gap: 0.2rem;
@@ -1144,6 +1156,14 @@
 .opengdd-author-entity-actions button {
   min-width: 0;
   border-color: var(--opengdd-author-line);
+  font-size: var(--opengdd-inspector-label-size);
+}
+
+/* The reason a header action is unavailable, shown beside it. */
+.opengdd-author-action-reason {
+  align-self: center;
+  color: var(--opengdd-author-muted);
+  font-family: var(--opengdd-author-font-sans);
   font-size: var(--opengdd-inspector-label-size);
 }
 
@@ -1411,6 +1431,18 @@
   background: var(--opengdd-author-accent-soft);
 }
 
+/* An open record field: Guess [box] · No guess yet · Does not apply, styled
+   as the enum choice row (checkmark on the chosen state). */
+.opengdd-author-form-open-number input[data-open-number-guess] {
+  width: 7rem;
+  min-width: 0;
+  height: var(--opengdd-inspector-control-height);
+}
+
+.opengdd-author-form-open-number input[data-open-number-guess][hidden] {
+  display: none;
+}
+
 [data-choice-tag] {
   font-weight: 700;
   color: var(--opengdd-author-accent);
@@ -1471,6 +1503,17 @@
   gap: 0.25rem;
 }
 
+/* Describe the fields: headings stay on one line, and the one-sentence
+   required/open explanation gets a readable width instead of a word column. */
+.opengdd-author-fields-dialog thead th {
+  white-space: nowrap;
+}
+
+.opengdd-author-fields-dialog [data-open-blocked] {
+  min-width: 14rem;
+  margin: 0.2rem 0 0;
+}
+
 [data-fields-table] {
   table-layout: auto;
   width: max-content;
@@ -1496,8 +1539,8 @@
   min-width: 8rem;
 }
 
-[data-fields-table] th:nth-child(8),
-[data-fields-table] td:nth-child(8) {
+[data-fields-table] th:nth-child(9),
+[data-fields-table] td:nth-child(9) {
   min-width: 20rem;
 }
 
@@ -1994,6 +2037,15 @@
   text-transform: uppercase;
 }
 
+.opengdd-author-quickfix-hints {
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--opengdd-author-muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
 .opengdd-author-quickfix-confirm {
   display: flex;
   flex-wrap: nowrap;
@@ -2264,6 +2316,31 @@
 .opengdd-author-validation-skipped,
 .opengdd-author-diagnostic-severity--warning {
   color: var(--opengdd-author-warning);
+}
+
+.opengdd-author-diagnostic-severity--hint {
+  color: var(--opengdd-author-accent);
+}
+
+.opengdd-author-review-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0 0 0.75rem;
+  color: var(--opengdd-author-ink);
+  font-size: 0.72rem;
+}
+
+.opengdd-author-report-section {
+  margin-top: 0.9rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--opengdd-author-line);
+}
+
+.opengdd-author-report-section h3,
+.opengdd-author-report-section p {
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
 }
 
 .opengdd-author-verdict--fail,
@@ -2926,6 +3003,11 @@
 
 .opengdd-author-outline-tree [role="group"] {
   margin-inline-start: 1rem;
+}
+
+/* Tags and numbers at a row's end keep clear of the panel edge. */
+.opengdd-author-outline-tree > [role="treeitem"] {
+  margin-inline-end: 0.5rem;
 }
 
 .opengdd-author-outline-tree [role="treeitem"] {

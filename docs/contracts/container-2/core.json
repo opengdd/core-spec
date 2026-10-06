@@ -1,0 +1,238 @@
+{
+  "contract": "container",
+  "version": 2,
+  "origin": "https://opengdd.org/contracts/container-2",
+  "summary": "This contract covers a container, such as a bag or a chest, that holds distinct items. A delivery is a group of items that arrives at the container. This contract says when the container is full and what happens when some items of a delivery do not fit. It also says which items the container accepts and which slot fills or empties first. It covers slots and size budgets. This version does not cover containers where an item occupies a width-and-height footprint, such as a grid inventory. This contract does not cover counted amounts such as gold. The Ranged value contract covers counted amounts.",
+  "mechanism": [
+    "One container holds items. Two items of one type are interchangeable. Items that differ inside one type, for example by wear or by charges, are separate types in this contract, or this game's prose says how they are handled. A slot holds one stack. A stack is items of one type together.",
+    "The container's own order is the order in which the game's material numbers or lists its slots. In the text below, first and last mean first and last in that order. A container with no slots has no order. Containers where an item occupies a width-and-height footprint, including attaché cases and grid inventories, are outside this version.",
+    "A delivery offers a type and an amount. A take asks for a type and an amount. A take that asks for more of a type than the container holds yields the amount that the container holds and reports the shortfall.",
+    "A delivery that fits is accepted whole. For a delivery that does not fit, the partial-acceptance answer applies. For the items that are left over, the leftover-destination answer applies.",
+    "A stack never holds more than the stack limit on its type's row. An amount above that limit starts a new stack in a free slot, or counts as not fitting if no slot is free. Under the type-restriction answer any-item, two rules apply to a type with no row. Where slots alone set the limit, such a type stacks one item per slot, and in a forced removal it does not leave, as if its when-forced-out value were never. Under a size budget, such a type has no size. A delivery of such a type is therefore refused, and the refused items stay intact, until a row names its size.",
+    "A forced removal is an item leaving without a take: the container shrank, its rules changed, or its owner is gone. Each item row says what happens to its type and gives the position of its type in the order in which the types leave. In a container with slots, items of one type leave from the last occupied slot of that type first.",
+    "One adoption file describes one container. Two containers need two files, each with its own rows. Moving an item between two containers is a take from one container and then a delivery to the other. This contract states no other rule between the two containers. Rearranging items by hand is player input. The player chooses the slots, and the fill-order answer does not apply. In a container with slots, a sort delivers the contents again in the order that the sort names. The fill-order answer then decides the slot for each of these deliveries. In a container with no slots, a sort changes nothing that can be observed.",
+    "The same delivery made from the same starting contents has the same result. The same take made from the same starting contents comes from the same slot."
+  ],
+  "questions": {
+    "capacity-limit": {
+      "asks": "What makes this container full?",
+      "rationale": "Capacity changes what the container can hold and how it fills. This contract supports one size measure. Containers where items occupy a width-and-height footprint are outside this version.",
+      "options": {
+        "slot-count": {
+          "meaning": "A fixed number of slots makes it full. A shop with twenty stock slots refuses an item of a new type when all twenty slots hold stacks. A stack that has room can still accept an item of its own type."
+        },
+        "size-budget": {
+          "meaning": "A size budget makes it full, and the container has no slots. A card deck with a thirty-point build budget can hold cards of different costs until their costs add up to thirty points."
+        },
+        "slots-and-size": {
+          "meaning": "A slot limit and a size budget both apply. A bag with three free slots can still refuse an anvil when its weight budget is full."
+        },
+        "no-limit": {
+          "meaning": "It never fills. A new item always has room, so nothing is refused because the container ran out of space.",
+          "rationale": "Use this when room can never run out. It avoids a fake large limit that readers may mistake for a real limit."
+        }
+      }
+    },
+    "partial-acceptance": {
+      "asks": "A delivery reaches the container, but not all the items fit. What goes in?",
+      "rationale": "Two containers with the same free space can act differently. One accepts what fits; the other refuses the whole delivery.",
+      "when": {
+        "flag": {
+          "capacity-limit": [
+            "slot-count",
+            "size-budget",
+            "slots-and-size"
+          ]
+        }
+      },
+      "options": {
+        "all-or-nothing": {
+          "meaning": "The whole delivery is refused. A ten-arrow pickup adds no arrows when the container has room for only five. Each offered type and amount is one delivery. A craft with several outputs makes several deliveries, so some outputs may enter before another is refused. The refused items stay with whatever offered them. Your game's own rules decide what the action that offered them does next."
+        },
+        "fill-what-fits": {
+          "meaning": "Everything that fits goes in. A ten-arrow pickup adds five when only five fit; the other five remain outside."
+        }
+      }
+    },
+    "leftover-destination": {
+      "asks": "What happens to the items that do not fit?",
+      "rationale": "Items that do not fit must go to a stated place. Otherwise one build may return them while another build drops or destroys them.",
+      "when": {
+        "flag": {
+          "partial-acceptance": [
+            "fill-what-fits"
+          ]
+        }
+      },
+      "options": {
+        "back-to-the-sender": {
+          "meaning": "The leftover goes back to the sender. Arrows that do not fit return to the chest or pickup that offered them."
+        },
+        "left-where-it-is": {
+          "meaning": "The leftover stays where the delivery arrived. Arrows that do not fit become a loose pickup beside the bag."
+        },
+        "another-store": {
+          "meaning": "The leftover moves to another store named by your game. Arrows that do not fit may go to a stash."
+        },
+        "destroyed": {
+          "meaning": "The leftover is destroyed. Arrows that do not fit disappear instead of returning, dropping, or moving elsewhere."
+        }
+      }
+    },
+    "fill-order": {
+      "asks": "Several slots could hold a new item. Which slot gets it?",
+      "rationale": "Two teams that build the same design can fill the same container differently. That changes what players see and what the game removes later. Rules that score slots, rotate between containers, or use a custom sequence stay in your game's prose.",
+      "when": {
+        "flag": {
+          "capacity-limit": [
+            "slot-count",
+            "slots-and-size",
+            "no-limit"
+          ]
+        }
+      },
+      "options": {
+        "top-up-then-first-empty": {
+          "meaning": "A new item goes to a stack of the same type that has room. When no stack of that type has room, the item goes to the first empty slot. A potion goes to the first potion stack with room, and to the first empty slot only when no potion stack has room."
+        },
+        "first-slot-that-fits": {
+          "meaning": "The first slot that can hold the item gets it. An empty first hotbar slot receives the item, even when a later stack of the same type has room."
+        },
+        "append": {
+          "meaning": "New items go after everything already held. An empty slot in the middle stays unused until the items after it are gone. A bag with a slot limit can count as full while that gap remains."
+        },
+        "not-applicable": {
+          "meaning": "Choose this only when each item has one reserved slot. If slots are unlimited, choose Append instead."
+        }
+      }
+    },
+    "draw-order": {
+      "asks": "The game needs an item for one of its own rules. Which matching slot does it take from?",
+      "rationale": "Automatic use needs a stable choice because it can change which stack remains for the player. A rotating choice over counted amounts belongs in the Ranged value contract.",
+      "options": {
+        "first-in-order": {
+          "meaning": "The first matching slot supplies the item. Crafting uses the earliest stack in the bag before later stacks."
+        },
+        "last-in-order": {
+          "meaning": "The last matching slot supplies the item. Crafting empties the last matching stack before earlier stacks."
+        },
+        "newest-first": {
+          "meaning": "The stack that received items most recently supplies them first. Adding potions to an older potion stack makes that stack the newest again."
+        },
+        "oldest-first": {
+          "meaning": "The stack that began first supplies items first. Adding potions to an old potion stack does not make that stack newer.",
+          "rationale": "Use this when the longest-held stack must leave first, such as a magazine or queue."
+        },
+        "not-applicable": {
+          "meaning": "The game never has to choose between matching slots. The player chooses a slot, only one can match, or the container has no slots."
+        }
+      }
+    },
+    "type-restriction": {
+      "asks": "Which item types can this container hold?",
+      "rationale": "A clear item rule prevents unnoticed differences between what the game accepts and what the designer intended. Rules that come from another list or from program code stay in your game's prose.",
+      "options": {
+        "only-these": {
+          "meaning": "Only listed item types can enter. A potion bag refuses a sword. The sword stays where it was; nothing is destroyed. An empty list means the container accepts nothing."
+        },
+        "any-item": {
+          "meaning": "Every item type may enter when the contract knows how much room the type needs. Where slots alone set the limit, a type that no row names, such as a quest letter, uses one slot for each item and cannot be forced out. Under a size budget, a type that no row names is refused until a row names its size. The refused items are not destroyed."
+        },
+        "by-slot": {
+          "meaning": "Each slot has its own item rule. An armor slot accepts a helmet but refuses a potion without destroying it. List every type that needs a stacking or forced-out rule.",
+          "semantics": "Each item row's slot-rules-declared-in citation is binding. It points to prose that lists every slot and every item type that the slot accepts. A slot refuses an item of a type that the prose does not list for that slot, and the refused item stays intact."
+        }
+      }
+    }
+  },
+  "declares": {
+    "values": {
+      "slot-count": {
+        "description": "How many slots the container has. Use at least one when slots set capacity. Use zero when this container has no slot limit. If your game stores this number elsewhere, move it here so two copies cannot disagree."
+      },
+      "size-budget": {
+        "description": "The largest total size the container holds. Your game chooses the unit, such as kilograms or bulk. Every item uses the same unit. Use zero when size does not limit the container."
+      }
+    },
+    "rows": {
+      "items": {
+        "description": "The item types whose rules this contract records. Use one row for each type. For a restricted container, the rows are also the allowed list. For any-item, two things together decide entry, stacking, and forced removal for every type: the rows, and the rules of this contract for a type that no row names. The validator checks each row's fields. A reviewer checks that the game's own prose does not give a type that no row names a rule that differs from those rules.",
+        "record": {
+          "id": {
+            "type": "string",
+            "required": true,
+            "pattern": "kebab-case",
+            "unique": true,
+            "description": "A short name for the item type in your game's words, such as berries or axe."
+          },
+          "slot-rules-declared-in": {
+            "type": "citation",
+            "when": {
+              "flag": {
+                "type-restriction": [
+                  "by-slot"
+                ]
+              }
+            },
+            "description": "Where your game's rules list every slot and every item type that the slot accepts. This citation is the binding rule for the slots. Use the same citation on every row when one section holds the whole list."
+          },
+          "stack-limit": {
+            "type": "integer",
+            "when": {
+              "flag": {
+                "capacity-limit": [
+                  "slot-count",
+                  "slots-and-size",
+                  "no-limit"
+                ]
+              }
+            },
+            "description": "How many items of this type fit in one slot. It is required whenever the container has slots, including when it never fills. Use one for an item that does not stack, or another positive whole number."
+          },
+          "size": {
+            "type": "number",
+            "when": {
+              "flag": {
+                "capacity-limit": [
+                  "size-budget",
+                  "slots-and-size"
+                ]
+              }
+            },
+            "description": "How much of the size budget one item uses. Use the same unit as the container's budget. Use zero or more."
+          },
+          "when-forced-out": {
+            "type": "string",
+            "required": true,
+            "options": [
+              "never",
+              "dropped-nearby",
+              "moved-to-another-store",
+              "destroyed"
+            ],
+            "description": "What happens to this item when the container must give items up. It may stay, drop nearby, move to another store, or be destroyed. An item marked to stay is skipped. The container tries other types in their chosen order. It refuses the forced removal if too few items can leave. If destroying an item could make the game impossible to finish, say so and test it in your own rules."
+          },
+          "forced-out-order": {
+            "type": "integer",
+            "unique": true,
+            "when": {
+              "row": {
+                "when-forced-out": [
+                  "dropped-nearby",
+                  "moved-to-another-store",
+                  "destroyed"
+                ]
+              }
+            },
+            "description": "The order in which item types leave, lowest number first. Give each movable type a different number. Items of one type leave from its last occupied slot first. The size of the gaps between numbers does not matter."
+          }
+        }
+      }
+    }
+  },
+  "pack": "sha256:ae851e93d7e94c3f971f69b518935f2a6367204ca88178a9f6defd4530a15eb2",
+  "rules": {
+    "slot-count-not-negative": "slot-count >= 0",
+    "size-budget-not-negative": "size-budget >= 0"
+  }
+}

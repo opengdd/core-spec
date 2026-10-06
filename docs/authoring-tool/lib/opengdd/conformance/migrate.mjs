@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-import { evaluateRule, parseRule, validatePackage, validateSchemaDocument } from "./validate-core.mjs?v=9e90533a9ecc";
+import { FORMAT_VERSION, buildSnapshotAddresses, evaluateRule, parseRule, validatePackage, validateSchemaDocument } from "./validate-core.mjs?v=6d328337d265";
+import { authorityTagScopes, unfencedLines } from "./package-syntax.mjs";
 
 const NUMBERED_CHAPTER = /^\d\d-[^/\\]+\.md$/;
 const JSON_TEXT = value => `${JSON.stringify(value, null, 2)}\n`;
@@ -179,6 +180,62 @@ function stageIfChanged(host, file, text, relative, report, outputs) {
   outputs.push({ file, relative, text });
 }
 
+function reportTagScopeChanges(text, report, file, reviewDelegatedText = false) {
+  const lines = text.split(/\r?\n/);
+  const scopes = authorityTagScopes(lines);
+  if (!scopes.length) return;
+  const headings = unfencedLines(text).map(item => {
+    const match = /^(#{1,6})\s+/.exec(item.text);
+    return match ? { index: item.line - 1, level: match[1].length } : undefined;
+  }).filter(Boolean);
+  for (const [index, scope] of scopes.entries()) {
+    if (reviewDelegatedText && scope.level === "delegated" && lines[scope.start].replace(/^\s*(?:>\s*)+DELEGATED:\s*/i, "").trim()) {
+      const tagText = scope.content.trim();
+      const passage = lines.slice(scope.start, scope.end)
+        .map(line => line.replace(/^\s*(?:>\s*)+/, "")).join(" ").replace(/^DELEGATED:\s*/, "").trim();
+      // v0.8 treated tag-line text as a descriptive label. Sentence-shaped
+      // prose does not demonstrate a fault; keep its meaning change as a note.
+      const sentenceEnd = /[.!?](?:["'”’)]*)$/;
+      const continuedSentence = /\b(?:of|the|a|an|to|with|for|and|or|in|on|by|from)\s*$/i.test(tagText)
+        && sentenceEnd.test(passage);
+      if (/\s/.test(tagText) && (sentenceEnd.test(tagText) || continuedSentence)) {
+        report.reviewNotes.push(`${file}:${scope.line}: Text after DELEGATED: is now part of the passage. This text reads as prose. Review its meaning in the passage.`);
+      } else {
+        report.manual.push(`${file}:${scope.line}: Text after DELEGATED: is now part of the passage. Replace a former label with the instruction you mean, or remove it.`);
+      }
+    }
+    const heading = headings.filter(item => item.index <= scope.start).at(-1);
+    const sectionEnd = heading
+      ? headings.find(item => item.index > scope.start && item.level <= heading.level)?.index ?? lines.length
+      : lines.length;
+    const nextTag = scopes.slice(index + 1).find(item => item.start > scope.start)?.start ?? lines.length;
+    const oldEnd = Math.min(sectionEnd, nextTag);
+    if (oldEnd <= scope.end) continue;
+    const oldScopedText = lines.slice(scope.end, oldEnd).join("\n").trim();
+    if (!oldScopedText) continue;
+    const tag = lines[scope.start].trim();
+    report.manual.push(`${file}:${scope.line}: tag ${JSON.stringify(tag)} used to cover text outside its blockquote: ${JSON.stringify(oldScopedText)}. Review this text. Quote the intended scoped lines, or leave them unquoted as Fixed text or text that applies in every ruleset.`);
+  }
+}
+
+function reportV09Review(chapters, tuning, manifest, report) {
+  const prose = chapters.map(([, text]) => unfencedLines(text).map(item => item.text).join("\n")).join("\n");
+  if (/\bseed(?:s|ed)?\b/i.test(prose) || chapters.some(([, text]) => /"seeds"\s*:/.test(text)) || /seed/i.test(JSON.stringify(tuning)) || manifest.seed_policy) {
+    report.reviewNotes.push("Review declared seed addresses and their uses. A seed must contain no colon (:). Choose a seed with no colon and update the places that use it. Keep earlier run evidence unchanged.");
+  }
+  if (chapters.some(([file]) => file === "05-build-plan.md")) {
+    report.reviewNotes.push("Review the build stages. Each stage must state work to build. Remove a stage that has no work. One stage is enough. A stage may name chapters or chapter parts.");
+  }
+  if (/^\s*(?:>\s*)+DELEGATED:/im.test(prose)) {
+    report.reviewNotes.push("Review each Delegated passage that changes how the game plays. State its gameplay target and limits. The builder chooses within those limits.");
+  }
+}
+
+function reportRemainingV09Errors(host, root, outputs, report) {
+  const errors = validatePackage(stagedValidationHost(host, outputs), root).findings.filter(finding => finding.severity === "error");
+  for (const finding of errors) report.manual.push(`migration validation: ${finding.code} ${finding.file}${finding.line ? `:${finding.line}` : ""} | ${finding.message}`);
+}
+
 function refuse(report, collectOutputs = false) {
   if (collectOutputs) report.refused = true;
   delete report.outputs;
@@ -322,7 +379,7 @@ function migrateFence(text, moodNames, report, file) {
       if (citation !== oldCitation) report.changes.push({ file, message: `rewrote fence citation ${JSON.stringify(oldCitation)} to ${JSON.stringify(citation)}` });
       bullets.push(`- \`${citation}\`${rationale.length ? `: ${rewriteDirectionText(rationale.join(" "), moodNames)}` : ""}`);
     }
-    return `${delegated}\n\n${bullets.join("\n")}\n\n`;
+    return `${delegated}${bullets.length ? `\n>\n${bullets.map(line => `> ${line}`).join("\n")}` : ""}\n\n`;
   });
 }
 
@@ -1247,7 +1304,7 @@ function contractOrigin(core, report, site) {
     report.changes.push({ file: site, message: "kept origin.url as the definition origin string; dropped the old origin wrapper" });
     return core.origin.url;
   }
-  report.changes.push({ file: site, message: "replaced the old origin object with the canonical OpenGDD catalogue origin" });
+  report.changes.push({ file: site, message: "replaced the old origin object with the canonical OpenGDD catalog origin" });
   return `https://opengdd.org/contracts/${core.id}-${core.version}`;
 }
 
@@ -1462,7 +1519,7 @@ function removeGeneratedContractBlocks(text, report, file) {
 
 export function migratePackage(host, root, options = {}) {
   const packageRoot = host.path.resolve(root);
-  const report = { root: packageRoot, changes: [], manual: [], noOp: false };
+  const report = { root: packageRoot, changes: [], manual: [], reviewNotes: [], noOp: false };
   const manifestFile = host.path.join(packageRoot, "manifest.json");
   const tuningFile = host.path.join(packageRoot, "tuning.json");
   const clocksFile = host.path.join(packageRoot, "clocks.json");
@@ -1472,7 +1529,11 @@ export function migratePackage(host, root, options = {}) {
   const manifestInput = readJsonForMigration(host, manifestFile, "manifest.json", report);
   if (manifestInput.failed) return refuse(report, options.collectOutputs);
   const manifest = manifestInput.document;
-  if (!["0.6", "0.7", "0.8"].includes(manifest.opengdd)) throw new Error(`manifest.json opengdd must be "0.6", "0.7" or "0.8", got ${JSON.stringify(manifest.opengdd)}`);
+  const sourceVersion = manifest.opengdd;
+  const targetVersion = options.targetVersion ?? FORMAT_VERSION;
+  if (!["0.8", "0.9"].includes(targetVersion)) throw new Error(`package migration target must be "0.8" or "0.9", got ${JSON.stringify(targetVersion)}`);
+  if (!["0.6", "0.7", "0.8", "0.9"].includes(manifest.opengdd)) throw new Error(`manifest.json opengdd must be "0.6", "0.7", "0.8" or "0.9", got ${JSON.stringify(manifest.opengdd)}`);
+  if (manifest.opengdd === "0.9" && targetVersion === "0.8") throw new Error("package migration cannot move OpenGDD v0.9 back to v0.8");
   if (!host.exists(tuningFile) || !host.isFile(tuningFile)) throw new Error(`tuning.json not found in ${packageRoot}`);
   const tuningInput = readJsonForMigration(host, tuningFile, "tuning.json", report);
   const clocksInput = host.exists(clocksFile) && host.isFile(clocksFile)
@@ -1498,11 +1559,26 @@ export function migratePackage(host, root, options = {}) {
   const phase5Legacy = phase5LegacyNeeded(host, packageRoot, chapters);
   const phase5 = phase5Legacy || phase5Needed(host, packageRoot, chapters);
   const phase6 = phase6PackageNeeded(host, packageRoot, tuning, chapters);
-  // v0.7 to v0.8 changes no file shape; only the manifest's version moves.
-  const phase0 = manifest.opengdd !== "0.8";
-  if (!phase0 && !phase1 && !phase2 && !phase3 && !phase4 && !phase5 && !phase6) {
+  // The v0.7 to v0.8 step changes no file shape. The v0.8 to v0.9 step keeps
+  // chapter bytes unchanged but reports text whose tag scope changed.
+  const versionStep = manifest.opengdd !== targetVersion;
+  if (!versionStep && !phase1 && !phase2 && !phase3 && !phase4 && !phase5 && !phase6) {
     report.noOp = true;
     if (options.collectOutputs) report.outputs = [];
+    return report;
+  }
+  if (versionStep && !phase1 && !phase2 && !phase3 && !phase4 && !phase5 && !phase6) {
+    if (targetVersion === "0.9") {
+      for (const [name, text] of chapters) reportTagScopeChanges(text, report, name, sourceVersion === "0.8");
+      reportV09Review(chapters, tuning, manifest, report);
+    }
+    const text = manifestInput.text.replace(/("opengdd"\s*:\s*)"0\.[678]"/, `$1"${targetVersion}"`);
+    if (text === manifestInput.text) throw new Error(`manifest.json opengdd could not be updated to ${targetVersion}`);
+    outputs.push({ file: manifestFile, relative: "manifest.json", text });
+    report.changes.push({ file: "manifest.json", message: `set opengdd to ${targetVersion}; chapter text is unchanged` });
+    if (targetVersion === "0.9") reportRemainingV09Errors(host, packageRoot, outputs, report);
+    if (!options.dryRun) host.writeText(manifestFile, text);
+    if (options.collectOutputs) report.outputs = outputs;
     return report;
   }
 
@@ -1681,7 +1757,7 @@ export function migratePackage(host, root, options = {}) {
         }
         return refuse(report, options.collectOutputs);
       }
-      throw new Error(`migrated direction.json does not satisfy the v0.8 schema: ${directionSchemaProblems.map(problem => `${problem.path} ${problem.message}`).join("; ")}`);
+      throw new Error(`migrated direction.json does not satisfy the v${FORMAT_VERSION} schema: ${directionSchemaProblems.map(problem => `${problem.path} ${problem.message}`).join("; ")}`);
     }
     stageIfChanged(host, directionFile, JSON_TEXT(migratedDirection.result), "direction.json", report, outputs);
     if (own(manifest, "palette")) report.changes.push({ file: "manifest.json", message: "moved palette to direction.json" });
@@ -1697,7 +1773,7 @@ export function migratePackage(host, root, options = {}) {
       const migratedClocks = migrateClocks(clocksForPhase3, report);
       const clockSchema = host.loadSchema("clocks.schema.json");
       const clockProblems = validateSchemaDocument(migratedClocks, clockSchema);
-      if (clockProblems.length) throw new Error(`migrated clocks.json does not satisfy the v0.8 schema: ${clockProblems.map(problem => `${problem.path} ${problem.message}`).join("; ")}`);
+      if (clockProblems.length) throw new Error(`migrated clocks.json does not satisfy the v${FORMAT_VERSION} schema: ${clockProblems.map(problem => `${problem.path} ${problem.message}`).join("; ")}`);
       stageIfChanged(host, clocksFile, JSON_TEXT(migratedClocks), "clocks.json", report, outputs);
     }
     const planEntry = chapters.find(([name]) => name === "05-build-plan.md");
@@ -1742,7 +1818,7 @@ export function migratePackage(host, root, options = {}) {
     }
   }
 
-  manifest.opengdd = "0.8";
+  manifest.opengdd = targetVersion;
   delete manifest.build;
   stageIfChanged(host, manifestFile, JSON_TEXT(manifest), "manifest.json", report, outputs);
 
@@ -1783,6 +1859,7 @@ export function migratePackage(host, root, options = {}) {
       if (/\bAT\s+[a-z0-9-]+\/[a-z0-9-]+(?:\/[a-z0-9-]+)?\b/.test(after.replace(/<!-- opengdd:contracts:generated:begin[\s\S]*/m, ""))) report.manual.push(`${name}: prose names a generated contract AT; replace that dependency with the contract adoption or rendered-test description`);
       after = removeGeneratedContractBlocks(after, report, name).replace(/tuning:contracts\./g, "contracts.");
     }
+    if (targetVersion === "0.9" && sourceVersion !== "0.9") reportTagScopeChanges(original, report, name, sourceVersion === "0.8");
     stageIfChanged(host, file, after, name, report, outputs);
   }
   if (phase3 && typeof initialId === "string" && !initialApplied) report.manual.push(`manifest.json: initial ruleset ${JSON.stringify(initialId)} has no chapter tag; add (initial) to its first tag after writing one`);
@@ -1795,22 +1872,40 @@ export function migratePackage(host, root, options = {}) {
       const match = /^rule ("(?:\\.|[^"])*"): retired word /.exec(finding.message);
       return !match || !report.manual.some(item => item.startsWith(`${finding.file}: rule ${match[1]} uses retired word `));
     });
+  if (targetVersion === "0.9") reportRemainingV09Errors(host, packageRoot, outputs, report);
+  if (targetVersion === "0.9" && sourceVersion !== "0.9") {
+    const stagedChapters = chapters.map(([name, text]) => [name, outputs.find(output => output.relative === name)?.text ?? text]);
+    reportV09Review(stagedChapters, tuningForPhase4, manifest, report);
+  }
   if (introduced.length) {
-    for (const finding of introduced) report.manual.push(`migration validation: ${finding.code} ${finding.file}${finding.line ? `:${finding.line}` : ""} | ${finding.message}`);
+    if (targetVersion !== "0.9") for (const finding of introduced) report.manual.push(`migration validation: ${finding.code} ${finding.file}${finding.line ? `:${finding.line}` : ""} | ${finding.message}`);
     return refuse(report, options.collectOutputs);
+  }
+  if (targetVersion === "0.9" && sourceVersion !== "0.9") {
+    const stagedManifest = outputs.find(output => output.relative === "manifest.json");
+    const source = stagedManifest?.text ?? manifestInput.text;
+    const targetText = source.replace(/("opengdd"\s*:\s*)"0\.[678]"/, `$1"${targetVersion}"`);
+    if (stagedManifest) {
+      stagedManifest.text = targetText;
+      report.changes.push({ file: "manifest.json", message: "set opengdd to 0.9" });
+    } else {
+      stageIfChanged(host, manifestFile, targetText, "manifest.json", report, outputs);
+      const versionChange = [...report.changes].reverse().find(change => change.file === "manifest.json" && change.message === "rewritten");
+      if (versionChange) versionChange.message = "set opengdd to 0.9";
+    }
   }
   if (!options.dryRun) for (const output of outputs) host.writeText(output.file, output.text);
   if (options.collectOutputs) report.outputs = outputs;
   return report;
 }
 
-export function migrateBuildRecord(json) {
+export function migrateBuildRecord(json, options = {}) {
   if (!isObject(json)) throw new Error("build record must be an object");
   const document = structuredClone(json);
   const changes = [];
   const manual = [];
   const beganLegacy = document.opengdd === "0.6" || !isObject(document.resolved_tuning?.values);
-  if (!["0.6", "0.7", "0.8"].includes(document.opengdd)) throw new Error(`opengdd-build.json opengdd must be "0.6", "0.7" or "0.8", got ${JSON.stringify(document.opengdd)}`);
+  if (!["0.6", "0.7", "0.8", "0.9"].includes(document.opengdd)) throw new Error(`opengdd-build.json opengdd must be "0.6", "0.7", "0.8" or "0.9", got ${JSON.stringify(document.opengdd)}`);
   if (document.opengdd === "0.6" || !isObject(document.resolved_tuning?.values)) {
     document.opengdd = "0.8";
     const resolved = isObject(document.resolved_tuning) ? document.resolved_tuning : {};
@@ -1852,6 +1947,35 @@ export function migrateBuildRecord(json) {
   if (beganLegacy && Object.keys(isObject(document.resolved_tuning?.values) ? document.resolved_tuning.values : {}).some(key => key.startsWith("contracts."))) {
     manual.push("opengdd-build.json: add evidence.contracts with each checked adoption and its matching sha256 pack hash; the migrator cannot infer pack presence without the certifying package");
   }
+  const targetVersion = options.targetVersion ?? FORMAT_VERSION;
+  if (targetVersion !== undefined && !["0.8", "0.9"].includes(targetVersion)) throw new Error(`build migration target must be "0.8" or "0.9", got ${JSON.stringify(targetVersion)}`);
+  if (json.opengdd === "0.9" && targetVersion === "0.8") throw new Error("build migration cannot move OpenGDD v0.9 back to v0.8");
+  if (document.opengdd === "0.8" && targetVersion !== document.opengdd) {
+    const recorded = Object.keys(isObject(document.resolved_tuning?.values) ? document.resolved_tuning.values : {}).sort();
+    const expected = Array.isArray(options.sourceAddresses) ? [...new Set(options.sourceAddresses)].sort() : undefined;
+    if (!expected) {
+      manual.push("opengdd-build.json: kept opengdd 0.8 because no source package was supplied; compare its address list before migration, and issue a new report if the package has gained an address");
+    } else {
+      const recordedSet = new Set(recorded);
+      const expectedSet = new Set(expected);
+      const missing = expected.filter(key => !recordedSet.has(key));
+      const unexpected = recorded.filter(key => !expectedSet.has(key));
+      if (missing.length || unexpected.length) {
+        const detail = [
+          missing.length ? `missing ${missing.map(key => JSON.stringify(key)).join(", ")}` : undefined,
+          unexpected.length ? `unexpected ${unexpected.map(key => JSON.stringify(key)).join(", ")}` : undefined
+        ].filter(Boolean).join("; ");
+        manual.push(`opengdd-build.json: kept opengdd 0.8 because the source package's address list changed (${detail}); the builder must issue a new report`);
+      } else {
+        if (targetVersion === document.opengdd) {
+          changes.push({ file: "opengdd-build.json", message: `source package addresses unchanged; target format remains ${targetVersion}` });
+        } else {
+          document.opengdd = targetVersion;
+          changes.push({ file: "opengdd-build.json", message: `set opengdd to ${targetVersion}; the source package address list is unchanged` });
+        }
+      }
+    }
+  }
   return { json: document, changes, manual };
 }
 
@@ -1876,10 +2000,11 @@ function createNodeHost({ fs, path, crypto, fileURLToPath }) {
 
 function printReport(report, jsonMode) {
   if (jsonMode) return `${JSON.stringify(report, null, 2)}\n`;
-  if (report.noOp) return "package already uses OpenGDD v0.8; no changes needed\n";
+  if (report.noOp) return `package already uses OpenGDD v${FORMAT_VERSION}; no changes needed\n`;
   const lines = [];
   for (const change of report.changes) lines.push(`CHANGE ${change.file}: ${change.message}`);
   for (const item of report.manual) lines.push(`MANUAL ${item}`);
+  for (const item of report.reviewNotes ?? []) lines.push(`REVIEW NOTE ${item}`);
   if (!lines.length) lines.push("no changes needed");
   return `${lines.join("\n")}\n`;
 }
@@ -1887,7 +2012,7 @@ function printReport(report, jsonMode) {
 function usage(message) {
   if (message) console.error(message);
   console.error("usage: node conformance/migrate.mjs <package-dir> [--dry-run] [--json]");
-  console.error("       node conformance/migrate.mjs --build <opengdd-build.json> [--dry-run] [--json]");
+  console.error("       node conformance/migrate.mjs --build <opengdd-build.json> [<package-dir>] [--dry-run] [--json]");
   process.exitCode = 2;
 }
 
@@ -1897,7 +2022,9 @@ async function main(args, modules) {
   const buildMode = args.includes("--build");
   const positional = args.filter(arg => !["--json", "--dry-run", "--build"].includes(arg));
   const unknown = positional.find(arg => arg.startsWith("-"));
-  if (unknown || positional.length !== 1) return usage(unknown ? `unknown option: ${unknown}` : "exactly one path is required");
+  if (unknown || (!buildMode && positional.length !== 1) || (buildMode && (positional.length < 1 || positional.length > 2))) {
+    return usage(unknown ? `unknown option: ${unknown}` : buildMode ? "build migration requires a record and optional source package" : "exactly one path is required");
+  }
   const { fs, path } = modules;
   const host = createNodeHost(modules);
   try {
@@ -1905,10 +2032,20 @@ async function main(args, modules) {
     if (buildMode) {
       const file = path.resolve(positional[0]);
       const before = fs.readFileSync(file, "utf8");
-      report = migrateBuildRecord(JSON.parse(before));
+      const sourceAddresses = positional[1] ? buildSnapshotAddresses(host, positional[1]) : undefined;
+      if (positional[1] && !sourceAddresses) throw new Error(`could not read build snapshot addresses from source package: ${path.resolve(positional[1])}`);
+      report = migrateBuildRecord(JSON.parse(before), { targetVersion: FORMAT_VERSION, sourceAddresses });
+      if (positional[1]) {
+        const root = path.resolve(positional[1]);
+        const sourceVersion = JSON.parse(fs.readFileSync(path.join(root, "manifest.json"), "utf8")).opengdd;
+        if (["0.6", "0.7", "0.8"].includes(sourceVersion)) {
+          for (const name of fs.readdirSync(root).filter(name => NUMBERED_CHAPTER.test(name)).sort()) {
+            reportTagScopeChanges(fs.readFileSync(path.join(root, name), "utf8"), report, name);
+          }
+        }
+      }
       const after = JSON_TEXT(report.json);
-      if (before === after) report.changes = [];
-      else if (!dryRun) fs.writeFileSync(file, after, "utf8");
+      if (before !== after && !dryRun) fs.writeFileSync(file, after, "utf8");
     } else {
       report = migratePackage(host, positional[0], { dryRun });
     }

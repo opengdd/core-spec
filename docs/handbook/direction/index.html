@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Art direction | OpenGDD handbook</title>
-<meta name="description" content="Art direction says what the game must look and feel like, without saying how to make it. The builder keeps the craft, and you keep the intent. The builder is the person, …">
+<title>Art direction | OpenGDD Handbook</title>
+<meta name="description" content="Art direction says what the game must look and feel like, without saying how to make it. You decide the intent, and the builder decides how to achieve it. The builder is …">
 <link rel="canonical" href="https://opengdd.org/handbook/direction/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Art direction | OpenGDD handbook">
-<meta property="og:description" content="Art direction says what the game must look and feel like, without saying how to make it. The builder keeps the craft, and you keep the intent. The builder is the person, …">
+<meta property="og:title" content="Art direction | OpenGDD Handbook">
+<meta property="og:description" content="Art direction says what the game must look and feel like, without saying how to make it. You decide the intent, and the builder decides how to achieve it. The builder is …">
 <meta property="og:url" content="https://opengdd.org/handbook/direction/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta property="og:image:type" content="image/png">
@@ -20,8 +20,8 @@
 <meta name="twitter:site" content="@OpenGDD">
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
-<meta name="twitter:title" content="Art direction | OpenGDD handbook">
-<meta name="twitter:description" content="Art direction says what the game must look and feel like, without saying how to make it. The builder keeps the craft, and you keep the intent. The builder is the person, …">
+<meta name="twitter:title" content="Art direction | OpenGDD Handbook">
+<meta name="twitter:description" content="Art direction says what the game must look and feel like, without saying how to make it. You decide the intent, and the builder decides how to achieve it. The builder is …">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -53,7 +53,7 @@
 <li><a href="/handbook/" class="toc-resource-current">Handbook</a></li>
 </ul>
 <div class="toc-group">
-<p class="toc-group-title">Start and foundations</p>
+<p class="toc-group-title">The basic parts</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
 <li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
@@ -78,12 +78,12 @@
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/" class="here" aria-current="page">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-color-promises/">Palette and color promises</a></li>
 <li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanics</p>
+<p class="toc-group-title">Contracts: reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -92,21 +92,21 @@
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
-<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you send it to the builder</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
 <h1>Art direction</h1>
 <p class="chapter-scope"><span class="scope-badge">Optional</span></p>
-<p>Art direction says what the game must look and feel like, without saying how to make it. The builder keeps the craft, and you keep the intent. The builder is the person, team or AI that turns your package into a game.</p>
-<p>Structured art direction lives in one <code>direction.json</code> beside the chapters. Five kinds of entry in it are judged by people:</p>
+<p>Art direction says what the game must look and feel like, without saying how to make it. You decide the intent, and the builder decides how to achieve it. The builder is the person, team or AI that turns your package into a game.</p>
+<p>Art direction is optional. Structured art direction is written in one <code>direction.json</code> file, next to the chapters. People judge four kinds of entry in it, and a fifth kind says how to judge them:</p>
 <ul>
-<li>A <strong>pillar</strong> is a visual priority. When two choices conflict, the pillar says which wins.</li>
+<li>A <strong>pillar</strong> is a visual priority. When two art direction goals conflict, the builder follows the pillars in the order you wrote them.</li>
 <li>A <strong>mood</strong> names a feeling: its intent, what it borrows from, and what it must not become.</li>
 <li>An <strong>anti-reference</strong> names a result you do not want, such as the genre's usual bright adventure-poster look.</li>
 <li>A <strong>must-keep</strong> is a visible quality every build has to preserve.</li>
-<li>The <strong>viewing</strong> entry says how someone should watch the game when judging it: how fast, how big, and on what kind of screen. A package has one.</li>
+<li>The optional <strong>viewing</strong> entry says how someone should watch the game when judging it: how fast, how big, and on what kind of screen. The file holds at most one.</li>
 </ul>
 <p><em><code>direction.json</code></em></p>
 <pre><code class="lang-json">{
@@ -141,27 +141,28 @@
   }
 }</code></pre>
 <p>Each mood has its own <code>anti</code> list for that mood. The top-level <code>anti</code> block is for the whole look, and those entries have names you can point at.</p>
-<p>The presentation chapter then points at these entries. A <strong>citation</strong> is an entry's dotted name in backticks, such as <code>pillars.weather-stays-readable</code>. The section is Delegated, because the builder decides how to achieve the intent. The <a href="/handbook/who-decides/">Who decides</a> chapter explains the tag.</p>
+<p>The presentation chapter then points at these entries. A <strong>citation</strong> is an entry's dotted name in backticks, such as <code>pillars.weather-stays-readable</code>.</p>
+<p>Write the passage inside a <code>&gt; DELEGATED:</code> blockquote, because the builder decides how to achieve the intent. Presentation text that no tag covers is Fixed: the builder follows it exactly. The <a href="/handbook/who-decides/">Who decides</a> chapter explains the tag.</p>
 <p><em><code>04-presentation.md</code></em></p>
 <blockquote>
-<p>DELEGATED: presentation-direction</p>
+<p>DELEGATED:</p>
 <p>Keep the safe route readable through blowing snow, with edge detail that stays calm rather than glowing, as guided by <code>pillars.weather-stays-readable</code>.</p>
 <p>Show repaired seams, replaced buckles, and uneven wear on every tool, as guided by <code>pillars.equipment-feels-used</code>.</p>
 <p>Let the wind drop out near each handhold so the climb feels concentrated rather than frantic, following <code>mood.cold-focus</code>.</p>
 <p>Keep the framing close to the climbers and refuse triumphant summit poses, following <code>anti.no-adventure-poster</code>.</p>
 <p>Keep the rope darker than the snow and clear across each climber's body, preserving <code>must_keep.rope-stays-legible</code>.</p>
 </blockquote>
-<p>A pillar, mood, anti-reference or must-keep that no chapter cites draws a warning.</p>
-<p>Pillars, moods, anti-references and must-keeps are read and judged by people, not by a machine. Measurable promises about colour, contrast and timing use the same file and are checked by acceptance tests. The <a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a> chapter covers them.</p>
+<p>A pillar, mood, anti-reference or must-keep that no chapter cites gets a warning.</p>
+<p>Pillars, moods, anti-references and must-keeps are read and judged by people, not by a machine. Measurable promises about color, contrast and timing use the same file and are checked by acceptance tests. The <a href="/handbook/palette-and-color-promises/">Palette and color promises</a> chapter covers them.</p>
 <p><em>Full rules: <a href="/spec/#9-art-direction-direction-json">OpenGDD specification</a>, §9.</em></p>
-<p class="note chapter-pager"><a href="/handbook/seeds/">← Seeds and repeatable randomness</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/palette-and-colour-promises/">Palette and colour promises →</a></p>
+<p class="note chapter-pager"><a href="/handbook/seeds/">← Seeds and repeatable randomness</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/palette-and-color-promises/">Palette and color promises →</a></p>
 </article>
 </div>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

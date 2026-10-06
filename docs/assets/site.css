@@ -892,6 +892,26 @@ a:focus-visible, button:focus-visible {
 }
 .doc-body { min-width: 0; max-width: 46rem; font-size: 0.94rem; line-height: 1.75; }
 .doc-body :not(pre) > code { overflow-wrap: anywhere; }
+/* The first column of a table names a field, a code or a form. Its name
+   stays on one line, so the column takes the width of the name and the
+   other columns share the rest. .table-scroll handles narrow viewports. */
+.doc-body td:first-child > code { white-space: nowrap; }
+/* A column of short cells (md.mjs marks it) keeps each cell on one line. */
+.doc-body th.tight, .doc-body td.tight { white-space: nowrap; }
+
+/* Reference pages (the specification and the changelogs) are read for
+   lookup, so their text is smaller and closer than a Handbook chapter. */
+.doc-reference { font-size: 0.875rem; line-height: 1.65; }
+.doc-reference h2 { font-size: 1.3rem; }
+.doc-reference h3 { font-size: 1.08rem; }
+.doc-reference h4 { font-size: 0.95rem; }
+.doc-reference table { font-size: 0.82rem; }
+.doc-reference th { font-size: 0.74rem; }
+.doc-reference .note { font-size: inherit; }
+/* Changelog tables: the first column has the same width in every table, and
+   a long name in it wraps, so the tables line up down the page. */
+.doc-changelog th:first-child { width: 30%; }
+.doc-changelog td:first-child:not(.tight) > code { white-space: normal; }
 .doc-shot { display: block; max-width: 100%; height: auto; margin: 1.1rem 0; border: 1px solid var(--line); border-radius: 6px; }
 
 .heading-anchor {

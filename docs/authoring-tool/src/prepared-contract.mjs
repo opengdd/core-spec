@@ -53,7 +53,7 @@ export function preparedQuestionCopy(recipe, adoption, id) {
 
 export function syncPreparedChoices(files, recipe, draft) {
   const tuning = parseJson(files.get('tuning.json'));
-  if (!tuning?.values) throw new Error('Open a specification with tuning values first.');
+  if (!tuning?.values) throw new Error('Open a package with a values table in tuning.json first.');
   const defaults = parseJson(recipe.definitionText);
   // Inactive answers may be absent from a saved adoption. Keep the prepared
   // defaults in the draft so enabling their parent restores a reviewed choice.
@@ -161,7 +161,7 @@ function stageMap(transaction, path, before, after, member) {
 
 export async function saveStartingPoint({ internal, files, recipe, draft, currentRevision, expectedRevision }) {
   const checkRevision = () => {
-    if (currentRevision && currentRevision() !== expectedRevision) throw new Error('The specification changed during this review. Reopen it before saving.');
+    if (currentRevision && currentRevision() !== expectedRevision) throw new Error('The package changed during this review. Open it again before saving.');
   };
   checkRevision();
   const plan = prepareStartingPoint(files, recipe, draft);

@@ -67,11 +67,11 @@ handbook chapter gives the full introduction.
 
 The [OpenGDD specification](../../SPEC.md) defines package and build-record
 conformance. The [build-certification protocol](../../conformance/CERTIFICATION.md)
-defines the experimental runner and audit profiles. Version 0.8 defines no
+defines the experimental runner and audit profiles. Version 0.9 defines no
 normative certification outcome, and the draft protocol grants no right to
 use a certification mark.
 
-The distinction matters here: the validator checks that a numeric colour
+The distinction matters here: the validator checks that a numeric color
 promise has a valid shape and a covering test, the runner observes the build,
 and the auditor decides whether the evidence supports the claim. Passing every
 test does not replace review of Fixed prose that no test repeats.
@@ -79,7 +79,7 @@ test does not replace review of Fixed prose that no test repeats.
 ## manifest.json: identity and target
 
 The [manifest](../tic-tac-toe/manifest.json) opens with
-`"opengdd": "0.8"`. That value selects the package's format version. The
+`"opengdd": "0.9"`. That value selects the package's format version. The
 remaining identity fields give the package id `tic-tac-toe`, design version
 `1.0.0`, title `Tic-Tac-Toe`, and designer name `OpenGDD Examples`.
 
@@ -126,7 +126,7 @@ The chapters cite the keys instead of repeating their digits. This gives each
 shared gameplay number one source of truth. It also lets tools follow the
 connection from prose to data.
 
-Not every number belongs here. The manifest's session length, the colour and
+Not every number belongs here. The manifest's session length, the color and
 tolerance in `direction.json`, and test inputs remain in the files that give
 them meaning. `tuning.json` holds the shared gameplay numbers that a build
 reads.
@@ -148,7 +148,7 @@ NOT: flashy, chancy, sprawling, cruel.
 ```
 
 The block is the first substantive content after the title. It gives the
-player fantasy, four feel adjectives, and results to avoid. It also guides
+player fantasy, four feel words, and results to avoid. It also guides
 every delegated choice in the package. A presentation choice can satisfy the
 fixed visual requirements and still be wrong if it makes the game flashy or
 cruel.
@@ -204,13 +204,13 @@ points the builder to two entries in the direction file:
 - `colors.mark-ink`: “One shared ink; the players stay distinguishable by
   mark shape alone.”
 
-These lines sit in a Delegated section labelled `presentation-direction`. They
+These lines sit in a Delegated section labeled `presentation-direction`. They
 give the builder structured art direction to follow without choosing every
 visual detail.
 
 The `Fixed requirements` section sets the presentation floor. The whole board
 and every mark stay visible at once. Grid lines separate cells. Empty and
-occupied cells are unmistakable. X and O differ by shape rather than colour.
+occupied cells are unmistakable. X and O differ by shape rather than color.
 The active player remains visible during play. A win names the winning mark
 and shows every completed line, a draw is announced, and a fresh board is
 offered without leaving the game.
@@ -224,21 +224,21 @@ rule. The fantasy block and `mood.paper-quiet` bound them.
 The [direction file](../tic-tac-toe/direction.json) contains four
 root objects: `palette`, `mood`, `colors`, and `viewing`.
 
-`palette.board.mark-ink` names the sRGB colour `#2B2A26`. sRGB is the standard
-colour space used by web displays. The mood entry
+`palette.board.mark-ink` names the sRGB color `#2B2A26`. sRGB is the standard
+color space used by web displays. The mood entry
 `mood.paper-quiet` describes a friendly, unhurried, low-stakes scrap-paper
 game. Its three negative examples rule out arena spectacle, casino imagery,
 and children's-toy gloss.
 
-The measured promise `colors.mark-ink` points to the named palette colour. It
-allows a CIEDE2000 distance, a perceptual colour-difference measure, of 12. It
+The measured promise `colors.mark-ink` points to the named palette color. It
+allows a CIEDE2000 distance, a perceptual color-difference measure, of 12. It
 applies to “every placed mark and every grid line” while the game is
 `in-game`. The file's single
 `viewing` object asks for the whole board at real play speed and an sRGB
 display at standard desktop viewing distance.
 
 The package uses one shared ink on purpose. Mark shape identifies each
-player, while colour carries atmosphere. The direction file states the
+player, while color carries atmosphere. The direction file states the
 promise once. The presentation chapter cites it, and AT-4 cites it again to
 describe how a runner observes it.
 
@@ -252,7 +252,7 @@ five ordered build stages, headed as phases:
 - `content` records that this game has no content chapter or collections.
 - `tuning` makes the build consume `board.size` and `win.line_length` as data.
 - `presentation` implements the fixed presentation requirements and the art
-  direction. AT-4 covers the measured colour promise.
+  direction. AT-4 covers the measured color promise.
 - `polish` permits builder courtesies that change no rule, followed by another
   run of every acceptance test.
 
@@ -286,7 +286,7 @@ Acceptance-test numbers are unique and ascend in document order. Gaps are
 allowed because a removed number is not reused. This package currently uses
 AT-1 through AT-4 without a gap.
 
-### How AT-4 observes the colour promise
+### How AT-4 observes the color promise
 
 AT-4 runs from an empty board to a finished game. A member is one placed mark
 or one grid line. The procedure samples every member rather than a subset.
@@ -295,10 +295,10 @@ For each member, it samples interior pixels and excludes antialiased edges.
 The runner samples once in a stable resting frame after placement animation.
 Each sampled interior pixel must remain within the distance declared in
 `direction.json`. The `in-game` period ends when the game ends, so a win
-highlight may recolour a completed line afterward. The run records its
+highlight may recolor a completed line afterward. The run records its
 viewport and rendering environment with the diagnostics.
 
-The direction file remains the only source for the colour, tolerance, covered
+The direction file remains the only source for the color, tolerance, covered
 members, and applicable state. AT-4 says how to observe the promise. It does
 not repeat those values.
 
@@ -328,7 +328,7 @@ game-local `general` test, the build record names its id in
 showed, but it may not turn a sample into a claim of absence or universality.
 
 This stronger audit instrument transmits no additional game rule. The four
-current scenarios cover the behaviour most likely to break, while every Fixed
+current scenarios cover the behavior most likely to break, while every Fixed
 statement remains binding. Whole-board enumeration is valuable when stronger
 audit evidence is the goal, but it does not belong in every lean design
 package.
@@ -342,7 +342,7 @@ would make the package less honest about what the design needs.
 From the repository root, validate the package with:
 
 ```text
-node conformance/validate.mjs specs/tic-tac-toe
+node conformance/validate.mjs examples/tic-tac-toe
 ```
 
 The validator checks required files, JSON shapes, the fantasy block,
@@ -360,13 +360,13 @@ the experimental audit own those questions.
 
 A builder reads the manifest, then reads every numbered chapter in filename
 order. The builder loads the two shared gameplay values, follows the five
-build stages, and makes choices only where the package delegates
-them. A named runner executes AT-1 through AT-4 and produces the requested
+build stages, and chooses how to build the work. The builder makes design
+choices only where the package delegates them. A named runner executes AT-1 through AT-4 and produces the requested
 diagnostics. The build record then reports the resolved values and acceptance
 results.
 
 The goal is a faithful and reviewable build, not merely four green labels. A
-game that scrolls the board, identifies players only by colour, or fails to
+game that scrolls the board, identifies players only by color, or fails to
 show both lines from one winning move breaks Fixed prose even if its recorded
 tests are green. A neon arena may conflict with `mood.paper-quiet`. The audit
 profile examines both kinds of evidence.
@@ -381,7 +381,7 @@ for craft.
 This package is small because the game is small, not because the format asks
 the builder to fill gaps. The prose settles the complete game. The JSON files
 give tools stable names for selected data and art direction. The tests focus
-on behaviour that benefits from execution, while Fixed statements remain
+on behavior that benefits from execution, while Fixed statements remain
 binding beyond test coverage.
 
 Use the package to learn how those parts connect, then compare the same shape

@@ -1,6 +1,6 @@
 {
   "name": "opengdd",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Conformance validator for OpenGDD game design documents.",
   "keywords": [
     "opengdd",

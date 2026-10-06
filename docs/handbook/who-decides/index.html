@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Who decides | OpenGDD handbook</title>
-<meta name="description" content="Every sentence in your design has an owner. OpenGDD calls this authority, and there are three levels:">
+<title>Who decides | OpenGDD Handbook</title>
+<meta name="description" content="Every sentence in your design has a level of authority: it says who decides that part of the game. There are three levels:">
 <link rel="canonical" href="https://opengdd.org/handbook/who-decides/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Who decides | OpenGDD handbook">
-<meta property="og:description" content="Every sentence in your design has an owner. OpenGDD calls this authority, and there are three levels:">
+<meta property="og:title" content="Who decides | OpenGDD Handbook">
+<meta property="og:description" content="Every sentence in your design has a level of authority: it says who decides that part of the game. There are three levels:">
 <meta property="og:url" content="https://opengdd.org/handbook/who-decides/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta property="og:image:type" content="image/png">
@@ -20,8 +20,8 @@
 <meta name="twitter:site" content="@OpenGDD">
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
-<meta name="twitter:title" content="Who decides | OpenGDD handbook">
-<meta name="twitter:description" content="Every sentence in your design has an owner. OpenGDD calls this authority, and there are three levels:">
+<meta name="twitter:title" content="Who decides | OpenGDD Handbook">
+<meta name="twitter:description" content="Every sentence in your design has a level of authority: it says who decides that part of the game. There are three levels:">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -53,7 +53,7 @@
 <li><a href="/handbook/" class="toc-resource-current">Handbook</a></li>
 </ul>
 <div class="toc-group">
-<p class="toc-group-title">Start and foundations</p>
+<p class="toc-group-title">The basic parts</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
 <li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
@@ -78,12 +78,12 @@
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-color-promises/">Palette and color promises</a></li>
 <li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanics</p>
+<p class="toc-group-title">Contracts: reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -92,16 +92,16 @@
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/how-checking-works/">What validation proves</a></li>
-<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you send it to the builder</a></li>
 </ul>
 </div>
 </nav>
 <article class="doc-body">
 <h1>Who decides</h1>
 <p class="chapter-scope"><span class="scope-badge">Required</span></p>
-<p>Every sentence in your design has an owner. OpenGDD calls this <strong>authority</strong>, and there are three levels:</p>
+<p>Every sentence in your design has a level of <strong>authority</strong>: it says who decides that part of the game. There are three levels:</p>
 <ul>
-<li><strong>Fixed</strong>: the builder follows the sentence exactly. The builder is the person, team or AI that turns your package into a game. This is the default: text with no tag in scope is Fixed.</li>
+<li><strong>Fixed</strong>: the builder follows the sentence exactly. The builder is the person, team or AI that turns your package into a game. This is the default: text that no tag covers is Fixed.</li>
 <li><strong>Delegated</strong>: the builder decides, inside the limits you write.</li>
 <li><strong>Personalization</strong>: you write a question, and each build records its own answer.</li>
 </ul>
@@ -110,33 +110,64 @@
 waits in a queue. A finished bar remains in the furnace until the player
 collects it.
 
-&gt; DELEGATED: furnace-presentation
-&gt;
-&gt; Decide how the furnace looks and sounds while processing ore. A player
-&gt; crossing the room must be able to tell that it is still running.
+&gt; DELEGATED: Decide how the furnace looks and sounds while processing ore.
+&gt; A player crossing the room must be able to tell that it is still running.
 
 &gt; PERSONALIZATION: furnace_signal
 &gt;
 &gt; Choose how the furnace signals that a bar is ready: a steady glow, or
 &gt; a glow with a soft chime. Either choice must be clear from across the
 &gt; room.</code></pre>
-<p>The first paragraph has no tag, so it is Fixed. The text after <code>DELEGATED:</code> is an optional free label for readers. The id after <code>PERSONALIZATION:</code> is not free. <code>furnace_signal</code> must be declared as a question in <code>personalization.json</code>, or validation fails.</p>
-<p>A tag applies until the next tag, or until the end of its section. A section ends at the next heading that is the same size or bigger. The limits you write still hold: the builder may choose the running animation, but it must be readable from across the room.</p>
-<p>A Delegated choice may not change how the game plays. A Personalization answer may, when you define the alternatives yourself. The <a href="/handbook/personalization/">Personalization questions</a> chapter shows how to write the question and its answers.</p>
+<p>The first paragraph has no tag, so it is Fixed. The delegated passage starts directly after <code>DELEGATED:</code>, on the tag line itself. The text after <code>PERSONALIZATION:</code> is different: it is an id. <code>furnace_signal</code> must be declared as a question in <code>personalization.json</code>, or validation fails.</p>
+<p>The limits you write still apply. The builder may choose how the furnace looks while it runs, but a player crossing the room must still be able to tell that it is running.</p>
+<p>Every tag covers its <strong>blockquote</strong> and nothing more. The blockquote is the tag line and the lines starting with <code>&gt;</code> directly under it. A line with only <code>&gt;</code> continues the blockquote, so one tag can cover several paragraphs. The first ordinary paragraph after the blockquote is outside the tag, so it is Fixed again. Write everything you delegate inside the blockquote.</p>
+<p><em><code>02-mechanics.md</code>, a one-line delegation, then a Fixed rule</em></p>
+<pre><code class="lang-markdown">&gt; DELEGATED: Decide how the furnace looks and sounds while processing ore.
+
+The furnace never hides the ore queue from the player.</code></pre>
+<p>The first line is a complete delegation. The last sentence is outside the blockquote, so it is Fixed: the builder may choose how the furnace looks, but the queue stays visible.</p>
+<p>A tag can also sit inside another tag's blockquote, in a nested quote that starts with <code>&gt; &gt;</code>. The inner tag then decides for its nested quote. Two <code>DELEGATED:</code> or <code>PERSONALIZATION:</code> tags at the same level of one blockquote are an error; start a new blockquote for the second tag. A tag inside a code block is only an example and has no effect.</p>
+<p>A Delegated choice may change how the game plays when the passage states its target and its limits. The target is what the choice must achieve. The builder then chooses inside those limits. A passage that states no target does not settle such a choice, so you must still decide it. The next section says when a choice changes how the game plays.</p>
+<p>A Personalization answer may also change how the game plays, when you define the alternatives yourself. The <a href="/handbook/personalization/">Personalization questions</a> chapter shows how to write the question and its answers.</p>
+<h2 id="deciding-by-value-or-by-target">Deciding by value or by target<a class="heading-anchor" href="#deciding-by-value-or-by-target" aria-label="Link to this section">#</a></h2>
+<p>You decide every difference that a player could notice and that changes how the game plays. Your package records each of these decisions in one of two ways:</p>
+<ul>
+<li>by its <strong>value</strong>: you state it exactly, such as a smelting time of 4 seconds;</li>
+<li>by its <strong>target</strong>: a rule, an acceptance test, or a sentence saying what it must achieve.</li>
+</ul>
+<p>A difference changes how the game plays when it changes at least one of these five things:</p>
+<ul>
+<li>what the player can do;</li>
+<li>what the player knows at the moment of a decision;</li>
+<li>the state of the game, or the result of an action;</li>
+<li>when something happens, or how much time the player has to act;</li>
+<li>whether the player succeeds or fails.</li>
+</ul>
+<p>Pictures, sound, the camera and feedback change how the game plays only when they change one of these five things. For example, when a chime is the only sign that a bar is ready, the chime changes what the player knows.</p>
+<p>A target lets you decide what a number is for before you know the number. Suppose you think &quot;smelting should take around 3 seconds, but I'm not sure&quot;. You write that as an <strong>open number</strong> in <code>tuning.json</code>: you write your guess there, and you write the target in your prose, next to the number's name. The <a href="/handbook/tuning/">Tuning</a> chapter shows how to write one.</p>
+<p><em><code>02-mechanics.md</code>, the target beside an open number</em></p>
+<blockquote>
+<p>A piece of ore becomes a bar in <code>furnace.smelt_seconds</code>. The bar must be ready before a player walking the mine loop comes back to the furnace.</p>
+</blockquote>
+<p>The builder finds a value that meets the target. No tag covers the target sentence, so it is Fixed: you decide what the number must achieve. A Delegated passage that states a target works in the same way: you decide the target, and the builder chooses inside the limits. For a choice that does not change how the game plays, such as how the furnace looks, the limits are enough. A sentence about looks that no tag covers is still Fixed.</p>
+<p>Some rules force a choice, such as which of two things goes first, or what the game does when two events happen at the same moment. When a rule allows two or more results, and a player could notice which one is chosen, the rule needs a <strong>tie-break</strong>: a statement of which result is chosen. Write the tie-break in the rule itself, or write it once in a Fixed sentence that covers several rules, such as &quot;When two candidates are equal, the one that was created first is chosen.&quot;</p>
+<p>The validator (the checking tool) can give optional review hints about missing tie-breaks. The hint check reads one paragraph at a time, so a hint can appear at a rule that your shared sentence already covers. A hint never makes a package invalid. The <a href="/handbook/how-checking-works/">What validation proves</a> chapter explains hints.</p>
 <h2 id="rulesets">Rulesets<a class="heading-anchor" href="#rulesets" aria-label="Link to this section">#</a></h2>
-<p>Most games never need this part. Some games swap one complete set of rules for another during play, such as act one and act two. <code>&gt; RULESET: &lt;id&gt;</code> marks a section as part of one ruleset. Write <code>(initial)</code> on one tag only: the rules the game starts with.</p>
+<p>Most games do not need this part. Some games replace one complete set of rules, a <strong>ruleset</strong>, with another during play, such as act one and act two. A <code>&gt; RULESET: &lt;id&gt;</code> tag puts its blockquote in one ruleset. It covers its blockquote in the same way as the other tags. Write <code>(initial)</code> on one tag only: the ruleset the game starts with. Text outside every ruleset applies in all rulesets.</p>
 <p><em><code>02-mechanics.md</code>, changing the gate rules between two acts</em></p>
-<pre><code class="lang-markdown">### Act one
-&gt; RULESET: act-one (initial)
+<pre><code class="lang-markdown">&gt; RULESET: act-one (initial)
+&gt;
+&gt; The east gate opens after the bell puzzle.
 
-The east gate opens after the bell puzzle.
-
-### Act two
 &gt; RULESET: act-two
+&gt;
+&gt; The east gate begins open and cannot close.
+&gt;
+&gt; &gt; DELEGATED: Choose the music for act two.
 
-The east gate begins open and cannot close.</code></pre>
-<p>The section under <code>act-one</code> applies at the start. The section under <code>act-two</code> applies after the game switches to it.</p>
-<p>Tags say who owns a sentence, not what it means. Validation checks the tag itself: a <code>PERSONALIZATION:</code> id must name a real question. No machine checks whether the builder kept your limits. The audit judges that. The format resolves one thing by machine: a personalization answer that moves a number.</p>
+The west gate stays locked.</code></pre>
+<p>The <code>act-one</code> blockquote applies at the start. The <code>act-two</code> blockquote applies after the game switches to it. Inside it, the nested quote, written with <code>&gt; &gt;</code>, is Delegated. The last sentence is outside both rulesets, so it applies in both acts.</p>
+<p>Tags say who decides a sentence, not what the sentence means. Validation checks the tag itself: a <code>PERSONALIZATION:</code> id must name a real question. No machine checks whether the builder kept your limits. An audit of the finished game judges that. The format defines one effect that a machine applies: a personalization answer that sets a tuning number.</p>
 <p><em>Full rules: <a href="/spec/#2-the-three-authority-levels">OpenGDD specification</a>, §2, <a href="/spec/#2a-the-responsibility-boundary">§2a</a> and <a href="/spec/#2c-rulesets">§2c</a>.</em></p>
 <p class="note chapter-pager"><a href="/handbook/player-fantasy/">← The player fantasy</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/naming-things/">Names and addresses →</a></p>
 </article>
@@ -145,7 +176,7 @@ The east gate begins open and cannot close.</code></pre>
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

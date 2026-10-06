@@ -1,4 +1,5 @@
 import { parseJson, pointerSegment } from "./json-path.mjs";
+import { createFileMapHost } from "opengdd-file-map-host";
 
 const DOTTED_KEY = /^[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+$/;
 const COLLECTION_RECORD_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -32,7 +33,8 @@ export function parseJsonScalar(text) {
   let value;
   try { value = JSON.parse(text); }
   catch { throw new Error(CREATION_COPY.validJsonScalar); }
-  if (value !== null && typeof value === "object") throw new Error(CREATION_COPY.jsonScalarOnly);
+  if (typeof value !== "number") throw new Error(CREATION_COPY.jsonScalarOnly);
+  if (!Number.isFinite(value)) throw new Error(CREATION_COPY.validJsonScalar);
   return value;
 }
 
@@ -86,13 +88,25 @@ function collectionDrawers(files, folders) {
   return [...drawers].sort((left, right) => left.localeCompare(right));
 }
 
-function seedCollectionField(record, field, definition) {
-  if (Object.hasOwn(definition, "pattern") || definition.unique === true || definition.type === "grid") return;
+function seedCollectionField(record, field, definition, existing = []) {
+  if (Object.hasOwn(definition, "pattern") || definition.type === "grid") return;
   if (definition.type === "link") record[field] = definition.many === true ? [] : null;
   else if (definition.type === "list") record[field] = [];
   else if (Array.isArray(definition.options) && definition.options.length) record[field] = definition.options[0];
   else if (definition.type === "string") record[field] = "";
   else if (definition.type === "integer" || definition.type === "number") record[field] = 0;
+  if (definition.unique === true && Object.hasOwn(record, field)) {
+    const used = new Set(existing.map(value => JSON.stringify(value?.[field])));
+    if (Array.isArray(definition.options)) {
+      const value = definition.options.find(option => !used.has(JSON.stringify(option)));
+      if (value === undefined) delete record[field];
+      else record[field] = value;
+    } else if (["number", "integer"].includes(definition.type)) {
+      while (used.has(JSON.stringify(record[field]))) record[field] += 1;
+    } else if (definition.type === "string") {
+      while (used.has(JSON.stringify(record[field]))) record[field] += "a";
+    } else if (used.has(JSON.stringify(record[field]))) delete record[field];
+  }
 }
 
 export function collectionRowWhenSatisfied(when, row) {
@@ -116,9 +130,11 @@ export function collectionRecordText(files, drawer) {
   const schema = label?.record;
   if (!schema || Array.isArray(schema) || typeof schema !== "object") return "{}\n";
   const record = {};
+  const existing = [...files].filter(([path]) => path.startsWith(`collections/${drawer}/`)
+    && path !== `collections/${drawer}/_collection.json`).map(([, text]) => parseJson(text));
   for (const [field, definition] of Object.entries(schema)) {
     if (!definition || Array.isArray(definition) || typeof definition !== "object" || definition.required !== true) continue;
-    seedCollectionField(record, field, definition);
+    seedCollectionField(record, field, definition, existing);
   }
   for (let pass = 0; pass < Object.keys(schema).length; pass += 1) {
     let added = false;
@@ -126,7 +142,7 @@ export function collectionRecordText(files, drawer) {
       if (!definition || Array.isArray(definition) || typeof definition !== "object") continue;
       if (!Object.hasOwn(definition, "when") || Object.hasOwn(record, field)) continue;
       if (!collectionRowWhenSatisfied(definition.when, record)) continue;
-      seedCollectionField(record, field, definition);
+      seedCollectionField(record, field, definition, existing);
       added = Object.hasOwn(record, field);
     }
     if (!added) break;
@@ -164,14 +180,19 @@ export function inferredLink(values, idsByDrawer) {
   return { type: "link", to: targets[0], ...(arrays.some(Boolean) ? { many: true } : {}) };
 }
 
-export function inferField(values, idsByDrawer) {
+export function inferField(values, idsByDrawer, { topLevel = true } = {}) {
   const present = values.filter(value => value !== MISSING_FIELD);
+  const finite = value => typeof value === "number" && Number.isFinite(value);
   const link = inferredLink(values, idsByDrawer);
   let definition;
   if (link) definition = link;
   else if (present.length && present.every(value => typeof value === "string")) definition = { type: "string" };
-  else if (present.length && present.every(value => typeof value === "number" && Number.isFinite(value))) {
+  else if (present.length && present.every(finite)) {
     definition = { type: present.every(Number.isInteger) ? "integer" : "number" };
+  } else if (topLevel && present.some(finite) && present.every(value => value === null || finite(value))) {
+    // Numbers beside "no guess yet" (null) are guesses: an open field, which
+    // is never required because leaving it out means it does not apply.
+    return { type: present.filter(finite).every(Number.isInteger) ? "integer" : "number", open: true };
   } else if (present.length && present.every(value => Array.isArray(value) && value.length > 0
     && value.every(row => typeof row === "string" && [...row].length > 0 && [...row].length === [...value[0]].length))
     // Equal-length word lists and character grids have the same JSON shape.
@@ -185,7 +206,7 @@ export function inferField(values, idsByDrawer) {
     const keys = [...new Set(rows.flatMap(row => Object.keys(row).filter(field => !field.startsWith("_"))))];
     const of = {};
     for (const field of keys) {
-      const nested = inferField(rows.map(row => Object.hasOwn(row, field) ? row[field] : MISSING_FIELD), idsByDrawer);
+      const nested = inferField(rows.map(row => Object.hasOwn(row, field) ? row[field] : MISSING_FIELD), idsByDrawer, { topLevel: false });
       if (!nested) return undefined;
       of[field] = nested;
     }
@@ -309,7 +330,7 @@ export function measuredPromiseCreation(files, requestedType, requestedName) {
     throw new Error(CREATION_COPY.outlineErrors.promiseMap(kind));
   }
   const requested = kebabName(String(requestedName ?? "").replace(/^(?:colors|contrast|timing)\./u, ""));
-  const base = kind === "colors" ? "new-colour-promise" : kind === "contrast" ? "new-contrast-promise" : "new-timing-promise";
+  const base = kind === "colors" ? "new-color-promise" : kind === "contrast" ? "new-contrast-promise" : "new-timing-promise";
   const id = (() => {
     const entries = direction?.[kind] ?? {};
     const wanted = requested || base;
@@ -392,15 +413,28 @@ export function rankCollectionCreationActions(actions, files, revisionFor, limit
 
 export function defaultRuleLine(files) {
   const tuning = parseJson(files.get("tuning.json"));
-  const values = tuning?.values && !Array.isArray(tuning.values) && typeof tuning.values === "object"
-    ? Object.entries(tuning.values).filter(([, value]) => Number.isFinite(value)).map(([key]) => key)
-    : [];
-  return values.length >= 2 ? `${values[0]} <= max(${values[0]}, ${values[1]})` : "1 <= 1";
+  const values = [
+    ...(tuning?.values && !Array.isArray(tuning.values) && typeof tuning.values === "object"
+      ? Object.entries(tuning.values).filter(([, value]) => Number.isFinite(value)).map(([key]) => key) : []),
+    ...(tuning?.open && !Array.isArray(tuning.open) && typeof tuning.open === "object"
+      ? Object.entries(tuning.open).filter(([, value]) => Number.isFinite(value)).map(([key]) => key) : [])
+  ];
+  return values.length >= 2 ? `${values[0]} <= max(${values[0]}, ${values[1]})`
+    : values.length ? `${values[0]} <= ${values[0]}` : "1 <= 1";
 }
 
-function ruleValue(source, values, writeAnyway = false) {
-  const ast = parseRule(source);
-  if (!writeAnyway && !evaluateRule(ast, values)) {
+function ruleValue(source, files, name, writeAnyway = false) {
+  parseRule(source);
+  const candidate = new Map(files);
+  const tuning = parseJson(files.get("tuning.json"));
+  candidate.set("tuning.json", JSON.stringify({ ...tuning, rules: { ...tuning.rules, [name]: source } }));
+  const run = validatePackage(createFileMapHost(candidate, { bytes: false }), "/package");
+  const findings = run.findings.filter(finding => finding.file === "tuning.json"
+    && (finding.message.includes(`rule ${JSON.stringify(name)}`) || finding.code === "TUNING_PIN_CONFLICT"
+      && finding.message.includes(JSON.stringify(name))));
+  const invalid = findings.find(finding => finding.severity === "error" && finding.code !== "TUNING_RULE_FAILED");
+  if (invalid) throw new Error(invalid.message);
+  if (!writeAnyway && findings.some(finding => finding.code === "TUNING_RULE_FAILED")) {
     const error = new Error(CREATION_COPY.ruleFalse);
     error.writeAnyway = true;
     throw error;
@@ -423,9 +457,6 @@ function ruleAction(address, files) {
   }
   if (Object.hasOwn(document?.rules ?? {}, match[1])) return { actions: [], reason: CREATION_COPY.alreadyDeclared(address) };
   const line = defaultRuleLine(files);
-  const values = document?.values && !Array.isArray(document.values) && typeof document.values === "object"
-    ? document.values
-    : {};
   const operations = value => document?.rules === undefined
     ? [insertion("", "rules", { [match[1]]: value })]
     : [insertion("/rules", match[1], value)];
@@ -438,7 +469,8 @@ function ruleAction(address, files) {
     needsValue: true,
     defaultValue: line,
     valueLabel: CREATION_COPY.ruleLine,
-    parseValue: source => ruleValue(source, values),
+    valueHelp: INSPECTOR_COPY.tuningRuleLineHelp,
+    parseValue: source => ruleValue(source, files, match[1]),
     selected: { kind: "rule", name: match[1], file: target },
     notice: CREATION_COPY.addedRule(match[1])
   };
@@ -446,7 +478,7 @@ function ruleAction(address, files) {
     ...action,
     choice: CREATION_COPY.writeRuleAnyway,
     hiddenUntilError: true,
-    parseValue: source => ruleValue(source, values, true)
+    parseValue: source => ruleValue(source, files, match[1], true)
   }] };
 }
 
@@ -485,9 +517,12 @@ function clockAction(address, files) {
 export function rangeChange(files, key) {
   const tuning = parseJson(files.get("tuning.json"));
   if (!tuning || Array.isArray(tuning) || typeof tuning !== "object") throw new Error(CREATION_COPY.outlineErrors.tuningObject);
-  if (!tuning.values || Array.isArray(tuning.values) || typeof tuning.values !== "object") throw new Error(CREATION_COPY.outlineErrors.tuningObject);
-  const value = tuning.values[key];
-  if (typeof value !== "number" || !Number.isFinite(value)) throw new Error(CREATION_COPY.cannotRangeValue(key));
+  const table = tuning.values && !Array.isArray(tuning.values) && typeof tuning.values === "object" && Object.hasOwn(tuning.values, key)
+    ? "values" : tuning.open && !Array.isArray(tuning.open) && typeof tuning.open === "object" && Object.hasOwn(tuning.open, key)
+      ? "open" : undefined;
+  if (!table) throw new Error(CREATION_COPY.outlineErrors.tuningObject);
+  const value = tuning[table][key];
+  if (value !== null && (typeof value !== "number" || !Number.isFinite(value))) throw new Error(CREATION_COPY.cannotRangeValue(key));
   if (tuning.ranges !== undefined && (!tuning.ranges || Array.isArray(tuning.ranges) || typeof tuning.ranges !== "object")) {
     throw new Error(CREATION_COPY.outlineErrors.rangesObject);
   }
@@ -500,12 +535,13 @@ export function rangeChange(files, key) {
   return {
     remove: false,
     operations: tuning.ranges === undefined
-      ? [insertion("", "ranges", { [key]: [value, value] }, { recordSpacing: true, arraySpacing: true })]
-      : [insertion("/ranges", key, [value, value], { arraySpacing: true })]
+      ? [insertion("", "ranges", { [key]: [value ?? 0, value ?? 0] }, { recordSpacing: true, arraySpacing: true })]
+      : [insertion("/ranges", key, [value ?? 0, value ?? 0], { arraySpacing: true })]
   };
 }
 
 export function rangeRemovalRefusal(files, key) {
+  if (Object.hasOwn(parseJson(files.get("tuning.json"))?.open ?? {}, key)) return undefined;
   const personalization = parseJson(files.get("personalization.json"));
   if (!Array.isArray(personalization?.questions)) return undefined;
   for (const question of personalization.questions) {
@@ -598,8 +634,20 @@ export function classifyCreation(name, { files, folders, manifest, openPath }) {
     const target = "tuning.json";
     const document = parseJson(files.get(target));
     const actions = [];
+    if (document && typeof document === "object" && !Array.isArray(document)
+      && (document.open === undefined || document.open && typeof document.open === "object" && !Array.isArray(document.open))) {
+      actions.push({
+        kind: "value", label: CREATION_COPY.createOpenNumber, choice: CREATION_COPY.choices.openNumber,
+        hint: CREATION_COPY.choiceHints.openNumber,
+        target, container: "open", operations: () => document.open === undefined
+          ? [insertion("", "open", { [name]: null }, { recordSpacing: true })]
+          : [insertion("/open", name, null)],
+        selected: { kind: "value", name, file: target }, notice: CREATION_COPY.addedOpenNumber(name)
+      });
+    }
     if (document?.values && typeof document.values === "object" && !Array.isArray(document.values)) {
       actions.push({ kind: "value", label: CREATION_COPY.createValue, choice: CREATION_COPY.choices.value, target, container: "values", needsValue: true,
+        hint: CREATION_COPY.choiceHints.value,
         operations: value => [insertion("/values", name, value)], notice: CREATION_COPY.addedValue(name) });
     }
     return actions.length ? { actions } : { actions, reason: CREATION_COPY.cannotAddTuningObjects(name) };
@@ -673,4 +721,4 @@ export function classifyCreation(name, { files, folders, manifest, openPath }) {
 import { CREATION_COPY } from "./copy/creation-copy.mjs";
 import { INSPECTOR_COPY } from "./copy/inspector-copy.mjs";
 import { SUPPORTED_OPENGDD_VERSION } from "./package.mjs";
-import { evaluateRule, parseRule, RESERVED_EXTENSIONS, RESERVED_FIRST_SEGMENTS } from "opengdd-validation";
+import { parseRule, validatePackage, RESERVED_EXTENSIONS, RESERVED_FIRST_SEGMENTS } from "opengdd-validation";

@@ -1,7 +1,7 @@
 import { COLLECTION_COPY, counted } from "./collection-copy.mjs";
 const ADD_ROW = "Add a row";
 
-// All designer-facing contract language lives in this one catalogue. The
+// All designer-facing contract language lives in this one catalog. The
 // wording was approved 2026-08-28; lines may still change once seen in context.
 export const CONTRACT_COPY = Object.freeze({
   groupEmpty: "Someone has already written the questions for things like stamina, health, and cooldowns. Add one and answer it here.",
@@ -11,7 +11,7 @@ export const CONTRACT_COPY = Object.freeze({
   addTitle: (name, version) => `Add ${name}-${version} contract`,
   drop: "Drop a contract file or a ZIP here, or paste one.",
   pastePlaceholder: "…or paste the contract's text here",
-  catalogue: "Find contract definitions at",
+  catalog: "Find contract definitions at",
   refusal: "This isn't a contract file. A contract file names its contract, version, and questions.",
   zipRefusal: "Nothing in this ZIP is a contract file. A ZIP should hold at least one contract .json.",
   nameQuestion: "Name in your game",
@@ -19,14 +19,14 @@ export const CONTRACT_COPY = Object.freeze({
   nameTaken: name => `You already have a contract called \`${name}\`. Pick another name.`,
   nameReserved: name => `\`${name}\` is reserved for a verification pack filename. Pick another name.`,
   sameDefinition: "You already have this contract in your game; the copy you have will be used.",
-  definitionConflict: file => `The definition in ${file} differs from this adoption's definition, despite sharing its name and version. Resolve that difference before using the supplied answers, or choose Start unanswered to use your game's definition.`,
+  definitionConflict: file => `The definition in ${file} differs from this adoption's definition, but both have the same name and version. Fix that difference before you use the supplied answers, or choose Start unanswered to use your game's definition.`,
   adoptionStart: "How would you like to start?",
   useSupplied: "Use supplied answers and settings",
   startUnanswered: "Start unanswered",
   unknownSourceName: "Pasted text has no source filename. References keep their original names; review them if you choose a different name.",
   copiedAdoption: findings => findings ? `${counted(findings, "validation issue")} to review after adding.` : "",
   updateLegend: "Update an adoption",
-  updateBoundary: "This changes the contract definition and adds its matching pack when supplied. Review pack status, ordinary game rules and tuning separately; keeping answers does not complete a mechanic's migration.",
+  updateBoundary: "This changes the contract definition. It also adds the matching pack when one is supplied. Check the pack status, your other game rules and your tuning separately: keeping the answers does not finish the update of the mechanic.",
   updateOffer: (name, version) => `Update \`${name}\` to version ${version}`,
   updateLine: (kept, dropped, added, outOfRange, options = {}) => {
     const { droppedInputs = 0, testInputs = 0, orphanedPacks = 0,

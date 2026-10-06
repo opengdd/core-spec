@@ -147,7 +147,7 @@ particular, `selection.clear()` is available,
 `references.pick` is not revision-1 vocabulary.
 
 `validation.contribute()` accepts `warning` and `info` advice. The host shows
-both as warnings labelled with the panel title and includes them in displayed
+both as warnings labeled with the panel title and includes them in displayed
 warning counts; advice does not become a conformance error.
 
 Descriptor rejection appears as a persistent **Panel not loaded** message. It

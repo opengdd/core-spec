@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Embedded OpenGDD authoring tool</title>
 <meta name="robots" content="noindex">
-<link rel="stylesheet" href="/authoring-tool/authoring.css?v=9e90533a9ecc">
-<link rel="stylesheet" href="/authoring-tool/src/workbench/workbench.css?v=9e90533a9ecc">
+<link rel="stylesheet" href="/authoring-tool/authoring.css?v=6d328337d265">
+<link rel="stylesheet" href="/authoring-tool/src/workbench/workbench.css?v=6d328337d265">
 <style>html,body,#workbench{height:100%;margin:0} body{overflow:hidden}</style>
 <script type="importmap">
 {
   "imports": {
-    "opengdd-analysis": "/authoring-tool/lib/lang/tools/src/analysis.mjs?v=9e90533a9ecc",
-    "opengdd-syntax": "/authoring-tool/lib/opengdd/conformance/package-syntax.mjs?v=9e90533a9ecc",
-    "opengdd-file-map-host": "/authoring-tool/lib/opengdd/conformance/file-map-host.mjs?v=9e90533a9ecc",
-    "opengdd-migrate": "/authoring-tool/lib/opengdd/conformance/migrate.mjs?v=9e90533a9ecc",
-    "opengdd-validation": "/authoring-tool/lib/opengdd/conformance/validate-core.mjs?v=9e90533a9ecc",
-    "opengdd-authoring-version": "/authoring-tool/src/version.mjs?v=9e90533a9ecc"
+    "opengdd-analysis": "/authoring-tool/lib/lang/tools/src/analysis.mjs?v=6d328337d265",
+    "opengdd-syntax": "/authoring-tool/lib/opengdd/conformance/package-syntax.mjs?v=6d328337d265",
+    "opengdd-file-map-host": "/authoring-tool/lib/opengdd/conformance/file-map-host.mjs?v=6d328337d265",
+    "opengdd-migrate": "/authoring-tool/lib/opengdd/conformance/migrate.mjs?v=6d328337d265",
+    "opengdd-validation": "/authoring-tool/lib/opengdd/conformance/validate-core.mjs?v=6d328337d265",
+    "opengdd-authoring-version": "/authoring-tool/src/version.mjs?v=6d328337d265"
   }
 }
 </script>
@@ -24,9 +24,9 @@
 <body>
 <div id="workbench" class="opengdd-workbench opengdd-author-theme--light"></div>
 <script type="module">
-import { mountWorkbenchShell } from "/authoring-tool/src/workbench/shell.mjs?v=9e90533a9ecc";
-import { createScaffoldPackage } from "/authoring-tool/src/package.mjs?v=9e90533a9ecc";
-import panels from "/authoring-tool/panels/index.mjs?v=9e90533a9ecc";
+import { mountWorkbenchShell } from "/authoring-tool/src/workbench/shell.mjs?v=6d328337d265";
+import { createScaffoldPackage } from "/authoring-tool/src/package.mjs?v=6d328337d265";
+import panels from "/authoring-tool/panels/index.mjs?v=6d328337d265";
 
 const schemaNames = [
   "manifest.schema.json", "tuning.schema.json", "personalization.schema.json",
@@ -34,7 +34,7 @@ const schemaNames = [
   "clocks.schema.json"
 ];
 const schemas = async () => Object.fromEntries(await Promise.all(schemaNames.map(async name => {
-  const response = await fetch("/schema/core/v0.8/" + name);
+  const response = await fetch("/schema/core/v0.9/" + name);
   if (!response.ok) throw new Error("Could not load schema " + name);
   return [name, await response.json()];
 })));
@@ -50,7 +50,7 @@ mountWorkbenchShell(document.querySelector("#workbench"), {
     return createScaffoldPackage(listed.id, listed.title);
   },
   readerUrl: null,
-  contractsCatalogueUrl: "/contracts/",
+  contractsCatalogUrl: "/contracts/",
   showTheme: false
 });
 </script>

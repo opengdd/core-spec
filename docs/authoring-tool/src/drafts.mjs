@@ -1,6 +1,6 @@
 const DATABASE = "opengdd-authoring";
 const STORE = "drafts";
-const DATABASE_VERSION = 3;
+const DATABASE_VERSION = 4;
 
 export function moveLegacyTicTacToeDraft(draft) {
   if (!draft || draft.id !== "tic-tac-toe") return null;
@@ -8,7 +8,7 @@ export function moveLegacyTicTacToeDraft(draft) {
   try {
     const files = new Map(draft.files ?? []);
     format = JSON.parse(files.get("manifest.json")).opengdd;
-    if (typeof format !== "string" || !["0.6", "0.7"].includes(format)) return null;
+    if (typeof format !== "string" || !["0.6", "0.7", "0.8"].includes(format)) return null;
   } catch {
     return null;
   }
@@ -28,7 +28,7 @@ function database() {
         ? request.result.createObjectStore(STORE, { keyPath: "id" })
         : request.transaction.objectStore(STORE);
       if (event.oldVersion < 2) store.delete("lantern-demo");
-      if (event.oldVersion < 3) {
+      if (event.oldVersion < 4) {
         const legacy = store.get("tic-tac-toe");
         legacy.onsuccess = () => {
           const moved = moveLegacyTicTacToeDraft(legacy.result);

@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The validator, and what a pass means — OpenGDD</title>
-<meta name="description" content="How OpenGDD validates packages and build records, and how the experimental audit protocol treats their evidence.">
+<meta name="description" content="How OpenGDD validates packages and build records, and how the experimental certification protocol treats their evidence.">
 <link rel="canonical" href="https://opengdd.org/conformance/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
 <meta property="og:title" content="The validator, and what a pass means — OpenGDD">
-<meta property="og:description" content="How OpenGDD validates packages and build records, and how the experimental audit protocol treats their evidence.">
+<meta property="og:description" content="How OpenGDD validates packages and build records, and how the experimental certification protocol treats their evidence.">
 <meta property="og:url" content="https://opengdd.org/conformance/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta property="og:image:type" content="image/png">
@@ -21,7 +21,7 @@
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
 <meta name="twitter:title" content="The validator, and what a pass means — OpenGDD">
-<meta name="twitter:description" content="How OpenGDD validates packages and build records, and how the experimental audit protocol treats their evidence.">
+<meta name="twitter:description" content="How OpenGDD validates packages and build records, and how the experimental certification protocol treats their evidence.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/sora-latin-600-normal.woff2">
@@ -51,27 +51,29 @@
 <p class="toc-title">About OpenGDD</p>
 <ul><li><a href="/about/">Overview</a></li>
 <li><a href="/schema/">Schemas</a></li>
-<li><a href="/conformance/" aria-current="page">Validator</a><ul><li class="toc-h3"><a href="/conformance/certification/">Experimental certification protocol</a></li></ul></li>
+<li><a href="/conformance/" aria-current="page">Validator</a><ul><li class="toc-h3"><a href="/conformance/certification/">Experimental certification protocol</a></li><li class="toc-h3"><a href="/conformance/injection-lint/">Safety scan</a></li></ul></li>
 <li><a href="/evolution/">Evolution</a></li></ul>
 </nav>
 <div class="doc-body">
 <h1>The validator, and what a pass means</h1>
 
 <p><strong>Conformance</strong> means meeting the OpenGDD specification's
-requirements. OpenGDD's <strong>validator</strong> checks the requirements a
-program can decide from the design files. A person reviews the written
-design.</p>
+requirements. OpenGDD's <strong>validator</strong> checks the requirements that a
+program can check in a package. A <strong>package</strong> is one folder that
+contains a game's design. A person reviews the written design.</p>
 
 <h2>Run the checks</h2>
 
 <p>The validator runs inside OpenGDD's <a href="/authoring-tool/">authoring
-tool</a> as you write. Nothing to install.</p>
+tool</a> as you write. You do not need to install anything.</p>
 
 <details><summary>Run the validator from the command line</summary>
 <p>With Node.js installed, replace <code>&lt;package-dir&gt;</code> with
-the path to the folder containing the game's design:</p>
+the path to the package folder:</p>
 
 <pre><code>npx opengdd validate &lt;package-dir&gt;</code></pre>
+<p>For an automated check, pin this release:
+<code>npx opengdd@0.9 validate &lt;package-dir&gt;</code>.</p>
 <p>To check a build record, name the record and, if you have it, the package
 it was built from. <code>--render-contract-tests</code> prints the tests that
 the package's checked contract adoptions imply, as Markdown, without
@@ -80,12 +82,18 @@ changing any file.</p>
 npx opengdd validate --render-contract-tests &lt;package-dir&gt;</code></pre>
 
 <h3>Exit codes</h3>
+<p>For a package check:</p>
 <ul>
-<li><code>0</code>: the report has no errors. Warnings never fail a run.</li>
+<li><code>0</code>: the report has no errors. Warnings, hints, and safety
+notices never fail a run.</li>
 <li><code>1</code>: the report has one or more conformance errors.</li>
 <li><code>2</code>: the command has a usage error, such as an unknown option
 or a missing argument.</li>
 </ul>
+<p>For a build-record check, <code>0</code> means conforming. No other outcome
+exits with <code>0</code>. <code>1</code> means invalid, <code>2</code> means a command usage error, and
+<code>3</code> means incomplete, not verified, or not checked because no
+package was supplied.</p>
 
 <h3>JSON report</h3>
 <p><code>validate --json</code> writes one JSON object to standard output for
@@ -93,38 +101,58 @@ both passing and failing validation runs. It has these fields:</p>
 <ul>
 <li><code>validator</code> names the validation kind;
 <code>format</code> is the OpenGDD version checked, currently
-<code>"0.8"</code>; and <code>validator_version</code> is the npm package
+<code>"0.9"</code>; and <code>validator_version</code> is the npm package
 version that produced the report.</li>
 <li><code>package</code>, or <code>build</code> in build-record mode, contains
 <code>id</code> and <code>path</code>. A package id is <code>null</code> when
 the package directory could not be read.</li>
-<li><code>valid</code> is a Boolean, or <code>null</code> when a build record
-was checked without its package. <code>verdict</code> is <code>PASS</code>,
-<code>PASS WITH WARNINGS</code>, <code>FAIL</code>, or
-<code>NOT CHECKED</code>.</li>
+<li><code>valid</code> is a Boolean, with one exception. It is
+<code>null</code> when a build record was checked without its package and
+has no errors of its own. A build record with errors has <code>valid</code>
+set to <code>false</code>, also when it was checked without its package.
+Package verdicts are <code>PASS</code>,
+<code>PASS WITH WARNINGS</code>, or <code>FAIL</code>. A build verdict is
+<code>PASS</code> or <code>PASS WITH WARNINGS</code> only when the outcome is
+conforming. Otherwise the build verdict is <code>INCOMPLETE</code>,
+<code>NOT VERIFIED</code>, <code>NOT CHECKED</code>, or <code>FAIL</code>.</li>
+<li>In build-record mode, <code>outcome</code> is <code>conforming</code>,
+<code>incomplete</code>, <code>not verified</code>, <code>invalid</code>, or
+<code>not checked</code>.</li>
 <li><code>summary</code> contains the numeric counts <code>errors</code>,
-<code>dependent</code>, <code>warnings</code>, and <code>findings</code>.</li>
+<code>dependent</code>, <code>warnings</code>, <code>hints</code>,
+<code>safety</code>, and <code>findings</code>.</li>
 <li><code>findings</code> is an array. Every finding has <code>code</code>,
 <code>severity</code>, <code>spec_section</code>, <code>file</code>, and
 <code>message</code>. <code>line</code> and check-specific <code>data</code>
 appear when known. <code>dependent: true</code> appears on an error that is
 waiting for required designer input.</li>
+<li><code>hints</code> and <code>safety</code> are separate arrays with the same
+location and message fields. All three arrays are present even when empty.
+Hints appear only when <code>--review</code> is requested; the safety scan runs
+by default. Neither array changes the verdict or warning count.</li>
 </ul>
 
-<p>The same checks live in the specification repository. They run on plain Node with no dependencies. Every finding has a stable code, such
-as <code>PROSE_CITATION_DANGLING</code>. It names the rule and the
-specification section behind it.</p>
+<p><code>validate --review &lt;package-dir&gt;</code> asks for optional review
+hints. The hint checks work only on English text. Three checks of the safety
+scan also read only English, so these checks do not find a hostile
+instruction in another language. A scan with no findings does not prove that
+a package is safe.</p>
+
+<p>The source code of these checks is in the specification repository. It
+needs only Node.js and no other software. Every finding has a stable code,
+such as <code>PROSE_CITATION_DANGLING</code>. This code names the rule. The
+finding also names the specification section of that rule.</p>
 </details>
 
 <h2>What the validator checks</h2>
 
-<p>A <strong>package</strong> is one folder containing a game's design.
-The validator checks its files and the connections between them:</p>
+<p>The validator checks the files of the package and the connections between
+them:</p>
 <ul>
 <li>Required files and fields are present.</li>
 <li>References in the writing point to defined names.</li>
-<li>Numbers fall within their declared limits and satisfy the written
-calculation rules.</li>
+<li>Numbers fall within their declared limits and satisfy the rules in
+<code>tuning.json</code>.</li>
 <li>Data files follow their required structure.</li>
 <li>Acceptance tests, the checks a finished game must pass, contain the
 required information.</li>
@@ -134,37 +162,40 @@ required information.</li>
 <ul>
 <li>the package: required files present, every declared path inside the
 package, the manifest valid against its schema;</li>
-<li>the fantasy block: at least one fantasy line, sentence-ending
-punctuation, no more than 280 characters across the lines, three to five
-feel adjectives, and a non-empty <code>NOT:</code> line;</li>
+<li>the fantasy block: at least one fantasy line, no more
+than 280 characters across the lines, three to five
+feel entries, and a non-empty <code>NOT:</code> line;</li>
 <li>values: finite shared numbers under declared keys;</li>
 <li>ranges: inclusive limits that contain their current values;</li>
 <li>rules: one comparison between two calculations, with resolvable keys
 and finite results;</li>
-<li>personalization: question and answer shapes, with every <code>sets</code>
-entry aimed at a ranged number and kept inside that range;</li>
-<li>collections: well-formed collection and record ids, every record held
-to its schema where one is declared, and no dangling collection or record
-citation;</li>
+<li>personalization: question and answer shapes. Every <code>sets</code>
+entry targets a ranged <code>values</code> number or an open number, and
+stays inside the range when the number has one. A record field or a contract
+value is never a target;</li>
+<li>collections: collection and record ids are well formed, every record is
+checked against its schema where one is declared, and every cited collection
+or record exists;</li>
 <li>links: linked records exist, forbidden loops are absent, and declared
 back-pointers agree in both directions;</li>
-<li>runtime values: every use has a declaration in a chapter or a clock;</li>
+<li>runtime values: each address in the <code>unchanged.values</code> list of
+a test has a declaration in a chapter or a clock;</li>
 <li>clocks: every clock covers every time mode with one of the four
-behaviour words, and supports any test claim that named runtime values
+behavior words, and supports any test claim that named runtime values
 stay unchanged;</li>
 <li>acceptance tests: ordered headings, one structured <code>test</code>
 block per heading, and the fields that block requires;</li>
 <li>art direction: palette and direction shape, dotted references, coverage
 of every measured promise, and declared WCAG 2.1 contrast floors;</li>
-<li>contracts: each adoption's answers, numbers, rows and rules against its
-contract, and that the acceptance tests beside it match the contract they
-belong to.</li>
+<li>contracts: the answers, numbers, rows and rules of each adoption agree
+with its contract, and the acceptance tests stored with the adoption match
+that contract.</li>
 </ul>
 </details>
 
-<p>Zero errors means the package passed the validator's checks. Warnings ask
-for another look, but do not fail validation. A person still reviews the
-written design. Passing validation does not prove that the design is good, or
+<p>Zero errors means the package passed the validator's checks. A warning
+marks something to read again. A warning does not fail validation. Passing
+validation does not prove that the design is good, or
 that a finished game follows it.</p>
 
 <h2>Build records</h2>
@@ -176,22 +207,40 @@ package, the choices made for that build, the final numbers and the test
 results.</p>
 
 <p>If you also have the package, the validator checks that the record agrees
-with it. For example, the final numbers must follow from the recorded
-answers, and the test totals must add up. These checks read the report. They
-do not run the game or prove that the report is true.</p>
+with it. The final numbers include the builder's choices for ranged and open
+numbers. The test counts must add up, and every test that did not pass must be
+listed with <code>failed</code>, <code>partial</code>, or <code>not-run</code>
+and a reason. These checks read the record. They do not run the game or prove
+that the record is true.</p>
+
+<p>The validator reports <code>conforming</code> only when the package has
+tests and all of them passed. A record that correctly lists the tests that
+did not pass is <code>incomplete</code>. A record for a package with no tests
+is <code>not verified</code>. Tests the builder added for their own process do
+not change these outcomes.</p>
+
+<p>A record that has errors is <code>invalid</code>, also when it is checked
+without its package. Without its package, a record that has no errors of its
+own is <code>not checked</code>, because the package-dependent checks did not
+run. From the record alone, the validator still checks the acceptance sum:
+the number of passed tests plus the number of tests listed as not passed
+must equal the total.</p>
+
+<p>The exit codes and the JSON verdicts for a build record are listed above,
+in the command-line part of the section Run the checks.</p>
 
 <h2>Auditing a build</h2>
 
 <p>An <strong>audit</strong> examines a finished game and its evidence to
 check whether it follows the package. OpenGDD's
-<a href="/conformance/certification/">experimental audit protocol</a>
+<a href="/conformance/certification/">experimental certification protocol</a>
 describes the process:</p>
 
 <ol>
 <li><strong>Check the package.</strong> Run the validator and have a person
 review the applicable requirements in the writing.</li>
 <li><strong>Build and test the game.</strong> The builder follows the design,
-runs every required acceptance test and records the results.</li>
+runs every acceptance test the package declares and records the results.</li>
 <li><strong>Review the game and evidence.</strong> A separate auditor checks
 whether the tests measure the intended behavior. They also check that the
 game uses the declared numbers and follows the design.</li>
@@ -207,15 +256,15 @@ OpenGDD certification program. These verdicts grant no certification mark.</p>
 <h2>Limits of the checks</h2>
 
 <ul>
-<li><strong>Taste.</strong> An audit asks whether a build is faithful to
-its package. It does not decide whether the game is enjoyable. Builds may
+<li><strong>Taste.</strong> An audit asks whether a build follows its
+package. It does not decide whether the game is enjoyable. Builds may
 differ where the designer leaves choices open.</li>
 <li><strong>Audio.</strong> A package may describe audio in prose, but the
-current standard has no portable checking rules for audio direction.</li>
+current format has no checking rules for audio direction.</li>
 <li><strong>What a player feels or knows.</strong> The format can test what
 is on screen and in the game's state. Those observations do not prove a
 player's feelings or understanding. The
-<a href="/spec/limitations/">known limitations</a> page draws that line.</li>
+<a href="/spec/limitations/">known limitations</a> page explains this limit.</li>
 </ul>
 </div>
 </div>
@@ -223,7 +272,7 @@ player's feelings or understanding. The
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

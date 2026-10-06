@@ -35,10 +35,10 @@ Discussion with the tool version filled in. Pull requests against
 before merging, so a pull request only needs to describe what it changes and
 why.
 
-## Licence for contributions
+## License for contributions
 
 By submitting specification text, documentation, examples, schemas, or code,
-you agree that the contribution may be published under the same licence that
+you agree that the contribution may be published under the same license that
 covers that part of the project: CC-BY 4.0 for specification text and
 documentation, and MIT for schemas and code.
 

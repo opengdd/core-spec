@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>What validation proves | OpenGDD handbook</title>
+<title>What validation proves | OpenGDD Handbook</title>
 <meta name="description" content="Three different checks happen between a design and a finished game. Each one proves something different, so a pass means something different each time.">
 <link rel="canonical" href="https://opengdd.org/handbook/how-checking-works/">
 <meta property="og:site_name" content="OpenGDD">
 <meta property="og:type" content="website">
-<meta property="og:title" content="What validation proves | OpenGDD handbook">
+<meta property="og:title" content="What validation proves | OpenGDD Handbook">
 <meta property="og:description" content="Three different checks happen between a design and a finished game. Each one proves something different, so a pass means something different each time.">
 <meta property="og:url" content="https://opengdd.org/handbook/how-checking-works/">
 <meta property="og:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
@@ -20,7 +20,7 @@
 <meta name="twitter:site" content="@OpenGDD">
 <meta name="twitter:image" content="https://opengdd.org/assets/opengdd-social-v1.png">
 <meta name="twitter:image:alt" content="OpenGDD. An open format for game design documents.">
-<meta name="twitter:title" content="What validation proves | OpenGDD handbook">
+<meta name="twitter:title" content="What validation proves | OpenGDD Handbook">
 <meta name="twitter:description" content="Three different checks happen between a design and a finished game. Each one proves something different, so a pass means something different each time.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/inter-latin-400-normal.woff2">
@@ -53,7 +53,7 @@
 <li><a href="/handbook/" class="toc-resource-current">Handbook</a></li>
 </ul>
 <div class="toc-group">
-<p class="toc-group-title">Start and foundations</p>
+<p class="toc-group-title">The basic parts</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/complete-example/">A complete example: Garden Snake</a></li>
 <li class="toc-h2"><a href="/handbook/what-a-package-contains/">What a package contains</a></li>
@@ -78,12 +78,12 @@
 <p class="toc-group-title">Art direction and variation</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/direction/">Art direction</a></li>
-<li class="toc-h2"><a href="/handbook/palette-and-colour-promises/">Palette and colour promises</a></li>
+<li class="toc-h2"><a href="/handbook/palette-and-color-promises/">Palette and color promises</a></li>
 <li class="toc-h2"><a href="/handbook/personalization/">Personalization questions</a></li>
 </ul>
 </div>
 <div class="toc-group">
-<p class="toc-group-title">Reusable mechanics</p>
+<p class="toc-group-title">Contracts: reusable mechanics</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/contracts/">Contracts</a></li>
 </ul>
@@ -92,7 +92,7 @@
 <p class="toc-group-title">Checking and handoff</p>
 <ul>
 <li class="toc-h2"><a href="/handbook/how-checking-works/" class="here" aria-current="page">What validation proves</a></li>
-<li class="toc-h2"><a href="/handbook/before-handoff/">Before you hand it over</a></li>
+<li class="toc-h2"><a href="/handbook/before-handoff/">Before you send it to the builder</a></li>
 </ul>
 </div>
 </nav>
@@ -100,29 +100,43 @@
 <h1>What validation proves</h1>
 <p>Three different checks happen between a design and a finished game. Each one proves something different, so a pass means something different each time.</p>
 <ul>
-<li><strong>Package checking</strong> reads your files: names, links, numbers, rules and the shape of the prose. The validator (the checking tool) does it while you write. A human still reads the prose for sense.</li>
-<li><strong>Build record checking</strong> compares what the builder says they built with what you asked for. The builder is the person, team or AI that turned the package into a game. Their <strong>build record</strong> is a JSON report: which answers were chosen, the numbers as built, and which tests they say passed. This check does not rerun the tests, and it does not prove the report is true.</li>
-<li><strong>Auditing</strong> runs the tests and reviews the art direction against the finished game. A separate auditor does it, only when someone asks for a certified build. If nobody audits, both files can be valid even though nobody tested the game itself. The <a href="/conformance/certification/">experimental certification protocol</a> describes it.</li>
+<li><strong>Package checking</strong> reads your files: names, links, numbers, rules and the shape of the prose. The validator (the checking tool) does it while you write. A person still reads the prose to check that it makes sense.</li>
+<li><strong>Build record checking</strong> compares what the builder says they built with what you asked for. The builder is the person, team or AI that turned the package into a game. Their <strong>build record</strong> is a JSON report: which answers were chosen, the numbers as built, and which tests passed or did not pass. This check does not rerun the tests, and it does not prove the report is true.</li>
+<li><strong>Auditing</strong> runs the tests and reviews the art direction against the finished game. A separate auditor does it, only when someone asks for an audit of a build. If nobody audits, both files can be valid even though nobody tested the game itself. The <a href="/conformance/certification/">experimental certification protocol</a> describes it.</li>
 </ul>
-<p>Validation of the files is never proof that the finished game works.</p>
+<p>Valid files never prove that the finished game works.</p>
 <p><em>a validator finding, from the command line</em></p>
 <pre><code class="lang-text">ERROR [PROSE_CITATION_DANGLING] 02-mechanics.md:3 — prose citation `stamina.regen` does not resolve to a tuning.json key (SPEC §4)</code></pre>
 <p>The name in brackets is the code for the exact rule. Quote it when asking for help.</p>
 <p>There are two severities:</p>
 <ul>
-<li>An <strong>error</strong> means the package or the build record breaks a rule of the format. The package is not valid until it is fixed.</li>
-<li>A <strong>warning</strong> points at something worth a look. It does not make the package invalid.</li>
+<li>An <strong>error</strong> means the package or the build record breaks a rule of the format. It is not valid until the error is fixed.</li>
+<li>A <strong>warning</strong> points at something you should check. It does not make the package invalid.</li>
 </ul>
-<p>The authoring tool reports package errors while you write, so missing names and bad data are fixed before a build begins.</p>
-<p><em>Full rules: <a href="/spec/#2d-conformance-layers-and-certification-status">OpenGDD specification</a>, §2d.</em></p>
-<p class="note chapter-pager"><a href="/handbook/contracts/">← Contracts</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/before-handoff/">Before you hand it over →</a></p>
+<p>Errors and warnings check structure: names, links, numbers, and the shape of files and blocks. They do not read the meaning of your words, so a package is checked the same way in any language.</p>
+<p><strong>Hints</strong> are optional. The validator gives them only when you ask for review mode, for example with <code>--review</code> on the command line. A hint points at a place you may want to read again. One example is a rule that picks one thing from several, but may not say what happens when two of them are equal. Another is a number in your prose that equals one of your decided numbers in <code>tuning.json</code>. Hints are never errors or warnings, and they never change the result. They only work on English text.</p>
+<p>The authoring tool reports package errors while you write, so you can fix missing names and wrong data before a build begins.</p>
+<h2 id="the-safety-scan">The safety scan<a class="heading-anchor" href="#the-safety-scan" aria-label="Link to this section">#</a></h2>
+<p>By default, the report of a package check ends with a separate <strong>safety scan</strong>. It points out places a person should look at before giving the package to an AI that can run tools, such as a line that tells an AI to ignore previous instructions or to run a command. The safety scan never changes the result. It does not prove that a package is hostile, and it does not prove that a package is safe. Some of its checks only read English, so the scan may not report a hostile instruction in another language.</p>
+<h2 id="what-a-build-record-check-says">What a build record check says<a class="heading-anchor" href="#what-a-build-record-check-says" aria-label="Link to this section">#</a></h2>
+<p>When the validator checks a build record, it gives exactly one result. The exit code is the number the command returns, so a script can read the result.</p>
+<ul>
+<li><strong>Conforming</strong>: your package has at least one acceptance test, and every test passed. Exit code 0.</li>
+<li><strong>Incomplete</strong>: at least one test failed, could be run only in part, or did not run. The record lists each one with a reason. Exit code 3.</li>
+<li><strong>Not verified</strong>: your package has no acceptance tests. Exit code 3.</li>
+<li><strong>Invalid</strong>: the record has at least one error. Exit code 1.</li>
+<li><strong>Not checked</strong>: the validator was not given your package, and the record has no errors of its own. The validator could not compare the record with your package. Exit code 3.</li>
+</ul>
+<p>Only conforming means the build passed every test in your package. Tests the builder adds on their own do not count.</p>
+<p><em>Full rules: <a href="/spec/#2d-conformance-layers-and-certification-status">OpenGDD specification</a>, §2d and <a href="/spec/#derived-build-outcomes-and-exit-codes">§7</a>.</em></p>
+<p class="note chapter-pager"><a href="/handbook/contracts/">← Contracts</a> · <a href="/handbook/">All chapters</a> · <a href="/handbook/before-handoff/">Before you send it to the builder →</a></p>
 </article>
 </div>
 </main>
 <footer class="site-footer">
   <div class="wrap-wide">
     <span><a href="/about/">About OpenGDD</a></span>
-    <span>Prose CC-BY 4.0 · code MIT</span>
+    <span>Text: CC-BY 4.0 · Code: MIT</span>
     <span><a href="mailto:steward@opengdd.org">steward@opengdd.org</a> · <a href="https://github.com/opengdd/core-spec">github.com/opengdd/core-spec</a></span>
   </div>
 </footer>

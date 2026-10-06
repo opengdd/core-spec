@@ -34,6 +34,7 @@ export const COLLECTION_COPY = Object.freeze({
   }),
   columns: Object.freeze({
     required: "required",
+    open: "Open: values are guesses",
     unique: "no two records share it",
     choices: "choices",
     pattern: "must be a lowercase-hyphen name",
@@ -43,6 +44,8 @@ export const COLLECTION_COPY = Object.freeze({
   noSentence: "no sentence yet",
   choicesHelp: "One per line. Lowercase words joined with hyphens, at most 64 characters.",
   exclusive: "A field is either always required or required only when — not both.",
+  openRequiredBlocked: "An open field cannot be required because leaving it out means it does not apply.",
+  openNumbersOnly: "Only a top-level number or whole number can be open.",
   whenSentence: (field, values) => `only when ${field} is one of ${values}`,
   pointsTo: "points to",
   one: "one",
